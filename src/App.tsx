@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { RoleSelector } from './components/RoleSelector';
+import { RoleInfoModal } from './components/RoleInfoModal';
 import { AuthModal } from './components/AuthModal';
 import { CustomerApp } from './pages/CustomerApp';
 import { VendorApp } from './pages/VendorApp';
@@ -14,6 +15,7 @@ import { UserType } from './types';
 function AppContent() {
   const { user, profile, loading } = useAuth();
   const [selectedRole, setSelectedRole] = useState<UserType | null>(null);
+  const [showRoleInfo, setShowRoleInfo] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
 
   if (loading) {
@@ -28,30 +30,48 @@ function AppContent() {
   }
 
   if (!user) {
-    if (selectedRole && selectedRole !== 'customer') {
-      return (
-        <>
+    return (
+      <>
+        {!selectedRole || selectedRole === 'customer' ? (
+          <CustomerApp />
+        ) : (
           <RoleSelector onSelectRole={(role) => {
             setSelectedRole(role);
-            if (role !== 'customer') {
+            if (role !== 'customer' && role !== 'admin') {
+              setShowRoleInfo(true);
+            } else if (role === 'admin') {
               setShowAuth(true);
             }
           }} />
-          {showAuth && (
-            <AuthModal
-              isOpen={showAuth}
-              onClose={() => {
-                setShowAuth(false);
-                setSelectedRole(null);
-              }}
-              initialMode="signin"
-            />
-          )}
-        </>
-      );
-    }
+        )}
 
-    return <CustomerApp />;
+        {selectedRole && selectedRole !== 'customer' && (
+          <RoleInfoModal
+            isOpen={showRoleInfo}
+            onClose={() => {
+              setShowRoleInfo(false);
+              setSelectedRole(null);
+            }}
+            onContinue={() => {
+              setShowRoleInfo(false);
+              setShowAuth(true);
+            }}
+            roleType={selectedRole}
+          />
+        )}
+
+        {showAuth && (
+          <AuthModal
+            isOpen={showAuth}
+            onClose={() => {
+              setShowAuth(false);
+              setSelectedRole(null);
+            }}
+            initialMode="signup"
+          />
+        )}
+      </>
+    );
   }
 
   const userType = profile?.user_type || 'customer';
