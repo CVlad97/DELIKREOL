@@ -28,31 +28,30 @@ function AppContent() {
   }
 
   if (!user) {
-    if (!selectedRole) {
-      return <RoleSelector onSelectRole={(role) => {
-        setSelectedRole(role);
-        setShowAuth(true);
-      }} />;
+    if (selectedRole && selectedRole !== 'customer') {
+      return (
+        <>
+          <RoleSelector onSelectRole={(role) => {
+            setSelectedRole(role);
+            if (role !== 'customer') {
+              setShowAuth(true);
+            }
+          }} />
+          {showAuth && (
+            <AuthModal
+              isOpen={showAuth}
+              onClose={() => {
+                setShowAuth(false);
+                setSelectedRole(null);
+              }}
+              initialMode="signin"
+            />
+          )}
+        </>
+      );
     }
 
-    return (
-      <>
-        <RoleSelector onSelectRole={(role) => {
-          setSelectedRole(role);
-          setShowAuth(true);
-        }} />
-        {showAuth && (
-          <AuthModal
-            isOpen={showAuth}
-            onClose={() => {
-              setShowAuth(false);
-              setSelectedRole(null);
-            }}
-            initialMode="signin"
-          />
-        )}
-      </>
-    );
+    return <CustomerApp />;
   }
 
   const userType = profile?.user_type || 'customer';

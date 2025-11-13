@@ -2,24 +2,24 @@ import { X, Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useState } from 'react';
+import { AuthModal } from './AuthModal';
 
 interface CartProps {
-  isOpen: boolean;
   onClose: () => void;
-  onCheckout: () => void;
+  onCheckout?: () => void;
 }
 
-export function Cart({ isOpen, onClose, onCheckout }: CartProps) {
+export function Cart({ onClose, onCheckout }: CartProps) {
   const { items, updateQuantity, removeItem, total, itemCount } = useCart();
   const { user } = useAuth();
   const [deliveryFee] = useState(5.0);
-
-  if (!isOpen) return null;
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const finalTotal = total + deliveryFee;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
+    <>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
       <div className="bg-white w-full sm:max-w-md sm:rounded-t-2xl rounded-t-2xl max-h-[90vh] flex flex-col">
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           <div className="flex items-center">
@@ -111,10 +111,12 @@ export function Cart({ isOpen, onClose, onCheckout }: CartProps) {
             <button
               onClick={() => {
                 if (!user) {
-                  alert('Veuillez vous connecter pour commander');
+                  setShowAuthModal(true);
                   return;
                 }
-                onCheckout();
+                if (onCheckout) {
+                  onCheckout();
+                }
               }}
               className="w-full bg-emerald-600 text-white py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors"
             >
@@ -124,5 +126,14 @@ export function Cart({ isOpen, onClose, onCheckout }: CartProps) {
         )}
       </div>
     </div>
+
+      {showAuthModal && (
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          initialMode="signup"
+        />
+      )}
+    </>
   );
 }
