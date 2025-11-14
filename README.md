@@ -267,6 +267,107 @@ CREATE POLICY "Vendors can manage own products"
 - ✅ Webhook signature verification
 - ❌ Aucune clé secrète dans le code frontend
 
+### WhatsApp Business Integration
+- ✅ Bot conversationnel automatique
+- ✅ Prise de commandes via WhatsApp
+- ✅ Notifications en temps réel (confirmation, livraison)
+- ✅ Support multi-langues (français)
+- ✅ Webhook sécurisé avec vérification
+
+---
+
+## 📱 WhatsApp Business
+
+Delikreol intègre WhatsApp Business pour permettre aux clients de commander directement via l'application de messagerie la plus populaire en Martinique.
+
+### Fonctionnalités WhatsApp
+
+**Pour les clients :**
+- 💬 Commandes directes par messages
+- 🤖 Réponses automatiques intelligentes
+- 📋 Consultation du menu et des restaurants
+- 📦 Suivi de commande en temps réel
+- 🔔 Notifications de statut
+
+**Pour les vendeurs :**
+- 📬 Notifications de nouvelles commandes
+- ✅ Confirmation de préparation
+- 🚚 Mise à jour de statut
+
+**Pour les livreurs :**
+- 🛵 Assignation de livraisons
+- 📍 Informations de livraison
+- ✔️ Confirmation de livraison
+
+### Configuration WhatsApp Business
+
+1. **Créer un compte Meta Business**
+   - Allez sur [business.facebook.com](https://business.facebook.com)
+   - Créez un compte Business
+
+2. **Configurer WhatsApp Business API**
+   - Accédez à [developers.facebook.com](https://developers.facebook.com)
+   - Créez une application WhatsApp Business
+   - Obtenez votre Phone Number ID et Access Token
+
+3. **Ajouter la clé API dans Delikreol**
+   - Connectez-vous en tant qu'admin
+   - Allez dans "Clés API"
+   - Ajoutez votre Meta Access Token
+   - Dans metadata, ajoutez : `{"phone_number_id": "VOTRE_ID"}`
+
+4. **Configurer le Webhook**
+   - URL : `https://votre-domaine.com/functions/v1/whatsapp-webhook`
+   - Verify Token : `delikreol_2024`
+   - Événements : `messages`, `message_status`
+
+### Utilisation pour les Clients
+
+Les clients peuvent :
+
+1. **Démarrer une conversation**
+   ```
+   Envoyer "menu" ou "start" au +596 696 XX XX XX
+   ```
+
+2. **Commander via WhatsApp**
+   ```
+   1 - Voir les restaurants
+   2 - Voir les producteurs
+   3 - Mes commandes
+   4 - Mon panier
+   5 - Aide
+   ```
+
+3. **Recevoir des notifications**
+   - ✅ Commande confirmée
+   - 👨‍🍳 En préparation
+   - 🚚 Livreur assigné
+   - 📍 En route
+   - 🎉 Livrée
+
+### Templates de Messages
+
+Les templates suivants sont préconfigurés :
+- `order_confirmation` - Confirmation de commande
+- `order_preparing` - Commande en préparation
+- `order_ready` - Commande prête
+- `driver_assigned` - Livreur assigné
+- `order_delivered` - Commande livrée
+- `welcome_message` - Message de bienvenue
+
+### Intégration dans le Code
+
+```typescript
+import { notifyOrderConfirmed, openWhatsAppChat } from '@/utils/whatsapp';
+
+// Envoyer une notification
+await notifyOrderConfirmed('+596696123456', order);
+
+// Ouvrir une conversation
+openWhatsAppChat('+596696000000', 'Bonjour, je veux commander!');
+```
+
 ---
 
 ## 🧪 Tests

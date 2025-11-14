@@ -3,6 +3,7 @@ import { Users, Store, MapPin, Truck, TrendingUp, DollarSign, Key } from 'lucide
 import { Navigation } from '../components/Navigation';
 import { MapView } from '../components/Map/MapView';
 import { APIKeysManager } from '../components/admin/APIKeysManager';
+import { WhatsAppManager } from '../components/admin/WhatsAppManager';
 import { supabase } from '../lib/supabase';
 import { Vendor, RelayPoint, Location } from '../types';
 
@@ -335,6 +336,8 @@ export function AdminApp() {
         return renderAnalytics();
       case 'api-keys':
         return <APIKeysManager />;
+      case 'whatsapp':
+        return <WhatsAppManager />;
       default:
         return renderDashboard();
     }
