@@ -7,6 +7,7 @@ import { Cart } from '../components/Cart';
 import { CheckoutModal } from '../components/CheckoutModal';
 import { Onboarding } from '../components/Onboarding';
 import { UserProfile } from '../components/UserProfile';
+import { WhatsAppButton } from '../components/WhatsAppButton';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -230,6 +231,11 @@ export function HomePage() {
           onClose={() => setSelectedVendor(null)}
         />
       )}
+
+      <WhatsAppButton
+        phoneNumber="+596696000000"
+        message="Bonjour, je souhaite passer une commande sur Delikreol !"
+      />
     </div>
   );
 }
