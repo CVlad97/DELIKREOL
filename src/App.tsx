@@ -12,6 +12,7 @@ import { VendorApp } from './pages/VendorApp';
 import { RelayHostApp } from './pages/RelayHostApp';
 import { DriverApp } from './pages/DriverApp';
 import { AdminApp } from './pages/AdminApp';
+import { isSupabaseConfigured } from './lib/supabase';
 import type { UserType } from './types';
 
 type MainShellProps = {
@@ -125,6 +126,25 @@ function AppContent() {
       <MainShell currentRole="admin" onResetRole={resetRole}>
         <AdminApp />
       </MainShell>
+    );
+  }
+
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-50 px-4">
+        <div className="max-w-md w-full space-y-4 text-center">
+          <h1 className="text-2xl font-bold">Configuration requise</h1>
+          <p className="text-sm text-slate-300">
+            Supabase n&apos;est pas encore configuré pour ce projet DELIKREOL.
+          </p>
+          <p className="text-xs text-slate-400">
+            Ajoutez les variables d&apos;environnement{' '}
+            <code className="font-mono">VITE_SUPABASE_URL</code> et{' '}
+            <code className="font-mono">VITE_SUPABASE_ANON_KEY</code> à partir
+            de votre projet Supabase (voir le fichier <code>.env.example</code>).
+          </p>
+        </div>
+      </div>
     );
   }
 
