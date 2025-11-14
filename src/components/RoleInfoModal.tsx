@@ -1,5 +1,9 @@
 import { X, TrendingUp, Euro, Clock, CheckCircle } from 'lucide-react';
 import { UserType } from '../types';
+import { useState } from 'react';
+import { AuthModal } from './AuthModal';
+import { OnboardingForm } from './OnboardingForm';
+import { useAuth } from '../contexts/AuthContext';
 
 interface RoleInfoModalProps {
   isOpen: boolean;
@@ -145,11 +149,24 @@ const roleInfoData: Record<UserType, RoleInfo> = {
 };
 
 export function RoleInfoModal({ isOpen, onClose, onContinue, roleType }: RoleInfoModalProps) {
+  const { user } = useAuth();
+  const [showAuth, setShowAuth] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
   if (!isOpen || roleType === 'customer' || roleType === 'admin') return null;
 
   const info = roleInfoData[roleType];
 
+  const handleContinue = () => {
+    if (user) {
+      setShowOnboarding(true);
+    } else {
+      setShowAuth(true);
+    }
+  };
+
   return (
+    <>
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
         <div className="sticky top-0 bg-gradient-to-r from-orange-500 to-red-500 text-white p-6 rounded-t-3xl">
@@ -244,14 +261,31 @@ export function RoleInfoModal({ isOpen, onClose, onContinue, roleType }: RoleInf
           <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-6 text-white text-center">
             <p className="text-xl mb-4">Prêt à rejoindre Delikreol ?</p>
             <button
-              onClick={onContinue}
+              onClick={handleContinue}
               className="bg-white text-orange-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-orange-50 transition-colors transform hover:scale-105 duration-200 shadow-lg"
             >
-              Créer mon compte {info.title.toLowerCase()}
+              {user ? 'Remplir le formulaire' : `Créer mon compte ${info.title.toLowerCase()}`}
             </button>
           </div>
         </div>
       </div>
     </div>
+
+      {showAuth && (
+        <AuthModal
+          isOpen={showAuth}
+          onClose={() => setShowAuth(false)}
+          initialMode="signup"
+        />
+      )}
+
+      {showOnboarding && (
+        <OnboardingForm
+          isOpen={showOnboarding}
+          onClose={() => setShowOnboarding(false)}
+          roleType={roleType}
+        />
+      )}
+    </>
   );
 }
