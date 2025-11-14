@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import type { OrderStatus, DeliveryType } from '../types';
 
 interface CartItem {
   id: string;
@@ -12,7 +13,7 @@ interface CartItem {
 interface CreateOrderParams {
   customerId: string;
   items: CartItem[];
-  deliveryType: 'home_delivery' | 'pickup' | 'relay_point';
+  deliveryType: DeliveryType;
   deliveryAddress?: string;
   deliveryLatitude?: number;
   deliveryLongitude?: number;
@@ -130,11 +131,11 @@ export async function createOrder(params: CreateOrderParams) {
   }
 }
 
-export async function updateOrderStatus(orderId: string, status: string) {
+export async function updateOrderStatus(orderId: string, status: OrderStatus) {
   try {
     const { error } = await supabase
       .from('orders')
-      .update({ status })
+      .update({ status, updated_at: new Date().toISOString() })
       .eq('id', orderId);
 
     if (error) throw error;

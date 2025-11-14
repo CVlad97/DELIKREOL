@@ -1,70 +1,60 @@
-import Stripe from "stripe";
+import { supabase } from '../lib/supabase';
 
-const stripeSecretKey = import.meta.env.VITE_STRIPE_SECRET_KEY;
-
-export const stripe = stripeSecretKey ? new Stripe(stripeSecretKey, {
-  apiVersion: '2024-11-20.acacia',
-}) : null;
+const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 
 export async function createPaymentIntent(
   total: number,
+  orderId: string,
   vendorAccountId?: string
 ): Promise<string | null> {
-  if (!stripe) {
-    console.warn('Stripe is not configured');
-    return null;
-  }
-
   try {
-    const paymentIntentData: Stripe.PaymentIntentCreateParams = {
-      amount: Math.round(total * 100),
-      currency: "eur",
-      automatic_payment_methods: {
-        enabled: true,
+    const { data, error } = await supabase.functions.invoke('create-payment-intent', {
+      body: {
+        amount: Math.round(total * 100),
+        currency: 'eur',
+        orderId,
+        vendorAccountId,
       },
-    };
+    });
 
-    if (vendorAccountId) {
-      paymentIntentData.application_fee_amount = Math.round(total * 0.10 * 100);
-      paymentIntentData.transfer_data = {
-        destination: vendorAccountId,
-      };
+    if (error) {
+      console.error('Error creating payment intent:', error);
+      return null;
     }
 
-    const paymentIntent = await stripe.paymentIntents.create(paymentIntentData);
-    return paymentIntent.client_secret;
+    return data.clientSecret;
   } catch (error) {
-    console.error('Error creating payment intent:', error);
+    console.error('Error calling payment function:', error);
     return null;
   }
 }
 
 export async function createConnectedAccount(
   email: string,
-  businessName: string
+  businessName: string,
+  userId: string
 ): Promise<string | null> {
-  if (!stripe) {
-    console.warn('Stripe is not configured');
-    return null;
-  }
-
   try {
-    const account = await stripe.accounts.create({
-      type: 'express',
-      country: 'FR',
-      email,
-      capabilities: {
-        card_payments: { requested: true },
-        transfers: { requested: true },
-      },
-      business_profile: {
-        name: businessName,
+    const { data, error } = await supabase.functions.invoke('create-connected-account', {
+      body: {
+        email,
+        businessName,
+        userId,
       },
     });
 
-    return account.id;
+    if (error) {
+      console.error('Error creating connected account:', error);
+      return null;
+    }
+
+    return data.accountId;
   } catch (error) {
-    console.error('Error creating connected account:', error);
+    console.error('Error calling account creation function:', error);
     return null;
   }
+}
+
+export function getStripePublishableKey(): string | undefined {
+  return STRIPE_PUBLISHABLE_KEY;
 }
