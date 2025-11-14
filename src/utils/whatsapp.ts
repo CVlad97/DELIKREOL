@@ -23,7 +23,7 @@ export async function sendWhatsAppNotification(
       message = message.replace(new RegExp(`{{${key}}}`, 'g'), value);
     });
 
-    const { data, error } = await supabase.functions.invoke('whatsapp-send', {
+    const { error } = await supabase.functions.invoke('whatsapp-send', {
       body: {
         to: phoneNumber,
         message,

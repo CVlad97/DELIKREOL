@@ -1,5 +1,4 @@
 import { supabase } from '../lib/supabase';
-import { callOpenAI } from '../utils/apiIntegrations';
 
 export type PartnerType = 'vendor' | 'driver' | 'relay_host';
 export type ApplicationStatus = 'submitted' | 'under_review' | 'approved' | 'rejected' | 'pending_info';

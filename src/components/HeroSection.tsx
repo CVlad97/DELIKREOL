@@ -1,4 +1,4 @@
-import { MapPin, Clock, TrendingUp, Heart } from 'lucide-react';
+import { Clock, TrendingUp, Heart } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export function HeroSection() {

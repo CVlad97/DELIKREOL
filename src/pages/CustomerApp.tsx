@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapPin, Search, ShoppingCart, Filter, FileText } from 'lucide-react';
+import { MapPin, Search, ShoppingCart } from 'lucide-react';
 import { Navigation } from '../components/Navigation';
 import EnhancedMap from '../components/Map/EnhancedMap';
 import MapFilters from '../components/Map/MapFilters';
@@ -228,7 +228,7 @@ export function CustomerApp() {
       {orders.length > 0 ? (
         <div className="space-y-4">
           {orders.map((order) => (
-            <OrderTracking key={order.id} order={order} />
+            <OrderTracking key={order.id} orderId={order.id} onClose={() => {}} />
           ))}
         </div>
       ) : (
@@ -299,7 +299,7 @@ export function CustomerApp() {
     </div>
   );
 
-  const renderProfile = () => <UserProfile />;
+  const renderProfile = () => <UserProfile isOpen={true} onClose={() => setCurrentView('home')} />;
 
   const renderRequests = () => (
     <div className="p-4 pb-20 space-y-6 bg-slate-950">

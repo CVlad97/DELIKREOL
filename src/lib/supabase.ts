@@ -18,7 +18,6 @@ if (isSupabaseConfigured) {
     '[DELIKREOL] Supabase non configuré. Définissez VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY pour activer les données.'
   );
 
-  // @ts-expect-error - client minimal pour éviter les crashs
   client = {
     from() {
       throw new Error(
@@ -26,12 +25,11 @@ if (isSupabaseConfigured) {
       );
     },
     functions: {
-      invoke() {
-        throw new Error(
-          'Supabase non configuré : fonctions indisponibles.'
-        );
-      },
-    },
+      invoke: () => Promise.reject(new Error('Supabase non configuré')),
+      setAuth: () => {},
+      url: '',
+      headers: {},
+    } as any,
     auth: {
       getUser() {
         return Promise.reject(
@@ -43,7 +41,13 @@ if (isSupabaseConfigured) {
       },
       onAuthStateChange() {
         return {
-          data: { subscription: { unsubscribe: () => {} } },
+          data: {
+            subscription: {
+              id: '',
+              callback: () => {},
+              unsubscribe: () => {}
+            }
+          },
         };
       },
       signUp() {
@@ -61,8 +65,8 @@ if (isSupabaseConfigured) {
           new Error('Supabase non configuré : auth indisponible.')
         );
       },
-    },
-  };
+    } as any,
+  } as any;
 }
 
 export const supabase = client;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Upload, CheckCircle, AlertCircle } from 'lucide-react';
+import { X, CheckCircle } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
 import { submitApplication, PartnerType } from '../agents/partnerScoring';
 

@@ -1,4 +1,4 @@
-import { Store, MapPin, Truck, Shield, ShoppingBag } from 'lucide-react';
+import { Store, MapPin, Truck } from 'lucide-react';
 import { UserType } from '../types';
 
 interface RoleSelectorProps {

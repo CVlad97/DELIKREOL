@@ -123,7 +123,7 @@ export async function autoAssignDriver(orderId: string): Promise<{
       return { success: false, error: 'Aucun livreur optimal trouvé' };
     }
 
-    const { data: delivery, error: deliveryError } = await supabase
+    const { error: deliveryError } = await supabase
       .from('deliveries')
       .update({
         driver_id: bestDriver.id,

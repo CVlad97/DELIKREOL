@@ -23,15 +23,15 @@ export interface Vendor {
   user_id: string;
   business_name: string;
   business_type: BusinessType;
-  description?: string;
-  logo_url?: string;
+  description: string | null;
+  logo_url: string | null;
   address: string;
-  latitude?: number;
-  longitude?: number;
+  latitude: number | null;
+  longitude: number | null;
   phone: string;
   commission_rate: number;
   is_active: boolean;
-  opening_hours?: Record<string, any>;
+  opening_hours: Record<string, any> | null;
   delivery_radius_km: number;
   created_at: string;
 }
@@ -40,12 +40,12 @@ export interface Product {
   id: string;
   vendor_id: string;
   name: string;
-  description?: string;
+  description: string | null;
   category: string;
   price: number;
-  image_url?: string;
+  image_url: string | null;
   is_available: boolean;
-  stock_quantity?: number;
+  stock_quantity: number | null;
   created_at: string;
   vendor?: Vendor;
 }
@@ -107,6 +107,7 @@ export interface Delivery {
   delivered_at?: string;
   created_at: string;
   driver?: Driver;
+  order?: Order;
 }
 
 export interface RelayPoint {

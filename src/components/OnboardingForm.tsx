@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Upload, MapPin, DollarSign, Clock, Package, User, Phone, Mail, Building, FileText, Truck, CreditCard } from 'lucide-react';
+import { X, MapPin, User, Building, Truck, CreditCard } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { UserType, BusinessType, VehicleType, StorageType, CompensationType } from '../types';

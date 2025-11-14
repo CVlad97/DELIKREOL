@@ -29,7 +29,7 @@ export function WhatsAppManager() {
     messagesLast24h: 0,
     avgResponseTime: 0,
   });
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
 
   useEffect(() => {

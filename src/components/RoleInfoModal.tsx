@@ -148,7 +148,7 @@ const roleInfoData: Record<UserType, RoleInfo> = {
   },
 };
 
-export function RoleInfoModal({ isOpen, onClose, onContinue, roleType }: RoleInfoModalProps) {
+export function RoleInfoModal({ isOpen, onClose, roleType }: RoleInfoModalProps) {
   const { user } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
