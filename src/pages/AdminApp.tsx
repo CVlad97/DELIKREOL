@@ -5,6 +5,7 @@ import { MapView } from '../components/Map/MapView';
 import { APIKeysManager } from '../components/admin/APIKeysManager';
 import { WhatsAppManager } from '../components/admin/WhatsAppManager';
 import { AdminInsights } from './AdminInsights';
+import { AdminHub } from './AdminHub';
 import { supabase } from '../lib/supabase';
 import { Vendor, RelayPoint, Location } from '../types';
 
@@ -323,6 +324,8 @@ export function AdminApp() {
     }
 
     switch (currentView) {
+      case 'hub':
+        return <AdminHub />;
       case 'dashboard':
         return renderDashboard();
       case 'users':

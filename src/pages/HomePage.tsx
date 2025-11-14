@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, MapPin, Filter, ShoppingCart, User, LogOut, Moon, Sun } from 'lucide-react';
+import { Search, MapPin, Filter, ShoppingCart, User, LogOut, Moon, Sun, Users, Zap, Shield } from 'lucide-react';
 import { supabase, Vendor } from '../lib/supabase';
 import { VendorCard } from '../components/VendorCard';
 import { AuthModal } from '../components/AuthModal';
@@ -8,6 +8,7 @@ import { CheckoutModal } from '../components/CheckoutModal';
 import { Onboarding } from '../components/Onboarding';
 import { UserProfile } from '../components/UserProfile';
 import { WhatsAppButton } from '../components/WhatsAppButton';
+import { BecomePartner } from './BecomePartner';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -26,6 +27,7 @@ export function HomePage() {
     return !localStorage.getItem('onboarding_completed');
   });
   const [profileOpen, setProfileOpen] = useState(false);
+  const [showBecomePartner, setShowBecomePartner] = useState(false);
 
   const { user, profile, signOut } = useAuth();
   const { itemCount } = useCart();
@@ -72,6 +74,10 @@ export function HomePage() {
 
   if (showOnboarding) {
     return <Onboarding onComplete={() => setShowOnboarding(false)} />;
+  }
+
+  if (showBecomePartner) {
+    return <BecomePartner onBack={() => setShowBecomePartner(false)} />;
   }
 
   return (
@@ -139,6 +145,59 @@ export function HomePage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              La Plateforme Logistique Locale Intelligente
+            </h2>
+            <p className="text-gray-600 max-w-3xl mx-auto">
+              DELIKREOL n'est pas qu'une marketplace : c'est un écosystème collaboratif qui mutualise
+              la logistique locale avec des points relais de proximité et une optimisation par IA.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Users className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2">Réseau Mutualisé</h3>
+              <p className="text-sm text-gray-600">
+                Points relais partagés entre tous les vendeurs pour une logistique optimale
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Zap className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2">Optimisation IA</h3>
+              <p className="text-sm text-gray-600">
+                Tournées intelligentes et affectations automatiques pour livraisons rapides
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Shield className="w-8 h-8 text-orange-600" />
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2">Écosystème Local</h3>
+              <p className="text-sm text-gray-600">
+                Soutenez les producteurs et commerces martiniquais avec chaque commande
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={() => setShowBecomePartner(true)}
+              className="bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition-colors font-bold"
+            >
+              Devenir Partenaire
+            </button>
+          </div>
+        </div>
+
         <div className="mb-6 space-y-4">
           <div className="flex items-center gap-2 bg-white rounded-lg px-4 py-3 shadow-sm">
             <Search size={20} className="text-gray-400" />
