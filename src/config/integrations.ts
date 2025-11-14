@@ -22,11 +22,11 @@ export interface IntegrationsConfig {
 
 export const integrations: IntegrationsConfig = {
   stripe: {
-    enabled: !!import.meta.env.VITE_STRIPE_PUBLIC_KEY,
+    enabled: !!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
     label: 'Stripe',
     description: 'Paiements en ligne sécurisés',
-    publicKey: import.meta.env.VITE_STRIPE_PUBLIC_KEY,
-    status: import.meta.env.VITE_STRIPE_PUBLIC_KEY ? 'configured' : 'pending',
+    publicKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
+    status: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ? 'configured' : 'pending',
   },
   qonto: {
     enabled: false,
