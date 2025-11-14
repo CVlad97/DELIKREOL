@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Users, Store, MapPin, Truck, TrendingUp, DollarSign, Key } from 'lucide-react';
+import { Users, Store, MapPin, Truck, TrendingUp, DollarSign, Key, Brain } from 'lucide-react';
 import { Navigation } from '../components/Navigation';
 import { MapView } from '../components/Map/MapView';
 import { APIKeysManager } from '../components/admin/APIKeysManager';
 import { WhatsAppManager } from '../components/admin/WhatsAppManager';
+import { AdminInsights } from './AdminInsights';
 import { supabase } from '../lib/supabase';
 import { Vendor, RelayPoint, Location } from '../types';
 
@@ -338,6 +339,8 @@ export function AdminApp() {
         return <APIKeysManager />;
       case 'whatsapp':
         return <WhatsAppManager />;
+      case 'ai-insights':
+        return <AdminInsights />;
       default:
         return renderDashboard();
     }

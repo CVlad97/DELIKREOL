@@ -76,20 +76,24 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+      <header className="bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-600 border-b border-emerald-700 sticky top-0 z-40 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-2xl font-bold text-emerald-600">Delikreol</h1>
-              <p className="text-sm text-gray-600">Martinique</p>
+            <div className="flex-1 flex justify-center">
+              <div className="text-center">
+                <h1 className="text-4xl md:text-5xl font-black text-white tracking-wider drop-shadow-lg" style={{ fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.1em' }}>
+                  DELI<span className="text-yellow-300">KRÉOL</span>
+                </h1>
+                <p className="text-sm text-emerald-100 mt-1 font-medium tracking-wide">🌴 Martinique · Livraison Locale 🌴</p>
+              </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="absolute right-4 top-4 flex items-center gap-3">
               <button
                 onClick={() => setCartOpen(true)}
-                className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="relative p-2 hover:bg-white/20 rounded-full transition-colors backdrop-blur-sm"
               >
-                <ShoppingCart size={24} className="text-gray-700" />
+                <ShoppingCart size={24} className="text-white" />
                 {itemCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-emerald-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                     {itemCount}
@@ -100,21 +104,21 @@ export function HomePage() {
               {user ? (
                 <div className="flex items-center gap-2">
                   <div className="text-right hidden sm:block">
-                    <p className="text-sm font-medium text-gray-900">{profile?.full_name}</p>
-                    <p className="text-xs text-gray-500">{profile?.user_type}</p>
+                    <p className="text-sm font-medium text-white">{profile?.full_name}</p>
+                    <p className="text-xs text-emerald-100">{profile?.user_type}</p>
                   </div>
                   <button
                     onClick={signOut}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    className="p-2 hover:bg-white/20 rounded-full transition-colors backdrop-blur-sm"
                     title="Déconnexion"
                   >
-                    <LogOut size={20} className="text-gray-700" />
+                    <LogOut size={20} className="text-white" />
                   </button>
                 </div>
               ) : (
                 <button
                   onClick={() => setAuthModalOpen(true)}
-                  className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
+                  className="flex items-center gap-2 bg-white text-emerald-600 px-4 py-2 rounded-lg hover:bg-emerald-50 transition-colors font-semibold shadow-md"
                 >
                   <User size={20} />
                   <span className="hidden sm:inline">Connexion</span>
