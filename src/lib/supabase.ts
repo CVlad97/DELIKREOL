@@ -1,13 +1,71 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+export const isSupabaseConfigured =
+  typeof supabaseUrl === 'string' &&
+  supabaseUrl.length > 0 &&
+  typeof supabaseAnonKey === 'string' &&
+  supabaseAnonKey.length > 0;
+
+let client: SupabaseClient;
+
+if (isSupabaseConfigured) {
+  client = createClient(supabaseUrl!, supabaseAnonKey!);
+} else {
+  console.warn(
+    '[DELIKREOL] Supabase non configuré. Définissez VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY pour activer les données.'
+  );
+
+  // @ts-expect-error - client minimal pour éviter les crashs
+  client = {
+    from() {
+      throw new Error(
+        'Supabase non configuré : veuillez définir VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY.'
+      );
+    },
+    functions: {
+      invoke() {
+        throw new Error(
+          'Supabase non configuré : fonctions indisponibles.'
+        );
+      },
+    },
+    auth: {
+      getUser() {
+        return Promise.reject(
+          new Error('Supabase non configuré : auth indisponible.')
+        );
+      },
+      getSession() {
+        return Promise.resolve({ data: { session: null }, error: null });
+      },
+      onAuthStateChange() {
+        return {
+          data: { subscription: { unsubscribe: () => {} } },
+        };
+      },
+      signUp() {
+        return Promise.reject(
+          new Error('Supabase non configuré : auth indisponible.')
+        );
+      },
+      signInWithPassword() {
+        return Promise.reject(
+          new Error('Supabase non configuré : auth indisponible.')
+        );
+      },
+      signOut() {
+        return Promise.reject(
+          new Error('Supabase non configuré : auth indisponible.')
+        );
+      },
+    },
+  };
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = client;
 
 export type UserType = 'customer' | 'vendor' | 'driver' | 'admin';
 export type BusinessType = 'restaurant' | 'producer' | 'merchant';
