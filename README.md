@@ -20,6 +20,53 @@ Pour les acteurs locaux :
 
 ---
 
+## 🚀 DELIKREOL Differentiation - Hub Logistique Intelligent
+
+**DELIKREOL n'est pas un simple marketplace de livraison** - c'est une plateforme d'orchestration logistique avec intelligence artificielle intégrée.
+
+### Trois Agents IA Spécialisés
+
+**🧠 Agent 1 : Operations Copilot**
+- Assistant IA conversationnel pour les administrateurs
+- Analyse en temps réel des métriques opérationnelles
+- Recommandations automatiques d'optimisation
+- Chat interactif pour questions ad-hoc
+
+**🚚 Agent 2 : Route Optimizer**
+- Affectation automatique des livreurs aux commandes
+- Tournées optimisées par algorithme de scoring
+- Prise en compte distance, charge de travail, disponibilité
+- Génération de plans de livraison en < 1 seconde
+
+**⭐ Agent 3 : Partner Scoring**
+- Évaluation automatique des candidatures de partenaires
+- Notation A/B/C selon complétude et conformité
+- Génération de réponses personnalisées
+- Réduction du temps de traitement de 7 jours à 48h
+
+### Hub Logistique Centralisé
+
+**Admin Hub** (`/admin/hub`)
+- Vue d'ensemble temps réel : commandes, livreurs, relais, candidatures
+- Cartographie interactive avec saturation des zones
+- Panneau assistant IA avec actions rapides
+- Gestion des candidatures avec scoring automatique
+
+### Infrastructure Mutualisée
+
+- **Points relais partagés** entre tous les vendeurs
+- **Capacités multi-types** : froid, chaud, sec, congelé
+- **Optimisation automatique** des affectations
+- **Réduction des coûts** logistiques pour petits acteurs
+
+### Documentation Technique
+
+- `docs/agents.md` - Architecture des 3 agents IA
+- `docs/admin-operations.md` - Guide opérationnel
+- `docs/concept-partners.md` - Modèle d'affaires
+
+---
+
 ## 🏗️ Architecture & Stack Technique
 
 ### Frontend
