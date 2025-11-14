@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -14,6 +14,49 @@ import { DriverApp } from './pages/DriverApp';
 import { AdminApp } from './pages/AdminApp';
 import type { UserType } from './types';
 
+type MainShellProps = {
+  children: ReactNode;
+  onResetRole: () => void;
+  currentRole: UserType;
+};
+
+function MainShell({ children, onResetRole, currentRole }: MainShellProps) {
+  const roleLabels: Record<UserType, string> = {
+    customer: 'Client',
+    vendor: 'Vendeur',
+    relay_host: 'Hôte Relais',
+    driver: 'Livreur',
+    admin: 'Admin',
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-50">
+      <header className="w-full border-b border-slate-800 bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500 text-slate-950 font-bold">
+              D
+            </span>
+            <div className="flex flex-col leading-tight">
+              <span className="font-semibold text-sm">Delikreol</span>
+              <span className="text-xs text-slate-400">
+                Hub logistique · {roleLabels[currentRole]}
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={onResetRole}
+            className="text-xs px-3 py-1.5 rounded-full border border-slate-700 hover:border-emerald-400 hover:text-emerald-400 transition-all"
+          >
+            ⬅ Changer de rôle
+          </button>
+        </div>
+      </header>
+      <main className="flex-1">{children}</main>
+    </div>
+  );
+}
+
 function AppContent() {
   const { user, profile, loading } = useAuth();
   const [selectedRole, setSelectedRole] = useState<UserType | null>(null);
@@ -22,11 +65,18 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-green-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-emerald-600 mx-auto mb-4"></div>
-          <p className="text-gray-700 font-medium text-lg">Chargement de DELIKREOL...</p>
-          <p className="text-gray-500 text-sm mt-2">Plateforme logistique intelligente</p>
+          <div className="relative">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-emerald-500 mx-auto mb-4"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500 text-slate-950 font-bold text-sm">
+                D
+              </span>
+            </div>
+          </div>
+          <p className="text-slate-200 font-medium text-lg">Chargement de DELIKREOL</p>
+          <p className="text-slate-400 text-sm mt-2">Plateforme logistique intelligente</p>
         </div>
       </div>
     );
@@ -35,20 +85,47 @@ function AppContent() {
   const effectiveRole: UserType | null =
     (profile?.user_type as UserType | undefined) ?? selectedRole;
 
+  const resetRole = () => {
+    setSelectedRole(null);
+    setShowRoleInfo(false);
+    setShowAuthModal(false);
+    window.scrollTo(0, 0);
+  };
+
   if (user && effectiveRole === 'customer') {
-    return <CustomerApp />;
+    return (
+      <MainShell currentRole="customer" onResetRole={resetRole}>
+        <CustomerApp />
+      </MainShell>
+    );
   }
   if (user && effectiveRole === 'vendor') {
-    return <VendorApp />;
+    return (
+      <MainShell currentRole="vendor" onResetRole={resetRole}>
+        <VendorApp />
+      </MainShell>
+    );
   }
   if (user && effectiveRole === 'relay_host') {
-    return <RelayHostApp />;
+    return (
+      <MainShell currentRole="relay_host" onResetRole={resetRole}>
+        <RelayHostApp />
+      </MainShell>
+    );
   }
   if (user && effectiveRole === 'driver') {
-    return <DriverApp />;
+    return (
+      <MainShell currentRole="driver" onResetRole={resetRole}>
+        <DriverApp />
+      </MainShell>
+    );
   }
   if (user && effectiveRole === 'admin') {
-    return <AdminApp />;
+    return (
+      <MainShell currentRole="admin" onResetRole={resetRole}>
+        <AdminApp />
+      </MainShell>
+    );
   }
 
   return (
