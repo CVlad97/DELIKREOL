@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Users, Store, MapPin, Truck, TrendingUp, DollarSign } from 'lucide-react';
+import { Users, Store, MapPin, Truck, TrendingUp, DollarSign, Key } from 'lucide-react';
 import { Navigation } from '../components/Navigation';
 import { MapView } from '../components/Map/MapView';
+import { APIKeysManager } from '../components/admin/APIKeysManager';
 import { supabase } from '../lib/supabase';
 import { Vendor, RelayPoint, Location } from '../types';
 
@@ -332,6 +333,8 @@ export function AdminApp() {
         return renderDeliveries();
       case 'analytics':
         return renderAnalytics();
+      case 'api-keys':
+        return <APIKeysManager />;
       default:
         return renderDashboard();
     }
