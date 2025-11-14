@@ -157,8 +157,8 @@ export function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+            <div className="text-center group">
+              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 transition-transform group-hover:scale-110">
                 <Users className="w-8 h-8 text-blue-600" />
               </div>
               <h3 className="font-bold text-gray-900 mb-2">Réseau Mutualisé</h3>
@@ -167,8 +167,8 @@ export function HomePage() {
               </p>
             </div>
 
-            <div className="text-center">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+            <div className="text-center group">
+              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 transition-transform group-hover:scale-110">
                 <Zap className="w-8 h-8 text-green-600" />
               </div>
               <h3 className="font-bold text-gray-900 mb-2">Optimisation IA</h3>
@@ -177,8 +177,8 @@ export function HomePage() {
               </p>
             </div>
 
-            <div className="text-center">
-              <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+            <div className="text-center group">
+              <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 transition-transform group-hover:scale-110">
                 <Shield className="w-8 h-8 text-orange-600" />
               </div>
               <h3 className="font-bold text-gray-900 mb-2">Écosystème Local</h3>
@@ -191,7 +191,7 @@ export function HomePage() {
           <div className="mt-6 flex justify-center">
             <button
               onClick={() => setShowBecomePartner(true)}
-              className="bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition-colors font-bold"
+              className="bg-emerald-600 text-white px-8 py-3 rounded-lg hover:bg-emerald-700 transition-all transform hover:scale-105 font-bold shadow-lg hover:shadow-xl"
             >
               Devenir Partenaire
             </button>

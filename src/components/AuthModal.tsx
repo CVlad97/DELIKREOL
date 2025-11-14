@@ -28,19 +28,37 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     try {
       if (mode === 'signin') {
         const { error } = await signIn(email, password);
-        if (error) throw error;
+        if (error) {
+          const errorMessages: Record<string, string> = {
+            'Invalid login credentials': 'Email ou mot de passe incorrect',
+            'Email not confirmed': 'Veuillez confirmer votre email',
+          };
+          throw new Error(errorMessages[error.message] || error.message);
+        }
         onClose();
       } else {
-        if (!fullName || !phone) {
+        if (!fullName.trim() || !phone.trim()) {
           setError('Veuillez remplir tous les champs');
+          setLoading(false);
+          return;
+        }
+        if (password.length < 6) {
+          setError('Le mot de passe doit contenir au moins 6 caractères');
+          setLoading(false);
           return;
         }
         const { error } = await signUp(email, password, fullName, phone);
-        if (error) throw error;
+        if (error) {
+          const errorMessages: Record<string, string> = {
+            'User already registered': 'Cet email est déjà utilisé',
+            'Password should be at least 6 characters': 'Le mot de passe doit contenir au moins 6 caractères',
+          };
+          throw new Error(errorMessages[error.message] || error.message);
+        }
         onClose();
       }
     } catch (err: any) {
-      setError(err.message || 'Une erreur est survenue');
+      setError(err.message || 'Une erreur est survenue. Veuillez réessayer.');
     } finally {
       setLoading(false);
     }

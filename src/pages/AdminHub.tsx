@@ -60,11 +60,28 @@ export function AdminHub() {
       setLoading(true);
 
       const [metricsData, vendorsRes, relayPointsRes, appsData, statsData] = await Promise.all([
-        aggregateDailyMetrics(),
+        aggregateDailyMetrics().catch(err => {
+          console.error('Metrics error:', err);
+          return {
+            totalOrders: 0,
+            ordersByStatus: {},
+            totalRevenue: 0,
+            activeDrivers: 0,
+            availableDrivers: 0,
+            totalRelayPoints: 0,
+            relayUtilization: [],
+            ordersByZone: {},
+          };
+        }),
         supabase.from('vendors').select('*').eq('is_active', true),
         supabase.from('relay_points').select('*, storage_capacities(*)').eq('is_active', true),
-        getApplications({ status: 'submitted' }),
-        getApplicationStats(),
+        getApplications({ status: 'submitted' }).catch(() => []),
+        getApplicationStats().catch(() => ({
+          total: 0,
+          byStatus: {} as any,
+          byType: {} as any,
+          byGrade: {} as any,
+        })),
       ]);
 
       setMetrics(metricsData);
@@ -73,12 +90,21 @@ export function AdminHub() {
       setApplications(appsData);
       setAppStats(statsData);
 
-      const summary = await generateCopilotSummary(metricsData);
-      setCopilotSummary(summary);
+      if (metricsData.totalOrders > 0) {
+        const summary = await generateCopilotSummary(metricsData).catch(err => {
+          console.error('Copilot summary error:', err);
+          return {
+            summary: `${metricsData.totalOrders} commandes aujourd'hui`,
+            alerts: [],
+            suggestions: [],
+          };
+        });
+        setCopilotSummary(summary);
+      }
 
     } catch (error) {
       console.error('Error loading hub data:', error);
-      showError('Erreur de chargement des données');
+      showError('Certaines données n\'ont pas pu être chargées. Essayez de rafraîchir.');
     } finally {
       setLoading(false);
     }
