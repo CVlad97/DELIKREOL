@@ -1,4 +1,4 @@
-import { Home, Store, MapPin, Truck, Settings, User, LogIn, FileText } from 'lucide-react';
+import { Home, Store, MapPin, Truck, Settings, User, LogIn, FileText, Heart } from 'lucide-react';
 import { UserType } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useState } from 'react';
@@ -23,6 +23,7 @@ export function Navigation({ userType, currentView, onNavigate }: NavigationProp
         if (user) {
           customerItems.push(
             { id: 'requests', label: 'Demandes', icon: FileText },
+            { id: 'community-fund', label: 'Fonds', icon: Heart },
             { id: 'orders', label: 'Commandes', icon: Store },
             { id: 'profile', label: 'Profil', icon: User }
           );
@@ -54,11 +55,11 @@ export function Navigation({ userType, currentView, onNavigate }: NavigationProp
       case 'admin':
         return [
           { id: 'dashboard', label: 'Vue d\'ensemble', icon: Home },
+          { id: 'requests', label: 'Demandes', icon: FileText },
+          { id: 'community-fund', label: 'Fonds', icon: Heart },
           { id: 'users', label: 'Utilisateurs', icon: User },
           { id: 'vendors', label: 'Vendeurs', icon: Store },
           { id: 'relay-points', label: 'Points Relais', icon: MapPin },
-          { id: 'deliveries', label: 'Livraisons', icon: Truck },
-          { id: 'analytics', label: 'Analytics', icon: Settings },
         ];
       default:
         return [];

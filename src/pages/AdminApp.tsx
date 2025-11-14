@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Store, MapPin, Truck, TrendingUp, DollarSign, Key, Brain, FileText, Plug } from 'lucide-react';
+import { Users, Store, MapPin, Truck, TrendingUp, DollarSign, Key, Brain, FileText, Plug, Heart } from 'lucide-react';
 import { Navigation } from '../components/Navigation';
 import { MapView } from '../components/Map/MapView';
 import { APIKeysManager } from '../components/admin/APIKeysManager';
@@ -7,6 +7,7 @@ import { WhatsAppManager } from '../components/admin/WhatsAppManager';
 import { AdminInsights } from './AdminInsights';
 import { AdminHub } from './AdminHub';
 import { AdminRequests } from './AdminRequests';
+import { CommunityFundAdmin } from './admin/CommunityFundAdmin';
 import { supabase } from '../lib/supabase';
 import { Vendor, RelayPoint, Location } from '../types';
 import { integrations, getIntegrationStatus } from '../config/integrations';
@@ -390,6 +391,8 @@ export function AdminApp() {
         return <AdminHub />;
       case 'requests':
         return <AdminRequests />;
+      case 'community-fund':
+        return <CommunityFundAdmin />;
       case 'dashboard':
         return renderDashboard();
       case 'users':

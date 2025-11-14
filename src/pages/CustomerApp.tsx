@@ -9,6 +9,7 @@ import { OrderTracking } from '../components/OrderTracking';
 import { UserProfile } from '../components/UserProfile';
 import { ClientRequestForm } from '../components/ClientRequestForm';
 import { MyRequests } from '../components/MyRequests';
+import { CommunityFundPage } from './CommunityFundPage';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { supabase } from '../lib/supabase';
@@ -326,6 +327,8 @@ export function CustomerApp() {
         return renderHome();
       case 'requests':
         return renderRequests();
+      case 'community-fund':
+        return <CommunityFundPage />;
       case 'orders':
         return renderOrders();
       case 'map':
