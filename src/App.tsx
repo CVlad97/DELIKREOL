@@ -14,21 +14,10 @@ import { AdminApp } from './pages/AdminApp';
 import type { UserType } from './types';
 
 function AppContent() {
-  const { user, profile, loading } = useAuth();
+  const { user, profile } = useAuth();
   const [selectedRole, setSelectedRole] = useState<UserType | null>(null);
   const [showRoleInfo, setShowRoleInfo] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-green-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-600 mx-auto mb-4"></div>
-          <p className="text-gray-700 font-medium">Chargement de Delikreol...</p>
-        </div>
-      </div>
-    );
-  }
 
   const effectiveRole: UserType | null =
     (profile?.user_type as UserType | undefined) ?? selectedRole;
