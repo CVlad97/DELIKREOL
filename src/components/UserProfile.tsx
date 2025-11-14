@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, User, Phone, Mail, MapPin, Clock, Package, Star, Heart } from 'lucide-react';
+import { X, User, Mail, Package, Heart } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, Order } from '../lib/supabase';
 import { OrderTracking } from './OrderTracking';

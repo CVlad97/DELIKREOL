@@ -133,9 +133,9 @@ Génère un résumé opérationnel concis avec:
 
 Réponds en français, format concis et actionnable.`;
 
-    const analysis = await callOpenAI(prompt);
+    const analysis = await callOpenAI([{ role: 'user', content: prompt }]);
 
-    const lines = analysis.split('\n').filter(l => l.trim());
+    const lines = analysis.split('\n').filter((l: string) => l.trim());
     const summary = lines.slice(0, 3).join(' ');
 
     const alerts: string[] = [];
@@ -192,7 +192,7 @@ Contexte actuel:
 
 Réponds de manière concise et actionnable en français.`;
 
-    return await callOpenAI(prompt);
+    return await callOpenAI([{ role: 'user', content: prompt }]);
   } catch (error) {
     console.error('Error asking copilot:', error);
     throw new Error('Assistant IA temporairement indisponible');

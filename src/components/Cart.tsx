@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { AuthModal } from './AuthModal';
 
 interface CartProps {
+  isOpen?: boolean;
   onClose: () => void;
   onCheckout?: () => void;
 }

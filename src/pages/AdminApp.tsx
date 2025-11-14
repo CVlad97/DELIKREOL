@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Store, MapPin, Truck, TrendingUp, DollarSign, Key, Brain, FileText, Plug, Heart } from 'lucide-react';
+import { Users, Store, MapPin, Truck, DollarSign, Plug } from 'lucide-react';
 import { Navigation } from '../components/Navigation';
 import { MapView } from '../components/Map/MapView';
 import { APIKeysManager } from '../components/admin/APIKeysManager';

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, MapPin, Filter, ShoppingCart, User, LogOut, Moon, Sun, Users, Zap, Shield } from 'lucide-react';
+import { Search, MapPin, Filter, ShoppingCart, User, LogOut, Users, Zap, Shield } from 'lucide-react';
 import { supabase, Vendor } from '../lib/supabase';
 import { VendorCard } from '../components/VendorCard';
 import { AuthModal } from '../components/AuthModal';
@@ -11,7 +11,6 @@ import { WhatsAppButton } from '../components/WhatsAppButton';
 import { BecomePartner } from './BecomePartner';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { useTheme } from '../contexts/ThemeContext';
 
 export function HomePage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -31,7 +30,6 @@ export function HomePage() {
 
   const { user, profile, signOut } = useAuth();
   const { itemCount } = useCart();
-  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     loadVendors();

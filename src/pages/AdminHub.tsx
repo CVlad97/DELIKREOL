@@ -22,8 +22,8 @@ import {
   DailyMetrics,
   CopilotResponse
 } from '../agents/adminCopilot';
-import { optimizeRoutes, assignRouteToDriver, getOptimizationStats } from '../agents/routeOptimizer';
-import { getApplications, getApplicationStats, updateApplicationStatus } from '../agents/partnerScoring';
+import { optimizeRoutes } from '../agents/routeOptimizer';
+import { getApplications, updateApplicationStatus } from '../agents/partnerScoring';
 import { supabase } from '../lib/supabase';
 import { Vendor, RelayPoint, Location } from '../types';
 
@@ -34,7 +34,6 @@ interface ChatMessage {
 }
 
 export function AdminHub() {
-  const [currentView, setCurrentView] = useState('hub');
   const [metrics, setMetrics] = useState<DailyMetrics | null>(null);
   const [copilotSummary, setCopilotSummary] = useState<CopilotResponse | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -44,10 +43,8 @@ export function AdminHub() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [relayPoints, setRelayPoints] = useState<RelayPoint[]>([]);
   const [mapCenter] = useState<Location>({ latitude: 14.6415, longitude: -61.0242 });
-  const [showCopilot, setShowCopilot] = useState(true);
   const [routeOptimization, setRouteOptimization] = useState<any>(null);
   const [applications, setApplications] = useState<any[]>([]);
-  const [appStats, setAppStats] = useState<any>(null);
 
   const { showSuccess, showError, showInfo } = useToast();
 
@@ -59,7 +56,7 @@ export function AdminHub() {
     try {
       setLoading(true);
 
-      const [metricsData, vendorsRes, relayPointsRes, appsData, statsData] = await Promise.all([
+      const [metricsData, vendorsRes, relayPointsRes, appsData] = await Promise.all([
         aggregateDailyMetrics().catch(err => {
           console.error('Metrics error:', err);
           return {
@@ -76,19 +73,12 @@ export function AdminHub() {
         supabase.from('vendors').select('*').eq('is_active', true),
         supabase.from('relay_points').select('*, storage_capacities(*)').eq('is_active', true),
         getApplications({ status: 'submitted' }).catch(() => []),
-        getApplicationStats().catch(() => ({
-          total: 0,
-          byStatus: {} as any,
-          byType: {} as any,
-          byGrade: {} as any,
-        })),
       ]);
 
       setMetrics(metricsData);
       setVendors(vendorsRes.data || []);
       setRelayPoints(relayPointsRes.data || []);
       setApplications(appsData);
-      setAppStats(statsData);
 
       if (metricsData.totalOrders > 0) {
         const summary = await generateCopilotSummary(metricsData).catch(err => {
@@ -370,7 +360,7 @@ export function AdminHub() {
             )}
           </div>
 
-          {showCopilot && (
+          {copilotSummary && (
             <div className="lg:col-span-1">
               <div className="bg-white rounded-xl shadow-lg sticky top-6">
                 <div className="p-4 border-b border-gray-200 flex items-center justify-between">
@@ -474,7 +464,7 @@ export function AdminHub() {
         </div>
       </div>
 
-      <Navigation userType="admin" currentView="hub" onNavigate={setCurrentView} />
+      <Navigation userType="admin" currentView="hub" onNavigate={() => {}} />
     </div>
   );
 }

@@ -127,9 +127,9 @@ ${JSON.stringify(contextData, null, 2)}
 
 Réponds en français de manière claire et actionnable. Propose des recommandations concrètes basées sur les données.`;
 
-      const aiMessages = [
+      const aiMessages: Array<{ role: string; content: string }> = [
         { role: 'system', content: systemContext },
-        ...newMessages.filter((m) => m.role !== 'system'),
+        ...newMessages,
       ];
 
       const response = await callOpenAI(aiMessages, 'gpt-4');

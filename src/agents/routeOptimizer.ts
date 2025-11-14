@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { Order, Driver, RelayPoint } from '../types';
+import { Order, Driver } from '../types';
 
 interface OrderWithLocation extends Order {
   delivery_latitude: number;
@@ -87,10 +87,8 @@ function scoreDriverForOrder(
   return distanceScore * 0.6 + loadScore * 0.4;
 }
 
-export async function optimizeRoutes(timeWindowMinutes: number = 60): Promise<OptimizationResult> {
+export async function optimizeRoutes(_timeWindowMinutes: number = 60): Promise<OptimizationResult> {
   try {
-    const now = new Date();
-    const timeWindow = new Date(now.getTime() + timeWindowMinutes * 60000);
 
     const [ordersRes, driversRes] = await Promise.all([
       supabase
