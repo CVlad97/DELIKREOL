@@ -11,13 +11,13 @@ import { VendorApp } from './pages/VendorApp';
 import { RelayHostApp } from './pages/RelayHostApp';
 import { DriverApp } from './pages/DriverApp';
 import { AdminApp } from './pages/AdminApp';
-import { UserType } from './types';
+import type { UserType } from './types';
 
 function AppContent() {
   const { user, profile, loading } = useAuth();
   const [selectedRole, setSelectedRole] = useState<UserType | null>(null);
   const [showRoleInfo, setShowRoleInfo] = useState(false);
-  const [showAuth, setShowAuth] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   if (loading) {
     return (
@@ -30,67 +30,56 @@ function AppContent() {
     );
   }
 
-  if (!user) {
-    return (
-      <>
-        {!selectedRole || selectedRole === 'customer' ? (
-          <CustomerApp />
-        ) : (
-          <RoleSelector onSelectRole={(role) => {
-            setSelectedRole(role);
-            if (role !== 'customer' && role !== 'admin') {
-              setShowRoleInfo(true);
-            } else if (role === 'admin') {
-              setShowAuth(true);
-            }
-          }} />
-        )}
+  const effectiveRole: UserType | null =
+    (profile?.user_type as UserType | undefined) ?? selectedRole;
 
-        {selectedRole && selectedRole !== 'customer' && (
-          <RoleInfoModal
-            isOpen={showRoleInfo}
-            onClose={() => {
-              setShowRoleInfo(false);
-              setSelectedRole(null);
-            }}
-            onContinue={() => {
-              setShowRoleInfo(false);
-              setShowAuth(true);
-            }}
-            roleType={selectedRole}
-          />
-        )}
-
-        {showAuth && (
-          <AuthModal
-            isOpen={showAuth}
-            onClose={() => {
-              setShowAuth(false);
-              setSelectedRole(null);
-            }}
-            initialMode="signup"
-          />
-        )}
-      </>
-    );
+  if (user && effectiveRole === 'customer') {
+    return <CustomerApp />;
+  }
+  if (user && effectiveRole === 'vendor') {
+    return <VendorApp />;
+  }
+  if (user && effectiveRole === 'relay_host') {
+    return <RelayHostApp />;
+  }
+  if (user && effectiveRole === 'driver') {
+    return <DriverApp />;
+  }
+  if (user && effectiveRole === 'admin') {
+    return <AdminApp />;
   }
 
-  const userType = profile?.user_type || 'customer';
+  return (
+    <>
+      <RoleSelector
+        onSelectRole={(role) => {
+          setSelectedRole(role);
+          if (role === 'customer') {
+            setShowAuthModal(true);
+          } else {
+            setShowRoleInfo(true);
+          }
+        }}
+      />
 
-  switch (userType) {
-    case 'customer':
-      return <CustomerApp />;
-    case 'vendor':
-      return <VendorApp />;
-    case 'relay_host':
-      return <RelayHostApp />;
-    case 'driver':
-      return <DriverApp />;
-    case 'admin':
-      return <AdminApp />;
-    default:
-      return <CustomerApp />;
-  }
+      {selectedRole && selectedRole !== 'customer' && (
+        <RoleInfoModal
+          isOpen={showRoleInfo}
+          roleType={selectedRole}
+          onClose={() => setShowRoleInfo(false)}
+          onContinue={() => {
+            setShowRoleInfo(false);
+            setShowAuthModal(true);
+          }}
+        />
+      )}
+
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+      />
+    </>
+  );
 }
 
 function App() {
