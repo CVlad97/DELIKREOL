@@ -1,4 +1,4 @@
-import { Home, Store, MapPin, Truck, Settings, User, LogIn } from 'lucide-react';
+import { Home, Store, MapPin, Truck, Settings, User, LogIn, FileText } from 'lucide-react';
 import { UserType } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useState } from 'react';
@@ -22,6 +22,7 @@ export function Navigation({ userType, currentView, onNavigate }: NavigationProp
         ];
         if (user) {
           customerItems.push(
+            { id: 'requests', label: 'Demandes', icon: FileText },
             { id: 'orders', label: 'Commandes', icon: Store },
             { id: 'profile', label: 'Profil', icon: User }
           );
