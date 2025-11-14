@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Users, Store, MapPin, Truck, TrendingUp, DollarSign, Key, Brain } from 'lucide-react';
+import { Users, Store, MapPin, Truck, TrendingUp, DollarSign, Key, Brain, FileText, Plug } from 'lucide-react';
 import { Navigation } from '../components/Navigation';
 import { MapView } from '../components/Map/MapView';
 import { APIKeysManager } from '../components/admin/APIKeysManager';
 import { WhatsAppManager } from '../components/admin/WhatsAppManager';
 import { AdminInsights } from './AdminInsights';
 import { AdminHub } from './AdminHub';
+import { AdminRequests } from './AdminRequests';
 import { supabase } from '../lib/supabase';
 import { Vendor, RelayPoint, Location } from '../types';
+import { integrations, getIntegrationStatus } from '../config/integrations';
 
 export function AdminApp() {
   const [currentView, setCurrentView] = useState('dashboard');
@@ -314,11 +316,71 @@ export function AdminApp() {
     </div>
   );
 
+  const renderIntegrations = () => (
+    <div className="p-6 space-y-6 bg-slate-950">
+      <div>
+        <h1 className="text-3xl font-bold text-slate-50 mb-2">Int\u00e9grations Externes</h1>
+        <p className="text-slate-400">
+          Connecteurs pour finance, automatisation et crypto
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        {Object.entries(integrations).map(([key, integration]) => (
+          <div
+            key={key}
+            className="bg-slate-800 rounded-lg p-6 border border-slate-700"
+          >
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                  integration.enabled ? 'bg-emerald-500/10' : 'bg-slate-700'
+                }`}>
+                  <Plug className={`w-6 h-6 ${
+                    integration.enabled ? 'text-emerald-400' : 'text-slate-500'
+                  }`} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-50">{integration.label}</h3>
+                  <span className="text-xs text-slate-400">{getIntegrationStatus(key as any)}</span>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-sm text-slate-400 mb-4">
+              {integration.description}
+            </p>
+
+            <div className="text-xs text-slate-500 bg-slate-900 p-2 rounded">
+              {integration.enabled
+                ? '\u2705 Configur\u00e9 et pr\u00eat'
+                : '\u231b \u00c0 configurer - Voir docs/integrations.md'}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-6">
+        <h2 className="text-lg font-bold text-blue-400 mb-2">Documentation</h2>
+        <p className="text-slate-300 text-sm mb-3">
+          Pour activer une int\u00e9gration, consultez la documentation technique dans <code className="bg-slate-900 px-2 py-1 rounded">docs/integrations.md</code>
+        </p>
+        <ul className="text-sm text-slate-400 space-y-1">
+          <li>\u2022 <strong>Stripe:</strong> Paiements en ligne (d\u00e9j\u00e0 configur\u00e9 si cl\u00e9 pr\u00e9sente)</li>
+          <li>\u2022 <strong>Qonto/Revolut:</strong> Comptes bancaires pros + API</li>
+          <li>\u2022 <strong>Zapier/Make:</strong> Automatisation des workflows</li>
+          <li>\u2022 <strong>Sheets:</strong> Export donn\u00e9es vers Google Sheets</li>
+          <li>\u2022 <strong>Crypto:</strong> Conversion points \u2192 tokens (Solana/Polygon)</li>
+        </ul>
+      </div>
+    </div>
+  );
+
   const renderView = () => {
     if (loading) {
       return (
-        <div className="flex items-center justify-center h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800"></div>
+        <div className="flex items-center justify-center h-screen bg-slate-950">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
         </div>
       );
     }
@@ -326,6 +388,8 @@ export function AdminApp() {
     switch (currentView) {
       case 'hub':
         return <AdminHub />;
+      case 'requests':
+        return <AdminRequests />;
       case 'dashboard':
         return renderDashboard();
       case 'users':
@@ -344,6 +408,8 @@ export function AdminApp() {
         return <WhatsAppManager />;
       case 'ai-insights':
         return <AdminInsights />;
+      case 'integrations':
+        return renderIntegrations();
       default:
         return renderDashboard();
     }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapPin, Search, ShoppingCart, Filter } from 'lucide-react';
+import { MapPin, Search, ShoppingCart, Filter, FileText } from 'lucide-react';
 import { Navigation } from '../components/Navigation';
 import EnhancedMap from '../components/Map/EnhancedMap';
 import MapFilters from '../components/Map/MapFilters';
@@ -7,6 +7,8 @@ import { ProductCard } from '../components/ProductCard';
 import { Cart } from '../components/Cart';
 import { OrderTracking } from '../components/OrderTracking';
 import { UserProfile } from '../components/UserProfile';
+import { ClientRequestForm } from '../components/ClientRequestForm';
+import { MyRequests } from '../components/MyRequests';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { supabase } from '../lib/supabase';
@@ -298,10 +300,32 @@ export function CustomerApp() {
 
   const renderProfile = () => <UserProfile />;
 
+  const renderRequests = () => (
+    <div className="p-4 pb-20 space-y-6 bg-slate-950">
+      <div className="bg-slate-900/50 rounded-lg p-6 border border-slate-800">
+        <h1 className="text-3xl font-bold text-slate-50 mb-2">
+          Service Conciergerie
+        </h1>
+        <p className="text-slate-300">
+          💡 <strong>Delikreol</strong> — Livraison mutualisée & points relais en Martinique
+        </p>
+        <p className="text-slate-400 mt-2 text-sm">
+          Commandez ce que vous voulez, où vous voulez. Livraison à domicile ou retrait en point relais.
+          Nous soutenons les commerces locaux avec une logistique transparente et efficace.
+        </p>
+      </div>
+
+      <ClientRequestForm />
+      <MyRequests />
+    </div>
+  );
+
   const renderView = () => {
     switch (currentView) {
       case 'home':
         return renderHome();
+      case 'requests':
+        return renderRequests();
       case 'orders':
         return renderOrders();
       case 'map':
