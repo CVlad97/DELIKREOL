@@ -12,6 +12,8 @@ import { VendorApp } from './pages/VendorApp';
 import { RelayHostApp } from './pages/RelayHostApp';
 import { DriverApp } from './pages/DriverApp';
 import { AdminApp } from './pages/AdminApp';
+import { ClientHomePage } from './pages/ClientHomePage';
+import { HowItWorks } from './pages/HowItWorks';
 import { isSupabaseConfigured } from './lib/supabase';
 import type { UserType } from './types';
 
@@ -30,6 +32,8 @@ function MainShell({ children, onResetRole, currentRole }: MainShellProps) {
     admin: 'Admin',
   };
 
+  const isPro = currentRole !== 'customer';
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-50">
       <header className="w-full border-b border-slate-800 bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
@@ -41,16 +45,18 @@ function MainShell({ children, onResetRole, currentRole }: MainShellProps) {
             <div className="flex flex-col leading-tight">
               <span className="font-semibold text-sm">Delikreol</span>
               <span className="text-xs text-slate-400">
-                Hub logistique · {roleLabels[currentRole]}
+                {isPro ? 'Espace Pro' : 'Mode Client'} · {roleLabels[currentRole]}
               </span>
             </div>
           </div>
-          <button
-            onClick={onResetRole}
-            className="text-xs px-3 py-1.5 rounded-full border border-slate-700 hover:border-emerald-400 hover:text-emerald-400 transition-all"
-          >
-            ⬅ Changer de rôle
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onResetRole}
+              className="text-xs px-3 py-1.5 rounded-full border border-slate-700 hover:border-emerald-400 hover:text-emerald-400 transition-all"
+            >
+              {isPro ? '👤 Mode Client' : '💼 Espace Pro'}
+            </button>
+          </div>
         </div>
       </header>
       <main className="flex-1">{children}</main>
@@ -63,6 +69,8 @@ function AppContent() {
   const [selectedRole, setSelectedRole] = useState<UserType | null>(null);
   const [showRoleInfo, setShowRoleInfo] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
+  const [mode, setMode] = useState<'home' | 'customer' | 'pro' | null>(null);
 
   if (loading) {
     return (
@@ -90,6 +98,7 @@ function AppContent() {
     setSelectedRole(null);
     setShowRoleInfo(false);
     setShowAuthModal(false);
+    setMode('home');
     window.scrollTo(0, 0);
   };
 
@@ -148,31 +157,74 @@ function AppContent() {
     );
   }
 
-  return (
-    <>
-      <RoleSelector
-        onSelectRole={(role) => {
-          setSelectedRole(role);
-          if (role === 'customer') {
+  if (showGuide) {
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setShowGuide(false)}
+          className="fixed top-4 left-4 z-50 px-4 py-2 bg-slate-800/80 backdrop-blur border border-slate-700 rounded-full text-slate-300 hover:text-emerald-400 hover:border-emerald-500 transition-all"
+        >
+          ← Retour
+        </button>
+        <HowItWorks />
+      </div>
+    );
+  }
+
+  if (!mode || mode === 'home') {
+    return (
+      <ClientHomePage
+        onSelectMode={(selectedMode) => {
+          if (selectedMode === 'customer') {
+            setMode('customer');
+            setSelectedRole('customer');
             setShowAuthModal(true);
           } else {
-            setShowRoleInfo(true);
+            setMode('pro');
           }
         }}
+        onShowGuide={() => setShowGuide(true)}
       />
+    );
+  }
 
-      {selectedRole && selectedRole !== 'customer' && (
-        <RoleInfoModal
-          isOpen={showRoleInfo}
-          roleType={selectedRole}
-          onClose={() => setShowRoleInfo(false)}
-          onContinue={() => {
-            setShowRoleInfo(false);
-            setShowAuthModal(true);
+  if (mode === 'pro') {
+    return (
+      <>
+        <RoleSelector
+          onSelectRole={(role) => {
+            setSelectedRole(role);
+            if (role === 'customer') {
+              setMode('customer');
+              setShowAuthModal(true);
+            } else {
+              setShowRoleInfo(true);
+            }
           }}
         />
-      )}
 
+        {selectedRole && selectedRole !== 'customer' && (
+          <RoleInfoModal
+            isOpen={showRoleInfo}
+            roleType={selectedRole}
+            onClose={() => setShowRoleInfo(false)}
+            onContinue={() => {
+              setShowRoleInfo(false);
+              setShowAuthModal(true);
+            }}
+          />
+        )}
+
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+        />
+      </>
+    );
+  }
+
+  return (
+    <>
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}

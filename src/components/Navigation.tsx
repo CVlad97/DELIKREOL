@@ -56,6 +56,7 @@ export function Navigation({ userType, currentView, onNavigate }: NavigationProp
         return [
           { id: 'dashboard', label: 'Vue d\'ensemble', icon: Home },
           { id: 'requests', label: 'Demandes', icon: FileText },
+          { id: 'guide', label: 'Guide & Test', icon: Settings },
           { id: 'community-fund', label: 'Fonds', icon: Heart },
           { id: 'users', label: 'Utilisateurs', icon: User },
           { id: 'vendors', label: 'Vendeurs', icon: Store },
