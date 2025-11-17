@@ -7,6 +7,7 @@ import { WhatsAppManager } from '../components/admin/WhatsAppManager';
 import { AdminInsights } from './AdminInsights';
 import { AdminHub } from './AdminHub';
 import { AdminRequests } from './AdminRequests';
+import { AdminTestGuide } from './AdminTestGuide';
 import { CommunityFundAdmin } from './admin/CommunityFundAdmin';
 import { supabase } from '../lib/supabase';
 import { Vendor, RelayPoint, Location } from '../types';
@@ -391,6 +392,8 @@ export function AdminApp() {
         return <AdminHub />;
       case 'requests':
         return <AdminRequests />;
+      case 'guide':
+        return <AdminTestGuide />;
       case 'community-fund':
         return <CommunityFundAdmin />;
       case 'dashboard':
