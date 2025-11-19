@@ -14,6 +14,7 @@ import { DriverApp } from './pages/DriverApp';
 import { AdminApp } from './pages/AdminApp';
 import { ClientHomePage } from './pages/ClientHomePage';
 import { HowItWorks } from './pages/HowItWorks';
+import { BecomePartner } from './pages/BecomePartner';
 import { isSupabaseConfigured } from './lib/supabase';
 import type { UserType } from './types';
 
@@ -70,6 +71,7 @@ function AppContent() {
   const [showRoleInfo, setShowRoleInfo] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const [showBecomePartner, setShowBecomePartner] = useState(false);
   const [mode, setMode] = useState<'home' | 'customer' | 'pro' | null>(null);
 
   if (loading) {
@@ -98,6 +100,7 @@ function AppContent() {
     setSelectedRole(null);
     setShowRoleInfo(false);
     setShowAuthModal(false);
+    setShowBecomePartner(false);
     setMode('home');
     window.scrollTo(0, 0);
   };
@@ -171,20 +174,35 @@ function AppContent() {
     );
   }
 
+  if (showBecomePartner) {
+    return <BecomePartner onBack={() => setShowBecomePartner(false)} />;
+  }
+
   if (!mode || mode === 'home') {
     return (
-      <ClientHomePage
-        onSelectMode={(selectedMode) => {
-          if (selectedMode === 'customer') {
-            setMode('customer');
-            setSelectedRole('customer');
-            setShowAuthModal(true);
-          } else {
-            setMode('pro');
-          }
-        }}
-        onShowGuide={() => setShowGuide(true)}
-      />
+      <>
+        <ClientHomePage
+          onSelectMode={(selectedMode) => {
+            if (selectedMode === 'customer') {
+              setMode('customer');
+              setSelectedRole('customer');
+              setShowAuthModal(true);
+            } else {
+              setMode('pro');
+            }
+          }}
+          onShowGuide={() => setShowGuide(true)}
+        />
+        <div className="fixed bottom-6 right-6 z-40">
+          <button
+            onClick={() => setShowBecomePartner(true)}
+            className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full shadow-2xl hover:shadow-orange-500/50 transition-all transform hover:scale-105 font-semibold flex items-center gap-2"
+          >
+            <span>🤝</span>
+            <span>Devenir Partenaire</span>
+          </button>
+        </div>
+      </>
     );
   }
 
