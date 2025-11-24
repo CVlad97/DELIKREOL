@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { MapPin, Package, Clock, Send, ShoppingBag } from 'lucide-react';
+import { MapPin, Package, Clock, Send, ShoppingBag, CheckCircle, AlertTriangle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { AddressAutocomplete } from './AddressAutocomplete';
+import { GeocodeResult, isInDeliveryZone } from '../services/geocodingService';
 
 interface InitialProduct {
   id: string;
@@ -34,6 +36,10 @@ export function ClientRequestForm({ initialProducts = [] }: ClientRequestFormPro
     preferredTime: 'midi',
   });
 
+  const [geocodeData, setGeocodeData] = useState<GeocodeResult | null>(null);
+  const [addressVerified, setAddressVerified] = useState(false);
+  const [addressError, setAddressError] = useState<string>('');
+
   useEffect(() => {
     if (initialProducts.length > 0) {
       setFormData(prev => ({
@@ -43,11 +49,32 @@ export function ClientRequestForm({ initialProducts = [] }: ClientRequestFormPro
     }
   }, [initialProducts]);
 
+  const handleAddressSelect = (result: GeocodeResult) => {
+    setGeocodeData(result);
+    setAddressVerified(true);
+    setAddressError('');
+    setFormData(prev => ({ ...prev, address: result.displayName }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
       showError('Vous devez être connecté');
       return;
+    }
+
+    if (!addressVerified || !geocodeData) {
+      setAddressError('Veuillez sélectionner une adresse dans la liste');
+      showError('Veuillez sélectionner et vérifier votre adresse');
+      return;
+    }
+
+    const inZone = isInDeliveryZone(geocodeData.latitude, geocodeData.longitude);
+    if (!inZone) {
+      const confirmOutOfZone = window.confirm(
+        'Votre adresse est hors de notre zone de livraison principale. La livraison est sous réserve de disponibilité. Voulez-vous continuer ?'
+      );
+      if (!confirmOutOfZone) return;
     }
 
     setLoading(true);
@@ -111,14 +138,41 @@ export function ClientRequestForm({ initialProducts = [] }: ClientRequestFormPro
             <MapPin className="inline w-4 h-4 mr-1" />
             Adresse ou commune
           </label>
-          <input
-            type="text"
+          <AddressAutocomplete
             value={formData.address}
-            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-            className="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-slate-50 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-            placeholder="Ex: Fort-de-France, Schoelcher..."
-            required
+            onChange={(value) => {
+              setFormData({ ...formData, address: value });
+              setAddressVerified(false);
+              setGeocodeData(null);
+            }}
+            onSelectAddress={handleAddressSelect}
+            error={addressError}
           />
+          {geocodeData && addressVerified && (
+            <div className="mt-3 p-3 bg-slate-900/50 border border-emerald-500/30 rounded-lg">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <div className="text-emerald-400 font-medium mb-1">Adresse vérifiée</div>
+                  <div className="text-slate-300 text-sm">{geocodeData.displayName}</div>
+                  <div className="text-slate-400 text-xs mt-1">
+                    {geocodeData.commune} • {geocodeData.postalCode}
+                  </div>
+                  {isInDeliveryZone(geocodeData.latitude, geocodeData.longitude) ? (
+                    <div className="flex items-center gap-1 mt-2 text-xs text-emerald-400">
+                      <CheckCircle className="w-3 h-3" />
+                      Zone de livraison couverte
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 mt-2 text-xs text-orange-400">
+                      <AlertTriangle className="w-3 h-3" />
+                      Hors zone principale - livraison sous réserve
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div>
