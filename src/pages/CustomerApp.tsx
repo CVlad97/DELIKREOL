@@ -15,10 +15,15 @@ import { useCart } from '../contexts/CartContext';
 import { supabase } from '../lib/supabase';
 import { Product, RelayPoint, Location, Order } from '../types';
 
-export function CustomerApp() {
+interface CustomerAppProps {
+  initialDraftProducts?: any[];
+}
+
+export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
   const { user } = useAuth();
   const { items } = useCart();
   const [currentView, setCurrentView] = useState('home');
+  const [draftProducts] = useState(initialDraftProducts || []);
   const [products, setProducts] = useState<Product[]>([]);
   const [relayPoints, setRelayPoints] = useState<RelayPoint[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -316,7 +321,7 @@ export function CustomerApp() {
         </p>
       </div>
 
-      <ClientRequestForm />
+      <ClientRequestForm initialProducts={draftProducts} />
       <MyRequests />
     </div>
   );
