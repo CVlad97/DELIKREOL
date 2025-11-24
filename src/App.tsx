@@ -15,6 +15,9 @@ import { AdminApp } from './pages/AdminApp';
 import { ClientHomePage } from './pages/ClientHomePage';
 import { HowItWorks } from './pages/HowItWorks';
 import { BecomePartner } from './pages/BecomePartner';
+import { LegalMentionsPage } from './pages/LegalMentionsPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { TermsOfUsePage } from './pages/TermsOfUsePage';
 import { isSupabaseConfigured } from './lib/supabase';
 import type { UserType } from './types';
 
@@ -72,6 +75,7 @@ function AppContent() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [showBecomePartner, setShowBecomePartner] = useState(false);
+  const [showLegalPage, setShowLegalPage] = useState<'legal' | 'privacy' | 'terms' | null>(null);
   const [mode, setMode] = useState<'home' | 'customer' | 'pro' | null>(null);
 
   if (loading) {
@@ -101,6 +105,7 @@ function AppContent() {
     setShowRoleInfo(false);
     setShowAuthModal(false);
     setShowBecomePartner(false);
+    setShowLegalPage(null);
     setMode('home');
     window.scrollTo(0, 0);
   };
@@ -178,6 +183,48 @@ function AppContent() {
     return <BecomePartner onBack={() => setShowBecomePartner(false)} />;
   }
 
+  if (showLegalPage === 'legal') {
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setShowLegalPage(null)}
+          className="fixed top-4 left-4 z-50 px-4 py-2 bg-slate-800/80 backdrop-blur border border-slate-700 rounded-full text-slate-300 hover:text-emerald-400 hover:border-emerald-500 transition-all"
+        >
+          ← Retour
+        </button>
+        <LegalMentionsPage />
+      </div>
+    );
+  }
+
+  if (showLegalPage === 'privacy') {
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setShowLegalPage(null)}
+          className="fixed top-4 left-4 z-50 px-4 py-2 bg-slate-800/80 backdrop-blur border border-slate-700 rounded-full text-slate-300 hover:text-emerald-400 hover:border-emerald-500 transition-all"
+        >
+          ← Retour
+        </button>
+        <PrivacyPolicyPage />
+      </div>
+    );
+  }
+
+  if (showLegalPage === 'terms') {
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setShowLegalPage(null)}
+          className="fixed top-4 left-4 z-50 px-4 py-2 bg-slate-800/80 backdrop-blur border border-slate-700 rounded-full text-slate-300 hover:text-emerald-400 hover:border-emerald-500 transition-all"
+        >
+          ← Retour
+        </button>
+        <TermsOfUsePage />
+      </div>
+    );
+  }
+
   if (!mode || mode === 'home') {
     return (
       <>
@@ -192,6 +239,7 @@ function AppContent() {
             }
           }}
           onShowGuide={() => setShowGuide(true)}
+          onShowLegal={(page) => setShowLegalPage(page)}
         />
         <div className="fixed top-20 right-6 z-40">
           <button
