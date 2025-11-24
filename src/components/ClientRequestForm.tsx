@@ -1,19 +1,47 @@
-import { useState } from 'react';
-import { MapPin, Package, Clock, Send } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { MapPin, Package, Clock, Send, ShoppingBag } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 
-export function ClientRequestForm() {
+interface InitialProduct {
+  id: string;
+  name: string;
+  vendor: string;
+  price: number;
+}
+
+interface ClientRequestFormProps {
+  initialProducts?: InitialProduct[];
+}
+
+export function ClientRequestForm({ initialProducts = [] }: ClientRequestFormProps) {
   const { user } = useAuth();
   const { showSuccess, showError } = useToast();
   const [loading, setLoading] = useState(false);
+
+  const generateInitialDetails = () => {
+    if (initialProducts.length === 0) return '';
+    return initialProducts
+      .map(p => `• ${p.name} (${p.vendor}) - ${p.price.toFixed(2)}€`)
+      .join('\n');
+  };
+
   const [formData, setFormData] = useState({
     address: '',
     deliveryPreference: 'home_delivery' as 'home_delivery' | 'relay_point',
-    requestDetails: '',
+    requestDetails: generateInitialDetails(),
     preferredTime: 'midi',
   });
+
+  useEffect(() => {
+    if (initialProducts.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        requestDetails: generateInitialDetails(),
+      }));
+    }
+  }, [initialProducts]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,8 +83,26 @@ export function ClientRequestForm() {
       <h2 className="text-2xl font-bold text-slate-50 mb-4">
         Nouvelle Demande
       </h2>
+      {initialProducts.length > 0 && (
+        <div className="mb-4 p-4 bg-emerald-900/20 border border-emerald-500/30 rounded-lg">
+          <div className="flex items-center gap-2 text-emerald-400 font-semibold mb-2">
+            <ShoppingBag className="w-5 h-5" />
+            Produits sélectionnés ({initialProducts.length})
+          </div>
+          <div className="text-slate-300 text-sm space-y-1">
+            {initialProducts.map((p, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                <span>{p.name} <span className="text-slate-400">({p.vendor})</span> - {p.price.toFixed(2)}€</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <p className="text-slate-300 mb-6">
-        Décrivez ce que vous souhaitez commander. Notre équipe vous recontactera rapidement.
+        {initialProducts.length > 0
+          ? "Complétez votre demande ou ajoutez d'autres produits ci-dessous."
+          : "Décrivez ce que vous souhaitez commander. Notre équipe vous recontactera rapidement."}
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">

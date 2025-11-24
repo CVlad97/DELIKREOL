@@ -77,6 +77,7 @@ function AppContent() {
   const [showBecomePartner, setShowBecomePartner] = useState(false);
   const [showLegalPage, setShowLegalPage] = useState<'legal' | 'privacy' | 'terms' | null>(null);
   const [mode, setMode] = useState<'home' | 'customer' | 'pro' | null>(null);
+  const [draftProducts, setDraftProducts] = useState<any[]>([]);
 
   if (loading) {
     return (
@@ -113,7 +114,7 @@ function AppContent() {
   if (user && effectiveRole === 'customer') {
     return (
       <MainShell currentRole="customer" onResetRole={resetRole}>
-        <CustomerApp />
+        <CustomerApp initialDraftProducts={draftProducts} />
       </MainShell>
     );
   }
@@ -229,10 +230,13 @@ function AppContent() {
     return (
       <>
         <ClientHomePage
-          onSelectMode={(selectedMode) => {
+          onSelectMode={(selectedMode, products) => {
             if (selectedMode === 'customer') {
               setMode('customer');
               setSelectedRole('customer');
+              if (products && products.length > 0) {
+                setDraftProducts(products);
+              }
               setShowAuthModal(true);
             } else {
               setMode('pro');
