@@ -1,11 +1,12 @@
-import { Package, MapPin, Clock, Shield, ArrowRight, HelpCircle } from 'lucide-react';
+import { Package, MapPin, Clock, Shield, ArrowRight, HelpCircle, FileText } from 'lucide-react';
 
 interface ClientHomePageProps {
   onSelectMode: (mode: 'customer' | 'pro') => void;
   onShowGuide: () => void;
+  onShowLegal?: (page: 'legal' | 'privacy' | 'terms') => void;
 }
 
-export function ClientHomePage({ onSelectMode, onShowGuide }: ClientHomePageProps) {
+export function ClientHomePage({ onSelectMode, onShowGuide, onShowLegal }: ClientHomePageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950">
       <div className="fixed top-4 right-4 z-50">
@@ -137,6 +138,37 @@ export function ClientHomePage({ onSelectMode, onShowGuide }: ClientHomePageProp
           </div>
         </div>
       </div>
+
+      <footer className="border-t border-slate-800 bg-slate-950/50 backdrop-blur mt-16 py-8">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-400">
+            <button
+              onClick={() => onShowLegal?.('legal')}
+              className="hover:text-emerald-400 transition-colors flex items-center gap-1"
+            >
+              <FileText className="w-4 h-4" />
+              Mentions légales
+            </button>
+            <button
+              onClick={() => onShowLegal?.('privacy')}
+              className="hover:text-emerald-400 transition-colors flex items-center gap-1"
+            >
+              <FileText className="w-4 h-4" />
+              Confidentialité
+            </button>
+            <button
+              onClick={() => onShowLegal?.('terms')}
+              className="hover:text-emerald-400 transition-colors flex items-center gap-1"
+            >
+              <FileText className="w-4 h-4" />
+              Conditions d'utilisation
+            </button>
+          </div>
+          <p className="text-center text-xs text-slate-500 mt-4">
+            © 2024 DELIKREOL - Plateforme logistique intelligente Martinique
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
