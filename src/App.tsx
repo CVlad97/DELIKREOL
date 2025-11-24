@@ -193,10 +193,10 @@ function AppContent() {
           }}
           onShowGuide={() => setShowGuide(true)}
         />
-        <div className="fixed bottom-6 right-6 z-40">
+        <div className="fixed top-20 right-6 z-40">
           <button
             onClick={() => setShowBecomePartner(true)}
-            className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full shadow-2xl hover:shadow-orange-500/50 transition-all transform hover:scale-105 font-semibold flex items-center gap-2"
+            className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full shadow-lg hover:shadow-orange-500/50 transition-all transform hover:scale-105 font-medium flex items-center gap-2 text-sm"
           >
             <span>🤝</span>
             <span>Devenir Partenaire</span>
