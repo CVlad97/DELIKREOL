@@ -3,6 +3,7 @@ import { Navigation, MapPin, DollarSign, Clock, Package } from 'lucide-react';
 import { Navigation as NavBar } from '../components/Navigation';
 import { MapView } from '../components/Map/MapView';
 import { QRScanner } from '../components/QRScanner';
+import { ProDashboard } from './ProDashboard';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Driver, Delivery, Location } from '../types';
@@ -543,6 +544,8 @@ export function DriverApp() {
     }
 
     switch (currentView) {
+      case 'dashboard':
+        return <ProDashboard onNavigate={setCurrentView} />;
       case 'available':
         return renderAvailable();
       case 'active':
@@ -552,7 +555,7 @@ export function DriverApp() {
       case 'earnings':
         return renderEarnings();
       default:
-        return renderAvailable();
+        return <ProDashboard onNavigate={setCurrentView} />;
     }
   };
 
