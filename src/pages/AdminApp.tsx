@@ -11,6 +11,7 @@ import { AdminTestGuide } from './AdminTestGuide';
 import { AdminPartners } from './admin/AdminPartners';
 import { CommunityFundAdmin } from './admin/CommunityFundAdmin';
 import { ProDashboard } from './ProDashboard';
+import { SimulationDashboard } from './SimulationDashboard';
 import { supabase } from '../lib/supabase';
 import { Vendor, RelayPoint, Location } from '../types';
 // Integration imports removed (not used in this view)
@@ -94,6 +95,8 @@ export function AdminApp() {
         return <WhatsAppManager />;
       case 'community-fund':
         return <CommunityFundAdmin />;
+      case 'simulation':
+        return <SimulationDashboard />;
       default:
         return renderDashboard();
     }
