@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Store, MapPin, Truck, DollarSign, Plug } from 'lucide-react';
+// Unused imports removed for cleaner code
 import { Navigation } from '../components/Navigation';
 import { MapView } from '../components/Map/MapView';
 import { APIKeysManager } from '../components/admin/APIKeysManager';
@@ -13,25 +13,18 @@ import { CommunityFundAdmin } from './admin/CommunityFundAdmin';
 import { ProDashboard } from './ProDashboard';
 import { supabase } from '../lib/supabase';
 import { Vendor, RelayPoint, Location } from '../types';
-import { integrations, getIntegrationStatus } from '../config/integrations';
+// Integration imports removed (not used in this view)
 
 export function AdminApp() {
   const [currentView, setCurrentView] = useState('dashboard');
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [relayPoints, setRelayPoints] = useState<RelayPoint[]>([]);
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    totalVendors: 0,
-    totalRelayPoints: 0,
-    totalOrders: 0,
-    totalRevenue: 0,
-    activeDrivers: 0,
-  });
+  // Stats now managed by ProDashboard
   const [mapCenter] = useState<Location>({
     latitude: 14.6415,
     longitude: -61.0242,
   });
-  const [loading, setLoading] = useState(true);
+  // Loading state managed by ProDashboard and sub-views
 
   useEffect(() => {
     loadAdminData();
@@ -40,37 +33,15 @@ export function AdminApp() {
   const loadAdminData = async () => {
     try {
       await Promise.all([
-        loadStats(),
         loadVendors(),
         loadRelayPoints(),
       ]);
     } catch (error) {
       console.error('Error loading admin data:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
-  const loadStats = async () => {
-    const [usersRes, vendorsRes, relayPointsRes, ordersRes, driversRes] = await Promise.all([
-      supabase.from('profiles').select('id', { count: 'exact', head: true }),
-      supabase.from('vendors').select('id', { count: 'exact', head: true }),
-      supabase.from('relay_points').select('id', { count: 'exact', head: true }),
-      supabase.from('orders').select('total_amount'),
-      supabase.from('drivers').select('id', { count: 'exact', head: true }).eq('is_available', true),
-    ]);
-
-    const totalRevenue = ordersRes.data?.reduce((sum, order) => sum + parseFloat(order.total_amount), 0) || 0;
-
-    setStats({
-      totalUsers: usersRes.count || 0,
-      totalVendors: vendorsRes.count || 0,
-      totalRelayPoints: relayPointsRes.count || 0,
-      totalOrders: ordersRes.data?.length || 0,
-      totalRevenue,
-      activeDrivers: driversRes.count || 0,
-    });
-  };
+  // loadStats removed - now handled by ProDashboard
 
   const loadVendors = async () => {
     const { data, error } = await supabase
