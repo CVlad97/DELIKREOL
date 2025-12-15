@@ -85,10 +85,16 @@ export function HomePage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex-1 flex justify-center">
               <div className="text-center">
-                <h1 className="text-4xl md:text-5xl font-black text-white tracking-wider drop-shadow-lg" style={{ fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.1em' }}>
-                  DELI<span className="text-yellow-300">KRÉOL</span>
-                </h1>
-                <p className="text-sm text-emerald-100 mt-1 font-medium tracking-wide">🌴 Martinique · Livraison Locale 🌴</p>
+                <div className="flex justify-center mb-2">
+                  <img
+                    src="/capture_d'ecran_2025-12-15_144525.png"
+                    alt="DELIKREOL Logo"
+                    className="h-20 md:h-28 w-auto drop-shadow-2xl"
+                  />
+                </div>
+                <p className="text-sm md:text-base text-white font-black tracking-wide bg-gradient-to-r from-orange-500 to-yellow-400 px-5 py-2 rounded-full shadow-xl inline-block">
+                  ⚡ Saveurs Local Express ⚡
+                </p>
               </div>
             </div>
 
