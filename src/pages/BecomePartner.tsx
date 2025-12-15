@@ -105,7 +105,7 @@ export function BecomePartner({ onBack }: BecomePartnerProps) {
         <div className="max-w-4xl mx-auto px-4 py-8">
           <button
             onClick={() => setSelectedType(null)}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+            className="flex items-center gap-2 bg-white text-gray-700 px-4 py-2 rounded-xl hover:bg-gray-100 border-2 border-gray-200 transition-all transform hover:scale-105 font-bold shadow-md mb-6"
           >
             <ArrowLeft size={20} />
             Retour
@@ -209,7 +209,7 @@ export function BecomePartner({ onBack }: BecomePartnerProps) {
         {onBack && (
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+            className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 text-white px-6 py-3 rounded-xl hover:from-red-700 hover:to-orange-700 transition-all transform hover:scale-105 font-bold shadow-lg mb-6"
           >
             <ArrowLeft size={20} />
             Retour à l'accueil

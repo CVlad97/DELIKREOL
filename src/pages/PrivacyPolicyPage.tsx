@@ -6,9 +6,9 @@ export function PrivacyPolicyPage() {
       <div className="max-w-4xl mx-auto px-4 py-12">
         <button
           onClick={() => window.history.back()}
-          className="flex items-center gap-2 text-slate-400 hover:text-emerald-400 transition-colors mb-8"
+          className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 text-white px-6 py-3 rounded-xl hover:from-red-700 hover:to-orange-700 transition-all transform hover:scale-105 font-bold shadow-lg mb-8"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-5 h-5" />
           <span>Retour</span>
         </button>
 

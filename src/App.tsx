@@ -1,4 +1,5 @@
 import { ReactNode, useState } from 'react';
+import { Home, LogOut } from 'lucide-react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -28,6 +29,7 @@ type MainShellProps = {
 };
 
 function MainShell({ children, onResetRole, currentRole }: MainShellProps) {
+  const { signOut } = useAuth();
   const roleLabels: Record<UserType, string> = {
     customer: 'Client',
     vendor: 'Vendeur',
@@ -38,27 +40,47 @@ function MainShell({ children, onResetRole, currentRole }: MainShellProps) {
 
   const isPro = currentRole !== 'customer';
 
+  const handleGoHome = () => {
+    if (window.confirm('Voulez-vous vraiment retourner à l\'accueil? Vous serez déconnecté.')) {
+      signOut();
+      onResetRole();
+    }
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-50">
-      <header className="w-full border-b border-slate-800 bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500 text-slate-950 font-bold">
-              D
-            </span>
-            <div className="flex flex-col leading-tight">
-              <span className="font-semibold text-sm">Delikreol</span>
-              <span className="text-xs text-slate-400">
-                {isPro ? 'Espace Pro' : 'Mode Client'} · {roleLabels[currentRole]}
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-orange-50 via-white to-yellow-50">
+      <header className="w-full border-b-4 border-orange-400 bg-gradient-to-r from-red-600 via-orange-500 to-red-600 shadow-xl sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleGoHome}
+              className="flex items-center gap-2 px-3 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl transition-all transform hover:scale-105 text-white font-bold"
+              title="Retour à l'accueil"
+            >
+              <Home className="w-5 h-5" />
+              <span className="hidden sm:inline text-sm">Accueil</span>
+            </button>
+            <div className="h-8 w-px bg-white/30"></div>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-400 text-red-700 font-black text-lg shadow-lg">
+                D
               </span>
+              <div className="flex flex-col leading-tight">
+                <span className="font-black text-white text-sm md:text-base">DELIKREOL</span>
+                <span className="text-xs text-yellow-200 font-bold">
+                  {isPro ? 'Espace Pro' : 'Client'} · {roleLabels[currentRole]}
+                </span>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={onResetRole}
-              className="text-xs px-3 py-1.5 rounded-full border border-slate-700 hover:border-emerald-400 hover:text-emerald-400 transition-all"
+              onClick={signOut}
+              className="flex items-center gap-2 text-xs md:text-sm px-3 md:px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white font-bold hover:scale-105 transform transition-all"
+              title="Déconnexion"
             >
-              {isPro ? '👤 Mode Client' : '💼 Espace Pro'}
+              <LogOut className="w-4 h-4" />
+              <span className="hidden md:inline">Déconnexion</span>
             </button>
           </div>
         </div>
@@ -168,12 +190,13 @@ function AppContent() {
 
   if (showGuide) {
     return (
-      <div className="relative">
+      <div className="relative min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50">
         <button
           onClick={() => setShowGuide(false)}
-          className="fixed top-4 left-4 z-50 px-4 py-2 bg-slate-800/80 backdrop-blur border border-slate-700 rounded-full text-slate-300 hover:text-emerald-400 hover:border-emerald-500 transition-all"
+          className="fixed top-4 left-4 z-50 flex items-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 text-white px-6 py-3 rounded-xl hover:from-red-700 hover:to-orange-700 transition-all transform hover:scale-105 font-bold shadow-xl"
         >
-          ← Retour
+          <Home className="w-5 h-5" />
+          <span>Retour à l'accueil</span>
         </button>
         <HowItWorks />
       </div>
@@ -186,12 +209,13 @@ function AppContent() {
 
   if (showLegalPage === 'legal') {
     return (
-      <div className="relative">
+      <div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         <button
           onClick={() => setShowLegalPage(null)}
-          className="fixed top-4 left-4 z-50 px-4 py-2 bg-slate-800/80 backdrop-blur border border-slate-700 rounded-full text-slate-300 hover:text-emerald-400 hover:border-emerald-500 transition-all"
+          className="fixed top-4 left-4 z-50 flex items-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 text-white px-6 py-3 rounded-xl hover:from-red-700 hover:to-orange-700 transition-all transform hover:scale-105 font-bold shadow-xl"
         >
-          ← Retour
+          <Home className="w-5 h-5" />
+          <span>Retour</span>
         </button>
         <LegalMentionsPage />
       </div>
@@ -200,12 +224,13 @@ function AppContent() {
 
   if (showLegalPage === 'privacy') {
     return (
-      <div className="relative">
+      <div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         <button
           onClick={() => setShowLegalPage(null)}
-          className="fixed top-4 left-4 z-50 px-4 py-2 bg-slate-800/80 backdrop-blur border border-slate-700 rounded-full text-slate-300 hover:text-emerald-400 hover:border-emerald-500 transition-all"
+          className="fixed top-4 left-4 z-50 flex items-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 text-white px-6 py-3 rounded-xl hover:from-red-700 hover:to-orange-700 transition-all transform hover:scale-105 font-bold shadow-xl"
         >
-          ← Retour
+          <Home className="w-5 h-5" />
+          <span>Retour</span>
         </button>
         <PrivacyPolicyPage />
       </div>
@@ -214,12 +239,13 @@ function AppContent() {
 
   if (showLegalPage === 'terms') {
     return (
-      <div className="relative">
+      <div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         <button
           onClick={() => setShowLegalPage(null)}
-          className="fixed top-4 left-4 z-50 px-4 py-2 bg-slate-800/80 backdrop-blur border border-slate-700 rounded-full text-slate-300 hover:text-emerald-400 hover:border-emerald-500 transition-all"
+          className="fixed top-4 left-4 z-50 flex items-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 text-white px-6 py-3 rounded-xl hover:from-red-700 hover:to-orange-700 transition-all transform hover:scale-105 font-bold shadow-xl"
         >
-          ← Retour
+          <Home className="w-5 h-5" />
+          <span>Retour</span>
         </button>
         <TermsOfUsePage />
       </div>
