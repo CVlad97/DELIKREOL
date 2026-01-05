@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, lazy, Suspense } from 'react';
 import { Home, LogOut } from 'lucide-react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
@@ -8,19 +8,36 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { RoleSelector } from './components/RoleSelector';
 import { RoleInfoModal } from './components/RoleInfoModal';
 import { AuthModal } from './components/AuthModal';
-import { CustomerApp } from './pages/CustomerApp';
-import { VendorApp } from './pages/VendorApp';
-import { RelayHostApp } from './pages/RelayHostApp';
-import { DriverApp } from './pages/DriverApp';
-import { AdminApp } from './pages/AdminApp';
 import { ClientHomePage } from './pages/ClientHomePage';
-import { HowItWorks } from './pages/HowItWorks';
-import { BecomePartner } from './pages/BecomePartner';
-import { LegalMentionsPage } from './pages/LegalMentionsPage';
-import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
-import { TermsOfUsePage } from './pages/TermsOfUsePage';
 import { isSupabaseConfigured } from './lib/supabase';
 import type { UserType } from './types';
+
+const CustomerApp = lazy(() => import('./pages/CustomerApp'));
+const VendorApp = lazy(() => import('./pages/VendorApp'));
+const RelayHostApp = lazy(() => import('./pages/RelayHostApp'));
+const DriverApp = lazy(() => import('./pages/DriverApp'));
+const AdminApp = lazy(() => import('./pages/AdminApp'));
+const HowItWorks = lazy(() => import('./pages/HowItWorks'));
+const BecomePartner = lazy(() => import('./pages/BecomePartner'));
+const LegalMentionsPage = lazy(() => import('./pages/LegalMentionsPage'));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const TermsOfUsePage = lazy(() => import('./pages/TermsOfUsePage'));
+
+const LoadingFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-white to-yellow-50">
+    <div className="text-center">
+      <div className="relative">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500 mx-auto mb-4"></div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white font-bold text-sm">
+            D
+          </span>
+        </div>
+      </div>
+      <p className="text-gray-800 font-medium text-lg">Chargement...</p>
+    </div>
+  </div>
+);
 
 type MainShellProps = {
   children: ReactNode;
@@ -136,35 +153,45 @@ function AppContent() {
   if (user && effectiveRole === 'customer') {
     return (
       <MainShell currentRole="customer" onResetRole={resetRole}>
-        <CustomerApp initialDraftProducts={draftProducts} />
+        <Suspense fallback={<LoadingFallback />}>
+          <CustomerApp initialDraftProducts={draftProducts} />
+        </Suspense>
       </MainShell>
     );
   }
   if (user && effectiveRole === 'vendor') {
     return (
       <MainShell currentRole="vendor" onResetRole={resetRole}>
-        <VendorApp />
+        <Suspense fallback={<LoadingFallback />}>
+          <VendorApp />
+        </Suspense>
       </MainShell>
     );
   }
   if (user && effectiveRole === 'relay_host') {
     return (
       <MainShell currentRole="relay_host" onResetRole={resetRole}>
-        <RelayHostApp />
+        <Suspense fallback={<LoadingFallback />}>
+          <RelayHostApp />
+        </Suspense>
       </MainShell>
     );
   }
   if (user && effectiveRole === 'driver') {
     return (
       <MainShell currentRole="driver" onResetRole={resetRole}>
-        <DriverApp />
+        <Suspense fallback={<LoadingFallback />}>
+          <DriverApp />
+        </Suspense>
       </MainShell>
     );
   }
   if (user && effectiveRole === 'admin') {
     return (
       <MainShell currentRole="admin" onResetRole={resetRole}>
-        <AdminApp />
+        <Suspense fallback={<LoadingFallback />}>
+          <AdminApp />
+        </Suspense>
       </MainShell>
     );
   }
@@ -198,13 +225,19 @@ function AppContent() {
           <Home className="w-5 h-5" />
           <span>Retour à l'accueil</span>
         </button>
-        <HowItWorks />
+        <Suspense fallback={<LoadingFallback />}>
+          <HowItWorks />
+        </Suspense>
       </div>
     );
   }
 
   if (showBecomePartner) {
-    return <BecomePartner onBack={() => setShowBecomePartner(false)} />;
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <BecomePartner onBack={() => setShowBecomePartner(false)} />
+      </Suspense>
+    );
   }
 
   if (showLegalPage === 'legal') {
@@ -217,7 +250,9 @@ function AppContent() {
           <Home className="w-5 h-5" />
           <span>Retour</span>
         </button>
-        <LegalMentionsPage />
+        <Suspense fallback={<LoadingFallback />}>
+          <LegalMentionsPage />
+        </Suspense>
       </div>
     );
   }
@@ -232,7 +267,9 @@ function AppContent() {
           <Home className="w-5 h-5" />
           <span>Retour</span>
         </button>
-        <PrivacyPolicyPage />
+        <Suspense fallback={<LoadingFallback />}>
+          <PrivacyPolicyPage />
+        </Suspense>
       </div>
     );
   }
@@ -247,7 +284,9 @@ function AppContent() {
           <Home className="w-5 h-5" />
           <span>Retour</span>
         </button>
-        <TermsOfUsePage />
+        <Suspense fallback={<LoadingFallback />}>
+          <TermsOfUsePage />
+        </Suspense>
       </div>
     );
   }
