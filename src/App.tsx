@@ -19,6 +19,8 @@ import { BecomePartner } from './pages/BecomePartner';
 import { LegalMentionsPage } from './pages/LegalMentionsPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfUsePage } from './pages/TermsOfUsePage';
+import { CGUPage } from './pages/CGUPage';
+import { PartnerDashboardPage } from './pages/PartnerDashboardPage';
 import { isSupabaseConfigured } from './lib/supabase';
 import type { UserType } from './types';
 
@@ -97,8 +99,8 @@ function AppContent() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [showBecomePartner, setShowBecomePartner] = useState(false);
-  const [showLegalPage, setShowLegalPage] = useState<'legal' | 'privacy' | 'terms' | null>(null);
-  const [mode, setMode] = useState<'home' | 'customer' | 'pro' | null>(null);
+  const [showLegalPage, setShowLegalPage] = useState<'legal' | 'privacy' | 'terms' | 'cgu' | null>(null);
+  const [mode, setMode] = useState<'home' | 'customer' | 'pro' | 'dashboard/partner' | null>(null);
   const [draftProducts, setDraftProducts] = useState<any[]>([]);
 
   if (loading) {
@@ -165,6 +167,15 @@ function AppContent() {
     return (
       <MainShell currentRole="admin" onResetRole={resetRole}>
         <AdminApp />
+      </MainShell>
+    );
+  }
+
+  // Dashboard partner route
+  if (mode === 'dashboard/partner' && user) {
+    return (
+      <MainShell currentRole="vendor" onResetRole={() => setMode(null)}>
+        <PartnerDashboardPage />
       </MainShell>
     );
   }
@@ -248,6 +259,21 @@ function AppContent() {
           <span>Retour</span>
         </button>
         <TermsOfUsePage />
+      </div>
+    );
+  }
+
+  if (showLegalPage === 'cgu') {
+    return (
+      <div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+        <button
+          onClick={() => setShowLegalPage(null)}
+          className="fixed top-4 left-4 z-50 flex items-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 text-white px-6 py-3 rounded-xl hover:from-red-700 hover:to-orange-700 transition-all transform hover:scale-105 font-bold shadow-xl"
+        >
+          <Home className="w-5 h-5" />
+          <span>Retour</span>
+        </button>
+        <CGUPage onBack={() => setShowLegalPage(null)} />
       </div>
     );
   }
