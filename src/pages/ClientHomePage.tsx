@@ -7,7 +7,7 @@ import { mockCategories, getFeaturedProducts, LocalProduct } from '../data/mockC
 interface ClientHomePageProps {
   onSelectMode: (mode: 'customer' | 'pro', draftItems?: LocalProduct[]) => void;
   onShowGuide: () => void;
-  onShowLegal?: (page: 'legal' | 'privacy' | 'terms') => void;
+  onShowLegal?: (page: 'legal' | 'privacy' | 'terms' | 'cgu') => void;
 }
 
 export function ClientHomePage({ onSelectMode, onShowGuide, onShowLegal }: ClientHomePageProps) {
@@ -253,4 +253,9 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onShowLegal }: Clien
             >
               <FileText className="w-4 h-4" />
               CGU
-            </button>
+            </button>          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
