@@ -1,5 +1,4 @@
 import { Star, Clock, MapPin, TrendingUp } from 'lucide-react';
-import { TrustBadgeHACCP } from './TrustBadgeHACCP';
 
 interface Restaurant {
   id: string;
@@ -57,7 +56,7 @@ export function RestaurantCard({ restaurant, onClick }: RestaurantCardProps) {
       </div>
 
       <div className="p-4">
-        <div className="flex items-start justify-between mb-3">
+        <div className="flex items-start justify-between mb-2">
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-gray-900 text-lg truncate">
               {restaurant.name}
@@ -69,10 +68,6 @@ export function RestaurantCard({ restaurant, onClick }: RestaurantCardProps) {
             <span className="text-sm font-bold text-gray-900">{restaurant.rating}</span>
             <span className="text-xs text-gray-500">({restaurant.reviews})</span>
           </div>
-        </div>
-
-        <div className="mb-3">
-          <TrustBadgeHACCP showTooltip={true} />
         </div>
 
         <div className="flex items-center gap-1 text-xs text-gray-500">
