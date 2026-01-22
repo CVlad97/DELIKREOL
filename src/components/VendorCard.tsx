@@ -1,5 +1,6 @@
 import { Store, MapPin, Clock } from 'lucide-react';
 import { Vendor } from '../lib/supabase';
+import { TrustBadgeHACCP } from './TrustBadgeHACCP';
 
 interface VendorCardProps {
   vendor: Vendor;
@@ -31,13 +32,17 @@ export function VendorCard({ vendor, onClick }: VendorCardProps) {
       </div>
 
       <div className="p-4">
-        <div className="flex items-start justify-between mb-2">
+        <div className="flex items-start justify-between mb-3">
           <div>
             <h3 className="font-bold text-lg text-gray-900">{vendor.business_name}</h3>
             <span className="inline-block px-2 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded mt-1">
               {businessTypeLabels[vendor.business_type]}
             </span>
           </div>
+        </div>
+
+        <div className="mb-3">
+          <TrustBadgeHACCP showTooltip={true} />
         </div>
 
         {vendor.description && (

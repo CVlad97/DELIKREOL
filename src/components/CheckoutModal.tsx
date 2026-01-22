@@ -4,6 +4,9 @@ import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 
+// Configurable VAT rate (8.5% for Martinique)
+const VAT_RATE = 0.085;
+
 interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -19,11 +22,13 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const [error, setError] = useState('');
 
   const deliveryFee = deliveryType === 'home_delivery' ? 5.0 : 0;
-  const finalTotal = total + deliveryFee;
+  const subtotalHT = total + deliveryFee; // HT = before tax
+  const vat = subtotalHT * VAT_RATE; // Calculate VAT (8.5%)
+  const finalTotal = subtotalHT + vat; // TTC = Total with tax
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user) return;
 
@@ -168,8 +173,16 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
               <span>Frais de livraison</span>
               <span>{deliveryFee.toFixed(2)} €</span>
             </div>
-            <div className="flex justify-between text-xl font-bold text-gray-900 pt-3 border-t border-gray-300">
-              <span>Total</span>
+            <div className="flex justify-between text-sm text-gray-600 py-2 border-t border-gray-300">
+              <span>Sous-total HT</span>
+              <span>{subtotalHT.toFixed(2)} €</span>
+            </div>
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>TVA (8,5%)</span>
+              <span className="font-semibold">{vat.toFixed(2)} €</span>
+            </div>
+            <div className="flex justify-between text-xl font-bold text-gray-900 pt-3 border-t-2 border-gray-300">
+              <span>Total TTC</span>
               <span>{finalTotal.toFixed(2)} €</span>
             </div>
           </div>
