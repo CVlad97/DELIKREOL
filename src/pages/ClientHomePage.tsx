@@ -7,7 +7,7 @@ import { mockCategories, getFeaturedProducts, LocalProduct } from '../data/mockC
 interface ClientHomePageProps {
   onSelectMode: (mode: 'customer' | 'pro', draftItems?: LocalProduct[]) => void;
   onShowGuide: () => void;
-  onShowLegal?: (page: 'legal' | 'privacy' | 'terms') => void;
+  onShowLegal?: (page: 'legal' | 'privacy' | 'terms' | 'cgu') => void;
 }
 
 export function ClientHomePage({ onSelectMode, onShowGuide, onShowLegal }: ClientHomePageProps) {
@@ -247,10 +247,13 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onShowLegal }: Clien
               <FileText className="w-4 h-4" />
               Conditions d'utilisation
             </button>
-          </div>
-          <p className="text-center text-xs text-slate-500 mt-4">
-            © 2024 DELIKREOL - Plateforme logistique intelligente Martinique
-          </p>
+            <button
+              onClick={() => onShowLegal?.('cgu')}
+              className="hover:text-emerald-400 transition-colors flex items-center gap-1"
+            >
+              <FileText className="w-4 h-4" />
+              CGU
+            </button>          </div>
         </div>
       </footer>
     </div>
