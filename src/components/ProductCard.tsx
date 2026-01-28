@@ -1,5 +1,5 @@
-import { Plus, Package } from 'lucide-react';
-import { Product } from '../lib/supabase';
+import { Plus, Package, ShoppingBag } from 'lucide-react';
+import { Product } from '../types';
 import { useCart } from '../contexts/CartContext';
 
 interface ProductCardProps {
@@ -10,50 +10,54 @@ export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
 
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-      <div className="h-48 bg-gradient-to-br from-amber-200 to-orange-300 flex items-center justify-center">
+    <div className="group bg-card rounded-[2rem] border border-border hover:border-primary/50 transition-all duration-500 overflow-hidden shadow-elegant hover:-translate-y-1">
+      <div className="relative h-56 overflow-hidden">
         {product.image_url ? (
           <img
             src={product.image_url}
             alt={product.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           />
         ) : (
-          <Package size={48} className="text-orange-600" />
+          <div className="w-full h-full bg-muted flex items-center justify-center">
+            <Package size={48} className="text-muted-foreground opacity-20" />
+          </div>
         )}
-      </div>
-
-      <div className="p-4">
-        <div className="mb-2">
-          <h3 className="font-bold text-lg text-gray-900 line-clamp-1">{product.name}</h3>
-          <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded mt-1">
+        <div className="absolute top-4 left-4">
+          <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-foreground text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-sm">
             {product.category}
           </span>
         </div>
+      </div>
 
-        {product.description && (
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
-        )}
+      <div className="p-6 space-y-4">
+        <div className="space-y-1">
+          <h3 className="font-black text-xl text-foreground tracking-tight line-clamp-1 group-hover:text-primary transition-colors">{product.name}</h3>
+          {product.description && (
+            <p className="text-sm text-muted-foreground font-medium line-clamp-2 leading-relaxed">{product.description}</p>
+          )}
+        </div>
 
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-2xl font-bold text-emerald-600">{product.price.toFixed(2)} €</span>
-            {product.stock_quantity !== null && (
-              <p className="text-xs text-gray-500 mt-1">Stock: {product.stock_quantity}</p>
-            )}
+        <div className="flex items-center justify-between pt-2">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Prix Unitaire</span>
+            <span className="text-2xl font-black text-foreground tracking-tighter">{product.price.toFixed(2)} €</span>
           </div>
 
           <button
             onClick={() => addItem(product)}
             disabled={!product.is_available}
-            className="bg-emerald-600 text-white p-3 rounded-full hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-primary text-primary-foreground p-4 rounded-2xl hover:shadow-elegant transition-all transform active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed group/btn"
           >
-            <Plus size={20} />
+            <Plus className="w-6 h-6 group-hover/btn:rotate-90 transition-transform" />
           </button>
         </div>
 
         {!product.is_available && (
-          <p className="text-sm text-red-600 mt-2 font-medium">Indisponible</p>
+          <div className="flex items-center gap-2 text-primary font-black uppercase tracking-widest text-[10px] pt-2 border-t border-border">
+            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            Victime de son succès
+          </div>
         )}
       </div>
     </div>

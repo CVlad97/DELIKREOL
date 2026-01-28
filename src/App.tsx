@@ -24,17 +24,18 @@ const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
 const TermsOfUsePage = lazy(() => import('./pages/TermsOfUsePage'));
 
 const LoadingFallback = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-white to-yellow-50">
+  <div className="min-h-screen flex items-center justify-center bg-background">
     <div className="text-center">
       <div className="relative">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500 mx-auto mb-4"></div>
+        <div className="animate-spin rounded-full h-20 w-20 border-b-4 border-primary mx-auto mb-6"></div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white font-bold text-sm">
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-black text-lg shadow-elegant">
             D
           </span>
         </div>
       </div>
-      <p className="text-gray-800 font-medium text-lg">Chargement...</p>
+      <p className="text-foreground font-bold text-xl tracking-tight">DELIKREOL</p>
+      <p className="text-muted-foreground text-sm mt-2">Chargement de votre expérience...</p>
     </div>
   </div>
 );
@@ -58,43 +59,41 @@ function MainShell({ children, onResetRole, currentRole }: MainShellProps) {
   const isPro = currentRole !== 'customer';
 
   const handleGoHome = () => {
-    if (window.confirm('Voulez-vous vraiment retourner à l\'accueil? Vous serez déconnecté.')) {
-      signOut();
+    if (window.confirm('Voulez-vous vraiment retourner à l\'accueil?')) {
       onResetRole();
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-orange-50 via-white to-yellow-50">
-      <header className="w-full border-b-4 border-orange-400 bg-gradient-to-r from-red-600 via-orange-500 to-red-600 shadow-xl sticky top-0 z-50">
+    <div className="min-h-screen flex flex-col bg-background">
+      <header className="w-full border-b bg-card/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <button
               onClick={handleGoHome}
-              className="flex items-center gap-2 px-3 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl transition-all transform hover:scale-105 text-white font-bold"
+              className="flex items-center gap-2 px-3 py-2 text-foreground hover:bg-muted rounded-xl transition-all font-semibold"
               title="Retour à l'accueil"
             >
               <Home className="w-5 h-5" />
               <span className="hidden sm:inline text-sm">Accueil</span>
             </button>
-            <div className="h-8 w-px bg-white/30"></div>
-            <div className="flex items-center gap-2">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-400 text-red-700 font-black text-lg shadow-lg">
+            <div className="h-6 w-px bg-border"></div>
+            <div className="flex items-center gap-3">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-black text-lg shadow-elegant">
                 D
               </span>
               <div className="flex flex-col leading-tight">
-                <span className="font-black text-white text-sm md:text-base">DELIKREOL</span>
-                <span className="text-xs text-yellow-200 font-bold">
-                  {isPro ? 'Espace Pro' : 'Client'} · {roleLabels[currentRole]}
+                <span className="font-black text-foreground text-base tracking-tight uppercase">DELIKREOL</span>
+                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+                  {isPro ? 'Espace Professionnel' : 'Espace Client'} · {roleLabels[currentRole]}
                 </span>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <button
               onClick={signOut}
-              className="flex items-center gap-2 text-xs md:text-sm px-3 md:px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white font-bold hover:scale-105 transform transition-all"
-              title="Déconnexion"
+              className="flex items-center gap-2 text-sm px-4 py-2 rounded-xl bg-primary text-primary-foreground font-bold hover:shadow-elegant transition-all active:scale-95"
             >
               <LogOut className="w-4 h-4" />
               <span className="hidden md:inline">Déconnexion</span>
@@ -107,6 +106,8 @@ function MainShell({ children, onResetRole, currentRole }: MainShellProps) {
   );
 }
 
+import MarketingHome from './pages/MarketingHome';
+
 function AppContent() {
   const { user, profile, loading } = useAuth();
   const [selectedRole, setSelectedRole] = useState<UserType | null>(null);
@@ -115,23 +116,28 @@ function AppContent() {
   const [showGuide, setShowGuide] = useState(false);
   const [showBecomePartner, setShowBecomePartner] = useState(false);
   const [showLegalPage, setShowLegalPage] = useState<'legal' | 'privacy' | 'terms' | null>(null);
-  const [mode, setMode] = useState<'home' | 'customer' | 'pro' | null>(null);
+  const [mode, setMode] = useState<'home' | 'customer' | 'pro' | 'marketing' | null>(null);
   const [draftProducts, setDraftProducts] = useState<any[]>([]);
 
   if (loading) {
+    return <LoadingFallback />;
+  }
+
+  // Show Marketing Home if not logged in and not specifically trying to enter an app
+  if (!user && !mode && !showBecomePartner && !showLegalPage && !showGuide) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950">
-        <div className="text-center">
-          <div className="relative">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-emerald-500 mx-auto mb-4"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500 text-slate-950 font-bold text-sm">
-                D
-              </span>
-            </div>
-          </div>
-          <p className="text-slate-200 font-medium text-lg">Chargement de DELIKREOL</p>
-          <p className="text-slate-400 text-sm mt-2">Plateforme logistique intelligente</p>
+      <div className="animate-fadeIn">
+        <MarketingHome 
+          onStart={() => setMode('home')} 
+          onBecomePartner={() => setShowBecomePartner(true)}
+        />
+        <div className="fixed top-6 right-6 z-50 flex gap-4">
+          <button 
+            onClick={() => setMode('home')}
+            className="px-6 py-3 bg-primary text-primary-foreground rounded-full font-black uppercase tracking-widest text-[10px] shadow-elegant hover:scale-105 transition-all border border-white/20 backdrop-blur-md"
+          >
+            Lancer l'App
+          </button>
         </div>
       </div>
     );
@@ -196,24 +202,7 @@ function AppContent() {
     );
   }
 
-  if (!isSupabaseConfigured) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-50 px-4">
-        <div className="max-w-md w-full space-y-4 text-center">
-          <h1 className="text-2xl font-bold">Configuration requise</h1>
-          <p className="text-sm text-slate-300">
-            Supabase n&apos;est pas encore configuré pour ce projet DELIKREOL.
-          </p>
-          <p className="text-xs text-slate-400">
-            Ajoutez les variables d&apos;environnement{' '}
-            <code className="font-mono">VITE_SUPABASE_URL</code> et{' '}
-            <code className="font-mono">VITE_SUPABASE_ANON_KEY</code> à partir
-            de votre projet Supabase (voir le fichier <code>.env.example</code>).
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // Supabase check removed since we use Blink DB as primary/fallback
 
   if (showGuide) {
     return (

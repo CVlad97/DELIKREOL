@@ -11,15 +11,17 @@ export function CategoryCard({ name, icon: Icon, count, onClick }: CategoryCardP
   return (
     <button
       onClick={onClick}
-      className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6 hover:border-emerald-500 transition-all group text-center"
+      className="group bg-card border-2 border-border/50 rounded-3xl p-8 hover:border-primary/50 transition-all duration-500 shadow-sm hover:shadow-elegant text-center flex flex-col items-center gap-4 active:scale-95"
     >
-      <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-3 group-hover:bg-emerald-500/30 transition-colors">
-        <Icon className="w-8 h-8 text-emerald-400" />
+      <div className="w-20 h-20 rounded-2xl bg-muted flex items-center justify-center group-hover:bg-primary/10 group-hover:rotate-6 transition-all duration-500">
+        <Icon className="w-10 h-10 text-muted-foreground group-hover:text-primary transition-colors" />
       </div>
-      <h3 className="font-semibold text-slate-50 mb-1">{name}</h3>
-      {count !== undefined && (
-        <p className="text-xs text-slate-400">{count} produits</p>
-      )}
+      <div className="space-y-1">
+        <h3 className="font-black text-foreground uppercase tracking-tight text-sm group-hover:text-primary transition-colors">{name}</h3>
+        {count !== undefined && (
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">{count} pépites</p>
+        )}
+      </div>
     </button>
   );
 }

@@ -71,8 +71,8 @@ export function Navigation({ userType, currentView, onNavigate }: NavigationProp
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40">
-        <div className="flex justify-around items-center h-16 max-w-screen-xl mx-auto">
+      <nav className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-xl border-t border-border shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] z-40 pb-safe">
+        <div className="flex justify-around items-center h-20 max-w-screen-xl mx-auto px-4">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
@@ -87,14 +87,21 @@ export function Navigation({ userType, currentView, onNavigate }: NavigationProp
                     onNavigate(item.id);
                   }
                 }}
-                className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+                className={`group relative flex flex-col items-center justify-center flex-1 h-full transition-all ${
                   isActive
-                    ? 'text-orange-600'
-                    : 'text-gray-600 hover:text-orange-500'
+                    ? 'text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <Icon className={`w-6 h-6 ${isActive ? 'stroke-[2.5]' : ''}`} />
-                <span className="text-xs mt-1 font-medium">{item.label}</span>
+                {isActive && (
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-primary rounded-full animate-fadeIn" />
+                )}
+                <div className={`p-2 rounded-2xl transition-all ${isActive ? 'bg-primary/10' : 'group-hover:bg-muted'}`}>
+                  <Icon className={`w-6 h-6 transition-transform ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+                </div>
+                <span className={`text-[10px] mt-1 font-black uppercase tracking-widest transition-all ${isActive ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'}`}>
+                  {item.label}
+                </span>
               </button>
             );
           })}

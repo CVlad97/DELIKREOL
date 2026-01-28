@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Package, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { Package, Clock, CheckCircle, XCircle, AlertCircle, MapPin, Inbox } from 'lucide-react';
+import { blink } from '../lib/blink';
 import { useAuth } from '../contexts/AuthContext';
 
 interface ClientRequest {
   id: string;
   address: string;
-  delivery_preference: string;
-  request_details: string;
-  preferred_time: string;
+  deliveryPreference: string;
+  requestDetails: string;
+  preferredTime: string;
   status: string;
-  created_at: string;
-  admin_notes?: string;
+  createdAt: string;
+  adminNotes?: string;
 }
 
 export function MyRequests() {
@@ -27,13 +27,11 @@ export function MyRequests() {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('client_requests')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      const data = await blink.db.clientRequests.list({
+        where: { userId: user.id },
+        orderBy: { createdAt: 'desc' }
+      }) as ClientRequest[];
 
-      if (error) throw error;
       setRequests(data || []);
     } catch (error) {
       console.error('Error loading requests:', error);
@@ -45,15 +43,15 @@ export function MyRequests() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pending_admin_review':
-        return <Clock className="w-5 h-5 text-yellow-400" />;
+        return <Clock className="w-5 h-5" />;
       case 'in_progress':
-        return <AlertCircle className="w-5 h-5 text-blue-400" />;
+        return <AlertCircle className="w-5 h-5" />;
       case 'completed':
-        return <CheckCircle className="w-5 h-5 text-green-400" />;
+        return <CheckCircle className="w-5 h-5" />;
       case 'cancelled':
-        return <XCircle className="w-5 h-5 text-red-400" />;
+        return <XCircle className="w-5 h-5" />;
       default:
-        return <Package className="w-5 h-5 text-slate-400" />;
+        return <Package className="w-5 h-5" />;
     }
   };
 
@@ -75,25 +73,25 @@ export function MyRequests() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending_admin_review':
-        return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30';
+        return 'bg-secondary/10 text-secondary border-secondary/20';
       case 'in_progress':
-        return 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+        return 'bg-primary/10 text-primary border-primary/20';
       case 'completed':
-        return 'bg-green-500/10 text-green-400 border-green-500/30';
+        return 'bg-accent/10 text-accent border-accent/20';
       case 'cancelled':
-        return 'bg-red-500/10 text-red-400 border-red-500/30';
+        return 'bg-muted text-muted-foreground border-border';
       default:
-        return 'bg-slate-500/10 text-slate-400 border-slate-500/30';
+        return 'bg-muted text-muted-foreground border-border';
     }
   };
 
   if (loading) {
     return (
-      <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-        <div className="animate-pulse space-y-4">
-          <div className="h-6 bg-slate-700 rounded w-1/3"></div>
-          <div className="h-20 bg-slate-700 rounded"></div>
-          <div className="h-20 bg-slate-700 rounded"></div>
+      <div className="bg-card rounded-[2rem] p-10 border border-border">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-muted rounded-xl w-1/3"></div>
+          <div className="h-32 bg-muted rounded-2xl"></div>
+          <div className="h-32 bg-muted rounded-2xl"></div>
         </div>
       </div>
     );
@@ -101,74 +99,78 @@ export function MyRequests() {
 
   if (requests.length === 0) {
     return (
-      <div className="bg-slate-800 rounded-lg p-8 border border-slate-700 text-center">
-        <Package className="w-12 h-12 text-slate-500 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-slate-200 mb-2">
-          Aucune demande
-        </h3>
-        <p className="text-slate-400">
-          Vous n'avez pas encore fait de demande. Créez-en une ci-dessus!
-        </p>
+      <div className="bg-card rounded-[2rem] p-16 border-2 border-dashed border-border text-center space-y-4">
+        <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto opacity-20">
+          <Inbox className="w-10 h-10" />
+        </div>
+        <div className="space-y-1">
+          <h3 className="text-xl font-black uppercase tracking-tighter text-foreground/60">Aucune demande</h3>
+          <p className="text-muted-foreground font-medium">Vous n'avez pas encore sollicité notre conciergerie.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-      <h2 className="text-2xl font-bold text-slate-50 mb-4">
-        Mes Demandes
-      </h2>
-
-      <div className="space-y-4">
+    <div className="space-y-8">
+      <div className="grid gap-6">
         {requests.map((request) => (
           <div
             key={request.id}
-            className="bg-slate-900 rounded-lg p-4 border border-slate-700"
+            className="group bg-card rounded-[2.5rem] border border-border hover:border-primary/30 transition-all duration-500 shadow-sm hover:shadow-elegant overflow-hidden"
           >
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-2">
-                {getStatusIcon(request.status)}
-                <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(request.status)}`}>
+            <div className="p-8 space-y-6">
+              <div className="flex items-start justify-between">
+                <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border ${getStatusColor(request.status)}`}>
+                  {getStatusIcon(request.status)}
                   {getStatusLabel(request.status)}
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">
+                  {new Date(request.createdAt).toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
                 </span>
               </div>
-              <span className="text-xs text-slate-400">
-                {new Date(request.created_at).toLocaleDateString('fr-FR', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </span>
-            </div>
 
-            <div className="space-y-2 text-sm">
-              <div>
-                <span className="text-slate-400">Adresse:</span>
-                <span className="text-slate-200 ml-2">{request.address}</span>
-              </div>
-              <div>
-                <span className="text-slate-400">Livraison:</span>
-                <span className="text-slate-200 ml-2">
-                  {request.delivery_preference === 'home_delivery' ? '🏠 Domicile' : '📦 Point relais'}
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-400">Créneau:</span>
-                <span className="text-slate-200 ml-2">{request.preferred_time}</span>
-              </div>
-              <div>
-                <span className="text-slate-400">Détails:</span>
-                <p className="text-slate-200 mt-1 bg-slate-800 p-2 rounded">
-                  {request.request_details}
-                </p>
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                      <MapPin className="w-3 h-3 text-secondary" />
+                      Lieu
+                    </div>
+                    <p className="text-sm font-bold text-foreground line-clamp-1">{request.address}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                      <Clock className="w-3 h-3 text-primary" />
+                      Créneau
+                    </div>
+                    <p className="text-sm font-bold text-foreground capitalize">{request.preferredTime}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    <Package className="w-3 h-3 text-accent" />
+                    Détails
+                  </div>
+                  <p className="text-sm font-medium text-muted-foreground leading-relaxed bg-muted/30 p-4 rounded-2xl italic">
+                    "{request.requestDetails}"
+                  </p>
+                </div>
               </div>
 
-              {request.admin_notes && (
-                <div className="mt-3 bg-emerald-500/10 border border-emerald-500/30 rounded p-3">
-                  <span className="text-emerald-400 font-medium text-xs">Note de l'équipe:</span>
-                  <p className="text-slate-200 text-xs mt-1">{request.admin_notes}</p>
+              {request.adminNotes && (
+                <div className="p-5 bg-accent/5 border border-accent/10 rounded-2xl animate-fadeIn">
+                  <div className="flex items-center gap-2 text-accent font-black uppercase tracking-widest text-[10px] mb-2">
+                    <CheckCircle className="w-4 h-4" />
+                    Réponse de l'équipe
+                  </div>
+                  <p className="text-sm font-bold text-foreground leading-relaxed">{request.adminNotes}</p>
                 </div>
               )}
             </div>
