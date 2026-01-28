@@ -20,67 +20,81 @@ export function Cart({ onClose, onCheckout }: CartProps) {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
-      <div className="bg-white w-full sm:max-w-md sm:rounded-t-2xl rounded-t-2xl max-h-[90vh] flex flex-col">
-        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          <div className="flex items-center">
-            <ShoppingBag className="text-emerald-600 mr-2" size={24} />
-            <h2 className="text-xl font-bold text-gray-900">
-              Panier ({itemCount})
+      <div className="fixed inset-0 bg-foreground/20 backdrop-blur-sm flex items-end sm:items-center justify-center z-[100] p-0 sm:p-4">
+      <div className="bg-card w-full sm:max-w-md sm:rounded-[3rem] rounded-t-[3rem] max-h-[95vh] flex flex-col shadow-elegant border-t sm:border border-border animate-slide-up sm:animate-fadeIn">
+        <div className="p-8 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+              <ShoppingBag size={24} />
+            </div>
+            <h2 className="text-2xl font-black text-foreground tracking-tighter uppercase">
+              Mon Panier <span className="text-primary">({itemCount})</span>
             </h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-            <X size={24} />
+          <button onClick={onClose} className="p-2 hover:bg-muted rounded-full transition-colors">
+            <X size={20} className="text-muted-foreground" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto p-8 no-scrollbar">
           {items.length === 0 ? (
-            <div className="text-center py-12">
-              <ShoppingBag size={64} className="mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-600">Votre panier est vide</p>
+            <div className="text-center py-20 space-y-4">
+              <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto opacity-20">
+                <ShoppingBag size={48} className="text-muted-foreground" />
+              </div>
+              <p className="text-xl font-black text-muted-foreground uppercase tracking-tighter">Votre panier est vide</p>
+              <button 
+                onClick={onClose}
+                className="text-primary font-black uppercase tracking-widest text-xs hover:underline"
+              >
+                Parcourir la carte →
+              </button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {items.map((item) => (
-                <div key={item.id} className="flex gap-4 bg-gray-50 rounded-lg p-3">
-                  <div className="w-20 h-20 bg-gradient-to-br from-amber-200 to-orange-300 rounded-lg flex-shrink-0">
+                <div key={item.id} className="flex gap-6 group">
+                  <div className="w-24 h-24 bg-muted rounded-2xl flex-shrink-0 overflow-hidden shadow-sm">
                     {item.image_url ? (
                       <img
                         src={item.image_url}
                         alt={item.name}
-                        className="w-full h-full object-cover rounded-lg"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
-                    ) : null}
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Package size={24} className="text-muted-foreground opacity-20" />
+                      </div>
+                    )}
                   </div>
 
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-gray-900 truncate">{item.name}</h3>
-                    <p className="text-sm text-gray-600">{item.category}</p>
-                    <p className="text-emerald-600 font-bold mt-1">
-                      {item.price.toFixed(2)} €
+                  <div className="flex-1 space-y-1">
+                    <h3 className="font-black text-lg text-foreground tracking-tight uppercase line-clamp-1">{item.name}</h3>
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{item.category}</p>
+                    <p className="text-xl font-black text-primary tracking-tighter mt-2">
+                      {(item.price * item.quantity).toFixed(2)} €
                     </p>
                   </div>
 
-                  <div className="flex flex-col items-end justify-between">
+                  <div className="flex flex-col items-end justify-between py-1">
                     <button
                       onClick={() => removeItem(item.id)}
-                      className="text-red-500 hover:text-red-700"
+                      className="p-2 hover:bg-red-50 text-red-400 hover:text-red-600 rounded-lg transition-colors"
                     >
                       <Trash2 size={18} />
                     </button>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center bg-muted rounded-xl p-1 gap-3">
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="bg-white border border-gray-300 rounded-full w-7 h-7 flex items-center justify-center hover:bg-gray-50"
+                        className="w-8 h-8 flex items-center justify-center bg-card rounded-lg shadow-sm hover:text-primary transition-all active:scale-90"
                       >
                         <Minus size={14} />
                       </button>
-                      <span className="font-medium w-8 text-center">{item.quantity}</span>
+                      <span className="font-black text-sm w-4 text-center">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="bg-emerald-600 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-emerald-700"
+                        className="w-8 h-8 flex items-center justify-center bg-primary text-primary-foreground rounded-lg shadow-sm hover:scale-105 transition-all active:scale-90"
                       >
                         <Plus size={14} />
                       </button>
@@ -93,19 +107,22 @@ export function Cart({ onClose, onCheckout }: CartProps) {
         </div>
 
         {items.length > 0 && (
-          <div className="p-4 border-t border-gray-200 space-y-3">
-            <div className="space-y-2">
-              <div className="flex justify-between text-gray-600">
+          <div className="p-8 border-t border-border bg-muted/30 space-y-6 rounded-b-[3rem]">
+            <div className="space-y-3">
+              <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-muted-foreground">
                 <span>Sous-total</span>
                 <span>{total.toFixed(2)} €</span>
               </div>
-              <div className="flex justify-between text-gray-600">
-                <span>Frais de livraison</span>
+              <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                <span>Livraison Express</span>
                 <span>{deliveryFee.toFixed(2)} €</span>
               </div>
-              <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-200">
-                <span>Total</span>
-                <span>{finalTotal.toFixed(2)} €</span>
+              <div className="h-px w-full bg-border mt-4" />
+              <div className="flex justify-between items-end pt-2">
+                <span className="text-xs font-black uppercase tracking-[0.2em] text-foreground">Total TTC</span>
+                <span className="text-4xl font-black text-foreground tracking-tighter">
+                  {finalTotal.toFixed(2)} <span className="text-2xl">€</span>
+                </span>
               </div>
             </div>
 
@@ -119,9 +136,9 @@ export function Cart({ onClose, onCheckout }: CartProps) {
                   onCheckout();
                 }
               }}
-              className="w-full bg-emerald-600 text-white py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors"
+              className="w-full bg-primary text-primary-foreground py-6 rounded-full font-black uppercase tracking-widest text-sm hover:shadow-elegant transition-all transform active:scale-95"
             >
-              Passer commande
+              Passer à la caisse
             </button>
           </div>
         )}

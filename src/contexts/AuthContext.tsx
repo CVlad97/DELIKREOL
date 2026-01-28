@@ -1,14 +1,15 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User, Session, AuthError } from '@supabase/supabase-js';
-import { supabase, Profile } from '../lib/supabase';
+import { useBlinkAuth } from '@blinkdotnew/react';
+import { blink } from '../lib/blink';
+import { Profile } from '../lib/supabase';
 
 interface AuthContextType {
-  user: User | null;
+  user: any | null;
   profile: Profile | null;
-  session: Session | null;
+  session: any | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string, phone: string) => Promise<{ error: AuthError | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signUp: (email: string, password: string, fullName: string, phone: string) => Promise<{ error: any | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: any | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -16,111 +17,93 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const { user: blinkUser, isLoading: blinkLoading, isAuthenticated } = useBlinkAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
-
-      if (!error && data) {
-        setProfile(data);
-      } else if (error) {
-        console.error('Error fetching profile:', error);
+      const profile = await blink.db.profiles.get(userId) as Profile | null;
+      if (profile) {
+        setProfile(profile);
+      } else {
+        // Create initial profile if it doesn't exist
+        const newProfile = await blink.db.profiles.create({
+          id: userId,
+          user_id: userId,
+          full_name: blinkUser?.displayName || 'Utilisateur',
+          user_type: 'customer',
+          created_at: new Date().toISOString()
+        }) as Profile;
+        setProfile(newProfile);
       }
     } catch (err) {
-      console.error('Unexpected error fetching profile:', err);
+      console.error('Error fetching profile:', err);
     }
   };
 
   const refreshProfile = async () => {
-    if (user) {
-      await fetchProfile(user.id);
+    if (blinkUser) {
+      await fetchProfile(blinkUser.id);
     }
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id).finally(() => setLoading(false));
+    if (!blinkLoading) {
+      if (isAuthenticated && blinkUser) {
+        fetchProfile(blinkUser.id).finally(() => setLoading(false));
       } else {
+        setProfile(null);
         setLoading(false);
       }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      (() => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          fetchProfile(session.user.id);
-        } else {
-          setProfile(null);
-        }
-      })();
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+    }
+  }, [blinkUser, blinkLoading, isAuthenticated]);
 
   const signUp = async (email: string, password: string, fullName: string, phone: string) => {
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { user } = await blink.auth.signUp({
         email,
         password,
+        displayName: fullName,
+        metadata: { phone }
       });
 
-      if (error) return { error };
-
-      if (data.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: data.user.id,
-            full_name: fullName,
-            phone,
-            user_type: 'customer',
-          });
-
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
-          return { error: profileError as any };
-        }
-
-        await fetchProfile(data.user.id);
+      if (user) {
+        await blink.db.profiles.create({
+          id: user.id,
+          user_id: user.id,
+          full_name: fullName,
+          phone,
+          user_type: 'customer',
+          created_at: new Date().toISOString()
+        });
+        await fetchProfile(user.id);
       }
 
       return { error: null };
     } catch (err: any) {
-      console.error('Unexpected signup error:', err);
+      console.error('Signup error:', err);
       return { error: err };
     }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    return { error };
+    try {
+      await blink.auth.signInWithEmail(email, password);
+      return { error: null };
+    } catch (err: any) {
+      console.error('Signin error:', err);
+      return { error: err };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await blink.auth.signOut();
     setProfile(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, session, loading, signUp, signIn, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ user: blinkUser, profile, session: null, loading: blinkLoading || loading, signUp, signIn, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

@@ -11,6 +11,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
+    "@blinkdotnew/react": "^1.0.2",
+    "@blinkdotnew/sdk": "^2.3.5",
     "@supabase/supabase-js": "^2.57.4",
     "html5-qrcode": "^2.3.8",
     "leaflet": "^1.9.4",

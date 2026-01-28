@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { X, Check, Clock, Bike, Package, MapPin } from 'lucide-react';
-import { supabase, Order, Delivery } from '../lib/supabase';
+import { blink } from '../lib/blink';
+import { Order, Delivery } from '../types';
 
 interface OrderTrackingProps {
   orderId: string;
@@ -22,171 +23,116 @@ export function OrderTracking({ orderId, onClose }: OrderTrackingProps) {
 
   useEffect(() => {
     loadOrderDetails();
-
-    const channel = supabase
-      .channel(`order-${orderId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'orders',
-          filter: `id=eq.${orderId}`,
-        },
-        (payload) => {
-          setOrder(payload.new as Order);
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'deliveries',
-          filter: `order_id=eq.${orderId}`,
-        },
-        (payload) => {
-          if (payload.new) {
-            setDelivery(payload.new as Delivery);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [orderId]);
 
   const loadOrderDetails = async () => {
     setLoading(true);
+    try {
+      const orderData = await blink.db.orders.get(orderId) as Order | null;
+      const deliveryData = (await blink.db.deliveries.list({ where: { orderId } }))[0] as Delivery | null;
 
-    const [orderResult, deliveryResult] = await Promise.all([
-      supabase.from('orders').select('*').eq('id', orderId).single(),
-      supabase.from('deliveries').select('*').eq('order_id', orderId).maybeSingle(),
-    ]);
-
-    if (orderResult.data) setOrder(orderResult.data);
-    if (deliveryResult.data) setDelivery(deliveryResult.data);
-
+      if (orderData) setOrder(orderData);
+      if (deliveryData) setDelivery(deliveryData);
+    } catch (e) {
+      console.error(e);
+    }
     setLoading(false);
   };
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6">
-          <p className="text-gray-600 dark:text-gray-300">Chargement...</p>
-        </div>
+      <div className="flex flex-col items-center justify-center p-12 space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-primary"></div>
+        <p className="font-black text-muted-foreground uppercase tracking-widest text-[10px]">Localisation du colis...</p>
       </div>
     );
   }
 
-  if (!order) {
-    return null;
-  }
+  if (!order) return null;
 
   const currentStepIndex = statusSteps.findIndex((s) => s.key === order.status);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white dark:bg-gray-800 p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Suivi de commande
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">{order.order_number}</p>
-          </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-            <X size={24} />
-          </button>
+    <div className="bg-card w-full rounded-[2.5rem] flex flex-col animate-fadeIn">
+      <div className="p-8 border-b border-border flex items-center justify-between bg-muted/30">
+        <div>
+          <h2 className="text-2xl font-black text-foreground tracking-tighter uppercase">Suivi Direct</h2>
+          <p className="text-[10px] font-black uppercase tracking-widest text-primary">#{order.order_number}</p>
         </div>
+        <button onClick={onClose} className="p-2 hover:bg-muted rounded-full">
+          <X size={20} className="text-muted-foreground" />
+        </button>
+      </div>
 
-        <div className="p-6">
-          <div className="relative">
-            {statusSteps.map((step, index) => {
-              const Icon = step.icon;
-              const isCompleted = index <= currentStepIndex;
-              const isCurrent = index === currentStepIndex;
+      <div className="p-10 space-y-10">
+        <div className="relative space-y-8">
+          {statusSteps.map((step, index) => {
+            const Icon = step.icon;
+            const isCompleted = index <= currentStepIndex;
+            const isCurrent = index === currentStepIndex;
 
-              return (
-                <div key={step.key} className="flex items-start mb-8 last:mb-0">
-                  {index < statusSteps.length - 1 && (
-                    <div
-                      className={`absolute left-5 top-12 w-0.5 h-16 -ml-px transition-colors ${
-                        isCompleted ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-gray-600'
-                      }`}
-                    />
-                  )}
-
+            return (
+              <div key={step.key} className="flex items-start group">
+                <div className="flex flex-col items-center mr-6">
                   <div
-                    className={`relative z-10 flex items-center justify-center w-10 h-10 rounded-full transition-all ${
+                    className={`relative z-10 flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-500 ${
                       isCompleted
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-400'
-                    } ${isCurrent ? 'ring-4 ring-emerald-200 dark:ring-emerald-900' : ''}`}
+                        ? 'bg-primary text-primary-foreground shadow-elegant'
+                        : 'bg-muted text-muted-foreground'
+                    } ${isCurrent ? 'scale-110 ring-4 ring-primary/10' : ''}`}
                   >
                     {isCompleted ? <Check size={20} /> : <Icon size={20} />}
                   </div>
-
-                  <div className="ml-4 flex-1">
-                    <p
-                      className={`font-medium ${
-                        isCompleted
-                          ? 'text-gray-900 dark:text-white'
-                          : 'text-gray-500 dark:text-gray-400'
+                  {index < statusSteps.length - 1 && (
+                    <div
+                      className={`w-1 h-12 -mb-8 mt-2 rounded-full transition-colors duration-500 ${
+                        index < currentStepIndex ? 'bg-primary' : 'bg-muted'
                       }`}
-                    >
-                      {step.label}
-                    </p>
-                    {isCurrent && delivery && step.key === 'in_delivery' && (
-                      <div className="mt-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3">
-                        <div className="flex items-center text-sm text-emerald-700 dark:text-emerald-400">
-                          <Bike size={16} className="mr-2" />
-                          <span>En route vers vous</span>
-                        </div>
-                        {delivery.estimated_time && (
-                          <p className="text-xs text-emerald-600 dark:text-emerald-500 mt-1">
-                            Temps estimé : {delivery.estimated_time} min
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                    />
+                  )}
                 </div>
-              );
-            })}
-          </div>
 
-          {order.delivery_type === 'home_delivery' && order.delivery_address && (
-            <div className="mt-6 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-              <div className="flex items-start">
-                <MapPin size={20} className="text-emerald-600 dark:text-emerald-400 mt-0.5 mr-3" />
-                <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Adresse de livraison</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                    {order.delivery_address}
+                <div className="flex-1 pt-3">
+                  <p
+                    className={`text-lg font-black uppercase tracking-tight transition-colors ${
+                      isCompleted ? 'text-foreground' : 'text-muted-foreground'
+                    }`}
+                  >
+                    {step.label}
                   </p>
+                  {isCurrent && delivery && step.key === 'in_delivery' && (
+                    <div className="mt-4 bg-accent/10 rounded-2xl p-4 border border-accent/20 animate-pulse">
+                      <div className="flex items-center text-accent">
+                        <Bike size={18} className="mr-2" />
+                        <span className="font-black text-xs uppercase tracking-widest">Livreur en approche</span>
+                      </div>
+                      {delivery.estimated_time && (
+                        <p className="text-sm font-bold mt-1">~ {delivery.estimated_time} minutes</p>
+                      )}
+                    </div>
+                  )}
                 </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="space-y-4">
+          {order.delivery_type === 'home_delivery' && order.delivery_address && (
+            <div className="bg-muted p-6 rounded-3xl border border-border flex items-start gap-4">
+              <div className="p-2 bg-white rounded-xl shadow-sm text-secondary">
+                <MapPin size={20} />
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Destination</p>
+                <p className="text-sm font-bold text-foreground leading-tight mt-1">{order.delivery_address}</p>
               </div>
             </div>
           )}
 
-          {order.notes && (
-            <div className="mt-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4">
-              <p className="text-sm font-medium text-amber-900 dark:text-amber-300">Note</p>
-              <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">{order.notes}</p>
-            </div>
-          )}
-
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex justify-between text-lg font-bold text-gray-900 dark:text-white">
-              <span>Total</span>
-              <span className="text-emerald-600 dark:text-emerald-400">
-                {order.total_amount.toFixed(2)} €
-              </span>
-            </div>
+          <div className="bg-primary/5 p-6 rounded-3xl border border-primary/10 flex justify-between items-center">
+            <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">Total Réglé</span>
+            <span className="text-xl font-black text-primary tracking-tighter">{order.total_amount.toFixed(2)} €</span>
           </div>
         </div>
       </div>

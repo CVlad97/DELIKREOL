@@ -3,12 +3,44 @@
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-gray-50 text-gray-900;
+  :root {
+    --background: 20 20% 98%;
+    --foreground: 20 10% 10%;
+    
+    --primary: 15 85% 55%; /* Creole Red-Orange */
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 40 95% 55%; /* Warm Amber */
+    --secondary-foreground: 20 20% 10%;
+    
+    --accent: 165 70% 35%; /* Tropical Teal */
+    --accent-foreground: 0 0% 100%;
+    
+    --muted: 20 10% 95%;
+    --muted-foreground: 20 10% 40%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 20 10% 10%;
+    
+    --border: 20 10% 90%;
+    --input: 20 10% 90%;
+    --ring: 15 85% 55%;
+    
+    --radius: 1rem;
+    
+    --shadow-elegant: 0 10px 30px -10px hsl(var(--primary) / 0.2);
+    --shadow-warm: 0 10px 30px -10px hsl(var(--secondary) / 0.2);
   }
 
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer base {
   * {
-    @apply scroll-smooth;
+    @apply border-border;
   }
 }
 

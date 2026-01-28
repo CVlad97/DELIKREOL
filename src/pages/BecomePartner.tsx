@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Store, Truck, MapPin, ArrowLeft, CheckCircle, TrendingUp, DollarSign } from 'lucide-react';
+import { Store, Truck, MapPin, ArrowLeft, CheckCircle, TrendingUp, DollarSign, ShieldCheck, Zap, Star } from 'lucide-react';
 import { PartnerApplicationForm } from '../components/PartnerApplicationForm';
 import { PartnerType } from '../agents/partnerScoring';
 
@@ -16,69 +16,60 @@ export function BecomePartner({ onBack }: BecomePartnerProps) {
       type: 'vendor' as PartnerType,
       icon: Store,
       title: 'Vendeur',
-      subtitle: 'Restaurant · Producteur · Commerce',
-      color: 'from-blue-500 to-blue-600',
+      subtitle: 'Restaurateur · Producteur',
+      color: 'bg-primary',
       revenue: '80% des revenus',
-      description: 'Augmentez votre visibilité et vendez vos produits locaux à travers notre plateforme',
+      description: 'Propulsez votre activité locale. Nous gérons la visibilité et la logistique, vous gérez la qualité.',
       benefits: [
-        'Commission de seulement 20%',
-        'Paiements automatiques sécurisés',
-        'Gestion simplifiée des commandes',
-        'Zéro infrastructure de livraison',
-        'Visibilité sur toute la Martinique',
+        'Commission ultra-compétitive (20%)',
+        'Zéro frais d\'infrastructure',
+        'Marketing local ciblé inclus',
+        'Paiements hebdomadaires garantis',
       ],
       requirements: [
-        'SIRET valide',
-        'Conformité sanitaire',
-        'Photos de vos produits',
-        'Horaires d\'ouverture',
-        'Adresse de préparation',
+        'SIRET martiniquais valide',
+        'Conformité normes sanitaires',
+        'Catalogue produits qualitatifs',
       ],
     },
     {
       type: 'driver' as PartnerType,
       icon: Truck,
       title: 'Livreur',
-      subtitle: 'Auto-entrepreneur',
-      color: 'from-green-500 to-green-600',
-      revenue: '70% des frais de livraison',
-      description: 'Travaillez en toute liberté avec des tournées optimisées par IA',
+      subtitle: 'Indépendant · Équipé',
+      color: 'bg-accent',
+      revenue: '70% frais livraison',
+      description: 'Liberté totale. Notre IA optimise vos tournées pour maximiser vos gains par kilomètre.',
       benefits: [
-        '70% des frais de livraison',
-        'Paiement immédiat après livraison',
-        'Horaires 100% flexibles',
-        'Routes optimisées par IA',
-        'Application mobile dédiée',
+        'Gains immédiats après livraison',
+        'Planification 100% libre',
+        'IA Route Optimizer intégrée',
+        'Support chauffeur 24/7',
       ],
       requirements: [
-        'Statut auto-entrepreneur (SIRET)',
-        'Véhicule (vélo, scooter, voiture)',
-        'Permis de conduire valide',
-        'Assurance responsabilité civile',
-        'Smartphone avec GPS',
+        'Statut auto-entrepreneur',
+        'Véhicule motorisé ou vélo',
+        'Smartphone récent (GPS)',
       ],
     },
     {
       type: 'relay_host' as PartnerType,
       icon: MapPin,
-      title: 'Hôte de Point Relais',
-      subtitle: 'Commerce · Particulier',
-      color: 'from-orange-500 to-orange-600',
-      revenue: '2-5€ par colis',
-      description: 'Générez un revenu complémentaire en accueillant des colis dans votre local',
+      title: 'Point Relais',
+      subtitle: 'Commerce · Accueil',
+      color: 'bg-secondary',
+      revenue: 'Jusqu\'à 5€ / colis',
+      description: 'Optimisez votre espace. Attirez de nouveaux clients et rentabilisez chaque mètre carré.',
       benefits: [
-        '2 à 5€ par colis géré',
-        'Augmentation du trafic client',
-        'Horaires flexibles configurables',
-        'Application simple de gestion',
-        'Pas d\'investissement requis',
+        'Revenu passif par colis',
+        'Flux de clients additionnels',
+        'Gestion simplifiée par QR Code',
+        'Zéro investissement matériel',
       ],
       requirements: [
-        'Local adapté au stockage',
-        'Capacité de stockage (min. 5 colis)',
-        'Horaires réguliers',
-        'Mesures de sécurité',
-        'Accès pratique pour retraits',
+        'Local commercial ou sécurisé',
+        'Zone de stockage dédiée',
+        'Horaires d\'accueil réguliers',
       ],
     },
   ];
@@ -101,188 +92,193 @@ export function BecomePartner({ onBack }: BecomePartnerProps) {
     const Icon = partner.icon;
 
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="min-h-screen bg-background">
+        <div className="max-w-5xl mx-auto px-4 py-12">
           <button
             onClick={() => setSelectedType(null)}
-            className="flex items-center gap-2 bg-white text-gray-700 px-4 py-2 rounded-xl hover:bg-gray-100 border-2 border-gray-200 transition-all transform hover:scale-105 font-bold shadow-md mb-6"
+            className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors font-black uppercase tracking-widest text-sm mb-12"
           >
-            <ArrowLeft size={20} />
-            Retour
+            <ArrowLeft size={18} />
+            Retour aux rôles
           </button>
 
-          <div className={`bg-gradient-to-br ${partner.color} text-white p-8 rounded-2xl shadow-xl mb-8`}>
-            <div className="flex items-center gap-4 mb-4">
-              <div className="bg-white/20 p-4 rounded-xl backdrop-blur-sm">
-                <Icon size={40} />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold">{partner.title}</h1>
-                <p className="text-lg opacity-90">{partner.subtitle}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg inline-flex">
-              <DollarSign size={20} />
-              <span className="font-bold">{partner.revenue}</span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
-            <h2 className="text-2xl font-bold mb-4">Pourquoi rejoindre DELIKREOL ?</h2>
-            <p className="text-gray-700 mb-6">{partner.description}</p>
-
-            <div className="grid md:grid-cols-2 gap-8">
-              <div>
-                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                  <TrendingUp className="text-green-600" size={24} />
-                  Avantages
-                </h3>
-                <ul className="space-y-3">
-                  {partner.benefits.map((benefit, idx) => (
-                    <li key={idx} className="flex items-start gap-3">
-                      <CheckCircle className="text-green-600 flex-shrink-0 mt-0.5" size={20} />
-                      <span className="text-gray-700">{benefit}</span>
-                    </li>
-                  ))}
-                </ul>
+          <div className="grid lg:grid-cols-2 gap-16">
+            <div className="space-y-10">
+              <div className="space-y-6">
+                <div className={`inline-flex p-5 ${partner.color} text-white rounded-3xl shadow-elegant`}>
+                  <Icon size={48} />
+                </div>
+                <h1 className="text-5xl md:text-7xl font-black text-foreground tracking-tighter uppercase leading-none">
+                  Devenir <br />
+                  <span className="text-primary">{partner.title}</span>
+                </h1>
+                <p className="text-2xl text-muted-foreground font-medium leading-relaxed">
+                  {partner.description}
+                </p>
               </div>
 
-              <div>
-                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                  <CheckCircle className="text-blue-600" size={24} />
-                  Pré-requis
-                </h3>
-                <ul className="space-y-3">
-                  {partner.requirements.map((req, idx) => (
-                    <li key={idx} className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 text-sm font-bold">
-                        {idx + 1}
+              <div className="inline-flex items-center gap-4 px-6 py-3 bg-primary/10 rounded-2xl border border-primary/20">
+                <DollarSign className="text-primary w-6 h-6" />
+                <span className="text-xl font-black text-primary uppercase tracking-tight">{partner.revenue}</span>
+              </div>
+
+              <div className="space-y-8 pt-4">
+                <div className="space-y-4">
+                  <h3 className="text-sm font-black uppercase tracking-[0.2em] text-foreground/40">Vos Avantages</h3>
+                  <div className="grid gap-4">
+                    {partner.benefits.map((benefit, i) => (
+                      <div key={i} className="flex items-center gap-4 p-4 bg-card border border-border rounded-2xl shadow-sm">
+                        <CheckCircle className="text-accent w-6 h-6 flex-shrink-0" />
+                        <span className="font-bold text-foreground/80">{benefit}</span>
                       </div>
-                      <span className="text-gray-700">{req}</span>
-                    </li>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-12">
+              <div className="p-10 bg-foreground text-background rounded-[3rem] shadow-elegant space-y-8">
+                <h3 className="text-3xl font-black uppercase tracking-tighter">Pré-requis</h3>
+                <div className="space-y-6">
+                  {partner.requirements.map((req, i) => (
+                    <div key={i} className="flex items-start gap-4">
+                      <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center font-black text-sm text-primary-foreground flex-shrink-0">
+                        {i + 1}
+                      </div>
+                      <p className="text-lg font-bold leading-tight">{req}</p>
+                    </div>
                   ))}
-                </ul>
+                </div>
+                <div className="pt-6 border-t border-background/10">
+                  <button
+                    onClick={() => setShowForm(true)}
+                    className="w-full py-6 bg-primary text-primary-foreground rounded-full font-black text-xl uppercase tracking-widest hover:scale-105 transition-all shadow-xl active:scale-95"
+                  >
+                    Postuler Maintenant
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-8 border-2 border-dashed border-border rounded-[2rem] space-y-4">
+                <div className="flex items-center gap-3 text-accent">
+                  <Zap className="w-6 h-6" />
+                  <h4 className="font-black uppercase tracking-widest text-sm">Validation Express</h4>
+                </div>
+                <p className="text-sm text-muted-foreground font-medium leading-relaxed">
+                  Notre IA analyse votre dossier en temps réel. Recevez une réponse de principe en moins de 5 minutes.
+                </p>
               </div>
             </div>
           </div>
-
-          <div className="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-6 mb-6">
-            <h3 className="font-bold text-lg text-emerald-900 mb-3">Processus de candidature</h3>
-            <div className="space-y-2 text-sm text-emerald-800">
-              <div className="flex items-center gap-2">
-                <span className="font-bold">1.</span>
-                <span>Remplissez le formulaire de candidature (5 min)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold">2.</span>
-                <span>Évaluation automatique par IA (instantané)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold">3.</span>
-                <span>Validation par notre équipe (24-48h)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold">4.</span>
-                <span>Formation en ligne et activation (1h)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold">5.</span>
-                <span>Commencez à gagner ! 🎉</span>
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={() => setShowForm(true)}
-            className={`w-full bg-gradient-to-r ${partner.color} text-white py-4 rounded-xl font-bold text-lg hover:shadow-xl transition-all transform hover:scale-[1.02]`}
-          >
-            Postuler maintenant
-          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        {onBack && (
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 text-white px-6 py-3 rounded-xl hover:from-red-700 hover:to-orange-700 transition-all transform hover:scale-105 font-bold shadow-lg mb-6"
-          >
-            <ArrowLeft size={20} />
-            Retour à l'accueil
-          </button>
-        )}
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 py-20">
+        <div className="flex justify-between items-center mb-20">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors font-black uppercase tracking-widest text-sm"
+            >
+              <ArrowLeft size={18} />
+              Retour
+            </button>
+          )}
+          <div className="hidden md:flex gap-8">
+            <button className="text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-primary">Aide</button>
+            <button className="text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-primary">Contact</button>
+          </div>
+        </div>
 
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Rejoignez l'écosystème DELIKREOL
+        <div className="text-center max-w-4xl mx-auto mb-24 space-y-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-black uppercase tracking-[0.2em]">
+            <TrendingUp className="w-3 h-3" />
+            Grow with us
+          </div>
+          <h1 className="text-6xl md:text-9xl font-black text-foreground tracking-tighter uppercase leading-[0.8]">
+            Bâtissons <br />
+            <span className="text-primary">le futur</span> ensemble.
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Une plateforme logistique locale où chaque acteur gagne. Choisissez votre rôle et commencez à développer votre activité dès aujourd'hui.
+          <p className="text-xl md:text-2xl text-muted-foreground font-medium leading-relaxed max-w-2xl mx-auto">
+            Que vous cuisiniez, cultiviez, livriez ou accueilliez, il y a une place pour votre talent dans l'écosystème Delikreol.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-8">
           {partnerTypes.map((partner) => {
             const Icon = partner.icon;
             return (
-              <button
+              <div
                 key={partner.type}
                 onClick={() => setSelectedType(partner.type)}
-                className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 overflow-hidden text-left group"
+                className="group cursor-pointer bg-card border-2 border-border/50 rounded-[3rem] p-10 space-y-8 hover:border-primary transition-all duration-500 shadow-elegant flex flex-col"
               >
-                <div className={`bg-gradient-to-br ${partner.color} p-6 text-white`}>
-                  <Icon size={48} className="mb-4" />
-                  <h2 className="text-2xl font-bold mb-2">{partner.title}</h2>
-                  <p className="text-sm opacity-90">{partner.subtitle}</p>
+                <div className={`w-20 h-20 rounded-3xl ${partner.color} text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500`}>
+                  <Icon size={40} />
+                </div>
+                
+                <div className="flex-1 space-y-4">
+                  <div className="space-y-1">
+                    <h2 className="text-4xl font-black text-foreground tracking-tighter uppercase leading-none">{partner.title}</h2>
+                    <p className="text-sm font-black uppercase tracking-widest text-muted-foreground">{partner.subtitle}</p>
+                  </div>
+                  <p className="text-muted-foreground font-medium leading-relaxed">{partner.description}</p>
                 </div>
 
-                <div className="p-6">
-                  <div className="flex items-center gap-2 text-green-600 font-bold mb-4">
-                    <DollarSign size={20} />
-                    <span>{partner.revenue}</span>
+                <div className="pt-6 border-t border-border flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Revenus</span>
+                    <span className="text-lg font-black text-primary tracking-tight">{partner.revenue}</span>
                   </div>
-
-                  <p className="text-gray-700 mb-4 text-sm">{partner.description}</p>
-
-                  <div className="space-y-2 text-sm text-gray-600">
-                    {partner.benefits.slice(0, 3).map((benefit, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <CheckCircle size={16} className="text-green-600 flex-shrink-0" />
-                        <span>{benefit}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-6 text-emerald-600 font-bold group-hover:translate-x-2 transition-transform flex items-center gap-2">
-                    En savoir plus
-                    <span>→</span>
+                  <div className="w-12 h-12 rounded-full border-2 border-primary flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                    <ArrowRight className="w-6 h-6" />
                   </div>
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>
 
-        <div className="mt-12 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-2xl p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4">Questions ?</h2>
-          <p className="mb-6">Notre équipe est là pour vous accompagner dans votre démarche</p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <a
-              href="mailto:contact@delikreol.com"
-              className="bg-white text-emerald-600 px-6 py-3 rounded-lg font-bold hover:bg-emerald-50 transition-colors"
-            >
-              contact@delikreol.com
-            </a>
-            <a
-              href="https://wa.me/596696000000"
-              className="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-lg font-bold hover:bg-white/30 transition-colors"
-            >
-              WhatsApp: +596 696 00 00 00
-            </a>
+        <div className="mt-32 relative overflow-hidden bg-primary rounded-[4rem] p-16 md:p-24 text-primary-foreground shadow-elegant">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
+          
+          <div className="relative z-10 grid lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-8">
+              <h2 className="text-4xl md:text-7xl font-black tracking-tighter uppercase leading-none">
+                Des questions <br />
+                sur le partenariat ?
+              </h2>
+              <p className="text-xl md:text-2xl text-primary-foreground/80 font-medium">
+                Notre équipe d'onboarding est prête à vous accueillir et à répondre à toutes vos interrogations.
+              </p>
+            </div>
+            <div className="flex flex-col gap-4">
+              <a
+                href="mailto:onboarding@delikreol.mq"
+                className="group flex items-center justify-between p-8 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-3xl border border-white/20 transition-all"
+              >
+                <div>
+                  <div className="text-xs font-black uppercase tracking-widest opacity-60 mb-1">Email Direct</div>
+                  <div className="text-2xl font-black tracking-tight uppercase">onboarding@delikreol.mq</div>
+                </div>
+                <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
+              </a>
+              <a
+                href="tel:+596696000000"
+                className="group flex items-center justify-between p-8 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-3xl border border-white/20 transition-all"
+              >
+                <div>
+                  <div className="text-xs font-black uppercase tracking-widest opacity-60 mb-1">WhatsApp Business</div>
+                  <div className="text-2xl font-black tracking-tight uppercase">+596 696 00 00 00</div>
+                </div>
+                <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
+              </a>
+            </div>
           </div>
         </div>
       </div>
