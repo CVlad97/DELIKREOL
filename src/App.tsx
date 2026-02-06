@@ -206,13 +206,13 @@ function AppContent() {
 
   if (showGuide) {
     return (
-      <div className="relative min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50">
+      <div className="relative min-h-screen bg-background">
         <button
           onClick={() => setShowGuide(false)}
-          className="fixed top-4 left-4 z-50 flex items-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 text-white px-6 py-3 rounded-xl hover:from-red-700 hover:to-orange-700 transition-all transform hover:scale-105 font-bold shadow-xl"
+          className="fixed top-4 left-4 z-50 flex items-center gap-2 bg-card text-foreground px-5 py-2.5 rounded-2xl border border-border hover:border-primary/30 hover:shadow-soft transition-all font-bold text-sm backdrop-blur-md"
         >
-          <Home className="w-5 h-5" />
-          <span>Retour à l'accueil</span>
+          <Home className="w-4 h-4" />
+          <span>Retour</span>
         </button>
         <Suspense fallback={<LoadingFallback />}>
           <HowItWorks />
@@ -231,12 +231,12 @@ function AppContent() {
 
   if (showLegalPage === 'legal') {
     return (
-      <div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      <div className="relative min-h-screen bg-background">
         <button
           onClick={() => setShowLegalPage(null)}
-          className="fixed top-4 left-4 z-50 flex items-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 text-white px-6 py-3 rounded-xl hover:from-red-700 hover:to-orange-700 transition-all transform hover:scale-105 font-bold shadow-xl"
+          className="fixed top-4 left-4 z-50 flex items-center gap-2 bg-card text-foreground px-5 py-2.5 rounded-2xl border border-border hover:border-primary/30 hover:shadow-soft transition-all font-bold text-sm backdrop-blur-md"
         >
-          <Home className="w-5 h-5" />
+          <Home className="w-4 h-4" />
           <span>Retour</span>
         </button>
         <Suspense fallback={<LoadingFallback />}>
@@ -248,12 +248,12 @@ function AppContent() {
 
   if (showLegalPage === 'privacy') {
     return (
-      <div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      <div className="relative min-h-screen bg-background">
         <button
           onClick={() => setShowLegalPage(null)}
-          className="fixed top-4 left-4 z-50 flex items-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 text-white px-6 py-3 rounded-xl hover:from-red-700 hover:to-orange-700 transition-all transform hover:scale-105 font-bold shadow-xl"
+          className="fixed top-4 left-4 z-50 flex items-center gap-2 bg-card text-foreground px-5 py-2.5 rounded-2xl border border-border hover:border-primary/30 hover:shadow-soft transition-all font-bold text-sm backdrop-blur-md"
         >
-          <Home className="w-5 h-5" />
+          <Home className="w-4 h-4" />
           <span>Retour</span>
         </button>
         <Suspense fallback={<LoadingFallback />}>
@@ -265,12 +265,12 @@ function AppContent() {
 
   if (showLegalPage === 'terms') {
     return (
-      <div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      <div className="relative min-h-screen bg-background">
         <button
           onClick={() => setShowLegalPage(null)}
-          className="fixed top-4 left-4 z-50 flex items-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 text-white px-6 py-3 rounded-xl hover:from-red-700 hover:to-orange-700 transition-all transform hover:scale-105 font-bold shadow-xl"
+          className="fixed top-4 left-4 z-50 flex items-center gap-2 bg-card text-foreground px-5 py-2.5 rounded-2xl border border-border hover:border-primary/30 hover:shadow-soft transition-all font-bold text-sm backdrop-blur-md"
         >
-          <Home className="w-5 h-5" />
+          <Home className="w-4 h-4" />
           <span>Retour</span>
         </button>
         <Suspense fallback={<LoadingFallback />}>
@@ -302,10 +302,9 @@ function AppContent() {
         <div className="fixed top-20 right-6 z-40">
           <button
             onClick={() => setShowBecomePartner(true)}
-            className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full shadow-lg hover:shadow-orange-500/50 transition-all transform hover:scale-105 font-medium flex items-center gap-2 text-sm"
+            className="px-5 py-2.5 bg-primary text-primary-foreground rounded-full shadow-elegant hover:shadow-warm transition-all hover:scale-105 font-bold flex items-center gap-2 text-xs uppercase tracking-widest"
           >
-            <span>🤝</span>
-            <span>Devenir Partenaire</span>
+            Devenir Partenaire
           </button>
         </div>
       </>

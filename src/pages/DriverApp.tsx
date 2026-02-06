@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Navigation, MapPin, DollarSign, Clock, Package } from 'lucide-react';
+import { Navigation, MapPin, DollarSign, Clock, Package, Star, Truck } from 'lucide-react';
 import { Navigation as NavBar } from '../components/Navigation';
 import { MapView } from '../components/Map/MapView';
 import { QRScanner } from '../components/QRScanner';
@@ -214,7 +214,7 @@ export function DriverApp() {
 
   const handleQRScan = async (qrData: string) => {
     setShowScanner(false);
-    alert('QR Code scanné: ' + qrData);
+    alert('QR Code scanne: ' + qrData);
   };
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -229,16 +229,16 @@ export function DriverApp() {
   };
 
   const renderAvailable = () => (
-    <div className="p-4 pb-20">
+    <div className="p-4 pb-24">
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold">Courses disponibles</h1>
+        <div className="flex items-center justify-between mb-5">
+          <h1 className="text-2xl font-black text-foreground tracking-tight uppercase">Courses disponibles</h1>
           <button
             onClick={toggleAvailability}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-5 py-2.5 rounded-full font-bold text-xs uppercase tracking-widest transition-all ${
               isAvailable
-                ? 'bg-green-600 text-white'
-                : 'bg-gray-300 text-gray-700'
+                ? 'bg-accent text-accent-foreground shadow-elegant'
+                : 'bg-muted text-muted-foreground border border-border'
             }`}
           >
             {isAvailable ? 'En ligne' : 'Hors ligne'}
@@ -246,29 +246,29 @@ export function DriverApp() {
         </div>
 
         <div className="grid grid-cols-3 gap-3 mb-4">
-          <div className="bg-blue-50 p-3 rounded-lg">
-            <Package className="w-6 h-6 text-blue-600 mb-1" />
-            <p className="text-xs text-gray-600">Aujourd'hui</p>
-            <p className="text-lg font-bold">{stats.todayDeliveries}</p>
+          <div className="bg-primary/[0.06] border border-primary/10 p-4 rounded-2xl">
+            <Package className="w-5 h-5 text-primary mb-2" />
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Aujourd'hui</p>
+            <p className="text-xl font-black text-foreground tracking-tighter">{stats.todayDeliveries}</p>
           </div>
-          <div className="bg-green-50 p-3 rounded-lg">
-            <DollarSign className="w-6 h-6 text-green-600 mb-1" />
-            <p className="text-xs text-gray-600">Gains jour</p>
-            <p className="text-lg font-bold">{stats.todayEarnings.toFixed(2)}€</p>
+          <div className="bg-accent/[0.06] border border-accent/10 p-4 rounded-2xl">
+            <DollarSign className="w-5 h-5 text-accent mb-2" />
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Gains jour</p>
+            <p className="text-xl font-black text-foreground tracking-tighter">{stats.todayEarnings.toFixed(2)} EUR</p>
           </div>
-          <div className="bg-orange-50 p-3 rounded-lg">
-            <Clock className="w-6 h-6 text-orange-600 mb-1" />
-            <p className="text-xs text-gray-600">Note</p>
-            <p className="text-lg font-bold">⭐ {driver?.rating.toFixed(1)}</p>
+          <div className="bg-secondary/[0.06] border border-secondary/10 p-4 rounded-2xl">
+            <Star className="w-5 h-5 text-secondary mb-2" />
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Note</p>
+            <p className="text-xl font-black text-foreground tracking-tighter">{driver?.rating.toFixed(1)}</p>
           </div>
         </div>
       </div>
 
       {!isAvailable ? (
-        <div className="text-center py-12 text-gray-500">
-          <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
-          <p className="mb-2">Vous êtes hors ligne</p>
-          <p className="text-sm">Activez votre disponibilité pour voir les courses</p>
+        <div className="text-center py-16 space-y-3">
+          <Package className="w-12 h-12 mx-auto text-muted-foreground/30" />
+          <p className="font-bold text-foreground">Vous etes hors ligne</p>
+          <p className="text-sm text-muted-foreground">Activez votre disponibilite pour voir les courses</p>
         </div>
       ) : availableDeliveries.length > 0 ? (
         <div className="space-y-3">
@@ -281,26 +281,26 @@ export function DriverApp() {
             );
 
             return (
-              <div key={delivery.id} className="bg-white rounded-lg shadow p-4">
+              <div key={delivery.id} className="bg-card rounded-2xl border border-border/50 p-5 hover:border-primary/30 hover:shadow-soft transition-all">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <p className="font-bold">{delivery.order?.order_number}</p>
-                    <p className="text-sm text-gray-600">{delivery.pickup_address}</p>
+                    <p className="font-bold text-foreground">{delivery.order?.order_number}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">{delivery.pickup_address}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-green-600 text-lg">{delivery.driver_fee}€</p>
-                    <p className="text-xs text-gray-500">{distance.toFixed(1)} km</p>
+                    <p className="font-black text-accent text-lg tracking-tighter">{delivery.driver_fee} EUR</p>
+                    <p className="text-xs text-muted-foreground font-bold">{distance.toFixed(1)} km</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
                   <Clock className="w-4 h-4" />
-                  <span>~{delivery.estimated_time} min</span>
+                  <span className="font-medium">~{delivery.estimated_time} min</span>
                 </div>
 
                 <button
                   onClick={() => acceptDelivery(delivery.id)}
-                  className="w-full bg-purple-600 text-white py-2 rounded-lg font-medium hover:bg-purple-700"
+                  className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-black uppercase tracking-widest text-xs hover:shadow-elegant transition-all active:scale-[0.98]"
                 >
                   Accepter la course
                 </button>
@@ -309,10 +309,10 @@ export function DriverApp() {
           })}
         </div>
       ) : (
-        <div className="text-center py-12 text-gray-500">
-          <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
-          <p>Aucune course disponible pour le moment</p>
-          <p className="text-sm">Patientez, de nouvelles courses arrivent...</p>
+        <div className="text-center py-16 space-y-3">
+          <Truck className="w-12 h-12 mx-auto text-muted-foreground/30" />
+          <p className="font-bold text-foreground">Aucune course disponible</p>
+          <p className="text-sm text-muted-foreground">Patientez, de nouvelles courses arrivent...</p>
         </div>
       )}
     </div>
@@ -321,64 +321,64 @@ export function DriverApp() {
   const renderActive = () => {
     if (!activeDelivery) {
       return (
-        <div className="p-4 pb-20">
-          <h1 className="text-2xl font-bold mb-6">Course en cours</h1>
-          <div className="text-center py-12 text-gray-500">
-            <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
-            <p>Aucune course en cours</p>
+        <div className="p-4 pb-24">
+          <h1 className="text-2xl font-black text-foreground tracking-tight uppercase mb-6">Course en cours</h1>
+          <div className="text-center py-16 space-y-3">
+            <Package className="w-12 h-12 mx-auto text-muted-foreground/30" />
+            <p className="text-muted-foreground font-medium">Aucune course en cours</p>
           </div>
         </div>
       );
     }
 
     return (
-      <div className="pb-20">
-        <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6">
-          <h1 className="text-2xl font-bold mb-2">Course en cours</h1>
-          <p className="text-purple-100">{activeDelivery.order?.order_number}</p>
+      <div className="pb-24">
+        <div className="bg-primary p-6 rounded-b-[2rem]">
+          <h1 className="text-2xl font-black text-primary-foreground tracking-tight uppercase mb-1">Course en cours</h1>
+          <p className="text-primary-foreground/70 font-medium">{activeDelivery.order?.order_number}</p>
         </div>
 
         <div className="p-4">
-          <div className="bg-white rounded-xl shadow p-4 mb-4">
+          <div className="bg-card rounded-2xl border border-border/50 p-5 mb-4">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  activeDelivery.status === 'assigned' ? 'bg-blue-100' :
-                  activeDelivery.status === 'picked_up' ? 'bg-orange-100' :
-                  'bg-green-100'
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                  activeDelivery.status === 'assigned' ? 'bg-primary/10' :
+                  activeDelivery.status === 'picked_up' ? 'bg-secondary/10' :
+                  'bg-accent/10'
                 }`}>
                   <Package className={`w-6 h-6 ${
-                    activeDelivery.status === 'assigned' ? 'text-blue-600' :
-                    activeDelivery.status === 'picked_up' ? 'text-orange-600' :
-                    'text-green-600'
+                    activeDelivery.status === 'assigned' ? 'text-primary' :
+                    activeDelivery.status === 'picked_up' ? 'text-secondary' :
+                    'text-accent'
                   }`} />
                 </div>
                 <div>
-                  <p className="font-bold text-lg capitalize">{activeDelivery.status.replace('_', ' ')}</p>
-                  <p className="text-sm text-gray-600">~{activeDelivery.estimated_time} min</p>
+                  <p className="font-black text-foreground text-lg capitalize tracking-tight">{activeDelivery.status.replace('_', ' ')}</p>
+                  <p className="text-sm text-muted-foreground font-medium">~{activeDelivery.estimated_time} min</p>
                 </div>
               </div>
-              <p className="text-2xl font-bold text-green-600">{activeDelivery.driver_fee}€</p>
+              <p className="text-2xl font-black text-accent tracking-tighter">{activeDelivery.driver_fee} EUR</p>
             </div>
 
             <div className="space-y-3">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-4 h-4 text-orange-600" />
+                <div className="w-8 h-8 rounded-xl bg-secondary/10 flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-4 h-4 text-secondary" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-600">Point de retrait</p>
-                  <p className="text-sm">{activeDelivery.pickup_address}</p>
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Point de retrait</p>
+                  <p className="text-sm font-medium text-foreground">{activeDelivery.pickup_address}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-4 h-4 text-green-600" />
+                <div className="w-8 h-8 rounded-xl bg-accent/10 flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-4 h-4 text-accent" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-600">Livraison</p>
-                  <p className="text-sm">{activeDelivery.order?.delivery_address}</p>
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Livraison</p>
+                  <p className="text-sm font-medium text-foreground">{activeDelivery.order?.delivery_address}</p>
                 </div>
               </div>
             </div>
@@ -390,7 +390,7 @@ export function DriverApp() {
                 center={{ latitude: activeDelivery.pickup_latitude, longitude: activeDelivery.pickup_longitude }}
                 userLocation={driverLocation}
                 zoom={14}
-                className="h-64 rounded-xl shadow"
+                className="h-64 rounded-2xl shadow-soft"
               />
             </div>
           )}
@@ -405,14 +405,14 @@ export function DriverApp() {
                       '_blank'
                     );
                   }}
-                  className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2"
+                  className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:shadow-elegant transition-all"
                 >
                   <Navigation className="w-5 h-5" />
                   Navigation vers le retrait
                 </button>
                 <button
                   onClick={() => updateDeliveryStatus('picked_up')}
-                  className="w-full bg-orange-600 text-white py-3 rounded-lg font-medium"
+                  className="w-full bg-primary text-primary-foreground py-3.5 rounded-xl font-black uppercase tracking-widest text-xs hover:shadow-elegant transition-all"
                 >
                   Confirmer le retrait
                 </button>
@@ -428,14 +428,14 @@ export function DriverApp() {
                       '_blank'
                     );
                   }}
-                  className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2"
+                  className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:shadow-elegant transition-all"
                 >
                   <Navigation className="w-5 h-5" />
                   Navigation vers le client
                 </button>
                 <button
                   onClick={() => updateDeliveryStatus('in_transit')}
-                  className="w-full bg-orange-600 text-white py-3 rounded-lg font-medium"
+                  className="w-full bg-primary text-primary-foreground py-3.5 rounded-xl font-black uppercase tracking-widest text-xs hover:shadow-elegant transition-all"
                 >
                   En route
                 </button>
@@ -445,9 +445,9 @@ export function DriverApp() {
             {activeDelivery.status === 'in_transit' && (
               <button
                 onClick={() => updateDeliveryStatus('delivered')}
-                className="w-full bg-green-600 text-white py-3 rounded-lg font-medium"
+                className="w-full bg-accent text-accent-foreground py-4 rounded-xl font-black uppercase tracking-widest text-sm hover:shadow-elegant transition-all"
               >
-                Livraison terminée
+                Livraison terminee
               </button>
             )}
           </div>
@@ -457,77 +457,84 @@ export function DriverApp() {
   };
 
   const renderHistory = () => (
-    <div className="p-4 pb-20">
-      <h1 className="text-2xl font-bold mb-6">Historique</h1>
+    <div className="p-4 pb-24">
+      <h1 className="text-2xl font-black text-foreground tracking-tight uppercase mb-6">Historique</h1>
 
       {deliveryHistory.length > 0 ? (
         <div className="space-y-3">
           {deliveryHistory.map((delivery) => (
-            <div key={delivery.id} className="bg-white rounded-lg shadow p-4">
+            <div key={delivery.id} className="bg-card rounded-2xl border border-border/50 p-5 hover:shadow-soft transition-all">
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <p className="font-bold">{delivery.order?.order_number}</p>
-                  <p className="text-sm text-gray-600">
+                  <p className="font-bold text-foreground">{delivery.order?.order_number}</p>
+                  <p className="text-sm text-muted-foreground">
                     {delivery.delivered_at && new Date(delivery.delivered_at).toLocaleString()}
                   </p>
                 </div>
-                <p className="font-bold text-green-600">{delivery.driver_fee}€</p>
+                <p className="font-black text-accent tracking-tighter">{delivery.driver_fee} EUR</p>
               </div>
-              <p className="text-sm text-gray-600">{delivery.pickup_address}</p>
+              <p className="text-sm text-muted-foreground">{delivery.pickup_address}</p>
             </div>
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 text-gray-500">
-          <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
-          <p>Aucune livraison pour le moment</p>
+        <div className="text-center py-16 space-y-3">
+          <Package className="w-12 h-12 mx-auto text-muted-foreground/30" />
+          <p className="text-muted-foreground font-medium">Aucune livraison pour le moment</p>
         </div>
       )}
     </div>
   );
 
   const renderEarnings = () => (
-    <div className="p-4 pb-20">
-      <h1 className="text-2xl font-bold mb-6">Gains</h1>
+    <div className="p-4 pb-24">
+      <h1 className="text-2xl font-black text-foreground tracking-tight uppercase mb-6">Gains</h1>
 
-      <div className="bg-gradient-to-br from-green-500 to-emerald-600 text-white p-6 rounded-xl shadow-lg mb-6">
-        <p className="text-sm opacity-90 mb-2">Total des gains</p>
-        <p className="text-4xl font-bold mb-4">{stats.totalEarnings.toFixed(2)}€</p>
-        <p className="text-sm opacity-90">
-          {driver?.total_deliveries || 0} livraisons effectuées
-        </p>
+      <div className="bg-foreground text-background p-8 rounded-3xl shadow-elegant mb-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-primary/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-[60px]" />
+        <div className="relative z-10">
+          <p className="text-xs font-bold uppercase tracking-widest text-background/50 mb-2">Total des gains</p>
+          <p className="text-5xl font-black tracking-tighter mb-4">{stats.totalEarnings.toFixed(2)} EUR</p>
+          <p className="text-sm font-medium text-background/60">
+            {driver?.total_deliveries || 0} livraisons effectuees
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-xl shadow">
-          <p className="text-sm text-gray-600 mb-1">Aujourd'hui</p>
-          <p className="text-2xl font-bold text-green-600">{stats.todayEarnings.toFixed(2)}€</p>
-          <p className="text-xs text-gray-500">{stats.todayDeliveries} livraisons</p>
+        <div className="bg-card p-5 rounded-2xl border border-border/50">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Aujourd'hui</p>
+          <p className="text-2xl font-black text-accent tracking-tighter">{stats.todayEarnings.toFixed(2)} EUR</p>
+          <p className="text-xs text-muted-foreground font-medium">{stats.todayDeliveries} livraisons</p>
         </div>
 
-        <div className="bg-white p-4 rounded-xl shadow">
-          <p className="text-sm text-gray-600 mb-1">Note moyenne</p>
-          <p className="text-2xl font-bold">⭐ {driver?.rating.toFixed(1)}</p>
-          <p className="text-xs text-gray-500">Sur 5.0</p>
+        <div className="bg-card p-5 rounded-2xl border border-border/50">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Note moyenne</p>
+          <p className="text-2xl font-black text-foreground tracking-tighter">{driver?.rating.toFixed(1)}/5</p>
+          <div className="flex gap-0.5 mt-1">
+            {[1, 2, 3, 4, 5].map(n => (
+              <Star key={n} className={`w-3 h-3 ${n <= Math.round(driver?.rating || 0) ? 'text-secondary fill-secondary' : 'text-border'}`} />
+            ))}
+          </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow p-4">
-        <h2 className="font-bold text-lg mb-3">Statistiques</h2>
+      <div className="bg-card rounded-2xl border border-border/50 p-5">
+        <h2 className="font-black text-foreground uppercase tracking-tight text-lg mb-4">Statistiques</h2>
         <div className="space-y-3">
-          <div className="flex justify-between py-2 border-b">
-            <span className="text-gray-600">Total livraisons:</span>
-            <span className="font-medium">{driver?.total_deliveries || 0}</span>
+          <div className="flex justify-between py-3 border-b border-border">
+            <span className="text-muted-foreground font-medium">Total livraisons</span>
+            <span className="font-bold text-foreground">{driver?.total_deliveries || 0}</span>
           </div>
-          <div className="flex justify-between py-2 border-b">
-            <span className="text-gray-600">Gains moyens:</span>
-            <span className="font-medium">
-              {driver?.total_deliveries ? (stats.totalEarnings / driver.total_deliveries).toFixed(2) : '0.00'}€
+          <div className="flex justify-between py-3 border-b border-border">
+            <span className="text-muted-foreground font-medium">Gains moyens</span>
+            <span className="font-bold text-foreground">
+              {driver?.total_deliveries ? (stats.totalEarnings / driver.total_deliveries).toFixed(2) : '0.00'} EUR
             </span>
           </div>
-          <div className="flex justify-between py-2">
-            <span className="text-gray-600">Véhicule:</span>
-            <span className="font-medium capitalize">{driver?.vehicle_type}</span>
+          <div className="flex justify-between py-3">
+            <span className="text-muted-foreground font-medium">Vehicule</span>
+            <span className="font-bold text-foreground capitalize">{driver?.vehicle_type}</span>
           </div>
         </div>
       </div>
@@ -538,7 +545,12 @@ export function DriverApp() {
     if (loading) {
       return (
         <div className="flex items-center justify-center h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+          <div className="relative">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground font-black text-[10px]">D</span>
+            </div>
+          </div>
         </div>
       );
     }
@@ -560,7 +572,7 @@ export function DriverApp() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {renderView()}
       <NavBar userType="driver" currentView={currentView} onNavigate={setCurrentView} />
       {showScanner && (
@@ -569,3 +581,5 @@ export function DriverApp() {
     </div>
   );
 }
+
+export default DriverApp;
