@@ -12,9 +12,10 @@ import { AdminPartners } from './admin/AdminPartners';
 import { CommunityFundAdmin } from './admin/CommunityFundAdmin';
 import { ProDashboard } from './ProDashboard';
 import { SimulationDashboard } from './SimulationDashboard';
+import AdminCatalog from './admin/AdminCatalog';
+import AdminOperations from './admin/AdminOperations';
 import { supabase } from '../lib/supabase';
 import { Vendor, RelayPoint, Location } from '../types';
-// Integration imports removed (not used in this view)
 
 export function AdminApp() {
   const [currentView, setCurrentView] = useState('dashboard');
@@ -97,15 +98,21 @@ export function AdminApp() {
         return <CommunityFundAdmin />;
       case 'simulation':
         return <SimulationDashboard />;
+      case 'catalog':
+        return <AdminCatalog />;
+      case 'operations':
+        return <AdminOperations />;
       default:
         return renderDashboard();
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {renderView()}
       <Navigation userType="admin" currentView={currentView} onNavigate={setCurrentView} />
     </div>
   );
 }
+
+export default AdminApp;
