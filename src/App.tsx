@@ -22,6 +22,7 @@ const BecomePartner = lazy(() => import('./pages/BecomePartner'));
 const LegalMentionsPage = lazy(() => import('./pages/LegalMentionsPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
 const TermsOfUsePage = lazy(() => import('./pages/TermsOfUsePage'));
+const DemoMode = lazy(() => import('./pages/DemoMode'));
 
 const LoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -114,6 +115,7 @@ function AppContent() {
   const [showRoleInfo, setShowRoleInfo] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const [showDemo, setShowDemo] = useState(false);
   const [showBecomePartner, setShowBecomePartner] = useState(false);
   const [showLegalPage, setShowLegalPage] = useState<'legal' | 'privacy' | 'terms' | null>(null);
   const [mode, setMode] = useState<'home' | 'customer' | 'pro' | 'marketing' | null>(null);
@@ -124,6 +126,14 @@ function AppContent() {
   }
 
   // Show Marketing Home if not logged in and not specifically trying to enter an app
+  if (showDemo) {
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <DemoMode onExit={() => setShowDemo(false)} />
+      </Suspense>
+    );
+  }
+
   if (!user && !mode && !showBecomePartner && !showLegalPage && !showGuide) {
     return (
       <div className="animate-fadeIn">
@@ -131,10 +141,16 @@ function AppContent() {
           onStart={() => setMode('home')} 
           onBecomePartner={() => setShowBecomePartner(true)}
         />
-        <div className="fixed top-6 right-6 z-50 flex gap-4">
-          <button 
+        <div className="fixed top-6 right-6 z-50 flex gap-3">
+          <button
+            onClick={() => setShowDemo(true)}
+            className="px-5 py-3 bg-foreground text-background rounded-full font-black uppercase tracking-widest text-[10px] shadow-elegant hover:scale-105 transition-all border border-white/10 backdrop-blur-md"
+          >
+            Mode Demo
+          </button>
+          <button
             onClick={() => setMode('home')}
-            className="px-6 py-3 bg-primary text-primary-foreground rounded-full font-black uppercase tracking-widest text-[10px] shadow-elegant hover:scale-105 transition-all border border-white/20 backdrop-blur-md"
+            className="px-5 py-3 bg-primary text-primary-foreground rounded-full font-black uppercase tracking-widest text-[10px] shadow-elegant hover:scale-105 transition-all border border-white/20 backdrop-blur-md"
           >
             Lancer l'App
           </button>

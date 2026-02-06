@@ -143,9 +143,10 @@ export function ProDashboard({ onNavigate }: { onNavigate?: (view: string) => vo
         {
           title: 'Actions rapides',
           links: [
+            { label: 'Operations', view: 'operations' },
+            { label: 'Catalogue', view: 'catalog' },
             { label: 'Demandes clients', view: 'requests' },
             { label: 'Partenaires', view: 'partners' },
-            { label: 'Guide de test', view: 'test-guide' }
           ]
         }
       ]
