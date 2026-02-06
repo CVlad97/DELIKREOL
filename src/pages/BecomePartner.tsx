@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Store, Truck, MapPin, ArrowLeft, CheckCircle, TrendingUp, DollarSign, ShieldCheck, Zap, Star } from 'lucide-react';
+import { Store, Truck, MapPin, ArrowLeft, ArrowRight, CheckCircle, TrendingUp, DollarSign, ShieldCheck, Zap, Star, Home } from 'lucide-react';
 import { PartnerApplicationForm } from '../components/PartnerApplicationForm';
 import { PartnerType } from '../agents/partnerScoring';
 
@@ -94,13 +94,24 @@ export function BecomePartner({ onBack }: BecomePartnerProps) {
     return (
       <div className="min-h-screen bg-background">
         <div className="max-w-5xl mx-auto px-4 py-12">
-          <button
-            onClick={() => setSelectedType(null)}
-            className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors font-black uppercase tracking-widest text-sm mb-12"
-          >
-            <ArrowLeft size={18} />
-            Retour aux rôles
-          </button>
+          <div className="flex items-center justify-between mb-12">
+            <button
+              onClick={() => setSelectedType(null)}
+              className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors font-black uppercase tracking-widest text-sm"
+            >
+              <ArrowLeft size={18} />
+              Retour aux rôles
+            </button>
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors font-bold text-sm px-4 py-2 rounded-xl border border-border hover:border-primary/30"
+              >
+                <Home size={16} />
+                Accueil
+              </button>
+            )}
+          </div>
 
           <div className="grid lg:grid-cols-2 gap-16">
             <div className="space-y-10">
