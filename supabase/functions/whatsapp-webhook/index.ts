@@ -101,7 +101,7 @@ async function handleIncomingMessage(message: any, businessPhone: string) {
     status: "delivered",
   });
 
-  let session = await getOrCreateSession(fromNumber);
+  const session = await getOrCreateSession(fromNumber);
 
   const response = await processMessage(messageContent.toLowerCase(), session);
 

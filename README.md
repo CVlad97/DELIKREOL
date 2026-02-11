@@ -1,3 +1,52 @@
+# DELIKREOL — Le Goût de la Martinique (démo)
+
+Résumé rapide
+- Projet Vite + React + TypeScript + TailwindCSS
+- Fonctionne en **mode démo** sans backend (données mock + auth locale)
+- Si `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY` sont définis, l'app bascule en mode prod Supabase
+
+Prérequis
+- Node 18+ / npm
+
+Installation
+```bash
+npm install
+```
+
+Démarrage en développement
+```bash
+# exécute le serveur de dev
+npm run dev
+```
+
+Build de production
+```bash
+npm run build
+```
+
+Vercel
+- Le fichier `vercel.json` redirige toutes les routes vers `index.html` pour assurer le routing SPA.
+- Déployer sur Vercel : lier le repo, définir les variables d'environnement si utilisation Supabase.
+
+Variables d'environnement (optionnelles)
+- `VITE_SUPABASE_URL` — URL Supabase
+- `VITE_SUPABASE_ANON_KEY` — clé anonyme Supabase
+- `VITE_DEMO_MODE` — `true` pour forcer le mode démo
+
+Mode démo
+- Les profils, session et dataset demo sont stockés dans `localStorage` sous les clés :
+  - `delikreol_demo_profiles`
+  - `delikreol_demo_session`
+
+Structure importante
+- `src/contexts/AuthContext.tsx` — AuthProvider (compatible demo / supabase)
+- `src/lib/supabase.ts` — client Supabase + flag `isDemoMode`
+- `src/data/mockCatalog.ts` — catalogue et données mock
+
+Objectif
+- Cette branche fournit une base opérationnelle et déployable rapidement en mode démo.
+
+Si vous voulez que j'implémente les services produits/commandes/partenaires (implémentations demo + supabase), dites-le et je les ajoute ensuite.
 # DELIKREOL
 
 **Marketplace logistique multi-acteurs pour la Martinique**

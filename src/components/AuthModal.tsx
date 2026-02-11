@@ -1,14 +1,17 @@
 import { useState } from 'react';
-import { X, LogIn, UserPlus } from 'lucide-react';
+import { ArrowLeft, X, LogIn, UserPlus } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onBack?: () => void;
   initialMode?: 'signin' | 'signup';
 }
 
-export function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModalProps) {
+type DemoRole = 'customer' | 'vendor' | 'relay_host' | 'driver' | 'admin';
+
+export function AuthModal({ isOpen, onClose, onBack, initialMode = 'signin' }: AuthModalProps) {
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,8 +21,56 @@ export function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModal
   const [loading, setLoading] = useState(false);
 
   const { signIn, signUp } = useAuth();
+  const handleBack = onBack ?? onClose;
+  const demoOverride =
+    typeof window !== 'undefined' &&
+    window.localStorage.getItem('delikreol_demo_override') === 'true';
 
   if (!isOpen) return null;
+
+  const handleDemoAccess = (role: DemoRole) => {
+    setError('');
+    try {
+      const roleLabels: Record<DemoRole, string> = {
+        customer: 'Client Demo',
+        vendor: 'Vendeur Demo',
+        relay_host: 'Hote Relais Demo',
+        driver: 'Livreur Demo',
+        admin: 'Admin Demo',
+      };
+      const raw = localStorage.getItem('delikreol_demo_profiles');
+      const profiles = raw ? JSON.parse(raw) : [];
+      const id = `demo_${role}_${Date.now()}`;
+      const demoEmail = `${role}@demo.delikreol.local`;
+      const newProfile = {
+        id,
+        full_name: roleLabels[role],
+        phone: '0696000000',
+        user_type: role,
+        avatar_url: null,
+        created_at: new Date().toISOString(),
+        email: demoEmail,
+      };
+      profiles.push(newProfile);
+      localStorage.setItem('delikreol_demo_profiles', JSON.stringify(profiles));
+      localStorage.setItem('delikreol_demo_session', JSON.stringify({ userId: id, email: demoEmail }));
+      localStorage.setItem('delikreol_demo_override', 'true');
+      window.location.reload();
+    } catch (err) {
+      console.error('Demo access error:', err);
+      setError('Impossible d\'activer le mode demo. Veuillez reessayer.');
+    }
+  };
+
+  const handleExitDemo = () => {
+    try {
+      localStorage.removeItem('delikreol_demo_override');
+      localStorage.removeItem('delikreol_demo_session');
+      window.location.reload();
+    } catch (err) {
+      console.error('Exit demo error:', err);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,6 +119,14 @@ export function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModal
   return (
     <div className="fixed inset-0 bg-foreground/20 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
       <div className="bg-card rounded-[2.5rem] max-w-md w-full p-10 relative shadow-elegant border border-border animate-fadeIn">
+        <button
+          type="button"
+          onClick={handleBack}
+          className="absolute top-4 left-4 text-gray-500 hover:text-gray-700 flex items-center gap-1 text-sm"
+        >
+          <ArrowLeft size={18} />
+          <span>Retour</span>
+        </button>
         <button
           onClick={onClose}
           className="absolute top-6 right-6 text-muted-foreground hover:text-primary transition-colors p-2 hover:bg-muted rounded-full"
@@ -191,6 +250,61 @@ export function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModal
               : "Créer mon compte"}
           </button>
         </form>
+
+        <div className="mt-6 border-t border-gray-200 pt-4">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+            Acces demo (sans compte)
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => handleDemoAccess('customer')}
+              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
+            >
+              Client demo
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDemoAccess('vendor')}
+              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
+            >
+              Vendeur demo
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDemoAccess('relay_host')}
+              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
+            >
+              Hote relais demo
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDemoAccess('driver')}
+              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
+            >
+              Livreur demo
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDemoAccess('admin')}
+              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
+            >
+              Admin demo
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            Active un mode demo local et ouvre directement l&apos;espace choisi.
+          </p>
+          {demoOverride && (
+            <button
+              type="button"
+              onClick={handleExitDemo}
+              className="mt-3 text-xs text-gray-500 underline hover:text-gray-700"
+            >
+              Quitter le mode demo
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
