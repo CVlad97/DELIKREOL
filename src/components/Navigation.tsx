@@ -15,7 +15,7 @@ export function Navigation({ userType, currentView, onNavigate }: NavigationProp
   const [showAuth, setShowAuth] = useState(false);
   const getMenuItems = () => {
     switch (userType) {
-      case 'customer':
+      case 'customer': {
         const customerItems = [
           { id: 'home', label: 'Accueil', icon: Home },
           { id: 'map', label: 'Carte', icon: MapPin },
@@ -31,6 +31,7 @@ export function Navigation({ userType, currentView, onNavigate }: NavigationProp
           customerItems.push({ id: 'auth', label: 'Connexion', icon: LogIn });
         }
         return customerItems;
+      }
       case 'vendor':
         return [
           { id: 'dashboard', label: 'Tableau de bord', icon: Home },

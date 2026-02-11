@@ -9,6 +9,15 @@ export const isSupabaseConfigured =
   typeof supabaseAnonKey === 'string' &&
   supabaseAnonKey.length > 0;
 
+const demoOverride =
+  typeof window !== 'undefined' &&
+  window.localStorage.getItem('delikreol_demo_override') === 'true';
+
+export const isDemoMode =
+  import.meta.env.VITE_DEMO_MODE === 'true' ||
+  !isSupabaseConfigured ||
+  demoOverride;
+
 let client: SupabaseClient;
 
 if (isSupabaseConfigured) {
@@ -85,6 +94,8 @@ export interface Profile {
   user_type: UserType;
   avatar_url: string | null;
   created_at: string;
+  contact_email?: string | null;
+  email?: string | null;
 }
 
 export interface Vendor {

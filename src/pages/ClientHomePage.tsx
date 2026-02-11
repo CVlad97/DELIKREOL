@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Package, MapPin, Clock, Shield, ArrowRight, HelpCircle, FileText, Sparkles, ShoppingBag, Zap, Star } from 'lucide-react';
+import { Package, MapPin, Clock, Shield, ArrowRight, HelpCircle, FileText, Sparkles, ShoppingBag } from 'lucide-react';
 import { LocalProductCard } from '../components/LocalProductCard';
 import { CategoryCard } from '../components/CategoryCard';
 import { mockCategories, getFeaturedProducts, LocalProduct } from '../data/mockCatalog';
@@ -7,10 +7,11 @@ import { mockCategories, getFeaturedProducts, LocalProduct } from '../data/mockC
 interface ClientHomePageProps {
   onSelectMode: (mode: 'customer' | 'pro', draftItems?: LocalProduct[]) => void;
   onShowGuide: () => void;
-  onShowLegal?: (page: 'legal' | 'privacy' | 'terms') => void;
+  onOpenDemo?: () => void;
+  onShowLegal?: (page: 'legal' | 'privacy' | 'terms' | 'cgu') => void;
 }
 
-export function ClientHomePage({ onSelectMode, onShowGuide, onShowLegal }: ClientHomePageProps) {
+export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLegal }: ClientHomePageProps) {
   const [draftRequest, setDraftRequest] = useState<LocalProduct[]>([]);
   const featuredProducts = getFeaturedProducts();
 
@@ -27,82 +28,67 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onShowLegal }: Clien
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Premium Header/Nav Floating */}
-      <div className="fixed top-6 right-6 z-50 flex gap-3">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950">
+      <div className="fixed top-4 right-4 z-50 flex flex-col sm:flex-row gap-2">
         <button
           onClick={onShowGuide}
-          className="flex items-center gap-2 px-5 py-2.5 bg-card/80 backdrop-blur-md border border-border rounded-full text-foreground hover:text-primary hover:border-primary/50 transition-all font-bold shadow-elegant"
+          className="flex items-center gap-2 px-4 py-2 bg-slate-800/80 backdrop-blur border border-slate-700 rounded-full text-slate-300 hover:text-emerald-400 hover:border-emerald-500 transition-all"
         >
           <HelpCircle className="w-5 h-5" />
-          <span className="text-sm uppercase tracking-widest">Guide</span>
+          <span className="text-sm font-medium">Comment ça marche ?</span>
         </button>
+        {onOpenDemo && (
+          <button
+            onClick={onOpenDemo}
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-500/90 hover:bg-emerald-500 text-slate-950 rounded-full border border-emerald-400 transition-all font-semibold shadow-lg shadow-emerald-500/20"
+          >
+            <span className="text-sm">Acces demo</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
-      {/* Floating Cart Badge */}
+      {/* Draft Request Badge */}
       {draftRequest.length > 0 && (
-        <div className="fixed bottom-8 right-8 z-50">
+        <div className="fixed bottom-6 right-6 z-50">
           <button
             onClick={handleStartOrder}
-            className="flex items-center gap-4 px-8 py-5 bg-primary text-primary-foreground rounded-[2rem] shadow-elegant hover:scale-105 transition-all transform active:scale-95 group"
+            className="flex items-center gap-3 px-6 py-4 bg-emerald-500 hover:bg-emerald-600 text-slate-950 rounded-2xl shadow-2xl shadow-emerald-500/50 transition-all transform hover:scale-105 font-semibold"
           >
-            <div className="relative">
-              <ShoppingBag className="w-7 h-7" />
-              <span className="absolute -top-2 -right-2 bg-white text-primary text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full shadow-md">
-                {draftRequest.length}
-              </span>
+            <ShoppingBag className="w-6 h-6" />
+            <div className="text-left">
+              <div className="text-sm">Ma sélection</div>
+              <div className="text-xs opacity-80">{draftRequest.length} produit(s)</div>
             </div>
-            <div className="text-left border-l border-white/20 pl-4">
-              <div className="text-xs font-black uppercase tracking-widest opacity-80 leading-none mb-1">Ma Sélection</div>
-              <div className="text-lg font-black tracking-tighter leading-none">Commander</div>
-            </div>
-            <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-5 h-5" />
           </button>
         </div>
       )}
 
-      {/* Hero Content Area */}
-      <div className="max-w-7xl mx-auto px-4 pt-20 pb-32">
-        <div className="text-center mb-24 space-y-8">
-          <div className="inline-flex h-24 w-24 items-center justify-center rounded-3xl bg-primary text-primary-foreground font-black text-4xl shadow-elegant animate-bounce-slow">
+      <div className="max-w-7xl mx-auto px-4 py-16">
+        {/* Hero Section */}
+        <div className="text-center mb-16">
+          <div className="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-emerald-500 text-slate-950 font-bold text-3xl mb-6 shadow-2xl shadow-emerald-500/50">
             D
           </div>
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent/10 text-accent rounded-full text-xs font-black uppercase tracking-[0.2em]">
-              <Star className="w-3 h-3 fill-accent" />
-              Le Terroir à votre porte
-            </div>
-            <h1 className="text-6xl md:text-8xl font-black text-foreground tracking-tighter uppercase leading-[0.9]">
-              Saveurs Locales <br />
-              <span className="text-primary">Martinique</span>
-            </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto font-medium leading-relaxed">
-              Produits frais, plats créoles authentiques et logistique intelligente pour une île connectée.
-            </p>
-          </div>
-          <div className="flex justify-center gap-6 pt-8">
-            <button 
-              onClick={handleStartOrder}
-              className="px-10 py-5 bg-primary text-primary-foreground rounded-full font-black uppercase tracking-widest hover:shadow-elegant transition-all transform hover:scale-105 active:scale-95"
-            >
-              Lancer ma commande
-            </button>
-          </div>
+          <h1 className="text-5xl md:text-6xl font-bold text-slate-50 mb-4">
+            Saveurs Locales Martinique
+          </h1>
+          <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto mb-4">
+            Produits locaux, repas créoles et conciergerie logistique
+          </p>
+          <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+            Commandez en un clic ou décrivez votre besoin, on s'occupe de tout
+          </p>
         </div>
 
         {/* Featured Products Section */}
-        <section className="mb-32">
-          <div className="flex items-end justify-between mb-12 border-b border-border pb-6">
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <Sparkles className="w-6 h-6 text-primary" />
-                <h2 className="text-4xl font-black text-foreground tracking-tighter uppercase">Les pépites du moment</h2>
-              </div>
-              <p className="text-muted-foreground font-medium">Sélectionnés avec soin parmi nos meilleurs partenaires.</p>
-            </div>
-            <button className="text-primary font-black uppercase tracking-widest text-sm hover:underline">Voir tout</button>
+        <section className="mb-16">
+          <div className="flex items-center gap-3 mb-6">
+            <Sparkles className="w-6 h-6 text-emerald-400" />
+            <h2 className="text-3xl font-bold text-slate-50">Pépites locales du moment</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredProducts.slice(0, 8).map(product => (
               <LocalProductCard
                 key={product.id}
@@ -113,13 +99,12 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onShowLegal }: Clien
           </div>
         </section>
 
-        {/* Categories Grid - High Fidelity */}
-        <section className="mb-32">
-          <div className="text-center mb-16 space-y-4">
-            <h2 className="text-4xl md:text-6xl font-black text-foreground tracking-tighter uppercase">Parcourir le Marché</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto font-medium">Explorez la diversité gastronomique et agricole de la Martinique par catégorie.</p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+        {/* Categories Section */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold text-slate-50 mb-6 text-center">
+            Parcourir par catégorie
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {mockCategories.map(category => (
               <CategoryCard
                 key={category.id}
@@ -132,108 +117,153 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onShowLegal }: Clien
           </div>
         </section>
 
-        {/* Conciergerie / Custom Request - Premium Card */}
-        <section className="mb-32">
-          <div className="relative overflow-hidden bg-foreground text-background rounded-[3rem] p-16 md:p-24 shadow-elegant border-4 border-primary/20 group">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-[100px] group-hover:scale-110 transition-transform duration-700" />
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-[100px]" />
-            
-            <div className="relative z-10 text-center space-y-8">
-              <div className="inline-flex p-4 bg-primary rounded-2xl mb-4">
-                <Package className="w-10 h-10 text-primary-foreground" />
-              </div>
-              <h2 className="text-4xl md:text-7xl font-black tracking-tighter uppercase leading-none">
-                Service Conciergerie <br />
-                <span className="text-primary">Sur Mesure</span>
-              </h2>
-              <p className="text-xl text-background/70 mb-12 max-w-3xl mx-auto font-medium leading-relaxed">
-                Vous ne trouvez pas un produit spécifique ? Décrivez votre besoin, nous sourçons, préparons et livrons directement chez vous.
-              </p>
-              <button
-                onClick={handleStartOrder}
-                className="inline-flex items-center gap-4 px-12 py-6 bg-white text-foreground hover:bg-primary hover:text-white rounded-full font-black text-xl uppercase tracking-widest transition-all transform hover:scale-105 shadow-2xl"
-              >
-                Faire une demande libre
-                <ArrowRight className="w-6 h-6" />
-              </button>
-            </div>
+        {/* CTA Section */}
+        <section className="mb-16">
+          <div className="bg-gradient-to-br from-emerald-900/50 to-emerald-800/30 backdrop-blur border-2 border-emerald-600 rounded-3xl p-12 text-center">
+            <h2 className="text-3xl font-bold text-slate-50 mb-4">
+              Vous ne trouvez pas ce que vous cherchez ?
+            </h2>
+            <p className="text-lg text-slate-300 mb-8 max-w-2xl mx-auto">
+              Utilisez notre service de conciergerie : décrivez ce que vous voulez, on s'occupe de trouver, préparer et livrer
+            </p>
+            <button
+              onClick={handleStartOrder}
+              className="inline-flex items-center gap-3 px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-slate-950 rounded-xl font-bold text-lg transition-all transform hover:scale-105 shadow-xl"
+            >
+              <Package className="w-6 h-6" />
+              Faire une demande personnalisée
+              <ArrowRight className="w-5 h-5" />
+            </button>
           </div>
         </section>
 
-        {/* Pro / Partners Split Section */}
+        {/* Pro Section */}
         <section className="mb-16">
-          <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
-            {/* Pro Card */}
-            <div 
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <button
               onClick={() => onSelectMode('pro')}
-              className="group cursor-pointer relative bg-card border-2 border-border/50 rounded-[3rem] p-12 overflow-hidden hover:border-primary/50 transition-all duration-500 shadow-elegant"
+              className="group relative bg-gradient-to-br from-orange-900/50 to-orange-800/30 backdrop-blur border-2 border-orange-600 rounded-3xl p-8 text-left hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/50 transition-all duration-300"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-150 transition-transform" />
-              <div className="space-y-6">
-                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:rotate-12 transition-transform">
-                  <Zap className="w-8 h-8" />
+              <div className="absolute top-4 right-4 w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <MapPin className="w-6 h-6 text-orange-400" />
+              </div>
+              <h2 className="text-3xl font-bold text-orange-400 mb-3">Espace Pro / Métiers</h2>
+              <p className="text-slate-300 mb-6">
+                Restaurants, points relais, livreurs, administrateurs
+              </p>
+              <div className="space-y-2 mb-6">
+                <div className="flex items-center gap-2 text-sm text-slate-400">
+                  <div className="w-1.5 h-1.5 rounded-full bg-orange-400"></div>
+                  <span>Recevez des demandes qualifiées</span>
                 </div>
-                <h2 className="text-4xl font-black text-foreground tracking-tighter uppercase">Espace Pro</h2>
-                <p className="text-muted-foreground font-medium leading-relaxed">
-                  Restaurateurs, producteurs, livreurs et points relais. Gérez votre activité avec nos outils avancés.
-                </p>
-                <div className="space-y-3">
-                  {['Flux de commandes', 'IA logistique', 'Revenus garantis'].map((feat, i) => (
-                    <div key={i} className="flex items-center gap-3 text-sm font-bold uppercase tracking-widest text-foreground/60">
-                      <div className="w-2 h-2 rounded-full bg-primary" />
-                      {feat}
-                    </div>
-                  ))}
+                <div className="flex items-center gap-2 text-sm text-slate-400">
+                  <div className="w-1.5 h-1.5 rounded-full bg-orange-400"></div>
+                  <span>Gérez vos produits et commandes</span>
                 </div>
-                <div className="flex items-center gap-3 text-primary font-black uppercase tracking-widest group-hover:gap-5 transition-all">
-                  <span>Accéder à l'espace</span>
-                  <ArrowRight className="w-5 h-5" />
+                <div className="flex items-center gap-2 text-sm text-slate-400">
+                  <div className="w-1.5 h-1.5 rounded-full bg-orange-400"></div>
+                  <span>Générez des revenus complémentaires</span>
                 </div>
               </div>
-            </div>
+              <div className="flex items-center gap-2 text-orange-400 font-semibold group-hover:gap-4 transition-all">
+                <span>Accéder</span>
+                <ArrowRight className="w-5 h-5" />
+              </div>
+            </button>
 
-            {/* Why Us Card */}
-            <div className="bg-muted/30 border border-border/50 rounded-[3rem] p-12 space-y-10">
-              <h3 className="text-3xl font-black text-foreground tracking-tighter uppercase">L'engagement Delikreol</h3>
-              <div className="space-y-8">
-                {[
-                  { icon: Clock, title: 'Rapidité Absolue', desc: 'Livraison en moins de 30 minutes ou retrait express.', color: 'text-primary' },
-                  { icon: MapPin, title: 'Ancrage Local', desc: 'Soutenez activement les producteurs martiniquais.', color: 'text-secondary' },
-                  { icon: Shield, title: 'Sécurité Totale', desc: 'Paiements cryptés et produits tracés par QR code.', color: 'text-accent' }
-                ].map((item, i) => (
-                  <div key={i} className="flex items-start gap-6">
-                    <div className={`w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 ${item.color}`}>
-                      <item.icon className="w-7 h-7" />
-                    </div>
-                    <div>
-                      <h4 className="text-xl font-black tracking-tight uppercase">{item.title}</h4>
-                      <p className="text-muted-foreground font-medium">{item.desc}</p>
-                    </div>
+            <div className="bg-slate-900/50 backdrop-blur border border-slate-800 rounded-3xl p-8">
+              <h3 className="text-2xl font-bold text-slate-50 mb-6">Pourquoi Delikreol ?</h3>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <Clock className="w-5 h-5 text-emerald-400" />
                   </div>
-                ))}
+                  <div>
+                    <h4 className="font-semibold text-slate-200 mb-1">Rapide</h4>
+                    <p className="text-sm text-slate-400">Traitement express de vos demandes</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-slate-200 mb-1">100% Local</h4>
+                    <p className="text-sm text-slate-400">Partenaires et produits martiniquais</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                    <Shield className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-slate-200 mb-1">Sécurisé</h4>
+                    <p className="text-sm text-slate-400">Paiement et données protégés</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </section>
       </div>
 
-      <footer className="border-t border-border bg-card py-16">
-        <div className="max-w-7xl mx-auto px-4 text-center space-y-8">
-          <div className="flex justify-center gap-12 text-xs font-black uppercase tracking-widest text-muted-foreground">
-            {['Mentions légales', 'Confidentialité', 'Conditions d\'utilisation'].map((link, i) => (
-              <button 
-                key={i}
-                onClick={() => onShowLegal?.(i === 0 ? 'legal' : i === 1 ? 'privacy' : 'terms')}
-                className="hover:text-primary transition-colors"
-              >
-                {link}
-              </button>
+      {/* Draft Items Preview */}
+      {draftRequest.length > 0 && (
+        <div className="fixed bottom-32 right-6 bg-slate-800/95 backdrop-blur border border-slate-700 rounded-xl p-4 shadow-2xl max-w-xs z-40">
+          <h3 className="font-semibold text-slate-50 mb-3 flex items-center gap-2">
+            <ShoppingBag className="w-4 h-4 text-emerald-400" />
+            Ma sélection ({draftRequest.length})
+          </h3>
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {draftRequest.map((item, idx) => (
+              <div key={`${item.id}-${idx}`} className="flex items-center justify-between gap-2 text-sm bg-slate-900/50 p-2 rounded">
+                <div className="flex-1 min-w-0">
+                  <div className="text-slate-200 font-medium truncate">{item.name}</div>
+                  <div className="text-slate-400 text-xs">{item.price.toFixed(2)} €</div>
+                </div>
+                <button
+                  onClick={() => handleRemoveFromDraft(item.id)}
+                  className="text-red-400 hover:text-red-300 text-xs"
+                >
+                  ✕
+                </button>
+              </div>
             ))}
           </div>
-          <div className="h-px w-24 bg-primary/20 mx-auto" />
-          <p className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground/50">
-            © 2026 DELIKREOL · Made with love in Martinique
-          </p>
+        </div>
+      )}
+
+      <footer className="border-t border-slate-800 bg-slate-950/50 backdrop-blur mt-16 py-8">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-400">
+            <button
+              onClick={() => onShowLegal?.('legal')}
+              className="hover:text-emerald-400 transition-colors flex items-center gap-1"
+            >
+              <FileText className="w-4 h-4" />
+              Mentions légales
+            </button>
+            <button
+              onClick={() => onShowLegal?.('privacy')}
+              className="hover:text-emerald-400 transition-colors flex items-center gap-1"
+            >
+              <FileText className="w-4 h-4" />
+              Confidentialité
+            </button>
+            <button
+              onClick={() => onShowLegal?.('terms')}
+              className="hover:text-emerald-400 transition-colors flex items-center gap-1"
+            >
+              <FileText className="w-4 h-4" />
+              Conditions d'utilisation
+            </button>
+            <button
+              onClick={() => onShowLegal?.('cgu')}
+              className="hover:text-emerald-400 transition-colors flex items-center gap-1"
+            >
+              <FileText className="w-4 h-4" />
+              CGU
+            </button>          </div>
         </div>
       </footer>
     </div>

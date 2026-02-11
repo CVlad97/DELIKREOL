@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Mail, Calendar, CheckCircle, Archive, Loader } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
