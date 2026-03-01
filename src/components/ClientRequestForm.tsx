@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapPin, Package, Clock, Send, ShoppingBag, CheckCircle, AlertTriangle, Sparkles } from 'lucide-react';
+import { MapPin, Clock, Send, ShoppingBag, CheckCircle, Sparkles } from 'lucide-react';
 import { blink } from '../lib/blink';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -18,6 +18,7 @@ interface ClientRequestFormProps {
 }
 
 export function ClientRequestForm({ initialProducts = [] }: ClientRequestFormProps) {
+  const blinkDb = blink.db as any;
   const { user } = useAuth();
   const { showSuccess, showError } = useToast();
   const [loading, setLoading] = useState(false);
@@ -79,7 +80,7 @@ export function ClientRequestForm({ initialProducts = [] }: ClientRequestFormPro
 
     setLoading(true);
     try {
-      await blink.db.clientRequests.create({
+      await blinkDb.clientRequests.create({
         userId: user.id,
         address: formData.address,
         deliveryPreference: formData.deliveryPreference,

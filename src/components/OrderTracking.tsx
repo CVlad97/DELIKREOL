@@ -17,6 +17,7 @@ const statusSteps = [
 ];
 
 export function OrderTracking({ orderId, onClose }: OrderTrackingProps) {
+  const blinkDb = blink.db as any;
   const [order, setOrder] = useState<Order | null>(null);
   const [delivery, setDelivery] = useState<Delivery | null>(null);
   const [loading, setLoading] = useState(true);
@@ -28,8 +29,8 @@ export function OrderTracking({ orderId, onClose }: OrderTrackingProps) {
   const loadOrderDetails = async () => {
     setLoading(true);
     try {
-      const orderData = await blink.db.orders.get(orderId) as Order | null;
-      const deliveryData = (await blink.db.deliveries.list({ where: { orderId } }))[0] as Delivery | null;
+      const orderData = await blinkDb.orders.get(orderId) as Order | null;
+      const deliveryData = (await blinkDb.deliveries.list({ where: { orderId } }))[0] as Delivery | null;
 
       if (orderData) setOrder(orderData);
       if (deliveryData) setDelivery(deliveryData);

@@ -1,4 +1,4 @@
-import { UtensilsCrossed, ShoppingBasket, Coffee, IceCream, Wine, Package } from 'lucide-react';
+import { Wine, Leaf, Hammer, Sprout, Package } from 'lucide-react';
 
 export interface LocalProduct {
   id: string;
@@ -14,17 +14,16 @@ export interface LocalProduct {
 export interface Category {
   id: string;
   name: string;
-  icon: typeof UtensilsCrossed;
+  icon: typeof Wine;
   count: number;
 }
 
 export const mockCategories: Category[] = [
-  { id: 'plats', name: 'Plats', icon: UtensilsCrossed, count: 24 },
-  { id: 'epicerie', name: 'Épicerie', icon: ShoppingBasket, count: 45 },
-  { id: 'boissons', name: 'Boissons', icon: Coffee, count: 18 },
-  { id: 'desserts', name: 'Desserts', icon: IceCream, count: 12 },
-  { id: 'vins', name: 'Vins & Rhums', icon: Wine, count: 15 },
-  { id: 'paniers', name: 'Paniers', icon: Package, count: 8 },
+  { id: 'rhums', name: 'Rhums', icon: Wine, count: 15 },
+  { id: 'epices', name: 'Epices', icon: Leaf, count: 34 },
+  { id: 'artisanat', name: 'Artisanat', icon: Hammer, count: 22 },
+  { id: 'agricoles', name: 'Produits agricoles', icon: Sprout, count: 28 },
+  { id: 'transformes', name: 'Produits transformes', icon: Package, count: 17 },
 ];
 
 export const mockProducts: LocalProduct[] = [

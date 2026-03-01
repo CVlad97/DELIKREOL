@@ -21,3 +21,6 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.bashrc
+.bash_logout
+.profile
