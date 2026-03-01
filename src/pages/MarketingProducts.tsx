@@ -1,31 +1,37 @@
 import { Link } from 'react-router-dom';
-import { UtensilsCrossed, ShoppingBasket, Leaf, Coffee } from 'lucide-react';
+import { Wine, Leaf, Hammer, Sprout, Package } from 'lucide-react';
 
 export default function MarketingProducts() {
   const categories = [
     {
-      icon: UtensilsCrossed,
-      title: 'Restaurants',
-      description: 'Découvrez les meilleurs restaurants locaux et commandez vos plats préférés.',
-      features: ['Cuisine créole', 'Plats du jour', 'Spécialités locales'],
-    },
-    {
-      icon: ShoppingBasket,
-      title: 'Épiceries & Marchés',
-      description: 'Produits frais et locaux directement des producteurs et épiceries.',
-      features: ['Fruits & légumes', 'Produits de la mer', 'Épices locales'],
+      icon: Wine,
+      title: 'Rhums',
+      description: 'Selection de rhums agricoles et vieux de Martinique, issus de distilleries locales.',
+      features: ['Rhum agricole AOC', 'Cuvées premium', 'Formats export'],
     },
     {
       icon: Leaf,
-      title: 'Agriculture locale',
-      description: 'Soutenez les agriculteurs locaux et profitez de produits ultra-frais.',
-      features: ['Légumes bio', 'Fruits de saison', 'Produits fermiers'],
+      title: 'Epices',
+      description: 'Epices antillaises, condiments et melanges traditionnels pour cuisine creole.',
+      features: ['Massale', 'Piments locaux', 'Assemblages maison'],
     },
     {
-      icon: Coffee,
-      title: 'Artisans & Spécialités',
-      description: 'Découvrez les créations des artisans et producteurs locaux.',
-      features: ['Café local', 'Rhum artisanal', 'Confiseries'],
+      icon: Hammer,
+      title: 'Artisanat',
+      description: 'Objets artisanaux et creations martiniquaises valorisant le savoir-faire local.',
+      features: ['Objets faits main', 'Series limitees', 'Packaging cadeau'],
+    },
+    {
+      icon: Sprout,
+      title: 'Produits agricoles',
+      description: 'Fruits, legumes et productions du terroir martiniquais, traces et frais.',
+      features: ['Sourcing local', 'Circuits courts', 'Calendrier saisonnier'],
+    },
+    {
+      icon: Package,
+      title: 'Produits transformes',
+      description: 'Conserves, sauces, confitures et specialites exportables a valeur ajoutee.',
+      features: ['Longue conservation', 'Format retail', 'Etiquetage export'],
     },
   ];
 
@@ -128,7 +134,7 @@ export default function MarketingProducts() {
                 </li>
                 <li className="flex items-center">
                   <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full mr-3"></span>
-                  Points relais dans toute la Guadeloupe
+                  Points relais dans toute la Martinique
                 </li>
               </ul>
             </div>
