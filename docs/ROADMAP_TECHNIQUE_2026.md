@@ -1,50 +1,29 @@
-# Roadmap Technique 2026 - Delikreol
+# Roadmap Technique DELIKREOL 2026
 
-## Phase 1 - MVP (0 a 8 semaines)
-Objectif: vente en ligne operationnelle Martinique + logistique locale minimale.
+## Phase 1 — Q1 2026 : Stabilisation & Lancement
+- [ ] Fix conflits git (README, autres fichiers)
+- [ ] Configuration Supabase (auth, storage, edge functions)
+- [ ] Variables .env production configurées
+- [ ] Déploiement Vercel fonctionnel
+- [ ] Tests E2E de base
 
-- Catalogue structure (5 categories prioritaires)
-- Comptes vendeurs + fiches producteurs
-- Checkout Stripe + confirmation commande
-- Backoffice commande simple (client/vendeur/admin)
-- Tracking de base (etat commande + notifications)
-- Deploiement Vercel + Supabase prod
+## Phase 2 — Q2 2026 : Paiements & Partenaires
+- [ ] Stripe production (paiements réels)
+- [ ] Google SSO live
+- [ ] Onboarding 10 premiers fournisseurs martiniquais
+- [ ] Système de livraison mutualisée opérationnel
+- [ ] Dashboard admin partenaires
 
-KPI MVP:
-- 50 produits actifs
-- 10 vendeurs onboardes
-- 95% commandes sans incident critique
+## Phase 3 — Q3 2026 : Mobile & Croissance
+- [ ] App mobile React Native (iOS + Android)
+- [ ] Notifications push commandes
+- [ ] Programme fidélité + cashback IKB token
+- [ ] Intégration tracking Leaflet en temps réel
+- [ ] 50 partenaires actifs
 
-## Phase 2 - Beta (2 a 4 mois)
-Objectif: marketplace multi-acteurs robuste et automatisation operationnelle.
-
-- Livraison mutualisee (tournes + points relais)
-- Dashboard fournisseurs complet (stock, ventes, SLA)
-- Sync fournisseurs (CSV/Sheets/API)
-- Moteur promo + coupons + fidelite
-- Observabilite (logs, alerting, quality gates)
-
-KPI Beta:
-- 1000 commandes/mois
-- taux de rupture < 5%
-- temps moyen preparation < 30 min
-
-## Phase 3 - Scale International (4 a 12 mois)
-Objectif: plateforme exportable DOM-TOM et internationale.
-
-- Gestion multi-zone et regles export
-- Multi-devises / TVA / frais douane
-- Connecteurs transporteurs internationaux
-- Architecture event-driven (files de messages)
-- Data platform BI (forecasting demande/stocks)
-
-KPI Scale:
-- 3 territoires actifs
-- delai moyen livraison export < 5 jours
-- marge logistique amelioree de 20%
-
-## Priorites transverses (en continu)
-- Securite: RLS, rotation secrets, audit acces
-- Qualite: tests e2e critiques, contracts API
-- Performance: monitoring front (LCP/INP), indexes SQL
-- Conformite: mentions legales, CGU, politique retours
+## Phase 4 — Q4 2026 : Expansion DOM-TOM & API
+- [ ] Expansion Guadeloupe, Guyane, La Réunion
+- [ ] API publique partenaires logistiques
+- [ ] Intégration DHL Express pour export
+- [ ] 200+ partenaires, 1000+ produits
+- [ ] Levée de fonds Serie A préparation
