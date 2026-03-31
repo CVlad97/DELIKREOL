@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DELIKREOL</title>
+  </head>
+  <body>
+    <script>
+      // GitHub Pages SPA fallback
+      var segmentCount = 1;
+      var l = window.location;
+      var newPath = l.pathname.split('/').slice(0, 1 + segmentCount).join('/');
+      var newUrl = newPath + '/?/' + l.pathname.slice(newPath.length).replace(/^\//, '') + l.search + l.hash;
+      l.replace(newUrl);
+    </script>
+  </body>
+</html>

@@ -44,6 +44,16 @@
     <script src="https://blink.new/auto-engineer.js?projectId=delikreol-platform-yf4gaa0e" type="module"></script>
   </head>
   <body>
+    <script>
+      (function () {
+        var l = window.location;
+        if (l.search && l.search.startsWith('?/')) {
+          var path = l.search.slice(2);
+          var newUrl = l.pathname.replace(/\/$/, '') + '/' + path + l.hash;
+          window.history.replaceState(null, '', newUrl);
+        }
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
