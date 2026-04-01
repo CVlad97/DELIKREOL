@@ -11,7 +11,7 @@ import { AuthModal } from './components/AuthModal';
 import { ClientHomePage } from './pages/ClientHomePage';
 import { CGUPage } from './pages/CGUPage';
 import { PartnerDashboardPage } from './pages/PartnerDashboardPage';
-import { isSupabaseConfigured } from './lib/supabase';
+import { isDemoMode, isSupabaseConfigured } from './lib/supabase';
 import type { UserType } from './types';
 
 const CustomerApp = lazy(() =>
@@ -239,25 +239,6 @@ function AppContent() {
     );
   }
 
-  if (!isSupabaseConfigured) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-50 px-4">
-        <div className="max-w-md w-full space-y-4 text-center">
-          <h1 className="text-2xl font-bold">Configuration requise</h1>
-          <p className="text-sm text-slate-300">
-            Supabase n&apos;est pas encore configuré pour ce projet DELIKREOL.
-          </p>
-          <p className="text-xs text-slate-400">
-            Ajoutez les variables d&apos;environnement{' '}
-            <code className="font-mono">VITE_SUPABASE_URL</code> et{' '}
-            <code className="font-mono">VITE_SUPABASE_ANON_KEY</code> à partir
-            de votre projet Supabase (voir le fichier <code>.env.example</code>).
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   if (showGuide) {
     return (
       <div className="relative min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50">
@@ -353,6 +334,7 @@ function AppContent() {
     return (
       <>
         <ClientHomePage
+          demoMode={isDemoMode || !isSupabaseConfigured}
           onSelectMode={(selectedMode, products) => {
             if (selectedMode === 'customer') {
               setMode('customer');

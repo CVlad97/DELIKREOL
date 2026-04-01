@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Package, Clock, CheckCircle, XCircle, AlertCircle, MapPin, Inbox } from 'lucide-react';
-import { blink } from '../lib/blink';
 import { useAuth } from '../contexts/AuthContext';
+import { listClientRequests } from '../services/clientRequestsService';
 
 interface ClientRequest {
   id: string;
@@ -15,7 +15,6 @@ interface ClientRequest {
 }
 
 export function MyRequests() {
-  const blinkDb = blink.db as any;
   const { user } = useAuth();
   const [requests, setRequests] = useState<ClientRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,11 +27,7 @@ export function MyRequests() {
     if (!user) return;
 
     try {
-      const data = await blinkDb.clientRequests.list({
-        where: { userId: user.id },
-        orderBy: { createdAt: 'desc' }
-      }) as ClientRequest[];
-
+      const data = await listClientRequests(user.id);
       setRequests(data || []);
     } catch (error) {
       console.error('Error loading requests:', error);
