@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Package, MapPin, Clock, Shield, ArrowRight, HelpCircle, FileText, Sparkles, ShoppingBag } from 'lucide-react';
+import { Package, MapPin, Clock, Shield, ArrowRight, HelpCircle, FileText, Sparkles, ShoppingBag, Truck, Users, Zap } from 'lucide-react';
 import { LocalProductCard } from '../components/LocalProductCard';
 import { CategoryCard } from '../components/CategoryCard';
 import { mockCategories, getFeaturedProducts, LocalProduct } from '../data/mockCatalog';
@@ -33,6 +33,24 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
       title: 'Besoin sur mesure',
       description: 'Tu decris le besoin, DELIKREOL qualifie et organise la reponse.',
       products: [],
+    },
+  ];
+
+  const howItWorks = [
+    {
+      icon: ShoppingBag,
+      title: 'Vous faites la demande',
+      description: 'Repas, courses, colis ou besoin local. Le parcours reste simple et rapide sur mobile.',
+    },
+    {
+      icon: Users,
+      title: 'DELIKREOL qualifie',
+      description: 'La demande est lue, clarifiee puis transmise au bon partenaire ou au bon relais terrain.',
+    },
+    {
+      icon: Truck,
+      title: 'Le partenaire execute',
+      description: 'Preparation, livraison ou service local avec suivi basique et coordination operateur.',
     },
   ];
 
@@ -157,6 +175,48 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
             <h2 className="mt-2 text-2xl font-bold text-slate-50">3 demandes qualifiees minimum</h2>
             <p className="mt-3 text-sm leading-relaxed text-slate-300">
               On vise un test terrain concret avec des besoins reels, pas un faux trafic.
+            </p>
+          </div>
+        </section>
+
+        <section className="mb-16">
+          <div className="mb-6 flex items-center gap-3">
+            <Zap className="w-6 h-6 text-emerald-400" />
+            <h2 className="text-3xl font-bold text-slate-50">Comment ca marche</h2>
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {howItWorks.map((step) => (
+              <div key={step.title} className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 shadow-xl">
+                <div className="inline-flex rounded-2xl bg-emerald-500/15 p-4 text-emerald-300">
+                  <step.icon className="w-7 h-7" />
+                </div>
+                <h3 className="mt-5 text-2xl font-bold text-slate-50">{step.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-300">{step.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mb-16 grid gap-4 lg:grid-cols-3">
+          <div className="rounded-3xl border border-red-500/20 bg-slate-900/60 p-6">
+            <p className="text-xs font-black uppercase tracking-[0.25em] text-red-300">Positionnement</p>
+            <h2 className="mt-2 text-2xl font-bold text-slate-50">Plateforme locale de coordination</h2>
+            <p className="mt-3 text-sm leading-relaxed text-slate-300">
+              DELIKREOL ne se limite pas a une vitrine. La plateforme organise demandes, partenaires et execution locale.
+            </p>
+          </div>
+          <div className="rounded-3xl border border-yellow-500/20 bg-slate-900/60 p-6">
+            <p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-300">Confiance</p>
+            <h2 className="mt-2 text-2xl font-bold text-slate-50">Transparence sur les partenaires</h2>
+            <p className="mt-3 text-sm leading-relaxed text-slate-300">
+              Les partenaires gardent la main sur leur catalogue, leurs prix de base et leurs zones d'intervention.
+            </p>
+          </div>
+          <div className="rounded-3xl border border-cyan-500/20 bg-slate-900/60 p-6">
+            <p className="text-xs font-black uppercase tracking-[0.25em] text-cyan-300">Execution</p>
+            <h2 className="mt-2 text-2xl font-bold text-slate-50">WhatsApp et qualif manuelle au depart</h2>
+            <p className="mt-3 text-sm leading-relaxed text-slate-300">
+              Le systeme reste exploitable sans backend lourd: demande rapide, qualification operateur, execution terrain.
             </p>
           </div>
         </section>
