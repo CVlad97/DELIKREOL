@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { MapPin, Clock, Send, ShoppingBag, CheckCircle, Sparkles } from 'lucide-react';
-import { blink } from '../lib/blink';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { AddressAutocomplete } from './AddressAutocomplete';
 import { GeocodeResult, isInDeliveryZone } from '../services/geocodingService';
+import { createClientRequest } from '../services/clientRequestsService';
 
 interface InitialProduct {
   id: string;
@@ -18,7 +18,6 @@ interface ClientRequestFormProps {
 }
 
 export function ClientRequestForm({ initialProducts = [] }: ClientRequestFormProps) {
-  const blinkDb = blink.db as any;
   const { user } = useAuth();
   const { showSuccess, showError } = useToast();
   const [loading, setLoading] = useState(false);
@@ -80,7 +79,7 @@ export function ClientRequestForm({ initialProducts = [] }: ClientRequestFormPro
 
     setLoading(true);
     try {
-      await blinkDb.clientRequests.create({
+      await createClientRequest({
         userId: user.id,
         address: formData.address,
         deliveryPreference: formData.deliveryPreference,
@@ -89,7 +88,7 @@ export function ClientRequestForm({ initialProducts = [] }: ClientRequestFormPro
         status: 'pending_admin_review',
       });
 
-      showSuccess('Votre demande a été envoyée avec succès!');
+      showSuccess('Votre demande a bien ete enregistree.');
       setFormData({
         address: '',
         deliveryPreference: 'home_delivery',

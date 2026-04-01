@@ -12,7 +12,10 @@ import { MyRequests } from '../components/MyRequests';
 import { CommunityFundPage } from './CommunityFundPage';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { supabase } from '../lib/supabase';
+import { isDemoMode, supabase } from '../lib/supabase';
+import { productsService } from '../services/productsService';
+import { ordersService } from '../services/ordersService';
+import { pointsRelais } from '../pointsRelais';
 import { Product, RelayPoint, Location, Order } from '../types';
 
 interface CustomerAppProps {
@@ -60,6 +63,12 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
 
   const loadProducts = async () => {
     try {
+      if (isDemoMode) {
+        const data = await productsService.listAll();
+        setProducts(data || []);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('products')
         .select(`
@@ -79,6 +88,33 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
 
   const loadRelayPoints = async () => {
     try {
+      if (isDemoMode) {
+        const demoRelayPoints: RelayPoint[] = pointsRelais.map((point) => ({
+          id: String(point.id),
+          name: point.name,
+          address: point.adresse,
+          latitude: point.lat,
+          longitude: point.lng,
+          type: 'relay_point',
+          is_active: point.statut === 'Ouvert',
+          parking_available: true,
+          pmr_accessible: true,
+          rating: point.statut === 'Ouvert' ? 4.8 : 4.2,
+          total_pickups: point.capacite * 3,
+          created_at: new Date().toISOString(),
+          distance: calculateDistance(
+            userLocation.latitude,
+            userLocation.longitude,
+            point.lat,
+            point.lng
+          ),
+        }));
+
+        demoRelayPoints.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+        setRelayPoints(demoRelayPoints);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('relay_points')
         .select(`
@@ -110,6 +146,16 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
     if (!user) return;
 
     try {
+      if (isDemoMode) {
+        const demoOrders = await ordersService.listByUser(user.id);
+        if (demoOrders.length > 0) {
+          setOrders(demoOrders);
+        } else {
+          setOrders(await ordersService.listAll());
+        }
+        return;
+      }
+
       const { data, error } = await supabase
         .from('orders')
         .select(`
@@ -156,6 +202,14 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
   const renderHome = () => (
     <div className="pb-24">
       <div className="bg-primary rounded-b-[2rem] p-6 pb-8 shadow-elegant">
+        {isDemoMode && (
+          <div className="mb-4 rounded-2xl border border-primary-foreground/20 bg-primary-foreground/10 px-4 py-3 text-primary-foreground">
+            <p className="text-xs font-black uppercase tracking-[0.25em]">Mode test actif</p>
+            <p className="mt-1 text-sm font-medium text-primary-foreground/80">
+              Catalogue, demandes et points relais fonctionnent sans backend pour valider l'offre des demain.
+            </p>
+          </div>
+        )}
         <div className="flex items-center justify-between mb-5">
           <div>
             <h1 className="text-2xl font-black text-primary-foreground tracking-tight">Bonjour !</h1>

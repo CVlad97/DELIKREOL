@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
-import { supabase } from "../../lib/supabase";
+import { isDemoMode, supabase } from "../../lib/supabase";
 import { deliveryZones } from "../../data/deliveryZones";
+import { pointsRelais } from "../../pointsRelais";
 
 interface RelayPoint {
   id: string;
@@ -72,6 +73,29 @@ export default function EnhancedMap({
   const [drivers, setDrivers] = useState<Driver[]>([]);
 
   async function loadRelayPoints() {
+    if (isDemoMode) {
+      setRelayPoints(
+        pointsRelais.map((point) => ({
+          id: String(point.id),
+          name: point.name,
+          address: point.adresse,
+          latitude: point.lat,
+          longitude: point.lng,
+          capacity: point.capacite,
+          is_active: point.statut === "Ouvert",
+          opening_hours: {
+            mon: { open: "08:00", close: "20:00" },
+            tue: { open: "08:00", close: "20:00" },
+            wed: { open: "08:00", close: "20:00" },
+            thu: { open: "08:00", close: "20:00" },
+            fri: { open: "08:00", close: "20:00" },
+            sat: { open: "09:00", close: "19:00" },
+          },
+        }))
+      );
+      return;
+    }
+
     const { data, error } = await supabase
       .from("relay_points")
       .select("*");
@@ -82,6 +106,11 @@ export default function EnhancedMap({
   }
 
   async function loadDrivers() {
+    if (isDemoMode) {
+      setDrivers([]);
+      return;
+    }
+
     const { data, error } = await supabase
       .from("drivers")
       .select("*")

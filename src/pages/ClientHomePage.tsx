@@ -9,9 +9,10 @@ interface ClientHomePageProps {
   onShowGuide: () => void;
   onOpenDemo?: () => void;
   onShowLegal?: (page: 'legal' | 'privacy' | 'terms' | 'cgu') => void;
+  demoMode?: boolean;
 }
 
-export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLegal }: ClientHomePageProps) {
+export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLegal, demoMode = false }: ClientHomePageProps) {
   const [draftRequest, setDraftRequest] = useState<LocalProduct[]>([]);
   const featuredProducts = getFeaturedProducts();
 
@@ -42,7 +43,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
             onClick={onOpenDemo}
             className="flex items-center gap-2 px-4 py-2 bg-emerald-500/90 hover:bg-emerald-500 text-slate-950 rounded-full border border-emerald-400 transition-all font-semibold shadow-lg shadow-emerald-500/20"
           >
-            <span className="text-sm">Acces demo</span>
+            <span className="text-sm">{demoMode ? 'Tester le parcours' : 'Acces demo'}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         )}
@@ -68,19 +69,65 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
       <div className="max-w-7xl mx-auto px-4 py-16">
         {/* Hero Section */}
         <div className="text-center mb-16">
+          {demoMode && (
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-300 mb-6">
+              <Sparkles className="w-4 h-4" />
+              Mode test actif: catalogue et demandes disponibles sans backend
+            </div>
+          )}
           <div className="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-emerald-500 text-slate-950 font-bold text-3xl mb-6 shadow-2xl shadow-emerald-500/50">
             D
           </div>
           <h1 className="text-5xl md:text-6xl font-bold text-slate-50 mb-4">
-            Saveurs Locales Martinique
+            Commandez local en Martinique des aujourd'hui
           </h1>
           <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto mb-4">
-            Produits locaux, repas créoles et conciergerie logistique
+            Repas creoles, paniers locaux et demandes sur mesure avec un parcours simple
           </p>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-            Commandez en un clic ou décrivez votre besoin, on s'occupe de tout
+            Objectif MVP: prendre des commandes, qualifier des besoins et recruter des partenaires sans friction
           </p>
+          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+            <button
+              onClick={handleStartOrder}
+              className="inline-flex items-center justify-center gap-3 rounded-2xl bg-emerald-500 px-8 py-4 text-lg font-bold text-slate-950 shadow-xl shadow-emerald-500/20 transition-transform hover:scale-[1.02]"
+            >
+              Tester une commande
+              <ArrowRight className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => onSelectMode('pro')}
+              className="inline-flex items-center justify-center gap-3 rounded-2xl border border-orange-500/40 bg-orange-500/10 px-8 py-4 text-lg font-bold text-orange-300 transition-transform hover:scale-[1.02]"
+            >
+              Rejoindre les partenaires
+              <MapPin className="w-5 h-5" />
+            </button>
+          </div>
         </div>
+
+        <section className="mb-16 grid gap-4 md:grid-cols-3">
+          <div className="rounded-3xl border border-emerald-500/20 bg-slate-900/60 p-6">
+            <p className="text-xs font-black uppercase tracking-[0.25em] text-emerald-300">Cash rapide</p>
+            <h2 className="mt-2 text-2xl font-bold text-slate-50">Dejeuner et diner creole</h2>
+            <p className="mt-3 text-sm leading-relaxed text-slate-300">
+              Priorite aux paniers repas, plats du jour et commandes de groupe sur Fort-de-France, Lamentin et Schoelcher.
+            </p>
+          </div>
+          <div className="rounded-3xl border border-orange-500/20 bg-slate-900/60 p-6">
+            <p className="text-xs font-black uppercase tracking-[0.25em] text-orange-300">Operation simple</p>
+            <h2 className="mt-2 text-2xl font-bold text-slate-50">Demande libre + validation manuelle</h2>
+            <p className="mt-3 text-sm leading-relaxed text-slate-300">
+              Le MVP peut encaisser des demandes et convertir en commande confirmee sans dependre d'une stack complexe.
+            </p>
+          </div>
+          <div className="rounded-3xl border border-cyan-500/20 bg-slate-900/60 p-6">
+            <p className="text-xs font-black uppercase tracking-[0.25em] text-cyan-300">Objectif demain</p>
+            <h2 className="mt-2 text-2xl font-bold text-slate-50">3 demandes qualifiees minimum</h2>
+            <p className="mt-3 text-sm leading-relaxed text-slate-300">
+              On vise un test terrain concret avec des besoins reels, pas un faux trafic.
+            </p>
+          </div>
+        </section>
 
         {/* Featured Products Section */}
         <section className="mb-16">
@@ -121,17 +168,17 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
         <section className="mb-16">
           <div className="bg-gradient-to-br from-emerald-900/50 to-emerald-800/30 backdrop-blur border-2 border-emerald-600 rounded-3xl p-12 text-center">
             <h2 className="text-3xl font-bold text-slate-50 mb-4">
-              Vous ne trouvez pas ce que vous cherchez ?
+              Vous voulez quelque chose de precis pour demain ?
             </h2>
             <p className="text-lg text-slate-300 mb-8 max-w-2xl mx-auto">
-              Utilisez notre service de conciergerie : décrivez ce que vous voulez, on s'occupe de trouver, préparer et livrer
+              Decris le besoin, le quartier et le creneau. DELIKREOL qualifie la demande puis organise la preparation et la livraison.
             </p>
             <button
               onClick={handleStartOrder}
               className="inline-flex items-center gap-3 px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-slate-950 rounded-xl font-bold text-lg transition-all transform hover:scale-105 shadow-xl"
             >
               <Package className="w-6 h-6" />
-              Faire une demande personnalisée
+              Lancer une demande rentable
               <ArrowRight className="w-5 h-5" />
             </button>
           </div>
