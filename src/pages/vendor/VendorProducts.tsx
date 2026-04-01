@@ -69,6 +69,9 @@ export function VendorProducts() {
     description: '',
     category: productCategories[0],
     price: '',
+    partnerFee: '',
+    deliveryFee: '',
+    commissionRate: '15',
     imageUrl: '',
     stock: '',
     available: true,
@@ -133,19 +136,40 @@ export function VendorProducts() {
     }
     try {
       setSaving(true);
-      const priceValue = Number(form.price.replace(',', '.'));
+      const vendorPrice = Number(form.price.replace(',', '.'));
+      const partnerFee = Number((form.partnerFee || '0').replace(',', '.')) || 0;
+      const deliveryFee = Number((form.deliveryFee || '0').replace(',', '.')) || 0;
+      const commissionRate = Number((form.commissionRate || '0').replace(',', '.')) || 0;
+      const platformFee = Number(((vendorPrice * commissionRate) / 100).toFixed(2));
+      const clientPrice = Number((vendorPrice + partnerFee + deliveryFee + platformFee).toFixed(2));
       const stockValue = form.stock ? Number(form.stock) : null;
       await productsService.create({
         vendor_id: vendorRef,
         name: form.name,
         description: form.description || null,
         category: form.category,
-        price: Number.isNaN(priceValue) ? 0 : priceValue,
+        price: Number.isNaN(clientPrice) ? 0 : clientPrice,
+        vendor_price: Number.isNaN(vendorPrice) ? 0 : vendorPrice,
+        client_price: Number.isNaN(clientPrice) ? 0 : clientPrice,
+        platform_fee: platformFee,
+        partner_fee: partnerFee,
+        delivery_fee: deliveryFee,
         image_url: form.imageUrl || null,
         stock_quantity: stockValue,
         is_available: form.available,
       });
-      setForm({ name: '', description: '', category: productCategories[0], price: '', imageUrl: '', stock: '', available: true });
+      setForm({
+        name: '',
+        description: '',
+        category: productCategories[0],
+        price: '',
+        partnerFee: '',
+        deliveryFee: '',
+        commissionRate: '15',
+        imageUrl: '',
+        stock: '',
+        available: true,
+      });
       setImagePreview(null);
       await loadProducts();
       showSuccess('Produit ajoute au catalogue');
@@ -265,9 +289,29 @@ export function VendorProducts() {
                   ))}
                 </select>
                 <input
-                  placeholder="Prix (EUR)"
+                  placeholder="Prix partenaire (EUR)"
                   value={form.price}
                   onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value }))}
+                  className="w-full rounded-2xl border border-[#ead8bb] bg-[#fffdfa] px-4 py-3 text-sm font-medium text-[#2f1911]"
+                />
+              </div>
+              <div className="grid gap-3 md:grid-cols-3">
+                <input
+                  placeholder="Frais partenaire (EUR)"
+                  value={form.partnerFee}
+                  onChange={(e) => setForm((prev) => ({ ...prev, partnerFee: e.target.value }))}
+                  className="w-full rounded-2xl border border-[#ead8bb] bg-[#fffdfa] px-4 py-3 text-sm font-medium text-[#2f1911]"
+                />
+                <input
+                  placeholder="Frais livraison (EUR)"
+                  value={form.deliveryFee}
+                  onChange={(e) => setForm((prev) => ({ ...prev, deliveryFee: e.target.value }))}
+                  className="w-full rounded-2xl border border-[#ead8bb] bg-[#fffdfa] px-4 py-3 text-sm font-medium text-[#2f1911]"
+                />
+                <input
+                  placeholder="Commission (%)"
+                  value={form.commissionRate}
+                  onChange={(e) => setForm((prev) => ({ ...prev, commissionRate: e.target.value }))}
                   className="w-full rounded-2xl border border-[#ead8bb] bg-[#fffdfa] px-4 py-3 text-sm font-medium text-[#2f1911]"
                 />
               </div>
@@ -286,6 +330,16 @@ export function VendorProducts() {
                   />
                   Disponible maintenant
                 </label>
+              </div>
+              <div className="rounded-2xl border border-[#ead8bb] bg-[#fffdfa] p-4 text-xs font-bold text-[#7a4a25]">
+                Prix client estime: {(() => {
+                  const vendorPrice = Number(form.price.replace(',', '.')) || 0;
+                  const partnerFee = Number((form.partnerFee || '0').replace(',', '.')) || 0;
+                  const deliveryFee = Number((form.deliveryFee || '0').replace(',', '.')) || 0;
+                  const commissionRate = Number((form.commissionRate || '0').replace(',', '.')) || 0;
+                  const platformFee = (vendorPrice * commissionRate) / 100;
+                  return (vendorPrice + partnerFee + deliveryFee + platformFee).toFixed(2);
+                })()} EUR
               </div>
               <div className="rounded-2xl border border-dashed border-[#ead8bb] bg-[#fffdfa] p-4">
                 <label className="text-xs font-black uppercase tracking-[0.2em] text-[#8f5b34]">Photo</label>
@@ -364,9 +418,11 @@ export function VendorProducts() {
                       {product.description && (
                         <p className="mt-2 text-xs text-[#6d5c52] line-clamp-2">{product.description}</p>
                       )}
-                      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-[#6d5c52]">
-                        <span className="font-black text-[#1f6a4a]">{product.price.toFixed(2)} EUR</span>
-                        <span>Stock: {product.stock_quantity ?? 'N/A'}</span>
+                      <div className="mt-3 grid gap-1 text-xs text-[#6d5c52]">
+                        <span className="font-black text-[#1f6a4a]">Prix client: {product.client_price?.toFixed(2) ?? product.price.toFixed(2)} EUR</span>
+                        <span>Prix partenaire: {product.vendor_price?.toFixed(2) ?? product.price.toFixed(2)} EUR</span>
+                        <span>Frais partenaire: {(product.partner_fee ?? 0).toFixed(2)} EUR · Commission: {(product.platform_fee ?? 0).toFixed(2)} EUR</span>
+                        <span>Livraison: {(product.delivery_fee ?? 0).toFixed(2)} EUR · Stock: {product.stock_quantity ?? 'N/A'}</span>
                       </div>
                     </div>
                   </div>

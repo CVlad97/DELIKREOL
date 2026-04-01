@@ -43,6 +43,11 @@ export interface Product {
   description: string | null;
   category: string;
   price: number;
+  vendor_price?: number | null;
+  client_price?: number | null;
+  platform_fee?: number | null;
+  partner_fee?: number | null;
+  delivery_fee?: number | null;
   image_url: string | null;
   is_available: boolean;
   stock_quantity: number | null;
