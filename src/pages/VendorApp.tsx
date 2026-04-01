@@ -1,13 +1,10 @@
 import { useState } from 'react';
 import { Navigation } from '../components/Navigation';
 import { ProDashboard } from './ProDashboard';
+import { VendorProducts } from './vendor/VendorProducts';
 
 export function VendorApp() {
   const [currentView, setCurrentView] = useState('dashboard');
-  // Vendor data now managed by ProDashboard and specific views
-  // Remove unused state variables to simplify component
-
-  // Data loading removed - now handled by ProDashboard and specific views when needed
 
   const renderDashboard = () => (
     <ProDashboard onNavigate={setCurrentView} />
@@ -18,16 +15,18 @@ export function VendorApp() {
       case 'dashboard':
         return renderDashboard();
       case 'products':
-        return <div className="p-4">Products View (TODO)</div>;
+        return <VendorProducts />;
       case 'orders':
-        return <div className="p-4">Orders View (TODO)</div>;
+        return <div className="p-4">Commandes (TODO)</div>;
+      case 'stats':
+        return <div className="p-4">Statistiques (TODO)</div>;
       default:
         return renderDashboard();
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f6efe7]">
       {renderView()}
       <Navigation userType="vendor" currentView={currentView} onNavigate={setCurrentView} />
     </div>
