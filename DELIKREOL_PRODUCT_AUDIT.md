@@ -28,6 +28,7 @@ Message central:
 - onboarding partenaire deja amorce
 - stockage documentaire local-first
 - catalogue et donnees de demonstration
+- module vendeur self-service pour gerer son propre catalogue
 
 ## Ce qui est problematique
 - navigation principale pilotee par etat local au lieu d'une logique metier plus nette
@@ -60,6 +61,8 @@ Message central:
 - storytelling
 - statut conformite
 - documents
+- catalogue produits
+- tarification vendeur
 
 ### Mission
 - id
@@ -95,6 +98,21 @@ Message central:
 - categories rentables
 - zones actives
 
+### Produit vendeur
+- id
+- vendor_id
+- nom
+- description
+- categorie
+- prix vendeur
+- frais partenaire
+- frais livraison
+- commission plateforme
+- prix client calcule
+- stock
+- image
+- disponibilite
+
 ## Pipeline V1
 - nouvelle
 - qualifiee
@@ -116,6 +134,7 @@ Message central:
 - meilleure navigation pro
 - responsive mobile renforce sur les vues ops
 - vue partenaires plus business et moins administrative
+- export catalogue vendeur CSV / JSON
 
 ## Phase 3 amelioration
 - export CSV / JSON

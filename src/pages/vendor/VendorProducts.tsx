@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, ImagePlus, Package, Plus, Save, Trash2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Download, ImagePlus, Package, Plus, Save, Trash2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { productsService } from '../../services/productsService';
@@ -57,6 +57,20 @@ function saveVendorProfile(userId: string, profile: VendorProfile) {
   localStorage.setItem(getVendorProfileKey(userId), JSON.stringify(profile));
 }
 
+function parseAmount(value: string) {
+  return Number(value.replace(',', '.')) || 0;
+}
+
+function downloadFile(filename: string, content: string, type: string) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 export function VendorProducts() {
   const { user } = useAuth();
   const { showSuccess, showError } = useToast();
@@ -87,6 +101,38 @@ export function VendorProducts() {
     localStorage.setItem(key, generated);
     return generated;
   }, [user]);
+
+  const pricingPreview = useMemo(() => {
+    const vendorPrice = parseAmount(form.price);
+    const partnerFee = parseAmount(form.partnerFee);
+    const deliveryFee = parseAmount(form.deliveryFee);
+    const commissionRate = parseAmount(form.commissionRate);
+    const platformFee = Number(((vendorPrice * commissionRate) / 100).toFixed(2));
+    const clientPrice = Number((vendorPrice + partnerFee + deliveryFee + platformFee).toFixed(2));
+    const commissionShare = clientPrice > 0 ? Number(((platformFee / clientPrice) * 100).toFixed(1)) : 0;
+    return {
+      vendorPrice,
+      partnerFee,
+      deliveryFee,
+      commissionRate,
+      platformFee,
+      clientPrice,
+      commissionShare,
+    };
+  }, [form.price, form.partnerFee, form.deliveryFee, form.commissionRate]);
+
+  const catalogMetrics = useMemo(() => {
+    const activeProducts = products.filter((product) => product.is_available);
+    const totalClientRevenue = activeProducts.reduce((sum, product) => sum + (product.client_price ?? product.price ?? 0), 0);
+    const totalVendorBase = activeProducts.reduce((sum, product) => sum + (product.vendor_price ?? product.price ?? 0), 0);
+    const totalPlatformFees = activeProducts.reduce((sum, product) => sum + (product.platform_fee ?? 0), 0);
+    return {
+      activeCount: activeProducts.length,
+      totalClientRevenue,
+      totalVendorBase,
+      totalPlatformFees,
+    };
+  }, [products]);
 
   useEffect(() => {
     if (!user) return;
@@ -136,12 +182,7 @@ export function VendorProducts() {
     }
     try {
       setSaving(true);
-      const vendorPrice = Number(form.price.replace(',', '.'));
-      const partnerFee = Number((form.partnerFee || '0').replace(',', '.')) || 0;
-      const deliveryFee = Number((form.deliveryFee || '0').replace(',', '.')) || 0;
-      const commissionRate = Number((form.commissionRate || '0').replace(',', '.')) || 0;
-      const platformFee = Number(((vendorPrice * commissionRate) / 100).toFixed(2));
-      const clientPrice = Number((vendorPrice + partnerFee + deliveryFee + platformFee).toFixed(2));
+      const { vendorPrice, partnerFee, deliveryFee, commissionRate, platformFee, clientPrice } = pricingPreview;
       const stockValue = form.stock ? Number(form.stock) : null;
       await productsService.create({
         vendor_id: vendorRef,
@@ -181,6 +222,37 @@ export function VendorProducts() {
     }
   };
 
+  const handleExportJson = () => {
+    downloadFile(
+      `delikreol-catalogue-${vendorRef}.json`,
+      JSON.stringify(products, null, 2),
+      'application/json;charset=utf-8'
+    );
+    showSuccess('Export JSON telecharge');
+  };
+
+  const handleExportCsv = () => {
+    const rows = [
+      ['nom', 'categorie', 'prix_partenaire', 'frais_partenaire', 'frais_livraison', 'commission_plateforme', 'prix_client', 'stock', 'disponible'],
+      ...products.map((product) => [
+        product.name,
+        product.category,
+        String(product.vendor_price ?? product.price ?? 0),
+        String(product.partner_fee ?? 0),
+        String(product.delivery_fee ?? 0),
+        String(product.platform_fee ?? 0),
+        String(product.client_price ?? product.price ?? 0),
+        String(product.stock_quantity ?? ''),
+        product.is_available ? 'oui' : 'non',
+      ]),
+    ];
+    const csv = rows
+      .map((row) => row.map((cell) => `"${cell.replaceAll('"', '""')}"`).join(','))
+      .join('\n');
+    downloadFile(`delikreol-catalogue-${vendorRef}.csv`, csv, 'text/csv;charset=utf-8');
+    showSuccess('Export CSV telecharge');
+  };
+
   const handleRemove = async (id: string) => {
     try {
       await productsService.remove(id);
@@ -212,11 +284,48 @@ export function VendorProducts() {
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#8f5b34]">Catalogue vendeur</p>
               <h1 className="mt-2 text-3xl font-black text-[#26150f]">Gerer vos produits</h1>
-              <p className="mt-2 text-sm text-[#6d5c52]">Ajoutez photos, descriptions et prix. Les demandes passent ensuite dans le cockpit DELIKREOL OPS.</p>
+              <p className="mt-2 text-sm text-[#6d5c52]">Ajoutez photo, description, prix vendeur et DELIKREOL calcule le prix client final avec frais et commission.</p>
             </div>
-            <div className="rounded-2xl bg-[#f7ecdb] px-4 py-2 text-xs font-black text-[#7a4a25]">
-              {products.length} produits actifs
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={handleExportJson}
+                className="inline-flex items-center gap-2 rounded-full border border-[#ead8bb] bg-[#fff7ef] px-4 py-2 text-xs font-black text-[#7a4a25]"
+              >
+                <Download className="h-4 w-4" /> Export JSON
+              </button>
+              <button
+                onClick={handleExportCsv}
+                className="inline-flex items-center gap-2 rounded-full border border-[#ead8bb] bg-[#fff7ef] px-4 py-2 text-xs font-black text-[#7a4a25]"
+              >
+                <Download className="h-4 w-4" /> Export CSV
+              </button>
+              <div className="rounded-2xl bg-[#f7ecdb] px-4 py-2 text-xs font-black text-[#7a4a25]">
+                {products.length} produits
+              </div>
             </div>
+          </div>
+        </section>
+
+        <section className="grid gap-4 md:grid-cols-4">
+          <div className="rounded-[28px] border border-[#ead8bb] bg-white p-5 shadow-[0_18px_50px_rgba(73,30,18,0.08)]">
+            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#8f5b34]">Catalogue actif</p>
+            <p className="mt-3 text-3xl font-black text-[#26150f]">{catalogMetrics.activeCount}</p>
+            <p className="mt-2 text-sm text-[#6d5c52]">produits visibles et disponibles</p>
+          </div>
+          <div className="rounded-[28px] border border-[#ead8bb] bg-white p-5 shadow-[0_18px_50px_rgba(73,30,18,0.08)]">
+            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#8f5b34]">Prix client cumule</p>
+            <p className="mt-3 text-3xl font-black text-[#1f6a4a]">{catalogMetrics.totalClientRevenue.toFixed(2)} EUR</p>
+            <p className="mt-2 text-sm text-[#6d5c52]">si chaque produit se vend une fois</p>
+          </div>
+          <div className="rounded-[28px] border border-[#ead8bb] bg-white p-5 shadow-[0_18px_50px_rgba(73,30,18,0.08)]">
+            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#8f5b34]">Base vendeur cumulee</p>
+            <p className="mt-3 text-3xl font-black text-[#26150f]">{catalogMetrics.totalVendorBase.toFixed(2)} EUR</p>
+            <p className="mt-2 text-sm text-[#6d5c52]">montant brut vendeur</p>
+          </div>
+          <div className="rounded-[28px] border border-[#ead8bb] bg-white p-5 shadow-[0_18px_50px_rgba(73,30,18,0.08)]">
+            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#8f5b34]">Commission DELIKREOL</p>
+            <p className="mt-3 text-3xl font-black text-[#b1452c]">{catalogMetrics.totalPlatformFees.toFixed(2)} EUR</p>
+            <p className="mt-2 text-sm text-[#6d5c52]">estimation catalogue actuel</p>
           </div>
         </section>
 
@@ -264,6 +373,7 @@ export function VendorProducts() {
 
           <div className="rounded-[28px] border border-[#ead8bb] bg-white p-6 shadow-[0_18px_50px_rgba(73,30,18,0.08)]">
             <h2 className="text-lg font-black text-[#26150f]">Ajouter un produit</h2>
+            <p className="mt-2 text-sm text-[#6d5c52]">Le vendeur renseigne son prix. DELIKREOL ajoute frais et commission pour afficher le prix client.</p>
             <div className="mt-4 space-y-3">
               <input
                 placeholder="Nom du produit"
@@ -332,14 +442,35 @@ export function VendorProducts() {
                 </label>
               </div>
               <div className="rounded-2xl border border-[#ead8bb] bg-[#fffdfa] p-4 text-xs font-bold text-[#7a4a25]">
-                Prix client estime: {(() => {
-                  const vendorPrice = Number(form.price.replace(',', '.')) || 0;
-                  const partnerFee = Number((form.partnerFee || '0').replace(',', '.')) || 0;
-                  const deliveryFee = Number((form.deliveryFee || '0').replace(',', '.')) || 0;
-                  const commissionRate = Number((form.commissionRate || '0').replace(',', '.')) || 0;
-                  const platformFee = (vendorPrice * commissionRate) / 100;
-                  return (vendorPrice + partnerFee + deliveryFee + platformFee).toFixed(2);
-                })()} EUR
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-[#8f5b34]">Simulation tarifaire</p>
+                    <p className="mt-2 text-lg font-black text-[#1f6a4a]">{pricingPreview.clientPrice.toFixed(2)} EUR</p>
+                  </div>
+                  <div className="rounded-full bg-white px-3 py-1 text-[11px] font-black text-[#7a4a25]">
+                    Commission reelle: {pricingPreview.commissionShare.toFixed(1)}%
+                  </div>
+                </div>
+                <div className="mt-3 grid gap-2 md:grid-cols-2">
+                  <div className="rounded-2xl bg-white px-3 py-2">
+                    Prix vendeur: {pricingPreview.vendorPrice.toFixed(2)} EUR
+                  </div>
+                  <div className="rounded-2xl bg-white px-3 py-2">
+                    Frais partenaire: {pricingPreview.partnerFee.toFixed(2)} EUR
+                  </div>
+                  <div className="rounded-2xl bg-white px-3 py-2">
+                    Livraison: {pricingPreview.deliveryFee.toFixed(2)} EUR
+                  </div>
+                  <div className="rounded-2xl bg-white px-3 py-2">
+                    Commission DELIKREOL: {pricingPreview.platformFee.toFixed(2)} EUR
+                  </div>
+                </div>
+                {pricingPreview.clientPrice > 0 && pricingPreview.commissionShare < 8 && (
+                  <div className="mt-3 flex items-start gap-2 rounded-2xl border border-[#f3d0b2] bg-[#fff4eb] px-3 py-2 text-[11px] font-black text-[#a14a2f]">
+                    <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
+                    Commission faible. Verifiez si la marge DELIKREOL couvre bien traitement, relance et coordination.
+                  </div>
+                )}
               </div>
               <div className="rounded-2xl border border-dashed border-[#ead8bb] bg-[#fffdfa] p-4">
                 <label className="text-xs font-black uppercase tracking-[0.2em] text-[#8f5b34]">Photo</label>
