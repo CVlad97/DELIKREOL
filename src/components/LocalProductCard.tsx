@@ -57,7 +57,7 @@ export function LocalProductCard({ product, onAddToRequest }: LocalProductCardPr
           className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-foreground text-background hover:bg-primary hover:text-primary-foreground rounded-full font-black uppercase tracking-widest text-xs transition-all transform active:scale-95 group/btn shadow-xl"
         >
           <Plus className="w-5 h-5 group-hover/btn:rotate-90 transition-transform" />
-          Ajouter à ma sélection
+          Ajouter a une demande
         </button>
       </div>
     </div>

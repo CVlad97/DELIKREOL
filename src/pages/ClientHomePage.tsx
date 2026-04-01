@@ -15,6 +15,26 @@ interface ClientHomePageProps {
 export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLegal, demoMode = false }: ClientHomePageProps) {
   const [draftRequest, setDraftRequest] = useState<LocalProduct[]>([]);
   const featuredProducts = getFeaturedProducts();
+  const quickOffers = [
+    {
+      id: 'dej-crew',
+      title: 'Dejeuner express',
+      description: 'Repas creole pour 2 a 4 personnes sur Fort-de-France ou Lamentin.',
+      products: featuredProducts.filter((product) => ['p1', 'p2', 'p4'].includes(product.id)),
+    },
+    {
+      id: 'panier-local',
+      title: 'Panier local',
+      description: 'Fruits, douceurs et produits signatures pour offrir ou tester le concept.',
+      products: featuredProducts.filter((product) => ['p3', 'p5', 'p8'].includes(product.id)),
+    },
+    {
+      id: 'demande-libre',
+      title: 'Besoin sur mesure',
+      description: 'Tu decris le besoin, DELIKREOL qualifie et organise la reponse.',
+      products: [],
+    },
+  ];
 
   const handleAddToRequest = (product: LocalProduct) => {
     setDraftRequest(prev => [...prev, product]);
@@ -26,6 +46,11 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
 
   const handleStartOrder = () => {
     onSelectMode('customer', draftRequest);
+  };
+
+  const handleQuickOffer = (products: LocalProduct[]) => {
+    setDraftRequest(products);
+    onSelectMode('customer', products);
   };
 
   return (
@@ -96,6 +121,13 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
               <ArrowRight className="w-5 h-5" />
             </button>
             <button
+              onClick={onOpenDemo}
+              className="inline-flex items-center justify-center gap-3 rounded-2xl border border-cyan-500/40 bg-cyan-500/10 px-8 py-4 text-lg font-bold text-cyan-300 transition-transform hover:scale-[1.02]"
+            >
+              Tester sans compte
+              <Sparkles className="w-5 h-5" />
+            </button>
+            <button
               onClick={() => onSelectMode('pro')}
               className="inline-flex items-center justify-center gap-3 rounded-2xl border border-orange-500/40 bg-orange-500/10 px-8 py-4 text-lg font-bold text-orange-300 transition-transform hover:scale-[1.02]"
             >
@@ -126,6 +158,39 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
             <p className="mt-3 text-sm leading-relaxed text-slate-300">
               On vise un test terrain concret avec des besoins reels, pas un faux trafic.
             </p>
+          </div>
+        </section>
+
+        <section className="mb-16">
+          <div className="mb-6 flex items-center gap-3">
+            <ShoppingBag className="w-6 h-6 text-emerald-400" />
+            <h2 className="text-3xl font-bold text-slate-50">Offres test a lancer demain</h2>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-3">
+            {quickOffers.map((offer) => (
+              <div key={offer.id} className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 shadow-xl">
+                <p className="text-xs font-black uppercase tracking-[0.25em] text-emerald-300">Sprint cash</p>
+                <h3 className="mt-3 text-2xl font-bold text-slate-50">{offer.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-300">{offer.description}</p>
+                {offer.products.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {offer.products.map((product) => (
+                      <div key={product.id} className="flex items-center justify-between rounded-2xl bg-slate-950/70 px-4 py-3 text-sm">
+                        <span className="font-semibold text-slate-200">{product.name}</span>
+                        <span className="font-black text-emerald-300">{product.price.toFixed(2)} €</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button
+                  onClick={() => handleQuickOffer(offer.products)}
+                  className="mt-6 inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-emerald-500 px-5 py-4 font-bold text-slate-950 transition-transform hover:scale-[1.02]"
+                >
+                  {offer.products.length > 0 ? 'Preparer cette offre' : 'Ouvrir la demande libre'}
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
+            ))}
           </div>
         </section>
 

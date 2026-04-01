@@ -252,6 +252,12 @@ export function AuthModal({ isOpen, onClose, onBack, initialMode = 'signin' }: A
         </form>
 
         <div className="mt-6 border-t border-gray-200 pt-4">
+          <div className="mb-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+            <p className="text-[11px] font-black uppercase tracking-[0.25em] text-emerald-600">Mode test prioritaire</p>
+            <p className="mt-2 text-sm font-medium text-slate-700">
+              Pour aller vite, ouvre directement un profil demo. Tu pourras tester le parcours client ou pro sans attendre Supabase.
+            </p>
+          </div>
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
             Acces demo (sans compte)
           </p>
