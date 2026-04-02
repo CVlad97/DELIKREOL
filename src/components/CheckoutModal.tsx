@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { X, MapPin, Store, Package } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabase';
+import { ordersService } from '../services/ordersService';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -38,38 +38,25 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     try {
       const orderNumber = `DK${Date.now().toString().slice(-8)}`;
 
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          customer_id: user.id,
-          order_number: orderNumber,
-          status: 'pending',
-          delivery_type: deliveryType,
-          delivery_address: deliveryType === 'home_delivery' ? address : null,
-          delivery_fee: deliveryFee,
-          total_amount: finalTotal,
-          notes: notes || null,
-        })
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
-
       const orderItems = items.map((item) => ({
-        order_id: order.id,
         product_id: item.id,
         vendor_id: item.vendor_id,
         quantity: item.quantity,
         unit_price: item.price,
         subtotal: item.price * item.quantity,
-        vendor_commission: (item.price * item.quantity * 0.2),
+        vendor_commission: item.price * item.quantity * 0.2,
       }));
-
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
-
-      if (itemsError) throw itemsError;
+      await ordersService.create({
+        customer_id: user.id,
+        order_number: orderNumber,
+        status: 'pending',
+        delivery_type: deliveryType,
+        delivery_address: deliveryType === 'home_delivery' ? address : null,
+        delivery_fee: deliveryFee,
+        total_amount: finalTotal,
+        notes: notes || null,
+        items: orderItems,
+      });
 
       clearCart();
       alert(`Commande ${orderNumber} passée avec succès !`);

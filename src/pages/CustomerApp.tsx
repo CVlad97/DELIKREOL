@@ -14,7 +14,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { isDemoMode, supabase } from '../lib/supabase';
 import { productsService } from '../services/productsService';
+import { catalogService } from '../services/catalogService';
 import { ordersService } from '../services/ordersService';
+import { isErpConfigured } from '../lib/erpClient';
 import { pointsRelais } from '../pointsRelais';
 import { Product, RelayPoint, Location, Order } from '../types';
 
@@ -63,6 +65,11 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
 
   const loadProducts = async () => {
     try {
+      if (isErpConfigured) {
+        const data = await catalogService.listProducts();
+        setProducts(data || []);
+        return;
+      }
       if (isDemoMode) {
         const data = await productsService.listAll();
         setProducts(data || []);
@@ -146,6 +153,11 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
     if (!user) return;
 
     try {
+      if (isErpConfigured) {
+        const data = await ordersService.listByUser(user.id);
+        setOrders(data || []);
+        return;
+      }
       if (isDemoMode) {
         const demoOrders = await ordersService.listByUser(user.id);
         if (demoOrders.length > 0) {
