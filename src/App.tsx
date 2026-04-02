@@ -44,6 +44,15 @@ const PrivacyPolicyPage = lazy(() =>
 const TermsOfUsePage = lazy(() =>
   import('./pages/TermsOfUsePage').then((module) => ({ default: module.TermsOfUsePage }))
 );
+const ErpAdminLite = lazy(() =>
+  import('./pages/ErpAdminLite').then((module) => ({ default: module.ErpAdminLite }))
+);
+const OrderStatusPage = lazy(() =>
+  import('./pages/OrderStatusPage').then((module) => ({ default: module.OrderStatusPage }))
+);
+const MicroLandingPage = lazy(() =>
+  import('./pages/MicroLandingPage').then((module) => ({ default: module.MicroLandingPage }))
+);
 
 const LoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-white to-yellow-50">
@@ -88,7 +97,7 @@ function MainShell({ children, onResetRole, currentRole }: MainShellProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-orange-50 via-white to-yellow-50">
-      <header className="w-full border-b-4 border-orange-400 bg-gradient-to-r from-red-600 via-orange-500 to-red-600 shadow-xl sticky top-0 z-50">
+      <header className="w-full border-b border-orange-300 bg-gradient-to-r from-red-600 via-orange-500 to-red-600 shadow-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
@@ -100,13 +109,14 @@ function MainShell({ children, onResetRole, currentRole }: MainShellProps) {
               <span className="hidden sm:inline text-sm">Accueil</span>
             </button>
             <div className="h-8 w-px bg-white/30"></div>
-            <div className="flex items-center gap-2">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-400 text-red-700 font-black text-lg shadow-lg">
-                D
-              </span>
+            <div className="flex items-center gap-3">
+              <img
+                src="/branding/logo-wordmark.svg"
+                alt="DELIKREOL"
+                className="h-9 md:h-10 w-auto"
+              />
               <div className="flex flex-col leading-tight">
-                <span className="font-black text-white text-sm md:text-base">DELIKREOL</span>
-                <span className="text-xs text-yellow-200 font-bold">
+                <span className="text-xs text-yellow-100 font-semibold">
                   {isPro ? 'Espace Pro' : 'Client'} · {roleLabels[currentRole]}
                 </span>
               </div>
@@ -123,6 +133,7 @@ function MainShell({ children, onResetRole, currentRole }: MainShellProps) {
             </button>
           </div>
         </div>
+        <div className="madras-strip" />
       </header>
       <main className="flex-1">{children}</main>
     </div>
@@ -131,6 +142,11 @@ function MainShell({ children, onResetRole, currentRole }: MainShellProps) {
 
 function AppContent() {
   const { user, profile, loading } = useAuth();
+  const searchParams =
+    typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const isErpAdmin = searchParams?.get('erp-admin') === '1';
+  const isOrderStatus = searchParams?.get('order-status') === '1';
+  const isLanding = searchParams?.get('landing') === '1';
   const [selectedRole, setSelectedRole] = useState<UserType | null>(null);
   const [showRoleInfo, setShowRoleInfo] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -139,6 +155,30 @@ function AppContent() {
   const [showLegalPage, setShowLegalPage] = useState<'legal' | 'privacy' | 'terms' | 'cgu' | null>(null);
   const [mode, setMode] = useState<'home' | 'customer' | 'pro' | 'dashboard/partner' | null>(null);
   const [draftProducts, setDraftProducts] = useState<any[]>([]);
+
+  if (isLanding) {
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <MicroLandingPage />
+      </Suspense>
+    );
+  }
+
+  if (isOrderStatus) {
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <OrderStatusPage />
+      </Suspense>
+    );
+  }
+
+  if (isErpAdmin) {
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <ErpAdminLite />
+      </Suspense>
+    );
+  }
 
   if (loading) {
     return (

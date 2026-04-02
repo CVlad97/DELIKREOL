@@ -1,4 +1,4 @@
-import { Plus, Package, ShoppingBag } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Product } from '../types';
 import { useCart } from '../contexts/CartContext';
 
@@ -8,56 +8,49 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
+  const vendorLabel = product.vendor?.business_name ?? (product.vendor_id ? 'Vendeur local' : null);
 
   return (
-    <div className="group bg-card rounded-[2rem] border border-border hover:border-primary/50 transition-all duration-500 overflow-hidden shadow-elegant hover:-translate-y-1">
-      <div className="relative h-56 overflow-hidden">
+    <div className="group bg-card rounded-2xl border border-border hover:border-primary/40 transition-all duration-300 overflow-hidden shadow-soft madras-accent">
+      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         {product.image_url ? (
           <img
             src={product.image_url}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          <div className="w-full h-full bg-muted flex items-center justify-center">
-            <Package size={48} className="text-muted-foreground opacity-20" />
-          </div>
+          <div className="w-full h-full bg-muted" />
         )}
-        <div className="absolute top-4 left-4">
-          <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-foreground text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-sm">
-            {product.category}
-          </span>
-        </div>
       </div>
 
-      <div className="p-6 space-y-4">
+      <div className="p-4 space-y-3">
         <div className="space-y-1">
-          <h3 className="font-black text-xl text-foreground tracking-tight line-clamp-1 group-hover:text-primary transition-colors">{product.name}</h3>
-          {product.description && (
-            <p className="text-sm text-muted-foreground font-medium line-clamp-2 leading-relaxed">{product.description}</p>
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            {product.category}
+          </div>
+          <h3 className="text-lg font-bold text-foreground line-clamp-1">{product.name}</h3>
+          {vendorLabel && (
+            <div className="text-xs text-muted-foreground">{vendorLabel}</div>
           )}
         </div>
 
-        <div className="flex items-center justify-between pt-2">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Prix Unitaire</span>
-            <span className="text-2xl font-black text-foreground tracking-tighter">{product.price.toFixed(2)} €</span>
+        <div className="flex items-center justify-between">
+          <div className="text-xl font-black text-foreground">
+            {product.price.toFixed(2)} €
           </div>
-
           <button
             onClick={() => addItem(product)}
             disabled={!product.is_available}
-            className="bg-primary text-primary-foreground p-4 rounded-2xl hover:shadow-elegant transition-all transform active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed group/btn"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:shadow-warm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Plus className="w-6 h-6 group-hover/btn:rotate-90 transition-transform" />
+            <Plus className="w-4 h-4" />
+            Ajouter
           </button>
         </div>
 
         {!product.is_available && (
-          <div className="flex items-center gap-2 text-primary font-black uppercase tracking-widest text-[10px] pt-2 border-t border-border">
-            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            Victime de son succès
-          </div>
+          <div className="text-xs font-semibold text-destructive">Indisponible</div>
         )}
       </div>
     </div>

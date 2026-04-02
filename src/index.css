@@ -4,19 +4,19 @@
 
 @layer base {
   :root {
-    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-    --font-display: 'Playfair Display', Georgia, serif;
+    --font-sans: 'Sora', system-ui, -apple-system, sans-serif;
+    --font-display: 'Fraunces', Georgia, serif;
 
     --background: 30 25% 98%;
     --foreground: 20 15% 8%;
 
-    --primary: 15 85% 55%;
+    --primary: 18 80% 52%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 38 95% 55%;
+    --secondary: 36 90% 52%;
     --secondary-foreground: 20 20% 10%;
 
-    --accent: 165 70% 35%;
+    --accent: 165 55% 32%;
     --accent-foreground: 0 0% 100%;
 
     --success: 152 60% 42%;
@@ -28,8 +28,8 @@
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --muted: 30 15% 95%;
-    --muted-foreground: 20 10% 40%;
+    --muted: 30 18% 95%;
+    --muted-foreground: 20 10% 42%;
 
     --card: 0 0% 100%;
     --card-foreground: 20 15% 8%;
@@ -82,6 +82,45 @@
   .glass-dark {
     @apply bg-foreground/80 backdrop-blur-xl border border-white/10;
   }
+}
+
+.madras-accent {
+  position: relative;
+}
+
+.madras-accent::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    #e74c3c 0px,
+    #e74c3c 16px,
+    #f5b041 16px,
+    #f5b041 32px,
+    #2ecc71 32px,
+    #2ecc71 48px,
+    #3498db 48px,
+    #3498db 64px
+  );
+}
+
+.madras-strip {
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    #e74c3c 0px,
+    #e74c3c 16px,
+    #f5b041 16px,
+    #f5b041 32px,
+    #2ecc71 32px,
+    #2ecc71 48px,
+    #3498db 48px,
+    #3498db 64px
+  );
 }
 
 @keyframes slide-in-right {

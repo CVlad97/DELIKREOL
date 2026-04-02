@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, MapPin, Filter, ShoppingCart, User, LogOut, Users, Zap, Shield, X, Loader2, AlertCircle } from 'lucide-react';
-import { supabase, Vendor } from '../lib/supabase';
+import { Vendor } from '../lib/supabase';
+import { catalogService } from '../services/catalogService';
 import { VendorCard } from '../components/VendorCard';
 import { ProductCard } from '../components/ProductCard';
 import { AuthModal } from '../components/AuthModal';
@@ -45,14 +46,7 @@ export function HomePage() {
     try {
       setLoading(true);
       setError(null);
-      const { data, error } = await supabase
-        .from('vendors')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
+      const data = await catalogService.listVendors();
       setVendors(data || []);
     } catch (err) {
       setError('Erreur lors du chargement des vendeurs. Veuillez réessayer.');
@@ -361,12 +355,12 @@ function VendorDetailModal({ vendorId, onClose }: { vendorId: string; onClose: (
     setLoading(true);
 
     const [vendorResult, productsResult] = await Promise.all([
-      supabase.from('vendors').select('*').eq('id', vendorId).maybeSingle(),
-      supabase.from('products').select('*').eq('vendor_id', vendorId).eq('is_available', true),
+      catalogService.getVendorById(vendorId),
+      catalogService.listProductsByVendor(vendorId),
     ]);
 
-    if (vendorResult.data) setVendor(vendorResult.data);
-    if (productsResult.data) setProducts(productsResult.data);
+    if (vendorResult) setVendor(vendorResult);
+    if (productsResult) setProducts(productsResult);
 
     setLoading(false);
   };
