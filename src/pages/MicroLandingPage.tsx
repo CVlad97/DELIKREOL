@@ -1,4 +1,4 @@
-const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696000000';
+const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 
 export function MicroLandingPage() {
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
