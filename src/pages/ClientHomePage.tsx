@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Package, MapPin, Clock, Shield, ArrowRight, HelpCircle, FileText, Sparkles, ShoppingBag, Truck, Users, Zap } from 'lucide-react';
+import { MapPin, ArrowRight, HelpCircle, FileText, Sparkles, ShoppingBag, Truck, Users, Zap } from 'lucide-react';
 import { LocalProductCard } from '../components/LocalProductCard';
-import { CategoryCard } from '../components/CategoryCard';
-import { mockCategories, getFeaturedProducts, LocalProduct } from '../data/mockCatalog';
+import { getFeaturedProducts, LocalProduct } from '../data/mockCatalog';
 
 interface ClientHomePageProps {
   onSelectMode: (mode: 'customer' | 'pro', draftItems?: LocalProduct[]) => void;
@@ -15,6 +14,8 @@ interface ClientHomePageProps {
 export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLegal, demoMode = false }: ClientHomePageProps) {
   const [draftRequest, setDraftRequest] = useState<LocalProduct[]>([]);
   const featuredProducts = getFeaturedProducts();
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696000000';
+  const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Bonjour, je souhaite commander sur DELIKREOL.')}`;
   const quickOffers = [
     {
       id: 'dej-crew',
@@ -25,13 +26,13 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
     {
       id: 'panier-local',
       title: 'Panier local',
-      description: 'Fruits, douceurs et produits signatures pour offrir ou tester le concept.',
+      description: 'Fruits, douceurs et produits signatures pour offrir ou découvrir.',
       products: featuredProducts.filter((product) => ['p3', 'p5', 'p8'].includes(product.id)),
     },
     {
       id: 'demande-libre',
       title: 'Besoin sur mesure',
-      description: 'Tu decris le besoin, on confirme et on organise la reponse.',
+      description: 'Dites-nous ce que vous voulez, on confirme rapidement par WhatsApp.',
       products: [],
     },
   ];
@@ -39,18 +40,36 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
   const howItWorks = [
     {
       icon: ShoppingBag,
-      title: 'Vous faites la demande',
-      description: 'Repas, courses, colis ou besoin local. Le parcours reste simple et rapide sur mobile.',
+      title: 'Je choisis',
+      description: 'Je selectionne un repas, un panier ou une demande simple.',
     },
     {
       icon: Users,
-      title: 'On confirme avec vous',
-      description: 'Votre demande est lue et precisee, puis transmise au bon partenaire local.',
+      title: 'Je commande',
+      description: 'Je confirme ma commande, en quelques secondes.',
     },
     {
       icon: Truck,
-      title: 'Le partenaire execute',
-      description: 'Preparation, livraison ou service local avec suivi basique et coordination operateur.',
+      title: 'On me confirme rapidement',
+      description: 'Un partenaire local valide par WhatsApp et on organise.',
+    },
+  ];
+
+  const partnerHighlights = [
+    {
+      name: 'Traiteur Kreyol FDF',
+      zone: 'Fort-de-France',
+      offer: 'Plats du jour et desserts',
+    },
+    {
+      name: 'Boutik Lakay',
+      zone: 'Lamentin',
+      offer: 'Paniers frais et douceurs',
+    },
+    {
+      name: 'Saveurs du Nord',
+      zone: 'Schoelcher',
+      offer: 'Repas familiaux',
     },
   ];
 
@@ -111,7 +130,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
 
       <div className="max-w-7xl mx-auto px-4 py-16">
         {/* Hero Section */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           {demoMode && (
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-200 mb-6">
               <Sparkles className="w-4 h-4" />
@@ -126,14 +145,14 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
             />
             <div className="madras-strip w-24 rounded-full" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-50 mb-4">
-            Produits locaux et repas creoles, livrés simplement
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-50 mb-3">
+            Commandez local en Martinique, simplement.
           </h1>
-          <p className="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-4">
-            Commande rapide, confirmation WhatsApp, partenaires martiniquais proches de chez vous.
+          <p className="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-3">
+            Repas creoles, paniers frais, douceurs locales. Confirmation rapide par WhatsApp.
           </p>
           <p className="text-base text-slate-400 max-w-2xl mx-auto">
-            Zones pilote : Fort-de-France, Lamentin, Schoelcher.
+            Zones pilotes : Fort-de-France, Lamentin, Schoelcher.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
             <button
@@ -158,79 +177,22 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
               <MapPin className="w-5 h-5" />
             </button>
           </div>
+          <div className="mt-6 text-sm text-emerald-200 font-semibold">
+            WhatsApp direct : réponse rapide
+            <a href={whatsappLink} className="ml-2 text-emerald-300 underline underline-offset-4">
+              {whatsappNumber}
+            </a>
+          </div>
         </div>
-
-        <section className="mb-16 grid gap-4 md:grid-cols-3">
-          <div className="rounded-3xl border border-emerald-500/15 bg-slate-900/60 p-6">
-            <p className="text-xs font-black uppercase tracking-[0.25em] text-emerald-200">Local et frais</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-50">Repas creoles & paniers</h2>
-            <p className="mt-3 text-sm leading-relaxed text-slate-300">
-              Plats du jour, douceurs, paniers locaux. Des produits simples, clairs, et disponibles rapidement.
-            </p>
-          </div>
-          <div className="rounded-3xl border border-orange-500/15 bg-slate-900/60 p-6">
-            <p className="text-xs font-black uppercase tracking-[0.25em] text-orange-200">Commande facile</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-50">Confirmation rapide</h2>
-            <p className="mt-3 text-sm leading-relaxed text-slate-300">
-              Vous choisissez, on confirme par WhatsApp, et on organise la préparation avec le partenaire.
-            </p>
-          </div>
-          <div className="rounded-3xl border border-cyan-500/15 bg-slate-900/60 p-6">
-            <p className="text-xs font-black uppercase tracking-[0.25em] text-cyan-200">Support humain</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-50">Aide locale</h2>
-            <p className="mt-3 text-sm leading-relaxed text-slate-300">
-              Besoin particulier ? On vous répond vite et on ajuste la commande au besoin.
-            </p>
-          </div>
-        </section>
-
-        <section className="mb-16">
-          <div className="mb-6 flex items-center gap-3">
-            <Zap className="w-6 h-6 text-emerald-400" />
-            <h2 className="text-3xl font-bold text-slate-50">Comment ca marche</h2>
-          </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            {howItWorks.map((step) => (
-              <div key={step.title} className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
-                <div className="inline-flex rounded-2xl bg-emerald-500/15 p-4 text-emerald-300">
-                  <step.icon className="w-7 h-7" />
-                </div>
-                <h3 className="mt-5 text-2xl font-bold text-slate-50">{step.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-slate-300">{step.description}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="mb-16 grid gap-4 lg:grid-cols-3">
-          <div className="rounded-3xl border border-red-500/15 bg-slate-900/60 p-6">
-            <p className="text-xs font-black uppercase tracking-[0.25em] text-red-200">Confiance</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-50">Partenaires locaux visibles</h2>
-            <p className="mt-3 text-sm leading-relaxed text-slate-300">
-              Vous voyez qui prépare votre commande et vous savez d'ou viennent les produits.
-            </p>
-          </div>
-          <div className="rounded-3xl border border-yellow-500/15 bg-slate-900/60 p-6">
-            <p className="text-xs font-black uppercase tracking-[0.25em] text-yellow-200">Prix clairs</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-50">Pas de surprise</h2>
-            <p className="mt-3 text-sm leading-relaxed text-slate-300">
-              Prix affichés et contact direct. Une commande simple, sans jargon.
-            </p>
-          </div>
-          <div className="rounded-3xl border border-cyan-500/15 bg-slate-900/60 p-6">
-            <p className="text-xs font-black uppercase tracking-[0.25em] text-cyan-200">WhatsApp</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-50">Support rapide</h2>
-            <p className="mt-3 text-sm leading-relaxed text-slate-300">
-              Besoin de modifier ? On vous répond vite sur WhatsApp pour valider.
-            </p>
-          </div>
-        </section>
 
         <section className="mb-16">
           <div className="mb-6 flex items-center gap-3">
             <ShoppingBag className="w-6 h-6 text-emerald-400" />
             <h2 className="text-3xl font-bold text-slate-50">Selections du moment</h2>
           </div>
+          <p className="text-sm text-slate-300 mb-6">
+            Des produits locaux choisis pour commander vite et simplement.
+          </p>
           <div className="grid gap-6 lg:grid-cols-3">
             {quickOffers.map((offer) => (
               <div key={offer.id} className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
@@ -276,110 +238,76 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           </div>
         </section>
 
-        {/* Categories Section */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-slate-50 mb-6 text-center">
-            Parcourir par catégorie
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {mockCategories.map(category => (
-              <CategoryCard
-                key={category.id}
-                name={category.name}
-                icon={category.icon}
-                count={category.count}
-                onClick={handleStartOrder}
-              />
+          <div className="flex items-center gap-3 mb-6">
+            <Users className="w-6 h-6 text-emerald-400" />
+            <h2 className="text-3xl font-bold text-slate-50">Partenaires locaux</h2>
+          </div>
+          <p className="text-sm text-slate-300 mb-6">
+            Des vendeurs pilotes en Martinique, visibles et joignables simplement.
+          </p>
+          <div className="grid gap-4 md:grid-cols-3">
+            {partnerHighlights.map((partner) => (
+              <div key={partner.name} className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
+                <p className="text-xs font-black uppercase tracking-[0.25em] text-emerald-200">{partner.zone}</p>
+                <h3 className="mt-3 text-2xl font-bold text-slate-50">{partner.name}</h3>
+                <p className="mt-2 text-sm text-slate-300">{partner.offer}</p>
+                <a
+                  href={whatsappLink}
+                  className="mt-4 inline-flex items-center gap-2 text-emerald-300 font-semibold"
+                >
+                  WhatsApp direct
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
             ))}
           </div>
         </section>
 
-        {/* CTA Section */}
         <section className="mb-16">
-          <div className="bg-slate-900/70 border border-emerald-500/30 rounded-3xl p-12 text-center">
-            <h2 className="text-3xl font-bold text-slate-50 mb-4">
-              Besoin particulier ou commande de groupe ?
-            </h2>
-            <p className="text-lg text-slate-300 mb-8 max-w-2xl mx-auto">
-              Decrivez votre besoin, le quartier et l'heure souhaitee. On vous repond vite pour confirmer.
-            </p>
-            <button
-              onClick={handleStartOrder}
-              className="inline-flex items-center gap-3 px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-slate-950 rounded-xl font-bold text-lg transition-colors"
-            >
-              <Package className="w-6 h-6" />
-              Demander un devis simple
-              <ArrowRight className="w-5 h-5" />
-            </button>
+          <div className="mb-6 flex items-center gap-3">
+            <Zap className="w-6 h-6 text-emerald-400" />
+            <h2 className="text-3xl font-bold text-slate-50">Comment ca marche</h2>
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {howItWorks.map((step) => (
+              <div key={step.title} className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
+                <div className="inline-flex rounded-2xl bg-emerald-500/15 p-4 text-emerald-300">
+                  <step.icon className="w-7 h-7" />
+                </div>
+                <h3 className="mt-5 text-2xl font-bold text-slate-50">{step.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-300">{step.description}</p>
+              </div>
+            ))}
           </div>
         </section>
 
-        {/* Pro Section */}
         <section className="mb-16">
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            <button
-              onClick={() => onSelectMode('pro')}
-              className="group relative bg-slate-900/60 border border-orange-500/40 rounded-3xl p-8 text-left hover:border-orange-400 transition-colors"
-            >
-              <div className="absolute top-4 right-4 w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <MapPin className="w-6 h-6 text-orange-400" />
-              </div>
-              <h2 className="text-3xl font-bold text-orange-200 mb-3">Espace partenaires</h2>
-              <p className="text-slate-300 mb-6">
-                Restaurants, traiteurs, boutiques, points relais
-              </p>
-              <div className="space-y-2 mb-6">
-                <div className="flex items-center gap-2 text-sm text-slate-400">
-                  <div className="w-1.5 h-1.5 rounded-full bg-orange-400"></div>
-                  <span>Recevez des commandes locales</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-slate-400">
-                  <div className="w-1.5 h-1.5 rounded-full bg-orange-400"></div>
-                  <span>Gerez vos produits et disponibilites</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-slate-400">
-                  <div className="w-1.5 h-1.5 rounded-full bg-orange-400"></div>
-                  <span>Augmentez vos ventes localement</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 text-orange-200 font-semibold group-hover:gap-4 transition-all">
-                <span>Je suis partenaire</span>
-                <ArrowRight className="w-5 h-5" />
-              </div>
-            </button>
-
-            <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-8">
-              <h3 className="text-2xl font-bold text-slate-50 mb-6">Pourquoi DELIKREOL ?</h3>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                    <Clock className="w-5 h-5 text-emerald-400" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-slate-200 mb-1">Rapide</h4>
-                    <p className="text-sm text-slate-400">Confirmation rapide via WhatsApp</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-5 h-5 text-blue-400" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-slate-200 mb-1">100% Local</h4>
-                    <p className="text-sm text-slate-400">Partenaires proches de chez vous</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
-                    <Shield className="w-5 h-5 text-emerald-300" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-slate-200 mb-1">Sécurisé</h4>
-                    <p className="text-sm text-slate-400">Suivi simple et support humain</p>
-                  </div>
-                </div>
-              </div>
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-8">
+            <h2 className="text-2xl font-bold text-slate-50 mb-4">FAQ rapide</h2>
+            <div className="grid gap-4 md:grid-cols-2 text-sm text-slate-300">
+              <div>Commande simple</div>
+              <div>Réponse rapide</div>
+              <div>Support WhatsApp</div>
+              <div>Zones pilotes</div>
+              <div>Partenaires locaux</div>
             </div>
+          </div>
+        </section>
+
+        <section className="mb-12">
+          <div className="rounded-3xl border border-emerald-500/30 bg-slate-900/70 p-8 text-center">
+            <h2 className="text-2xl font-bold text-slate-50 mb-3">Contact / WhatsApp</h2>
+            <p className="text-sm text-slate-300 mb-6">
+              Besoin d'aide ou d'une commande spéciale ? Écrivez-nous directement.
+            </p>
+            <a
+              href={whatsappLink}
+              className="inline-flex items-center gap-3 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-slate-950 rounded-xl font-bold transition-colors"
+            >
+              WhatsApp direct
+              <ArrowRight className="w-5 h-5" />
+            </a>
           </div>
         </section>
       </div>
