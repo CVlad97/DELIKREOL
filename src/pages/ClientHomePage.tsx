@@ -13,6 +13,8 @@ interface ClientHomePageProps {
 
 export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLegal, demoMode = false }: ClientHomePageProps) {
   const [draftRequest, setDraftRequest] = useState<LocalProduct[]>([]);
+  const [geoStatus, setGeoStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
+  const [geoLabel, setGeoLabel] = useState<string | null>(null);
   const featuredProducts = getFeaturedProducts();
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Bonjour, je souhaite commander sur DELIKREOL.')}`;
@@ -90,6 +92,27 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
     onSelectMode('customer', products);
   };
 
+  const handleLocate = () => {
+    if (!('geolocation' in navigator)) {
+      setGeoStatus('error');
+      setGeoLabel("Géolocalisation indisponible sur cet appareil.");
+      return;
+    }
+    setGeoStatus('loading');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setGeoStatus('ok');
+        setGeoLabel(`Position détectée: ${latitude.toFixed(3)}, ${longitude.toFixed(3)}`);
+      },
+      () => {
+        setGeoStatus('error');
+        setGeoLabel("Position non autorisée. Activez la géolocalisation.");
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0f1114] via-[#12151a] to-[#141a15]">
       <div className="fixed top-4 right-4 z-50 flex flex-col sm:flex-row gap-2">
@@ -139,7 +162,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           )}
           <div className="flex flex-col items-center gap-5 mb-6">
             <img
-              src="/branding/logo-wordmark.svg"
+              src="/branding/logo-wordmark-animated.svg"
               alt="DELIKREOL"
               className="h-10 md:h-12"
             />
@@ -176,6 +199,19 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
               Devenir partenaire
               <MapPin className="w-5 h-5" />
             </button>
+          </div>
+          <div className="mt-5 flex flex-col items-center gap-2 text-sm text-slate-300">
+            <button
+              onClick={handleLocate}
+              className="rounded-full border border-emerald-400/40 px-4 py-2 font-semibold text-emerald-200 hover:border-emerald-300 transition-colors"
+            >
+              Activer ma position
+            </button>
+            {geoStatus !== 'idle' && (
+              <span className={geoStatus === 'ok' ? 'text-emerald-200' : 'text-amber-200'}>
+                {geoLabel}
+              </span>
+            )}
           </div>
           <div className="mt-6 text-sm text-emerald-200 font-semibold">
             WhatsApp direct : réponse rapide
