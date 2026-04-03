@@ -1,4 +1,5 @@
-import { Plus } from 'lucide-react';
+import { Plus, Sparkles } from 'lucide-react';
+import { useState } from 'react';
 import { Product } from '../types';
 import { useCart } from '../contexts/CartContext';
 
@@ -8,6 +9,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
+  const [showSim, setShowSim] = useState(false);
   const vendorLabel = product.vendor?.business_name ?? (product.vendor_id ? 'Vendeur local' : null);
 
   return (
@@ -48,6 +50,19 @@ export function ProductCard({ product }: ProductCardProps) {
             Ajouter
           </button>
         </div>
+
+        <button
+          onClick={() => setShowSim(!showSim)}
+          className="inline-flex items-center gap-2 text-xs font-semibold text-primary"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          Simulation rapide
+        </button>
+        {showSim && (
+          <div className="rounded-xl border border-border/60 bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+            Estimation: 25–35 min · Zone pilote
+          </div>
+        )}
 
         {!product.is_available && (
           <div className="text-xs font-semibold text-destructive">Indisponible</div>
