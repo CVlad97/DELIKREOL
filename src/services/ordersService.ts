@@ -12,7 +12,7 @@ export interface OrderItemInput {
   vendor_commission: number;
 }
 
-export interface CreateOrderInput extends Partial<Order> {
+export interface CreateOrderInput extends Partial<Omit<Order, 'items'>> {
   items?: OrderItemInput[];
 }
 

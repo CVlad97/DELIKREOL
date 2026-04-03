@@ -51,10 +51,10 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         order_number: orderNumber,
         status: 'pending',
         delivery_type: deliveryType,
-        delivery_address: deliveryType === 'home_delivery' ? address : null,
+        delivery_address: deliveryType === 'home_delivery' ? address : undefined,
         delivery_fee: deliveryFee,
         total_amount: finalTotal,
-        notes: notes || null,
+        notes: notes || undefined,
         items: orderItems,
       });
 
