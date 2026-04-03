@@ -246,8 +246,9 @@ export function VendorProducts() {
         product.is_available ? 'oui' : 'non',
       ]),
     ];
+    const escapeCsvCell = (value: string) => `"${value.split('"').join('""')}"`;
     const csv = rows
-      .map((row) => row.map((cell) => `"${cell.replaceAll('"', '""')}"`).join(','))
+      .map((row) => row.map((cell) => escapeCsvCell(cell)).join(','))
       .join('\n');
     downloadFile(`delikreol-catalogue-${vendorRef}.csv`, csv, 'text/csv;charset=utf-8');
     showSuccess('Export CSV telecharge');
