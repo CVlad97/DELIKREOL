@@ -97,7 +97,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
         <div className="fixed bottom-6 right-6 z-50">
           <button
             onClick={handleStartOrder}
-            className="flex items-center gap-3 px-6 py-4 bg-emerald-500 hover:bg-emerald-600 text-slate-950 rounded-2xl shadow-xl transition-colors font-semibold"
+            className="flex items-center gap-3 px-6 py-4 bg-emerald-500 hover:bg-emerald-600 text-slate-950 rounded-2xl transition-colors font-semibold"
           >
             <ShoppingBag className="w-6 h-6" />
             <div className="text-left">
@@ -191,7 +191,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {howItWorks.map((step) => (
-              <div key={step.title} className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 shadow-xl">
+              <div key={step.title} className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
                 <div className="inline-flex rounded-2xl bg-emerald-500/15 p-4 text-emerald-300">
                   <step.icon className="w-7 h-7" />
                 </div>
@@ -386,7 +386,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
 
       {/* Draft Items Preview */}
       {draftRequest.length > 0 && (
-        <div className="fixed bottom-32 right-6 bg-slate-800/95 backdrop-blur border border-slate-700 rounded-xl p-4 shadow-2xl max-w-xs z-40">
+        <div className="fixed bottom-32 right-6 bg-slate-800/95 backdrop-blur border border-slate-700 rounded-xl p-4 max-w-xs z-40">
           <h3 className="font-semibold text-slate-50 mb-3 flex items-center gap-2">
             <ShoppingBag className="w-4 h-4 text-emerald-400" />
             Ma sélection ({draftRequest.length})

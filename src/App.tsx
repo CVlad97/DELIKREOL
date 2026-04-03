@@ -394,7 +394,7 @@ function AppContent() {
         <div className="fixed top-20 right-6 z-40">
           <button
             onClick={() => setShowBecomePartner(true)}
-            className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full shadow-lg hover:shadow-orange-500/50 transition-all transform hover:scale-105 font-medium flex items-center gap-2 text-sm"
+            className="px-4 py-2 rounded-full border border-orange-500/60 text-orange-100 bg-slate-900/40 hover:border-orange-400 transition-colors font-medium flex items-center gap-2 text-sm"
           >
             <span>🤝</span>
             <span>Devenir Partenaire</span>
