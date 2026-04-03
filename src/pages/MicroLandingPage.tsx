@@ -14,7 +14,7 @@ export function MicroLandingPage() {
               DELIKREOL - Bon plan local
             </div>
             <h1 className="text-4xl md:text-5xl font-black text-orange-700 leading-tight">
-              Commande local, simple et rapide en Martinique
+              Commande locale, simple et rapide en Martinique
             </h1>
             <p className="text-lg text-slate-600">
               Plats creoles, douceurs, paniers frais et artisanat. Des vendeurs locaux verifies,
@@ -76,9 +76,9 @@ export function MicroLandingPage() {
 
         <div className="mt-10 bg-orange-600 text-white rounded-3xl p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <div className="text-lg font-bold">Pret a tester DELIKREOL ?</div>
+            <div className="text-lg font-bold">Pret a commander ?</div>
             <div className="text-sm text-orange-100">
-              MVP en cours, feedback local bienvenu.
+              Service en lancement, retours locaux bienvenus.
             </div>
           </div>
           <a
