@@ -3,7 +3,7 @@ import { erpRequest, isErpConfigured } from '../lib/erpClient';
 import { readDemoOrders, seedDemoData } from '../data/demoDb';
 
 const allowDemoFallback = import.meta.env.VITE_ERP_FALLBACK_DEMO !== 'false';
-const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696000000';
+const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 
 const statusCopy: Record<string, { label: string; message: string }> = {
   pending: {

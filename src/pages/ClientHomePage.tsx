@@ -14,7 +14,7 @@ interface ClientHomePageProps {
 export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLegal, demoMode = false }: ClientHomePageProps) {
   const [draftRequest, setDraftRequest] = useState<LocalProduct[]>([]);
   const featuredProducts = getFeaturedProducts();
-  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696000000';
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Bonjour, je souhaite commander sur DELIKREOL.')}`;
   const quickOffers = [
     {
