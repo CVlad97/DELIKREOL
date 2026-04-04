@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MapPin, ArrowRight, HelpCircle, FileText, Sparkles, ShoppingBag, Truck, Users, Zap } from 'lucide-react';
 import { LocalProductCard } from '../components/LocalProductCard';
 import { getFeaturedProducts, LocalProduct } from '../data/mockCatalog';
@@ -13,11 +13,16 @@ interface ClientHomePageProps {
 
 export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLegal, demoMode = false }: ClientHomePageProps) {
   const [draftRequest, setDraftRequest] = useState<LocalProduct[]>([]);
+  const [showCart, setShowCart] = useState(false);
+  const [customNeed, setCustomNeed] = useState('');
+  const [customBudget, setCustomBudget] = useState('');
+  const [deliveryMode, setDeliveryMode] = useState<'pickup' | 'pilot' | 'outside'>('pilot');
   const [geoStatus, setGeoStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
   const [geoLabel, setGeoLabel] = useState<string | null>(null);
   const featuredProducts = getFeaturedProducts();
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
-  const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Bonjour, je souhaite commander sur DELIKREOL.')}`;
+  const baseWhatsAppText = 'Bonjour, je souhaite commander sur DELIKREOL.';
+  const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(baseWhatsAppText)}`;
   const quickOffers = [
     {
       id: 'dej-crew',
@@ -92,6 +97,43 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
     onSelectMode('customer', products);
   };
 
+  useEffect(() => {
+    const stored = localStorage.getItem('delikreol_cart');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as LocalProduct[];
+        if (Array.isArray(parsed)) setDraftRequest(parsed);
+      } catch {
+        // ignore invalid cache
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('delikreol_cart', JSON.stringify(draftRequest));
+  }, [draftRequest]);
+
+  const cartSummary = useMemo(() => {
+    const subtotal = draftRequest.reduce((sum, item) => sum + item.price, 0);
+    let deliveryFee = 0;
+    if (draftRequest.length > 0 && deliveryMode === 'pilot') deliveryFee = 2.5;
+    const total = subtotal + deliveryFee;
+    return { subtotal, deliveryFee, total };
+  }, [draftRequest, deliveryMode]);
+
+  const cartWhatsAppLink = useMemo(() => {
+    if (draftRequest.length === 0) return whatsappLink;
+    const lines = draftRequest.map((item) => `- ${item.name} (${item.vendor}) ${item.price.toFixed(2)} €`);
+    const modeLabel =
+      deliveryMode === 'pickup'
+        ? 'Retrait'
+        : deliveryMode === 'pilot'
+        ? 'Livraison zone pilote'
+        : 'Hors zone (confirmation)';
+    const text = `${baseWhatsAppText}\n\nMa selection :\n${lines.join('\n')}\n\nMode: ${modeLabel}\nTotal estimatif : ${cartSummary.total.toFixed(2)} €`;
+    return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
+  }, [draftRequest, whatsappLink, whatsappNumber, cartSummary.total, deliveryMode]);
+
   const handleLocate = () => {
     if (!('geolocation' in navigator)) {
       setGeoStatus('error');
@@ -138,7 +180,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
       {draftRequest.length > 0 && (
         <div className="fixed bottom-6 right-6 z-50">
           <button
-            onClick={handleStartOrder}
+            onClick={() => setShowCart(true)}
             className="flex items-center gap-3 px-6 py-4 bg-emerald-500 hover:bg-emerald-600 text-slate-950 rounded-2xl transition-colors font-semibold"
           >
             <ShoppingBag className="w-6 h-6" />
@@ -148,6 +190,104 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
             </div>
             <ArrowRight className="w-5 h-5" />
           </button>
+        </div>
+      )}
+
+      {showCart && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur">
+          <div className="w-full sm:max-w-xl bg-slate-950 border border-slate-800 rounded-t-3xl sm:rounded-3xl p-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-bold text-slate-50">Mon panier</h3>
+              <button
+                onClick={() => setShowCart(false)}
+                className="text-slate-400 hover:text-slate-200"
+              >
+                Fermer
+              </button>
+            </div>
+            <div className="mt-4 space-y-3 max-h-72 overflow-y-auto">
+              {draftRequest.map((item) => (
+                <div key={item.id} className="flex items-center justify-between rounded-2xl bg-slate-900/60 px-4 py-3">
+                  <div>
+                    <div className="text-sm font-semibold text-slate-100">{item.name}</div>
+                    <div className="text-xs text-slate-400">{item.vendor}</div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="text-sm font-black text-emerald-300">{item.price.toFixed(2)} €</div>
+                    <button
+                      onClick={() => handleRemoveFromDraft(item.id)}
+                      className="text-xs text-slate-400 hover:text-slate-200"
+                    >
+                      Retirer
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-sm text-slate-200">
+              <div className="flex justify-between">
+                <span>Sous-total</span>
+                <span>{cartSummary.subtotal.toFixed(2)} €</span>
+              </div>
+              <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/40 p-3">
+                <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Mode de retrait / livraison</div>
+                <div className="mt-3 grid gap-2 text-xs">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="deliveryMode"
+                      value="pickup"
+                      checked={deliveryMode === 'pickup'}
+                      onChange={() => setDeliveryMode('pickup')}
+                    />
+                    Retrait (0 €)
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="deliveryMode"
+                      value="pilot"
+                      checked={deliveryMode === 'pilot'}
+                      onChange={() => setDeliveryMode('pilot')}
+                    />
+                    Livraison zone pilote (forfait 2,50 €)
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="deliveryMode"
+                      value="outside"
+                      checked={deliveryMode === 'outside'}
+                      onChange={() => setDeliveryMode('outside')}
+                    />
+                    Hors zone (confirmation manuelle)
+                  </label>
+                </div>
+              </div>
+              <div className="flex justify-between mt-4">
+                <span>Livraison</span>
+                <span>{cartSummary.deliveryFee.toFixed(2)} €</span>
+              </div>
+              <div className="flex justify-between mt-3 text-base font-black text-emerald-300">
+                <span>Total estimatif</span>
+                <span>{cartSummary.total.toFixed(2)} €</span>
+              </div>
+            </div>
+            <div className="mt-5 flex flex-col sm:flex-row gap-3">
+              <a
+                href={cartWhatsAppLink}
+                className="flex-1 inline-flex items-center justify-center rounded-2xl bg-emerald-500 px-5 py-4 font-bold text-slate-950 hover:bg-emerald-600"
+              >
+                Valider sur WhatsApp
+              </a>
+              <button
+                onClick={handleStartOrder}
+                className="flex-1 inline-flex items-center justify-center rounded-2xl border border-slate-700 px-5 py-4 font-bold text-slate-100 hover:border-emerald-400"
+              >
+                Continuer le checkout
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -254,6 +394,50 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                 </button>
               </div>
             ))}
+          </div>
+        </section>
+
+        <section className="mb-16">
+          <div className="mb-6 flex items-center gap-3">
+            <Sparkles className="w-6 h-6 text-emerald-400" />
+            <h2 className="text-3xl font-bold text-slate-50">Besoin sur mesure</h2>
+          </div>
+          <p className="text-sm text-slate-300 mb-6">
+            Dites-nous ce que vous cherchez : on vous repond rapidement par WhatsApp.
+          </p>
+          <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+            <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">Votre besoin</label>
+              <textarea
+                value={customNeed}
+                onChange={(event) => setCustomNeed(event.target.value)}
+                placeholder="Ex: 3 repas creoles + dessert, livraison ce soir"
+                className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+                rows={4}
+              />
+              <label className="mt-4 block text-xs font-semibold uppercase tracking-wider text-slate-400">Budget indicatif (optionnel)</label>
+              <input
+                value={customBudget}
+                onChange={(event) => setCustomBudget(event.target.value)}
+                placeholder="Ex: 25€ / personne"
+                className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              />
+              <a
+                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Bonjour, voici ma demande sur mesure : ${customNeed || '...'}${customBudget ? ` | Budget: ${customBudget}` : ''}`)}`}
+                className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-emerald-500 px-5 py-4 font-bold text-slate-950 hover:bg-emerald-600"
+              >
+                Envoyer ma demande
+              </a>
+            </div>
+            <div className="rounded-3xl border border-slate-800 bg-slate-950/60 p-6 text-sm text-slate-300">
+              <div className="font-semibold text-slate-100 mb-3">Ce que vous recevez</div>
+              <ul className="space-y-2">
+                <li>✅ Confirmation rapide par WhatsApp</li>
+                <li>✅ Proposition de partenaire local</li>
+                <li>✅ Prix clair avant validation</li>
+                <li>✅ Zones pilotes Fort-de-France / Lamentin / Schoelcher</li>
+              </ul>
+            </div>
           </div>
         </section>
 
