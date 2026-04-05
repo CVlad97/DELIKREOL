@@ -1,6 +1,7 @@
 const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 
 export function MicroLandingPage() {
+  const baseUrl = import.meta.env.BASE_URL || '/';
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     'Bonjour, je veux commander sur DELIKREOL.'
   )}`;
@@ -28,7 +29,7 @@ export function MicroLandingPage() {
                 Commander via WhatsApp
               </a>
               <a
-                href="/"
+                href={baseUrl}
                 className="px-6 py-3 rounded-xl border border-orange-300 text-orange-700 font-bold text-center"
               >
                 Voir le catalogue
@@ -36,7 +37,7 @@ export function MicroLandingPage() {
             </div>
             <div className="text-sm text-slate-500">
               Besoin d'un suivi ?{' '}
-              <a href="/?order-status=1" className="text-orange-700 font-semibold">
+              <a href={`${baseUrl}?order-status=1`} className="text-orange-700 font-semibold">
                 Suivre ma commande
               </a>
             </div>
