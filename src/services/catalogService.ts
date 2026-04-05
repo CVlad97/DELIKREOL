@@ -1,6 +1,7 @@
 import { Vendor, Product, supabase, isDemoMode } from '../lib/supabase';
 import { seedDemoData, readDemoProducts } from '../data/demoDb';
 import { erpRequest, isErpConfigured } from '../lib/erpClient';
+import { fetchSheetData, normalizeBoolean, normalizeNumber, SheetProductRow } from './sheetsService';
 
 export interface CatalogService {
   listVendors(): Promise<Vendor[]>;
@@ -57,6 +58,8 @@ class DemoCatalogService implements CatalogService {
 
 const demoFallback = new DemoCatalogService();
 const allowDemoFallback = import.meta.env.VITE_ERP_FALLBACK_DEMO !== 'false';
+const sheetsProductsUrl = import.meta.env.VITE_SHEETS_PUBLIC_URL || '';
+const isSheetsConfigured = sheetsProductsUrl.length > 0;
 
 class ErpCatalogService implements CatalogService {
   private mapPartner(partner: any): Vendor {
@@ -166,8 +169,82 @@ class SupabaseCatalogService implements CatalogService {
   }
 }
 
+class SheetsCatalogService implements CatalogService {
+  private mapProduct(row: SheetProductRow, index: number, vendorId: string): Product {
+    return {
+      id: row.id ?? `sheet-product-${index}`,
+      vendor_id: vendorId,
+      name: row.name,
+      description: row.description ?? null,
+      category: row.category ?? 'Divers',
+      price: normalizeNumber(row.price),
+      image_url: row.image_url ?? null,
+      is_available: normalizeBoolean(row.is_available ?? 'true'),
+      stock_quantity: null,
+      created_at: new Date().toISOString()
+    } as Product;
+  }
+
+  async listVendors() {
+    try {
+      const products = await this.listProducts();
+      const vendorNames = Array.from(new Set(products.map((p) => p.vendor?.business_name ?? p.vendor_id)));
+      return vendorNames.map((name, index) => {
+        const id = `sheet-vendor-${index}`;
+        return {
+          id,
+          user_id: id,
+          business_name: name ?? 'Vendeur local',
+          business_type: 'merchant',
+          description: 'Vendeur local',
+          logo_url: null,
+          address: 'Martinique',
+          latitude: null,
+          longitude: null,
+          phone: '',
+          commission_rate: 0.2,
+          is_active: true,
+          opening_hours: null,
+          delivery_radius_km: 10,
+          created_at: new Date().toISOString()
+        } as Vendor;
+      });
+    } catch {
+      return demoFallback.listVendors();
+    }
+  }
+
+  async getVendorById(id: string) {
+    const vendors = await this.listVendors();
+    return vendors.find((v) => v.id === id) ?? null;
+  }
+
+  async listProducts() {
+    try {
+      const rows = await fetchSheetData<SheetProductRow>(sheetsProductsUrl);
+      return rows.map((row, index) => {
+        const vendorId = row.vendor ?? 'sheet-vendor';
+        const product = this.mapProduct(row, index, vendorId);
+        return {
+          ...product,
+          vendor: { business_name: row.vendor ?? 'Vendeur local' } as any
+        } as Product;
+      });
+    } catch {
+      return demoFallback.listProducts();
+    }
+  }
+
+  async listProductsByVendor(vendorId: string) {
+    const products = await this.listProducts();
+    return products.filter((p) => p.vendor_id === vendorId);
+  }
+}
+
 export const catalogService: CatalogService = isErpConfigured
   ? new ErpCatalogService()
-  : isDemoMode
-    ? new DemoCatalogService()
-    : new SupabaseCatalogService();
+  : isSheetsConfigured
+    ? new SheetsCatalogService()
+    : isDemoMode
+      ? new DemoCatalogService()
+      : new SupabaseCatalogService();
