@@ -222,7 +222,9 @@ class SheetsCatalogService implements CatalogService {
   async listProducts() {
     try {
       const rows = await fetchSheetData<SheetProductRow>(sheetsProductsUrl);
-      return rows.map((row, index) => {
+      return rows
+        .filter((row) => row.name && row.price !== undefined && row.price !== null)
+        .map((row, index) => {
         const vendorId = row.vendor ?? 'sheet-vendor';
         const product = this.mapProduct(row, index, vendorId);
         return {
