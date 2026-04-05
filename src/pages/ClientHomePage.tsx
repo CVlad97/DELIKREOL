@@ -659,6 +659,9 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                 Disponibles uniquement
               </label>
             </div>
+            <div className="text-xs text-slate-400">
+              {filteredProducts.length} resultat(s)
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {filteredProducts.map(product => (
@@ -669,6 +672,11 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
               />
             ))}
           </div>
+          {filteredProducts.length === 0 && !catalogLoading && (
+            <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-sm text-slate-300">
+              Aucun produit ne correspond a ta recherche. Essaie une autre categorie ou reinitialise les filtres.
+            </div>
+          )}
         </section>
 
         <section className="mb-16">
