@@ -9,6 +9,8 @@ export interface LocalProduct {
   category: string;
   description?: string;
   featured?: boolean;
+  zone?: string;
+  available?: boolean;
 }
 
 export interface Category {

@@ -6,6 +6,9 @@ export interface SheetProductRow {
   category?: string;
   description?: string;
   image_url?: string;
+  image?: string;
+  zone?: string;
+  available?: string | boolean;
   is_available?: string | boolean;
 }
 
@@ -21,12 +24,38 @@ export interface SheetVendorRow {
 
 const isJsonUrl = (url: string) => url.endsWith('.json') || url.includes('format=json');
 
+function parseCsvRow(line: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i += 1) {
+    const char = line[i];
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+    if (char === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+      continue;
+    }
+    current += char;
+  }
+  result.push(current.trim());
+  return result;
+}
+
 function parseCsv(text: string): string[][] {
   return text
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean)
-    .map((line) => line.split(',').map((cell) => cell.replace(/^"|"$/g, '').trim()));
+    .map((line) => parseCsvRow(line));
 }
 
 function rowsToObjects<T>(rows: string[][]): T[] {

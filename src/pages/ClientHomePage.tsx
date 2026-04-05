@@ -19,11 +19,20 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
   const [customNeed, setCustomNeed] = useState('');
   const [customBudget, setCustomBudget] = useState('');
   const [deliveryMode, setDeliveryMode] = useState<'pickup' | 'pilot' | 'outside'>('pilot');
+  const [customerName, setCustomerName] = useState('');
+  const [customerZone, setCustomerZone] = useState('');
+  const [customerTime, setCustomerTime] = useState('');
   const [geoStatus, setGeoStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
   const [geoLabel, setGeoLabel] = useState<string | null>(null);
   const [catalogProducts, setCatalogProducts] = useState<LocalProduct[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [catalogError, setCatalogError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Tous');
+  const [selectedVendor, setSelectedVendor] = useState('Tous');
+  const [selectedZone, setSelectedZone] = useState('Toutes');
+  const [sortBy, setSortBy] = useState<'default' | 'priceAsc' | 'priceDesc'>('default');
+  const [onlyAvailable, setOnlyAvailable] = useState(false);
   const featuredProducts = catalogProducts.length > 0 ? catalogProducts.slice(0, 6) : getFeaturedProducts();
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
   const baseWhatsAppText = 'Bonjour, je souhaite commander sur DELIKREOL.';
@@ -45,6 +54,8 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           category: item.category ?? 'Divers',
           description: item.description ?? undefined,
           image: item.image_url ?? undefined,
+          zone: (item as { zone?: string }).zone ?? undefined,
+          available: item.is_available ?? true
         }));
         setCatalogProducts(mapped);
       } catch (err) {
@@ -59,18 +70,65 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
       mounted = false;
     };
   }, []);
+
+  const availableCategories = useMemo(() => {
+    const list = Array.from(new Set(catalogProducts.map((p) => p.category || 'Divers')));
+    return ['Tous', ...list];
+  }, [catalogProducts]);
+
+  const availableVendors = useMemo(() => {
+    const list = Array.from(new Set(catalogProducts.map((p) => p.vendor || 'Vendeur local')));
+    return ['Tous', ...list];
+  }, [catalogProducts]);
+
+  const availableZones = useMemo(() => {
+    const list = Array.from(new Set(catalogProducts.map((p) => p.zone || 'Martinique')));
+    return ['Toutes', ...list];
+  }, [catalogProducts]);
+
+  const filteredProducts = useMemo(() => {
+    let items = [...(catalogProducts.length > 0 ? catalogProducts : getFeaturedProducts())];
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      items = items.filter((p) => `${p.name} ${p.vendor} ${p.category}`.toLowerCase().includes(q));
+    }
+    if (selectedCategory !== 'Tous') {
+      items = items.filter((p) => p.category === selectedCategory);
+    }
+    if (selectedVendor !== 'Tous') {
+      items = items.filter((p) => p.vendor === selectedVendor);
+    }
+    if (selectedZone !== 'Toutes') {
+      items = items.filter((p) => (p.zone ?? 'Martinique') === selectedZone);
+    }
+    if (onlyAvailable) {
+      items = items.filter((p) => p.available !== false);
+    }
+    if (sortBy === 'priceAsc') {
+      items.sort((a, b) => a.price - b.price);
+    }
+    if (sortBy === 'priceDesc') {
+      items.sort((a, b) => b.price - a.price);
+    }
+    return items;
+  }, [catalogProducts, searchTerm, selectedCategory, selectedVendor, selectedZone, onlyAvailable, sortBy]);
+  const matchesCategory = (product: LocalProduct, keywords: string[]) => {
+    const hay = `${product.category}`.toLowerCase();
+    return keywords.some((word) => hay.includes(word));
+  };
+
   const quickOffers = [
     {
       id: 'dej-crew',
       title: 'Dejeuner express',
       description: 'Repas creole pour 2 a 4 personnes sur Fort-de-France ou Lamentin.',
-      products: featuredProducts.filter((product) => ['plats', 'repas'].includes(product.category)),
+      products: featuredProducts.filter((product) => matchesCategory(product, ['plat', 'repas', 'menu'])),
     },
     {
       id: 'panier-local',
       title: 'Panier local',
       description: 'Fruits, douceurs et produits signatures pour offrir ou découvrir.',
-      products: featuredProducts.filter((product) => ['paniers', 'epicerie', 'boissons'].includes(product.category)),
+      products: featuredProducts.filter((product) => matchesCategory(product, ['panier', 'epicerie', 'boisson', 'fruit'])),
     },
     {
       id: 'demande-libre',
@@ -103,16 +161,22 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
       name: 'Traiteur Kreyol FDF',
       zone: 'Fort-de-France',
       offer: 'Plats du jour et desserts',
+      type: 'Traiteur',
+      availability: 'Commande J+0 / J+1',
     },
     {
       name: 'Boutik Lakay',
       zone: 'Lamentin',
       offer: 'Paniers frais et douceurs',
+      type: 'Epicerie locale',
+      availability: 'Stock limite',
     },
     {
       name: 'Saveurs du Nord',
       zone: 'Schoelcher',
       offer: 'Repas familiaux',
+      type: 'Cuisine creole',
+      availability: 'Confirmation rapide',
     },
   ];
 
@@ -170,7 +234,12 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
         : deliveryMode === 'pilot'
         ? 'Livraison zone pilote'
         : 'Hors zone (confirmation)';
-    const text = `${baseWhatsAppText}\n\nMa selection :\n${lines.join('\n')}\n\nMode: ${modeLabel}\nTotal estimatif : ${cartSummary.total.toFixed(2)} €`;
+    const contactLines = [
+      customerName ? `Nom: ${customerName}` : null,
+      customerZone ? `Zone: ${customerZone}` : null,
+      customerTime ? `Creneau souhaite: ${customerTime}` : null,
+    ].filter(Boolean);
+    const text = `${baseWhatsAppText}\n\nMa selection :\n${lines.join('\n')}\n\nMode: ${modeLabel}\nTotal estimatif : ${cartSummary.total.toFixed(2)} €${contactLines.length ? `\n\nInfos:\n${contactLines.join('\n')}` : ''}`;
     return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
   }, [draftRequest, whatsappLink, whatsappNumber, cartSummary.total, deliveryMode]);
 
@@ -313,6 +382,26 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                 <span>{cartSummary.total.toFixed(2)} €</span>
               </div>
             </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <input
+                value={customerName}
+                onChange={(event) => setCustomerName(event.target.value)}
+                placeholder="Nom (optionnel)"
+                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              />
+              <input
+                value={customerZone}
+                onChange={(event) => setCustomerZone(event.target.value)}
+                placeholder="Zone / Quartier"
+                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              />
+              <input
+                value={customerTime}
+                onChange={(event) => setCustomerTime(event.target.value)}
+                placeholder="Heure souhaitee"
+                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              />
+            </div>
             <div className="mt-5 flex flex-col sm:flex-row gap-3">
               <a
                 href={cartWhatsAppLink}
@@ -337,7 +426,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           {demoMode && (
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-200 mb-6">
               <Sparkles className="w-4 h-4" />
-              Service en lancement, commandes possibles
+              Pilote local: commandes possibles
             </div>
           )}
           <div className="flex flex-col items-center gap-5 mb-6">
@@ -349,13 +438,13 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
             <div className="madras-strip w-24 rounded-full" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-slate-50 mb-3">
-            Commandez local en Martinique, simplement.
+            Commandez repas creoles et produits locaux, simplement.
           </h1>
           <p className="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-3">
-            Repas creoles, paniers frais, douceurs locales. Confirmation rapide par WhatsApp.
+            Menus, paniers et douceurs locales. Confirmation manuelle rapide par WhatsApp.
           </p>
           <p className="text-base text-slate-400 max-w-2xl mx-auto">
-            Zones pilotes : Fort-de-France, Lamentin, Schoelcher.
+            Zones pilotes : Fort-de-France, Lamentin, Schoelcher. Prix valides avant finalisation.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
             <button
@@ -369,7 +458,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
               onClick={onOpenDemo}
               className="inline-flex items-center justify-center gap-3 rounded-2xl border border-slate-600/60 bg-slate-900/40 px-8 py-4 text-lg font-bold text-slate-100 transition-colors hover:border-emerald-400/60"
             >
-              Voir le catalogue
+              Voir le menu
               <Sparkles className="w-5 h-5 text-emerald-300" />
             </button>
             <button
@@ -385,7 +474,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
               onClick={handleLocate}
               className="rounded-full border border-emerald-400/40 px-4 py-2 font-semibold text-emerald-200 hover:border-emerald-300 transition-colors"
             >
-              Activer ma position
+              Vérifier ma zone
             </button>
             {geoStatus !== 'idle' && (
               <span className={geoStatus === 'ok' ? 'text-emerald-200' : 'text-amber-200'}>
@@ -400,6 +489,27 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
             </a>
           </div>
         </div>
+
+        <section className="mb-14">
+          <div className="grid gap-4 md:grid-cols-4">
+            <div className="rounded-3xl border border-emerald-500/30 bg-slate-900/70 p-5 text-sm text-slate-200">
+              <div className="font-semibold text-emerald-200 mb-1">Confirmation humaine</div>
+              Prix et dispo valides avant finalisation.
+            </div>
+            <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-200">
+              <div className="font-semibold text-slate-100 mb-1">Zones pilotes</div>
+              Fort-de-France · Lamentin · Schoelcher
+            </div>
+            <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-200">
+              <div className="font-semibold text-slate-100 mb-1">Support WhatsApp</div>
+              Reponse rapide et suivi manuel clair.
+            </div>
+            <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-200">
+              <div className="font-semibold text-slate-100 mb-1">Partenaires locaux</div>
+              Vendeurs pilotes et offre locale.
+            </div>
+          </div>
+        </section>
 
         <section className="mb-16">
           <div className="mb-6 flex items-center gap-3">
@@ -489,12 +599,69 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
 
         {/* Featured Products Section */}
         <section className="mb-16">
-          <div className="flex items-center gap-3 mb-6">
-            <Sparkles className="w-6 h-6 text-emerald-400" />
-            <h2 className="text-3xl font-bold text-slate-50">Pépites locales du moment</h2>
+          <div className="flex flex-col gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <Sparkles className="w-6 h-6 text-emerald-400" />
+              <h2 className="text-3xl font-bold text-slate-50">Catalogue</h2>
+            </div>
+            <p className="text-sm text-slate-300">
+              Choisis un produit, ajoute au panier, puis valide sur WhatsApp. Donnees mises a jour selon les partenaires.
+            </p>
+            <div className="grid gap-3 md:grid-cols-4">
+              <input
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Rechercher un plat, un vendeur..."
+                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 md:col-span-2"
+              />
+              <select
+                value={selectedCategory}
+                onChange={(event) => setSelectedCategory(event.target.value)}
+                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              >
+                {availableCategories.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+              <select
+                value={selectedVendor}
+                onChange={(event) => setSelectedVendor(event.target.value)}
+                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              >
+                {availableVendors.map((vendor) => (
+                  <option key={vendor} value={vendor}>{vendor}</option>
+                ))}
+              </select>
+              <select
+                value={selectedZone}
+                onChange={(event) => setSelectedZone(event.target.value)}
+                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              >
+                {availableZones.map((zone) => (
+                  <option key={zone} value={zone}>{zone}</option>
+                ))}
+              </select>
+              <select
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value as typeof sortBy)}
+                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              >
+                <option value="default">Tri: par defaut</option>
+                <option value="priceAsc">Tri: prix croissant</option>
+                <option value="priceDesc">Tri: prix decroissant</option>
+              </select>
+              <label className="flex items-center gap-2 text-sm text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={onlyAvailable}
+                  onChange={(event) => setOnlyAvailable(event.target.checked)}
+                />
+                Disponibles uniquement
+              </label>
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProducts.slice(0, 8).map(product => (
+            {filteredProducts.map(product => (
               <LocalProductCard
                 key={product.id}
                 product={product}
@@ -518,6 +685,9 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                 <p className="text-xs font-black uppercase tracking-[0.25em] text-emerald-200">{partner.zone}</p>
                 <h3 className="mt-3 text-2xl font-bold text-slate-50">{partner.name}</h3>
                 <p className="mt-2 text-sm text-slate-300">{partner.offer}</p>
+                <div className="mt-3 text-xs text-slate-400">
+                  {partner.type} · {partner.availability}
+                </div>
                 <a
                   href={whatsappLink}
                   className="mt-4 inline-flex items-center gap-2 text-emerald-300 font-semibold"
@@ -552,11 +722,22 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-8">
             <h2 className="text-2xl font-bold text-slate-50 mb-4">FAQ rapide</h2>
             <div className="grid gap-4 md:grid-cols-2 text-sm text-slate-300">
-              <div>Commande simple</div>
-              <div>Réponse rapide</div>
-              <div>Support WhatsApp</div>
-              <div>Zones pilotes</div>
-              <div>Partenaires locaux</div>
+              <div>
+                <div className="font-semibold text-slate-100">Comment je commande ?</div>
+                Panier → WhatsApp → confirmation manuelle.
+              </div>
+              <div>
+                <div className="font-semibold text-slate-100">Les prix sont-ils fixes ?</div>
+                Oui, confirmes avant validation.
+              </div>
+              <div>
+                <div className="font-semibold text-slate-100">Zones couvertes ?</div>
+                Fort-de-France, Lamentin, Schoelcher (pilote).
+              </div>
+              <div>
+                <div className="font-semibold text-slate-100">Support ?</div>
+                WhatsApp direct, reponse rapide.
+              </div>
             </div>
           </div>
         </section>

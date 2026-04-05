@@ -8,8 +8,10 @@ Colonnes recommandees:
 - price
 - category
 - description
-- image_url
-- is_available
+- image_url (ou image)
+- zone (optionnel)
+- available (optionnel)
+- is_available (optionnel)
 
 ## Publication
 1. Fichier Google Sheets -> Fichier -> Partager -> Publier sur le Web
@@ -18,8 +20,8 @@ Colonnes recommandees:
 
 ## Variables a definir
 - VITE_SHEETS_PUBLIC_URL="<url csv produits>"
- - VITE_LITE_MODE=true
- - VITE_WHATSAPP_NUMBER=596696653589
+- VITE_LITE_MODE=true
+- VITE_WHATSAPP_NUMBER=596696653589
 
 ## Commandes (optionnel)
 Pour enregistrer les commandes en mode Lite, utiliser un Google Form ou un Apps Script.

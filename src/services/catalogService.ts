@@ -178,8 +178,8 @@ class SheetsCatalogService implements CatalogService {
       description: row.description ?? null,
       category: row.category ?? 'Divers',
       price: normalizeNumber(row.price),
-      image_url: row.image_url ?? null,
-      is_available: normalizeBoolean(row.is_available ?? 'true'),
+      image_url: row.image_url ?? row.image ?? null,
+      is_available: normalizeBoolean(row.available ?? row.is_available ?? 'true'),
       stock_quantity: null,
       created_at: new Date().toISOString()
     } as Product;
