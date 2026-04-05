@@ -142,11 +142,13 @@ function MainShell({ children, onResetRole, currentRole }: MainShellProps) {
 
 function AppContent() {
   const { user, profile, loading } = useAuth();
+  const isLiteMode = import.meta.env.VITE_LITE_MODE === 'true';
   const searchParams =
     typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const isErpAdmin = searchParams?.get('erp-admin') === '1';
   const isOrderStatus = searchParams?.get('order-status') === '1';
   const isLanding = searchParams?.get('landing') === '1';
+  const isGuide = searchParams?.get('guide') === '1';
   const [selectedRole, setSelectedRole] = useState<UserType | null>(null);
   const [showRoleInfo, setShowRoleInfo] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -155,6 +157,35 @@ function AppContent() {
   const [showLegalPage, setShowLegalPage] = useState<'legal' | 'privacy' | 'terms' | 'cgu' | null>(null);
   const [mode, setMode] = useState<'home' | 'customer' | 'pro' | 'dashboard/partner' | null>(null);
   const [draftProducts, setDraftProducts] = useState<any[]>([]);
+
+  if (isLiteMode) {
+    if (isGuide) {
+      return (
+        <Suspense fallback={<LoadingFallback />}>
+          <HowItWorks />
+        </Suspense>
+      );
+    }
+    if (isOrderStatus) {
+      return (
+        <Suspense fallback={<LoadingFallback />}>
+          <OrderStatusPage />
+        </Suspense>
+      );
+    }
+    return (
+      <ClientHomePage
+        liteMode
+        demoMode
+        onSelectMode={() => setMode('customer')}
+        onShowGuide={() => {
+          window.location.search = '?guide=1';
+        }}
+        onOpenDemo={() => setMode('customer')}
+        onShowLegal={(page) => setShowLegalPage(page)}
+      />
+    );
+  }
 
   if (isLanding) {
     return (

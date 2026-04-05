@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { MapPin, ArrowRight, HelpCircle, FileText, Sparkles, ShoppingBag, Truck, Users, Zap } from 'lucide-react';
 import { LocalProductCard } from '../components/LocalProductCard';
 import { getFeaturedProducts, LocalProduct } from '../data/mockCatalog';
+import { catalogService } from '../services/catalogService';
 
 interface ClientHomePageProps {
   onSelectMode: (mode: 'customer' | 'pro', draftItems?: LocalProduct[]) => void;
@@ -9,9 +10,10 @@ interface ClientHomePageProps {
   onOpenDemo?: () => void;
   onShowLegal?: (page: 'legal' | 'privacy' | 'terms' | 'cgu') => void;
   demoMode?: boolean;
+  liteMode?: boolean;
 }
 
-export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLegal, demoMode = false }: ClientHomePageProps) {
+export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLegal, demoMode = false, liteMode = false }: ClientHomePageProps) {
   const [draftRequest, setDraftRequest] = useState<LocalProduct[]>([]);
   const [showCart, setShowCart] = useState(false);
   const [customNeed, setCustomNeed] = useState('');
@@ -19,22 +21,56 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
   const [deliveryMode, setDeliveryMode] = useState<'pickup' | 'pilot' | 'outside'>('pilot');
   const [geoStatus, setGeoStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
   const [geoLabel, setGeoLabel] = useState<string | null>(null);
-  const featuredProducts = getFeaturedProducts();
+  const [catalogProducts, setCatalogProducts] = useState<LocalProduct[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
+  const featuredProducts = catalogProducts.length > 0 ? catalogProducts.slice(0, 6) : getFeaturedProducts();
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
   const baseWhatsAppText = 'Bonjour, je souhaite commander sur DELIKREOL.';
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(baseWhatsAppText)}`;
+
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      setCatalogLoading(true);
+      setCatalogError(null);
+      try {
+        const items = await catalogService.listProducts();
+        if (!mounted) return;
+        const mapped = items.map((item) => ({
+          id: item.id,
+          name: item.name,
+          vendor: item.vendor?.business_name ?? item.vendor_id,
+          price: item.price,
+          category: item.category ?? 'Divers',
+          description: item.description ?? undefined,
+          image: item.image_url ?? undefined,
+        }));
+        setCatalogProducts(mapped);
+      } catch (err) {
+        if (!mounted) return;
+        setCatalogError('Catalogue indisponible pour le moment.');
+      } finally {
+        if (mounted) setCatalogLoading(false);
+      }
+    };
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
   const quickOffers = [
     {
       id: 'dej-crew',
       title: 'Dejeuner express',
       description: 'Repas creole pour 2 a 4 personnes sur Fort-de-France ou Lamentin.',
-      products: featuredProducts.filter((product) => ['p1', 'p2', 'p4'].includes(product.id)),
+      products: featuredProducts.filter((product) => ['plats', 'repas'].includes(product.category)),
     },
     {
       id: 'panier-local',
       title: 'Panier local',
       description: 'Fruits, douceurs et produits signatures pour offrir ou découvrir.',
-      products: featuredProducts.filter((product) => ['p3', 'p5', 'p8'].includes(product.id)),
+      products: featuredProducts.filter((product) => ['paniers', 'epicerie', 'boissons'].includes(product.category)),
     },
     {
       id: 'demande-libre',
@@ -89,6 +125,10 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
   };
 
   const handleStartOrder = () => {
+    if (liteMode) {
+      setShowCart(true);
+      return;
+    }
     onSelectMode('customer', draftRequest);
   };
 
@@ -395,6 +435,12 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
               </div>
             ))}
           </div>
+          {catalogLoading && (
+            <p className="mt-4 text-sm text-slate-400">Chargement du catalogue...</p>
+          )}
+          {catalogError && (
+            <p className="mt-4 text-sm text-amber-300">{catalogError}</p>
+          )}
         </section>
 
         <section className="mb-16">
