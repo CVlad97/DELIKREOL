@@ -8,7 +8,7 @@ const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 const statusCopy: Record<string, { label: string; message: string }> = {
   pending: {
     label: 'En attente',
-    message: 'Commande recue. Nous confirmons rapidement.'
+    message: 'Commande recue. Confirmation manuelle en cours.'
   },
   confirmed: {
     label: 'Confirmee',
@@ -20,11 +20,11 @@ const statusCopy: Record<string, { label: string; message: string }> = {
   },
   ready: {
     label: 'Prete',
-    message: 'Commande prete. Livraison ou retrait imminent.'
+    message: 'Commande prete. Livraison ou retrait a confirmer.'
   },
   in_delivery: {
     label: 'En livraison',
-    message: 'Le livreur est en route.'
+    message: 'Livraison en cours (mise a jour manuelle).'
   },
   delivered: {
     label: 'Livree',
@@ -120,8 +120,11 @@ export function OrderStatusPage() {
         <div className="bg-white/90 border border-orange-100 rounded-3xl p-6 shadow-lg">
           <h1 className="text-3xl font-black text-orange-700 mb-2">Suivre ma commande</h1>
           <p className="text-sm text-slate-600 mb-6">
-            Entre ton identifiant ou numero de commande pour voir le statut en temps reel.
+            Entre ton identifiant ou numero de commande pour voir un suivi indicatif.
           </p>
+          <div className="text-xs text-slate-500 mb-4">
+            Mise a jour manuelle. Pour une question urgente, contacte le support WhatsApp.
+          </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
             <input
