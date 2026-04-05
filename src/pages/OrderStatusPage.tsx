@@ -114,6 +114,8 @@ export function OrderStatusPage() {
     `Bonjour, je veux de l'aide pour la commande ${query.trim() || ''}.`
   )}`;
 
+  const baseUrl = import.meta.env.BASE_URL || '/';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 text-slate-900">
       <div className="max-w-3xl mx-auto px-6 py-12">
@@ -196,7 +198,7 @@ export function OrderStatusPage() {
                   WhatsApp support
                 </a>
                 <a
-                  href="/"
+                  href={baseUrl}
                   className="px-5 py-3 rounded-xl border border-orange-300 text-orange-700 font-bold text-center"
                 >
                   Retour accueil
