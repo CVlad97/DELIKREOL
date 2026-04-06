@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { MapPin, ArrowRight, HelpCircle, FileText, Sparkles, ShoppingBag, Truck, Users, Zap, Store, CalendarDays, Building2, Phone, Clock3 } from 'lucide-react';
 import { LocalProductCard } from '../components/LocalProductCard';
 import { getFeaturedProducts, LocalProduct } from '../data/mockCatalog';
+import { partnerProfiles, PartnerProfile } from '../data/partnerProfiles';
 import { catalogService } from '../services/catalogService';
 
 interface ClientHomePageProps {
@@ -13,16 +14,7 @@ interface ClientHomePageProps {
   liteMode?: boolean;
 }
 
-interface VendorProfile {
-  name: string;
-  zone: string;
-  offer: string;
-  type: string;
-  availability: string;
-  story: string;
-  promise: string;
-  eta: string;
-}
+type VendorProfile = PartnerProfile;
 
 export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLegal, demoMode = false, liteMode = false }: ClientHomePageProps) {
   const baseUrl = import.meta.env.BASE_URL || '/';
@@ -252,46 +244,13 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
     },
   ];
 
-  const partnerHighlights: VendorProfile[] = [
-    {
-      name: 'Traiteur Kreyol FDF',
-      zone: 'Fort-de-France',
-      offer: 'Plats du jour et desserts',
-      type: 'Traiteur',
-      availability: 'Commande J+0 / J+1',
-      story: 'Cuisine familiale, portions genereuses et recettes traditionnelles.',
-      promise: 'Portions genereuses, recettes creoles',
-      eta: 'Confirmation rapide',
-    },
-    {
-      name: 'Boutik Lakay',
-      zone: 'Lamentin',
-      offer: 'Paniers frais et douceurs',
-      type: 'Epicerie locale',
-      availability: 'Stock limite',
-      story: 'Selection locale, fruits et douceurs de saison.',
-      promise: 'Produits frais, paniers saisonniers',
-      eta: 'Disponibilite journaliere',
-    },
-    {
-      name: 'Saveurs du Nord',
-      zone: 'Schoelcher',
-      offer: 'Repas familiaux',
-      type: 'Cuisine creole',
-      availability: 'Confirmation rapide',
-      story: 'Menus creoles du nord, faits maison.',
-      promise: 'Cuisine maison, saveurs du nord',
-      eta: 'J+0 / J+1',
-    },
-  ];
-
   const vendorProfiles = useMemo(() => {
     const profiles = new Map<string, VendorProfile>();
-    partnerHighlights.forEach((partner) => {
+    partnerProfiles.forEach((partner) => {
       profiles.set(partner.name, partner);
     });
     return profiles;
-  }, [partnerHighlights]);
+  }, []);
 
   const activeVendorProfile = useMemo(() => {
     if (!selectedVendorMenu) return null;
@@ -305,6 +264,10 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
         story: 'Partenaire local visible dans DELIKREOL Lite.',
         promise: 'Offre locale, confirmation rapide',
         eta: 'Delai indicatif selon la demande',
+        specialty: 'Menu local selon disponibilite',
+        highlights: ['Confirmation manuelle'],
+        planifiable: true,
+        enterprise: false
       }
     );
   }, [selectedVendorMenu, vendorProfiles, selectedZone]);
@@ -1049,7 +1012,9 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
               <h2 className="text-3xl font-bold text-slate-50">Vendeurs pilotes</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
-              {availableVendors.filter((vendor) => vendor !== 'Tous').map((vendor) => (
+              {availableVendors.filter((vendor) => vendor !== 'Tous').map((vendor) => {
+                const profile = vendorProfiles.get(vendor);
+                return (
                 <button
                   key={vendor}
                   onClick={() => openVendorMenu(vendor)}
@@ -1058,11 +1023,17 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                   <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Vendeur</div>
                   <div className="mt-2 text-xl font-bold text-slate-50">{vendor}</div>
                   <div className="mt-2 text-sm text-slate-300">
-                    {vendorStats.get(vendor) ?? 0} produit(s) disponibles
+                    {profile?.specialty ?? 'Cuisine locale et selection du jour'}
                   </div>
-                  <div className="mt-3 text-sm font-semibold text-emerald-300">Voir le menu</div>
+                  <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-300">
+                    <span className="rounded-full border border-slate-700 px-2 py-1">{profile?.zone ?? 'Martinique'}</span>
+                    <span className="rounded-full border border-slate-700 px-2 py-1">{profile?.availability ?? 'Confirmation rapide'}</span>
+                    {profile?.planifiable && <span className="rounded-full border border-emerald-500/40 px-2 py-1 text-emerald-300">Planifiable</span>}
+                    {profile?.enterprise && <span className="rounded-full border border-amber-500/40 px-2 py-1 text-amber-300">Entreprise</span>}
+                  </div>
+                  <div className="mt-4 text-sm font-semibold text-emerald-300">Voir le menu</div>
                 </button>
-              ))}
+              )})}
             </div>
           </section>
         )}
@@ -1076,10 +1047,20 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                     <span>{activeVendorProfile.zone}</span>
                     <span>{activeVendorProfile.type}</span>
                     <span>{activeVendorProfile.availability}</span>
+                    {activeVendorProfile.planifiable && <span>Planifiable</span>}
+                    {activeVendorProfile.enterprise && <span>Entreprise</span>}
                   </div>
                   <h2 className="mt-4 text-4xl font-bold text-slate-50">{activeVendorProfile.name}</h2>
                   <p className="mt-3 text-lg text-slate-300">{activeVendorProfile.offer}</p>
+                  <p className="mt-2 text-sm text-emerald-200">{activeVendorProfile.specialty}</p>
                   <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-400">{activeVendorProfile.story}</p>
+                  <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-300">
+                    {activeVendorProfile.highlights.map((tag) => (
+                      <span key={tag} className="rounded-full border border-slate-700 px-2 py-1">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                   <div className="mt-6 grid gap-3 sm:grid-cols-3">
                     <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
                       <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Promesse</div>
@@ -1088,6 +1069,10 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                     <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
                       <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Delai indicatif</div>
                       <div className="mt-2 text-sm font-semibold text-slate-100">{activeVendorProfile.eta}</div>
+                    </div>
+                    <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+                      <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Specialite</div>
+                      <div className="mt-2 text-sm font-semibold text-slate-100">{activeVendorProfile.specialty}</div>
                     </div>
                     <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
                       <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Confirmation</div>
@@ -1479,18 +1464,22 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
             Nos partenaires, leurs histoires et leurs specialites locales.
           </p>
           <div className="grid gap-4 md:grid-cols-3">
-            {partnerHighlights.map((partner) => (
+            {partnerProfiles.map((partner) => (
               <div key={partner.name} className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
                 <div className="h-24 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-orange-500/10 border border-slate-800 mb-4 flex items-center justify-center text-xs text-emerald-200 uppercase tracking-[0.2em]">
                   {partner.zone}
                 </div>
                 <h3 className="mt-3 text-2xl font-bold text-slate-50">{partner.name}</h3>
-                <p className="mt-2 text-sm text-slate-300">{partner.offer}</p>
+                <p className="mt-2 text-sm text-emerald-300">{partner.offer}</p>
                 <p className="mt-2 text-xs text-slate-400">{partner.story}</p>
-                <div className="mt-3 text-xs text-slate-400">
-                  {partner.type} · {partner.availability}
+                <p className="mt-2 text-xs text-slate-300">{partner.specialty}</p>
+                <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-300">
+                  <span className="rounded-full border border-slate-700 px-2 py-1">{partner.type}</span>
+                  <span className="rounded-full border border-slate-700 px-2 py-1">{partner.availability}</span>
+                  {partner.planifiable && <span className="rounded-full border border-emerald-500/40 px-2 py-1 text-emerald-300">Planifiable</span>}
+                  {partner.enterprise && <span className="rounded-full border border-amber-500/40 px-2 py-1 text-amber-300">Entreprise</span>}
                 </div>
-                <div className="mt-2 text-xs text-emerald-300">{partner.promise} · {partner.eta}</div>
+                <div className="mt-3 text-xs text-emerald-300">{partner.promise} · {partner.eta}</div>
                 <button
                   onClick={() => openVendorMenu(partner.name)}
                   className="mt-4 inline-flex items-center gap-2 text-emerald-300 font-semibold"
