@@ -412,8 +412,90 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
     return { subtotal, deliveryFee, total };
   }, [draftRequest, deliveryMode]);
 
+  const sanitizeInput = (value: string, maxLength: number) => {
+    const cleaned = value
+      .replace(/[\r\n\t]+/g, ' ')
+      .replace(/[<>]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (cleaned.length > maxLength) return cleaned.slice(0, maxLength);
+    return cleaned;
+  };
+
+  const parsePeopleCount = (value: string) => {
+    const numeric = value.replace(/[^\d]/g, '');
+    if (!numeric) return Number.NaN;
+    return Number.parseInt(numeric, 10);
+  };
+
+  const checkoutValidation = useMemo(() => {
+    const name = sanitizeInput(customerName, 60);
+    const phone = sanitizeInput(customerPhone, 20);
+    const zone = sanitizeInput(customerZone, 60);
+    const address = sanitizeInput(customerAddress, 120);
+    const time = sanitizeInput(customerTime, 60);
+    const note = sanitizeInput(orderNote, 240);
+    const scheduledDateSafe = sanitizeInput(scheduledDate, 10);
+    const scheduledTimeSafe = sanitizeInput(scheduledTime, 10);
+    const businessNameSafe = sanitizeInput(businessName, 80);
+    const peopleCount = parsePeopleCount(businessPeople);
+
+    const phonePattern = /^[+()\d\s.-]{6,20}$/;
+    const nameOk = name.length >= 2;
+    const requiresPhone = deliveryMode !== 'pickup' || isBusinessCheckout;
+    const phoneOk = !requiresPhone ? (!phone || phonePattern.test(phone)) : phonePattern.test(phone);
+    const addressOk = deliveryMode === 'pickup' ? true : address.length >= 5;
+    const scheduleOk =
+      orderTiming !== 'scheduled' ? true : Boolean(scheduledDateSafe && scheduledTimeSafe);
+    const businessOk = !isBusinessCheckout
+      ? true
+      : businessNameSafe.length >= 2 && Number.isFinite(peopleCount) && peopleCount > 0;
+    const noteOk = note.length <= 240;
+
+    return {
+      sanitized: {
+        name,
+        phone,
+        zone,
+        address,
+        time,
+        note,
+        scheduledDate: scheduledDateSafe,
+        scheduledTime: scheduledTimeSafe,
+        businessName: businessNameSafe,
+        businessPeople: Number.isFinite(peopleCount) ? peopleCount : null
+      },
+      errors: {
+        name: nameOk ? null : 'Nom requis (2 caracteres min).',
+        phone: phoneOk ? null : 'Telephone invalide.',
+        address: addressOk ? null : 'Adresse requise pour la livraison.',
+        schedule: scheduleOk ? null : 'Date et heure requises pour une commande planifiee.',
+        business: businessOk ? null : 'Nom entreprise et nombre de personnes requis.',
+        note: noteOk ? null : 'Note trop longue (240 caracteres max).'
+      },
+      isValid: nameOk && phoneOk && addressOk && scheduleOk && businessOk && noteOk
+    };
+  }, [
+    businessName,
+    businessPeople,
+    customerAddress,
+    customerName,
+    customerPhone,
+    customerTime,
+    customerZone,
+    deliveryMode,
+    isBusinessCheckout,
+    orderNote,
+    orderTiming,
+    scheduledDate,
+    scheduledTime
+  ]);
+
+  const canSubmitCheckout = draftRequest.length > 0 && checkoutValidation.isValid;
+
   const cartWhatsAppLink = useMemo(() => {
-    if (draftRequest.length === 0) return whatsappLink;
+    if (draftRequest.length === 0 || !canSubmitCheckout) return whatsappLink;
+    const sanitized = checkoutValidation.sanitized;
     const lines = draftRequest.map((item) => `- ${item.name} (${item.vendor}) ${item.price.toFixed(2)} €`);
     const vendors = Array.from(new Set(draftRequest.map((item) => item.vendor)));
     const modeLabel =
@@ -423,29 +505,43 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
         ? 'Livraison zone pilote'
         : 'Hors zone (confirmation)';
     const contactLines = [
-      customerName ? `Nom: ${customerName}` : null,
-      customerPhone ? `Telephone: ${customerPhone}` : null,
-      customerZone ? `Zone: ${customerZone}` : null,
-      customerAddress ? `Adresse: ${customerAddress}` : null,
+      sanitized.name ? `Nom: ${sanitized.name}` : null,
+      sanitized.phone ? `Telephone: ${sanitized.phone}` : null,
+      sanitized.zone ? `Zone: ${sanitized.zone}` : null,
+      sanitized.address ? `Adresse: ${sanitized.address}` : null,
     ].filter(Boolean);
     const planningLines = [
       `Type: ${orderTiming === 'now' ? 'Commande maintenant' : orderTiming === 'asap' ? 'Des que possible' : 'Planifiee'}`,
-      orderTiming === 'scheduled' && scheduledDate ? `Date souhaitee: ${scheduledDate}` : null,
-      orderTiming === 'scheduled' && scheduledTime ? `Heure souhaitee: ${scheduledTime}` : null,
-      customerTime ? `Repere horaire libre: ${customerTime}` : null,
-      orderNote ? `Note: ${orderNote}` : null,
+      orderTiming === 'scheduled' && sanitized.scheduledDate
+        ? `Date souhaitee: ${sanitized.scheduledDate}`
+        : null,
+      orderTiming === 'scheduled' && sanitized.scheduledTime
+        ? `Heure souhaitee: ${sanitized.scheduledTime}`
+        : null,
+      sanitized.time ? `Repere horaire libre: ${sanitized.time}` : null,
+      sanitized.note ? `Note: ${sanitized.note}` : null,
     ].filter(Boolean);
     const businessLines = isBusinessCheckout
       ? [
           'Type client: Entreprise',
-          businessName ? `Entreprise: ${businessName}` : null,
-          businessPeople ? `Personnes: ${businessPeople}` : null,
+          sanitized.businessName ? `Entreprise: ${sanitized.businessName}` : null,
+          sanitized.businessPeople ? `Personnes: ${sanitized.businessPeople}` : null,
         ].filter(Boolean)
       : ['Type client: Particulier'];
     const text = `${baseWhatsAppText}\n\nVendeur(s): ${vendors.join(', ')}\n\nMa selection :\n${lines.join('\n')}\n\nMode: ${modeLabel}\nTotal estimatif : ${cartSummary.total.toFixed(2)} €${contactLines.length ? `\n\nInfos:\n${contactLines.join('\n')}` : ''}`;
     const fullText = `${text}${planningLines.length ? `\n\nPlanning:\n${planningLines.join('\n')}` : ''}\n\n${businessLines.join('\n')}\n\nCreaneau souhaite soumis a confirmation.`;
     return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(fullText)}`;
-  }, [draftRequest, whatsappLink, whatsappNumber, cartSummary.total, deliveryMode, customerName, customerPhone, customerZone, customerAddress, customerTime, orderTiming, scheduledDate, scheduledTime, orderNote, isBusinessCheckout, businessName, businessPeople]);
+  }, [
+    draftRequest,
+    whatsappLink,
+    whatsappNumber,
+    cartSummary.total,
+    deliveryMode,
+    orderTiming,
+    isBusinessCheckout,
+    canSubmitCheckout,
+    checkoutValidation.sanitized
+  ]);
 
   const proWhatsAppLink = useMemo(() => {
     const lines = [
@@ -683,6 +779,9 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                   <div className="mt-3 rounded-2xl border border-slate-800 bg-slate-950/50 px-4 py-3 text-xs text-slate-400">
                     Créneau souhaité soumis à confirmation.
                   </div>
+                  {checkoutValidation.errors.schedule && (
+                    <p className="mt-2 text-xs text-red-400">{checkoutValidation.errors.schedule}</p>
+                  )}
                 </section>
 
                 <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5">
@@ -722,6 +821,17 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                       className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 sm:col-span-2"
                     />
                   </div>
+                  {(checkoutValidation.errors.name ||
+                    checkoutValidation.errors.phone ||
+                    checkoutValidation.errors.address ||
+                    checkoutValidation.errors.note) && (
+                    <div className="mt-3 text-xs text-red-400 space-y-1">
+                      {checkoutValidation.errors.name && <p>{checkoutValidation.errors.name}</p>}
+                      {checkoutValidation.errors.phone && <p>{checkoutValidation.errors.phone}</p>}
+                      {checkoutValidation.errors.address && <p>{checkoutValidation.errors.address}</p>}
+                      {checkoutValidation.errors.note && <p>{checkoutValidation.errors.note}</p>}
+                    </div>
+                  )}
                 </section>
 
                 <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5">
@@ -768,6 +878,9 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                     className="mt-4 w-full rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
                     rows={3}
                   />
+                  {checkoutValidation.errors.business && (
+                    <p className="mt-2 text-xs text-red-400">{checkoutValidation.errors.business}</p>
+                  )}
                 </section>
               </div>
 
@@ -792,8 +905,10 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                     Disponibilite, frais et creneau confirmes avant validation finale.
                   </div>
                   <a
-                    href={cartWhatsAppLink}
-                    className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-emerald-500 px-5 py-4 font-bold text-slate-950 hover:bg-emerald-600"
+                    href={canSubmitCheckout ? cartWhatsAppLink : undefined}
+                    aria-disabled={!canSubmitCheckout}
+                    tabIndex={canSubmitCheckout ? 0 : -1}
+                    className={`mt-5 inline-flex w-full items-center justify-center rounded-2xl px-5 py-4 font-bold text-slate-950 ${canSubmitCheckout ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-emerald-500/50 cursor-not-allowed pointer-events-none'}`}
                   >
                     Valider sur WhatsApp
                   </a>

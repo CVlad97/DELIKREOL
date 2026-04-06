@@ -16,6 +16,9 @@ test('lite tunnel main flow', async ({ page }) => {
   const dialog = page.locator('[role="dialog"]');
   await expect(dialog).toBeVisible();
   await expect(dialog.locator('input[placeholder="Nom"]').first()).toBeVisible();
+  await dialog.locator('input[placeholder="Nom"]').fill('Client Test');
+  await dialog.locator('input[placeholder="Telephone"]').fill('0612345678');
+  await dialog.locator('input[placeholder="Adresse ou point de retrait"]').fill('Fort-de-France');
   await expect(page.getByText(/Recapitulatif/i)).toHaveCount(1);
 
   const whatsappCta = page.getByRole('link', { name: /valider sur whatsapp/i });
