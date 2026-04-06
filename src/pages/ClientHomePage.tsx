@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { MapPin, ArrowRight, HelpCircle, FileText, Sparkles, ShoppingBag, Truck, Users, Zap } from 'lucide-react';
+import { MapPin, ArrowRight, HelpCircle, FileText, Sparkles, ShoppingBag, Truck, Users, Zap, Store, CalendarDays, Building2, Phone, Clock3 } from 'lucide-react';
 import { LocalProductCard } from '../components/LocalProductCard';
 import { getFeaturedProducts, LocalProduct } from '../data/mockCatalog';
 import { catalogService } from '../services/catalogService';
@@ -11,6 +11,17 @@ interface ClientHomePageProps {
   onShowLegal?: (page: 'legal' | 'privacy' | 'terms' | 'cgu') => void;
   demoMode?: boolean;
   liteMode?: boolean;
+}
+
+interface VendorProfile {
+  name: string;
+  zone: string;
+  offer: string;
+  type: string;
+  availability: string;
+  story: string;
+  promise: string;
+  eta: string;
 }
 
 export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLegal, demoMode = false, liteMode = false }: ClientHomePageProps) {
@@ -29,6 +40,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
   const [scheduledTime, setScheduledTime] = useState('');
   const [orderNote, setOrderNote] = useState('');
   const [showByVendor, setShowByVendor] = useState(false);
+  const [showMobileNav, setShowMobileNav] = useState(false);
   const [proCompany, setProCompany] = useState('');
   const [proContact, setProContact] = useState('');
   const [proPeople, setProPeople] = useState('');
@@ -48,6 +60,12 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
   const [selectedZone, setSelectedZone] = useState('Toutes');
   const [sortBy, setSortBy] = useState<'default' | 'priceAsc' | 'priceDesc'>('default');
   const [onlyAvailable, setOnlyAvailable] = useState(false);
+  const [selectedVendorMenu, setSelectedVendorMenu] = useState<string | null>(null);
+  const [selectedVendorCategory, setSelectedVendorCategory] = useState<string>('Tous');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [isBusinessCheckout, setIsBusinessCheckout] = useState(false);
+  const [businessName, setBusinessName] = useState('');
+  const [businessPeople, setBusinessPeople] = useState('');
   const featuredProducts = catalogProducts.length > 0 ? catalogProducts.slice(0, 6) : getFeaturedProducts();
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
   const baseWhatsAppText = 'Bonjour, je souhaite commander sur DELIKREOL.';
@@ -84,6 +102,16 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
     return () => {
       mounted = false;
     };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const vendor = params.get('vendor');
+    if (vendor) {
+      setSelectedVendor(vendor);
+      setSelectedVendorMenu(vendor);
+    }
   }, []);
 
   const availableCategories = useMemo(() => {
@@ -146,6 +174,24 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
     });
     return Array.from(groups.entries());
   }, [filteredProducts]);
+
+  const activeVendorProducts = useMemo(() => {
+    if (!selectedVendorMenu) return [];
+    return (catalogProducts.length > 0 ? catalogProducts : getFeaturedProducts()).filter(
+      (product) => product.vendor === selectedVendorMenu
+    );
+  }, [catalogProducts, selectedVendorMenu]);
+
+  const activeVendorCategories = useMemo(() => {
+    if (activeVendorProducts.length === 0) return ['Tous'];
+    return ['Tous', ...Array.from(new Set(activeVendorProducts.map((product) => product.category || 'Divers')))];
+  }, [activeVendorProducts]);
+
+  const visibleVendorProducts = useMemo(() => {
+    if (selectedVendorCategory === 'Tous') return activeVendorProducts;
+    return activeVendorProducts.filter((product) => product.category === selectedVendorCategory);
+  }, [activeVendorProducts, selectedVendorCategory]);
+
   const matchesCategory = (product: LocalProduct, keywords: string[]) => {
     const hay = `${product.category}`.toLowerCase();
     return keywords.some((word) => hay.includes(word));
@@ -190,7 +236,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
     },
   ];
 
-  const partnerHighlights = [
+  const partnerHighlights: VendorProfile[] = [
     {
       name: 'Traiteur Kreyol FDF',
       zone: 'Fort-de-France',
@@ -198,6 +244,8 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
       type: 'Traiteur',
       availability: 'Commande J+0 / J+1',
       story: 'Cuisine familiale, portions genereuses et recettes traditionnelles.',
+      promise: 'Portions genereuses, recettes creoles',
+      eta: 'Confirmation rapide',
     },
     {
       name: 'Boutik Lakay',
@@ -206,6 +254,8 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
       type: 'Epicerie locale',
       availability: 'Stock limite',
       story: 'Selection locale, fruits et douceurs de saison.',
+      promise: 'Produits frais, paniers saisonniers',
+      eta: 'Disponibilite journaliere',
     },
     {
       name: 'Saveurs du Nord',
@@ -214,8 +264,34 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
       type: 'Cuisine creole',
       availability: 'Confirmation rapide',
       story: 'Menus creoles du nord, faits maison.',
+      promise: 'Cuisine maison, saveurs du nord',
+      eta: 'J+0 / J+1',
     },
   ];
+
+  const vendorProfiles = useMemo(() => {
+    const profiles = new Map<string, VendorProfile>();
+    partnerHighlights.forEach((partner) => {
+      profiles.set(partner.name, partner);
+    });
+    return profiles;
+  }, [partnerHighlights]);
+
+  const activeVendorProfile = useMemo(() => {
+    if (!selectedVendorMenu) return null;
+    return (
+      vendorProfiles.get(selectedVendorMenu) ?? {
+        name: selectedVendorMenu,
+        zone: selectedZone !== 'Toutes' ? selectedZone : 'Martinique',
+        offer: 'Selection locale',
+        type: 'Partenaire local',
+        availability: 'Confirmation manuelle',
+        story: 'Partenaire local visible dans DELIKREOL Lite.',
+        promise: 'Offre locale, confirmation rapide',
+        eta: 'Delai indicatif selon la demande',
+      }
+    );
+  }, [selectedVendorMenu, vendorProfiles, selectedZone]);
 
   const handleAddToRequest = (product: LocalProduct) => {
     setDraftRequest(prev => [...prev, product]);
@@ -235,7 +311,38 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
 
   const handleQuickOffer = (products: LocalProduct[]) => {
     setDraftRequest(products);
+    if (liteMode) {
+      setShowCart(true);
+      return;
+    }
     onSelectMode('customer', products);
+  };
+
+  const openVendorMenu = (vendorName: string) => {
+    setSelectedVendor(vendorName);
+    setSelectedVendorMenu(vendorName);
+    setSelectedVendorCategory('Tous');
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      params.set('vendor', vendorName);
+      const next = `${window.location.pathname}?${params.toString()}`;
+      window.history.replaceState({}, '', next);
+      window.setTimeout(() => {
+        document.getElementById('vendor-menu')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+    }
+  };
+
+  const closeVendorMenu = () => {
+    setSelectedVendorMenu(null);
+    setSelectedVendorCategory('Tous');
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      params.delete('vendor');
+      const search = params.toString();
+      const next = `${window.location.pathname}${search ? `?${search}` : ''}`;
+      window.history.replaceState({}, '', next);
+    }
   };
 
   useEffect(() => {
@@ -265,6 +372,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
   const cartWhatsAppLink = useMemo(() => {
     if (draftRequest.length === 0) return whatsappLink;
     const lines = draftRequest.map((item) => `- ${item.name} (${item.vendor}) ${item.price.toFixed(2)} €`);
+    const vendors = Array.from(new Set(draftRequest.map((item) => item.vendor)));
     const modeLabel =
       deliveryMode === 'pickup'
         ? 'Retrait'
@@ -273,20 +381,28 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
         : 'Hors zone (confirmation)';
     const contactLines = [
       customerName ? `Nom: ${customerName}` : null,
+      customerPhone ? `Telephone: ${customerPhone}` : null,
       customerZone ? `Zone: ${customerZone}` : null,
       customerAddress ? `Adresse: ${customerAddress}` : null,
-      customerTime ? `Creneau souhaite: ${customerTime}` : null,
     ].filter(Boolean);
     const planningLines = [
       `Type: ${orderTiming === 'now' ? 'Commande maintenant' : orderTiming === 'asap' ? 'Des que possible' : 'Planifiee'}`,
       orderTiming === 'scheduled' && scheduledDate ? `Date souhaitee: ${scheduledDate}` : null,
       orderTiming === 'scheduled' && scheduledTime ? `Heure souhaitee: ${scheduledTime}` : null,
+      customerTime ? `Repere horaire libre: ${customerTime}` : null,
       orderNote ? `Note: ${orderNote}` : null,
     ].filter(Boolean);
-    const text = `${baseWhatsAppText}\n\nMa selection :\n${lines.join('\n')}\n\nMode: ${modeLabel}\nTotal estimatif : ${cartSummary.total.toFixed(2)} €${contactLines.length ? `\n\nInfos:\n${contactLines.join('\n')}` : ''}`;
-    const fullText = `${text}${planningLines.length ? `\n\nPlanning:\n${planningLines.join('\n')}` : ''}\n\nCreaneau confirme par DELIKREOL.`;
+    const businessLines = isBusinessCheckout
+      ? [
+          'Type client: Entreprise',
+          businessName ? `Entreprise: ${businessName}` : null,
+          businessPeople ? `Personnes: ${businessPeople}` : null,
+        ].filter(Boolean)
+      : ['Type client: Particulier'];
+    const text = `${baseWhatsAppText}\n\nVendeur(s): ${vendors.join(', ')}\n\nMa selection :\n${lines.join('\n')}\n\nMode: ${modeLabel}\nTotal estimatif : ${cartSummary.total.toFixed(2)} €${contactLines.length ? `\n\nInfos:\n${contactLines.join('\n')}` : ''}`;
+    const fullText = `${text}${planningLines.length ? `\n\nPlanning:\n${planningLines.join('\n')}` : ''}\n\n${businessLines.join('\n')}\n\nCreaneau souhaite soumis a confirmation.`;
     return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(fullText)}`;
-  }, [draftRequest, whatsappLink, whatsappNumber, cartSummary.total, deliveryMode, customerName, customerZone, customerAddress, customerTime, orderTiming, scheduledDate, scheduledTime, orderNote]);
+  }, [draftRequest, whatsappLink, whatsappNumber, cartSummary.total, deliveryMode, customerName, customerPhone, customerZone, customerAddress, customerTime, orderTiming, scheduledDate, scheduledTime, orderNote, isBusinessCheckout, businessName, businessPeople]);
 
   const proWhatsAppLink = useMemo(() => {
     const lines = [
@@ -326,24 +442,57 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0f1114] via-[#12151a] to-[#141a15]">
-      <div className="fixed top-4 right-4 z-50 flex flex-col sm:flex-row gap-2">
-        <button
-          onClick={onShowGuide}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-800/80 backdrop-blur border border-slate-700 rounded-full text-slate-300 hover:text-emerald-300 hover:border-emerald-400 transition-colors"
-        >
-          <HelpCircle className="w-5 h-5" />
-          <span className="text-sm font-medium">Comment ça marche ?</span>
-        </button>
-        {onOpenDemo && (
-          <button
-            onClick={onOpenDemo}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 rounded-full border border-emerald-400/40 transition-colors font-semibold"
-          >
-            <span className="text-sm">{demoMode ? 'Commander maintenant' : 'Voir le catalogue'}</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
+      <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/80 backdrop-blur">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img
+              src={`${baseUrl}branding/logo-mark.svg`}
+              alt="DELIKREOL"
+              className="h-10 w-10"
+            />
+            <img
+              src={`${baseUrl}branding/logo-wordmark-premium.svg`}
+              alt="DELIKREOL"
+              className="h-10 hidden md:block"
+            />
+          </div>
+          <nav className="hidden md:flex items-center gap-6 text-sm text-slate-200">
+            <a href={`${baseUrl}#commander`} className="hover:text-emerald-300">Commander</a>
+            <a href={`${baseUrl}#planifier`} className="hover:text-emerald-300">Planifier</a>
+            <a href={`${baseUrl}#entreprise`} className="hover:text-emerald-300">Entreprise</a>
+            <a href={`${baseUrl}#partenaires`} className="hover:text-emerald-300">Partenaires</a>
+            <a href={`${baseUrl}?order-status=1`} className="hover:text-emerald-300">Suivi</a>
+          </nav>
+          <div className="flex items-center gap-3">
+            <a
+              href={whatsappLink}
+              className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500 text-slate-950 font-semibold"
+            >
+              WhatsApp
+              <ArrowRight className="w-4 h-4" />
+            </a>
+            <button
+              onClick={() => setShowMobileNav((prev) => !prev)}
+              className="md:hidden px-3 py-2 rounded-full border border-slate-700 text-slate-200"
+            >
+              Menu
+            </button>
+          </div>
+        </div>
+        {showMobileNav && (
+          <div className="md:hidden border-t border-slate-800 px-4 py-3 flex flex-col gap-3 text-sm text-slate-200">
+            <a href={`${baseUrl}#commander`} className="hover:text-emerald-300">Commander</a>
+            <a href={`${baseUrl}#planifier`} className="hover:text-emerald-300">Planifier</a>
+            <a href={`${baseUrl}#entreprise`} className="hover:text-emerald-300">Entreprise</a>
+            <a href={`${baseUrl}#partenaires`} className="hover:text-emerald-300">Partenaires</a>
+            <a href={`${baseUrl}?order-status=1`} className="hover:text-emerald-300">Suivi</a>
+            <a href={whatsappLink} className="inline-flex items-center gap-2 text-emerald-300">
+              WhatsApp direct
+              <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
         )}
-      </div>
+      </header>
 
       {/* Draft Request Badge */}
       {draftRequest.length > 0 && (
@@ -363,10 +512,19 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
       )}
 
       {showCart && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur">
-          <div className="w-full sm:max-w-xl bg-slate-950 border border-slate-800 rounded-t-3xl sm:rounded-3xl p-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold text-slate-50">Mon panier</h3>
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="lite-checkout-title"
+        >
+          <div className="w-full sm:max-w-5xl bg-slate-950 border border-slate-800 rounded-t-3xl sm:rounded-3xl p-6 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-start justify-between gap-6">
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">Checkout local</p>
+                <h3 id="lite-checkout-title" className="mt-2 text-2xl font-bold text-slate-50">Valider ma commande</h3>
+                <p className="mt-2 text-sm text-slate-400">Prix et disponibilite confirmes avant finalisation. Support WhatsApp inclus.</p>
+              </div>
               <button
                 onClick={() => setShowCart(false)}
                 className="text-slate-400 hover:text-slate-200"
@@ -374,172 +532,253 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                 Fermer
               </button>
             </div>
-            <div className="mt-4 space-y-3 max-h-72 overflow-y-auto">
-              {draftRequest.map((item) => (
-                <div key={item.id} className="flex items-center justify-between rounded-2xl bg-slate-900/60 px-4 py-3">
-                  <div>
-                    <div className="text-sm font-semibold text-slate-100">{item.name}</div>
-                    <div className="text-xs text-slate-400">{item.vendor}</div>
+
+            <div className="mt-6 grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
+              <div className="space-y-5">
+                <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-100">
+                    <ShoppingBag className="w-4 h-4 text-emerald-300" />
+                    1. Produits
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="text-sm font-black text-emerald-300">{item.price.toFixed(2)} €</div>
+                  <div className="mt-4 space-y-3 max-h-64 overflow-y-auto">
+                    {draftRequest.map((item) => (
+                      <div key={item.id} className="flex items-center justify-between rounded-2xl bg-slate-950/50 px-4 py-3">
+                        <div>
+                          <div className="text-sm font-semibold text-slate-100">{item.name}</div>
+                          <div className="text-xs text-slate-400">{item.vendor}</div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="text-sm font-black text-emerald-300">{item.price.toFixed(2)} €</div>
+                          <button
+                            onClick={() => handleRemoveFromDraft(item.id)}
+                            className="text-xs text-slate-400 hover:text-slate-200"
+                          >
+                            Retirer
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-100">
+                    <Truck className="w-4 h-4 text-emerald-300" />
+                    2. Retrait ou livraison
+                  </div>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-3 text-sm">
                     <button
-                      onClick={() => handleRemoveFromDraft(item.id)}
-                      className="text-xs text-slate-400 hover:text-slate-200"
+                      onClick={() => setDeliveryMode('pickup')}
+                      className={`rounded-2xl border px-4 py-4 text-left ${deliveryMode === 'pickup' ? 'border-emerald-400 bg-emerald-500/10 text-emerald-200' : 'border-slate-800 bg-slate-950/40 text-slate-300'}`}
                     >
-                      Retirer
+                      <div className="font-semibold">Retrait</div>
+                      <div className="mt-1 text-xs">0 €</div>
+                    </button>
+                    <button
+                      onClick={() => setDeliveryMode('pilot')}
+                      className={`rounded-2xl border px-4 py-4 text-left ${deliveryMode === 'pilot' ? 'border-emerald-400 bg-emerald-500/10 text-emerald-200' : 'border-slate-800 bg-slate-950/40 text-slate-300'}`}
+                    >
+                      <div className="font-semibold">Livraison pilote</div>
+                      <div className="mt-1 text-xs">Forfait 2,50 €</div>
+                    </button>
+                    <button
+                      onClick={() => setDeliveryMode('outside')}
+                      className={`rounded-2xl border px-4 py-4 text-left ${deliveryMode === 'outside' ? 'border-emerald-400 bg-emerald-500/10 text-emerald-200' : 'border-slate-800 bg-slate-950/40 text-slate-300'}`}
+                    >
+                      <div className="font-semibold">Hors zone</div>
+                      <div className="mt-1 text-xs">Confirmation manuelle</div>
                     </button>
                   </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-sm text-slate-200">
-              <div className="flex justify-between">
-                <span>Sous-total</span>
-                <span>{cartSummary.subtotal.toFixed(2)} €</span>
-              </div>
-              <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/40 p-3">
-                <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Mode de retrait / livraison</div>
-                <div className="mt-3 grid gap-2 text-xs">
-                  <label className="flex items-center gap-2">
+                  <p className="mt-3 text-xs text-slate-400">Zones desservies: Fort-de-France, Lamentin, Schoelcher.</p>
+                </section>
+
+                <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-100">
+                    <CalendarDays className="w-4 h-4 text-emerald-300" />
+                    3. Quand veux-tu etre servi ?
+                  </div>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-3 text-sm">
+                    <button
+                      onClick={() => setOrderTiming('now')}
+                      className={`rounded-2xl border px-4 py-4 text-left ${orderTiming === 'now' ? 'border-emerald-400 bg-emerald-500/10 text-emerald-200' : 'border-slate-800 bg-slate-950/40 text-slate-300'}`}
+                    >
+                      <div className="font-semibold">Maintenant</div>
+                      <div className="mt-1 text-xs">Confirmation rapide</div>
+                    </button>
+                    <button
+                      onClick={() => setOrderTiming('asap')}
+                      className={`rounded-2xl border px-4 py-4 text-left ${orderTiming === 'asap' ? 'border-emerald-400 bg-emerald-500/10 text-emerald-200' : 'border-slate-800 bg-slate-950/40 text-slate-300'}`}
+                    >
+                      <div className="font-semibold">Des que possible</div>
+                      <div className="mt-1 text-xs">Au plus tot selon la charge</div>
+                    </button>
+                    <button
+                      onClick={() => setOrderTiming('scheduled')}
+                      className={`rounded-2xl border px-4 py-4 text-left ${orderTiming === 'scheduled' ? 'border-emerald-400 bg-emerald-500/10 text-emerald-200' : 'border-slate-800 bg-slate-950/40 text-slate-300'}`}
+                    >
+                      <div className="font-semibold">Planifier</div>
+                      <div className="mt-1 text-xs">Aujourd'hui ou demain</div>
+                    </button>
+                  </div>
+                  {orderTiming === 'scheduled' && (
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      <input
+                        type="date"
+                        value={scheduledDate}
+                        onChange={(event) => setScheduledDate(event.target.value)}
+                        className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+                      />
+                      <input
+                        type="time"
+                        value={scheduledTime}
+                        onChange={(event) => setScheduledTime(event.target.value)}
+                        className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+                      />
+                    </div>
+                  )}
+                  <div className="mt-3 rounded-2xl border border-slate-800 bg-slate-950/50 px-4 py-3 text-xs text-slate-400">
+                    Créneau souhaité soumis à confirmation.
+                  </div>
+                </section>
+
+                <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-100">
+                    <Phone className="w-4 h-4 text-emerald-300" />
+                    4. Coordonnees
+                  </div>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     <input
-                      type="radio"
-                      name="deliveryMode"
-                      value="pickup"
-                      checked={deliveryMode === 'pickup'}
-                      onChange={() => setDeliveryMode('pickup')}
+                      value={customerName}
+                      onChange={(event) => setCustomerName(event.target.value)}
+                      placeholder="Nom"
+                      className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
                     />
-                    Retrait (0 €)
-                  </label>
-                  <label className="flex items-center gap-2">
                     <input
-                      type="radio"
-                      name="deliveryMode"
-                      value="pilot"
-                      checked={deliveryMode === 'pilot'}
-                      onChange={() => setDeliveryMode('pilot')}
+                      value={customerPhone}
+                      onChange={(event) => setCustomerPhone(event.target.value)}
+                      placeholder="Telephone"
+                      className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
                     />
-                    Livraison zone pilote (forfait 2,50 €)
-                  </label>
-                  <label className="flex items-center gap-2">
                     <input
-                      type="radio"
-                      name="deliveryMode"
-                      value="outside"
-                      checked={deliveryMode === 'outside'}
-                      onChange={() => setDeliveryMode('outside')}
+                      value={customerZone}
+                      onChange={(event) => setCustomerZone(event.target.value)}
+                      placeholder="Zone / Quartier"
+                      className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
                     />
-                    Hors zone (confirmation manuelle)
-                  </label>
-                </div>
+                    <input
+                      value={customerTime}
+                      onChange={(event) => setCustomerTime(event.target.value)}
+                      placeholder="Repere horaire libre"
+                      className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+                    />
+                    <input
+                      value={customerAddress}
+                      onChange={(event) => setCustomerAddress(event.target.value)}
+                      placeholder="Adresse ou point de retrait"
+                      className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 sm:col-span-2"
+                    />
+                  </div>
+                </section>
+
+                <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-100">
+                    <Building2 className="w-4 h-4 text-emerald-300" />
+                    5. Particulier ou entreprise
+                  </div>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 text-sm">
+                    <button
+                      onClick={() => setIsBusinessCheckout(false)}
+                      className={`rounded-2xl border px-4 py-4 text-left ${!isBusinessCheckout ? 'border-emerald-400 bg-emerald-500/10 text-emerald-200' : 'border-slate-800 bg-slate-950/40 text-slate-300'}`}
+                    >
+                      <div className="font-semibold">Commande particulier</div>
+                      <div className="mt-1 text-xs">Usage personnel ou familial</div>
+                    </button>
+                    <button
+                      onClick={() => setIsBusinessCheckout(true)}
+                      className={`rounded-2xl border px-4 py-4 text-left ${isBusinessCheckout ? 'border-emerald-400 bg-emerald-500/10 text-emerald-200' : 'border-slate-800 bg-slate-950/40 text-slate-300'}`}
+                    >
+                      <div className="font-semibold">Commande entreprise</div>
+                      <div className="mt-1 text-xs">Equipe, reunion, evenement</div>
+                    </button>
+                  </div>
+                  {isBusinessCheckout && (
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      <input
+                        value={businessName}
+                        onChange={(event) => setBusinessName(event.target.value)}
+                        placeholder="Nom entreprise"
+                        className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+                      />
+                      <input
+                        value={businessPeople}
+                        onChange={(event) => setBusinessPeople(event.target.value)}
+                        placeholder="Nombre de personnes"
+                        className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+                      />
+                    </div>
+                  )}
+                  <textarea
+                    value={orderNote}
+                    onChange={(event) => setOrderNote(event.target.value)}
+                    placeholder="Note speciale, allergie, consigne d'acces..."
+                    className="mt-4 w-full rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+                    rows={3}
+                  />
+                </section>
               </div>
-              <div className="flex justify-between mt-4">
-                <span>Livraison</span>
-                <span>{cartSummary.deliveryFee.toFixed(2)} €</span>
-              </div>
-              <div className="flex justify-between mt-3 text-base font-black text-emerald-300">
-                <span>Total estimatif</span>
-                <span>{cartSummary.total.toFixed(2)} €</span>
-              </div>
-            </div>
-            <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-sm text-slate-200">
-              <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Commande planifiable</div>
-              <div className="mt-3 grid gap-2 text-xs">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="orderTiming"
-                    value="now"
-                    checked={orderTiming === 'now'}
-                    onChange={() => setOrderTiming('now')}
-                  />
-                  Commander maintenant
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="orderTiming"
-                    value="asap"
-                    checked={orderTiming === 'asap'}
-                    onChange={() => setOrderTiming('asap')}
-                  />
-                  Des que possible
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="orderTiming"
-                    value="scheduled"
-                    checked={orderTiming === 'scheduled'}
-                    onChange={() => setOrderTiming('scheduled')}
-                  />
-                  Planifier un creneau
-                </label>
-              </div>
-              {orderTiming === 'scheduled' && (
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <input
-                    type="date"
-                    value={scheduledDate}
-                    onChange={(event) => setScheduledDate(event.target.value)}
-                    className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
-                  />
-                  <input
-                    type="time"
-                    value={scheduledTime}
-                    onChange={(event) => setScheduledTime(event.target.value)}
-                    className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
-                  />
-                </div>
-              )}
-              <div className="mt-3 text-xs text-slate-400">Creneau souhaite confirme par DELIKREOL.</div>
-            </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <input
-                value={customerName}
-                onChange={(event) => setCustomerName(event.target.value)}
-                placeholder="Nom (optionnel)"
-                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
-              />
-              <input
-                value={customerZone}
-                onChange={(event) => setCustomerZone(event.target.value)}
-                placeholder="Zone / Quartier"
-                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
-              />
-              <input
-                value={customerAddress}
-                onChange={(event) => setCustomerAddress(event.target.value)}
-                placeholder="Adresse (optionnel)"
-                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 sm:col-span-2"
-              />
-              <input
-                value={customerTime}
-                onChange={(event) => setCustomerTime(event.target.value)}
-                placeholder="Heure souhaitee (optionnel)"
-                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
-              />
-            </div>
-            <textarea
-              value={orderNote}
-              onChange={(event) => setOrderNote(event.target.value)}
-              placeholder="Note speciale (allergie, sans piment, etc.)"
-              className="mt-3 w-full rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
-              rows={3}
-            />
-            <div className="mt-5 flex flex-col sm:flex-row gap-3">
-              <a
-                href={cartWhatsAppLink}
-                className="flex-1 inline-flex items-center justify-center rounded-2xl bg-emerald-500 px-5 py-4 font-bold text-slate-950 hover:bg-emerald-600"
-              >
-                Valider sur WhatsApp
-              </a>
-              <button
-                onClick={handleStartOrder}
-                className="flex-1 inline-flex items-center justify-center rounded-2xl border border-slate-700 px-5 py-4 font-bold text-slate-100 hover:border-emerald-400"
-              >
-                Continuer le checkout
-              </button>
+
+              <aside className="space-y-5">
+                <section className="rounded-3xl border border-emerald-500/30 bg-slate-900/70 p-5">
+                  <div className="text-xs uppercase tracking-[0.2em] text-emerald-300">Recapitulatif</div>
+                  <div className="mt-4 space-y-3 text-sm text-slate-200">
+                    <div className="flex justify-between">
+                      <span>Sous-total</span>
+                      <span>{cartSummary.subtotal.toFixed(2)} €</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Frais indicatifs</span>
+                      <span>{cartSummary.deliveryFee.toFixed(2)} €</span>
+                    </div>
+                    <div className="flex justify-between text-base font-black text-emerald-300">
+                      <span>Total estimatif</span>
+                      <span>{cartSummary.total.toFixed(2)} €</span>
+                    </div>
+                  </div>
+                  <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/50 p-4 text-xs text-slate-400">
+                    Disponibilite, frais et creneau confirmes avant validation finale.
+                  </div>
+                  <a
+                    href={cartWhatsAppLink}
+                    className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-emerald-500 px-5 py-4 font-bold text-slate-950 hover:bg-emerald-600"
+                  >
+                    Valider sur WhatsApp
+                  </a>
+                  <button
+                    onClick={() => setShowCart(false)}
+                    className="mt-3 inline-flex w-full items-center justify-center rounded-2xl border border-slate-700 px-5 py-4 font-semibold text-slate-100"
+                  >
+                    Retour au menu
+                  </button>
+                </section>
+
+                <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5">
+                  <div className="text-sm font-semibold text-slate-100">Infos pratiques</div>
+                  <div className="mt-4 space-y-3 text-sm text-slate-300">
+                    <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
+                      <div className="font-semibold text-slate-100">Livraison / retrait</div>
+                      <div className="mt-1 text-xs text-slate-400">Retrait 0 €, livraison pilote 2,50 €, hors zone sur confirmation.</div>
+                    </div>
+                    <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
+                      <div className="font-semibold text-slate-100">Planification</div>
+                      <div className="mt-1 text-xs text-slate-400">Commande immediate, ASAP, plus tard aujourd'hui ou demain.</div>
+                    </div>
+                    <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
+                      <div className="font-semibold text-slate-100">Support</div>
+                      <div className="mt-1 text-xs text-slate-400">WhatsApp central DELIKREOL pour confirmation, rupture ou ajustement.</div>
+                    </div>
+                  </div>
+                </section>
+              </aside>
             </div>
           </div>
         </div>
@@ -547,29 +786,29 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
 
       <div className="max-w-7xl mx-auto px-4 py-16">
         {/* Hero Section */}
-        <div className="text-center mb-12">
+        <div id="commander" className="text-center mb-12">
           {demoMode && (
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-200 mb-6">
               <Sparkles className="w-4 h-4" />
               Pilote local: commandes possibles
             </div>
           )}
-          <div className="flex flex-col items-center gap-5 mb-6">
+          <div className="flex flex-col items-center gap-5 mb-8">
             <img
-              src={`${baseUrl}branding/logo-wordmark-animated.svg`}
+              src={`${baseUrl}branding/logo-wordmark-premium.svg`}
               alt="DELIKREOL"
-              className="h-10 md:h-12"
+              className="h-12 md:h-14"
             />
             <div className="madras-strip w-24 rounded-full" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-50 mb-3">
-            Commandez repas creoles et produits locaux, simplement.
+          <h1 className="text-4xl md:text-6xl font-bold text-slate-50 mb-4">
+            Repas créoles, menus locaux et commandes planifiées en Martinique
           </h1>
-          <p className="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-3">
-            Menus, paniers et douceurs locales. Confirmation manuelle rapide par WhatsApp.
+          <p className="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-4">
+            Livraison, retrait, devis entreprise et confirmation rapide par WhatsApp.
           </p>
-          <p className="text-base text-slate-400 max-w-2xl mx-auto">
-            Zones pilotes : Fort-de-France, Lamentin, Schoelcher. Prix valides avant finalisation.
+          <p className="text-sm text-slate-400 max-w-2xl mx-auto">
+            Zones pilotes : Fort-de-France, Lamentin, Schoelcher. Créneau souhaité soumis à confirmation.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
             <button
@@ -580,17 +819,21 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
               <ArrowRight className="w-5 h-5" />
             </button>
             <button
-              onClick={onOpenDemo}
+              onClick={() => {
+                document.getElementById('planifier')?.scrollIntoView({ behavior: 'smooth' });
+              }}
               className="inline-flex items-center justify-center gap-3 rounded-2xl border border-slate-600/60 bg-slate-900/40 px-8 py-4 text-lg font-bold text-slate-100 transition-colors hover:border-emerald-400/60"
             >
-              Voir le menu
+              Planifier une commande
               <Sparkles className="w-5 h-5 text-emerald-300" />
             </button>
             <button
-              onClick={() => onSelectMode('pro')}
+              onClick={() => {
+                document.getElementById('entreprise')?.scrollIntoView({ behavior: 'smooth' });
+              }}
               className="inline-flex items-center justify-center gap-3 rounded-2xl border border-orange-500/50 bg-orange-500/10 px-8 py-4 text-lg font-bold text-orange-200 transition-colors hover:border-orange-400"
             >
-              Devenir partenaire
+              Devis entreprise
               <MapPin className="w-5 h-5" />
             </button>
           </div>
@@ -615,7 +858,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           </div>
         </div>
 
-        <section className="mb-14">
+        <section className="mb-14" id="planifier">
           <div className="grid gap-4 md:grid-cols-4">
             <div className="rounded-3xl border border-emerald-500/30 bg-slate-900/70 p-5 text-sm text-slate-200">
               <div className="font-semibold text-emerald-200 mb-1">Confirmation humaine</div>
@@ -626,16 +869,16 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
               Choisis un creneau, confirme ensuite.
             </div>
             <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-200">
-              <div className="font-semibold text-slate-100 mb-1">Zones pilotes</div>
-              Fort-de-France · Lamentin · Schoelcher
-            </div>
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-200">
               <div className="font-semibold text-slate-100 mb-1">Support WhatsApp</div>
               Reponse rapide et suivi manuel clair.
             </div>
             <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-200">
               <div className="font-semibold text-slate-100 mb-1">Partenaires locaux</div>
               Vendeurs pilotes et offre locale.
+            </div>
+            <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-200">
+              <div className="font-semibold text-slate-100 mb-1">Zones pilotes</div>
+              Fort-de-France · Lamentin · Schoelcher
             </div>
           </div>
         </section>
@@ -650,7 +893,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
               {availableVendors.filter((vendor) => vendor !== 'Tous').map((vendor) => (
                 <button
                   key={vendor}
-                  onClick={() => setSelectedVendor(vendor)}
+                  onClick={() => openVendorMenu(vendor)}
                   className="text-left rounded-3xl border border-slate-800 bg-slate-900/60 p-6 hover:border-emerald-400/60 transition-colors"
                 >
                   <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Vendeur</div>
@@ -665,13 +908,123 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           </section>
         )}
 
+        {selectedVendorMenu && activeVendorProfile && (
+          <section id="vendor-menu" className="mb-16 scroll-mt-28">
+            <div className="rounded-[2rem] border border-slate-800 bg-slate-950/60 overflow-hidden">
+              <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+                <div className="p-8">
+                  <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-emerald-300">
+                    <span>{activeVendorProfile.zone}</span>
+                    <span>{activeVendorProfile.type}</span>
+                    <span>{activeVendorProfile.availability}</span>
+                  </div>
+                  <h2 className="mt-4 text-4xl font-bold text-slate-50">{activeVendorProfile.name}</h2>
+                  <p className="mt-3 text-lg text-slate-300">{activeVendorProfile.offer}</p>
+                  <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-400">{activeVendorProfile.story}</p>
+                  <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+                      <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Promesse</div>
+                      <div className="mt-2 text-sm font-semibold text-slate-100">{activeVendorProfile.promise}</div>
+                    </div>
+                    <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+                      <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Delai indicatif</div>
+                      <div className="mt-2 text-sm font-semibold text-slate-100">{activeVendorProfile.eta}</div>
+                    </div>
+                    <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+                      <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Confirmation</div>
+                      <div className="mt-2 text-sm font-semibold text-slate-100">Commande confirmee par WhatsApp</div>
+                    </div>
+                  </div>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <button
+                      onClick={() => setShowCart(true)}
+                      className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 font-bold text-slate-950"
+                    >
+                      Commander chez {activeVendorProfile.name}
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={closeVendorMenu}
+                      className="inline-flex items-center gap-2 rounded-2xl border border-slate-700 px-5 py-3 font-semibold text-slate-200"
+                    >
+                      Revenir au catalogue
+                    </button>
+                  </div>
+                </div>
+                <div className="p-8 bg-gradient-to-br from-emerald-500/10 to-orange-500/10 border-l border-slate-800">
+                  <div className="grid gap-4">
+                    <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-slate-100">
+                        <Store className="w-4 h-4 text-emerald-300" />
+                        Vrai partenaire local
+                      </div>
+                      <p className="mt-2 text-sm text-slate-400">Menu separe, offre lisible, commande humaine et locale.</p>
+                    </div>
+                    <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-slate-100">
+                        <Clock3 className="w-4 h-4 text-emerald-300" />
+                        Planifiable
+                      </div>
+                      <p className="mt-2 text-sm text-slate-400">Commande maintenant, des que possible ou a un creneau souhaite.</p>
+                    </div>
+                    <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-slate-100">
+                        <MapPin className="w-4 h-4 text-emerald-300" />
+                        Zone couverte
+                      </div>
+                      <p className="mt-2 text-sm text-slate-400">{activeVendorProfile.zone} et zones pilotes selon confirmation.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="border-t border-slate-800 p-8">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-2xl font-bold text-slate-50">Menu de {activeVendorProfile.name}</h3>
+                    <p className="mt-1 text-sm text-slate-400">Choisis une categorie puis ajoute directement au panier.</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {activeVendorCategories.map((category) => (
+                      <button
+                        key={category}
+                        onClick={() => setSelectedVendorCategory(category)}
+                        className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                          selectedVendorCategory === category
+                            ? 'bg-emerald-500 text-slate-950'
+                            : 'border border-slate-700 text-slate-300'
+                        }`}
+                      >
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+                  {visibleVendorProducts.map((product) => (
+                    <LocalProductCard
+                      key={product.id}
+                      product={product}
+                      onAddToRequest={handleAddToRequest}
+                    />
+                  ))}
+                </div>
+                {visibleVendorProducts.length === 0 && (
+                  <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-300">
+                    Aucun produit disponible dans cette categorie pour le moment.
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
         <section className="mb-16">
           <div className="mb-6 flex items-center gap-3">
             <ShoppingBag className="w-6 h-6 text-emerald-400" />
-            <h2 className="text-3xl font-bold text-slate-50">Selections du moment</h2>
+            <h2 className="text-3xl font-bold text-slate-50">Choix par usage</h2>
           </div>
           <p className="text-sm text-slate-300 mb-6">
-            Des produits locaux choisis pour commander vite et simplement.
+            Choisis ton usage principal: rapide, famille, planifie ou entreprise.
           </p>
           <div className="grid gap-6 lg:grid-cols-3">
             {quickOffers.map((offer) => (
@@ -751,7 +1104,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           </div>
         </section>
 
-        <section className="mb-16">
+        <section className="mb-16" id="entreprise">
           <div className="flex items-center gap-3 mb-6">
             <Users className="w-6 h-6 text-emerald-400" />
             <h2 className="text-3xl font-bold text-slate-50">Commande entreprise</h2>
@@ -833,7 +1186,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           <div className="flex flex-col gap-4 mb-6">
             <div className="flex items-center gap-3">
               <Sparkles className="w-6 h-6 text-emerald-400" />
-              <h2 className="text-3xl font-bold text-slate-50">Catalogue</h2>
+              <h2 className="text-3xl font-bold text-slate-50">Menu / Catalogue</h2>
             </div>
             <p className="text-sm text-slate-300">
               Choisis un produit, ajoute au panier, puis valide sur WhatsApp. Donnees mises a jour selon les partenaires.
@@ -901,6 +1254,15 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
             <div className="text-xs text-slate-400">
               {filteredProducts.length} resultat(s)
             </div>
+            {selectedVendor !== 'Tous' && (
+              <button
+                onClick={() => openVendorMenu(selectedVendor)}
+                className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-300"
+              >
+                Ouvrir la page vendeur
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            )}
           </div>
           {showByVendor ? (
             <div className="space-y-8">
@@ -913,10 +1275,10 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                       <div className="text-sm text-slate-400">{items.length} produit(s)</div>
                     </div>
                     <button
-                      onClick={() => setSelectedVendor(vendor)}
+                      onClick={() => openVendorMenu(vendor)}
                       className="text-sm font-semibold text-emerald-300"
                     >
-                      Filtrer ce vendeur
+                      Ouvrir ce menu
                     </button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -949,31 +1311,34 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           )}
         </section>
 
-        <section className="mb-16">
+        <section className="mb-16" id="partenaires">
           <div className="flex items-center gap-3 mb-6">
             <Users className="w-6 h-6 text-emerald-400" />
             <h2 className="text-3xl font-bold text-slate-50">Partenaires locaux</h2>
           </div>
           <p className="text-sm text-slate-300 mb-6">
-            Des vendeurs pilotes en Martinique, visibles et joignables simplement.
+            Nos partenaires, leurs histoires et leurs specialites locales.
           </p>
           <div className="grid gap-4 md:grid-cols-3">
             {partnerHighlights.map((partner) => (
               <div key={partner.name} className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
-                <p className="text-xs font-black uppercase tracking-[0.25em] text-emerald-200">{partner.zone}</p>
+                <div className="h-24 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-orange-500/10 border border-slate-800 mb-4 flex items-center justify-center text-xs text-emerald-200 uppercase tracking-[0.2em]">
+                  {partner.zone}
+                </div>
                 <h3 className="mt-3 text-2xl font-bold text-slate-50">{partner.name}</h3>
                 <p className="mt-2 text-sm text-slate-300">{partner.offer}</p>
                 <p className="mt-2 text-xs text-slate-400">{partner.story}</p>
                 <div className="mt-3 text-xs text-slate-400">
                   {partner.type} · {partner.availability}
                 </div>
-                <a
-                  href={whatsappLink}
+                <div className="mt-2 text-xs text-emerald-300">{partner.promise} · {partner.eta}</div>
+                <button
+                  onClick={() => openVendorMenu(partner.name)}
                   className="mt-4 inline-flex items-center gap-2 text-emerald-300 font-semibold"
                 >
-                  WhatsApp direct
+                  Decouvrir le partenaire
                   <ArrowRight className="w-4 h-4" />
-                </a>
+                </button>
               </div>
             ))}
           </div>
