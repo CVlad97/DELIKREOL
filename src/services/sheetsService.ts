@@ -61,9 +61,16 @@ function parseCsv(text: string): string[][] {
 function rowsToObjects<T>(rows: string[][]): T[] {
   const [header, ...data] = rows;
   if (!header) return [] as T[];
+  const normalizedHeader = header.map((key) =>
+    key
+      .replace(/^\uFEFF/, '')
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '_')
+  );
   return data.map((row) => {
     const obj: Record<string, string> = {};
-    header.forEach((key, index) => {
+    normalizedHeader.forEach((key, index) => {
       obj[key] = row[index] ?? '';
     });
     return obj as T;
