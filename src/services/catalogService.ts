@@ -227,6 +227,7 @@ class SheetsCatalogService implements CatalogService {
         .map((row, index) => {
         const vendorId = row.vendor ?? 'sheet-vendor';
         const product = this.mapProduct(row, index, vendorId);
+        (product as Product & { zone?: string }).zone = row.zone;
         return {
           ...product,
           vendor: { business_name: row.vendor ?? 'Vendeur local' } as any
