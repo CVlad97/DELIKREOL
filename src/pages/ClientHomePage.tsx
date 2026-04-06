@@ -507,17 +507,28 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
   ]);
 
   const proWhatsAppLink = useMemo(() => {
+    const sanitize = (value: string, max = 120) =>
+      value.replace(/[<>]/g, '').trim().slice(0, max);
+    const company = sanitize(proCompany, 80);
+    const contact = sanitize(proContact, 80);
+    const people = sanitize(proPeople, 20);
+    const date = sanitize(proDate, 24);
+    const time = sanitize(proTime, 16);
+    const location = sanitize(proLocation, 80);
+    const budget = sanitize(proBudget, 40);
+    const frequency = sanitize(proFrequency, 40);
     const lines = [
-      proCompany ? `Entreprise: ${proCompany}` : null,
-      proContact ? `Contact: ${proContact}` : null,
-      proPeople ? `Nombre de personnes: ${proPeople}` : null,
-      proDate ? `Date souhaitee: ${proDate}` : null,
-      proTime ? `Heure souhaitee: ${proTime}` : null,
-      proLocation ? `Lieu: ${proLocation}` : null,
-      proBudget ? `Budget indicatif: ${proBudget}` : null,
-      proFrequency ? `Frequence: ${proFrequency}` : null,
+      'Type: Devis entreprise',
+      company ? `Entreprise: ${company}` : null,
+      contact ? `Contact: ${contact}` : null,
+      people ? `Nombre de personnes: ${people}` : null,
+      date ? `Date souhaitee: ${date}` : null,
+      time ? `Heure souhaitee: ${time}` : null,
+      location ? `Lieu: ${location}` : null,
+      budget ? `Budget indicatif: ${budget}` : null,
+      frequency ? `Frequence: ${frequency}` : null,
     ].filter(Boolean);
-    const text = `Bonjour, je souhaite un devis entreprise sur DELIKREOL.\n\n${lines.join('\n')}\n\nTarif entreprise selon volume, zone, delai et composition.`;
+    const text = `Bonjour, je souhaite un devis entreprise sur DELIKREOL.\n\n${lines.join('\n')}\n\nTarif entreprise selon volume, zone, delai et composition.\nCreaneau souhaite soumis a confirmation.`;
     return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
   }, [proCompany, proContact, proPeople, proDate, proTime, proLocation, proBudget, proFrequency, whatsappNumber]);
 
@@ -1254,10 +1265,11 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
             <h2 className="text-3xl font-bold text-slate-50">Commande entreprise</h2>
           </div>
           <p className="text-sm text-slate-300 mb-6">
-            Repas d'equipe, reunion, evenements. Tarif entreprise selon volume, zone, delai et composition.
+            Repas d'equipe, reunions, evenements, commandes recurrentes. Devis rapide par WhatsApp.
           </p>
           <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
             <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 grid gap-3 sm:grid-cols-2">
+              <div className="sm:col-span-2 text-xs uppercase tracking-[0.2em] text-slate-400">Brief express</div>
               <input
                 value={proCompany}
                 onChange={(event) => setProCompany(event.target.value)}
@@ -1312,6 +1324,9 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
               >
                 Demander un devis entreprise
               </a>
+              <p className="sm:col-span-2 text-xs text-slate-400">
+                Confirmation et tarif final par WhatsApp. Creaneau souhaite soumis a confirmation.
+              </p>
             </div>
             <div className="rounded-3xl border border-slate-800 bg-slate-950/60 p-6 text-sm text-slate-300">
               <div className="font-semibold text-slate-100 mb-3">Pour les equipes</div>
@@ -1321,6 +1336,9 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                 <li>✅ Confirmation manuelle</li>
                 <li>✅ Facturation simple sur demande</li>
               </ul>
+              <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-xs text-slate-300">
+                Tarif entreprise ajuste selon volume, zone, delai et composition.
+              </div>
             </div>
           </div>
         </section>
@@ -1514,7 +1532,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           <div className="rounded-3xl border border-emerald-500/30 bg-slate-900/70 p-8">
             <h2 className="text-2xl font-bold text-slate-50 mb-3">Fidelite pilote</h2>
             <p className="text-sm text-slate-300 mb-4">
-              Programme fidelite en test: avantages apres X commandes, confirme manuellement.
+              Programme fidelite local en test: avantages simples, confirmes manuellement.
             </p>
             <div className="grid gap-4 md:grid-cols-3 text-sm text-slate-200">
               <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
@@ -1529,6 +1547,17 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                 <div className="font-semibold text-emerald-200">10 commandes</div>
                 <div className="text-slate-300 mt-1">Acces prioritaire aux offres</div>
               </div>
+            </div>
+            <div className="mt-6 flex flex-wrap items-center gap-3 text-xs text-slate-300">
+              <span className="rounded-full border border-slate-700 px-3 py-1">Bonus partenaires locaux</span>
+              <span className="rounded-full border border-slate-700 px-3 py-1">Activation manuelle</span>
+              <a
+                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Bonjour, je souhaite activer la fidelite pilote DELIKREOL.')}`}
+                className="ml-auto inline-flex items-center gap-2 rounded-full border border-emerald-500/50 px-4 py-2 text-emerald-300 hover:border-emerald-400"
+              >
+                Activer ma fidelite
+                <ArrowRight className="w-4 h-4" />
+              </a>
             </div>
           </div>
         </section>
