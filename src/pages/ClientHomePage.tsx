@@ -14,6 +14,7 @@ interface ClientHomePageProps {
 }
 
 export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLegal, demoMode = false, liteMode = false }: ClientHomePageProps) {
+  const baseUrl = import.meta.env.BASE_URL || '/';
   const [draftRequest, setDraftRequest] = useState<LocalProduct[]>([]);
   const [showCart, setShowCart] = useState(false);
   const [customNeed, setCustomNeed] = useState('');
@@ -22,6 +23,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
   const [customerName, setCustomerName] = useState('');
   const [customerZone, setCustomerZone] = useState('');
   const [customerTime, setCustomerTime] = useState('');
+  const [customerAddress, setCustomerAddress] = useState('');
   const [geoStatus, setGeoStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
   const [geoLabel, setGeoLabel] = useState<string | null>(null);
   const [catalogProducts, setCatalogProducts] = useState<LocalProduct[]>([]);
@@ -79,6 +81,15 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
   const availableVendors = useMemo(() => {
     const list = Array.from(new Set(catalogProducts.map((p) => p.vendor || 'Vendeur local')));
     return ['Tous', ...list];
+  }, [catalogProducts]);
+
+  const vendorStats = useMemo(() => {
+    const stats = new Map<string, number>();
+    catalogProducts.forEach((product) => {
+      const key = product.vendor || 'Vendeur local';
+      stats.set(key, (stats.get(key) || 0) + 1);
+    });
+    return stats;
   }, [catalogProducts]);
 
   const availableZones = useMemo(() => {
@@ -237,6 +248,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
     const contactLines = [
       customerName ? `Nom: ${customerName}` : null,
       customerZone ? `Zone: ${customerZone}` : null,
+      customerAddress ? `Adresse: ${customerAddress}` : null,
       customerTime ? `Creneau souhaite: ${customerTime}` : null,
     ].filter(Boolean);
     const text = `${baseWhatsAppText}\n\nMa selection :\n${lines.join('\n')}\n\nMode: ${modeLabel}\nTotal estimatif : ${cartSummary.total.toFixed(2)} €${contactLines.length ? `\n\nInfos:\n${contactLines.join('\n')}` : ''}`;
@@ -382,7 +394,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                 <span>{cartSummary.total.toFixed(2)} €</span>
               </div>
             </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <input
                 value={customerName}
                 onChange={(event) => setCustomerName(event.target.value)}
@@ -394,6 +406,12 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                 onChange={(event) => setCustomerZone(event.target.value)}
                 placeholder="Zone / Quartier"
                 className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              />
+              <input
+                value={customerAddress}
+                onChange={(event) => setCustomerAddress(event.target.value)}
+                placeholder="Adresse (optionnel)"
+                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 sm:col-span-2"
               />
               <input
                 value={customerTime}
@@ -431,7 +449,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           )}
           <div className="flex flex-col items-center gap-5 mb-6">
             <img
-              src="/branding/logo-wordmark-animated.svg"
+              src={`${baseUrl}branding/logo-wordmark-animated.svg`}
               alt="DELIKREOL"
               className="h-10 md:h-12"
             />
@@ -510,6 +528,31 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
             </div>
           </div>
         </section>
+
+        {availableVendors.length > 1 && (
+          <section className="mb-14">
+            <div className="mb-6 flex items-center gap-3">
+              <Users className="w-6 h-6 text-emerald-400" />
+              <h2 className="text-3xl font-bold text-slate-50">Vendeurs pilotes</h2>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              {availableVendors.filter((vendor) => vendor !== 'Tous').map((vendor) => (
+                <button
+                  key={vendor}
+                  onClick={() => setSelectedVendor(vendor)}
+                  className="text-left rounded-3xl border border-slate-800 bg-slate-900/60 p-6 hover:border-emerald-400/60 transition-colors"
+                >
+                  <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Vendeur</div>
+                  <div className="mt-2 text-xl font-bold text-slate-50">{vendor}</div>
+                  <div className="mt-2 text-sm text-slate-300">
+                    {vendorStats.get(vendor) ?? 0} produit(s) disponibles
+                  </div>
+                  <div className="mt-3 text-sm font-semibold text-emerald-300">Voir le menu</div>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="mb-16">
           <div className="mb-6 flex items-center gap-3">
