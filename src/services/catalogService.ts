@@ -170,6 +170,11 @@ class SupabaseCatalogService implements CatalogService {
 }
 
 class SheetsCatalogService implements CatalogService {
+  private normalizeText(value?: string | null) {
+    if (!value) return '';
+    return String(value).replace(/\s+/g, ' ').trim();
+  }
+
   private mapProduct(row: SheetProductRow, index: number, vendorId: string): Product {
     return {
       id: row.id ?? `sheet-product-${index}`,
@@ -222,17 +227,36 @@ class SheetsCatalogService implements CatalogService {
   async listProducts() {
     try {
       const rows = await fetchSheetData<SheetProductRow>(sheetsProductsUrl);
-      return rows
-        .filter((row) => row.name && row.price !== undefined && row.price !== null)
-        .map((row, index) => {
-        const vendorId = row.vendor ?? 'sheet-vendor';
-        const product = this.mapProduct(row, index, vendorId);
-        (product as Product & { zone?: string }).zone = row.zone;
-        return {
+      const results: Product[] = [];
+      rows.forEach((row, index) => {
+        const name = this.normalizeText(row.name);
+        const price = normalizeNumber(row.price);
+        if (!name || !Number.isFinite(price)) return;
+        const vendorName = this.normalizeText(row.vendor) || 'Vendeur local';
+        const category = this.normalizeText(row.category) || 'Divers';
+        const description = this.normalizeText(row.description) || null;
+        const imageUrl = this.normalizeText(row.image_url ?? row.image) || null;
+        const zone = this.normalizeText(row.zone) || undefined;
+        const product = this.mapProduct(
+          {
+            ...row,
+            name,
+            category,
+            description: description ?? undefined,
+            image_url: imageUrl ?? undefined,
+            vendor: vendorName,
+            price
+          },
+          index,
+          vendorName
+        );
+        (product as Product & { zone?: string }).zone = zone;
+        results.push({
           ...product,
-          vendor: { business_name: row.vendor ?? 'Vendeur local' } as any
-        } as Product;
+          vendor: { business_name: vendorName } as any
+        } as Product);
       });
+      return results;
     } catch {
       return demoFallback.listProducts();
     }
