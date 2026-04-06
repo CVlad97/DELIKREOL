@@ -71,6 +71,11 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
   const baseWhatsAppText = 'Bonjour, je souhaite commander sur DELIKREOL.';
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(baseWhatsAppText)}`;
 
+  const scrollToId = (id: string) => {
+    if (typeof document === 'undefined') return;
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   useEffect(() => {
     let mounted = true;
     const load = async () => {
@@ -106,12 +111,16 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
-    const vendor = params.get('vendor');
-    if (vendor) {
-      setSelectedVendor(vendor);
+    const syncVendorFromUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      const vendor = params.get('vendor');
+      setSelectedVendor(vendor ?? 'Tous');
       setSelectedVendorMenu(vendor);
-    }
+      setSelectedVendorCategory('Tous');
+    };
+    syncVendorFromUrl();
+    window.addEventListener('popstate', syncVendorFromUrl);
+    return () => window.removeEventListener('popstate', syncVendorFromUrl);
   }, []);
 
   const availableCategories = useMemo(() => {
@@ -191,6 +200,13 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
     if (selectedVendorCategory === 'Tous') return activeVendorProducts;
     return activeVendorProducts.filter((product) => product.category === selectedVendorCategory);
   }, [activeVendorProducts, selectedVendorCategory]);
+
+  useEffect(() => {
+    if (!selectedVendorMenu || selectedVendorCategory === 'Tous') return;
+    if (!activeVendorCategories.includes(selectedVendorCategory)) {
+      setSelectedVendorCategory('Tous');
+    }
+  }, [activeVendorCategories, selectedVendorCategory, selectedVendorMenu]);
 
   const matchesCategory = (product: LocalProduct, keywords: string[]) => {
     const hay = `${product.category}`.toLowerCase();
@@ -293,17 +309,37 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
     );
   }, [selectedVendorMenu, vendorProfiles, selectedZone]);
 
+  useEffect(() => {
+    if (!selectedVendorMenu) return;
+    const vendorExists =
+      activeVendorProducts.length > 0 || vendorProfiles.has(selectedVendorMenu);
+    if (vendorExists) return;
+    closeVendorMenu();
+  }, [activeVendorProducts.length, selectedVendorMenu, vendorProfiles]);
+
   const handleAddToRequest = (product: LocalProduct) => {
     setDraftRequest(prev => [...prev, product]);
   };
 
   const handleRemoveFromDraft = (productId: string) => {
-    setDraftRequest(prev => prev.filter(p => p.id !== productId));
+    setDraftRequest((prev) => {
+      const index = prev.findIndex((item) => item.id === productId);
+      if (index === -1) return prev;
+      return prev.filter((_, currentIndex) => currentIndex !== index);
+    });
+  };
+
+  const openCart = () => {
+    if (draftRequest.length === 0) {
+      scrollToId(selectedVendorMenu ? 'vendor-menu' : 'catalogue');
+      return;
+    }
+    setShowCart(true);
   };
 
   const handleStartOrder = () => {
     if (liteMode) {
-      setShowCart(true);
+      openCart();
       return;
     }
     onSelectMode('customer', draftRequest);
@@ -335,6 +371,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
 
   const closeVendorMenu = () => {
     setSelectedVendorMenu(null);
+    setSelectedVendor('Tous');
     setSelectedVendorCategory('Tous');
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
@@ -360,6 +397,12 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
   useEffect(() => {
     localStorage.setItem('delikreol_cart', JSON.stringify(draftRequest));
   }, [draftRequest]);
+
+  useEffect(() => {
+    if (draftRequest.length === 0 && showCart) {
+      setShowCart(false);
+    }
+  }, [draftRequest.length, showCart]);
 
   const cartSummary = useMemo(() => {
     const subtotal = draftRequest.reduce((sum, item) => sum + item.price, 0);
@@ -496,9 +539,10 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
 
       {/* Draft Request Badge */}
       {draftRequest.length > 0 && (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="fixed bottom-24 right-4 md:bottom-6 md:right-6 z-50">
           <button
-            onClick={() => setShowCart(true)}
+            onClick={openCart}
+            aria-label="Ouvrir le checkout"
             className="flex items-center gap-3 px-6 py-4 bg-emerald-500 hover:bg-emerald-600 text-slate-950 rounded-2xl transition-colors font-semibold"
           >
             <ShoppingBag className="w-6 h-6" />
@@ -937,10 +981,10 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                   </div>
                   <div className="mt-6 flex flex-wrap gap-3">
                     <button
-                      onClick={() => setShowCart(true)}
+                      onClick={openCart}
                       className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 font-bold text-slate-950"
                     >
-                      Commander chez {activeVendorProfile.name}
+                      {draftRequest.length > 0 ? `Valider chez ${activeVendorProfile.name}` : `Voir le menu de ${activeVendorProfile.name}`}
                       <ArrowRight className="w-4 h-4" />
                     </button>
                     <button
@@ -1018,7 +1062,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           </section>
         )}
 
-        <section className="mb-16">
+        <section id="catalogue" className="mb-16">
           <div className="mb-6 flex items-center gap-3">
             <ShoppingBag className="w-6 h-6 text-emerald-400" />
             <h2 className="text-3xl font-bold text-slate-50">Choix par usage</h2>
@@ -1425,32 +1469,6 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           </div>
         </section>
       </div>
-
-      {/* Draft Items Preview */}
-      {draftRequest.length > 0 && (
-        <div className="fixed bottom-32 right-6 bg-slate-800/95 backdrop-blur border border-slate-700 rounded-xl p-4 max-w-xs z-40">
-          <h3 className="font-semibold text-slate-50 mb-3 flex items-center gap-2">
-            <ShoppingBag className="w-4 h-4 text-emerald-400" />
-            Ma sélection ({draftRequest.length})
-          </h3>
-          <div className="space-y-2 max-h-48 overflow-y-auto">
-            {draftRequest.map((item, idx) => (
-              <div key={`${item.id}-${idx}`} className="flex items-center justify-between gap-2 text-sm bg-slate-900/50 p-2 rounded">
-                <div className="flex-1 min-w-0">
-                  <div className="text-slate-200 font-medium truncate">{item.name}</div>
-                  <div className="text-slate-400 text-xs">{item.price.toFixed(2)} €</div>
-                </div>
-                <button
-                  onClick={() => handleRemoveFromDraft(item.id)}
-                  className="text-red-400 hover:text-red-300 text-xs"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       <footer className="border-t border-slate-800 bg-slate-950/50 backdrop-blur mt-16 py-8">
         <div className="max-w-7xl mx-auto px-4">
