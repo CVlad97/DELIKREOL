@@ -29,6 +29,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
   const [scheduledTime, setScheduledTime] = useState('');
   const [orderNote, setOrderNote] = useState('');
   const [showByVendor, setShowByVendor] = useState(false);
+  const [showMobileNav, setShowMobileNav] = useState(false);
   const [proCompany, setProCompany] = useState('');
   const [proContact, setProContact] = useState('');
   const [proPeople, setProPeople] = useState('');
@@ -198,6 +199,8 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
       type: 'Traiteur',
       availability: 'Commande J+0 / J+1',
       story: 'Cuisine familiale, portions genereuses et recettes traditionnelles.',
+      promise: 'Portions genereuses, recettes creoles',
+      eta: 'Confirmation rapide',
     },
     {
       name: 'Boutik Lakay',
@@ -206,6 +209,8 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
       type: 'Epicerie locale',
       availability: 'Stock limite',
       story: 'Selection locale, fruits et douceurs de saison.',
+      promise: 'Produits frais, paniers saisonniers',
+      eta: 'Disponibilite journaliere',
     },
     {
       name: 'Saveurs du Nord',
@@ -214,6 +219,8 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
       type: 'Cuisine creole',
       availability: 'Confirmation rapide',
       story: 'Menus creoles du nord, faits maison.',
+      promise: 'Cuisine maison, saveurs du nord',
+      eta: 'J+0 / J+1',
     },
   ];
 
@@ -326,24 +333,57 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0f1114] via-[#12151a] to-[#141a15]">
-      <div className="fixed top-4 right-4 z-50 flex flex-col sm:flex-row gap-2">
-        <button
-          onClick={onShowGuide}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-800/80 backdrop-blur border border-slate-700 rounded-full text-slate-300 hover:text-emerald-300 hover:border-emerald-400 transition-colors"
-        >
-          <HelpCircle className="w-5 h-5" />
-          <span className="text-sm font-medium">Comment ça marche ?</span>
-        </button>
-        {onOpenDemo && (
-          <button
-            onClick={onOpenDemo}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 rounded-full border border-emerald-400/40 transition-colors font-semibold"
-          >
-            <span className="text-sm">{demoMode ? 'Commander maintenant' : 'Voir le catalogue'}</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
+      <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/80 backdrop-blur">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img
+              src={`${baseUrl}branding/logo-mark.svg`}
+              alt="DELIKREOL"
+              className="h-10 w-10"
+            />
+            <img
+              src={`${baseUrl}branding/logo-wordmark-premium.svg`}
+              alt="DELIKREOL"
+              className="h-10 hidden md:block"
+            />
+          </div>
+          <nav className="hidden md:flex items-center gap-6 text-sm text-slate-200">
+            <a href={`${baseUrl}#commander`} className="hover:text-emerald-300">Commander</a>
+            <a href={`${baseUrl}#planifier`} className="hover:text-emerald-300">Planifier</a>
+            <a href={`${baseUrl}#entreprise`} className="hover:text-emerald-300">Entreprise</a>
+            <a href={`${baseUrl}#partenaires`} className="hover:text-emerald-300">Partenaires</a>
+            <a href={`${baseUrl}?order-status=1`} className="hover:text-emerald-300">Suivi</a>
+          </nav>
+          <div className="flex items-center gap-3">
+            <a
+              href={whatsappLink}
+              className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500 text-slate-950 font-semibold"
+            >
+              WhatsApp
+              <ArrowRight className="w-4 h-4" />
+            </a>
+            <button
+              onClick={() => setShowMobileNav((prev) => !prev)}
+              className="md:hidden px-3 py-2 rounded-full border border-slate-700 text-slate-200"
+            >
+              Menu
+            </button>
+          </div>
+        </div>
+        {showMobileNav && (
+          <div className="md:hidden border-t border-slate-800 px-4 py-3 flex flex-col gap-3 text-sm text-slate-200">
+            <a href={`${baseUrl}#commander`} className="hover:text-emerald-300">Commander</a>
+            <a href={`${baseUrl}#planifier`} className="hover:text-emerald-300">Planifier</a>
+            <a href={`${baseUrl}#entreprise`} className="hover:text-emerald-300">Entreprise</a>
+            <a href={`${baseUrl}#partenaires`} className="hover:text-emerald-300">Partenaires</a>
+            <a href={`${baseUrl}?order-status=1`} className="hover:text-emerald-300">Suivi</a>
+            <a href={whatsappLink} className="inline-flex items-center gap-2 text-emerald-300">
+              WhatsApp direct
+              <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
         )}
-      </div>
+      </header>
 
       {/* Draft Request Badge */}
       {draftRequest.length > 0 && (
@@ -547,29 +587,29 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
 
       <div className="max-w-7xl mx-auto px-4 py-16">
         {/* Hero Section */}
-        <div className="text-center mb-12">
+        <div id="commander" className="text-center mb-12">
           {demoMode && (
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-200 mb-6">
               <Sparkles className="w-4 h-4" />
               Pilote local: commandes possibles
             </div>
           )}
-          <div className="flex flex-col items-center gap-5 mb-6">
+          <div className="flex flex-col items-center gap-5 mb-8">
             <img
-              src={`${baseUrl}branding/logo-wordmark-animated.svg`}
+              src={`${baseUrl}branding/logo-wordmark-premium.svg`}
               alt="DELIKREOL"
-              className="h-10 md:h-12"
+              className="h-12 md:h-14"
             />
             <div className="madras-strip w-24 rounded-full" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-50 mb-3">
-            Commandez repas creoles et produits locaux, simplement.
+          <h1 className="text-4xl md:text-6xl font-bold text-slate-50 mb-4">
+            Repas créoles, menus locaux et commandes planifiées en Martinique
           </h1>
-          <p className="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-3">
-            Menus, paniers et douceurs locales. Confirmation manuelle rapide par WhatsApp.
+          <p className="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-4">
+            Livraison, retrait, devis entreprise et confirmation rapide par WhatsApp.
           </p>
-          <p className="text-base text-slate-400 max-w-2xl mx-auto">
-            Zones pilotes : Fort-de-France, Lamentin, Schoelcher. Prix valides avant finalisation.
+          <p className="text-sm text-slate-400 max-w-2xl mx-auto">
+            Zones pilotes : Fort-de-France, Lamentin, Schoelcher. Créneau souhaité soumis à confirmation.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
             <button
@@ -580,17 +620,21 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
               <ArrowRight className="w-5 h-5" />
             </button>
             <button
-              onClick={onOpenDemo}
+              onClick={() => {
+                document.getElementById('planifier')?.scrollIntoView({ behavior: 'smooth' });
+              }}
               className="inline-flex items-center justify-center gap-3 rounded-2xl border border-slate-600/60 bg-slate-900/40 px-8 py-4 text-lg font-bold text-slate-100 transition-colors hover:border-emerald-400/60"
             >
-              Voir le menu
+              Planifier une commande
               <Sparkles className="w-5 h-5 text-emerald-300" />
             </button>
             <button
-              onClick={() => onSelectMode('pro')}
+              onClick={() => {
+                document.getElementById('entreprise')?.scrollIntoView({ behavior: 'smooth' });
+              }}
               className="inline-flex items-center justify-center gap-3 rounded-2xl border border-orange-500/50 bg-orange-500/10 px-8 py-4 text-lg font-bold text-orange-200 transition-colors hover:border-orange-400"
             >
-              Devenir partenaire
+              Devis entreprise
               <MapPin className="w-5 h-5" />
             </button>
           </div>
@@ -615,7 +659,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           </div>
         </div>
 
-        <section className="mb-14">
+        <section className="mb-14" id="planifier">
           <div className="grid gap-4 md:grid-cols-4">
             <div className="rounded-3xl border border-emerald-500/30 bg-slate-900/70 p-5 text-sm text-slate-200">
               <div className="font-semibold text-emerald-200 mb-1">Confirmation humaine</div>
@@ -626,16 +670,16 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
               Choisis un creneau, confirme ensuite.
             </div>
             <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-200">
-              <div className="font-semibold text-slate-100 mb-1">Zones pilotes</div>
-              Fort-de-France · Lamentin · Schoelcher
-            </div>
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-200">
               <div className="font-semibold text-slate-100 mb-1">Support WhatsApp</div>
               Reponse rapide et suivi manuel clair.
             </div>
             <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-200">
               <div className="font-semibold text-slate-100 mb-1">Partenaires locaux</div>
               Vendeurs pilotes et offre locale.
+            </div>
+            <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-200">
+              <div className="font-semibold text-slate-100 mb-1">Zones pilotes</div>
+              Fort-de-France · Lamentin · Schoelcher
             </div>
           </div>
         </section>
@@ -668,10 +712,10 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
         <section className="mb-16">
           <div className="mb-6 flex items-center gap-3">
             <ShoppingBag className="w-6 h-6 text-emerald-400" />
-            <h2 className="text-3xl font-bold text-slate-50">Selections du moment</h2>
+            <h2 className="text-3xl font-bold text-slate-50">Choix par usage</h2>
           </div>
           <p className="text-sm text-slate-300 mb-6">
-            Des produits locaux choisis pour commander vite et simplement.
+            Choisis ton usage principal: rapide, famille, planifie ou entreprise.
           </p>
           <div className="grid gap-6 lg:grid-cols-3">
             {quickOffers.map((offer) => (
@@ -751,7 +795,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           </div>
         </section>
 
-        <section className="mb-16">
+        <section className="mb-16" id="entreprise">
           <div className="flex items-center gap-3 mb-6">
             <Users className="w-6 h-6 text-emerald-400" />
             <h2 className="text-3xl font-bold text-slate-50">Commande entreprise</h2>
@@ -833,7 +877,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           <div className="flex flex-col gap-4 mb-6">
             <div className="flex items-center gap-3">
               <Sparkles className="w-6 h-6 text-emerald-400" />
-              <h2 className="text-3xl font-bold text-slate-50">Catalogue</h2>
+              <h2 className="text-3xl font-bold text-slate-50">Menu / Catalogue</h2>
             </div>
             <p className="text-sm text-slate-300">
               Choisis un produit, ajoute au panier, puis valide sur WhatsApp. Donnees mises a jour selon les partenaires.
@@ -949,29 +993,32 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           )}
         </section>
 
-        <section className="mb-16">
+        <section className="mb-16" id="partenaires">
           <div className="flex items-center gap-3 mb-6">
             <Users className="w-6 h-6 text-emerald-400" />
             <h2 className="text-3xl font-bold text-slate-50">Partenaires locaux</h2>
           </div>
           <p className="text-sm text-slate-300 mb-6">
-            Des vendeurs pilotes en Martinique, visibles et joignables simplement.
+            Nos partenaires, leurs histoires et leurs specialites locales.
           </p>
           <div className="grid gap-4 md:grid-cols-3">
             {partnerHighlights.map((partner) => (
               <div key={partner.name} className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
-                <p className="text-xs font-black uppercase tracking-[0.25em] text-emerald-200">{partner.zone}</p>
+                <div className="h-24 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-orange-500/10 border border-slate-800 mb-4 flex items-center justify-center text-xs text-emerald-200 uppercase tracking-[0.2em]">
+                  {partner.zone}
+                </div>
                 <h3 className="mt-3 text-2xl font-bold text-slate-50">{partner.name}</h3>
                 <p className="mt-2 text-sm text-slate-300">{partner.offer}</p>
                 <p className="mt-2 text-xs text-slate-400">{partner.story}</p>
                 <div className="mt-3 text-xs text-slate-400">
                   {partner.type} · {partner.availability}
                 </div>
+                <div className="mt-2 text-xs text-emerald-300">{partner.promise} · {partner.eta}</div>
                 <a
                   href={whatsappLink}
                   className="mt-4 inline-flex items-center gap-2 text-emerald-300 font-semibold"
                 >
-                  WhatsApp direct
+                  Decouvrir le partenaire
                   <ArrowRight className="w-4 h-4" />
                 </a>
               </div>
