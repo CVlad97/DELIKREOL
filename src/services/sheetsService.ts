@@ -24,7 +24,13 @@ export interface SheetVendorRow {
 
 const isJsonUrl = (url: string) => url.endsWith('.json') || url.includes('format=json');
 
-function parseCsvRow(line: string): string[] {
+function detectDelimiter(line: string): string {
+  const commaCount = (line.match(/,/g) || []).length;
+  const semiCount = (line.match(/;/g) || []).length;
+  return semiCount > commaCount ? ';' : ',';
+}
+
+function parseCsvRow(line: string, delimiter: string): string[] {
   const result: string[] = [];
   let current = '';
   let inQuotes = false;
@@ -39,7 +45,7 @@ function parseCsvRow(line: string): string[] {
       }
       continue;
     }
-    if (char === ',' && !inQuotes) {
+    if (char === delimiter && !inQuotes) {
       result.push(current.trim());
       current = '';
       continue;
@@ -51,19 +57,28 @@ function parseCsvRow(line: string): string[] {
 }
 
 function parseCsv(text: string): string[][] {
-  return text
+  const lines = text
     .split('\n')
     .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => parseCsvRow(line));
+    .filter(Boolean);
+  if (lines.length === 0) return [];
+  const delimiter = detectDelimiter(lines[0]);
+  return lines.map((line) => parseCsvRow(line, delimiter));
 }
 
 function rowsToObjects<T>(rows: string[][]): T[] {
   const [header, ...data] = rows;
   if (!header) return [] as T[];
+  const normalizedHeader = header.map((key) =>
+    key
+      .replace(/^\uFEFF/, '')
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '_')
+  );
   return data.map((row) => {
     const obj: Record<string, string> = {};
-    header.forEach((key, index) => {
+    normalizedHeader.forEach((key, index) => {
       obj[key] = row[index] ?? '';
     });
     return obj as T;

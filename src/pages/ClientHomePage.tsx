@@ -14,6 +14,7 @@ interface ClientHomePageProps {
 }
 
 export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLegal, demoMode = false, liteMode = false }: ClientHomePageProps) {
+  const baseUrl = import.meta.env.BASE_URL || '/';
   const [draftRequest, setDraftRequest] = useState<LocalProduct[]>([]);
   const [showCart, setShowCart] = useState(false);
   const [customNeed, setCustomNeed] = useState('');
@@ -22,6 +23,20 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
   const [customerName, setCustomerName] = useState('');
   const [customerZone, setCustomerZone] = useState('');
   const [customerTime, setCustomerTime] = useState('');
+  const [customerAddress, setCustomerAddress] = useState('');
+  const [orderTiming, setOrderTiming] = useState<'now' | 'asap' | 'scheduled'>('asap');
+  const [scheduledDate, setScheduledDate] = useState('');
+  const [scheduledTime, setScheduledTime] = useState('');
+  const [orderNote, setOrderNote] = useState('');
+  const [showByVendor, setShowByVendor] = useState(false);
+  const [proCompany, setProCompany] = useState('');
+  const [proContact, setProContact] = useState('');
+  const [proPeople, setProPeople] = useState('');
+  const [proDate, setProDate] = useState('');
+  const [proTime, setProTime] = useState('');
+  const [proLocation, setProLocation] = useState('');
+  const [proBudget, setProBudget] = useState('');
+  const [proFrequency, setProFrequency] = useState('');
   const [geoStatus, setGeoStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
   const [geoLabel, setGeoLabel] = useState<string | null>(null);
   const [catalogProducts, setCatalogProducts] = useState<LocalProduct[]>([]);
@@ -81,6 +96,15 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
     return ['Tous', ...list];
   }, [catalogProducts]);
 
+  const vendorStats = useMemo(() => {
+    const stats = new Map<string, number>();
+    catalogProducts.forEach((product) => {
+      const key = product.vendor || 'Vendeur local';
+      stats.set(key, (stats.get(key) || 0) + 1);
+    });
+    return stats;
+  }, [catalogProducts]);
+
   const availableZones = useMemo(() => {
     const list = Array.from(new Set(catalogProducts.map((p) => p.zone || 'Martinique')));
     return ['Toutes', ...list];
@@ -112,6 +136,16 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
     }
     return items;
   }, [catalogProducts, searchTerm, selectedCategory, selectedVendor, selectedZone, onlyAvailable, sortBy]);
+
+  const productsByVendor = useMemo(() => {
+    const groups = new Map<string, LocalProduct[]>();
+    filteredProducts.forEach((product) => {
+      const key = product.vendor || 'Vendeur local';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)?.push(product);
+    });
+    return Array.from(groups.entries());
+  }, [filteredProducts]);
   const matchesCategory = (product: LocalProduct, keywords: string[]) => {
     const hay = `${product.category}`.toLowerCase();
     return keywords.some((word) => hay.includes(word));
@@ -163,6 +197,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
       offer: 'Plats du jour et desserts',
       type: 'Traiteur',
       availability: 'Commande J+0 / J+1',
+      story: 'Cuisine familiale, portions genereuses et recettes traditionnelles.',
     },
     {
       name: 'Boutik Lakay',
@@ -170,6 +205,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
       offer: 'Paniers frais et douceurs',
       type: 'Epicerie locale',
       availability: 'Stock limite',
+      story: 'Selection locale, fruits et douceurs de saison.',
     },
     {
       name: 'Saveurs du Nord',
@@ -177,6 +213,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
       offer: 'Repas familiaux',
       type: 'Cuisine creole',
       availability: 'Confirmation rapide',
+      story: 'Menus creoles du nord, faits maison.',
     },
   ];
 
@@ -237,11 +274,34 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
     const contactLines = [
       customerName ? `Nom: ${customerName}` : null,
       customerZone ? `Zone: ${customerZone}` : null,
+      customerAddress ? `Adresse: ${customerAddress}` : null,
       customerTime ? `Creneau souhaite: ${customerTime}` : null,
     ].filter(Boolean);
+    const planningLines = [
+      `Type: ${orderTiming === 'now' ? 'Commande maintenant' : orderTiming === 'asap' ? 'Des que possible' : 'Planifiee'}`,
+      orderTiming === 'scheduled' && scheduledDate ? `Date souhaitee: ${scheduledDate}` : null,
+      orderTiming === 'scheduled' && scheduledTime ? `Heure souhaitee: ${scheduledTime}` : null,
+      orderNote ? `Note: ${orderNote}` : null,
+    ].filter(Boolean);
     const text = `${baseWhatsAppText}\n\nMa selection :\n${lines.join('\n')}\n\nMode: ${modeLabel}\nTotal estimatif : ${cartSummary.total.toFixed(2)} €${contactLines.length ? `\n\nInfos:\n${contactLines.join('\n')}` : ''}`;
+    const fullText = `${text}${planningLines.length ? `\n\nPlanning:\n${planningLines.join('\n')}` : ''}\n\nCreaneau confirme par DELIKREOL.`;
+    return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(fullText)}`;
+  }, [draftRequest, whatsappLink, whatsappNumber, cartSummary.total, deliveryMode, customerName, customerZone, customerAddress, customerTime, orderTiming, scheduledDate, scheduledTime, orderNote]);
+
+  const proWhatsAppLink = useMemo(() => {
+    const lines = [
+      proCompany ? `Entreprise: ${proCompany}` : null,
+      proContact ? `Contact: ${proContact}` : null,
+      proPeople ? `Nombre de personnes: ${proPeople}` : null,
+      proDate ? `Date souhaitee: ${proDate}` : null,
+      proTime ? `Heure souhaitee: ${proTime}` : null,
+      proLocation ? `Lieu: ${proLocation}` : null,
+      proBudget ? `Budget indicatif: ${proBudget}` : null,
+      proFrequency ? `Frequence: ${proFrequency}` : null,
+    ].filter(Boolean);
+    const text = `Bonjour, je souhaite un devis entreprise sur DELIKREOL.\n\n${lines.join('\n')}\n\nTarif entreprise selon volume, zone, delai et composition.`;
     return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
-  }, [draftRequest, whatsappLink, whatsappNumber, cartSummary.total, deliveryMode]);
+  }, [proCompany, proContact, proPeople, proDate, proTime, proLocation, proBudget, proFrequency, whatsappNumber]);
 
   const handleLocate = () => {
     if (!('geolocation' in navigator)) {
@@ -382,7 +442,59 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                 <span>{cartSummary.total.toFixed(2)} €</span>
               </div>
             </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-sm text-slate-200">
+              <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Commande planifiable</div>
+              <div className="mt-3 grid gap-2 text-xs">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="orderTiming"
+                    value="now"
+                    checked={orderTiming === 'now'}
+                    onChange={() => setOrderTiming('now')}
+                  />
+                  Commander maintenant
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="orderTiming"
+                    value="asap"
+                    checked={orderTiming === 'asap'}
+                    onChange={() => setOrderTiming('asap')}
+                  />
+                  Des que possible
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="orderTiming"
+                    value="scheduled"
+                    checked={orderTiming === 'scheduled'}
+                    onChange={() => setOrderTiming('scheduled')}
+                  />
+                  Planifier un creneau
+                </label>
+              </div>
+              {orderTiming === 'scheduled' && (
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <input
+                    type="date"
+                    value={scheduledDate}
+                    onChange={(event) => setScheduledDate(event.target.value)}
+                    className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+                  />
+                  <input
+                    type="time"
+                    value={scheduledTime}
+                    onChange={(event) => setScheduledTime(event.target.value)}
+                    className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+                  />
+                </div>
+              )}
+              <div className="mt-3 text-xs text-slate-400">Creneau souhaite confirme par DELIKREOL.</div>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <input
                 value={customerName}
                 onChange={(event) => setCustomerName(event.target.value)}
@@ -396,12 +508,25 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                 className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
               />
               <input
+                value={customerAddress}
+                onChange={(event) => setCustomerAddress(event.target.value)}
+                placeholder="Adresse (optionnel)"
+                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 sm:col-span-2"
+              />
+              <input
                 value={customerTime}
                 onChange={(event) => setCustomerTime(event.target.value)}
-                placeholder="Heure souhaitee"
+                placeholder="Heure souhaitee (optionnel)"
                 className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
               />
             </div>
+            <textarea
+              value={orderNote}
+              onChange={(event) => setOrderNote(event.target.value)}
+              placeholder="Note speciale (allergie, sans piment, etc.)"
+              className="mt-3 w-full rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              rows={3}
+            />
             <div className="mt-5 flex flex-col sm:flex-row gap-3">
               <a
                 href={cartWhatsAppLink}
@@ -431,7 +556,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           )}
           <div className="flex flex-col items-center gap-5 mb-6">
             <img
-              src="/branding/logo-wordmark-animated.svg"
+              src={`${baseUrl}branding/logo-wordmark-animated.svg`}
               alt="DELIKREOL"
               className="h-10 md:h-12"
             />
@@ -497,6 +622,10 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
               Prix et dispo valides avant finalisation.
             </div>
             <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-200">
+              <div className="font-semibold text-slate-100 mb-1">Commande planifiable</div>
+              Choisis un creneau, confirme ensuite.
+            </div>
+            <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-200">
               <div className="font-semibold text-slate-100 mb-1">Zones pilotes</div>
               Fort-de-France · Lamentin · Schoelcher
             </div>
@@ -510,6 +639,31 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
             </div>
           </div>
         </section>
+
+        {availableVendors.length > 1 && (
+          <section className="mb-14">
+            <div className="mb-6 flex items-center gap-3">
+              <Users className="w-6 h-6 text-emerald-400" />
+              <h2 className="text-3xl font-bold text-slate-50">Vendeurs pilotes</h2>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              {availableVendors.filter((vendor) => vendor !== 'Tous').map((vendor) => (
+                <button
+                  key={vendor}
+                  onClick={() => setSelectedVendor(vendor)}
+                  className="text-left rounded-3xl border border-slate-800 bg-slate-900/60 p-6 hover:border-emerald-400/60 transition-colors"
+                >
+                  <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Vendeur</div>
+                  <div className="mt-2 text-xl font-bold text-slate-50">{vendor}</div>
+                  <div className="mt-2 text-sm text-slate-300">
+                    {vendorStats.get(vendor) ?? 0} produit(s) disponibles
+                  </div>
+                  <div className="mt-3 text-sm font-semibold text-emerald-300">Voir le menu</div>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="mb-16">
           <div className="mb-6 flex items-center gap-3">
@@ -597,6 +751,83 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
           </div>
         </section>
 
+        <section className="mb-16">
+          <div className="flex items-center gap-3 mb-6">
+            <Users className="w-6 h-6 text-emerald-400" />
+            <h2 className="text-3xl font-bold text-slate-50">Commande entreprise</h2>
+          </div>
+          <p className="text-sm text-slate-300 mb-6">
+            Repas d'equipe, reunion, evenements. Tarif entreprise selon volume, zone, delai et composition.
+          </p>
+          <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+            <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 grid gap-3 sm:grid-cols-2">
+              <input
+                value={proCompany}
+                onChange={(event) => setProCompany(event.target.value)}
+                placeholder="Entreprise / Organisation"
+                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              />
+              <input
+                value={proContact}
+                onChange={(event) => setProContact(event.target.value)}
+                placeholder="Contact (nom + tel)"
+                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              />
+              <input
+                value={proPeople}
+                onChange={(event) => setProPeople(event.target.value)}
+                placeholder="Nombre de personnes"
+                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              />
+              <input
+                type="date"
+                value={proDate}
+                onChange={(event) => setProDate(event.target.value)}
+                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              />
+              <input
+                type="time"
+                value={proTime}
+                onChange={(event) => setProTime(event.target.value)}
+                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              />
+              <input
+                value={proLocation}
+                onChange={(event) => setProLocation(event.target.value)}
+                placeholder="Lieu / Zone"
+                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              />
+              <input
+                value={proBudget}
+                onChange={(event) => setProBudget(event.target.value)}
+                placeholder="Budget indicatif"
+                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              />
+              <input
+                value={proFrequency}
+                onChange={(event) => setProFrequency(event.target.value)}
+                placeholder="Frequence (ponctuel / hebdo / mensuel)"
+                className="rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 sm:col-span-2"
+              />
+              <a
+                href={proWhatsAppLink}
+                className="sm:col-span-2 inline-flex items-center justify-center rounded-2xl bg-emerald-500 px-5 py-4 font-bold text-slate-950 hover:bg-emerald-600"
+              >
+                Demander un devis entreprise
+              </a>
+            </div>
+            <div className="rounded-3xl border border-slate-800 bg-slate-950/60 p-6 text-sm text-slate-300">
+              <div className="font-semibold text-slate-100 mb-3">Pour les equipes</div>
+              <ul className="space-y-2">
+                <li>✅ Plateaux repas & paniers</li>
+                <li>✅ Livraison sur site ou retrait</li>
+                <li>✅ Confirmation manuelle</li>
+                <li>✅ Facturation simple sur demande</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
         {/* Featured Products Section */}
         <section className="mb-16">
           <div className="flex flex-col gap-4 mb-6">
@@ -658,20 +889,59 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                 />
                 Disponibles uniquement
               </label>
+              <label className="flex items-center gap-2 text-sm text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={showByVendor}
+                  onChange={(event) => setShowByVendor(event.target.checked)}
+                />
+                Vue par vendeur
+              </label>
             </div>
             <div className="text-xs text-slate-400">
               {filteredProducts.length} resultat(s)
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredProducts.map(product => (
-              <LocalProductCard
-                key={product.id}
-                product={product}
-                onAddToRequest={handleAddToRequest}
-              />
-            ))}
-          </div>
+          {showByVendor ? (
+            <div className="space-y-8">
+              {productsByVendor.map(([vendor, items]) => (
+                <div key={vendor}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Vendeur</div>
+                      <h3 className="text-2xl font-bold text-slate-50">{vendor}</h3>
+                      <div className="text-sm text-slate-400">{items.length} produit(s)</div>
+                    </div>
+                    <button
+                      onClick={() => setSelectedVendor(vendor)}
+                      className="text-sm font-semibold text-emerald-300"
+                    >
+                      Filtrer ce vendeur
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {items.map((product) => (
+                      <LocalProductCard
+                        key={product.id}
+                        product={product}
+                        onAddToRequest={handleAddToRequest}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {filteredProducts.map(product => (
+                <LocalProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToRequest={handleAddToRequest}
+                />
+              ))}
+            </div>
+          )}
           {filteredProducts.length === 0 && !catalogLoading && (
             <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-sm text-slate-300">
               Aucun produit ne correspond a ta recherche. Essaie une autre categorie ou reinitialise les filtres.
@@ -693,6 +963,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                 <p className="text-xs font-black uppercase tracking-[0.25em] text-emerald-200">{partner.zone}</p>
                 <h3 className="mt-3 text-2xl font-bold text-slate-50">{partner.name}</h3>
                 <p className="mt-2 text-sm text-slate-300">{partner.offer}</p>
+                <p className="mt-2 text-xs text-slate-400">{partner.story}</p>
                 <div className="mt-3 text-xs text-slate-400">
                   {partner.type} · {partner.availability}
                 </div>
@@ -723,6 +994,29 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                 <p className="mt-3 text-sm leading-relaxed text-slate-300">{step.description}</p>
               </div>
             ))}
+          </div>
+        </section>
+
+        <section className="mb-16">
+          <div className="rounded-3xl border border-emerald-500/30 bg-slate-900/70 p-8">
+            <h2 className="text-2xl font-bold text-slate-50 mb-3">Fidelite pilote</h2>
+            <p className="text-sm text-slate-300 mb-4">
+              Programme fidelite en test: avantages apres X commandes, confirme manuellement.
+            </p>
+            <div className="grid gap-4 md:grid-cols-3 text-sm text-slate-200">
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+                <div className="font-semibold text-emerald-200">3 commandes</div>
+                <div className="text-slate-300 mt-1">Bonus local surprise</div>
+              </div>
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+                <div className="font-semibold text-emerald-200">5 commandes</div>
+                <div className="text-slate-300 mt-1">Livraison pilote offerte (si dispo)</div>
+              </div>
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+                <div className="font-semibold text-emerald-200">10 commandes</div>
+                <div className="text-slate-300 mt-1">Acces prioritaire aux offres</div>
+              </div>
+            </div>
           </div>
         </section>
 

@@ -111,7 +111,7 @@ function MainShell({ children, onResetRole, currentRole }: MainShellProps) {
             <div className="h-8 w-px bg-white/30"></div>
             <div className="flex items-center gap-3">
               <img
-                src="/branding/logo-wordmark.svg"
+                src={`${import.meta.env.BASE_URL || '/'}branding/logo-wordmark.svg`}
                 alt="DELIKREOL"
                 className="h-9 md:h-10 w-auto"
               />
