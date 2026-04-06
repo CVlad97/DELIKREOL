@@ -10,6 +10,8 @@ node_modules
 dist
 dist-ssr
 *.local
+test-results
+playwright-report
 
 .vscode/*
 !.vscode/extensions.json
