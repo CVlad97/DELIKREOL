@@ -1,0 +1,9 @@
+<svg width="720" height="160" viewBox="0 0 720 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="720" height="160" rx="48" fill="#0F1F1A"/>
+  <rect x="28" y="28" width="104" height="104" rx="36" fill="#11402E"/>
+  <path d="M48 92C62 66 86 50 114 46" stroke="#F5E8D0" stroke-width="8" stroke-linecap="round"/>
+  <path d="M44 108C64 96 90 92 120 92" stroke="#E97B4F" stroke-width="8" stroke-linecap="round"/>
+  <text x="80" y="105" text-anchor="middle" font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-size="44" font-weight="700" fill="#F5E8D0">DK</text>
+  <text x="170" y="94" font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-size="54" font-weight="700" fill="#F5E8D0">DELIKREOL</text>
+  <text x="170" y="124" font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-size="20" fill="#E97B4F" letter-spacing="4">LOCAL · PREMIUM · HUMAIN</text>
+</svg>
