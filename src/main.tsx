@@ -14,15 +14,23 @@ function getProjectId(): string {
   return 'delikreol-platform-yf4gaa0e';
 }
 
+const isLiteMode = import.meta.env.VITE_LITE_MODE === 'true';
+const blinkPublishableKey = import.meta.env.VITE_BLINK_PUBLISHABLE_KEY;
+const shouldUseBlinkProviders = !isLiteMode && Boolean(blinkPublishableKey);
+
+const appTree = <App />;
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BlinkProvider 
-      projectId={getProjectId()}
-      publishableKey={import.meta.env.VITE_BLINK_PUBLISHABLE_KEY}
-    >
-      <BlinkAuthProvider>
-        <App />
-      </BlinkAuthProvider>
-    </BlinkProvider>
+    {shouldUseBlinkProviders ? (
+      <BlinkProvider
+        projectId={getProjectId()}
+        publishableKey={blinkPublishableKey}
+      >
+        <BlinkAuthProvider>{appTree}</BlinkAuthProvider>
+      </BlinkProvider>
+    ) : (
+      appTree
+    )}
   </StrictMode>
 );
