@@ -512,12 +512,17 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
       )}
 
       {showCart && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur">
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="lite-checkout-title"
+        >
           <div className="w-full sm:max-w-5xl bg-slate-950 border border-slate-800 rounded-t-3xl sm:rounded-3xl p-6 max-h-[92vh] overflow-y-auto">
             <div className="flex items-start justify-between gap-6">
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">Checkout local</p>
-                <h3 className="mt-2 text-2xl font-bold text-slate-50">Valider ma commande</h3>
+                <h3 id="lite-checkout-title" className="mt-2 text-2xl font-bold text-slate-50">Valider ma commande</h3>
                 <p className="mt-2 text-sm text-slate-400">Prix et disponibilite confirmes avant finalisation. Support WhatsApp inclus.</p>
               </div>
               <button
@@ -746,7 +751,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
                     href={cartWhatsAppLink}
                     className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-emerald-500 px-5 py-4 font-bold text-slate-950 hover:bg-emerald-600"
                   >
-                    Envoyer sur WhatsApp
+                    Valider sur WhatsApp
                   </a>
                   <button
                     onClick={() => setShowCart(false)}
