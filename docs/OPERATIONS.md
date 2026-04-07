@@ -16,6 +16,8 @@ npx playwright test
 - Les variables `VITE_*` sont lues au build
 - Modifier les variables dans le workflow GitHub Pages
 - Relancer un build/deploiement apres modification
+ - `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY` doivent etre presentes pour activer Supabase
+ - `SUPABASE_SERVICE_ROLE_KEY` reste serveur uniquement
 
 ## Verification post-deploiement
 - Home charge correctement

@@ -64,6 +64,7 @@ Obligatoires:
 Recommandees:
 - `VITE_WHATSAPP_NUMBER=59669653589`
 - `VITE_BASE_PATH=/`
+ - `VITE_SHEETS_FALLBACK=true` (fallback catalogue si Supabase indisponible)
 
 Optionnel:
 - `VITE_SHEETS_ORDERS_URL="<endpoint post commandes>"`

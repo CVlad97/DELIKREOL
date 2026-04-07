@@ -1,4 +1,4 @@
-import { Vendor, Product, supabase, isDemoMode } from '../lib/supabase';
+import { Vendor, Product, supabase, isDemoMode, isSupabaseConfigured } from '../lib/supabase';
 import { seedDemoData, readDemoProducts } from '../data/demoDb';
 import { erpRequest, isErpConfigured } from '../lib/erpClient';
 import { fetchSheetData, normalizeBoolean, normalizeNumber, SheetProductRow } from './sheetsService';
@@ -60,6 +60,8 @@ const demoFallback = new DemoCatalogService();
 const allowDemoFallback = import.meta.env.VITE_ERP_FALLBACK_DEMO !== 'false';
 const sheetsProductsUrl = import.meta.env.VITE_SHEETS_PUBLIC_URL || '';
 const isSheetsConfigured = sheetsProductsUrl.length > 0;
+const allowSheetsFallback =
+  import.meta.env.VITE_SHEETS_FALLBACK !== 'false' && isSheetsConfigured;
 
 class ErpCatalogService implements CatalogService {
   private mapPartner(partner: any): Vendor {
@@ -144,28 +146,48 @@ class ErpCatalogService implements CatalogService {
 
 class SupabaseCatalogService implements CatalogService {
   async listVendors() {
-    const { data, error } = await supabase
-      .from('vendors')
-      .select('*')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
-    if (error) throw error;
-    return data as Vendor[];
+    try {
+      const { data, error } = await supabase
+        .from('vendors')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as Vendor[];
+    } catch (err) {
+      if (allowSheetsFallback) return sheetsFallback.listVendors();
+      throw err;
+    }
   }
   async getVendorById(id: string) {
-    const { data, error } = await supabase.from('vendors').select('*').eq('id', id).maybeSingle();
-    if (error) throw error;
-    return data as Vendor | null;
+    try {
+      const { data, error } = await supabase.from('vendors').select('*').eq('id', id).maybeSingle();
+      if (error) throw error;
+      return data as Vendor | null;
+    } catch (err) {
+      if (allowSheetsFallback) return sheetsFallback.getVendorById(id);
+      throw err;
+    }
   }
   async listProducts() {
-    const { data, error } = await supabase.from('products').select('*').eq('is_available', true);
-    if (error) throw error;
-    return data as Product[];
+    try {
+      const { data, error } = await supabase.from('products').select('*').eq('is_available', true);
+      if (error) throw error;
+      return data as Product[];
+    } catch (err) {
+      if (allowSheetsFallback) return sheetsFallback.listProducts();
+      throw err;
+    }
   }
   async listProductsByVendor(vendorId: string) {
-    const { data, error } = await supabase.from('products').select('*').eq('vendor_id', vendorId).eq('is_available', true);
-    if (error) throw error;
-    return data as Product[];
+    try {
+      const { data, error } = await supabase.from('products').select('*').eq('vendor_id', vendorId).eq('is_available', true);
+      if (error) throw error;
+      return data as Product[];
+    } catch (err) {
+      if (allowSheetsFallback) return sheetsFallback.listProductsByVendor(vendorId);
+      throw err;
+    }
   }
 }
 
@@ -268,10 +290,14 @@ class SheetsCatalogService implements CatalogService {
   }
 }
 
+const sheetsFallback = new SheetsCatalogService();
+
 export const catalogService: CatalogService = isErpConfigured
   ? new ErpCatalogService()
-  : isSheetsConfigured
-    ? new SheetsCatalogService()
-    : isDemoMode
-      ? new DemoCatalogService()
-      : new SupabaseCatalogService();
+  : isSupabaseConfigured
+    ? new SupabaseCatalogService()
+    : isSheetsConfigured
+      ? new SheetsCatalogService()
+      : isDemoMode
+        ? new DemoCatalogService()
+        : new SupabaseCatalogService();

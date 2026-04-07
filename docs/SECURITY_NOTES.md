@@ -4,6 +4,7 @@
 - Ne jamais mettre de secrets dans le frontend.
 - Utiliser uniquement des variables d'environnement GitHub/CI pour les `VITE_*`.
 - Les valeurs `VITE_*` sont visibles dans le bundle final (build-time).
+- `SUPABASE_SERVICE_ROLE_KEY` ne doit jamais etre expose cote client.
 
 ## Donnees utilisateur (checkout)
 - Les champs sont assainis (trim, limites, suppression de caracteres HTML).
