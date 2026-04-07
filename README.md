@@ -19,6 +19,8 @@ npm run dev
 Obligatoires:
 - `VITE_LITE_MODE=true`
 - `VITE_SHEETS_PUBLIC_URL="<url csv produits>"`
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
 
 Recommandees:
 - `VITE_WHATSAPP_NUMBER=59669653589`
@@ -26,6 +28,7 @@ Recommandees:
 
 Optionnelles:
 - `VITE_SHEETS_ORDERS_URL="<endpoint post commandes>"`
+- `VITE_SHEETS_FALLBACK=true` (fallback catalogue si Supabase indisponible)
 
 Important: avec Vite, les variables `VITE_*` sont lues au build. Sur GitHub Pages, le redeploiement est necessaire apres modification.
 
