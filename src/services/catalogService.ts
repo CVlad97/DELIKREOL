@@ -145,6 +145,26 @@ class ErpCatalogService implements CatalogService {
 }
 
 class SupabaseCatalogService implements CatalogService {
+  private normalizeVendor(row: any): Vendor {
+    return {
+      id: row.id,
+      user_id: row.user_id ?? row.id,
+      business_name: row.business_name ?? row.name ?? 'Partenaire local',
+      business_type: (row.business_type as Vendor['business_type']) ?? 'merchant',
+      description: row.description ?? null,
+      logo_url: row.logo_url ?? row.image_url ?? null,
+      address: row.address ?? row.zone_label ?? 'Martinique',
+      latitude: row.latitude ?? null,
+      longitude: row.longitude ?? null,
+      phone: row.phone ?? '',
+      commission_rate: Number(row.commission_rate ?? 0),
+      is_active: row.is_active !== false,
+      opening_hours: row.opening_hours ?? null,
+      delivery_radius_km: Number(row.delivery_radius_km ?? 10),
+      created_at: row.created_at ?? new Date().toISOString()
+    } as Vendor;
+  }
+
   async listVendors() {
     try {
       const { data, error } = await supabase
@@ -153,7 +173,7 @@ class SupabaseCatalogService implements CatalogService {
         .eq('is_active', true)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return data as Vendor[];
+      return (data ?? []).map((row) => this.normalizeVendor(row));
     } catch (err) {
       if (allowSheetsFallback) return sheetsFallback.listVendors();
       throw err;
@@ -163,7 +183,7 @@ class SupabaseCatalogService implements CatalogService {
     try {
       const { data, error } = await supabase.from('vendors').select('*').eq('id', id).maybeSingle();
       if (error) throw error;
-      return data as Vendor | null;
+      return data ? this.normalizeVendor(data) : null;
     } catch (err) {
       if (allowSheetsFallback) return sheetsFallback.getVendorById(id);
       throw err;
@@ -171,7 +191,11 @@ class SupabaseCatalogService implements CatalogService {
   }
   async listProducts() {
     try {
-      const { data, error } = await supabase.from('products').select('*').eq('is_available', true);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*, vendor:vendors(business_name)')
+        .eq('is_available', true)
+        .order('created_at', { ascending: false });
       if (error) throw error;
       return data as Product[];
     } catch (err) {
@@ -181,7 +205,12 @@ class SupabaseCatalogService implements CatalogService {
   }
   async listProductsByVendor(vendorId: string) {
     try {
-      const { data, error } = await supabase.from('products').select('*').eq('vendor_id', vendorId).eq('is_available', true);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*, vendor:vendors(business_name)')
+        .eq('vendor_id', vendorId)
+        .eq('is_available', true)
+        .order('created_at', { ascending: false });
       if (error) throw error;
       return data as Product[];
     } catch (err) {
@@ -292,10 +321,12 @@ class SheetsCatalogService implements CatalogService {
 
 const sheetsFallback = new SheetsCatalogService();
 
-export const catalogService: CatalogService = isErpConfigured
-  ? new ErpCatalogService()
-  : isSupabaseConfigured
-    ? new SupabaseCatalogService()
+// Live catalogue must read from Supabase first. ERP stays available for dedicated flows,
+// while Sheets remains a lightweight fallback if public catalogue reads fail.
+export const catalogService: CatalogService = isSupabaseConfigured
+  ? new SupabaseCatalogService()
+  : isErpConfigured
+    ? new ErpCatalogService()
     : isSheetsConfigured
       ? new SheetsCatalogService()
       : isDemoMode
