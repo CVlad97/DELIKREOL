@@ -1,46 +1,40 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowRight, Building2, MapPin, MessageCircle, Package, ShoppingBag, Store, Truck, Users } from 'lucide-react';
-import { LocalProductCard } from '../components/LocalProductCard';
-import { Vendor } from '../lib/supabase';
-import { catalogService } from '../services/catalogService';
-import { LocalProduct } from '../data/mockCatalog';
+import {
+  ArrowRight,
+  BadgeCheck,
+  Briefcase,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  MapPin,
+  MessageCircle,
+  Package,
+  Search,
+  ShieldCheck,
+  ShoppingBag,
+  Store,
+  Truck,
+  Utensils,
+} from 'lucide-react';
+import { loadPublicCatalog, PublicCatalogProduct, PublicCatalogVendor } from '../services/publicCatalogService';
+import { calculateOrderEconomics } from '../services/orderEconomics';
+import { getMartiniqueServiceZones } from '../services/serviceZones';
 
-type PublicVendor = Vendor & {
-  is_public?: boolean | null;
-  is_demo?: boolean | null;
-  status?: string | null;
-  service_zone?: string | null;
-  zone_label?: string | null;
+type CatalogState = {
+  configured: boolean;
+  vendors: PublicCatalogVendor[];
+  products: PublicCatalogProduct[];
 };
 
-type PublicProduct = LocalProduct & {
-  is_public?: boolean | null;
-  is_demo?: boolean | null;
-  status?: string | null;
-  vendor_id?: string;
-  vendorId?: string;
-};
-
-const zones = ['Fort-de-France', 'Le Lamentin', 'Schoelcher'];
-const contactPhone = '+596 696 65 35 89';
-const ok = (v: unknown) => v === true || String(v ?? '').toLowerCase() === 'true';
-const verified = (v: unknown) => String(v ?? '').toLowerCase() === 'verified';
-
-function vendorIsPublic(vendor: PublicVendor) {
-  return ok(vendor.is_public) && !ok(vendor.is_demo) && verified(vendor.status);
-}
-
-function productIsPublic(product: PublicProduct) {
-  return ok(product.is_public) && !ok(product.is_demo) && verified(product.status) && product.available !== false;
-}
+const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
+const whatsappBase = `https://wa.me/${whatsappNumber}`;
+const defaultZones = getMartiniqueServiceZones();
 
 export function PublicHomePage() {
   const baseUrl = import.meta.env.BASE_URL || '/';
-  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
-  const whatsappBase = `https://wa.me/${whatsappNumber}`;
-  const [vendors, setVendors] = useState<PublicVendor[]>([]);
-  const [products, setProducts] = useState<PublicProduct[]>([]);
-  const [selected, setSelected] = useState<LocalProduct[]>([]);
+  const [catalog, setCatalog] = useState<CatalogState>({ configured: false, vendors: [], products: [] });
+  const [selected, setSelected] = useState<PublicCatalogProduct[]>([]);
+  const [activeSlide, setActiveSlide] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -51,133 +45,337 @@ export function PublicHomePage() {
 
   useEffect(() => {
     let active = true;
-    Promise.all([catalogService.listVendors(), catalogService.listProducts()])
-      .then(([vendorRows, productRows]) => {
+    loadPublicCatalog()
+      .then((result) => {
         if (!active) return;
-        const publicVendors = (vendorRows as PublicVendor[]).filter(vendorIsPublic);
-        const vendorMap = new Map(publicVendors.map((vendor) => [vendor.id, vendor]));
-        const publicProducts = (productRows as unknown as PublicProduct[])
-          .filter(productIsPublic)
-          .filter((product) => vendorMap.has(product.vendor_id ?? product.vendorId ?? ''))
-          .map((product) => {
-            const vendor = vendorMap.get(product.vendor_id ?? product.vendorId ?? '');
-            return {
-              ...product,
-              vendor: vendor?.business_name ?? product.vendor ?? 'Partenaire DELIKREOL',
-              zone: vendor?.service_zone ?? vendor?.zone_label ?? vendor?.address ?? 'Martinique',
-            };
-          });
-        setVendors(publicVendors);
-        setProducts(publicProducts);
+        setCatalog(result);
+        setError(null);
       })
-      .catch(() => setError('Catalogue public indisponible pour le moment.'))
+      .catch(() => {
+        if (!active) return;
+        setError('Catalogue public temporairement indisponible. Aucune donnee fictive n est affichee.');
+        setCatalog({ configured: true, vendors: [], products: [] });
+      })
       .finally(() => active && setLoading(false));
+
     return () => {
       active = false;
     };
   }, []);
 
-  const categories = useMemo(() => ['Toutes', ...Array.from(new Set(products.map((p) => p.category || 'Divers')))], [products]);
+  const categories = useMemo(
+    () => ['Toutes', ...Array.from(new Set(catalog.products.map((product) => product.category || 'Cuisine locale')))],
+    [catalog.products],
+  );
+
   const filteredProducts = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    return products.filter((product) => {
-      const text = `${product.name} ${product.vendor} ${product.category} ${product.description ?? ''}`.toLowerCase();
+    return catalog.products.filter((product) => {
+      const text = `${product.name} ${product.vendor_name} ${product.category} ${product.description}`.toLowerCase();
       return (!needle || text.includes(needle)) && (category === 'Toutes' || product.category === category);
     });
-  }, [category, products, query]);
+  }, [catalog.products, category, query]);
+
+  const carouselProducts = useMemo(() => catalog.products.slice(0, 8), [catalog.products]);
+
+  useEffect(() => {
+    if (carouselProducts.length < 2) return;
+    const timer = window.setInterval(() => {
+      setActiveSlide((current) => (current + 1) % carouselProducts.length);
+    }, 4500);
+    return () => window.clearInterval(timer);
+  }, [carouselProducts.length]);
+
+  const serviceZones = useMemo(
+    () => getMartiniqueServiceZones(catalog.vendors.map((vendor) => vendor.zone_label)).slice(0, 8),
+    [catalog.vendors],
+  );
+
+  const economics = useMemo(
+    () =>
+      calculateOrderEconomics({
+        items: selected.map((product) => ({ price: product.price, commissionRate: 0.15 })),
+        deliveryFee: selected.length > 0 ? 4.5 : 0,
+        serviceFee: selected.length > 0 ? 1.5 : 0,
+      }),
+    [selected],
+  );
 
   const orderLink = useMemo(() => {
-    const lines = selected.map((product) => `- ${product.name} · ${product.vendor} · ${product.price.toFixed(2)} €`);
-    const text = ['Bonjour, je souhaite commander sur DELIKREOL Martinique.', '', 'Selection :', ...lines, '', 'Merci de confirmer disponibilite, retrait ou livraison.'].join('\n');
+    const lines = selected.map((product) => `- ${product.name} - ${product.vendor_name} - ${formatPrice(product.price)}`);
+    const text = [
+      'Bonjour, je souhaite commander sur DELIKREOL Martinique.',
+      '',
+      selected.length ? 'Selection :' : 'Je souhaite connaitre les produits disponibles.',
+      ...lines,
+      '',
+      'Merci de confirmer la disponibilite, le retrait ou la livraison.',
+    ].join('\n');
     return `${whatsappBase}?text=${encodeURIComponent(text)}`;
-  }, [selected, whatsappBase]);
+  }, [selected]);
+
+  const partnerLink = `${whatsappBase}?text=${encodeURIComponent('Bonjour, je souhaite devenir partenaire DELIKREOL en Martinique.')}`;
 
   const proLink = useMemo(() => {
-    const text = ['Bonjour, je souhaite une demande pro sur DELIKREOL Martinique.', proCompany && `Entreprise: ${proCompany}`, proContact && `Contact: ${proContact}`, proNeed && `Besoin: ${proNeed}`].filter(Boolean).join('\n');
+    const text = [
+      'Bonjour, je souhaite faire une demande pro sur DELIKREOL Martinique.',
+      proCompany && `Entreprise : ${proCompany}`,
+      proContact && `Contact : ${proContact}`,
+      proNeed && `Besoin : ${proNeed}`,
+    ]
+      .filter(Boolean)
+      .join('\n');
     return `${whatsappBase}?text=${encodeURIComponent(text)}`;
-  }, [proCompany, proContact, proNeed, whatsappBase]);
+  }, [proCompany, proContact, proNeed]);
 
-  const addProduct = (product: LocalProduct) => setSelected((current) => [...current, product]);
-  const removeProduct = (id: string) => setSelected((current) => {
-    const index = current.findIndex((item) => item.id === id);
-    return index === -1 ? current : current.filter((_, itemIndex) => itemIndex !== index);
-  });
-
-  const hasRealData = vendors.length > 0 && products.length > 0;
+  const addProduct = (product: PublicCatalogProduct) => setSelected((current) => [...current, product]);
+  const removeProduct = (index: number) => setSelected((current) => current.filter((_, itemIndex) => itemIndex !== index));
+  const currentSlide = carouselProducts[activeSlide];
+  const hasProducts = catalog.products.length > 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0d1014] via-[#11161b] to-[#10181d] text-slate-100">
-      <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/90 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-3">
-            <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-10 w-10" />
-            <img src={`${baseUrl}branding/logo-wordmark-premium.svg`} alt="DELIKREOL" className="hidden h-10 md:block" />
-          </div>
-          <nav className="flex items-center gap-2 md:gap-3">
-            <a href="#catalogue" className="rounded-full border border-emerald-500/30 px-4 py-2 text-sm font-semibold text-emerald-200">Commander</a>
-            <a href="#partenaires" className="rounded-full border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200">Devenir partenaire</a>
-            <a href="#demande-pro" className="rounded-full bg-emerald-500 px-4 py-2 text-sm font-bold text-slate-950">Demande pro</a>
+    <div className="min-h-screen bg-[#fff8ed] text-[#24170f]">
+      <header className="sticky top-0 z-50 border-b border-orange-100 bg-white/95 shadow-sm backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
+          <a href="#accueil" className="flex items-center gap-3" aria-label="DELIKREOL accueil">
+            <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-11 w-11 rounded-2xl shadow-[0_10px_30px_rgba(249,115,22,0.18)]" />
+            <img src={`${baseUrl}branding/logo-wordmark-premium.svg`} alt="DELIKREOL" className="hidden h-10 sm:block" />
+          </a>
+          <nav className="hidden items-center gap-2 md:flex">
+            <a href="#catalogue" className="rounded-full bg-[#f97316] px-5 py-2.5 text-sm font-black text-white shadow-lg shadow-orange-500/20">Commander</a>
+            <a href="#partenaires" className="rounded-full border border-orange-200 px-5 py-2.5 text-sm font-bold text-[#7c2d12]">Devenir partenaire</a>
+            <a href="#demande-pro" className="rounded-full border border-emerald-200 bg-emerald-50 px-5 py-2.5 text-sm font-bold text-emerald-800">Demande pro</a>
           </nav>
+          <a href="#catalogue" className="rounded-full bg-[#f97316] px-4 py-2 text-sm font-black text-white md:hidden">Commander</a>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-10 md:py-14">
-        <section className="rounded-[2rem] border border-emerald-500/20 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.16),transparent_26%),linear-gradient(180deg,rgba(15,23,42,0.96),rgba(10,14,20,0.96))] p-8 shadow-2xl md:p-12">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-300">Martinique uniquement</p>
-          <h1 className="mt-4 max-w-5xl text-4xl font-black tracking-tight text-white md:text-6xl">Commande locale simple, retrait ou livraison, avec partenaires verifies en Martinique.</h1>
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-300">DELIKREOL centralise les commandes locales verifiees, confirme les disponibilites et oriente chaque demande vers le bon partenaire en Martinique.</p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <a href="#catalogue" className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-6 py-4 font-bold text-slate-950">Commander <ArrowRight className="h-5 w-5" /></a>
-            <a href="#partenaires" className="inline-flex items-center gap-2 rounded-2xl border border-slate-700 px-6 py-4 font-semibold text-slate-100">Devenir partenaire</a>
-            <a href="#demande-pro" className="inline-flex items-center gap-2 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 px-6 py-4 font-semibold text-emerald-200">Demande pro</a>
+      <main id="accueil">
+        <section className="relative overflow-hidden border-b border-orange-100 bg-[radial-gradient(circle_at_10%_15%,rgba(251,146,60,0.24),transparent_30%),radial-gradient(circle_at_90%_8%,rgba(16,185,129,0.18),transparent_30%),linear-gradient(135deg,#fff7ed_0%,#fff_46%,#fff4e6_100%)]">
+          <div className="madras-strip" />
+          <div className="mx-auto grid max-w-7xl gap-10 px-4 py-10 md:grid-cols-[1.05fr_0.95fr] md:py-16 lg:py-20">
+            <div className="flex flex-col justify-center">
+              <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-orange-200 bg-white/80 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-[#c2410c] shadow-sm">
+                <MapPin className="h-4 w-4" /> Martinique uniquement
+              </div>
+              <div className="mb-6 flex items-center gap-4">
+                <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-20 w-20 animate-float rounded-[1.5rem] bg-white p-2 shadow-2xl shadow-orange-500/20" />
+                <div>
+                  <p className="text-sm font-bold uppercase tracking-[0.28em] text-emerald-700">Commande locale</p>
+                  <p className="text-sm font-semibold text-stone-500">Vendeurs verifies - retrait ou livraison selon zone</p>
+                </div>
+              </div>
+              <h1 className="max-w-4xl font-display text-4xl font-black tracking-tight text-[#301607] md:text-6xl lg:text-7xl">
+                Commandez local en Martinique, simplement et sans faux catalogue.
+              </h1>
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-700">
+                DELIKREOL met en relation particuliers, pros et vendeurs martiniquais autour d offres disponibles, confirmees et activees publiquement.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <a href="#catalogue" className="inline-flex items-center gap-2 rounded-2xl bg-[#f97316] px-6 py-4 font-black text-white shadow-xl shadow-orange-500/25">Commander <ArrowRight className="h-5 w-5" /></a>
+                <a href="#partenaires" className="inline-flex items-center gap-2 rounded-2xl border border-orange-200 bg-white px-6 py-4 font-bold text-[#7c2d12]">Devenir partenaire</a>
+                <a href="#demande-pro" className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-4 font-bold text-emerald-800">Demande pro</a>
+              </div>
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                <TrustPill icon={<ShieldCheck />} label="Partenaires verifies" />
+                <TrustPill icon={<Clock />} label="Confirmation rapide" />
+                <TrustPill icon={<Truck />} label="Zones servies claires" />
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-orange-100 bg-white/86 p-4 shadow-2xl shadow-orange-900/10 backdrop-blur">
+              {currentSlide ? (
+                <ProductCarousel product={currentSlide} count={carouselProducts.length} active={activeSlide} onPrev={() => setActiveSlide((activeSlide - 1 + carouselProducts.length) % carouselProducts.length)} onNext={() => setActiveSlide((activeSlide + 1) % carouselProducts.length)} />
+              ) : (
+                <EmptyHeroCard configured={catalog.configured} loading={loading} />
+              )}
+            </div>
           </div>
         </section>
 
-        <section className="mt-10 grid gap-4 md:grid-cols-3">
-          <InfoCard icon={<ShoppingBag />} title="Commande simple" text="Choix produit, confirmation de disponibilite, puis validation finale." />
-          <InfoCard icon={<Truck />} title="Retrait ou livraison" text="Conditions publiques lisibles selon zone desservie et partenaire actif." />
-          <InfoCard icon={<Store />} title="Partenaires verifies" text="Seuls les partenaires verifies et publics sont visibles." />
+        <section className="mx-auto grid max-w-7xl gap-4 px-4 py-10 md:grid-cols-3">
+          <InfoCard icon={<ShoppingBag />} title="Commande simple" text="Choisissez une offre visible, puis confirmez la disponibilite avant validation." />
+          <InfoCard icon={<Store />} title="Vendeurs locaux" text="Le public affiche uniquement les partenaires verifies, actifs et publies." />
+          <InfoCard icon={<MessageCircle />} title="Contact direct" text="WhatsApp sert a confirmer les commandes, les besoins pro et les demandes partenaires." />
         </section>
 
-        <section id="zones" className="mt-10 rounded-[1.5rem] border border-slate-800 bg-slate-900/70 p-6">
-          <div className="flex items-center gap-3"><MapPin className="h-6 w-6 text-emerald-300" /><h2 className="text-2xl font-bold text-white">Zones desservies en Martinique</h2></div>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">La facade publique se limite aux zones actuellement servies. Toute extension doit etre verifiee avant publication.</p>
-          <div className="mt-5 grid gap-3 md:grid-cols-3">{zones.map((zone) => <div key={zone} className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4"><div className="font-semibold text-slate-100">{zone}</div><div className="mt-1 text-sm text-slate-400">Retrait, livraison ou confirmation selon partenaire.</div></div>)}</div>
+        <section className="mx-auto max-w-7xl px-4 pb-10">
+          <SectionIntro eyebrow="Types d offres" title="Une facade claire pour les besoins particuliers et pros" text="La premiere version publique reste volontairement simple : offres reelles, partenaires verifies, zones martiniquaises lisibles." />
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <OfferCard title="Plats et produits locaux" text="Catalogue vivant lorsque les produits sont actifs et verifies." icon={<Utensils />} />
+            <OfferCard title="Commandes groupees" text="Demandes pro, repas d equipe et besoins recurrents." icon={<Briefcase />} />
+            <OfferCard title="Retrait ou livraison" text="Affichage selon commune, zone et partenaire disponible." icon={<Truck />} />
+          </div>
         </section>
 
-        <section id="catalogue" className="mt-10">
-          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between"><div><h2 className="text-3xl font-bold text-white">Catalogue public verifie</h2><p className="mt-2 text-sm text-slate-300">Uniquement les partenaires et produits publics, verifies et reels.</p></div><a href={whatsappBase} className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-300">WhatsApp direct <ArrowRight className="h-4 w-4" /></a></div>
-          <div className="mt-6 grid gap-3 md:grid-cols-3"><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Rechercher un produit ou un partenaire" className="rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-slate-100 md:col-span-2" /><select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-slate-100">{categories.map((item) => <option key={item} value={item}>{item}</option>)}</select></div>
-          {loading && <p className="mt-6 text-sm text-slate-400">Chargement du catalogue public...</p>}
-          {error && <p className="mt-6 text-sm text-amber-300">{error}</p>}
-          {!loading && !hasRealData && <EmptyCatalogue whatsappBase={whatsappBase} />}
-          {hasRealData && <div className="mt-6 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]"><div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">{filteredProducts.map((product) => <LocalProductCard key={product.id} product={product} onAddToRequest={addProduct} />)}</div><Selection products={selected} onRemove={removeProduct} orderLink={orderLink} /></div>}
+        <section id="catalogue" className="bg-white py-12">
+          <div className="mx-auto max-w-7xl px-4">
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <SectionIntro eyebrow="Catalogue reel" title="Produits publics verifies" text="Aucune ligne fictive n est affichee : les offres doivent etre publiques, actives et liees a un partenaire verifie." />
+              <a href={orderLink} className="inline-flex w-fit items-center gap-2 rounded-2xl bg-[#f97316] px-5 py-3 font-black text-white">Commander <ArrowRight className="h-5 w-5" /></a>
+            </div>
+            <div className="mt-6 grid gap-3 md:grid-cols-[1fr_260px]">
+              <label className="relative block">
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
+                <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Rechercher un plat, produit ou partenaire" className="w-full rounded-2xl border border-orange-100 bg-orange-50/60 py-4 pl-12 pr-4 text-sm font-semibold outline-none ring-orange-200 focus:ring-4" />
+              </label>
+              <select value={category} onChange={(event) => setCategory(event.target.value)} className="rounded-2xl border border-orange-100 bg-orange-50/60 px-4 py-4 text-sm font-semibold outline-none ring-orange-200 focus:ring-4">
+                {categories.map((item) => <option key={item} value={item}>{item}</option>)}
+              </select>
+            </div>
+            {loading && <p className="mt-6 rounded-2xl bg-orange-50 p-5 text-sm font-semibold text-stone-600">Chargement du catalogue public...</p>}
+            {error && <p className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm font-semibold text-amber-800">{error}</p>}
+            {!loading && !hasProducts && <EmptyCatalogue configured={catalog.configured} />}
+            {hasProducts && <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_360px]"><div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">{filteredProducts.map((product) => <ProductCard key={product.id} product={product} onAdd={() => addProduct(product)} />)}</div><Selection products={selected} onRemove={removeProduct} orderLink={orderLink} economics={economics} /></div>}
+          </div>
         </section>
 
-        <section id="partenaires" className="mt-10">
-          <div className="flex items-center gap-3"><Users className="h-6 w-6 text-emerald-300" /><h2 className="text-3xl font-bold text-white">Partenaires verifies</h2></div>
-          <p className="mt-2 text-sm text-slate-300">Les partenaires affiches publiquement sont verifies, actifs et reels.</p>
-          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{vendors.map((vendor) => <div key={vendor.id} className="rounded-[1.5rem] border border-slate-800 bg-slate-900/70 p-6"><div className="text-xs uppercase tracking-[0.2em] text-emerald-300">{vendor.business_type}</div><h3 className="mt-3 text-2xl font-bold text-white">{vendor.business_name}</h3><p className="mt-2 text-sm text-slate-300">{vendor.description || 'Partenaire local verifie en Martinique.'}</p><div className="mt-4 text-sm text-slate-400">{vendor.service_zone || vendor.zone_label || vendor.address}</div></div>)}</div>
-          {!loading && vendors.length === 0 && <p className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-300">Aucun partenaire public verifie n'est encore visible.</p>}
+        <section id="partenaires" className="mx-auto max-w-7xl px-4 py-12">
+          <SectionIntro eyebrow="Partenaires" title="Vendeurs verifies en Martinique" text="La liste reste volontairement stricte : pas de partenaire visible sans validation publique." />
+          <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {catalog.vendors.map((vendor) => <VendorCard key={vendor.id} vendor={vendor} />)}
+          </div>
+          {!loading && catalog.vendors.length === 0 && <p className="mt-6 rounded-2xl border border-orange-100 bg-white p-5 text-sm font-semibold text-stone-600">Aucun partenaire public verifie n est encore visible. La facade reste honnete jusqu a activation des donnees reelles.</p>}
         </section>
 
-        <section id="demande-pro" className="mt-10 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-[1.5rem] border border-slate-800 bg-slate-900/70 p-6"><div className="flex items-center gap-3 text-emerald-300"><Building2 className="h-6 w-6" /><h2 className="text-3xl font-bold text-white">Demande pro</h2></div><p className="mt-3 text-sm leading-6 text-slate-300">Repas d'equipe, demande recurrente, retrait groupe ou livraison sur site.</p><div className="mt-5 grid gap-3 sm:grid-cols-2"><input value={proCompany} onChange={(e) => setProCompany(e.target.value)} placeholder="Entreprise" className="rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-slate-100" /><input value={proContact} onChange={(e) => setProContact(e.target.value)} placeholder="Contact / telephone" className="rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-slate-100" /><textarea value={proNeed} onChange={(e) => setProNeed(e.target.value)} placeholder="Besoin, volume, zone, date souhaitee" className="rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-slate-100 sm:col-span-2" rows={4} /></div><a href={proLink} className="mt-5 inline-flex rounded-2xl bg-emerald-500 px-5 py-4 font-bold text-slate-950">Envoyer ma demande pro</a></div>
-          <div className="rounded-[1.5rem] border border-slate-800 bg-slate-900/70 p-6"><div className="flex items-center gap-3 text-emerald-300"><MessageCircle className="h-6 w-6" /><h2 className="text-2xl font-bold text-white">Retrait, livraison, horaires</h2></div><div className="mt-5 space-y-4 text-sm leading-6 text-slate-300"><p>Retrait disponible selon partenaire et point relais public verifie.</p><p>Livraison disponible selon zone desservie, volume et creneau confirme.</p><p>Google Business Profile : Martinique · lien principal : commande DELIKREOL · contact : {contactPhone}</p></div></div>
+        <section className="bg-[#fff1df] py-12">
+          <div className="mx-auto max-w-7xl px-4">
+            <SectionIntro eyebrow="Comment ca marche" title="Un parcours volontairement court" text="Le client comprend vite ce qui est disponible, comment confirmer, et dans quelle zone la commande peut etre traitee." />
+            <div className="mt-6 grid gap-4 md:grid-cols-4">
+              <Step number="1" title="Choisir" text="Produit ou besoin pro visible sur la facade publique." />
+              <Step number="2" title="Confirmer" text="Disponibilite, zone, creneau et mode retrait/livraison." />
+              <Step number="3" title="Valider" text="Commande transmise au partenaire concerne." />
+              <Step number="4" title="Suivre" text="Contact direct pour ajuster et finaliser." />
+            </div>
+          </div>
+        </section>
+
+        <section id="zones" className="mx-auto max-w-7xl px-4 py-12">
+          <SectionIntro eyebrow="Zones desservies" title="Martinique, avec zones claires par partenaire" text="Le site ne promet pas une couverture hors zone. La logique evolue par commune, rayon interne et zone partenaire." />
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {(serviceZones.length ? serviceZones : defaultZones).map((zone) => <ZoneCard key={zone} zone={zone} />)}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 pb-12">
+          <div className="grid gap-5 lg:grid-cols-3">
+            <ProofCard icon={<BadgeCheck />} title="Donnees reelles seulement" text="Les filtres publics imposent partenaires verifies, produits publics, statut valide et disponibilite non desactivee." />
+            <ProofCard icon={<ShieldCheck />} title="Marge tracable" text="La logique interne separe total client, livraison, frais service, commission, payout vendeur et marge plateforme." />
+            <ProofCard icon={<MapPin />} title="Zones controlees" text="Rayon prestataire, geolocalisation et fallback par commune sont prepares pour l exploitation terrain." />
+          </div>
+        </section>
+
+        <section id="demande-pro" className="bg-[#24170f] py-12 text-white">
+          <div className="mx-auto grid max-w-7xl gap-6 px-4 lg:grid-cols-[1.05fr_0.95fr]">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.25em] text-orange-300">Pros et partenaires</p>
+              <h2 className="mt-3 font-display text-4xl font-black">Une demande pro claire, sans parcours complique.</h2>
+              <p className="mt-4 max-w-2xl text-stone-300">Repas d equipe, commandes groupees, partenaires vendeurs ou besoins recurrents : DELIKREOL qualifie la demande avant engagement.</p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <a href={partnerLink} className="rounded-2xl border border-white/20 px-5 py-3 font-bold text-white">Devenir partenaire</a>
+                <a href={proLink} className="rounded-2xl bg-[#f97316] px-5 py-3 font-black text-white">Demande pro</a>
+              </div>
+            </div>
+            <div className="rounded-[2rem] border border-white/10 bg-white/8 p-5">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <input value={proCompany} onChange={(event) => setProCompany(event.target.value)} placeholder="Entreprise" className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-stone-400" />
+                <input value={proContact} onChange={(event) => setProContact(event.target.value)} placeholder="Contact / telephone" className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-stone-400" />
+                <textarea value={proNeed} onChange={(event) => setProNeed(event.target.value)} placeholder="Besoin, volume, commune, date souhaitee" className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-stone-400 sm:col-span-2" rows={4} />
+              </div>
+              <a href={proLink} className="mt-4 inline-flex w-full justify-center rounded-2xl bg-emerald-400 px-5 py-4 font-black text-emerald-950">Envoyer la demande pro</a>
+            </div>
+          </div>
         </section>
       </main>
+
+      <footer className="border-t border-orange-100 bg-white py-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3">
+            <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-10 w-10" />
+            <div>
+              <p className="font-black">DELIKREOL Martinique</p>
+              <p className="text-sm text-stone-500">Commande locale - partenaires verifies - zones desservies claires</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-3 text-sm font-bold text-stone-600">
+            <a href="#catalogue">Commander</a>
+            <a href="#partenaires">Devenir partenaire</a>
+            <a href="#demande-pro">Demande pro</a>
+          </div>
+        </div>
+      </footer>
+
+      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-orange-100 bg-white/95 p-3 shadow-2xl backdrop-blur md:hidden">
+        <div className="mx-auto grid max-w-md grid-cols-3 gap-2 text-center text-xs font-black">
+          <a href="#catalogue" className="rounded-xl bg-[#f97316] px-2 py-3 text-white">Commander</a>
+          <a href="#partenaires" className="rounded-xl border border-orange-200 px-2 py-3 text-[#7c2d12]">Partenaire</a>
+          <a href="#demande-pro" className="rounded-xl border border-emerald-200 bg-emerald-50 px-2 py-3 text-emerald-800">Pro</a>
+        </div>
+      </div>
     </div>
   );
 }
 
+function SectionIntro({ eyebrow, title, text }: { eyebrow: string; title: string; text: string }) {
+  return <div><p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">{eyebrow}</p><h2 className="mt-2 font-display text-3xl font-black tracking-tight text-[#301607] md:text-4xl">{title}</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600">{text}</p></div>;
+}
+
+function TrustPill({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return <div className="flex items-center gap-2 rounded-2xl border border-orange-100 bg-white/80 px-4 py-3 text-sm font-black text-stone-700 shadow-sm">{icon}<span>{label}</span></div>;
+}
+
 function InfoCard({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
-  return <div className="rounded-[1.5rem] border border-slate-800 bg-slate-900/70 p-5"><div className="flex items-center gap-3 text-emerald-300">{icon}<span className="font-semibold">{title}</span></div><p className="mt-3 text-sm leading-6 text-slate-300">{text}</p></div>;
+  return <div className="rounded-[1.5rem] border border-orange-100 bg-white p-5 shadow-sm"><div className="flex items-center gap-3 text-[#c2410c]">{icon}<span className="font-black text-[#301607]">{title}</span></div><p className="mt-3 text-sm leading-6 text-stone-600">{text}</p></div>;
 }
 
-function EmptyCatalogue({ whatsappBase }: { whatsappBase: string }) {
-  return <div className="mt-6 rounded-[1.5rem] border border-amber-500/30 bg-amber-500/10 p-6"><div className="flex items-center gap-3 text-amber-200"><Package className="h-5 w-5" /><p className="font-semibold">Catalogue public en cours d'activation</p></div><p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">Aucun partenaire verifie et public n'est encore affiche. DELIKREOL affiche uniquement les donnees reelles activees. Contactez-nous sur WhatsApp pour une demande manuelle ou pour devenir partenaire.</p><a href={whatsappBase} className="mt-4 inline-flex rounded-2xl bg-emerald-500 px-5 py-3 font-bold text-slate-950">Commander par WhatsApp</a></div>;
+function OfferCard({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
+  return <div className="rounded-[1.5rem] border border-orange-100 bg-white p-6 shadow-sm"><div className="mb-4 inline-flex rounded-2xl bg-orange-100 p-3 text-[#c2410c]">{icon}</div><h3 className="text-xl font-black text-[#301607]">{title}</h3><p className="mt-2 text-sm leading-6 text-stone-600">{text}</p></div>;
 }
 
-function Selection({ products, onRemove, orderLink }: { products: LocalProduct[]; onRemove: (id: string) => void; orderLink: string }) {
-  return <aside className="rounded-[1.5rem] border border-slate-800 bg-slate-900/70 p-6"><div className="flex items-center gap-3 text-emerald-300"><ShoppingBag className="h-5 w-5" /><h3 className="text-lg font-bold text-white">Ma selection</h3></div>{products.length === 0 ? <p className="mt-4 text-sm leading-6 text-slate-400">Ajoutez des produits pour preparer votre demande.</p> : <div className="mt-4 space-y-3">{products.map((product) => <div key={`${product.id}-${product.vendor}`} className="flex items-start justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-950/50 px-4 py-3"><div><div className="text-sm font-semibold text-slate-100">{product.name}</div><div className="text-xs text-slate-400">{product.vendor}</div></div><button onClick={() => onRemove(product.id)} className="text-xs text-slate-400">Retirer</button></div>)}<a href={orderLink} className="inline-flex w-full justify-center rounded-2xl bg-emerald-500 px-5 py-4 font-bold text-slate-950">Commander</a></div>}</aside>;
+function ProductCarousel({ product, count, active, onPrev, onNext }: { product: PublicCatalogProduct; count: number; active: number; onPrev: () => void; onNext: () => void }) {
+  return <div className="overflow-hidden rounded-[1.5rem] bg-[#24170f] text-white"><div className="relative aspect-[4/3] bg-gradient-to-br from-orange-200 via-amber-100 to-emerald-100">{product.image_url ? <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" /> : <DishPlaceholder name={product.name} /> }<div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/78 to-transparent p-5"><p className="text-xs font-black uppercase tracking-[0.2em] text-orange-200">Disponible si confirme</p><h3 className="mt-2 text-3xl font-black">{product.name}</h3><p className="mt-1 text-sm text-stone-200">{product.vendor_name} - {product.zone_label}</p><p className="mt-3 text-2xl font-black text-orange-200">{formatPrice(product.price)}</p></div><button onClick={onPrev} className="absolute left-3 top-1/2 rounded-full bg-white/90 p-2 text-stone-900"><ChevronLeft className="h-5 w-5" /></button><button onClick={onNext} className="absolute right-3 top-1/2 rounded-full bg-white/90 p-2 text-stone-900"><ChevronRight className="h-5 w-5" /></button></div><div className="flex items-center justify-between px-5 py-4 text-sm text-stone-300"><span>Offres reelles activees</span><span>{active + 1} / {count}</span></div></div>;
+}
+
+function EmptyHeroCard({ configured, loading }: { configured: boolean; loading: boolean }) {
+  return <div className="flex min-h-[380px] flex-col justify-center rounded-[1.5rem] bg-gradient-to-br from-[#24170f] to-[#6b2d08] p-8 text-white"><p className="text-xs font-black uppercase tracking-[0.24em] text-orange-200">Catalogue vivant</p><h3 className="mt-4 font-display text-4xl font-black">{loading ? 'Verification des offres publiques...' : 'Activation des partenaires reels en cours'}</h3><p className="mt-4 text-stone-200">{configured ? 'Aucune offre publique validee n est visible pour le moment.' : 'La configuration publique doit etre activee avant affichage des donnees.'}</p></div>;
+}
+
+function EmptyCatalogue({ configured }: { configured: boolean }) {
+  return <div className="mt-8 rounded-[2rem] border border-amber-200 bg-amber-50 p-7"><div className="flex items-center gap-3 text-amber-800"><Package className="h-6 w-6" /><p className="text-lg font-black">Catalogue public en cours d activation</p></div><p className="mt-3 max-w-3xl text-sm leading-6 text-amber-900">{configured ? 'Aucun partenaire et produit public verifie n est encore visible. DELIKREOL n affiche pas de faux catalogue.' : 'La configuration publique doit etre completee dans GitHub Actions avant lecture des donnees reelles.'}</p><div className="mt-5 flex flex-wrap gap-3"><a href="#partenaires" className="rounded-2xl border border-amber-300 bg-white px-5 py-3 font-bold text-amber-900">Devenir partenaire</a><a href="#demande-pro" className="rounded-2xl bg-[#f97316] px-5 py-3 font-black text-white">Demande pro</a></div></div>;
+}
+
+function ProductCard({ product, onAdd }: { product: PublicCatalogProduct; onAdd: () => void }) {
+  return <article className="overflow-hidden rounded-[1.5rem] border border-orange-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"><div className="aspect-[4/3] bg-orange-50">{product.image_url ? <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" /> : <DishPlaceholder name={product.name} />}</div><div className="p-5"><div className="flex items-center justify-between gap-3"><span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-black uppercase tracking-wider text-[#c2410c]">{product.category}</span><span className="text-xs font-bold text-emerald-700">Verifie</span></div><h3 className="mt-4 text-xl font-black text-[#301607]">{product.name}</h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-stone-600">{product.description}</p><div className="mt-4 text-sm font-bold text-stone-500">{product.vendor_name} - {product.zone_label}</div><div className="mt-5 flex items-center justify-between gap-3"><strong className="text-2xl font-black text-[#24170f]">{formatPrice(product.price)}</strong><button onClick={onAdd} className="rounded-xl bg-[#f97316] px-4 py-2 text-sm font-black text-white">Ajouter</button></div></div></article>;
+}
+
+function VendorCard({ vendor }: { vendor: PublicCatalogVendor }) {
+  return <article className="rounded-[1.5rem] border border-orange-100 bg-white p-6 shadow-sm"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.2em] text-[#c2410c]">{vendor.business_type}</p><h3 className="mt-3 text-2xl font-black text-[#301607]">{vendor.business_name}</h3></div><BadgeCheck className="h-7 w-7 text-emerald-600" /></div><p className="mt-3 text-sm leading-6 text-stone-600">{vendor.description}</p><div className="mt-4 flex flex-wrap gap-2 text-xs font-bold text-stone-600"><span className="rounded-full bg-orange-50 px-3 py-1">{vendor.zone_label}</span><span className="rounded-full bg-emerald-50 px-3 py-1">Rayon {vendor.delivery_radius_km} km</span></div></article>;
+}
+
+function Step({ number, title, text }: { number: string; title: string; text: string }) {
+  return <div className="rounded-[1.5rem] border border-orange-100 bg-white p-5 shadow-sm"><div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f97316] font-black text-white">{number}</div><h3 className="mt-4 text-lg font-black text-[#301607]">{title}</h3><p className="mt-2 text-sm leading-6 text-stone-600">{text}</p></div>;
+}
+
+function ZoneCard({ zone }: { zone: string }) {
+  return <div className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm"><div className="flex items-center gap-2 font-black text-[#301607]"><MapPin className="h-5 w-5 text-[#f97316]" />{zone}</div><p className="mt-2 text-sm text-stone-600">Retrait ou livraison selon partenaire active.</p></div>;
+}
+
+function ProofCard({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
+  return <div className="rounded-[1.5rem] border border-orange-100 bg-white p-6 shadow-sm"><div className="mb-4 inline-flex rounded-2xl bg-emerald-50 p-3 text-emerald-700">{icon}</div><h3 className="text-xl font-black text-[#301607]">{title}</h3><p className="mt-2 text-sm leading-6 text-stone-600">{text}</p></div>;
+}
+
+function Selection({ products, onRemove, orderLink, economics }: { products: PublicCatalogProduct[]; onRemove: (index: number) => void; orderLink: string; economics: ReturnType<typeof calculateOrderEconomics> }) {
+  return <aside className="sticky top-24 h-fit rounded-[1.5rem] border border-orange-100 bg-[#fff8ed] p-5 shadow-sm"><div className="flex items-center gap-3"><ShoppingBag className="h-5 w-5 text-[#f97316]" /><h3 className="text-lg font-black text-[#301607]">Selection</h3></div>{products.length === 0 ? <p className="mt-4 text-sm leading-6 text-stone-600">Ajoutez des produits pour preparer une demande de confirmation.</p> : <div className="mt-4 space-y-3">{products.map((product, index) => <div key={`${product.id}-${index}`} className="rounded-2xl bg-white p-3"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-black text-[#301607]">{product.name}</p><p className="text-xs text-stone-500">{product.vendor_name}</p></div><button onClick={() => onRemove(index)} className="text-xs font-bold text-stone-400">Retirer</button></div></div>)}<div className="rounded-2xl border border-orange-100 bg-white p-4 text-sm"><Line label="Produits" value={formatPrice(economics.subtotal_produits)} /><Line label="Livraison estimee" value={formatPrice(economics.frais_livraison)} /><Line label="Frais service" value={formatPrice(economics.frais_service)} /><Line label="Total a confirmer" value={formatPrice(economics.total_client)} strong /></div><a href={orderLink} className="inline-flex w-full justify-center rounded-2xl bg-[#f97316] px-5 py-4 font-black text-white">Commander</a></div>}</aside>;
+}
+
+function Line({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
+  return <div className={`flex justify-between py-1 ${strong ? 'text-base font-black text-[#301607]' : 'text-stone-600'}`}><span>{label}</span><span>{value}</span></div>;
+}
+
+function DishPlaceholder({ name }: { name: string }) {
+  return <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_30%_30%,rgba(251,146,60,0.35),transparent_35%),linear-gradient(135deg,#ffedd5,#fef3c7,#dcfce7)]"><div className="rounded-full bg-white/80 px-6 py-4 text-center shadow-lg"><Utensils className="mx-auto h-8 w-8 text-[#c2410c]" /><p className="mt-2 max-w-[180px] text-sm font-black text-[#301607]">{name}</p></div></div>;
+}
+
+function formatPrice(value: number) {
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value);
 }
