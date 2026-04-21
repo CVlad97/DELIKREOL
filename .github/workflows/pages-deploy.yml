@@ -33,8 +33,8 @@ jobs:
       - name: Build
         env:
           VITE_BASE_PATH: "/${{ github.event.repository.name }}/"
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || vars.VITE_SUPABASE_ANON_KEY }}
           VITE_ERP_FALLBACK_DEMO: "false"
           VITE_SHEETS_PUBLIC_URL: ${{ vars.VITE_SHEETS_PUBLIC_URL }}
           VITE_WHATSAPP_NUMBER: ${{ vars.VITE_WHATSAPP_NUMBER }}
