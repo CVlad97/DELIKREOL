@@ -146,7 +146,7 @@ export function PublicHomePage() {
         </section>
 
         <section id="catalogue" className="mt-10">
-          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between"><div><h2 className="text-3xl font-bold text-white">Catalogue public verifie</h2><p className="mt-2 text-sm text-slate-300">Uniquement les partenaires et produits publics, verifies et non demo.</p></div><a href={whatsappBase} className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-300">WhatsApp direct <ArrowRight className="h-4 w-4" /></a></div>
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between"><div><h2 className="text-3xl font-bold text-white">Catalogue public verifie</h2><p className="mt-2 text-sm text-slate-300">Uniquement les partenaires et produits publics, verifies et reels.</p></div><a href={whatsappBase} className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-300">WhatsApp direct <ArrowRight className="h-4 w-4" /></a></div>
           <div className="mt-6 grid gap-3 md:grid-cols-3"><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Rechercher un produit ou un partenaire" className="rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-slate-100 md:col-span-2" /><select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-slate-100">{categories.map((item) => <option key={item} value={item}>{item}</option>)}</select></div>
           {loading && <p className="mt-6 text-sm text-slate-400">Chargement du catalogue public...</p>}
           {error && <p className="mt-6 text-sm text-amber-300">{error}</p>}
@@ -156,7 +156,7 @@ export function PublicHomePage() {
 
         <section id="partenaires" className="mt-10">
           <div className="flex items-center gap-3"><Users className="h-6 w-6 text-emerald-300" /><h2 className="text-3xl font-bold text-white">Partenaires verifies</h2></div>
-          <p className="mt-2 text-sm text-slate-300">Les partenaires affiches publiquement sont verifies, actifs et non demo.</p>
+          <p className="mt-2 text-sm text-slate-300">Les partenaires affiches publiquement sont verifies, actifs et reels.</p>
           <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{vendors.map((vendor) => <div key={vendor.id} className="rounded-[1.5rem] border border-slate-800 bg-slate-900/70 p-6"><div className="text-xs uppercase tracking-[0.2em] text-emerald-300">{vendor.business_type}</div><h3 className="mt-3 text-2xl font-bold text-white">{vendor.business_name}</h3><p className="mt-2 text-sm text-slate-300">{vendor.description || 'Partenaire local verifie en Martinique.'}</p><div className="mt-4 text-sm text-slate-400">{vendor.service_zone || vendor.zone_label || vendor.address}</div></div>)}</div>
           {!loading && vendors.length === 0 && <p className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-300">Aucun partenaire public verifie n'est encore visible.</p>}
         </section>
@@ -175,7 +175,7 @@ function InfoCard({ icon, title, text }: { icon: React.ReactNode; title: string;
 }
 
 function EmptyCatalogue({ whatsappBase }: { whatsappBase: string }) {
-  return <div className="mt-6 rounded-[1.5rem] border border-amber-500/30 bg-amber-500/10 p-6"><div className="flex items-center gap-3 text-amber-200"><Package className="h-5 w-5" /><p className="font-semibold">Catalogue public en cours d'activation</p></div><p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">Aucun partenaire verifie et public n'est encore affiche. DELIKREOL n'affiche pas de faux catalogue. Contactez-nous sur WhatsApp pour une demande manuelle ou pour devenir partenaire.</p><a href={whatsappBase} className="mt-4 inline-flex rounded-2xl bg-emerald-500 px-5 py-3 font-bold text-slate-950">Commander par WhatsApp</a></div>;
+  return <div className="mt-6 rounded-[1.5rem] border border-amber-500/30 bg-amber-500/10 p-6"><div className="flex items-center gap-3 text-amber-200"><Package className="h-5 w-5" /><p className="font-semibold">Catalogue public en cours d'activation</p></div><p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">Aucun partenaire verifie et public n'est encore affiche. DELIKREOL affiche uniquement les donnees reelles activees. Contactez-nous sur WhatsApp pour une demande manuelle ou pour devenir partenaire.</p><a href={whatsappBase} className="mt-4 inline-flex rounded-2xl bg-emerald-500 px-5 py-3 font-bold text-slate-950">Commander par WhatsApp</a></div>;
 }
 
 function Selection({ products, onRemove, orderLink }: { products: LocalProduct[]; onRemove: (id: string) => void; orderLink: string }) {
