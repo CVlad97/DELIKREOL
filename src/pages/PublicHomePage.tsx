@@ -3,10 +3,13 @@ import {
   ArrowRight,
   BadgeCheck,
   Briefcase,
+  Camera,
   ChevronLeft,
   ChevronRight,
   Clock,
+  ImagePlus,
   MapPin,
+  MapPinned,
   MessageCircle,
   Package,
   Search,
@@ -19,6 +22,7 @@ import {
 import { loadPublicCatalog, PublicCatalogProduct, PublicCatalogVendor } from '../services/publicCatalogService';
 import { calculateOrderEconomics } from '../services/orderEconomics';
 import { getMartiniqueServiceZones } from '../services/serviceZones';
+import { submitPartnerLead, submitPartnerProduct, uploadPartnerProductPhoto } from '../services/partnerPortalService';
 
 type CatalogState = {
   configured: boolean;
@@ -26,9 +30,58 @@ type CatalogState = {
   products: PublicCatalogProduct[];
 };
 
+type PartnerFormState = {
+  business_name: string;
+  contact_name: string;
+  phone: string;
+  whatsapp: string;
+  email: string;
+  address: string;
+  commune: string;
+  zone_label: string;
+  activity_type: string;
+  delivery_radius_km: string;
+  opening_hours: string;
+};
+
+type ProductFormState = {
+  business_name: string;
+  product_name: string;
+  description: string;
+  category: string;
+  price: string;
+  stock_quantity: string;
+};
+
+type SubmitStatus = { kind: 'idle' | 'saving' | 'success' | 'error'; message?: string };
+
 const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 const whatsappBase = `https://wa.me/${whatsappNumber}`;
-const defaultZones = getMartiniqueServiceZones();
+const southZones = ['Ducos', 'Riviere-Salee', 'Le Diamant', 'Sainte-Luce', 'Sainte-Anne', 'Le Marin', 'Le Francois'];
+const defaultZones = Array.from(new Set([...getMartiniqueServiceZones(), ...southZones, 'Secteur sud']));
+
+const defaultPartnerForm: PartnerFormState = {
+  business_name: '',
+  contact_name: '',
+  phone: '',
+  whatsapp: '',
+  email: '',
+  address: '',
+  commune: '',
+  zone_label: 'Secteur sud',
+  activity_type: 'food_partner',
+  delivery_radius_km: '8',
+  opening_hours: '',
+};
+
+const defaultProductForm: ProductFormState = {
+  business_name: '',
+  product_name: '',
+  description: '',
+  category: 'Cuisine locale',
+  price: '',
+  stock_quantity: '',
+};
 
 export function PublicHomePage() {
   const baseUrl = import.meta.env.BASE_URL || '/';
@@ -42,6 +95,11 @@ export function PublicHomePage() {
   const [proCompany, setProCompany] = useState('');
   const [proContact, setProContact] = useState('');
   const [proNeed, setProNeed] = useState('');
+  const [partnerForm, setPartnerForm] = useState<PartnerFormState>(defaultPartnerForm);
+  const [productForm, setProductForm] = useState<ProductFormState>(defaultProductForm);
+  const [partnerStatus, setPartnerStatus] = useState<SubmitStatus>({ kind: 'idle' });
+  const [productStatus, setProductStatus] = useState<SubmitStatus>({ kind: 'idle' });
+  const [productPhoto, setProductPhoto] = useState<File | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -87,7 +145,7 @@ export function PublicHomePage() {
   }, [carouselProducts.length]);
 
   const serviceZones = useMemo(
-    () => getMartiniqueServiceZones(catalog.vendors.map((vendor) => vendor.zone_label)).slice(0, 8),
+    () => Array.from(new Set([...getMartiniqueServiceZones(catalog.vendors.map((vendor) => vendor.zone_label)), ...southZones, 'Secteur sud'])).slice(0, 12),
     [catalog.vendors],
   );
 
@@ -132,6 +190,57 @@ export function PublicHomePage() {
   const removeProduct = (index: number) => setSelected((current) => current.filter((_, itemIndex) => itemIndex !== index));
   const currentSlide = carouselProducts[activeSlide];
   const hasProducts = catalog.products.length > 0;
+
+  const handlePartnerSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setPartnerStatus({ kind: 'saving', message: 'Enregistrement du partenaire...' });
+    try {
+      await submitPartnerLead({
+        business_name: partnerForm.business_name,
+        contact_name: partnerForm.contact_name,
+        phone: partnerForm.phone,
+        whatsapp: partnerForm.whatsapp || partnerForm.phone,
+        email: partnerForm.email,
+        address: partnerForm.address,
+        commune: partnerForm.commune,
+        zone_label: partnerForm.zone_label,
+        activity_type: partnerForm.activity_type,
+        delivery_radius_km: Number(partnerForm.delivery_radius_km || '8'),
+        opening_hours: partnerForm.opening_hours,
+      });
+      setPartnerStatus({ kind: 'success', message: 'Demande partenaire enregistree. Nous revenons vers vous apres verification.' });
+      setPartnerForm(defaultPartnerForm);
+    } catch (submitError) {
+      setPartnerStatus({ kind: 'error', message: extractError(submitError, 'Impossible d enregistrer la demande partenaire.') });
+    }
+  };
+
+  const handleProductSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setProductStatus({ kind: 'saving', message: 'Enregistrement du catalogue...' });
+    try {
+      let imageUrl: string | null = null;
+      if (productPhoto) {
+        const upload = await uploadPartnerProductPhoto(productPhoto);
+        imageUrl = upload.publicUrl;
+      }
+      await submitPartnerProduct({
+        business_name: productForm.business_name,
+        product_name: productForm.product_name,
+        description: productForm.description,
+        category: productForm.category,
+        price: Number(productForm.price || '0'),
+        stock_quantity: productForm.stock_quantity ? Number(productForm.stock_quantity) : undefined,
+        is_available: true,
+        image_url: imageUrl,
+      });
+      setProductStatus({ kind: 'success', message: 'Produit transmis pour verification. La photo sera publiee apres validation.' });
+      setProductForm(defaultProductForm);
+      setProductPhoto(null);
+    } catch (submitError) {
+      setProductStatus({ kind: 'error', message: extractError(submitError, 'Impossible d enregistrer le produit pour le moment.') });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#fff8ed] text-[#24170f]">
@@ -236,6 +345,53 @@ export function PublicHomePage() {
             {catalog.vendors.map((vendor) => <VendorCard key={vendor.id} vendor={vendor} />)}
           </div>
           {!loading && catalog.vendors.length === 0 && <p className="mt-6 rounded-2xl border border-orange-100 bg-white p-5 text-sm font-semibold text-stone-600">Aucun partenaire public verifie n est encore visible. La facade reste honnete jusqu a activation des donnees reelles.</p>}
+        </section>
+
+        <section className="bg-[#fff1df] py-12">
+          <div className="mx-auto max-w-7xl px-4">
+            <SectionIntro eyebrow="Secteur sud et portail partenaire" title="Developper le sud Martinique, puis alimenter le catalogue" text="Cette passe compacte ajoute une base exploitable pour les partenaires : inscription, proposition de produits et envoi de photos sans casser la facade publique actuelle." />
+            <div className="mt-6 grid gap-6 xl:grid-cols-[0.95fr_1.05fr_1.05fr]">
+              <SouthCoverageCard zones={southZones} />
+              <PortalCard title="Inscription partenaire" icon={<Store className='h-5 w-5' />}>
+                <form className="space-y-3" onSubmit={handlePartnerSubmit}>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <input value={partnerForm.business_name} onChange={(event) => setPartnerForm((current) => ({ ...current, business_name: event.target.value }))} placeholder="Nom de l etablissement" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4 sm:col-span-2" required />
+                    <input value={partnerForm.contact_name} onChange={(event) => setPartnerForm((current) => ({ ...current, contact_name: event.target.value }))} placeholder="Contact" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" required />
+                    <input value={partnerForm.phone} onChange={(event) => setPartnerForm((current) => ({ ...current, phone: event.target.value }))} placeholder="Telephone" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" required />
+                    <input value={partnerForm.whatsapp} onChange={(event) => setPartnerForm((current) => ({ ...current, whatsapp: event.target.value }))} placeholder="WhatsApp" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" />
+                    <input value={partnerForm.email} onChange={(event) => setPartnerForm((current) => ({ ...current, email: event.target.value }))} placeholder="Email" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" />
+                    <input value={partnerForm.address} onChange={(event) => setPartnerForm((current) => ({ ...current, address: event.target.value }))} placeholder="Adresse" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4 sm:col-span-2" />
+                    <input value={partnerForm.commune} onChange={(event) => setPartnerForm((current) => ({ ...current, commune: event.target.value }))} placeholder="Commune" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" />
+                    <input value={partnerForm.zone_label} onChange={(event) => setPartnerForm((current) => ({ ...current, zone_label: event.target.value }))} placeholder="Zone servie" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" />
+                    <input value={partnerForm.delivery_radius_km} onChange={(event) => setPartnerForm((current) => ({ ...current, delivery_radius_km: event.target.value }))} placeholder="Rayon livraison (km)" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" />
+                    <input value={partnerForm.activity_type} onChange={(event) => setPartnerForm((current) => ({ ...current, activity_type: event.target.value }))} placeholder="Type d activite" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" />
+                    <textarea value={partnerForm.opening_hours} onChange={(event) => setPartnerForm((current) => ({ ...current, opening_hours: event.target.value }))} placeholder="Horaires et creneaux" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4 sm:col-span-2" rows={3} />
+                  </div>
+                  <button type="submit" disabled={partnerStatus.kind === 'saving'} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#f97316] px-5 py-4 font-black text-white disabled:opacity-70">{partnerStatus.kind === 'saving' ? 'Envoi en cours...' : 'Envoyer la demande partenaire'}</button>
+                  <StatusBanner status={partnerStatus} />
+                </form>
+              </PortalCard>
+              <PortalCard title="Ajouter catalogue et photos" icon={<ImagePlus className='h-5 w-5' />}>
+                <form className="space-y-3" onSubmit={handleProductSubmit}>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <input value={productForm.business_name} onChange={(event) => setProductForm((current) => ({ ...current, business_name: event.target.value }))} placeholder="Nom de l etablissement" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4 sm:col-span-2" required />
+                    <input value={productForm.product_name} onChange={(event) => setProductForm((current) => ({ ...current, product_name: event.target.value }))} placeholder="Nom du produit" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" required />
+                    <input value={productForm.category} onChange={(event) => setProductForm((current) => ({ ...current, category: event.target.value }))} placeholder="Categorie" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" />
+                    <input value={productForm.price} onChange={(event) => setProductForm((current) => ({ ...current, price: event.target.value }))} placeholder="Prix" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" />
+                    <input value={productForm.stock_quantity} onChange={(event) => setProductForm((current) => ({ ...current, stock_quantity: event.target.value }))} placeholder="Stock" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" />
+                    <textarea value={productForm.description} onChange={(event) => setProductForm((current) => ({ ...current, description: event.target.value }))} placeholder="Description courte" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4 sm:col-span-2" rows={3} />
+                    <label className="flex items-center justify-between rounded-2xl border border-dashed border-orange-200 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-600 sm:col-span-2">
+                      <span className="inline-flex items-center gap-2"><Camera className="h-4 w-4 text-[#c2410c]" /> {productPhoto ? productPhoto.name : 'Ajouter une photo produit'}</span>
+                      <input type="file" accept="image/*" className="hidden" onChange={(event) => setProductPhoto(event.target.files?.[0] ?? null)} />
+                      <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">Choisir</span>
+                    </label>
+                  </div>
+                  <button type="submit" disabled={productStatus.kind === 'saving'} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-4 font-black text-white disabled:opacity-70">{productStatus.kind === 'saving' ? 'Envoi du produit...' : 'Ajouter catalogue et photos'}</button>
+                  <StatusBanner status={productStatus} />
+                </form>
+              </PortalCard>
+            </div>
+          </div>
         </section>
 
         <section className="bg-[#fff1df] py-12">
@@ -352,6 +508,20 @@ function VendorCard({ vendor }: { vendor: PublicCatalogVendor }) {
   return <article className="rounded-[1.5rem] border border-orange-100 bg-white p-6 shadow-sm"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.2em] text-[#c2410c]">{vendor.business_type}</p><h3 className="mt-3 text-2xl font-black text-[#301607]">{vendor.business_name}</h3></div><BadgeCheck className="h-7 w-7 text-emerald-600" /></div><p className="mt-3 text-sm leading-6 text-stone-600">{vendor.description}</p><div className="mt-4 flex flex-wrap gap-2 text-xs font-bold text-stone-600"><span className="rounded-full bg-orange-50 px-3 py-1">{vendor.zone_label}</span><span className="rounded-full bg-emerald-50 px-3 py-1">Rayon {vendor.delivery_radius_km} km</span></div></article>;
 }
 
+function PortalCard({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
+  return <div className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-sm"><div className="mb-4 flex items-center gap-3 text-[#c2410c]">{icon}<h3 className="text-xl font-black text-[#301607]">{title}</h3></div>{children}</div>;
+}
+
+function SouthCoverageCard({ zones }: { zones: string[] }) {
+  return <div className="rounded-[1.75rem] border border-orange-100 bg-[#24170f] p-6 text-white shadow-sm"><div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-orange-200"><MapPinned className="h-4 w-4" /> Secteur sud</div><h3 className="mt-4 text-2xl font-black">Renforcer la couverture partenaire au sud de la Martinique</h3><p className="mt-3 text-sm leading-6 text-stone-200">Cette passe compacte ouvre un parcours public pour les partenaires du sud : inscription, proposition de produits et ajout de photos avant validation.</p><div className="mt-5 flex flex-wrap gap-2">{zones.map((zone) => <span key={zone} className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-stone-100">{zone}</span>)}</div><ul className="mt-5 space-y-2 text-sm text-stone-200"><li>- inscription partenaire rapide</li><li>- ajout catalogue unitaire</li><li>- photo produit via bucket dedie</li><li>- validation publique ensuite seulement</li></ul></div>;
+}
+
+function StatusBanner({ status }: { status: SubmitStatus }) {
+  if (status.kind === 'idle') return null;
+  const tone = status.kind === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : status.kind === 'error' ? 'border-rose-200 bg-rose-50 text-rose-700' : 'border-orange-200 bg-orange-50 text-orange-800';
+  return <p className={`rounded-2xl border px-4 py-3 text-sm font-semibold ${tone}`}>{status.message}</p>;
+}
+
 function Step({ number, title, text }: { number: string; title: string; text: string }) {
   return <div className="rounded-[1.5rem] border border-orange-100 bg-white p-5 shadow-sm"><div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f97316] font-black text-white">{number}</div><h3 className="mt-4 text-lg font-black text-[#301607]">{title}</h3><p className="mt-2 text-sm leading-6 text-stone-600">{text}</p></div>;
 }
@@ -378,4 +548,9 @@ function DishPlaceholder({ name }: { name: string }) {
 
 function formatPrice(value: number) {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value);
+}
+
+function extractError(error: unknown, fallback: string) {
+  if (error instanceof Error && error.message) return error.message;
+  return fallback;
 }
