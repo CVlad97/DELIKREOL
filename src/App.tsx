@@ -1,10 +1,10 @@
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { PublicHomePage } from './pages/PublicHomePage';
+import { LaunchNetworkPage } from './pages/LaunchNetworkPage';
 
 function App() {
   return (
     <ErrorBoundary>
-      <PublicHomePage />
+      <LaunchNetworkPage />
     </ErrorBoundary>
   );
 }
