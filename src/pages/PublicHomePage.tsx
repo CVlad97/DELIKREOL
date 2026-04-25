@@ -1,15 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { FormEvent, ReactNode, useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
-  BadgeCheck,
   Briefcase,
   Camera,
-  ChevronLeft,
-  ChevronRight,
+  CheckCircle2,
   Clock,
-  ImagePlus,
   MapPin,
-  MapPinned,
   MessageCircle,
   Package,
   Search,
@@ -53,12 +49,15 @@ type ProductFormState = {
   stock_quantity: string;
 };
 
-type SubmitStatus = { kind: 'idle' | 'saving' | 'success' | 'error'; message?: string };
+type SubmitStatus = {
+  kind: 'idle' | 'saving' | 'success' | 'error';
+  message?: string;
+};
 
 const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 const whatsappBase = `https://wa.me/${whatsappNumber}`;
+const shortcutCategories = ['Tous', 'Cuisine locale', 'Plats', 'Boissons', 'Epicerie', 'Service'];
 const southZones = ['Ducos', 'Riviere-Salee', 'Le Diamant', 'Sainte-Luce', 'Sainte-Anne', 'Le Marin', 'Le Francois'];
-const defaultZones = Array.from(new Set([...getMartiniqueServiceZones(), ...southZones, 'Secteur sud']));
 
 const defaultPartnerForm: PartnerFormState = {
   business_name: '',
@@ -87,19 +86,18 @@ export function PublicHomePage() {
   const baseUrl = import.meta.env.BASE_URL || '/';
   const [catalog, setCatalog] = useState<CatalogState>({ configured: false, vendors: [], products: [] });
   const [selected, setSelected] = useState<PublicCatalogProduct[]>([]);
-  const [activeSlide, setActiveSlide] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
-  const [category, setCategory] = useState('Toutes');
-  const [proCompany, setProCompany] = useState('');
-  const [proContact, setProContact] = useState('');
-  const [proNeed, setProNeed] = useState('');
+  const [category, setCategory] = useState('Tous');
   const [partnerForm, setPartnerForm] = useState<PartnerFormState>(defaultPartnerForm);
   const [productForm, setProductForm] = useState<ProductFormState>(defaultProductForm);
   const [partnerStatus, setPartnerStatus] = useState<SubmitStatus>({ kind: 'idle' });
   const [productStatus, setProductStatus] = useState<SubmitStatus>({ kind: 'idle' });
   const [productPhoto, setProductPhoto] = useState<File | null>(null);
+  const [proCompany, setProCompany] = useState('');
+  const [proContact, setProContact] = useState('');
+  const [proNeed, setProNeed] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -111,10 +109,12 @@ export function PublicHomePage() {
       })
       .catch(() => {
         if (!active) return;
-        setError('Catalogue public temporairement indisponible. Aucune donnee fictive n est affichee.');
         setCatalog({ configured: true, vendors: [], products: [] });
+        setError('Le catalogue est momentanement indisponible. Aucune ligne fictive n est affichee.');
       })
-      .finally(() => active && setLoading(false));
+      .finally(() => {
+        if (active) setLoading(false);
+      });
 
     return () => {
       active = false;
@@ -122,32 +122,27 @@ export function PublicHomePage() {
   }, []);
 
   const categories = useMemo(
-    () => ['Toutes', ...Array.from(new Set(catalog.products.map((product) => product.category || 'Cuisine locale')))],
+    () => ['Tous', ...Array.from(new Set(catalog.products.map((product) => product.category || 'Cuisine locale')))],
     [catalog.products],
   );
 
   const filteredProducts = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return catalog.products.filter((product) => {
-      const text = `${product.name} ${product.vendor_name} ${product.category} ${product.description}`.toLowerCase();
-      return (!needle || text.includes(needle)) && (category === 'Toutes' || product.category === category);
+      const haystack = `${product.name} ${product.vendor_name} ${product.category} ${product.description}`.toLowerCase();
+      const categoryMatch = category === 'Tous' || product.category === category;
+      const queryMatch = !needle || haystack.includes(needle);
+      return categoryMatch && queryMatch;
     });
   }, [catalog.products, category, query]);
 
-  const carouselProducts = useMemo(() => catalog.products.slice(0, 8), [catalog.products]);
+  const heroProducts = useMemo(() => filteredProducts.slice(0, 3), [filteredProducts]);
+  const featuredProducts = useMemo(() => filteredProducts.slice(0, 6), [filteredProducts]);
 
-  useEffect(() => {
-    if (carouselProducts.length < 2) return;
-    const timer = window.setInterval(() => {
-      setActiveSlide((current) => (current + 1) % carouselProducts.length);
-    }, 4500);
-    return () => window.clearInterval(timer);
-  }, [carouselProducts.length]);
-
-  const serviceZones = useMemo(
-    () => Array.from(new Set([...getMartiniqueServiceZones(catalog.vendors.map((vendor) => vendor.zone_label)), ...southZones, 'Secteur sud'])).slice(0, 12),
-    [catalog.vendors],
-  );
+  const serviceZones = useMemo(() => {
+    const zones = catalog.vendors.map((vendor) => vendor.zone_label).filter(Boolean);
+    return Array.from(new Set([...getMartiniqueServiceZones(zones), ...southZones])).slice(0, 12);
+  }, [catalog.vendors]);
 
   const economics = useMemo(
     () =>
@@ -159,99 +154,114 @@ export function PublicHomePage() {
     [selected],
   );
 
+  const productPreviewEconomics = useMemo(() => {
+    const price = Number(productForm.price || '0');
+    if (!Number.isFinite(price) || price <= 0) return null;
+    return calculateOrderEconomics({
+      items: [{ price, commissionRate: 0.15 }],
+      deliveryFee: 4.5,
+      serviceFee: 1.5,
+    });
+  }, [productForm.price]);
+
   const orderLink = useMemo(() => {
     const lines = selected.map((product) => `- ${product.name} - ${product.vendor_name} - ${formatPrice(product.price)}`);
-    const text = [
+    const message = [
       'Bonjour, je souhaite commander sur DELIKREOL Martinique.',
       '',
-      selected.length ? 'Selection :' : 'Je souhaite connaitre les produits disponibles.',
+      selected.length ? 'Selection :' : 'Je souhaite connaitre les produits disponibles maintenant.',
       ...lines,
       '',
-      'Merci de confirmer la disponibilite, le retrait ou la livraison.',
+      'Merci de confirmer la disponibilite et le retrait ou la livraison selon ma zone.',
     ].join('\n');
-    return `${whatsappBase}?text=${encodeURIComponent(text)}`;
+    return `${whatsappBase}?text=${encodeURIComponent(message)}`;
   }, [selected]);
 
-  const partnerLink = `${whatsappBase}?text=${encodeURIComponent('Bonjour, je souhaite devenir partenaire DELIKREOL en Martinique.')}`;
+  const partnerLink = `${whatsappBase}?text=${encodeURIComponent('Bonjour, je souhaite devenir partenaire sur DELIKREOL Martinique.')}`;
 
   const proLink = useMemo(() => {
-    const text = [
-      'Bonjour, je souhaite faire une demande pro sur DELIKREOL Martinique.',
+    const message = [
+      'Bonjour, je souhaite faire une demande entreprise sur DELIKREOL Martinique.',
       proCompany && `Entreprise : ${proCompany}`,
       proContact && `Contact : ${proContact}`,
       proNeed && `Besoin : ${proNeed}`,
     ]
       .filter(Boolean)
       .join('\n');
-    return `${whatsappBase}?text=${encodeURIComponent(text)}`;
+    return `${whatsappBase}?text=${encodeURIComponent(message)}`;
   }, [proCompany, proContact, proNeed]);
 
-  const addProduct = (product: PublicCatalogProduct) => setSelected((current) => [...current, product]);
-  const removeProduct = (index: number) => setSelected((current) => current.filter((_, itemIndex) => itemIndex !== index));
-  const currentSlide = carouselProducts[activeSlide];
-  const hasProducts = catalog.products.length > 0;
-
-  const handlePartnerSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  async function handlePartnerSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setPartnerStatus({ kind: 'saving', message: 'Enregistrement du partenaire...' });
+    setPartnerStatus({ kind: 'saving', message: 'Envoi de votre demande...' });
     try {
       await submitPartnerLead({
         business_name: partnerForm.business_name,
         contact_name: partnerForm.contact_name,
         phone: partnerForm.phone,
         whatsapp: partnerForm.whatsapp || partnerForm.phone,
-        email: partnerForm.email,
-        address: partnerForm.address,
-        commune: partnerForm.commune,
-        zone_label: partnerForm.zone_label,
-        activity_type: partnerForm.activity_type,
+        email: partnerForm.email || undefined,
+        address: partnerForm.address || undefined,
+        commune: partnerForm.commune || undefined,
+        zone_label: partnerForm.zone_label || undefined,
+        activity_type: partnerForm.activity_type || undefined,
         delivery_radius_km: Number(partnerForm.delivery_radius_km || '8'),
-        opening_hours: partnerForm.opening_hours,
+        opening_hours: partnerForm.opening_hours || undefined,
       });
-      setPartnerStatus({ kind: 'success', message: 'Demande partenaire enregistree. Nous revenons vers vous apres verification.' });
+      setPartnerStatus({ kind: 'success', message: 'Demande envoyee. Nous revenons vers vous rapidement.' });
       setPartnerForm(defaultPartnerForm);
     } catch (submitError) {
-      setPartnerStatus({ kind: 'error', message: extractError(submitError, 'Impossible d enregistrer la demande partenaire.') });
+      setPartnerStatus({ kind: 'error', message: getErrorMessage(submitError, 'Impossible d envoyer la demande pour le moment.') });
     }
-  };
+  }
 
-  const handleProductSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  async function handleProductSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setProductStatus({ kind: 'saving', message: 'Enregistrement du catalogue...' });
+    setProductStatus({ kind: 'saving', message: 'Envoi du produit...' });
     try {
       let imageUrl: string | null = null;
       if (productPhoto) {
         const upload = await uploadPartnerProductPhoto(productPhoto);
         imageUrl = upload.publicUrl;
       }
+
       await submitPartnerProduct({
         business_name: productForm.business_name,
         product_name: productForm.product_name,
-        description: productForm.description,
-        category: productForm.category,
+        description: productForm.description || undefined,
+        category: productForm.category || undefined,
         price: Number(productForm.price || '0'),
         stock_quantity: productForm.stock_quantity ? Number(productForm.stock_quantity) : undefined,
         is_available: true,
         image_url: imageUrl,
       });
-      setProductStatus({ kind: 'success', message: 'Produit transmis pour verification. La photo sera publiee apres validation.' });
+
+      setProductStatus({ kind: 'success', message: 'Produit envoye. Il sera verifie avant affichage.' });
       setProductForm(defaultProductForm);
       setProductPhoto(null);
     } catch (submitError) {
-      setProductStatus({ kind: 'error', message: extractError(submitError, 'Impossible d enregistrer le produit pour le moment.') });
+      setProductStatus({ kind: 'error', message: getErrorMessage(submitError, 'Impossible d envoyer le produit pour le moment.') });
     }
-  };
+  }
+
+  function addToSelection(product: PublicCatalogProduct) {
+    setSelected((current) => [...current, product]);
+  }
+
+  function removeFromSelection(index: number) {
+    setSelected((current) => current.filter((_, currentIndex) => currentIndex !== index));
+  }
 
   return (
     <div className="min-h-screen bg-[#fff8ed] text-[#24170f]">
       <header className="sticky top-0 z-50 border-b border-orange-100 bg-white/95 shadow-sm backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
           <a href="#accueil" className="flex items-center gap-3" aria-label="DELIKREOL accueil">
-            <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-11 w-11 rounded-2xl shadow-[0_10px_30px_rgba(249,115,22,0.18)]" />
+            <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-11 w-11 rounded-2xl shadow-[0_12px_30px_rgba(249,115,22,0.18)]" />
             <img src={`${baseUrl}branding/logo-wordmark-premium.svg`} alt="DELIKREOL" className="hidden h-10 sm:block" />
           </a>
           <nav className="hidden items-center gap-2 md:flex">
-            <a href="#catalogue" className="rounded-full bg-[#f97316] px-5 py-2.5 text-sm font-black text-white shadow-lg shadow-orange-500/20">Commander</a>
+            <a href="#catalogue" className="rounded-full bg-[#f97316] px-5 py-2.5 text-sm font-black text-white">Commander</a>
             <a href="#partenaires" className="rounded-full border border-orange-200 px-5 py-2.5 text-sm font-bold text-[#7c2d12]">Devenir partenaire</a>
             <a href="#demande-pro" className="rounded-full border border-emerald-200 bg-emerald-50 px-5 py-2.5 text-sm font-bold text-emerald-800">Demande pro</a>
           </nav>
@@ -260,185 +270,313 @@ export function PublicHomePage() {
       </header>
 
       <main id="accueil">
-        <section className="relative overflow-hidden border-b border-orange-100 bg-[radial-gradient(circle_at_10%_15%,rgba(251,146,60,0.24),transparent_30%),radial-gradient(circle_at_90%_8%,rgba(16,185,129,0.18),transparent_30%),linear-gradient(135deg,#fff7ed_0%,#fff_46%,#fff4e6_100%)]">
+        <section className="relative overflow-hidden border-b border-orange-100 bg-[radial-gradient(circle_at_10%_15%,rgba(251,146,60,0.22),transparent_30%),radial-gradient(circle_at_90%_10%,rgba(16,185,129,0.14),transparent_28%),linear-gradient(135deg,#fff7ed_0%,#ffffff_48%,#fff4e6_100%)]">
           <div className="madras-strip" />
-          <div className="mx-auto grid max-w-7xl gap-10 px-4 py-10 md:grid-cols-[1.05fr_0.95fr] md:py-16 lg:py-20">
+          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 md:grid-cols-[1.05fr_0.95fr] md:py-14 lg:py-16">
             <div className="flex flex-col justify-center">
-              <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-orange-200 bg-white/80 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-[#c2410c] shadow-sm">
+              <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-orange-200 bg-white/90 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-[#c2410c] shadow-sm">
                 <MapPin className="h-4 w-4" /> Martinique uniquement
               </div>
-              <div className="mb-6 flex items-center gap-4">
-                <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-20 w-20 animate-float rounded-[1.5rem] bg-white p-2 shadow-2xl shadow-orange-500/20" />
+              <div className="mb-5 flex items-center gap-4">
+                <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-20 w-20 rounded-[1.5rem] bg-white p-2 shadow-2xl shadow-orange-500/20" />
                 <div>
-                  <p className="text-sm font-bold uppercase tracking-[0.28em] text-emerald-700">Commande locale</p>
-                  <p className="text-sm font-semibold text-stone-500">Vendeurs verifies - retrait ou livraison selon zone</p>
+                  <p className="text-sm font-bold uppercase tracking-[0.28em] text-emerald-700">Commande immediate</p>
+                  <p className="text-sm font-semibold text-stone-500">Retrait ou livraison selon zone et partenaire</p>
                 </div>
               </div>
-              <h1 className="max-w-4xl font-display text-4xl font-black tracking-tight text-[#301607] md:text-6xl lg:text-7xl">
-                Commandez local en Martinique, simplement et sans faux catalogue.
+              <h1 className="max-w-4xl font-display text-5xl font-black leading-none tracking-tight text-[#301607] md:text-6xl lg:text-7xl">
+                Commander en Martinique sans perdre de temps.
               </h1>
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-700">
-                DELIKREOL met en relation particuliers, pros et vendeurs martiniquais autour d offres disponibles, confirmees et activees publiquement.
+              <p className="mt-4 max-w-2xl text-lg leading-8 text-stone-700">
+                Recherchez un plat, un produit ou un vendeur local. Ajoutez au panier, puis confirmez le retrait ou la livraison selon votre zone.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-6 rounded-[1.75rem] border border-orange-100 bg-white/95 p-3 shadow-xl shadow-orange-900/5">
+                <div className="grid gap-3 lg:grid-cols-[1fr_auto_auto]">
+                  <label className="relative block">
+                    <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
+                    <input
+                      value={query}
+                      onChange={(event) => setQuery(event.target.value)}
+                      placeholder="Rechercher un plat, un produit ou un vendeur"
+                      className="w-full rounded-2xl border border-orange-100 bg-orange-50/60 py-4 pl-12 pr-4 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4"
+                    />
+                  </label>
+                  <a href="#catalogue" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#f97316] px-6 py-4 font-black text-white shadow-xl shadow-orange-500/25">Commander <ArrowRight className="h-5 w-5" /></a>
+                  <a href="#partenaires" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-white px-6 py-4 font-bold text-[#7c2d12]">Devenir partenaire</a>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <ProofChip label="Partenaires verifies" />
+                  <ProofChip label="Retrait ou livraison" />
+                  <ProofChip label="Confirmation rapide" />
+                </div>
+              </div>
+              <div className="mt-6 flex flex-wrap gap-3">
                 <a href="#catalogue" className="inline-flex items-center gap-2 rounded-2xl bg-[#f97316] px-6 py-4 font-black text-white shadow-xl shadow-orange-500/25">Commander <ArrowRight className="h-5 w-5" /></a>
                 <a href="#partenaires" className="inline-flex items-center gap-2 rounded-2xl border border-orange-200 bg-white px-6 py-4 font-bold text-[#7c2d12]">Devenir partenaire</a>
                 <a href="#demande-pro" className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-4 font-bold text-emerald-800">Demande pro</a>
               </div>
-              <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                <TrustPill icon={<ShieldCheck />} label="Partenaires verifies" />
-                <TrustPill icon={<Clock />} label="Confirmation rapide" />
-                <TrustPill icon={<Truck />} label="Zones servies claires" />
-              </div>
             </div>
 
-            <div className="rounded-[2rem] border border-orange-100 bg-white/86 p-4 shadow-2xl shadow-orange-900/10 backdrop-blur">
-              {currentSlide ? (
-                <ProductCarousel product={currentSlide} count={carouselProducts.length} active={activeSlide} onPrev={() => setActiveSlide((activeSlide - 1 + carouselProducts.length) % carouselProducts.length)} onNext={() => setActiveSlide((activeSlide + 1) % carouselProducts.length)} />
+            <div className="rounded-[2rem] border border-orange-100 bg-white/88 p-4 shadow-2xl shadow-orange-900/10 backdrop-blur">
+              {heroProducts.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="overflow-hidden rounded-[1.5rem] bg-[#24170f] text-white">
+                    <div className="relative aspect-[4/3] bg-gradient-to-br from-orange-200 via-amber-100 to-emerald-100">
+                      {heroProducts[0].image_url ? (
+                        <img src={heroProducts[0].image_url} alt={heroProducts[0].name} className="h-full w-full object-cover" />
+                      ) : (
+                        <DishPlaceholder name={heroProducts[0].name} />
+                      )}
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-5">
+                        <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-200">Disponible maintenant</p>
+                        <h2 className="mt-2 text-3xl font-black">{heroProducts[0].name}</h2>
+                        <p className="mt-1 text-sm text-stone-200">{heroProducts[0].vendor_name} - {heroProducts[0].zone_label}</p>
+                        <p className="mt-3 text-2xl font-black text-orange-200">{formatPrice(heroProducts[0].price)}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {heroProducts.slice(1).map((product) => (
+                      <div key={product.id} className="rounded-[1.25rem] border border-orange-100 bg-orange-50/60 p-4">
+                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#c2410c]">{product.category}</p>
+                        <h3 className="mt-2 text-lg font-black text-[#301607]">{product.name}</h3>
+                        <p className="mt-1 text-sm text-stone-500">{product.vendor_name}</p>
+                        <div className="mt-3 flex items-center justify-between">
+                          <strong className="text-xl font-black text-[#24170f]">{formatPrice(product.price)}</strong>
+                          <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-emerald-700">{product.zone_label}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               ) : (
-                <EmptyHeroCard configured={catalog.configured} loading={loading} />
+                <EmptyHero loading={loading} configured={catalog.configured} />
               )}
             </div>
           </div>
         </section>
 
-        <section className="mx-auto grid max-w-7xl gap-4 px-4 py-10 md:grid-cols-3">
-          <InfoCard icon={<ShoppingBag />} title="Commande simple" text="Choisissez une offre visible, puis confirmez la disponibilite avant validation." />
-          <InfoCard icon={<Store />} title="Vendeurs locaux" text="Le public affiche uniquement les partenaires verifies, actifs et publies." />
-          <InfoCard icon={<MessageCircle />} title="Contact direct" text="WhatsApp sert a confirmer les commandes, les besoins pro et les demandes partenaires." />
+        <section className="mx-auto max-w-7xl px-4 py-8">
+          <div className="flex flex-wrap gap-3">
+            {shortcutCategories.map((item) => {
+              const target = item === 'Tous' ? 'Tous' : item;
+              const active = category === target;
+              return (
+                <button
+                  key={item}
+                  onClick={() => {
+                    setCategory(target);
+                    document.getElementById('catalogue')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  className={`rounded-full border px-4 py-2 text-sm font-black transition ${active ? 'border-orange-300 bg-[#f97316] text-white' : 'border-orange-200 bg-white text-[#7c2d12] hover:-translate-y-0.5'}`}
+                >
+                  {item}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 pb-8">
+          <SectionIntro
+            eyebrow="Interface client"
+            title="Je cherche, j ajoute, je confirme."
+            text="Le parcours est court : vous trouvez un produit, vous le mettez dans la selection, puis vous confirmez le retrait ou la livraison selon votre zone."
+          />
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <ClientStep icon={<Search className="h-5 w-5" />} title="Je cherche" text="Recherche directe par produit, vendeur ou categorie." />
+            <ClientStep icon={<ShoppingBag className="h-5 w-5" />} title="J ajoute" text="Le panier reste visible et le total estimatif se met a jour tout de suite." />
+            <ClientStep icon={<MessageCircle className="h-5 w-5" />} title="Je confirme" text="WhatsApp sert a confirmer rapidement le retrait ou la livraison." />
+          </div>
         </section>
 
         <section className="mx-auto max-w-7xl px-4 pb-10">
-          <SectionIntro eyebrow="Types d offres" title="Une facade claire pour les besoins particuliers et pros" text="La premiere version publique reste volontairement simple : offres reelles, partenaires verifies, zones martiniquaises lisibles." />
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <OfferCard title="Plats et produits locaux" text="Catalogue vivant lorsque les produits sont actifs et verifies." icon={<Utensils />} />
-            <OfferCard title="Commandes groupees" text="Demandes pro, repas d equipe et besoins recurrents." icon={<Briefcase />} />
-            <OfferCard title="Retrait ou livraison" text="Affichage selon commune, zone et partenaire disponible." icon={<Truck />} />
+          <SectionIntro
+            eyebrow="Par type de partenaire"
+            title="Chaque partenaire voit tout de suite ou aller."
+            text="Le site distingue clairement les parcours pour vendre, livrer ou gerer une demande groupee."
+          />
+          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+            <PartnerTypeCard icon={<Utensils className="h-5 w-5" />} title="Restaurant / traiteur" text="Ajouter vos informations, proposer vos produits et envoyer vos photos depuis le formulaire partenaire." />
+            <PartnerTypeCard icon={<Truck className="h-5 w-5" />} title="Livraison / point relais" text="Preciser votre zone, votre rayon et vos horaires pour recevoir des demandes adaptees." />
+            <PartnerTypeCard icon={<Briefcase className="h-5 w-5" />} title="Entreprise / commande groupee" text="Envoyer une demande claire pour repas d equipe, besoin recurent ou commande programmee." />
           </div>
         </section>
 
         <section id="catalogue" className="bg-white py-12">
           <div className="mx-auto max-w-7xl px-4">
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <SectionIntro eyebrow="Catalogue reel" title="Produits publics verifies" text="Aucune ligne fictive n est affichee : les offres doivent etre publiques, actives et liees a un partenaire verifie." />
+              <SectionIntro
+                eyebrow="Catalogue"
+                title="Produits disponibles maintenant"
+                text="Prix, vendeur, zone et bouton d ajout sont visibles tout de suite. Vous ne voyez que les lignes reelles disponibles."
+              />
               <a href={orderLink} className="inline-flex w-fit items-center gap-2 rounded-2xl bg-[#f97316] px-5 py-3 font-black text-white">Commander <ArrowRight className="h-5 w-5" /></a>
             </div>
+
             <div className="mt-6 grid gap-3 md:grid-cols-[1fr_260px]">
               <label className="relative block">
                 <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
-                <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Rechercher un plat, produit ou partenaire" className="w-full rounded-2xl border border-orange-100 bg-orange-50/60 py-4 pl-12 pr-4 text-sm font-semibold outline-none ring-orange-200 focus:ring-4" />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Rechercher un plat, un produit ou un partenaire"
+                  className="w-full rounded-2xl border border-orange-100 bg-orange-50/60 py-4 pl-12 pr-4 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4"
+                />
               </label>
-              <select value={category} onChange={(event) => setCategory(event.target.value)} className="rounded-2xl border border-orange-100 bg-orange-50/60 px-4 py-4 text-sm font-semibold outline-none ring-orange-200 focus:ring-4">
-                {categories.map((item) => <option key={item} value={item}>{item}</option>)}
+              <select
+                value={category}
+                onChange={(event) => setCategory(event.target.value)}
+                className="rounded-2xl border border-orange-100 bg-orange-50/60 px-4 py-4 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4"
+              >
+                {categories.map((item) => (
+                  <option key={item} value={item}>{item}</option>
+                ))}
               </select>
             </div>
-            {loading && <p className="mt-6 rounded-2xl bg-orange-50 p-5 text-sm font-semibold text-stone-600">Chargement du catalogue public...</p>}
-            {error && <p className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm font-semibold text-amber-800">{error}</p>}
-            {!loading && !hasProducts && <EmptyCatalogue configured={catalog.configured} />}
-            {hasProducts && <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_360px]"><div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">{filteredProducts.map((product) => <ProductCard key={product.id} product={product} onAdd={() => addProduct(product)} />)}</div><Selection products={selected} onRemove={removeProduct} orderLink={orderLink} economics={economics} /></div>}
+
+            {loading && <InfoBanner tone="neutral" message="Chargement des produits disponibles..." />}
+            {error && <InfoBanner tone="warning" message={error} />}
+            {!loading && filteredProducts.length === 0 && <EmptyCatalog configured={catalog.configured} />}
+
+            {filteredProducts.length > 0 && (
+              <div className="mt-8 space-y-8">
+                <div>
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <h3 className="text-xl font-black text-[#301607]">A regarder en premier</h3>
+                    <span className="text-xs font-black uppercase tracking-[0.2em] text-stone-400">{featuredProducts.length} cartes</span>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    {featuredProducts.map((product) => (
+                      <ProductCard key={`top-${product.id}`} product={product} onAdd={() => addToSelection(product)} compact />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+                  <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                    {filteredProducts.map((product) => (
+                      <ProductCard key={product.id} product={product} onAdd={() => addToSelection(product)} />
+                    ))}
+                  </div>
+                  <SelectionPanel products={selected} economics={economics} orderLink={orderLink} onRemove={removeFromSelection} />
+                </div>
+              </div>
+            )}
           </div>
         </section>
 
-        <section id="partenaires" className="mx-auto max-w-7xl px-4 py-12">
-          <SectionIntro eyebrow="Partenaires" title="Vendeurs verifies en Martinique" text="La liste reste volontairement stricte : pas de partenaire visible sans validation publique." />
-          <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {catalog.vendors.map((vendor) => <VendorCard key={vendor.id} vendor={vendor} />)}
+        <section id="zones" className="mx-auto max-w-7xl px-4 py-12">
+          <SectionIntro
+            eyebrow="Zones et confiance"
+            title="Zones servies claires, partenaires visibles"
+            text="Les zones sont affichees simplement. Les partenaires visibles ont deja leur place dans le catalogue reel."
+          />
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {(serviceZones.length ? serviceZones : southZones).map((zone) => (
+              <ZoneCard key={zone} zone={zone} />
+            ))}
           </div>
-          {!loading && catalog.vendors.length === 0 && <p className="mt-6 rounded-2xl border border-orange-100 bg-white p-5 text-sm font-semibold text-stone-600">Aucun partenaire public verifie n est encore visible. La facade reste honnete jusqu a activation des donnees reelles.</p>}
+          <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {catalog.vendors.map((vendor) => (
+              <VendorCard key={vendor.id} vendor={vendor} />
+            ))}
+          </div>
+          {!loading && catalog.vendors.length === 0 && (
+            <InfoBanner tone="neutral" message="Aucun partenaire verifie n est visible pour le moment." />
+          )}
         </section>
 
-        <section className="bg-[#fff1df] py-12">
+        <section id="partenaires" className="bg-[#fff1df] py-12">
           <div className="mx-auto max-w-7xl px-4">
-            <SectionIntro eyebrow="Secteur sud et portail partenaire" title="Developper le sud Martinique, puis alimenter le catalogue" text="Cette passe compacte ajoute une base exploitable pour les partenaires : inscription, proposition de produits et envoi de photos sans casser la facade publique actuelle." />
+            <SectionIntro
+              eyebrow="Partenaire"
+              title="Choisissez votre formulaire et envoyez vos informations rapidement"
+              text="Un formulaire pour vous presenter, un second pour ajouter un produit et une photo. Le parcours reste direct et lisible."
+            />
             <div className="mt-6 grid gap-6 xl:grid-cols-[0.95fr_1.05fr_1.05fr]">
               <SouthCoverageCard zones={southZones} />
-              <PortalCard title="Inscription partenaire" icon={<Store className='h-5 w-5' />}>
+
+              <FormCard title="Devenir partenaire" subtitle="Restaurant, traiteur, point relais ou livraison : envoyez vos infos principales.">
                 <form className="space-y-3" onSubmit={handlePartnerSubmit}>
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <input value={partnerForm.business_name} onChange={(event) => setPartnerForm((current) => ({ ...current, business_name: event.target.value }))} placeholder="Nom de l etablissement" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4 sm:col-span-2" required />
-                    <input value={partnerForm.contact_name} onChange={(event) => setPartnerForm((current) => ({ ...current, contact_name: event.target.value }))} placeholder="Contact" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" required />
-                    <input value={partnerForm.phone} onChange={(event) => setPartnerForm((current) => ({ ...current, phone: event.target.value }))} placeholder="Telephone" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" required />
-                    <input value={partnerForm.whatsapp} onChange={(event) => setPartnerForm((current) => ({ ...current, whatsapp: event.target.value }))} placeholder="WhatsApp" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" />
-                    <input value={partnerForm.email} onChange={(event) => setPartnerForm((current) => ({ ...current, email: event.target.value }))} placeholder="Email" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" />
-                    <input value={partnerForm.address} onChange={(event) => setPartnerForm((current) => ({ ...current, address: event.target.value }))} placeholder="Adresse" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4 sm:col-span-2" />
-                    <input value={partnerForm.commune} onChange={(event) => setPartnerForm((current) => ({ ...current, commune: event.target.value }))} placeholder="Commune" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" />
-                    <input value={partnerForm.zone_label} onChange={(event) => setPartnerForm((current) => ({ ...current, zone_label: event.target.value }))} placeholder="Zone servie" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" />
-                    <input value={partnerForm.delivery_radius_km} onChange={(event) => setPartnerForm((current) => ({ ...current, delivery_radius_km: event.target.value }))} placeholder="Rayon livraison (km)" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" />
-                    <input value={partnerForm.activity_type} onChange={(event) => setPartnerForm((current) => ({ ...current, activity_type: event.target.value }))} placeholder="Type d activite" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" />
-                    <textarea value={partnerForm.opening_hours} onChange={(event) => setPartnerForm((current) => ({ ...current, opening_hours: event.target.value }))} placeholder="Horaires et creneaux" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4 sm:col-span-2" rows={3} />
+                    <TextInput value={partnerForm.business_name} onChange={(value) => setPartnerForm((current) => ({ ...current, business_name: value }))} placeholder="Nom de l etablissement" required className="sm:col-span-2" />
+                    <TextInput value={partnerForm.contact_name} onChange={(value) => setPartnerForm((current) => ({ ...current, contact_name: value }))} placeholder="Contact" required />
+                    <TextInput value={partnerForm.phone} onChange={(value) => setPartnerForm((current) => ({ ...current, phone: value }))} placeholder="Telephone" required />
+                    <TextInput value={partnerForm.whatsapp} onChange={(value) => setPartnerForm((current) => ({ ...current, whatsapp: value }))} placeholder="WhatsApp" />
+                    <TextInput value={partnerForm.email} onChange={(value) => setPartnerForm((current) => ({ ...current, email: value }))} placeholder="Email" />
+                    <TextInput value={partnerForm.address} onChange={(value) => setPartnerForm((current) => ({ ...current, address: value }))} placeholder="Adresse" className="sm:col-span-2" />
+                    <TextInput value={partnerForm.commune} onChange={(value) => setPartnerForm((current) => ({ ...current, commune: value }))} placeholder="Commune" />
+                    <TextInput value={partnerForm.zone_label} onChange={(value) => setPartnerForm((current) => ({ ...current, zone_label: value }))} placeholder="Zone servie" />
+                    <TextInput value={partnerForm.delivery_radius_km} onChange={(value) => setPartnerForm((current) => ({ ...current, delivery_radius_km: value }))} placeholder="Rayon livraison (km)" />
+                    <TextInput value={partnerForm.activity_type} onChange={(value) => setPartnerForm((current) => ({ ...current, activity_type: value }))} placeholder="Type d activite" />
+                    <TextArea value={partnerForm.opening_hours} onChange={(value) => setPartnerForm((current) => ({ ...current, opening_hours: value }))} placeholder="Horaires et creneaux" className="sm:col-span-2" rows={3} />
                   </div>
-                  <button type="submit" disabled={partnerStatus.kind === 'saving'} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#f97316] px-5 py-4 font-black text-white disabled:opacity-70">{partnerStatus.kind === 'saving' ? 'Envoi en cours...' : 'Envoyer la demande partenaire'}</button>
+                  <button type="submit" disabled={partnerStatus.kind === 'saving'} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#f97316] px-5 py-4 font-black text-white disabled:opacity-70">
+                    {partnerStatus.kind === 'saving' ? 'Envoi en cours...' : 'Envoyer ma demande'}
+                  </button>
                   <StatusBanner status={partnerStatus} />
                 </form>
-              </PortalCard>
-              <PortalCard title="Ajouter catalogue et photos" icon={<ImagePlus className='h-5 w-5' />}>
+              </FormCard>
+
+              <FormCard title="Ajouter mon produit" subtitle="Ajoutez un nom, un prix, une photo et une description courte. Le bouton vous concerne si vous vendez deja.">
                 <form className="space-y-3" onSubmit={handleProductSubmit}>
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <input value={productForm.business_name} onChange={(event) => setProductForm((current) => ({ ...current, business_name: event.target.value }))} placeholder="Nom de l etablissement" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4 sm:col-span-2" required />
-                    <input value={productForm.product_name} onChange={(event) => setProductForm((current) => ({ ...current, product_name: event.target.value }))} placeholder="Nom du produit" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" required />
-                    <input value={productForm.category} onChange={(event) => setProductForm((current) => ({ ...current, category: event.target.value }))} placeholder="Categorie" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" />
-                    <input value={productForm.price} onChange={(event) => setProductForm((current) => ({ ...current, price: event.target.value }))} placeholder="Prix" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" />
-                    <input value={productForm.stock_quantity} onChange={(event) => setProductForm((current) => ({ ...current, stock_quantity: event.target.value }))} placeholder="Stock" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4" />
-                    <textarea value={productForm.description} onChange={(event) => setProductForm((current) => ({ ...current, description: event.target.value }))} placeholder="Description courte" className="rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4 sm:col-span-2" rows={3} />
+                    <TextInput value={productForm.business_name} onChange={(value) => setProductForm((current) => ({ ...current, business_name: value }))} placeholder="Nom de l etablissement" required className="sm:col-span-2" />
+                    <TextInput value={productForm.product_name} onChange={(value) => setProductForm((current) => ({ ...current, product_name: value }))} placeholder="Nom du produit" required />
+                    <TextInput value={productForm.category} onChange={(value) => setProductForm((current) => ({ ...current, category: value }))} placeholder="Categorie" />
+                    <TextInput value={productForm.price} onChange={(value) => setProductForm((current) => ({ ...current, price: value }))} placeholder="Prix" />
+                    <TextInput value={productForm.stock_quantity} onChange={(value) => setProductForm((current) => ({ ...current, stock_quantity: value }))} placeholder="Stock" />
+                    <TextArea value={productForm.description} onChange={(value) => setProductForm((current) => ({ ...current, description: value }))} placeholder="Description courte" className="sm:col-span-2" rows={3} />
                     <label className="flex items-center justify-between rounded-2xl border border-dashed border-orange-200 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-600 sm:col-span-2">
                       <span className="inline-flex items-center gap-2"><Camera className="h-4 w-4 text-[#c2410c]" /> {productPhoto ? productPhoto.name : 'Ajouter une photo produit'}</span>
                       <input type="file" accept="image/*" className="hidden" onChange={(event) => setProductPhoto(event.target.files?.[0] ?? null)} />
                       <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">Choisir</span>
                     </label>
                   </div>
-                  <button type="submit" disabled={productStatus.kind === 'saving'} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-4 font-black text-white disabled:opacity-70">{productStatus.kind === 'saving' ? 'Envoi du produit...' : 'Ajouter catalogue et photos'}</button>
+
+                  {productPreviewEconomics && (
+                    <div className="rounded-[1.25rem] border border-orange-100 bg-orange-50/70 p-4 text-sm">
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">Lecture rapide</p>
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        <MiniLine label="Prix client" value={formatPrice(productPreviewEconomics.total_client)} />
+                        <MiniLine label="Net vendeur" value={formatPrice(productPreviewEconomics.remuneration_vendeur)} />
+                        <MiniLine label="Livraison" value={formatPrice(productPreviewEconomics.frais_livraison)} />
+                        <MiniLine label="Marge plateforme" value={formatPrice(productPreviewEconomics.marge_nette_plateforme)} />
+                      </div>
+                    </div>
+                  )}
+
+                  <button type="submit" disabled={productStatus.kind === 'saving'} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-4 font-black text-white disabled:opacity-70">
+                    {productStatus.kind === 'saving' ? 'Envoi en cours...' : 'Ajouter mon produit'}
+                  </button>
                   <StatusBanner status={productStatus} />
                 </form>
-              </PortalCard>
+              </FormCard>
             </div>
-          </div>
-        </section>
-
-        <section className="bg-[#fff1df] py-12">
-          <div className="mx-auto max-w-7xl px-4">
-            <SectionIntro eyebrow="Comment ca marche" title="Un parcours volontairement court" text="Le client comprend vite ce qui est disponible, comment confirmer, et dans quelle zone la commande peut etre traitee." />
-            <div className="mt-6 grid gap-4 md:grid-cols-4">
-              <Step number="1" title="Choisir" text="Produit ou besoin pro visible sur la facade publique." />
-              <Step number="2" title="Confirmer" text="Disponibilite, zone, creneau et mode retrait/livraison." />
-              <Step number="3" title="Valider" text="Commande transmise au partenaire concerne." />
-              <Step number="4" title="Suivre" text="Contact direct pour ajuster et finaliser." />
-            </div>
-          </div>
-        </section>
-
-        <section id="zones" className="mx-auto max-w-7xl px-4 py-12">
-          <SectionIntro eyebrow="Zones desservies" title="Martinique, avec zones claires par partenaire" text="Le site ne promet pas une couverture hors zone. La logique evolue par commune, rayon interne et zone partenaire." />
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {(serviceZones.length ? serviceZones : defaultZones).map((zone) => <ZoneCard key={zone} zone={zone} />)}
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 pb-12">
-          <div className="grid gap-5 lg:grid-cols-3">
-            <ProofCard icon={<BadgeCheck />} title="Donnees reelles seulement" text="Les filtres publics imposent partenaires verifies, produits publics, statut valide et disponibilite non desactivee." />
-            <ProofCard icon={<ShieldCheck />} title="Marge tracable" text="La logique interne separe total client, livraison, frais service, commission, payout vendeur et marge plateforme." />
-            <ProofCard icon={<MapPin />} title="Zones controlees" text="Rayon prestataire, geolocalisation et fallback par commune sont prepares pour l exploitation terrain." />
           </div>
         </section>
 
         <section id="demande-pro" className="bg-[#24170f] py-12 text-white">
           <div className="mx-auto grid max-w-7xl gap-6 px-4 lg:grid-cols-[1.05fr_0.95fr]">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.25em] text-orange-300">Pros et partenaires</p>
-              <h2 className="mt-3 font-display text-4xl font-black">Une demande pro claire, sans parcours complique.</h2>
-              <p className="mt-4 max-w-2xl text-stone-300">Repas d equipe, commandes groupees, partenaires vendeurs ou besoins recurrents : DELIKREOL qualifie la demande avant engagement.</p>
+              <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-300">Demande entreprise</p>
+              <h2 className="mt-3 font-display text-4xl font-black">Une demande claire pour repas d equipe, besoin groupe ou commande recurente.</h2>
+              <p className="mt-4 max-w-2xl text-stone-300">
+                Ce bloc s adresse aux entreprises, groupes et organisateurs qui veulent envoyer une demande simple et etre recontactes rapidement.
+              </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <a href={partnerLink} className="rounded-2xl border border-white/20 px-5 py-3 font-bold text-white">Devenir partenaire</a>
-                <a href={proLink} className="rounded-2xl bg-[#f97316] px-5 py-3 font-black text-white">Demande pro</a>
+                <a href={proLink} className="rounded-2xl bg-[#f97316] px-5 py-3 font-black text-white">Envoyer ma demande</a>
               </div>
             </div>
             <div className="rounded-[2rem] border border-white/10 bg-white/8 p-5">
               <div className="grid gap-3 sm:grid-cols-2">
-                <input value={proCompany} onChange={(event) => setProCompany(event.target.value)} placeholder="Entreprise" className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-stone-400" />
-                <input value={proContact} onChange={(event) => setProContact(event.target.value)} placeholder="Contact / telephone" className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-stone-400" />
-                <textarea value={proNeed} onChange={(event) => setProNeed(event.target.value)} placeholder="Besoin, volume, commune, date souhaitee" className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-stone-400 sm:col-span-2" rows={4} />
+                <TextInputDark value={proCompany} onChange={setProCompany} placeholder="Entreprise" />
+                <TextInputDark value={proContact} onChange={setProContact} placeholder="Contact / telephone" />
+                <TextAreaDark value={proNeed} onChange={setProNeed} placeholder="Besoin, volume, commune, date souhaitee" className="sm:col-span-2" rows={4} />
               </div>
-              <a href={proLink} className="mt-4 inline-flex w-full justify-center rounded-2xl bg-emerald-400 px-5 py-4 font-black text-emerald-950">Envoyer la demande pro</a>
+              <a href={proLink} className="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-emerald-400 px-5 py-4 font-black text-emerald-950">Demande pro</a>
             </div>
           </div>
         </section>
@@ -450,7 +588,7 @@ export function PublicHomePage() {
             <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-10 w-10" />
             <div>
               <p className="font-black">DELIKREOL Martinique</p>
-              <p className="text-sm text-stone-500">Commande locale - partenaires verifies - zones desservies claires</p>
+              <p className="text-sm text-stone-500">Commande locale - partenaires verifies - zones servies claires</p>
             </div>
           </div>
           <div className="flex flex-wrap gap-3 text-sm font-bold text-stone-600">
@@ -473,84 +611,326 @@ export function PublicHomePage() {
 }
 
 function SectionIntro({ eyebrow, title, text }: { eyebrow: string; title: string; text: string }) {
-  return <div><p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">{eyebrow}</p><h2 className="mt-2 font-display text-3xl font-black tracking-tight text-[#301607] md:text-4xl">{title}</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600">{text}</p></div>;
+  return (
+    <div>
+      <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">{eyebrow}</p>
+      <h2 className="mt-2 font-display text-3xl font-black tracking-tight text-[#301607] md:text-4xl">{title}</h2>
+      <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600 md:text-base md:leading-7">{text}</p>
+    </div>
+  );
 }
 
-function TrustPill({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return <div className="flex items-center gap-2 rounded-2xl border border-orange-100 bg-white/80 px-4 py-3 text-sm font-black text-stone-700 shadow-sm">{icon}<span>{label}</span></div>;
+function ProofChip({ label }: { label: string }) {
+  return <span className="rounded-full bg-orange-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-[#c2410c]">{label}</span>;
 }
 
-function InfoCard({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
-  return <div className="rounded-[1.5rem] border border-orange-100 bg-white p-5 shadow-sm"><div className="flex items-center gap-3 text-[#c2410c]">{icon}<span className="font-black text-[#301607]">{title}</span></div><p className="mt-3 text-sm leading-6 text-stone-600">{text}</p></div>;
+function ClientStep({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
+  return (
+    <div className="rounded-[1.5rem] border border-orange-100 bg-white p-5 shadow-sm">
+      <div className="inline-flex rounded-2xl bg-orange-100 p-3 text-[#c2410c]">{icon}</div>
+      <h3 className="mt-4 text-lg font-black text-[#301607]">{title}</h3>
+      <p className="mt-2 text-sm leading-6 text-stone-600">{text}</p>
+    </div>
+  );
 }
 
-function OfferCard({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
-  return <div className="rounded-[1.5rem] border border-orange-100 bg-white p-6 shadow-sm"><div className="mb-4 inline-flex rounded-2xl bg-orange-100 p-3 text-[#c2410c]">{icon}</div><h3 className="text-xl font-black text-[#301607]">{title}</h3><p className="mt-2 text-sm leading-6 text-stone-600">{text}</p></div>;
+function PartnerTypeCard({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
+  return (
+    <div className="rounded-[1.5rem] border border-orange-100 bg-white p-6 shadow-sm">
+      <div className="inline-flex rounded-2xl bg-emerald-50 p-3 text-emerald-700">{icon}</div>
+      <h3 className="mt-4 text-xl font-black text-[#301607]">{title}</h3>
+      <p className="mt-2 text-sm leading-6 text-stone-600">{text}</p>
+    </div>
+  );
 }
 
-function ProductCarousel({ product, count, active, onPrev, onNext }: { product: PublicCatalogProduct; count: number; active: number; onPrev: () => void; onNext: () => void }) {
-  return <div className="overflow-hidden rounded-[1.5rem] bg-[#24170f] text-white"><div className="relative aspect-[4/3] bg-gradient-to-br from-orange-200 via-amber-100 to-emerald-100">{product.image_url ? <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" /> : <DishPlaceholder name={product.name} /> }<div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/78 to-transparent p-5"><p className="text-xs font-black uppercase tracking-[0.2em] text-orange-200">Disponible si confirme</p><h3 className="mt-2 text-3xl font-black">{product.name}</h3><p className="mt-1 text-sm text-stone-200">{product.vendor_name} - {product.zone_label}</p><p className="mt-3 text-2xl font-black text-orange-200">{formatPrice(product.price)}</p></div><button onClick={onPrev} className="absolute left-3 top-1/2 rounded-full bg-white/90 p-2 text-stone-900"><ChevronLeft className="h-5 w-5" /></button><button onClick={onNext} className="absolute right-3 top-1/2 rounded-full bg-white/90 p-2 text-stone-900"><ChevronRight className="h-5 w-5" /></button></div><div className="flex items-center justify-between px-5 py-4 text-sm text-stone-300"><span>Offres reelles activees</span><span>{active + 1} / {count}</span></div></div>;
-}
-
-function EmptyHeroCard({ configured, loading }: { configured: boolean; loading: boolean }) {
-  return <div className="flex min-h-[380px] flex-col justify-center rounded-[1.5rem] bg-gradient-to-br from-[#24170f] to-[#6b2d08] p-8 text-white"><p className="text-xs font-black uppercase tracking-[0.24em] text-orange-200">Catalogue vivant</p><h3 className="mt-4 font-display text-4xl font-black">{loading ? 'Verification des offres publiques...' : 'Activation des partenaires reels en cours'}</h3><p className="mt-4 text-stone-200">{configured ? 'Aucune offre publique validee n est visible pour le moment.' : 'La configuration publique doit etre activee avant affichage des donnees.'}</p></div>;
-}
-
-function EmptyCatalogue({ configured }: { configured: boolean }) {
-  return <div className="mt-8 rounded-[2rem] border border-amber-200 bg-amber-50 p-7"><div className="flex items-center gap-3 text-amber-800"><Package className="h-6 w-6" /><p className="text-lg font-black">Catalogue public en cours d activation</p></div><p className="mt-3 max-w-3xl text-sm leading-6 text-amber-900">{configured ? 'Aucun partenaire et produit public verifie n est encore visible. DELIKREOL n affiche pas de faux catalogue.' : 'La configuration publique doit etre completee dans GitHub Actions avant lecture des donnees reelles.'}</p><div className="mt-5 flex flex-wrap gap-3"><a href="#partenaires" className="rounded-2xl border border-amber-300 bg-white px-5 py-3 font-bold text-amber-900">Devenir partenaire</a><a href="#demande-pro" className="rounded-2xl bg-[#f97316] px-5 py-3 font-black text-white">Demande pro</a></div></div>;
-}
-
-function ProductCard({ product, onAdd }: { product: PublicCatalogProduct; onAdd: () => void }) {
-  return <article className="overflow-hidden rounded-[1.5rem] border border-orange-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"><div className="aspect-[4/3] bg-orange-50">{product.image_url ? <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" /> : <DishPlaceholder name={product.name} />}</div><div className="p-5"><div className="flex items-center justify-between gap-3"><span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-black uppercase tracking-wider text-[#c2410c]">{product.category}</span><span className="text-xs font-bold text-emerald-700">Verifie</span></div><h3 className="mt-4 text-xl font-black text-[#301607]">{product.name}</h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-stone-600">{product.description}</p><div className="mt-4 text-sm font-bold text-stone-500">{product.vendor_name} - {product.zone_label}</div><div className="mt-5 flex items-center justify-between gap-3"><strong className="text-2xl font-black text-[#24170f]">{formatPrice(product.price)}</strong><button onClick={onAdd} className="rounded-xl bg-[#f97316] px-4 py-2 text-sm font-black text-white">Ajouter</button></div></div></article>;
+function ProductCard({ product, onAdd, compact = false }: { product: PublicCatalogProduct; onAdd: () => void; compact?: boolean }) {
+  return (
+    <article className="overflow-hidden rounded-[1.5rem] border border-orange-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+      <div className={`${compact ? 'aspect-[16/11]' : 'aspect-[4/3]'} bg-orange-50`}>
+        {product.image_url ? (
+          <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
+        ) : (
+          <DishPlaceholder name={product.name} />
+        )}
+      </div>
+      <div className={compact ? 'p-4' : 'p-5'}>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-full bg-orange-100 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-[#c2410c]">{product.category}</span>
+          <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-emerald-700">Disponible</span>
+          <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-slate-600">{product.zone_label || 'Martinique'}</span>
+        </div>
+        <h3 className={`mt-3 font-black text-[#301607] ${compact ? 'text-lg' : 'text-xl'}`}>{product.name}</h3>
+        <p className={`mt-2 line-clamp-2 text-sm text-stone-600 ${compact ? 'leading-5' : 'leading-6'}`}>{product.description}</p>
+        <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-stone-400">
+          <span>Retrait</span>
+          <span>Livraison selon zone</span>
+          <span>{product.vendor_name}</span>
+        </div>
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <strong className={`${compact ? 'text-xl' : 'text-2xl'} font-black text-[#24170f]`}>{formatPrice(product.price)}</strong>
+          <button onClick={onAdd} className="rounded-xl bg-[#f97316] px-4 py-2 text-sm font-black text-white">Ajouter au panier</button>
+        </div>
+      </div>
+    </article>
+  );
 }
 
 function VendorCard({ vendor }: { vendor: PublicCatalogVendor }) {
-  return <article className="rounded-[1.5rem] border border-orange-100 bg-white p-6 shadow-sm"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.2em] text-[#c2410c]">{vendor.business_type}</p><h3 className="mt-3 text-2xl font-black text-[#301607]">{vendor.business_name}</h3></div><BadgeCheck className="h-7 w-7 text-emerald-600" /></div><p className="mt-3 text-sm leading-6 text-stone-600">{vendor.description}</p><div className="mt-4 flex flex-wrap gap-2 text-xs font-bold text-stone-600"><span className="rounded-full bg-orange-50 px-3 py-1">{vendor.zone_label}</span><span className="rounded-full bg-emerald-50 px-3 py-1">Rayon {vendor.delivery_radius_km} km</span></div></article>;
+  const zone = vendor.zone_label || 'Martinique';
+  const destination = `${zone}, Martinique`;
+  const googleMaps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination)}`;
+  const waze = `https://waze.com/ul?q=${encodeURIComponent(destination)}&navigate=yes`;
+
+  return (
+    <article className="rounded-[1.5rem] border border-orange-100 bg-white p-6 shadow-sm">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-[#c2410c]">{vendor.business_type}</p>
+          <h3 className="mt-3 text-2xl font-black text-[#301607]">{vendor.business_name}</h3>
+        </div>
+        <CheckCircle2 className="h-7 w-7 text-emerald-600" />
+      </div>
+      <p className="mt-3 text-sm leading-6 text-stone-600">{vendor.description}</p>
+      <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold text-stone-600">
+        <span className="rounded-full bg-orange-50 px-3 py-1">{zone}</span>
+        <span className="rounded-full bg-emerald-50 px-3 py-1">Rayon {vendor.delivery_radius_km} km</span>
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <a href={googleMaps} target="_blank" rel="noreferrer" className="rounded-full border border-orange-200 px-3 py-2 text-xs font-black text-[#7c2d12]">Google Maps</a>
+        <a href={waze} target="_blank" rel="noreferrer" className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-800">Waze</a>
+      </div>
+    </article>
+  );
 }
 
-function PortalCard({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
-  return <div className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-sm"><div className="mb-4 flex items-center gap-3 text-[#c2410c]">{icon}<h3 className="text-xl font-black text-[#301607]">{title}</h3></div>{children}</div>;
+function FormCard({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
+  return (
+    <div className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-sm">
+      <h3 className="text-2xl font-black text-[#301607]">{title}</h3>
+      <p className="mt-2 text-sm leading-6 text-stone-600">{subtitle}</p>
+      <div className="mt-5">{children}</div>
+    </div>
+  );
 }
 
 function SouthCoverageCard({ zones }: { zones: string[] }) {
-  return <div className="rounded-[1.75rem] border border-orange-100 bg-[#24170f] p-6 text-white shadow-sm"><div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-orange-200"><MapPinned className="h-4 w-4" /> Secteur sud</div><h3 className="mt-4 text-2xl font-black">Renforcer la couverture partenaire au sud de la Martinique</h3><p className="mt-3 text-sm leading-6 text-stone-200">Cette passe compacte ouvre un parcours public pour les partenaires du sud : inscription, proposition de produits et ajout de photos avant validation.</p><div className="mt-5 flex flex-wrap gap-2">{zones.map((zone) => <span key={zone} className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-stone-100">{zone}</span>)}</div><ul className="mt-5 space-y-2 text-sm text-stone-200"><li>- inscription partenaire rapide</li><li>- ajout catalogue unitaire</li><li>- photo produit via bucket dedie</li><li>- validation publique ensuite seulement</li></ul></div>;
+  return (
+    <div className="rounded-[1.75rem] border border-orange-100 bg-[#24170f] p-6 text-white shadow-sm">
+      <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-orange-200">
+        <MapPin className="h-4 w-4" /> Secteur sud
+      </div>
+      <h3 className="mt-4 text-2xl font-black">Zones a servir en priorite</h3>
+      <p className="mt-3 text-sm leading-6 text-stone-200">
+        Vous voyez ici les communes mises en avant pour la prise de contact, la livraison et le retrait.
+      </p>
+      <div className="mt-5 flex flex-wrap gap-2">
+        {zones.map((zone) => (
+          <span key={zone} className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-stone-100">{zone}</span>
+        ))}
+      </div>
+      <ul className="mt-5 space-y-2 text-sm text-stone-200">
+        <li>- inscription simple</li>
+        <li>- ajout produit</li>
+        <li>- ajout photo</li>
+        <li>- zone de service lisible</li>
+      </ul>
+    </div>
+  );
+}
+
+function SelectionPanel({
+  products,
+  economics,
+  orderLink,
+  onRemove,
+}: {
+  products: PublicCatalogProduct[];
+  economics: ReturnType<typeof calculateOrderEconomics>;
+  orderLink: string;
+  onRemove: (index: number) => void;
+}) {
+  return (
+    <aside className="sticky top-24 h-fit rounded-[1.5rem] border border-orange-100 bg-[#fff8ed] p-5 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <ShoppingBag className="h-5 w-5 text-[#f97316]" />
+          <h3 className="text-lg font-black text-[#301607]">Selection</h3>
+        </div>
+        <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">{products.length} article{products.length > 1 ? 's' : ''}</span>
+      </div>
+
+      {products.length === 0 ? (
+        <p className="mt-4 text-sm leading-6 text-stone-600">Ajoutez des produits pour preparer votre commande.</p>
+      ) : (
+        <div className="mt-4 space-y-3">
+          {products.map((product, index) => (
+            <div key={`${product.id}-${index}`} className="rounded-2xl bg-white p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-black text-[#301607]">{product.name}</p>
+                  <p className="text-xs text-stone-500">{product.vendor_name}</p>
+                </div>
+                <button onClick={() => onRemove(index)} className="text-xs font-bold text-stone-400">Retirer</button>
+              </div>
+            </div>
+          ))}
+
+          <div className="rounded-2xl border border-orange-100 bg-white p-4 text-sm">
+            <SummaryLine label="Sous-total" value={formatPrice(economics.subtotal_produits)} />
+            <SummaryLine label="Livraison" value={formatPrice(economics.frais_livraison)} />
+            <SummaryLine label="Frais service" value={formatPrice(economics.frais_service)} />
+            <SummaryLine label="Total estime" value={formatPrice(economics.total_client)} strong />
+          </div>
+
+          <a href={orderLink} className="inline-flex w-full justify-center rounded-2xl bg-[#f97316] px-5 py-4 font-black text-white">Confirmer la commande</a>
+          <p className="text-xs font-semibold text-stone-500">Retrait ou livraison confirmes ensuite selon votre zone.</p>
+        </div>
+      )}
+    </aside>
+  );
+}
+
+function EmptyHero({ loading, configured }: { loading: boolean; configured: boolean }) {
+  return (
+    <div className="flex min-h-[380px] flex-col justify-center rounded-[1.5rem] bg-gradient-to-br from-[#24170f] to-[#6b2d08] p-8 text-white">
+      <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-200">Catalogue</p>
+      <h3 className="mt-4 font-display text-4xl font-black">{loading ? 'Chargement des produits...' : 'Aucun produit visible pour le moment'}</h3>
+      <p className="mt-4 text-stone-200">
+        {configured ? 'Les prochaines lignes verifiees apparaitront ici.' : 'La connexion au catalogue n est pas disponible pour le moment.'}
+      </p>
+    </div>
+  );
+}
+
+function EmptyCatalog({ configured }: { configured: boolean }) {
+  return (
+    <div className="mt-8 rounded-[2rem] border border-amber-200 bg-amber-50 p-7">
+      <div className="flex items-center gap-3 text-amber-800">
+        <Package className="h-6 w-6" />
+        <p className="text-lg font-black">Aucun produit visible pour le moment</p>
+      </div>
+      <p className="mt-3 max-w-3xl text-sm leading-6 text-amber-900">
+        {configured ? 'Le site n affiche pas de faux catalogue. Les prochains produits verifies apparaitront ici.' : 'Le catalogue ne peut pas etre lu pour le moment.'}
+      </p>
+      <div className="mt-5 flex flex-wrap gap-3">
+        <a href="#partenaires" className="rounded-2xl border border-amber-300 bg-white px-5 py-3 font-bold text-amber-900">Devenir partenaire</a>
+        <a href="#demande-pro" className="rounded-2xl bg-[#f97316] px-5 py-3 font-black text-white">Demande pro</a>
+      </div>
+    </div>
+  );
+}
+
+function InfoBanner({ tone, message }: { tone: 'neutral' | 'warning'; message: string }) {
+  const classes = tone === 'warning'
+    ? 'border-amber-200 bg-amber-50 text-amber-800'
+    : 'border-orange-100 bg-white text-stone-600';
+  return <p className={`mt-6 rounded-2xl border p-5 text-sm font-semibold ${classes}`}>{message}</p>;
 }
 
 function StatusBanner({ status }: { status: SubmitStatus }) {
   if (status.kind === 'idle') return null;
-  const tone = status.kind === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : status.kind === 'error' ? 'border-rose-200 bg-rose-50 text-rose-700' : 'border-orange-200 bg-orange-50 text-orange-800';
+  const tone = status.kind === 'success'
+    ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+    : status.kind === 'error'
+      ? 'border-rose-200 bg-rose-50 text-rose-700'
+      : 'border-orange-200 bg-orange-50 text-orange-800';
   return <p className={`rounded-2xl border px-4 py-3 text-sm font-semibold ${tone}`}>{status.message}</p>;
 }
 
-function Step({ number, title, text }: { number: string; title: string; text: string }) {
-  return <div className="rounded-[1.5rem] border border-orange-100 bg-white p-5 shadow-sm"><div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f97316] font-black text-white">{number}</div><h3 className="mt-4 text-lg font-black text-[#301607]">{title}</h3><p className="mt-2 text-sm leading-6 text-stone-600">{text}</p></div>;
+function SummaryLine({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
+  return (
+    <div className={`flex justify-between py-1 ${strong ? 'text-base font-black text-[#301607]' : 'text-stone-600'}`}>
+      <span>{label}</span>
+      <span>{value}</span>
+    </div>
+  );
+}
+
+function MiniLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl bg-white px-3 py-2">
+      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">{label}</p>
+      <p className="mt-1 text-sm font-black text-[#301607]">{value}</p>
+    </div>
+  );
 }
 
 function ZoneCard({ zone }: { zone: string }) {
-  return <div className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm"><div className="flex items-center gap-2 font-black text-[#301607]"><MapPin className="h-5 w-5 text-[#f97316]" />{zone}</div><p className="mt-2 text-sm text-stone-600">Retrait ou livraison selon partenaire active.</p></div>;
+  return (
+    <div className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm">
+      <div className="flex items-center gap-2 font-black text-[#301607]">
+        <MapPin className="h-5 w-5 text-[#f97316]" />
+        {zone}
+      </div>
+      <p className="mt-2 text-sm text-stone-600">Retrait ou livraison selon partenaire actif.</p>
+    </div>
+  );
 }
 
-function ProofCard({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
-  return <div className="rounded-[1.5rem] border border-orange-100 bg-white p-6 shadow-sm"><div className="mb-4 inline-flex rounded-2xl bg-emerald-50 p-3 text-emerald-700">{icon}</div><h3 className="text-xl font-black text-[#301607]">{title}</h3><p className="mt-2 text-sm leading-6 text-stone-600">{text}</p></div>;
+function TextInput({ value, onChange, placeholder, className = '', required = false }: { value: string; onChange: (value: string) => void; placeholder: string; className?: string; required?: boolean }) {
+  return (
+    <input
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      placeholder={placeholder}
+      required={required}
+      className={`rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4 ${className}`}
+    />
+  );
 }
 
-function Selection({ products, onRemove, orderLink, economics }: { products: PublicCatalogProduct[]; onRemove: (index: number) => void; orderLink: string; economics: ReturnType<typeof calculateOrderEconomics> }) {
-  return <aside className="sticky top-24 h-fit rounded-[1.5rem] border border-orange-100 bg-[#fff8ed] p-5 shadow-sm"><div className="flex items-center gap-3"><ShoppingBag className="h-5 w-5 text-[#f97316]" /><h3 className="text-lg font-black text-[#301607]">Selection</h3></div>{products.length === 0 ? <p className="mt-4 text-sm leading-6 text-stone-600">Ajoutez des produits pour preparer une demande de confirmation.</p> : <div className="mt-4 space-y-3">{products.map((product, index) => <div key={`${product.id}-${index}`} className="rounded-2xl bg-white p-3"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-black text-[#301607]">{product.name}</p><p className="text-xs text-stone-500">{product.vendor_name}</p></div><button onClick={() => onRemove(index)} className="text-xs font-bold text-stone-400">Retirer</button></div></div>)}<div className="rounded-2xl border border-orange-100 bg-white p-4 text-sm"><Line label="Produits" value={formatPrice(economics.subtotal_produits)} /><Line label="Livraison estimee" value={formatPrice(economics.frais_livraison)} /><Line label="Frais service" value={formatPrice(economics.frais_service)} /><Line label="Total a confirmer" value={formatPrice(economics.total_client)} strong /></div><a href={orderLink} className="inline-flex w-full justify-center rounded-2xl bg-[#f97316] px-5 py-4 font-black text-white">Commander</a></div>}</aside>;
+function TextArea({ value, onChange, placeholder, className = '', rows = 3 }: { value: string; onChange: (value: string) => void; placeholder: string; className?: string; rows?: number }) {
+  return (
+    <textarea
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      placeholder={placeholder}
+      rows={rows}
+      className={`rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4 ${className}`}
+    />
+  );
 }
 
-function Line({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
-  return <div className={`flex justify-between py-1 ${strong ? 'text-base font-black text-[#301607]' : 'text-stone-600'}`}><span>{label}</span><span>{value}</span></div>;
+function TextInputDark({ value, onChange, placeholder }: { value: string; onChange: (value: string) => void; placeholder: string }) {
+  return (
+    <input
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      placeholder={placeholder}
+      className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-stone-400"
+    />
+  );
+}
+
+function TextAreaDark({ value, onChange, placeholder, className = '', rows = 4 }: { value: string; onChange: (value: string) => void; placeholder: string; className?: string; rows?: number }) {
+  return (
+    <textarea
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      placeholder={placeholder}
+      rows={rows}
+      className={`rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-stone-400 ${className}`}
+    />
+  );
 }
 
 function DishPlaceholder({ name }: { name: string }) {
-  return <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_30%_30%,rgba(251,146,60,0.35),transparent_35%),linear-gradient(135deg,#ffedd5,#fef3c7,#dcfce7)]"><div className="rounded-full bg-white/80 px-6 py-4 text-center shadow-lg"><Utensils className="mx-auto h-8 w-8 text-[#c2410c]" /><p className="mt-2 max-w-[180px] text-sm font-black text-[#301607]">{name}</p></div></div>;
+  return (
+    <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_30%_30%,rgba(251,146,60,0.35),transparent_35%),linear-gradient(135deg,#ffedd5,#fef3c7,#dcfce7)]">
+      <div className="rounded-full bg-white/80 px-6 py-4 text-center shadow-lg">
+        <Utensils className="mx-auto h-8 w-8 text-[#c2410c]" />
+        <p className="mt-2 max-w-[180px] text-sm font-black text-[#301607]">{name}</p>
+      </div>
+    </div>
+  );
 }
 
 function formatPrice(value: number) {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value);
 }
 
-function extractError(error: unknown, fallback: string) {
+function getErrorMessage(error: unknown, fallback: string) {
   if (error instanceof Error && error.message) return error.message;
   return fallback;
 }
