@@ -1,0 +1,8 @@
+<svg width="480" height="160" viewBox="0 0 480 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="480" height="160" rx="28" fill="#FFF7EF"/>
+  <text x="32" y="90" font-family="Sora, sans-serif" font-size="54" font-weight="800" fill="#7A2E1B">DELIKREOL</text>
+  <rect x="32" y="110" width="260" height="10" rx="5" fill="#E46A2E"/>
+  <rect x="32" y="124" width="416" height="10" fill="#E74C3C"/>
+  <rect x="32" y="134" width="416" height="10" fill="#F5B041"/>
+  <rect x="32" y="144" width="416" height="10" fill="#2ECC71"/>
+</svg>
