@@ -174,6 +174,42 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
 
   const renderDriverFields = () => (
     <>
+      <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-900">
+        <p className="font-semibold">Espace livreur</p>
+        <p className="mt-1">
+          Indiquez votre zone, votre rayon, votre disponibilité, votre véhicule et votre objectif de rémunération.
+        </p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Zone desservie *
+        </label>
+        <input
+          type="text"
+          required
+          value={formData.service_zone || ''}
+          onChange={(e) => updateField('service_zone', e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          placeholder="Ex: Fort-de-France, Lamentin, Schoelcher"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Rayon souhaité (km) *
+        </label>
+        <input
+          type="number"
+          min="1"
+          required
+          value={formData.delivery_radius_km || ''}
+          onChange={(e) => updateField('delivery_radius_km', e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          placeholder="Ex: 8"
+        />
+      </div>
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Nom complet *
@@ -268,6 +304,20 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           onChange={(e) => updateField('availability', e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
           placeholder="Ex: Lundi-Vendredi 9h-18h"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Rémunération estimée souhaitée *
+        </label>
+        <input
+          type="text"
+          required
+          value={formData.expected_remuneration || ''}
+          onChange={(e) => updateField('expected_remuneration', e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          placeholder="Ex: 70% des frais livraison + bonus distance"
         />
       </div>
 
