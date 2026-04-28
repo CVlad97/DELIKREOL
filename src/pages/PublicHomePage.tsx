@@ -1,24 +1,24 @@
-import { FormEvent, ReactNode, useEffect, useMemo, useState } from 'react';
+import { FormEvent, ReactNode, useEffect, useMemo, useState, type ComponentType } from 'react';
 import {
   ArrowRight,
-  Briefcase,
-  Camera,
-  CheckCircle2,
-  Clock,
+  BadgeCheck,
+  ChevronRight,
+  Filter,
   MapPin,
   MessageCircle,
   Package,
   Search,
   ShieldCheck,
   ShoppingBag,
-  Store,
-  Truck,
+  Sparkles,
+  Star,
   Utensils,
 } from 'lucide-react';
 import { loadPublicCatalog, PublicCatalogProduct, PublicCatalogVendor } from '../services/publicCatalogService';
 import { calculateOrderEconomics } from '../services/orderEconomics';
 import { getMartiniqueServiceZones } from '../services/serviceZones';
 import { submitPartnerLead, submitPartnerProduct, uploadPartnerProductPhoto } from '../services/partnerPortalService';
+import { createBusinessRequest } from '../services/liteOrdersService';
 
 type CatalogState = {
   configured: boolean;
@@ -26,27 +26,38 @@ type CatalogState = {
   products: PublicCatalogProduct[];
 };
 
-type PartnerFormState = {
+type PartnerLeadForm = {
   business_name: string;
   contact_name: string;
   phone: string;
   whatsapp: string;
   email: string;
-  address: string;
   commune: string;
   zone_label: string;
   activity_type: string;
   delivery_radius_km: string;
   opening_hours: string;
+  description: string;
 };
 
-type ProductFormState = {
+type ProductSubmissionForm = {
   business_name: string;
   product_name: string;
-  description: string;
   category: string;
   price: string;
-  stock_quantity: string;
+  description: string;
+};
+
+type BusinessRequestForm = {
+  company_name: string;
+  contact: string;
+  people_count: string;
+  requested_date: string;
+  requested_time: string;
+  location: string;
+  budget: string;
+  frequency: string;
+  details: string;
 };
 
 type SubmitStatus = {
@@ -56,48 +67,131 @@ type SubmitStatus = {
 
 const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 const whatsappBase = `https://wa.me/${whatsappNumber}`;
-const shortcutCategories = ['Tous', 'Cuisine locale', 'Plats', 'Boissons', 'Epicerie', 'Service'];
-const southZones = ['Ducos', 'Riviere-Salee', 'Le Diamant', 'Sainte-Luce', 'Sainte-Anne', 'Le Marin', 'Le Francois'];
+const fallbackZones = ['Fort-de-France', 'Le Lamentin', 'Schoelcher', 'Ducos', 'Rivière-Salée', 'Sainte-Luce', 'Le Marin', 'Le François'];
+const featuredCategories = ['plats créoles', 'traiteurs', 'box / plateaux', 'desserts', 'boissons', 'commande entreprise'];
+const budgetRanges = ['Tous', '≤ 15 €', '15 € - 30 €', '30 € et plus'];
 
-const defaultPartnerForm: PartnerFormState = {
+const trustPills = [
+  'partenaires vérifiés',
+  'retrait ou livraison',
+  'confirmation rapide',
+  'pensé pour la Martinique',
+];
+
+const howItWorks = [
+  {
+    title: 'Je cherche',
+    text: 'Je filtre par commune, catégorie et budget pour trouver rapidement une offre claire et locale.',
+  },
+  {
+    title: 'J’ajoute',
+    text: 'Je sélectionne les produits ou je prépare une demande pour un repas d’équipe, un événement ou une commande récurrente.',
+  },
+  {
+    title: 'Je confirme',
+    text: 'Je finalise par WhatsApp ou via la demande entreprise pour recevoir une réponse rapide et concrète.',
+  },
+];
+
+const reassurance = [
+  {
+    title: 'Local et crédible',
+    text: 'Le site met en avant des partenaires visibles, des zones servies lisibles et des informations utiles au premier regard.',
+    icon: ShieldCheck,
+  },
+  {
+    title: 'Simple et rapide',
+    text: 'Un parcours direct sur mobile, avec des CTA visibles et une conversion pensée pour aller droit au devis ou à la commande.',
+    icon: Sparkles,
+  },
+  {
+    title: 'Pensé pour la Martinique',
+    text: 'Le vocabulaire, les communes, les besoins et les usages sont adaptés à un usage local réel.',
+    icon: MapPin,
+  },
+];
+
+const faqItems = [
+  {
+    question: 'DELIKREOL est-il un simple traiteur ?',
+    answer: 'Non. DELIKREOL est une plateforme locale multi-partenaire qui relie clients, vendeurs, livraison et demandes entreprises.',
+  },
+  {
+    question: 'Comment savoir si un partenaire est actif ?',
+    answer: 'Les fiches affichent la visibilité, la commune, la zone, les horaires et l’état disponible ou à confirmer.',
+  },
+  {
+    question: 'Peut-on commander pour une entreprise ?',
+    answer: 'Oui. Le bloc Entreprises & commandes groupées permet de demander un devis, un repas d’équipe ou une récurrence.',
+  },
+  {
+    question: 'Quels modes de paiement sont disponibles ?',
+    answer: 'Les modes proposés sont affichés au niveau des fiches et du panier. Si une donnée manque, elle doit rester en [À VALIDER].',
+  },
+  {
+    question: 'Comment rejoindre la plateforme ?',
+    answer: 'Les vendeurs, traiteurs et prestataires peuvent remplir le formulaire partenaire pour être examinés puis intégrés.',
+  },
+];
+
+const defaultPartnerLeadForm: PartnerLeadForm = {
   business_name: '',
   contact_name: '',
   phone: '',
   whatsapp: '',
   email: '',
-  address: '',
   commune: '',
-  zone_label: 'Secteur sud',
-  activity_type: 'food_partner',
+  zone_label: '',
+  activity_type: 'restaurant',
   delivery_radius_km: '8',
   opening_hours: '',
+  description: '',
 };
 
-const defaultProductForm: ProductFormState = {
+const defaultProductSubmissionForm: ProductSubmissionForm = {
   business_name: '',
   product_name: '',
-  description: '',
-  category: 'Cuisine locale',
+  category: 'plats créoles',
   price: '',
-  stock_quantity: '',
+  description: '',
+};
+
+const defaultBusinessRequestForm: BusinessRequestForm = {
+  company_name: '',
+  contact: '',
+  people_count: '',
+  requested_date: '',
+  requested_time: '',
+  location: '',
+  budget: '',
+  frequency: '',
+  details: '',
 };
 
 export function PublicHomePage() {
   const baseUrl = import.meta.env.BASE_URL || '/';
   const [catalog, setCatalog] = useState<CatalogState>({ configured: false, vendors: [], products: [] });
-  const [selected, setSelected] = useState<PublicCatalogProduct[]>([]);
+  const [query, setQuery] = useState('');
+  const [communeFilter, setCommuneFilter] = useState('Tous');
+  const [categoryFilter, setCategoryFilter] = useState('Tous');
+  const [budgetFilter, setBudgetFilter] = useState('Tous');
+  const [selectedProducts, setSelectedProducts] = useState<PublicCatalogProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [query, setQuery] = useState('');
-  const [category, setCategory] = useState('Tous');
-  const [partnerForm, setPartnerForm] = useState<PartnerFormState>(defaultPartnerForm);
-  const [productForm, setProductForm] = useState<ProductFormState>(defaultProductForm);
+  const [partnerLeadForm, setPartnerLeadForm] = useState<PartnerLeadForm>(defaultPartnerLeadForm);
+  const [productSubmissionForm, setProductSubmissionForm] = useState<ProductSubmissionForm>(defaultProductSubmissionForm);
+  const [businessRequestForm, setBusinessRequestForm] = useState<BusinessRequestForm>(defaultBusinessRequestForm);
   const [partnerStatus, setPartnerStatus] = useState<SubmitStatus>({ kind: 'idle' });
   const [productStatus, setProductStatus] = useState<SubmitStatus>({ kind: 'idle' });
+  const [businessStatus, setBusinessStatus] = useState<SubmitStatus>({ kind: 'idle' });
   const [productPhoto, setProductPhoto] = useState<File | null>(null);
-  const [proCompany, setProCompany] = useState('');
-  const [proContact, setProContact] = useState('');
-  const [proNeed, setProNeed] = useState('');
+
+  useEffect(() => {
+    document.title = 'DELIKREOL Martinique | Plats créoles, traiteurs, produits locaux et entreprises';
+    upsertMeta('description', 'DELIKREOL est la plateforme locale premium pour commander des plats créoles, des produits locaux et des demandes entreprises en Martinique.');
+    upsertMeta('og:title', 'DELIKREOL Martinique | Plateforme locale premium');
+    upsertMeta('og:description', 'Commandez des plats créoles et produits locaux en Martinique, avec retrait ou livraison selon votre commune.');
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -110,7 +204,7 @@ export function PublicHomePage() {
       .catch(() => {
         if (!active) return;
         setCatalog({ configured: true, vendors: [], products: [] });
-        setError('Le catalogue est momentanement indisponible. Aucune ligne fictive n est affichee.');
+        setError('Le catalogue est momentanément indisponible. Aucune donnée inventée n’est affichée.');
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -121,809 +215,1206 @@ export function PublicHomePage() {
     };
   }, []);
 
-  const categories = useMemo(
-    () => ['Tous', ...Array.from(new Set(catalog.products.map((product) => product.category || 'Cuisine locale')))],
-    [catalog.products],
-  );
+  const serviceZones = useMemo(() => {
+    const vendorZones = catalog.vendors.map((vendor) => vendor.zone_label).filter(Boolean);
+    return Array.from(new Set([...getMartiniqueServiceZones(vendorZones), ...fallbackZones]));
+  }, [catalog.vendors]);
+
+  const categoryOptions = useMemo(() => {
+    const fromCatalog = catalog.products.map((product) => product.category || 'plats créoles');
+    return ['Tous', ...Array.from(new Set([...featuredCategories, ...fromCatalog]))];
+  }, [catalog.products]);
 
   const filteredProducts = useMemo(() => {
     const needle = query.trim().toLowerCase();
+
     return catalog.products.filter((product) => {
-      const haystack = `${product.name} ${product.vendor_name} ${product.category} ${product.description}`.toLowerCase();
-      const categoryMatch = category === 'Tous' || product.category === category;
-      const queryMatch = !needle || haystack.includes(needle);
-      return categoryMatch && queryMatch;
+      const zone = product.zone_label || '';
+      const matchQuery =
+        !needle ||
+        `${product.name} ${product.vendor_name} ${product.category} ${product.description} ${zone}`
+          .toLowerCase()
+          .includes(needle);
+      const matchCategory = categoryFilter === 'Tous' || product.category === categoryFilter;
+      const matchCommune = communeFilter === 'Tous' || zone.toLowerCase().includes(communeFilter.toLowerCase());
+      const price = product.price;
+      const matchBudget =
+        budgetFilter === 'Tous' ||
+        (budgetFilter === '≤ 15 €' && price <= 15) ||
+        (budgetFilter === '15 € - 30 €' && price > 15 && price <= 30) ||
+        (budgetFilter === '30 € et plus' && price > 30);
+      return matchQuery && matchCategory && matchCommune && matchBudget;
     });
-  }, [catalog.products, category, query]);
+  }, [catalog.products, categoryFilter, communeFilter, budgetFilter, query]);
 
-  const heroProducts = useMemo(() => filteredProducts.slice(0, 3), [filteredProducts]);
   const featuredProducts = useMemo(() => filteredProducts.slice(0, 6), [filteredProducts]);
+  const heroProduct = featuredProducts[0] ?? catalog.products[0] ?? null;
+  const highlightedVendors = useMemo(() => catalog.vendors.slice(0, 6), [catalog.vendors]);
 
-  const serviceZones = useMemo(() => {
-    const zones = catalog.vendors.map((vendor) => vendor.zone_label).filter(Boolean);
-    return Array.from(new Set([...getMartiniqueServiceZones(zones), ...southZones])).slice(0, 12);
-  }, [catalog.vendors]);
-
-  const economics = useMemo(
+  const selectionEconomics = useMemo(
     () =>
       calculateOrderEconomics({
-        items: selected.map((product) => ({ price: product.price, commissionRate: 0.15 })),
-        deliveryFee: selected.length > 0 ? 4.5 : 0,
-        serviceFee: selected.length > 0 ? 1.5 : 0,
+        items: selectedProducts.map((product) => ({ price: product.price, commissionRate: 0.15 })),
       }),
-    [selected],
+    [selectedProducts],
   );
 
-  const productPreviewEconomics = useMemo(() => {
-    const price = Number(productForm.price || '0');
-    if (!Number.isFinite(price) || price <= 0) return null;
-    return calculateOrderEconomics({
-      items: [{ price, commissionRate: 0.15 }],
-      deliveryFee: 4.5,
-      serviceFee: 1.5,
-    });
-  }, [productForm.price]);
-
   const orderLink = useMemo(() => {
-    const lines = selected.map((product) => `- ${product.name} - ${product.vendor_name} - ${formatPrice(product.price)}`);
-    const message = [
-      'Bonjour, je souhaite commander sur DELIKREOL Martinique.',
+    const lines = selectedProducts.map((product) => `- ${product.name} — ${product.vendor_name} — ${formatPrice(product.price)}`);
+    const body = [
+      'Bonjour DELIKREOL, je souhaite commander.',
       '',
-      selected.length ? 'Selection :' : 'Je souhaite connaitre les produits disponibles maintenant.',
+      selectedProducts.length ? 'Sélection :' : 'Je souhaite connaître les disponibilités du moment.',
       ...lines,
       '',
-      'Merci de confirmer la disponibilite et le retrait ou la livraison selon ma zone.',
+      'Merci de confirmer la disponibilité, la commune et le mode de retrait / livraison.',
     ].join('\n');
-    return `${whatsappBase}?text=${encodeURIComponent(message)}`;
-  }, [selected]);
 
-  const partnerLink = `${whatsappBase}?text=${encodeURIComponent('Bonjour, je souhaite devenir partenaire sur DELIKREOL Martinique.')}`;
+    return `${whatsappBase}?text=${encodeURIComponent(body)}`;
+  }, [selectedProducts]);
 
-  const proLink = useMemo(() => {
-    const message = [
-      'Bonjour, je souhaite faire une demande entreprise sur DELIKREOL Martinique.',
-      proCompany && `Entreprise : ${proCompany}`,
-      proContact && `Contact : ${proContact}`,
-      proNeed && `Besoin : ${proNeed}`,
+  const partnerLink = `${whatsappBase}?text=${encodeURIComponent('Bonjour DELIKREOL, je souhaite devenir partenaire.')}`;
+
+  const businessLink = useMemo(() => {
+    const body = [
+      'Bonjour DELIKREOL, je souhaite une demande entreprise.',
+      businessRequestForm.company_name && `Entreprise : ${businessRequestForm.company_name}`,
+      businessRequestForm.contact && `Contact : ${businessRequestForm.contact}`,
+      businessRequestForm.people_count && `Nombre de personnes : ${businessRequestForm.people_count}`,
+      businessRequestForm.requested_date && `Date : ${businessRequestForm.requested_date}`,
+      businessRequestForm.requested_time && `Heure : ${businessRequestForm.requested_time}`,
+      businessRequestForm.location && `Lieu : ${businessRequestForm.location}`,
+      businessRequestForm.budget && `Budget : ${businessRequestForm.budget}`,
+      businessRequestForm.frequency && `Fréquence : ${businessRequestForm.frequency}`,
+      businessRequestForm.details && `Détails : ${businessRequestForm.details}`,
     ]
       .filter(Boolean)
       .join('\n');
-    return `${whatsappBase}?text=${encodeURIComponent(message)}`;
-  }, [proCompany, proContact, proNeed]);
 
-  async function handlePartnerSubmit(event: FormEvent<HTMLFormElement>) {
+    return `${whatsappBase}?text=${encodeURIComponent(body || 'Bonjour DELIKREOL, je souhaite une demande entreprise.')}`;
+  }, [businessRequestForm]);
+
+  async function handlePartnerLeadSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setPartnerStatus({ kind: 'saving', message: 'Envoi de votre demande...' });
+    setPartnerStatus({ kind: 'saving', message: 'Envoi de la demande partenaire...' });
+
     try {
       await submitPartnerLead({
-        business_name: partnerForm.business_name,
-        contact_name: partnerForm.contact_name,
-        phone: partnerForm.phone,
-        whatsapp: partnerForm.whatsapp || partnerForm.phone,
-        email: partnerForm.email || undefined,
-        address: partnerForm.address || undefined,
-        commune: partnerForm.commune || undefined,
-        zone_label: partnerForm.zone_label || undefined,
-        activity_type: partnerForm.activity_type || undefined,
-        delivery_radius_km: Number(partnerForm.delivery_radius_km || '8'),
-        opening_hours: partnerForm.opening_hours || undefined,
+        business_name: partnerLeadForm.business_name,
+        contact_name: partnerLeadForm.contact_name,
+        phone: partnerLeadForm.phone,
+        whatsapp: partnerLeadForm.whatsapp || partnerLeadForm.phone,
+        email: partnerLeadForm.email || undefined,
+        commune: partnerLeadForm.commune || undefined,
+        zone_label: partnerLeadForm.zone_label || partnerLeadForm.commune || undefined,
+        activity_type: partnerLeadForm.activity_type || undefined,
+        delivery_radius_km: Number(partnerLeadForm.delivery_radius_km || '8'),
+        opening_hours: partnerLeadForm.opening_hours || undefined,
       });
-      setPartnerStatus({ kind: 'success', message: 'Demande envoyee. Nous revenons vers vous rapidement.' });
-      setPartnerForm(defaultPartnerForm);
+      setPartnerStatus({ kind: 'success', message: 'Demande envoyée. Votre dossier sera examiné rapidement.' });
+      setPartnerLeadForm(defaultPartnerLeadForm);
     } catch (submitError) {
-      setPartnerStatus({ kind: 'error', message: getErrorMessage(submitError, 'Impossible d envoyer la demande pour le moment.') });
+      setPartnerStatus({ kind: 'error', message: getErrorMessage(submitError, 'Impossible d’envoyer la demande pour le moment.') });
     }
   }
 
   async function handleProductSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setProductStatus({ kind: 'saving', message: 'Envoi du produit...' });
+    setProductStatus({ kind: 'saving', message: 'Envoi de la proposition...' });
+
     try {
       let imageUrl: string | null = null;
       if (productPhoto) {
-        const upload = await uploadPartnerProductPhoto(productPhoto);
-        imageUrl = upload.publicUrl;
+        const uploaded = await uploadPartnerProductPhoto(productPhoto);
+        imageUrl = uploaded.publicUrl;
       }
 
       await submitPartnerProduct({
-        business_name: productForm.business_name,
-        product_name: productForm.product_name,
-        description: productForm.description || undefined,
-        category: productForm.category || undefined,
-        price: Number(productForm.price || '0'),
-        stock_quantity: productForm.stock_quantity ? Number(productForm.stock_quantity) : undefined,
+        business_name: productSubmissionForm.business_name,
+        product_name: productSubmissionForm.product_name,
+        description: productSubmissionForm.description || undefined,
+        category: productSubmissionForm.category || undefined,
+        price: Number(productSubmissionForm.price || '0'),
         is_available: true,
         image_url: imageUrl,
       });
 
-      setProductStatus({ kind: 'success', message: 'Produit envoye. Il sera verifie avant affichage.' });
-      setProductForm(defaultProductForm);
+      setProductStatus({ kind: 'success', message: 'Proposition envoyée. Elle sera vérifiée avant affichage.' });
+      setProductSubmissionForm(defaultProductSubmissionForm);
       setProductPhoto(null);
     } catch (submitError) {
-      setProductStatus({ kind: 'error', message: getErrorMessage(submitError, 'Impossible d envoyer le produit pour le moment.') });
+      setProductStatus({ kind: 'error', message: getErrorMessage(submitError, 'Impossible d’envoyer la proposition pour le moment.') });
+    }
+  }
+
+  async function handleBusinessRequestSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusinessStatus({ kind: 'saving', message: 'Envoi de la demande entreprise...' });
+
+    try {
+      await createBusinessRequest({
+        company_name: businessRequestForm.company_name,
+        contact: businessRequestForm.contact,
+        people_count: businessRequestForm.people_count ? Number(businessRequestForm.people_count) : null,
+        requested_date: businessRequestForm.requested_date || null,
+        requested_time: businessRequestForm.requested_time || null,
+        location: businessRequestForm.location || null,
+        budget: businessRequestForm.budget || null,
+        frequency: businessRequestForm.frequency || null,
+      });
+      setBusinessStatus({ kind: 'success', message: 'Demande entreprise envoyée. Un retour rapide est attendu.' });
+      setBusinessRequestForm(defaultBusinessRequestForm);
+    } catch (submitError) {
+      setBusinessStatus({ kind: 'error', message: getErrorMessage(submitError, 'Impossible d’envoyer la demande entreprise pour le moment.') });
     }
   }
 
   function addToSelection(product: PublicCatalogProduct) {
-    setSelected((current) => [...current, product]);
+    setSelectedProducts((current) => [...current, product]);
   }
 
   function removeFromSelection(index: number) {
-    setSelected((current) => current.filter((_, currentIndex) => currentIndex !== index));
+    setSelectedProducts((current) => current.filter((_, currentIndex) => currentIndex !== index));
+  }
+
+  function clearSelection() {
+    setSelectedProducts([]);
   }
 
   return (
-    <div className="min-h-screen bg-[#fff8ed] text-[#24170f]">
-      <header className="sticky top-0 z-50 border-b border-orange-100 bg-white/95 shadow-sm backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
+    <div className="min-h-screen bg-[#fbf4ea] text-[#2a190f]">
+      <header className="sticky top-0 z-50 border-b border-white/80 bg-[#fbf4ea]/95 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
           <a href="#accueil" className="flex items-center gap-3" aria-label="DELIKREOL accueil">
-            <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-11 w-11 rounded-2xl shadow-[0_12px_30px_rgba(249,115,22,0.18)]" />
-            <img src={`${baseUrl}branding/logo-wordmark-premium.svg`} alt="DELIKREOL" className="hidden h-10 sm:block" />
+            <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-11 w-11 rounded-2xl bg-white p-1.5 shadow-lg" />
+            <div className="hidden sm:block">
+              <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">Martinique locale premium</p>
+              <p className="text-sm font-bold text-[#2a190f]">DELIKREOL</p>
+            </div>
           </a>
-          <nav className="hidden items-center gap-2 md:flex">
-            <a href="#catalogue" className="rounded-full bg-[#f97316] px-5 py-2.5 text-sm font-black text-white">Commander</a>
-            <a href="#partenaires" className="rounded-full border border-orange-200 px-5 py-2.5 text-sm font-bold text-[#7c2d12]">Devenir partenaire</a>
-            <a href="#demande-pro" className="rounded-full border border-emerald-200 bg-emerald-50 px-5 py-2.5 text-sm font-bold text-emerald-800">Demande pro</a>
+
+          <nav className="hidden items-center gap-2 lg:flex">
+            <NavLink href="#catalogue">Catalogue</NavLink>
+            <NavLink href="#zones">Zones</NavLink>
+            <NavLink href="#entreprises">Entreprises</NavLink>
+            <NavLink href="#partenaires">Devenir partenaire</NavLink>
+            <NavLink href="#faq">FAQ</NavLink>
           </nav>
-          <a href="#catalogue" className="rounded-full bg-[#f97316] px-4 py-2 text-sm font-black text-white md:hidden">Commander</a>
+
+          <div className="flex items-center gap-2">
+            <a
+              href={partnerLink}
+              className="hidden rounded-full border border-orange-200 bg-white px-4 py-2 text-sm font-black text-[#7c2d12] shadow-sm transition hover:-translate-y-0.5 sm:inline-flex"
+            >
+              Devenir partenaire
+            </a>
+            <a
+              href={orderLink}
+              className="inline-flex rounded-full bg-[#d95f2d] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/25 transition hover:-translate-y-0.5"
+            >
+              Commander
+            </a>
+          </div>
         </div>
       </header>
 
       <main id="accueil">
-        <section className="relative overflow-hidden border-b border-orange-100 bg-[radial-gradient(circle_at_10%_15%,rgba(251,146,60,0.22),transparent_30%),radial-gradient(circle_at_90%_10%,rgba(16,185,129,0.14),transparent_28%),linear-gradient(135deg,#fff7ed_0%,#ffffff_48%,#fff4e6_100%)]">
+        <section className="relative overflow-hidden border-b border-orange-100 bg-[radial-gradient(circle_at_top_left,_rgba(217,95,45,0.18),_transparent_34%),radial-gradient(circle_at_top_right,_rgba(10,77,62,0.12),_transparent_28%),linear-gradient(135deg,_#fff8ee_0%,_#fffdf9_50%,_#fff3e7_100%)]">
           <div className="madras-strip" />
-          <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 md:grid-cols-[1.05fr_0.95fr] md:py-14 lg:py-16">
+          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 lg:grid-cols-[1.08fr_0.92fr] lg:py-16">
             <div className="flex flex-col justify-center">
-              <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-orange-200 bg-white/90 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.22em] text-[#c2410c] shadow-sm sm:mb-6 sm:px-4 sm:py-2 sm:text-xs">
-                <MapPin className="h-4 w-4" /> Martinique uniquement
-              </div>
-              <div className="mb-4 flex items-center gap-3 sm:mb-5 sm:gap-4">
-                <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-16 w-16 rounded-[1.5rem] bg-white p-2 shadow-2xl shadow-orange-500/20 sm:h-20 sm:w-20" />
-                <div>
-                  <p className="text-sm font-bold uppercase tracking-[0.28em] text-emerald-700">Commande immediate</p>
-                  <p className="text-sm font-semibold text-stone-500">Retrait ou livraison selon zone et partenaire</p>
-                </div>
-              </div>
-              <h1 className="max-w-4xl font-display text-[2.4rem] font-black leading-[0.95] tracking-tight text-[#301607] sm:text-5xl md:text-6xl lg:text-7xl">
-                Commander en Martinique sans perdre de temps.
+              <BadgeRow />
+              <h1 className="mt-6 max-w-4xl font-display text-4xl font-black leading-[0.96] tracking-tight text-[#2a190f] sm:text-5xl lg:text-7xl">
+                Commandez des plats créoles et produits locaux en Martinique.
               </h1>
-              <p className="mt-3 max-w-2xl text-base leading-7 text-stone-700 sm:mt-4 sm:text-lg sm:leading-8">
-                Recherchez un plat, un produit ou un vendeur local. Ajoutez au panier, puis confirmez le retrait ou la livraison selon votre zone.
+              <p className="mt-5 max-w-2xl text-base leading-7 text-[#5a4334] sm:text-lg">
+                Retrait ou livraison selon votre commune, auprès de partenaires visibles et vérifiés. Un site local, clair, premium et déjà opérationnel pour les particuliers, les entreprises et les prestataires.
               </p>
-              <div className="mt-5 rounded-[1.5rem] border border-orange-100 bg-white/95 p-2 shadow-xl shadow-orange-900/5 sm:mt-6 sm:rounded-[1.75rem] sm:p-3">
-                <div className="grid gap-2 sm:grid-cols-[1fr_auto] lg:grid-cols-[1fr_auto_auto] lg:gap-3">
-                  <label className="relative block">
-                    <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
-                    <input
-                      value={query}
-                      onChange={(event) => setQuery(event.target.value)}
-                      placeholder="Rechercher un plat, un produit ou un vendeur"
-                      className="w-full rounded-2xl border border-orange-100 bg-orange-50/60 py-4 pl-12 pr-4 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4"
-                    />
-                  </label>
-                  <a href="#catalogue" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#f97316] px-6 py-4 font-black text-white shadow-xl shadow-orange-500/25 sm:w-auto">Commander <ArrowRight className="h-5 w-5" /></a>
-                  <a href="#partenaires" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-white px-6 py-4 font-bold text-[#7c2d12] sm:w-auto">Devenir partenaire</a>
-                </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <ProofChip label="Partenaires verifies" />
-                  <ProofChip label="Retrait ou livraison" />
-                  <ProofChip label="Confirmation rapide" />
-                </div>
+
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <a href="#catalogue" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#d95f2d] px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25 transition hover:-translate-y-0.5">
+                  Commander maintenant <ArrowRight className="h-5 w-5" />
+                </a>
+                <a href="#partenaires" className="inline-flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-white px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-[#7c2d12] transition hover:-translate-y-0.5">
+                  Devenir partenaire
+                </a>
               </div>
-              <div className="mt-5 grid gap-3 sm:mt-6 sm:flex sm:flex-wrap">
-                <a href="#catalogue" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#f97316] px-6 py-4 font-black text-white shadow-xl shadow-orange-500/25">Commander <ArrowRight className="h-5 w-5" /></a>
-                <a href="#partenaires" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-white px-6 py-4 font-bold text-[#7c2d12]">Devenir partenaire</a>
-                <a href="#demande-pro" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-4 font-bold text-emerald-800">Demande pro</a>
+
+              <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                {heroMetrics(catalog, serviceZones).map((metric) => (
+                  <MetricCard key={metric.label} {...metric} />
+                ))}
+              </div>
+
+              <div className="mt-6 grid gap-3 rounded-[1.75rem] border border-orange-100 bg-white/90 p-4 shadow-soft sm:grid-cols-2">
+                <InfoLine label="Communes desservies" value={serviceZones.slice(0, 5).join(' · ') || '[À VALIDER]'} />
+                <InfoLine label="Retrait / livraison" value="Selon la commune et le partenaire" />
+                <InfoLine label="Paiement" value="[À VALIDER]" />
+                <InfoLine label="Minimum de commande" value="[À VALIDER]" />
               </div>
             </div>
 
-            <div className="rounded-[1.75rem] border border-orange-100 bg-white/88 p-3 shadow-2xl shadow-orange-900/10 backdrop-blur sm:rounded-[2rem] sm:p-4">
-              {heroProducts.length > 0 ? (
-                <div className="space-y-4">
-                  <div className="overflow-hidden rounded-[1.5rem] bg-[#24170f] text-white">
-                    <div className="relative aspect-[4/3] bg-gradient-to-br from-orange-200 via-amber-100 to-emerald-100">
-                      {heroProducts[0].image_url ? (
-                        <img src={heroProducts[0].image_url} alt={heroProducts[0].name} className="h-full w-full object-cover" />
-                      ) : (
-                        <DishPlaceholder name={heroProducts[0].name} />
-                      )}
-                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-5">
-                        <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-200">Disponible maintenant</p>
-                        <h2 className="mt-2 text-3xl font-black">{heroProducts[0].name}</h2>
-                        <p className="mt-1 text-sm text-stone-200">{heroProducts[0].vendor_name} - {heroProducts[0].zone_label}</p>
-                        <p className="mt-3 text-2xl font-black text-orange-200">{formatPrice(heroProducts[0].price)}</p>
+            <div className="brand-panel rounded-[2rem] p-4 shadow-elegant">
+              {heroProduct ? (
+                <div className="overflow-hidden rounded-[1.75rem] bg-[#20150f] text-white shadow-2xl">
+                  <div className="relative aspect-[4/3]">
+                    {heroProduct.image_url ? (
+                      <img src={heroProduct.image_url} alt={heroProduct.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <HeroFallback name={heroProduct.name} />
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/45 to-transparent p-5">
+                      <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-200">Produit phare</p>
+                      <h2 className="mt-2 text-2xl font-black sm:text-3xl">{heroProduct.name}</h2>
+                      <div className="mt-2 flex flex-wrap gap-2 text-xs font-black uppercase tracking-[0.16em]">
+                        <span className="rounded-full bg-white/10 px-3 py-1">{heroProduct.vendor_name}</span>
+                        <span className="rounded-full bg-white/10 px-3 py-1">{heroProduct.zone_label}</span>
+                      </div>
+                      <div className="mt-4 flex items-end justify-between gap-3">
+                        <strong className="text-3xl font-black text-orange-200">{formatPrice(heroProduct.price)}</strong>
+                        <span className="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-emerald-200">
+                          Disponible
+                        </span>
                       </div>
                     </div>
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {heroProducts.slice(1).map((product) => (
-                      <div key={product.id} className="rounded-[1.25rem] border border-orange-100 bg-orange-50/60 p-4">
-                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#c2410c]">{product.category}</p>
-                        <h3 className="mt-2 text-lg font-black text-[#301607]">{product.name}</h3>
-                        <p className="mt-1 text-sm text-stone-500">{product.vendor_name}</p>
-                        <div className="mt-3 flex items-center justify-between">
-                          <strong className="text-xl font-black text-[#24170f]">{formatPrice(product.price)}</strong>
-                          <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-emerald-700">{product.zone_label}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               ) : (
-                <EmptyHero loading={loading} configured={catalog.configured} />
+                <HeroFallback name="DELIKREOL" loading={loading} configured={catalog.configured} />
               )}
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {trustPills.map((pill) => (
+                  <TrustCard key={pill} label={pill} />
+                ))}
+              </div>
             </div>
           </div>
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-8">
-          <div className="flex flex-wrap gap-3">
-            {shortcutCategories.map((item) => {
-              const target = item === 'Tous' ? 'Tous' : item;
-              const active = category === target;
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {reassurance.map((item) => (
+              <ValueCard key={item.title} {...item} />
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 py-12">
+          <SectionTitle
+            eyebrow="Comment ça marche"
+            title="Un parcours très court pour commander ou demander un devis."
+            text="Le site évite les détours. L’utilisateur comprend immédiatement ce qu’il peut faire, où, et comment obtenir une réponse rapide."
+          />
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {howItWorks.map((step, index) => (
+              <StepCard key={step.title} index={index + 1} title={step.title} text={step.text} />
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 py-12">
+          <SectionTitle
+            eyebrow="Catégories populaires"
+            title="Les demandes qui convertissent le plus vite."
+            text="Les catégories restent lisibles, concrètes et orientées décision."
+          />
+          <div className="mt-8 flex flex-wrap gap-3">
+            {categoryOptions.slice(0, 12).map((category) => {
+              const active = categoryFilter === category;
               return (
                 <button
-                  key={item}
-                  onClick={() => {
-                    setCategory(target);
-                    document.getElementById('catalogue')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }}
-                  className={`rounded-full border px-4 py-2 text-sm font-black transition ${active ? 'border-orange-300 bg-[#f97316] text-white' : 'border-orange-200 bg-white text-[#7c2d12] hover:-translate-y-0.5'}`}
+                  key={category}
+                  onClick={() => setCategoryFilter(category)}
+                  className={`rounded-full border px-4 py-2 text-sm font-black transition ${
+                    active
+                      ? 'border-transparent bg-[#d95f2d] text-white shadow-lg shadow-orange-500/20'
+                      : 'border-orange-200 bg-white text-[#7c2d12] hover:-translate-y-0.5'
+                  }`}
                 >
-                  {item}
+                  {category}
                 </button>
               );
             })}
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 pb-8">
-          <SectionIntro
-            eyebrow="Interface client"
-            title="Je cherche, j ajoute, je confirme."
-            text="Le parcours est court : vous trouvez un produit, vous le mettez dans la selection, puis vous confirmez le retrait ou la livraison selon votre zone."
-          />
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <ClientStep icon={<Search className="h-5 w-5" />} title="Je cherche" text="Recherche directe par produit, vendeur ou categorie." />
-            <ClientStep icon={<ShoppingBag className="h-5 w-5" />} title="J ajoute" text="Le panier reste visible et le total estimatif se met a jour tout de suite." />
-            <ClientStep icon={<MessageCircle className="h-5 w-5" />} title="Je confirme" text="WhatsApp sert a confirmer rapidement le retrait ou la livraison." />
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 pb-10">
-          <SectionIntro
-            eyebrow="Par type de partenaire"
-            title="Chaque partenaire voit tout de suite ou aller."
-            text="Le site distingue clairement les parcours pour vendre, livrer ou gerer une demande groupee."
-          />
-          <div className="mt-6 grid gap-4 lg:grid-cols-3">
-            <PartnerTypeCard icon={<Utensils className="h-5 w-5" />} title="Restaurant / traiteur" text="Ajouter vos informations, proposer vos produits et envoyer vos photos depuis le formulaire partenaire." />
-            <PartnerTypeCard icon={<Truck className="h-5 w-5" />} title="Livraison / point relais" text="Preciser votre zone, votre rayon et vos horaires pour recevoir des demandes adaptees." />
-            <PartnerTypeCard icon={<Briefcase className="h-5 w-5" />} title="Entreprise / commande groupee" text="Envoyer une demande claire pour repas d equipe, besoin recurent ou commande programmee." />
-          </div>
-        </section>
-
-        <section id="catalogue" className="bg-white py-12">
+        <section id="catalogue" className="bg-white py-14">
           <div className="mx-auto max-w-7xl px-4">
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <SectionIntro
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+              <SectionTitle
                 eyebrow="Catalogue"
-                title="Produits disponibles maintenant"
-                text="Prix, vendeur, zone et bouton d ajout sont visibles tout de suite. Vous ne voyez que les lignes reelles disponibles."
+                title="Les offres visibles maintenant."
+                text="Chaque carte affiche le nom, le prix, le vendeur, la commune et le mode de service. Les informations inconnues restent marquées [À VALIDER]."
               />
-              <a href={orderLink} className="inline-flex w-fit items-center gap-2 rounded-2xl bg-[#f97316] px-5 py-3 font-black text-white">Commander <ArrowRight className="h-5 w-5" /></a>
+              <a href={orderLink} className="inline-flex w-fit items-center gap-2 rounded-full bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25">
+                Commander par WhatsApp <MessageCircle className="h-5 w-5" />
+              </a>
             </div>
 
-            <div className="mt-6 grid gap-3 md:grid-cols-[1fr_260px]">
+            <div className="mt-8 grid gap-4 rounded-[1.75rem] border border-orange-100 bg-[#fff8ef] p-4 shadow-soft lg:grid-cols-[1fr_220px_220px]">
               <label className="relative block">
                 <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Rechercher un plat, un produit ou un partenaire"
-                  className="w-full rounded-2xl border border-orange-100 bg-orange-50/60 py-4 pl-12 pr-4 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4"
+                  placeholder="Rechercher un plat, un traiteur, un produit ou une commune"
+                  className="w-full rounded-2xl border border-orange-100 bg-white py-4 pl-12 pr-4 text-sm font-semibold outline-none ring-orange-200 focus:ring-4"
                 />
               </label>
-              <select
-                value={category}
-                onChange={(event) => setCategory(event.target.value)}
-                className="rounded-2xl border border-orange-100 bg-orange-50/60 px-4 py-4 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4"
-              >
-                {categories.map((item) => (
-                  <option key={item} value={item}>{item}</option>
+              <Select value={communeFilter} onChange={setCommuneFilter}>
+                <option value="Tous">Toutes les communes</option>
+                {serviceZones.map((zone) => (
+                  <option key={zone} value={zone}>
+                    {zone}
+                  </option>
                 ))}
-              </select>
+              </Select>
+              <Select value={budgetFilter} onChange={setBudgetFilter}>
+                {budgetRanges.map((range) => (
+                  <option key={range} value={range}>
+                    {range}
+                  </option>
+                ))}
+              </Select>
             </div>
 
-            {loading && <InfoBanner tone="neutral" message="Chargement des produits disponibles..." />}
-            {error && <InfoBanner tone="warning" message={error} />}
-            {!loading && filteredProducts.length === 0 && <EmptyCatalog configured={catalog.configured} />}
+            <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+              <div>
+                {loading && <EmptyState title="Catalogue en chargement" text="Les offres apparaîtront dès que les partenaires publiés sont récupérés." />}
+                {error && <EmptyState title="Catalogue indisponible" text={error} />}
+                {!loading && !error && filteredProducts.length === 0 && (
+                  <EmptyState
+                    title="Aucune offre visible avec ces filtres"
+                    text="Affinez la commune, la catégorie ou le budget. Si vous êtes prestataire, la meilleure prochaine action est de devenir partenaire."
+                    action={partnerLink}
+                  />
+                )}
 
-            {filteredProducts.length > 0 && (
-              <div className="mt-8 space-y-8">
-                <div>
-                  <div className="mb-4 flex items-center justify-between gap-3">
-                    <h3 className="text-xl font-black text-[#301607]">A regarder en premier</h3>
-                    <span className="text-xs font-black uppercase tracking-[0.2em] text-stone-400">{featuredProducts.length} cartes</span>
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    {featuredProducts.map((product) => (
-                      <ProductCard key={`top-${product.id}`} product={product} onAdd={() => addToSelection(product)} compact />
-                    ))}
-                  </div>
-                </div>
+                {filteredProducts.length > 0 && (
+                  <>
+                    <div className="mb-4 flex items-center justify-between gap-3">
+                      <p className="text-sm font-black uppercase tracking-[0.18em] text-[#c2410c]">Sélection en vedette</p>
+                      <span className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">{featuredProducts.length} cartes</span>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                      {featuredProducts.map((product) => (
+                        <ProductCard key={`featured-${product.id}`} product={product} onAdd={() => addToSelection(product)} compact />
+                      ))}
+                    </div>
 
-                <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-                  <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                    {filteredProducts.map((product) => (
-                      <ProductCard key={product.id} product={product} onAdd={() => addToSelection(product)} />
-                    ))}
-                  </div>
-                  <SelectionPanel products={selected} economics={economics} orderLink={orderLink} onRemove={removeFromSelection} />
-                </div>
+                    <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+                      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                        {filteredProducts.map((product) => (
+                          <ProductCard key={product.id} product={product} onAdd={() => addToSelection(product)} />
+                        ))}
+                      </div>
+                      <SelectionPanel
+                        products={selectedProducts}
+                        summary={selectionEconomics}
+                        orderLink={orderLink}
+                        onRemove={removeFromSelection}
+                        onClear={clearSelection}
+                      />
+                    </div>
+                  </>
+                )}
               </div>
-            )}
+
+              <aside className="rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">Fiche produit</p>
+                <h3 className="mt-2 text-2xl font-black text-[#2a190f]">Lecture rapide</h3>
+                <p className="mt-2 text-sm leading-6 text-stone-600">
+                  Chaque fiche affiche le vendeur, la commune, le prix et l’action de conversion la plus simple. C’est la vitrine la plus rentable du site.
+                </p>
+                {heroProduct ? (
+                  <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-orange-100">
+                    <div className="aspect-[4/3] bg-[#fff2e6]">
+                      {heroProduct.image_url ? (
+                        <img src={heroProduct.image_url} alt={heroProduct.name} className="h-full w-full object-cover" />
+                      ) : (
+                        <HeroFallback name={heroProduct.name} />
+                      )}
+                    </div>
+                    <div className="space-y-3 p-4">
+                      <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">
+                        <BadgeCheck className="h-4 w-4" />
+                        partenaire visible
+                      </div>
+                      <h4 className="text-xl font-black text-[#2a190f]">{heroProduct.name}</h4>
+                      <p className="text-sm text-stone-600">{heroProduct.vendor_name}</p>
+                      <div className="grid gap-2 text-sm text-stone-600">
+                        <InfoLine label="Commune" value={heroProduct.zone_label} />
+                        <InfoLine label="Prix" value={formatPrice(heroProduct.price)} />
+                        <InfoLine label="Service" value="Retrait / livraison selon zone" />
+                        <InfoLine label="Disponibilité" value={heroProduct.available ? 'Disponible' : 'À confirmer'} />
+                      </div>
+                      <a href={orderLink} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white">
+                        Ajouter et commander
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-5 rounded-[1.5rem] border border-dashed border-orange-200 bg-orange-50/60 p-6 text-sm text-stone-600">
+                    Aucune fiche produit active pour le moment. Les prochaines offres publiées apparaîtront ici.
+                  </div>
+                )}
+              </aside>
+            </div>
           </div>
         </section>
 
-        <section id="zones" className="mx-auto max-w-7xl px-4 py-12">
-          <SectionIntro
-            eyebrow="Zones et confiance"
-            title="Zones servies claires, partenaires visibles"
-            text="Les zones sont affichees simplement. Les partenaires visibles ont deja leur place dans le catalogue reel."
+        <section id="zones" className="mx-auto max-w-7xl px-4 py-14">
+          <SectionTitle
+            eyebrow="Zones desservies"
+            title="La couverture est lisible, simple et locale."
+            text="Les communes apparaissent clairement pour éviter les frictions au moment de commander ou de demander un devis."
           />
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {(serviceZones.length ? serviceZones : southZones).map((zone) => (
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {serviceZones.slice(0, 8).map((zone) => (
               <ZoneCard key={zone} zone={zone} />
             ))}
           </div>
-          <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {catalog.vendors.map((vendor) => (
+          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {highlightedVendors.map((vendor) => (
               <VendorCard key={vendor.id} vendor={vendor} />
             ))}
           </div>
-          {!loading && catalog.vendors.length === 0 && (
-            <InfoBanner tone="neutral" message="Aucun partenaire verifie n est visible pour le moment." />
-          )}
         </section>
 
-        <section id="partenaires" className="bg-[#fff1df] py-12">
+        <section id="entreprises" className="bg-[#24170f] py-14 text-white">
+          <div className="mx-auto grid max-w-7xl gap-8 px-4 lg:grid-cols-[1.05fr_0.95fr]">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-300">Entreprises & commandes groupées</p>
+              <h2 className="mt-3 max-w-2xl font-display text-4xl font-black leading-tight sm:text-5xl">
+                Repas d’équipe, commandes récurrentes, événements ou demandes urgentes.
+              </h2>
+              <p className="mt-4 max-w-2xl text-base leading-7 text-stone-300">
+                DELIKREOL permet à une entreprise de formuler une demande structurée, simple à traiter, avec un devis rapide et un suivi propre.
+              </p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <BusinessChip text="Repas d’équipe" />
+                <BusinessChip text="Commande récurrente" />
+                <BusinessChip text="Événement / cocktail" />
+                <BusinessChip text="Facturation" />
+              </div>
+              <div className="mt-6 rounded-[1.5rem] border border-white/10 bg-white/8 p-5">
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  <MiniMetric label="Frais livraison" value="[À VALIDER]" />
+                  <MiniMetric label="Mode de paiement" value="[À VALIDER]" />
+                  <MiniMetric label="Confirmation" value="WhatsApp + email" />
+                  <MiniMetric label="Délai" value="[À VALIDER]" />
+                </div>
+              </div>
+            </div>
+
+            <form onSubmit={handleBusinessRequestSubmit} className="rounded-[2rem] border border-white/10 bg-white/8 p-5 backdrop-blur">
+              <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-200">Demande entreprise</p>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <InputDark value={businessRequestForm.company_name} onChange={(value) => setBusinessRequestForm((current) => ({ ...current, company_name: value }))} placeholder="Entreprise" required />
+                <InputDark value={businessRequestForm.contact} onChange={(value) => setBusinessRequestForm((current) => ({ ...current, contact: value }))} placeholder="Contact" required />
+                <InputDark value={businessRequestForm.people_count} onChange={(value) => setBusinessRequestForm((current) => ({ ...current, people_count: value }))} placeholder="Nombre de personnes" />
+                <InputDark value={businessRequestForm.location} onChange={(value) => setBusinessRequestForm((current) => ({ ...current, location: value }))} placeholder="Commune / lieu" />
+                <InputDark value={businessRequestForm.requested_date} onChange={(value) => setBusinessRequestForm((current) => ({ ...current, requested_date: value }))} placeholder="Date souhaitée" />
+                <InputDark value={businessRequestForm.requested_time} onChange={(value) => setBusinessRequestForm((current) => ({ ...current, requested_time: value }))} placeholder="Heure souhaitée" />
+                <InputDark value={businessRequestForm.budget} onChange={(value) => setBusinessRequestForm((current) => ({ ...current, budget: value }))} placeholder="Budget" />
+                <InputDark value={businessRequestForm.frequency} onChange={(value) => setBusinessRequestForm((current) => ({ ...current, frequency: value }))} placeholder="Fréquence" />
+                <TextareaDark
+                  value={businessRequestForm.details}
+                  onChange={(value) => setBusinessRequestForm((current) => ({ ...current, details: value }))}
+                  placeholder="Repas d’équipe, buffet, commande récurrente, livraison..."
+                  className="sm:col-span-2"
+                  rows={4}
+                />
+              </div>
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                <button type="submit" disabled={businessStatus.kind === 'saving'} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-400 px-5 py-3 font-black text-emerald-950 disabled:opacity-70">
+                  {businessStatus.kind === 'saving' ? 'Envoi...' : 'Envoyer la demande'}
+                </button>
+                <a href={businessLink} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 px-5 py-3 font-black text-white">
+                  Copier sur WhatsApp
+                </a>
+              </div>
+              <StatusBanner status={businessStatus} />
+            </form>
+          </div>
+        </section>
+
+        <section id="partenaires" className="bg-[#fff4e2] py-14">
           <div className="mx-auto max-w-7xl px-4">
-            <SectionIntro
-              eyebrow="Partenaire"
-              title="Choisissez votre formulaire et envoyez vos informations rapidement"
-              text="Un formulaire pour vous presenter, un second pour ajouter un produit et une photo. Le parcours reste direct et lisible."
+            <SectionTitle
+              eyebrow="Devenir partenaire"
+              title="Restaurants, traiteurs, vendeurs et prestataires locaux."
+              text="Le site permet de rejoindre la plateforme avec une fiche simple, un catalogue clair et une conversion pensée pour les smartphones."
             />
-            <div className="mt-6 grid gap-6 xl:grid-cols-[0.95fr_1.05fr_1.05fr]">
-              <SouthCoverageCard zones={southZones} />
 
-              <FormCard title="Devenir partenaire" subtitle="Restaurant, traiteur, point relais ou livraison : envoyez vos infos principales.">
-                <form className="space-y-3" onSubmit={handlePartnerSubmit}>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <TextInput value={partnerForm.business_name} onChange={(value) => setPartnerForm((current) => ({ ...current, business_name: value }))} placeholder="Nom de l etablissement" required className="sm:col-span-2" />
-                    <TextInput value={partnerForm.contact_name} onChange={(value) => setPartnerForm((current) => ({ ...current, contact_name: value }))} placeholder="Contact" required />
-                    <TextInput value={partnerForm.phone} onChange={(value) => setPartnerForm((current) => ({ ...current, phone: value }))} placeholder="Telephone" required />
-                    <TextInput value={partnerForm.whatsapp} onChange={(value) => setPartnerForm((current) => ({ ...current, whatsapp: value }))} placeholder="WhatsApp" />
-                    <TextInput value={partnerForm.email} onChange={(value) => setPartnerForm((current) => ({ ...current, email: value }))} placeholder="Email" />
-                    <TextInput value={partnerForm.address} onChange={(value) => setPartnerForm((current) => ({ ...current, address: value }))} placeholder="Adresse" className="sm:col-span-2" />
-                    <TextInput value={partnerForm.commune} onChange={(value) => setPartnerForm((current) => ({ ...current, commune: value }))} placeholder="Commune" />
-                    <TextInput value={partnerForm.zone_label} onChange={(value) => setPartnerForm((current) => ({ ...current, zone_label: value }))} placeholder="Zone servie" />
-                    <TextInput value={partnerForm.delivery_radius_km} onChange={(value) => setPartnerForm((current) => ({ ...current, delivery_radius_km: value }))} placeholder="Rayon livraison (km)" />
-                    <TextInput value={partnerForm.activity_type} onChange={(value) => setPartnerForm((current) => ({ ...current, activity_type: value }))} placeholder="Type d activite" />
-                    <TextArea value={partnerForm.opening_hours} onChange={(value) => setPartnerForm((current) => ({ ...current, opening_hours: value }))} placeholder="Horaires et creneaux" className="sm:col-span-2" rows={3} />
-                  </div>
-                  <button type="submit" disabled={partnerStatus.kind === 'saving'} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#f97316] px-5 py-4 font-black text-white disabled:opacity-70">
-                    {partnerStatus.kind === 'saving' ? 'Envoi en cours...' : 'Envoyer ma demande'}
-                  </button>
-                  <StatusBanner status={partnerStatus} />
-                </form>
-              </FormCard>
-
-              <FormCard title="Ajouter mon produit" subtitle="Ajoutez un nom, un prix, une photo et une description courte. Le bouton vous concerne si vous vendez deja.">
-                <form className="space-y-3" onSubmit={handleProductSubmit}>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <TextInput value={productForm.business_name} onChange={(value) => setProductForm((current) => ({ ...current, business_name: value }))} placeholder="Nom de l etablissement" required className="sm:col-span-2" />
-                    <TextInput value={productForm.product_name} onChange={(value) => setProductForm((current) => ({ ...current, product_name: value }))} placeholder="Nom du produit" required />
-                    <TextInput value={productForm.category} onChange={(value) => setProductForm((current) => ({ ...current, category: value }))} placeholder="Categorie" />
-                    <TextInput value={productForm.price} onChange={(value) => setProductForm((current) => ({ ...current, price: value }))} placeholder="Prix" />
-                    <TextInput value={productForm.stock_quantity} onChange={(value) => setProductForm((current) => ({ ...current, stock_quantity: value }))} placeholder="Stock" />
-                    <TextArea value={productForm.description} onChange={(value) => setProductForm((current) => ({ ...current, description: value }))} placeholder="Description courte" className="sm:col-span-2" rows={3} />
-                    <label className="flex items-center justify-between rounded-2xl border border-dashed border-orange-200 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-600 sm:col-span-2">
-                      <span className="inline-flex items-center gap-2"><Camera className="h-4 w-4 text-[#c2410c]" /> {productPhoto ? productPhoto.name : 'Ajouter une photo produit'}</span>
-                      <input type="file" accept="image/*" className="hidden" onChange={(event) => setProductPhoto(event.target.files?.[0] ?? null)} />
-                      <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">Choisir</span>
-                    </label>
-                  </div>
-
-                  {productPreviewEconomics && (
-                    <div className="rounded-[1.25rem] border border-orange-100 bg-orange-50/70 p-4 text-sm">
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">Lecture rapide</p>
-                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                        <MiniLine label="Prix client" value={formatPrice(productPreviewEconomics.total_client)} />
-                        <MiniLine label="Net vendeur" value={formatPrice(productPreviewEconomics.remuneration_vendeur)} />
-                        <MiniLine label="Livraison" value={formatPrice(productPreviewEconomics.frais_livraison)} />
-                        <MiniLine label="Marge plateforme" value={formatPrice(productPreviewEconomics.marge_nette_plateforme)} />
-                      </div>
+            <div className="mt-8 grid gap-6 xl:grid-cols-[0.92fr_1.08fr_1.08fr]">
+              <div className="rounded-[1.75rem] bg-[#20150f] p-6 text-white shadow-elegant">
+                <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-300">Pourquoi rejoindre DELIKREOL</p>
+                <h3 className="mt-3 text-3xl font-black leading-tight">Un site qui met en avant votre offre sans vous noyer.</h3>
+                <div className="mt-6 space-y-3">
+                  {[
+                    'Visibilité locale premium',
+                    'Fiche claire avec commune et zone',
+                    'CTA WhatsApp et devis rapide',
+                    'Catalogue produit ou service',
+                    'Parcours pensé pour la conversion mobile',
+                  ].map((item) => (
+                    <div key={item} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                      <BadgeCheck className="h-5 w-5 text-emerald-300" />
+                      <span className="text-sm font-semibold text-stone-100">{item}</span>
                     </div>
-                  )}
+                  ))}
+                </div>
+              </div>
 
-                  <button type="submit" disabled={productStatus.kind === 'saving'} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-4 font-black text-white disabled:opacity-70">
-                    {productStatus.kind === 'saving' ? 'Envoi en cours...' : 'Ajouter mon produit'}
+              <form onSubmit={handlePartnerLeadSubmit} className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-soft">
+                <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">Formulaire partenaire</p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <Input value={partnerLeadForm.business_name} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, business_name: value }))} placeholder="Nom de l’établissement" required className="sm:col-span-2" />
+                  <Input value={partnerLeadForm.contact_name} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, contact_name: value }))} placeholder="Contact" required />
+                  <Input value={partnerLeadForm.phone} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, phone: value }))} placeholder="Téléphone" required />
+                  <Input value={partnerLeadForm.whatsapp} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, whatsapp: value }))} placeholder="WhatsApp" />
+                  <Input value={partnerLeadForm.email} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, email: value }))} placeholder="Email" />
+                  <Input value={partnerLeadForm.commune} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, commune: value }))} placeholder="Commune" />
+                  <Input value={partnerLeadForm.zone_label} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, zone_label: value }))} placeholder="Zone servie" />
+                  <Input value={partnerLeadForm.delivery_radius_km} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, delivery_radius_km: value }))} placeholder="Rayon (km)" />
+                  <Input value={partnerLeadForm.activity_type} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, activity_type: value }))} placeholder="Type d’activité" />
+                  <Input value={partnerLeadForm.opening_hours} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, opening_hours: value }))} placeholder="Horaires" className="sm:col-span-2" />
+                  <Textarea
+                    value={partnerLeadForm.description}
+                    onChange={(value) => setPartnerLeadForm((current) => ({ ...current, description: value }))}
+                    placeholder="Décrivez votre activité, vos produits, votre livraison..."
+                    className="sm:col-span-2"
+                    rows={4}
+                  />
+                </div>
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                  <button type="submit" disabled={partnerStatus.kind === 'saving'} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-5 py-3 font-black text-white disabled:opacity-70">
+                    {partnerStatus.kind === 'saving' ? 'Envoi...' : 'Envoyer ma demande'}
                   </button>
-                  <StatusBanner status={productStatus} />
-                </form>
-              </FormCard>
+                  <a href={partnerLink} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-[#fff8ef] px-5 py-3 font-black text-[#7c2d12]">
+                    WhatsApp partenaire
+                  </a>
+                </div>
+                <StatusBanner status={partnerStatus} />
+              </form>
+
+              <form onSubmit={handleProductSubmit} className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-soft">
+                <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">Proposer un produit</p>
+                <p className="mt-2 text-sm leading-6 text-stone-600">
+                  Ajoutez une offre ou une carte produit pour enrichir le catalogue local. Les champs manquants restent visibles en [À VALIDER].
+                </p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <Input value={productSubmissionForm.business_name} onChange={(value) => setProductSubmissionForm((current) => ({ ...current, business_name: value }))} placeholder="Nom de l’établissement" required className="sm:col-span-2" />
+                  <Input value={productSubmissionForm.product_name} onChange={(value) => setProductSubmissionForm((current) => ({ ...current, product_name: value }))} placeholder="Nom du produit" required />
+                  <Input value={productSubmissionForm.category} onChange={(value) => setProductSubmissionForm((current) => ({ ...current, category: value }))} placeholder="Catégorie" />
+                  <Input value={productSubmissionForm.price} onChange={(value) => setProductSubmissionForm((current) => ({ ...current, price: value }))} placeholder="Prix" />
+                  <Textarea
+                    value={productSubmissionForm.description}
+                    onChange={(value) => setProductSubmissionForm((current) => ({ ...current, description: value }))}
+                    placeholder="Description courte"
+                    className="sm:col-span-2"
+                    rows={4}
+                  />
+                  <label className="sm:col-span-2 flex items-center justify-between rounded-2xl border border-dashed border-orange-200 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-600">
+                    <span className="inline-flex items-center gap-2">
+                      <Package className="h-4 w-4 text-[#c2410c]" />
+                      {productPhoto ? productPhoto.name : 'Ajouter une photo produit'}
+                    </span>
+                    <input type="file" accept="image/*" className="hidden" onChange={(event) => setProductPhoto(event.target.files?.[0] ?? null)} />
+                    <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">Choisir</span>
+                  </label>
+                </div>
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                  <button type="submit" disabled={productStatus.kind === 'saving'} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 font-black text-white disabled:opacity-70">
+                    {productStatus.kind === 'saving' ? 'Envoi...' : 'Ajouter au catalogue'}
+                  </button>
+                  <span className="inline-flex items-center rounded-2xl border border-orange-100 px-4 py-3 text-xs font-black uppercase tracking-[0.16em] text-stone-500">
+                    Visibilité locale premium
+                  </span>
+                </div>
+                <StatusBanner status={productStatus} />
+              </form>
             </div>
           </div>
         </section>
 
-        <section id="demande-pro" className="bg-[#24170f] py-12 text-white">
-          <div className="mx-auto grid max-w-7xl gap-6 px-4 lg:grid-cols-[1.05fr_0.95fr]">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-300">Demande entreprise</p>
-              <h2 className="mt-3 font-display text-4xl font-black">Une demande claire pour repas d equipe, besoin groupe ou commande recurente.</h2>
-              <p className="mt-4 max-w-2xl text-stone-300">
-                Ce bloc s adresse aux entreprises, groupes et organisateurs qui veulent envoyer une demande simple et etre recontactes rapidement.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <a href={partnerLink} className="rounded-2xl border border-white/20 px-5 py-3 font-bold text-white">Devenir partenaire</a>
-                <a href={proLink} className="rounded-2xl bg-[#f97316] px-5 py-3 font-black text-white">Envoyer ma demande</a>
-              </div>
+        <section className="mx-auto max-w-7xl px-4 py-14">
+          <SectionTitle
+            eyebrow="Preuves et confiance"
+            title="Le site doit rassurer au premier regard."
+            text="Les preuves affichées ici sont visibles, simples et honnêtes. Lorsqu’une donnée n’est pas encore confirmée, elle reste en [À VALIDER]."
+          />
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {[
+              'Partenaires visibles et vérifiés',
+              'Réponse rapide par WhatsApp',
+              'Commande entreprise simple à relancer',
+            ].map((item) => (
+              <ProofCard key={item} title={item} />
+            ))}
+          </div>
+        </section>
+
+        <section id="faq" className="bg-white py-14">
+          <div className="mx-auto max-w-7xl px-4">
+            <SectionTitle
+              eyebrow="FAQ"
+              title="Les questions qui déclenchent la conversion."
+              text="Chaque réponse doit lever une objection simple: confiance, zone, disponibilité, commande, partenaire ou entreprise."
+            />
+            <div className="mt-8 grid gap-4 lg:grid-cols-2">
+              {faqItems.map((item) => (
+                <FaqItem key={item.question} {...item} />
+              ))}
             </div>
-            <div className="rounded-[2rem] border border-white/10 bg-white/8 p-5">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <TextInputDark value={proCompany} onChange={setProCompany} placeholder="Entreprise" />
-                <TextInputDark value={proContact} onChange={setProContact} placeholder="Contact / telephone" />
-                <TextAreaDark value={proNeed} onChange={setProNeed} placeholder="Besoin, volume, commune, date souhaitee" className="sm:col-span-2" rows={4} />
+          </div>
+        </section>
+
+        <section id="contact" className="mx-auto max-w-7xl px-4 py-14">
+          <div className="grid gap-4 rounded-[1.75rem] border border-orange-100 bg-[linear-gradient(135deg,_#24170f_0%,_#392115_52%,_#d95f2d_180%)] p-6 text-white lg:grid-cols-[1.1fr_0.9fr] lg:p-8">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-200">Contact / WhatsApp</p>
+              <h2 className="mt-3 text-3xl font-black sm:text-5xl">Une réponse rapide, directe, locale.</h2>
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-200 sm:text-base sm:leading-7">
+                En cas de doute, l’utilisateur doit pouvoir joindre DELIKREOL immédiatement. Le bouton WhatsApp reste l’action la plus rentable pour convertir.
+              </p>
+            </div>
+            <div className="grid gap-3">
+              <a href={orderLink} className="rounded-2xl bg-white px-5 py-4 text-center font-black text-[#24170f]">
+                Commander sur WhatsApp
+              </a>
+              <a href={partnerLink} className="rounded-2xl border border-white/20 px-5 py-4 text-center font-black text-white">
+                Devenir partenaire
+              </a>
+              <a href={businessLink} className="rounded-2xl border border-white/20 px-5 py-4 text-center font-black text-white">
+                Demande entreprise
+              </a>
+              <div className="rounded-2xl bg-white/10 px-5 py-4 text-sm leading-6 text-stone-100">
+                Email: <span className="font-bold">[À VALIDER]</span>
+                <br />
+                Frais de livraison: <span className="font-bold">[À VALIDER]</span>
+                <br />
+                Minimum de commande: <span className="font-bold">[À VALIDER]</span>
               </div>
-              <a href={proLink} className="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-emerald-400 px-5 py-4 font-black text-emerald-950">Demande pro</a>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-orange-100 bg-white py-8">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-10 w-10" />
-            <div>
-              <p className="font-black">DELIKREOL Martinique</p>
-              <p className="text-sm text-stone-500">Commande locale - partenaires verifies - zones servies claires</p>
+      <footer className="border-t border-orange-100 bg-[#fff9f3]">
+        <div className="mx-auto grid max-w-7xl gap-6 px-4 py-10 lg:grid-cols-[1.1fr_0.9fr_0.9fr]">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-10 w-10 rounded-2xl bg-white p-1.5 shadow-sm" />
+              <div>
+                <p className="font-black text-[#2a190f]">DELIKREOL</p>
+                <p className="text-sm text-stone-500">Plateforme locale premium en Martinique</p>
+              </div>
             </div>
+            <p className="max-w-xl text-sm leading-6 text-stone-600">
+              Commande locale, partenaires visibles, demandes entreprises et parcours mobile-first pour faire de DELIKREOL une vraie plateforme opérationnelle.
+            </p>
           </div>
-          <div className="flex flex-wrap gap-3 text-sm font-bold text-stone-600">
-            <a href="#catalogue">Commander</a>
-            <a href="#partenaires">Devenir partenaire</a>
-            <a href="#demande-pro">Demande pro</a>
-          </div>
+          <FooterBlock title="Zones et services">
+            {serviceZones.slice(0, 6).map((zone) => (
+              <FooterLink key={zone} label={zone} />
+            ))}
+            <FooterLink label="Retrait / livraison" />
+            <FooterLink label="Entreprise / devis" />
+          </FooterBlock>
+          <FooterBlock title="Liens utiles">
+            <FooterLink label="CGV" />
+            <FooterLink label="Mentions légales" />
+            <FooterLink label="Confidentialité" />
+            <a href={whatsappBase} className="inline-flex items-center gap-2 text-sm font-bold text-[#7c2d12]">
+              WhatsApp <MessageCircle className="h-4 w-4" />
+            </a>
+          </FooterBlock>
         </div>
       </footer>
 
-      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-orange-100 bg-white/95 p-3 shadow-2xl backdrop-blur md:hidden">
-        <div className="mx-auto grid max-w-md grid-cols-3 gap-2 text-center text-xs font-black">
-          <a href="#catalogue" className="rounded-xl bg-[#f97316] px-2 py-3 text-white">Commander</a>
-          <a href="#partenaires" className="rounded-xl border border-orange-200 px-2 py-3 text-[#7c2d12]">Partenaire</a>
-          <a href="#demande-pro" className="rounded-xl border border-emerald-200 bg-emerald-50 px-2 py-3 text-emerald-800">Pro</a>
+      {selectedProducts.length > 0 && (
+        <div className="fixed inset-x-4 bottom-4 z-50 rounded-[1.5rem] border border-orange-100 bg-white p-4 shadow-2xl shadow-orange-900/20 md:hidden">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">{selectedProducts.length} article(s)</p>
+              <p className="text-sm font-bold text-[#2a190f]">{formatPrice(selectionEconomics.subtotal_produits)} hors livraison</p>
+            </div>
+            <a href={orderLink} className="rounded-full bg-[#d95f2d] px-4 py-3 text-sm font-black text-white">
+              Commander
+            </a>
+          </div>
         </div>
+      )}
+
+      <a
+        href={whatsappBase}
+        className="fixed bottom-5 right-5 z-50 inline-flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-3 text-sm font-black text-white shadow-2xl shadow-green-500/30"
+      >
+        WhatsApp <MessageCircle className="h-5 w-5" />
+      </a>
+    </div>
+  );
+}
+
+function heroMetrics(catalog: CatalogState, serviceZones: string[]) {
+  return [
+    {
+      label: 'Communes desservies',
+      value: serviceZones.slice(0, 4).join(' · ') || '[À VALIDER]',
+    },
+    {
+      label: 'Partenaires visibles',
+      value: catalog.vendors.length ? `${catalog.vendors.length}` : '[À VALIDER]',
+    },
+    {
+      label: 'Mode principal',
+      value: 'Retrait / livraison',
+    },
+    {
+      label: 'Réponse rapide',
+      value: 'WhatsApp',
+    },
+  ];
+}
+
+function BadgeRow() {
+  return (
+    <div className="flex flex-wrap gap-2">
+      <span className="rounded-full border border-orange-200 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-[#c2410c] shadow-sm">
+        plateforme locale premium
+      </span>
+      <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-800">
+        pensée pour la Martinique
+      </span>
+    </div>
+  );
+}
+
+function MetricCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[1.4rem] border border-orange-100 bg-white p-4 shadow-soft">
+      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">{label}</p>
+      <p className="mt-2 text-sm font-black text-[#2a190f]">{value}</p>
+    </div>
+  );
+}
+
+function InfoLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-4 rounded-2xl bg-white px-4 py-3">
+      <span className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">{label}</span>
+      <span className="text-right text-sm font-semibold text-[#2a190f]">{value}</span>
+    </div>
+  );
+}
+
+function TrustCard({ label }: { label: string }) {
+  return (
+    <div className="rounded-[1.4rem] border border-orange-100 bg-white px-4 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-[#c2410c] shadow-soft">
+      {label}
+    </div>
+  );
+}
+
+function ValueCard({ title, text, icon: Icon }: { title: string; text: string; icon: ComponentType<{ className?: string }> }) {
+  return (
+    <div className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-soft">
+      <div className="inline-flex rounded-2xl bg-[#fff3e5] p-3 text-[#c2410c]">
+        <Icon className="h-5 w-5" />
       </div>
-    </div>
-  );
-}
-
-function SectionIntro({ eyebrow, title, text }: { eyebrow: string; title: string; text: string }) {
-  return (
-    <div>
-      <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">{eyebrow}</p>
-      <h2 className="mt-2 font-display text-3xl font-black tracking-tight text-[#301607] md:text-4xl">{title}</h2>
-      <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600 md:text-base md:leading-7">{text}</p>
-    </div>
-  );
-}
-
-function ProofChip({ label }: { label: string }) {
-  return <span className="rounded-full bg-orange-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-[#c2410c]">{label}</span>;
-}
-
-function ClientStep({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
-  return (
-    <div className="rounded-[1.5rem] border border-orange-100 bg-white p-5 shadow-sm">
-      <div className="inline-flex rounded-2xl bg-orange-100 p-3 text-[#c2410c]">{icon}</div>
-      <h3 className="mt-4 text-lg font-black text-[#301607]">{title}</h3>
+      <h3 className="mt-4 text-xl font-black text-[#2a190f]">{title}</h3>
       <p className="mt-2 text-sm leading-6 text-stone-600">{text}</p>
     </div>
   );
 }
 
-function PartnerTypeCard({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
+function StepCard({ index, title, text }: { index: number; title: string; text: string }) {
   return (
-    <div className="rounded-[1.5rem] border border-orange-100 bg-white p-6 shadow-sm">
-      <div className="inline-flex rounded-2xl bg-emerald-50 p-3 text-emerald-700">{icon}</div>
-      <h3 className="mt-4 text-xl font-black text-[#301607]">{title}</h3>
+    <div className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-soft">
+      <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#d95f2d] text-sm font-black text-white">{index}</div>
+      <h3 className="mt-4 text-xl font-black text-[#2a190f]">{title}</h3>
       <p className="mt-2 text-sm leading-6 text-stone-600">{text}</p>
     </div>
   );
 }
 
-function ProductCard({ product, onAdd, compact = false }: { product: PublicCatalogProduct; onAdd: () => void; compact?: boolean }) {
+function ProductCard({
+  product,
+  onAdd,
+  compact = false,
+}: {
+  product: PublicCatalogProduct;
+  onAdd: () => void;
+  compact?: boolean;
+}) {
   return (
-    <article className="overflow-hidden rounded-[1.5rem] border border-orange-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
-      <div className={`${compact ? 'aspect-[16/11]' : 'aspect-[4/3]'} bg-orange-50`}>
+    <article className="overflow-hidden rounded-[1.75rem] border border-orange-100 bg-white shadow-soft transition hover:-translate-y-1 hover:shadow-xl">
+      <div className={`${compact ? 'aspect-[16/11]' : 'aspect-[4/3]'} bg-[#fff4e7]`}>
         {product.image_url ? (
           <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
         ) : (
-          <DishPlaceholder name={product.name} />
+          <HeroFallback name={product.name} />
         )}
       </div>
-      <div className={compact ? 'p-4' : 'p-5'}>
+      <div className="space-y-4 p-5">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-orange-100 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-[#c2410c]">{product.category}</span>
+          <span className="rounded-full bg-[#fff3e5] px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-[#c2410c]">{product.category}</span>
           <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-emerald-700">Disponible</span>
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-slate-600">{product.zone_label || 'Martinique'}</span>
+          <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-slate-600">{product.zone_label || '[À VALIDER]'}</span>
         </div>
-        <h3 className={`mt-3 font-black text-[#301607] ${compact ? 'text-lg' : 'text-xl'}`}>{product.name}</h3>
-        <p className={`mt-2 line-clamp-2 text-sm text-stone-600 ${compact ? 'leading-5' : 'leading-6'}`}>{product.description}</p>
-        <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-stone-400">
-          <span>Retrait</span>
-          <span>Livraison selon zone</span>
-          <span>{product.vendor_name}</span>
+        <div>
+          <h3 className={`${compact ? 'text-lg' : 'text-xl'} font-black text-[#2a190f]`}>{product.name}</h3>
+          <p className="mt-2 text-sm leading-6 text-stone-600">{product.description}</p>
         </div>
-        <div className="mt-4 flex items-center justify-between gap-3">
-          <strong className={`${compact ? 'text-xl' : 'text-2xl'} font-black text-[#24170f]`}>{formatPrice(product.price)}</strong>
-          <button onClick={onAdd} className="rounded-xl bg-[#f97316] px-4 py-2 text-sm font-black text-white">Ajouter au panier</button>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">Vendeur</p>
+            <p className="text-sm font-semibold text-[#2a190f]">{product.vendor_name}</p>
+          </div>
+          <strong className={`${compact ? 'text-xl' : 'text-2xl'} font-black text-[#2a190f]`}>{formatPrice(product.price)}</strong>
         </div>
+        <button onClick={onAdd} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white">
+          Ajouter au panier <ArrowRight className="h-4 w-4" />
+        </button>
       </div>
     </article>
   );
 }
 
 function VendorCard({ vendor }: { vendor: PublicCatalogVendor }) {
-  const zone = vendor.zone_label || 'Martinique';
-  const destination = `${zone}, Martinique`;
-  const googleMaps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination)}`;
-  const waze = `https://waze.com/ul?q=${encodeURIComponent(destination)}&navigate=yes`;
-
   return (
-    <article className="rounded-[1.5rem] border border-orange-100 bg-white p-6 shadow-sm">
+    <article className="rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-[#c2410c]">{vendor.business_type}</p>
-          <h3 className="mt-3 text-2xl font-black text-[#301607]">{vendor.business_name}</h3>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">{vendor.business_type}</p>
+          <h3 className="mt-2 text-2xl font-black text-[#2a190f]">{vendor.business_name}</h3>
         </div>
-        <CheckCircle2 className="h-7 w-7 text-emerald-600" />
+        <BadgeCheck className="h-7 w-7 text-emerald-600" />
       </div>
       <p className="mt-3 text-sm leading-6 text-stone-600">{vendor.description}</p>
-      <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold text-stone-600">
-        <span className="rounded-full bg-orange-50 px-3 py-1">{zone}</span>
-        <span className="rounded-full bg-emerald-50 px-3 py-1">Rayon {vendor.delivery_radius_km} km</span>
-      </div>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <a href={googleMaps} target="_blank" rel="noreferrer" className="rounded-full border border-orange-200 px-3 py-2 text-xs font-black text-[#7c2d12]">Google Maps</a>
-        <a href={waze} target="_blank" rel="noreferrer" className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-800">Waze</a>
+      <div className="mt-4 grid gap-2 text-sm">
+        <InfoLine label="Commune" value={vendor.zone_label || '[À VALIDER]'} />
+        <InfoLine label="Rayon" value={`${vendor.delivery_radius_km} km`} />
+        <InfoLine label="Adresse" value={vendor.address || '[À VALIDER]'} />
       </div>
     </article>
   );
 }
 
-function FormCard({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
-  return (
-    <div className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-sm">
-      <h3 className="text-2xl font-black text-[#301607]">{title}</h3>
-      <p className="mt-2 text-sm leading-6 text-stone-600">{subtitle}</p>
-      <div className="mt-5">{children}</div>
-    </div>
-  );
-}
-
-function SouthCoverageCard({ zones }: { zones: string[] }) {
-  return (
-    <div className="rounded-[1.75rem] border border-orange-100 bg-[#24170f] p-6 text-white shadow-sm">
-      <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-orange-200">
-        <MapPin className="h-4 w-4" /> Secteur sud
-      </div>
-      <h3 className="mt-4 text-2xl font-black">Zones a servir en priorite</h3>
-      <p className="mt-3 text-sm leading-6 text-stone-200">
-        Vous voyez ici les communes mises en avant pour la prise de contact, la livraison et le retrait.
-      </p>
-      <div className="mt-5 flex flex-wrap gap-2">
-        {zones.map((zone) => (
-          <span key={zone} className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-stone-100">{zone}</span>
-        ))}
-      </div>
-      <ul className="mt-5 space-y-2 text-sm text-stone-200">
-        <li>- inscription simple</li>
-        <li>- ajout produit</li>
-        <li>- ajout photo</li>
-        <li>- zone de service lisible</li>
-      </ul>
-    </div>
-  );
-}
-
 function SelectionPanel({
   products,
-  economics,
+  summary,
   orderLink,
   onRemove,
+  onClear,
 }: {
   products: PublicCatalogProduct[];
-  economics: ReturnType<typeof calculateOrderEconomics>;
+  summary: ReturnType<typeof calculateOrderEconomics>;
   orderLink: string;
   onRemove: (index: number) => void;
+  onClear: () => void;
 }) {
   return (
-    <aside className="h-fit rounded-[1.5rem] border border-orange-100 bg-[#fff8ed] p-4 shadow-sm sm:sticky sm:top-24 sm:p-5">
+    <aside className="h-fit rounded-[1.75rem] border border-orange-100 bg-[#fffaf4] p-5 shadow-soft lg:sticky lg:top-24">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <ShoppingBag className="h-5 w-5 text-[#f97316]" />
-          <h3 className="text-lg font-black text-[#301607]">Selection</h3>
+          <ShoppingBag className="h-5 w-5 text-[#d95f2d]" />
+          <h3 className="text-lg font-black text-[#2a190f]">Panier</h3>
         </div>
-        <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">{products.length} article{products.length > 1 ? 's' : ''}</span>
+        <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">{products.length} article(s)</span>
       </div>
 
       {products.length === 0 ? (
-        <p className="mt-4 text-sm leading-6 text-stone-600">Ajoutez des produits pour preparer votre commande.</p>
+        <p className="mt-4 text-sm leading-6 text-stone-600">Ajoutez une offre pour préparer votre commande. Le montant final sera confirmé avant validation.</p>
       ) : (
         <div className="mt-4 space-y-3">
           {products.map((product, index) => (
-            <div key={`${product.id}-${index}`} className="rounded-2xl bg-white p-3">
+            <div key={`${product.id}-${index}`} className="rounded-2xl bg-white p-3 shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-black text-[#301607]">{product.name}</p>
+                  <p className="text-sm font-black text-[#2a190f]">{product.name}</p>
                   <p className="text-xs text-stone-500">{product.vendor_name}</p>
                 </div>
-                <button onClick={() => onRemove(index)} className="text-xs font-bold text-stone-400">Retirer</button>
+                <button onClick={() => onRemove(index)} className="text-xs font-bold text-stone-400">
+                  Retirer
+                </button>
               </div>
             </div>
           ))}
 
           <div className="rounded-2xl border border-orange-100 bg-white p-4 text-sm">
-            <SummaryLine label="Sous-total" value={formatPrice(economics.subtotal_produits)} />
-            <SummaryLine label="Livraison" value={formatPrice(economics.frais_livraison)} />
-            <SummaryLine label="Frais service" value={formatPrice(economics.frais_service)} />
-            <SummaryLine label="Total estime" value={formatPrice(economics.total_client)} strong />
+            <PriceLine label="Sous-total" value={formatPrice(summary.subtotal_produits)} />
+            <PriceLine label="Livraison" value="[À VALIDER]" />
+            <PriceLine label="Minimum commande" value="[À VALIDER]" />
+            <PriceLine label="Total panier" value={formatPrice(summary.total_client)} strong />
           </div>
 
-          <a href={orderLink} className="inline-flex w-full justify-center rounded-2xl bg-[#f97316] px-5 py-4 font-black text-white">Confirmer la commande</a>
-          <p className="text-xs font-semibold text-stone-500">Retrait ou livraison confirmes ensuite selon votre zone.</p>
+          <a href={orderLink} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-5 py-3 font-black uppercase tracking-[0.14em] text-white">
+            Commander par WhatsApp <MessageCircle className="h-4 w-4" />
+          </a>
+          <button onClick={onClear} className="w-full rounded-2xl border border-orange-200 bg-white px-5 py-3 text-sm font-black text-[#7c2d12]">
+            Vider le panier
+          </button>
+          <p className="text-xs font-medium text-stone-500">La disponibilité, le retrait ou la livraison sont confirmés selon votre commune.</p>
         </div>
       )}
     </aside>
   );
 }
 
-function EmptyHero({ loading, configured }: { loading: boolean; configured: boolean }) {
+function EmptyState({ title, text, action }: { title: string; text: string; action?: string }) {
   return (
-    <div className="flex min-h-[300px] flex-col justify-center rounded-[1.5rem] bg-gradient-to-br from-[#24170f] to-[#6b2d08] p-6 text-white sm:min-h-[380px] sm:p-8">
-      <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-200">Catalogue</p>
-      <h3 className="mt-4 font-display text-3xl font-black sm:text-4xl">{loading ? 'Chargement des produits...' : 'Aucun produit visible pour le moment'}</h3>
-      <p className="mt-4 text-stone-200">
-        {configured ? 'Les prochaines lignes verifiees apparaitront ici.' : 'La connexion au catalogue n est pas disponible pour le moment.'}
-      </p>
-    </div>
-  );
-}
-
-function EmptyCatalog({ configured }: { configured: boolean }) {
-  return (
-    <div className="mt-8 rounded-[2rem] border border-amber-200 bg-amber-50 p-7">
-      <div className="flex items-center gap-3 text-amber-800">
+    <div className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-soft">
+      <div className="inline-flex rounded-2xl bg-[#fff3e5] p-3 text-[#c2410c]">
         <Package className="h-6 w-6" />
-        <p className="text-lg font-black">Aucun produit visible pour le moment</p>
       </div>
-      <p className="mt-3 max-w-3xl text-sm leading-6 text-amber-900">
-        {configured ? 'Le site n affiche pas de faux catalogue. Les prochains produits verifies apparaitront ici.' : 'Le catalogue ne peut pas etre lu pour le moment.'}
+      <h3 className="mt-4 text-2xl font-black text-[#2a190f]">{title}</h3>
+      <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">{text}</p>
+      {action && (
+        <a href={action} className="mt-5 inline-flex rounded-2xl bg-[#d95f2d] px-5 py-3 text-sm font-black text-white">
+          Devenir partenaire
+        </a>
+      )}
+    </div>
+  );
+}
+
+function FaqItem({ question, answer }: { question: string; answer: string }) {
+  return (
+    <details className="group rounded-[1.5rem] border border-orange-100 bg-white p-5 shadow-soft">
+      <summary className="cursor-pointer list-none text-lg font-black text-[#2a190f]">
+        <span className="flex items-center justify-between gap-3">
+          {question}
+          <ChevronRight className="h-5 w-5 transition group-open:rotate-90" />
+        </span>
+      </summary>
+      <p className="mt-4 text-sm leading-6 text-stone-600">{answer}</p>
+    </details>
+  );
+}
+
+function ProofCard({ title }: { title: string }) {
+  return (
+    <div className="rounded-[1.5rem] border border-orange-100 bg-white p-5 shadow-soft">
+      <div className="inline-flex rounded-2xl bg-[#fff3e5] p-3 text-[#c2410c]">
+        <Star className="h-5 w-5" />
+      </div>
+      <h3 className="mt-4 text-lg font-black text-[#2a190f]">{title}</h3>
+      <p className="mt-2 text-sm leading-6 text-stone-600">
+        [À VALIDER] Cette preuve sera remplacée par des témoignages et des chiffres réels dès que les premières ventes sont remontées.
       </p>
-      <div className="mt-5 flex flex-wrap gap-3">
-        <a href="#partenaires" className="rounded-2xl border border-amber-300 bg-white px-5 py-3 font-bold text-amber-900">Devenir partenaire</a>
-        <a href="#demande-pro" className="rounded-2xl bg-[#f97316] px-5 py-3 font-black text-white">Demande pro</a>
-      </div>
     </div>
   );
 }
 
-function InfoBanner({ tone, message }: { tone: 'neutral' | 'warning'; message: string }) {
-  const classes = tone === 'warning'
-    ? 'border-amber-200 bg-amber-50 text-amber-800'
-    : 'border-orange-100 bg-white text-stone-600';
-  return <p className={`mt-6 rounded-2xl border p-5 text-sm font-semibold ${classes}`}>{message}</p>;
-}
-
-function StatusBanner({ status }: { status: SubmitStatus }) {
-  if (status.kind === 'idle') return null;
-  const tone = status.kind === 'success'
-    ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-    : status.kind === 'error'
-      ? 'border-rose-200 bg-rose-50 text-rose-700'
-      : 'border-orange-200 bg-orange-50 text-orange-800';
-  return <p className={`rounded-2xl border px-4 py-3 text-sm font-semibold ${tone}`}>{status.message}</p>;
-}
-
-function SummaryLine({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
+function SectionTitle({ eyebrow, title, text }: { eyebrow: string; title: string; text: string }) {
   return (
-    <div className={`flex justify-between py-1 ${strong ? 'text-base font-black text-[#301607]' : 'text-stone-600'}`}>
-      <span>{label}</span>
-      <span>{value}</span>
+    <div>
+      <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">{eyebrow}</p>
+      <h2 className="mt-2 max-w-3xl font-display text-3xl font-black tracking-tight text-[#2a190f] sm:text-4xl">{title}</h2>
+      <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600 sm:text-base sm:leading-7">{text}</p>
     </div>
   );
 }
 
-function MiniLine({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl bg-white px-3 py-2">
-      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">{label}</p>
-      <p className="mt-1 text-sm font-black text-[#301607]">{value}</p>
-    </div>
-  );
-}
-
-function ZoneCard({ zone }: { zone: string }) {
-  return (
-    <div className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm">
-      <div className="flex items-center gap-2 font-black text-[#301607]">
-        <MapPin className="h-5 w-5 text-[#f97316]" />
-        {zone}
-      </div>
-      <p className="mt-2 text-sm text-stone-600">Retrait ou livraison selon partenaire actif.</p>
-    </div>
-  );
-}
-
-function TextInput({ value, onChange, placeholder, className = '', required = false }: { value: string; onChange: (value: string) => void; placeholder: string; className?: string; required?: boolean }) {
+function Input({
+  value,
+  onChange,
+  placeholder,
+  className = '',
+  required = false,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  className?: string;
+  required?: boolean;
+}) {
   return (
     <input
       value={value}
       onChange={(event) => onChange(event.target.value)}
       placeholder={placeholder}
       required={required}
-      className={`rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4 ${className}`}
+      className={`rounded-2xl border border-orange-100 bg-[#fffaf4] px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4 ${className}`}
     />
   );
 }
 
-function TextArea({ value, onChange, placeholder, className = '', rows = 3 }: { value: string; onChange: (value: string) => void; placeholder: string; className?: string; rows?: number }) {
-  return (
-    <textarea
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      placeholder={placeholder}
-      rows={rows}
-      className={`rounded-2xl border border-orange-100 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4 ${className}`}
-    />
-  );
-}
-
-function TextInputDark({ value, onChange, placeholder }: { value: string; onChange: (value: string) => void; placeholder: string }) {
+function InputDark({
+  value,
+  onChange,
+  placeholder,
+  className = '',
+  required = false,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  className?: string;
+  required?: boolean;
+}) {
   return (
     <input
       value={value}
       onChange={(event) => onChange(event.target.value)}
       placeholder={placeholder}
-      className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-stone-400"
+      required={required}
+      className={`rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white placeholder:text-stone-300 outline-none ring-white/20 focus:ring-4 ${className}`}
     />
   );
 }
 
-function TextAreaDark({ value, onChange, placeholder, className = '', rows = 4 }: { value: string; onChange: (value: string) => void; placeholder: string; className?: string; rows?: number }) {
+function Textarea({
+  value,
+  onChange,
+  placeholder,
+  className = '',
+  rows = 3,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  className?: string;
+  rows?: number;
+}) {
   return (
     <textarea
       value={value}
       onChange={(event) => onChange(event.target.value)}
       placeholder={placeholder}
       rows={rows}
-      className={`rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-stone-400 ${className}`}
+      className={`rounded-2xl border border-orange-100 bg-[#fffaf4] px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4 ${className}`}
     />
   );
 }
 
-function DishPlaceholder({ name }: { name: string }) {
+function TextareaDark({
+  value,
+  onChange,
+  placeholder,
+  className = '',
+  rows = 3,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  className?: string;
+  rows?: number;
+}) {
   return (
-    <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_30%_30%,rgba(251,146,60,0.35),transparent_35%),linear-gradient(135deg,#ffedd5,#fef3c7,#dcfce7)]">
-      <div className="rounded-full bg-white/80 px-6 py-4 text-center shadow-lg">
+    <textarea
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      placeholder={placeholder}
+      rows={rows}
+      className={`rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white placeholder:text-stone-300 outline-none ring-white/20 focus:ring-4 ${className}`}
+    />
+  );
+}
+
+function Select({
+  value,
+  onChange,
+  children,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  children: ReactNode;
+}) {
+  return (
+    <div className="relative">
+      <Filter className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="w-full appearance-none rounded-2xl border border-orange-100 bg-[#fffaf4] px-10 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
+      >
+        {children}
+      </select>
+    </div>
+  );
+}
+
+function PriceLine({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
+  return (
+    <div className={`flex items-center justify-between py-1 ${strong ? 'text-base font-black text-[#2a190f]' : 'text-stone-600'}`}>
+      <span>{label}</span>
+      <span>{value}</span>
+    </div>
+  );
+}
+
+function MiniMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-white/10 px-3 py-3">
+      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-300">{label}</p>
+      <p className="mt-1 text-sm font-bold text-white">{value}</p>
+    </div>
+  );
+}
+
+function BusinessChip({ text }: { text: string }) {
+  return <span className="rounded-full border border-white/10 bg-white/8 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-stone-100">{text}</span>;
+}
+
+function HeroFallback({ name, loading, configured }: { name: string; loading?: boolean; configured?: boolean }) {
+  return (
+    <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_30%_30%,rgba(217,95,45,0.28),transparent_35%),linear-gradient(135deg,#fde9d6,#fff3e4,#dfefe9)]">
+      <div className="rounded-full bg-white/85 px-6 py-4 text-center shadow-lg">
         <Utensils className="mx-auto h-8 w-8 text-[#c2410c]" />
-        <p className="mt-2 max-w-[180px] text-sm font-black text-[#301607]">{name}</p>
+        <p className="mt-2 max-w-[220px] text-sm font-black text-[#2a190f]">
+          {loading ? 'Chargement...' : configured === false ? 'Catalogue non configuré' : name}
+        </p>
       </div>
     </div>
   );
+}
+
+function NavLink({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <a href={href} className="rounded-full px-4 py-2 text-sm font-black text-[#5a4334] transition hover:bg-white hover:text-[#2a190f]">
+      {children}
+    </a>
+  );
+}
+
+function FooterBlock({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="space-y-3">
+      <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">{title}</p>
+      <div className="space-y-2">{children}</div>
+    </div>
+  );
+}
+
+function FooterLink({ label }: { label: string }) {
+  return <p className="text-sm font-semibold text-stone-600">{label}</p>;
+}
+
+function StatusBanner({ status }: { status: SubmitStatus }) {
+  if (status.kind === 'idle') return null;
+  const tone =
+    status.kind === 'success'
+      ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+      : status.kind === 'error'
+        ? 'border-rose-200 bg-rose-50 text-rose-700'
+        : 'border-orange-200 bg-orange-50 text-orange-800';
+  return <p className={`mt-4 rounded-2xl border px-4 py-3 text-sm font-semibold ${tone}`}>{status.message}</p>;
+}
+
+function upsertMeta(name: string, content: string) {
+  const selector = `meta[name="${name}"]`;
+  let element = document.head.querySelector(selector) as HTMLMetaElement | null;
+  if (!element) {
+    element = document.createElement('meta');
+    element.setAttribute('name', name);
+    document.head.appendChild(element);
+  }
+  element.setAttribute('content', content);
 }
 
 function formatPrice(value: number) {
