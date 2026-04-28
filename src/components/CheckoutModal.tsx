@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { X, MapPin, Store, Package } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Banknote, CreditCard, MessageCircle, ReceiptText, X, MapPin, Store, Package } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { ordersService } from '../services/ordersService';
@@ -9,17 +9,51 @@ interface CheckoutModalProps {
   onClose: () => void;
 }
 
+type PaymentMode = 'paypal' | 'bank_revolut' | 'stripe_pending' | 'whatsapp';
+
 export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const { items, total, clearCart } = useCart();
   const { user } = useAuth();
   const [deliveryType, setDeliveryType] = useState<'home_delivery' | 'pickup'>('home_delivery');
   const [address, setAddress] = useState('');
   const [notes, setNotes] = useState('');
+  const [paymentMode, setPaymentMode] = useState<PaymentMode>('whatsapp');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const deliveryFee = deliveryType === 'home_delivery' ? 5.0 : 0;
   const finalTotal = total + deliveryFee;
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
+
+  const paymentOptions = useMemo(
+    () => [
+      {
+        id: 'paypal' as const,
+        title: 'PayPal',
+        subtitle: 'Lien transitoire a envoyer au client',
+        icon: CreditCard,
+      },
+      {
+        id: 'bank_revolut' as const,
+        title: 'Bancaire / Revolut',
+        subtitle: 'Coordonnees a confirmer par WhatsApp',
+        icon: Banknote,
+      },
+      {
+        id: 'stripe_pending' as const,
+        title: 'Stripe en attente',
+        subtitle: 'Conserve pour la phase suivante',
+        icon: ReceiptText,
+      },
+      {
+        id: 'whatsapp' as const,
+        title: 'WhatsApp',
+        subtitle: 'Confirmation manuelle rapide',
+        icon: MessageCircle,
+      },
+    ],
+    [],
+  );
 
   if (!isOpen) return null;
 
@@ -37,6 +71,12 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
     try {
       const orderNumber = `DK${Date.now().toString().slice(-8)}`;
+      const paymentLabel = paymentOptions.find((option) => option.id === paymentMode)?.title ?? 'WhatsApp';
+      const paymentNotes = [
+        `Mode de paiement transitoire: ${paymentLabel}`,
+        `Confirmation WhatsApp: https://wa.me/${whatsappNumber}`,
+        'Stripe conserve en attente pour integration future.',
+      ].join('\n');
 
       const orderItems = items.map((item) => ({
         product_id: item.id,
@@ -54,12 +94,12 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         delivery_address: deliveryType === 'home_delivery' ? address : undefined,
         delivery_fee: deliveryFee,
         total_amount: finalTotal,
-        notes: notes || undefined,
+        notes: [notes.trim(), paymentNotes].filter(Boolean).join('\n\n') || undefined,
         items: orderItems,
       });
 
       clearCart();
-      alert(`Commande ${orderNumber} passée avec succès !`);
+      alert(`Commande ${orderNumber} passée avec succès. Mode de paiement: ${paymentLabel}.`);
       onClose();
     } catch (err: any) {
       console.error('Error creating order:', err);
@@ -110,6 +150,42 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                 <p className="font-medium">Retrait</p>
                 <p className="text-sm text-gray-600">Sur place</p>
               </button>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="font-bold text-lg mb-3">Paiement transitoire</h3>
+            <p className="text-sm text-gray-600 mb-3">
+              Choisissez un mode simple pour la phase actuelle. Stripe reste en attente.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {paymentOptions.map((option) => {
+                const Icon = option.icon;
+                const active = paymentMode === option.id;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => setPaymentMode(option.id)}
+                    className={`rounded-2xl border-2 p-4 text-left transition-all ${
+                      active ? 'border-emerald-600 bg-emerald-50' : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`rounded-xl p-2 ${active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>
+                        <Icon size={18} />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">{option.title}</p>
+                        <p className="text-sm text-gray-600">{option.subtitle}</p>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+              La commande est enregistrée avec le mode choisi et peut ensuite être confirmée sur WhatsApp si besoin.
             </div>
           </div>
 
@@ -172,7 +248,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             disabled={loading}
             className="w-full bg-emerald-600 text-white py-4 rounded-lg font-medium text-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
           >
-            {loading ? 'Traitement...' : `Confirmer et payer ${finalTotal.toFixed(2)} €`}
+            {loading ? 'Traitement...' : `Enregistrer la commande ${finalTotal.toFixed(2)} €`}
           </button>
 
           <p className="text-xs text-gray-500 text-center">
