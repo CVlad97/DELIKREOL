@@ -272,26 +272,26 @@ export function PublicHomePage() {
       <main id="accueil">
         <section className="relative overflow-hidden border-b border-orange-100 bg-[radial-gradient(circle_at_10%_15%,rgba(251,146,60,0.22),transparent_30%),radial-gradient(circle_at_90%_10%,rgba(16,185,129,0.14),transparent_28%),linear-gradient(135deg,#fff7ed_0%,#ffffff_48%,#fff4e6_100%)]">
           <div className="madras-strip" />
-          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 md:grid-cols-[1.05fr_0.95fr] md:py-14 lg:py-16">
+          <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 md:grid-cols-[1.05fr_0.95fr] md:py-14 lg:py-16">
             <div className="flex flex-col justify-center">
-              <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-orange-200 bg-white/90 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-[#c2410c] shadow-sm">
+              <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-orange-200 bg-white/90 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.22em] text-[#c2410c] shadow-sm sm:mb-6 sm:px-4 sm:py-2 sm:text-xs">
                 <MapPin className="h-4 w-4" /> Martinique uniquement
               </div>
-              <div className="mb-5 flex items-center gap-4">
-                <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-20 w-20 rounded-[1.5rem] bg-white p-2 shadow-2xl shadow-orange-500/20" />
+              <div className="mb-4 flex items-center gap-3 sm:mb-5 sm:gap-4">
+                <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-16 w-16 rounded-[1.5rem] bg-white p-2 shadow-2xl shadow-orange-500/20 sm:h-20 sm:w-20" />
                 <div>
                   <p className="text-sm font-bold uppercase tracking-[0.28em] text-emerald-700">Commande immediate</p>
                   <p className="text-sm font-semibold text-stone-500">Retrait ou livraison selon zone et partenaire</p>
                 </div>
               </div>
-              <h1 className="max-w-4xl font-display text-5xl font-black leading-none tracking-tight text-[#301607] md:text-6xl lg:text-7xl">
+              <h1 className="max-w-4xl font-display text-[2.4rem] font-black leading-[0.95] tracking-tight text-[#301607] sm:text-5xl md:text-6xl lg:text-7xl">
                 Commander en Martinique sans perdre de temps.
               </h1>
-              <p className="mt-4 max-w-2xl text-lg leading-8 text-stone-700">
+              <p className="mt-3 max-w-2xl text-base leading-7 text-stone-700 sm:mt-4 sm:text-lg sm:leading-8">
                 Recherchez un plat, un produit ou un vendeur local. Ajoutez au panier, puis confirmez le retrait ou la livraison selon votre zone.
               </p>
-              <div className="mt-6 rounded-[1.75rem] border border-orange-100 bg-white/95 p-3 shadow-xl shadow-orange-900/5">
-                <div className="grid gap-3 lg:grid-cols-[1fr_auto_auto]">
+              <div className="mt-5 rounded-[1.5rem] border border-orange-100 bg-white/95 p-2 shadow-xl shadow-orange-900/5 sm:mt-6 sm:rounded-[1.75rem] sm:p-3">
+                <div className="grid gap-2 sm:grid-cols-[1fr_auto] lg:grid-cols-[1fr_auto_auto] lg:gap-3">
                   <label className="relative block">
                     <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
                     <input
@@ -301,8 +301,8 @@ export function PublicHomePage() {
                       className="w-full rounded-2xl border border-orange-100 bg-orange-50/60 py-4 pl-12 pr-4 text-sm font-semibold text-stone-700 outline-none ring-orange-200 focus:ring-4"
                     />
                   </label>
-                  <a href="#catalogue" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#f97316] px-6 py-4 font-black text-white shadow-xl shadow-orange-500/25">Commander <ArrowRight className="h-5 w-5" /></a>
-                  <a href="#partenaires" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-white px-6 py-4 font-bold text-[#7c2d12]">Devenir partenaire</a>
+                  <a href="#catalogue" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#f97316] px-6 py-4 font-black text-white shadow-xl shadow-orange-500/25 sm:w-auto">Commander <ArrowRight className="h-5 w-5" /></a>
+                  <a href="#partenaires" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-white px-6 py-4 font-bold text-[#7c2d12] sm:w-auto">Devenir partenaire</a>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <ProofChip label="Partenaires verifies" />
@@ -310,14 +310,14 @@ export function PublicHomePage() {
                   <ProofChip label="Confirmation rapide" />
                 </div>
               </div>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <a href="#catalogue" className="inline-flex items-center gap-2 rounded-2xl bg-[#f97316] px-6 py-4 font-black text-white shadow-xl shadow-orange-500/25">Commander <ArrowRight className="h-5 w-5" /></a>
-                <a href="#partenaires" className="inline-flex items-center gap-2 rounded-2xl border border-orange-200 bg-white px-6 py-4 font-bold text-[#7c2d12]">Devenir partenaire</a>
-                <a href="#demande-pro" className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-4 font-bold text-emerald-800">Demande pro</a>
+              <div className="mt-5 grid gap-3 sm:mt-6 sm:flex sm:flex-wrap">
+                <a href="#catalogue" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#f97316] px-6 py-4 font-black text-white shadow-xl shadow-orange-500/25">Commander <ArrowRight className="h-5 w-5" /></a>
+                <a href="#partenaires" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-white px-6 py-4 font-bold text-[#7c2d12]">Devenir partenaire</a>
+                <a href="#demande-pro" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-4 font-bold text-emerald-800">Demande pro</a>
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-orange-100 bg-white/88 p-4 shadow-2xl shadow-orange-900/10 backdrop-blur">
+            <div className="rounded-[1.75rem] border border-orange-100 bg-white/88 p-3 shadow-2xl shadow-orange-900/10 backdrop-blur sm:rounded-[2rem] sm:p-4">
               {heroProducts.length > 0 ? (
                 <div className="space-y-4">
                   <div className="overflow-hidden rounded-[1.5rem] bg-[#24170f] text-white">
@@ -751,7 +751,7 @@ function SelectionPanel({
   onRemove: (index: number) => void;
 }) {
   return (
-    <aside className="sticky top-24 h-fit rounded-[1.5rem] border border-orange-100 bg-[#fff8ed] p-5 shadow-sm">
+    <aside className="h-fit rounded-[1.5rem] border border-orange-100 bg-[#fff8ed] p-4 shadow-sm sm:sticky sm:top-24 sm:p-5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <ShoppingBag className="h-5 w-5 text-[#f97316]" />
@@ -793,9 +793,9 @@ function SelectionPanel({
 
 function EmptyHero({ loading, configured }: { loading: boolean; configured: boolean }) {
   return (
-    <div className="flex min-h-[380px] flex-col justify-center rounded-[1.5rem] bg-gradient-to-br from-[#24170f] to-[#6b2d08] p-8 text-white">
+    <div className="flex min-h-[300px] flex-col justify-center rounded-[1.5rem] bg-gradient-to-br from-[#24170f] to-[#6b2d08] p-6 text-white sm:min-h-[380px] sm:p-8">
       <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-200">Catalogue</p>
-      <h3 className="mt-4 font-display text-4xl font-black">{loading ? 'Chargement des produits...' : 'Aucun produit visible pour le moment'}</h3>
+      <h3 className="mt-4 font-display text-3xl font-black sm:text-4xl">{loading ? 'Chargement des produits...' : 'Aucun produit visible pour le moment'}</h3>
       <p className="mt-4 text-stone-200">
         {configured ? 'Les prochaines lignes verifiees apparaitront ici.' : 'La connexion au catalogue n est pas disponible pour le moment.'}
       </p>
