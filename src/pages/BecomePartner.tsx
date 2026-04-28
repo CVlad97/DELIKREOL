@@ -74,6 +74,14 @@ export function BecomePartner({ onBack }: BecomePartnerProps) {
     },
   ];
 
+  const driverJourney = [
+    { label: 'Zone', value: 'Communes et secteurs que vous desservez' },
+    { label: 'Rayon', value: 'Distance habituelle acceptée' },
+    { label: 'Disponibilité', value: 'Plages horaires et jours actifs' },
+    { label: 'Véhicule', value: 'Vélo, scooter ou voiture' },
+    { label: 'Rémunération', value: 'Estimatif ou objectif souhaité' },
+  ];
+
   if (showForm && selectedType) {
     return (
       <PartnerApplicationForm
@@ -132,6 +140,26 @@ export function BecomePartner({ onBack }: BecomePartnerProps) {
                 <DollarSign className="text-primary w-6 h-6" />
                 <span className="text-xl font-black text-primary uppercase tracking-tight">{partner.revenue}</span>
               </div>
+
+              {selectedType === 'driver' && (
+                <div className="rounded-[2rem] border border-emerald-200 bg-emerald-50 p-6 space-y-4">
+                  <div className="flex items-center gap-3 text-emerald-800">
+                    <Truck className="w-6 h-6" />
+                    <h3 className="text-xl font-black uppercase tracking-tight">Espace livreur</h3>
+                  </div>
+                  <p className="text-sm leading-relaxed text-emerald-900/80">
+                    Le parcours livreur est séparé pour garder la lecture simple: zone, rayon, disponibilité, véhicule et rémunération estimée sont visibles avant l envoi du dossier.
+                  </p>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {driverJourney.map((item) => (
+                      <div key={item.label} className="rounded-2xl border border-emerald-200 bg-white p-4">
+                        <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-600">{item.label}</p>
+                        <p className="mt-2 text-sm font-semibold text-foreground">{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-8 pt-4">
                 <div className="space-y-4">
@@ -210,6 +238,26 @@ export function BecomePartner({ onBack }: BecomePartnerProps) {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-black uppercase tracking-[0.2em]">
             <TrendingUp className="w-3 h-3" />
             Grow with us
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <button
+              onClick={() => setSelectedType('vendor')}
+              className="rounded-full border border-primary/20 bg-white px-6 py-3 text-sm font-black uppercase tracking-widest text-primary shadow-sm transition hover:-translate-y-0.5"
+            >
+              Devenir vendeur
+            </button>
+            <button
+              onClick={() => setSelectedType('driver')}
+              className="rounded-full bg-primary px-6 py-3 text-sm font-black uppercase tracking-widest text-white shadow-sm transition hover:-translate-y-0.5"
+            >
+              Devenir livreur
+            </button>
+            <button
+              onClick={() => setSelectedType('relay_host')}
+              className="rounded-full border border-border bg-card px-6 py-3 text-sm font-black uppercase tracking-widest text-foreground shadow-sm transition hover:-translate-y-0.5"
+            >
+              Devenir point relais
+            </button>
           </div>
           <h1 className="text-6xl md:text-9xl font-black text-foreground tracking-tighter uppercase leading-[0.8]">
             Bâtissons <br />
