@@ -2,8 +2,10 @@ import { FormEvent, ReactNode, useEffect, useMemo, useState, type ComponentType 
 import {
   ArrowRight,
   BadgeCheck,
+  Briefcase,
   ChevronRight,
   Filter,
+  Home,
   MapPin,
   MessageCircle,
   Package,
@@ -11,6 +13,8 @@ import {
   ShieldCheck,
   ShoppingBag,
   Sparkles,
+  Store,
+  Truck,
   Star,
   Utensils,
 } from 'lucide-react';
@@ -81,15 +85,19 @@ const trustPills = [
 const howItWorks = [
   {
     title: 'Je cherche',
-    text: 'Je filtre par commune, catégorie et budget pour trouver rapidement une offre claire et locale.',
+    text: 'Adresse, commune ou produit: je trouve vite les offres disponibles près de moi.',
   },
   {
     title: 'J’ajoute',
-    text: 'Je sélectionne les produits ou je prépare une demande pour un repas d’équipe, un événement ou une commande récurrente.',
+    text: 'Je choisis un produit clair avec photo, prix, zone et disponibilité.',
   },
   {
-    title: 'Je confirme',
-    text: 'Je finalise par WhatsApp ou via la demande entreprise pour recevoir une réponse rapide et concrète.',
+    title: 'Je confirme / je paie',
+    text: 'Je valide retrait ou livraison, puis PayPal, carte via lien sécurisé ou assistance WhatsApp.',
+  },
+  {
+    title: 'Je suis ma commande',
+    text: 'Je reçois une confirmation simple et les informations utiles pour récupérer ou recevoir ma commande.',
   },
 ];
 
@@ -109,6 +117,45 @@ const reassurance = [
     text: 'Le vocabulaire, les communes, les besoins et les usages sont adaptés à un usage local réel.',
     icon: MapPin,
   },
+];
+
+const roleCards = [
+  {
+    title: 'Vendeur',
+    text: 'Publiez vos plats, produits ou menus locaux.',
+    cta: 'Devenir vendeur',
+    href: '#partenaires',
+    icon: Store,
+  },
+  {
+    title: 'Livreur',
+    text: 'Choisissez votre zone, vos créneaux et votre rayon.',
+    cta: 'Devenir livreur',
+    href: '#livreur',
+    icon: Truck,
+  },
+  {
+    title: 'Point relais',
+    text: 'Accueillez des retraits clients dans votre commerce.',
+    cta: 'Proposer un relais',
+    href: '#partenaires',
+    icon: Home,
+  },
+  {
+    title: 'Entreprise',
+    text: 'Commandes groupées, repas d’équipe et récurrence.',
+    cta: 'Demander un devis',
+    href: '#entreprises',
+    icon: Briefcase,
+  },
+];
+
+const driverHighlights = [
+  ['Gains estimés', 'À valider selon course'],
+  ['Zone', 'Commune + secteur'],
+  ['Rayon', '5 à 12 km conseillé'],
+  ['Disponibilité', 'Créneaux libres'],
+  ['Véhicule', 'Scooter, voiture ou vélo'],
 ];
 
 const faqItems = [
@@ -176,6 +223,7 @@ export function PublicHomePage() {
   const [categoryFilter, setCategoryFilter] = useState('Tous');
   const [budgetFilter, setBudgetFilter] = useState('Tous');
   const [selectedProducts, setSelectedProducts] = useState<PublicCatalogProduct[]>([]);
+  const [fulfillmentMode, setFulfillmentMode] = useState<'delivery' | 'pickup'>('delivery');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [partnerLeadForm, setPartnerLeadForm] = useState<PartnerLeadForm>(defaultPartnerLeadForm);
@@ -421,37 +469,51 @@ export function PublicHomePage() {
       <main id="accueil">
         <section className="relative overflow-hidden border-b border-orange-100 bg-[radial-gradient(circle_at_top_left,_rgba(217,95,45,0.18),_transparent_34%),radial-gradient(circle_at_top_right,_rgba(10,77,62,0.12),_transparent_28%),linear-gradient(135deg,_#fff8ee_0%,_#fffdf9_50%,_#fff3e7_100%)]">
           <div className="madras-strip" />
-          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 lg:grid-cols-[1.08fr_0.92fr] lg:py-16">
+          <div className="mx-auto grid max-w-7xl gap-7 px-4 py-7 sm:py-10 lg:grid-cols-[1.08fr_0.92fr] lg:py-14">
             <div className="flex flex-col justify-center">
               <BadgeRow />
-              <h1 className="mt-6 max-w-4xl font-display text-4xl font-black leading-[0.96] tracking-tight text-[#2a190f] sm:text-5xl lg:text-7xl">
-                Commandez des plats créoles et produits locaux en Martinique.
+              <h1 className="mt-5 max-w-4xl font-display text-4xl font-black leading-[0.96] tracking-tight text-[#2a190f] sm:text-5xl lg:text-7xl">
+                Commandez local en Martinique.
               </h1>
-              <p className="mt-5 max-w-2xl text-base leading-7 text-[#5a4334] sm:text-lg">
-                Retrait ou livraison selon votre commune, auprès de partenaires visibles et vérifiés. Un site local, clair, premium et déjà opérationnel pour les particuliers, les entreprises et les prestataires.
+              <p className="mt-4 max-w-xl text-base leading-7 text-[#5a4334] sm:text-lg">
+                Trouvez un plat, un produit ou un traiteur disponible près de votre commune. Retrait ou livraison selon l’offre.
               </p>
 
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                <a href="#catalogue" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#d95f2d] px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25 transition hover:-translate-y-0.5">
-                  Commander maintenant <ArrowRight className="h-5 w-5" />
-                </a>
-                <a href="#partenaires" className="inline-flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-white px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-[#7c2d12] transition hover:-translate-y-0.5">
-                  Devenir partenaire
-                </a>
+              <div className="mt-6 rounded-[1.75rem] border border-orange-100 bg-white p-3 shadow-elegant">
+                <div className="grid gap-3 lg:grid-cols-[1fr_190px]">
+                  <label className="relative block">
+                    <MapPin className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#c2410c]" />
+                    <input
+                      value={query}
+                      onChange={(event) => setQuery(event.target.value)}
+                      placeholder="Votre commune, adresse ou produit"
+                      className="h-14 w-full rounded-2xl border border-orange-100 bg-[#fffaf4] pl-12 pr-4 text-base font-black text-[#2a190f] outline-none ring-orange-200 placeholder:text-stone-400 focus:ring-4"
+                    />
+                  </label>
+                  <a href="#catalogue" className="inline-flex h-14 items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-5 text-sm font-black uppercase tracking-[0.12em] text-white shadow-xl shadow-orange-500/25 transition hover:-translate-y-0.5">
+                    Commander <ArrowRight className="h-5 w-5" />
+                  </a>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-black uppercase tracking-[0.16em] text-stone-400">Zones rapides</span>
+                  {serviceZones.slice(0, 4).map((zone) => (
+                    <button
+                      key={zone}
+                      onClick={() => {
+                        setCommuneFilter(zone);
+                        setQuery(zone);
+                      }}
+                      className="rounded-full border border-orange-100 bg-[#fff8ef] px-3 py-1.5 text-xs font-black text-[#7c2d12]"
+                    >
+                      {zone}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                {heroMetrics(catalog, serviceZones).map((metric) => (
-                  <MetricCard key={metric.label} {...metric} />
-                ))}
-              </div>
-
-              <div className="mt-6 grid gap-3 rounded-[1.75rem] border border-orange-100 bg-white/90 p-4 shadow-soft sm:grid-cols-2">
-                <InfoLine label="Communes desservies" value={serviceZones.slice(0, 5).join(' · ') || '[À VALIDER]'} />
-                <InfoLine label="Retrait / livraison" value="Selon la commune et le partenaire" />
-                <InfoLine label="Paiement" value="[À VALIDER]" />
-                <InfoLine label="Minimum de commande" value="[À VALIDER]" />
-              </div>
+              <a href="#partenaires" className="mt-4 inline-flex w-fit items-center justify-center gap-2 rounded-full border border-orange-200 bg-white/80 px-5 py-3 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5">
+                Devenir partenaire <ChevronRight className="h-4 w-4" />
+              </a>
             </div>
 
             <div className="brand-panel rounded-[2rem] p-4 shadow-elegant">
@@ -492,50 +554,16 @@ export function PublicHomePage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-8">
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {reassurance.map((item) => (
-              <ValueCard key={item.title} {...item} />
-            ))}
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 py-12">
+        <section className="mx-auto max-w-7xl px-4 py-10">
           <SectionTitle
             eyebrow="Comment ça marche"
-            title="Un parcours très court pour commander ou demander un devis."
-            text="Le site évite les détours. L’utilisateur comprend immédiatement ce qu’il peut faire, où, et comment obtenir une réponse rapide."
+            title="Chercher, ajouter, confirmer, suivre."
+            text="Un parcours court, lisible sur mobile, centré sur la commande."
           />
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {howItWorks.map((step, index) => (
               <StepCard key={step.title} index={index + 1} title={step.title} text={step.text} />
             ))}
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 py-12">
-          <SectionTitle
-            eyebrow="Catégories populaires"
-            title="Les demandes qui convertissent le plus vite."
-            text="Les catégories restent lisibles, concrètes et orientées décision."
-          />
-          <div className="mt-8 flex flex-wrap gap-3">
-            {categoryOptions.slice(0, 12).map((category) => {
-              const active = categoryFilter === category;
-              return (
-                <button
-                  key={category}
-                  onClick={() => setCategoryFilter(category)}
-                  className={`rounded-full border px-4 py-2 text-sm font-black transition ${
-                    active
-                      ? 'border-transparent bg-[#d95f2d] text-white shadow-lg shadow-orange-500/20'
-                      : 'border-orange-200 bg-white text-[#7c2d12] hover:-translate-y-0.5'
-                  }`}
-                >
-                  {category}
-                </button>
-              );
-            })}
           </div>
         </section>
 
@@ -544,8 +572,8 @@ export function PublicHomePage() {
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <SectionTitle
                 eyebrow="Catalogue"
-                title="Les offres visibles maintenant."
-                text="Chaque carte affiche le nom, le prix, le vendeur, la commune et le mode de service. Les informations inconnues restent marquées [À VALIDER]."
+                title="Les offres disponibles."
+                text="Photo, prix, zone, disponibilité, action."
               />
               <a href={orderLink} className="inline-flex w-fit items-center gap-2 rounded-full bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25">
                 Commander par WhatsApp <MessageCircle className="h-5 w-5" />
@@ -577,6 +605,25 @@ export function PublicHomePage() {
                   </option>
                 ))}
               </Select>
+            </div>
+
+            <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {categoryOptions.slice(0, 12).map((category) => {
+                const active = categoryFilter === category;
+                return (
+                  <button
+                    key={category}
+                    onClick={() => setCategoryFilter(category)}
+                    className={`shrink-0 rounded-full border px-4 py-2 text-sm font-black transition ${
+                      active
+                        ? 'border-transparent bg-[#d95f2d] text-white shadow-lg shadow-orange-500/20'
+                        : 'border-orange-200 bg-white text-[#7c2d12] hover:-translate-y-0.5'
+                    }`}
+                  >
+                    {category}
+                  </button>
+                );
+              })}
             </div>
 
             <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -613,6 +660,8 @@ export function PublicHomePage() {
                         products={selectedProducts}
                         summary={selectionEconomics}
                         orderLink={orderLink}
+                        fulfillmentMode={fulfillmentMode}
+                        onFulfillmentModeChange={setFulfillmentMode}
                         onRemove={removeFromSelection}
                         onClear={clearSelection}
                       />
@@ -678,6 +727,52 @@ export function PublicHomePage() {
           <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {highlightedVendors.map((vendor) => (
               <VendorCard key={vendor.id} vendor={vendor} />
+            ))}
+          </div>
+        </section>
+
+        <section className="bg-[#fff8ef] py-14">
+          <div className="mx-auto max-w-7xl px-4">
+            <SectionTitle
+              eyebrow="Rôles"
+              title="Un accès clair pour chaque profil."
+              text="Chaque rôle a une action unique. Le parcours client reste prioritaire."
+            />
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {roleCards.map((role) => (
+                <RoleCard key={role.title} {...role} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="livreur" className="mx-auto max-w-7xl px-4 py-14">
+          <div className="grid gap-6 rounded-[2rem] border border-orange-100 bg-white p-5 shadow-elegant lg:grid-cols-[0.95fr_1.05fr] lg:p-8">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">Livreurs</p>
+              <h2 className="mt-3 font-display text-4xl font-black tracking-tight text-[#2a190f] sm:text-5xl">Un parcours livreur simple à comprendre.</h2>
+              <p className="mt-4 max-w-xl text-sm leading-6 text-stone-600 sm:text-base">
+                DELIKREOL doit afficher ce qui compte avant l’inscription: gains estimés, zone, rayon, disponibilités et véhicule.
+              </p>
+              <a href={`${whatsappBase}?text=${encodeURIComponent('Bonjour DELIKREOL, je souhaite devenir livreur.')}`} className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white">
+                Devenir livreur <Truck className="h-4 w-4" />
+              </a>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {driverHighlights.map(([label, value]) => (
+                <div key={label} className="rounded-[1.35rem] border border-orange-100 bg-[#fffaf4] p-4">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">{label}</p>
+                  <p className="mt-2 text-lg font-black text-[#2a190f]">{value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 py-10">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {reassurance.map((item) => (
+              <ValueCard key={item.title} {...item} />
             ))}
           </div>
         </section>
@@ -949,35 +1044,25 @@ export function PublicHomePage() {
         </div>
       )}
 
+      {selectedProducts.length === 0 && (
+        <div className="fixed inset-x-4 bottom-4 z-50 grid grid-cols-[1fr_auto] gap-2 rounded-[1.5rem] border border-orange-100 bg-white p-3 shadow-2xl shadow-orange-900/20 md:hidden">
+          <a href="#catalogue" className="inline-flex items-center justify-center rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black text-white">
+            Commander maintenant
+          </a>
+          <a href="#partenaires" className="inline-flex items-center justify-center rounded-2xl border border-orange-200 px-4 py-3 text-sm font-black text-[#7c2d12]">
+            Partenaire
+          </a>
+        </div>
+      )}
+
       <a
         href={whatsappBase}
-        className="fixed bottom-5 right-5 z-50 inline-flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-3 text-sm font-black text-white shadow-2xl shadow-green-500/30"
+        className="fixed bottom-5 right-5 z-50 hidden items-center gap-2 rounded-full bg-[#25D366] px-4 py-3 text-sm font-black text-white shadow-2xl shadow-green-500/30 md:inline-flex"
       >
         WhatsApp <MessageCircle className="h-5 w-5" />
       </a>
     </div>
   );
-}
-
-function heroMetrics(catalog: CatalogState, serviceZones: string[]) {
-  return [
-    {
-      label: 'Communes desservies',
-      value: serviceZones.slice(0, 4).join(' · ') || '[À VALIDER]',
-    },
-    {
-      label: 'Partenaires visibles',
-      value: catalog.vendors.length ? `${catalog.vendors.length}` : '[À VALIDER]',
-    },
-    {
-      label: 'Mode principal',
-      value: 'Retrait / livraison',
-    },
-    {
-      label: 'Réponse rapide',
-      value: 'WhatsApp',
-    },
-  ];
 }
 
 function BadgeRow() {
@@ -989,15 +1074,6 @@ function BadgeRow() {
       <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-800">
         pensée pour la Martinique
       </span>
-    </div>
-  );
-}
-
-function MetricCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-[1.4rem] border border-orange-100 bg-white p-4 shadow-soft">
-      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">{label}</p>
-      <p className="mt-2 text-sm font-black text-[#2a190f]">{value}</p>
     </div>
   );
 }
@@ -1019,6 +1095,16 @@ function TrustCard({ label }: { label: string }) {
   );
 }
 
+function ZoneCard({ zone }: { zone: string }) {
+  return (
+    <div className="rounded-[1.4rem] border border-orange-100 bg-white px-4 py-3 shadow-soft">
+      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">commune</p>
+      <p className="mt-2 text-sm font-black text-[#2a190f]">{zone}</p>
+      <p className="mt-1 text-xs leading-5 text-stone-500">Retrait ou livraison selon l’offre visible sur la fiche.</p>
+    </div>
+  );
+}
+
 function ValueCard({ title, text, icon: Icon }: { title: string; text: string; icon: ComponentType<{ className?: string }> }) {
   return (
     <div className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-soft">
@@ -1028,6 +1114,37 @@ function ValueCard({ title, text, icon: Icon }: { title: string; text: string; i
       <h3 className="mt-4 text-xl font-black text-[#2a190f]">{title}</h3>
       <p className="mt-2 text-sm leading-6 text-stone-600">{text}</p>
     </div>
+  );
+}
+
+function RoleCard({
+  title,
+  text,
+  cta,
+  href,
+  icon: Icon,
+}: {
+  title: string;
+  text: string;
+  cta: string;
+  href: string;
+  icon: ComponentType<{ className?: string }>;
+}) {
+  return (
+    <article className="rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="text-xl font-black text-[#2a190f]">{title}</h3>
+          <p className="mt-2 text-sm leading-6 text-stone-600">{text}</p>
+        </div>
+        <span className="rounded-2xl bg-[#fff3e5] p-3 text-[#c2410c]">
+          <Icon className="h-5 w-5" />
+        </span>
+      </div>
+      <a href={href} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-[#fffaf4] px-4 py-3 text-sm font-black text-[#7c2d12]">
+        {cta} <ChevronRight className="h-4 w-4" />
+      </a>
+    </article>
   );
 }
 
@@ -1059,25 +1176,20 @@ function ProductCard({
           <HeroFallback name={product.name} />
         )}
       </div>
-      <div className="space-y-4 p-5">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-[#fff3e5] px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-[#c2410c]">{product.category}</span>
-          <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-emerald-700">Disponible</span>
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-slate-600">{product.zone_label || '[À VALIDER]'}</span>
-        </div>
-        <div>
-          <h3 className={`${compact ? 'text-lg' : 'text-xl'} font-black text-[#2a190f]`}>{product.name}</h3>
-          <p className="mt-2 text-sm leading-6 text-stone-600">{product.description}</p>
-        </div>
-        <div className="flex items-center justify-between gap-3">
+      <div className="space-y-4 p-4 sm:p-5">
+        <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">Vendeur</p>
-            <p className="text-sm font-semibold text-[#2a190f]">{product.vendor_name}</p>
+            <h3 className={`${compact ? 'text-lg' : 'text-xl'} font-black text-[#2a190f]`}>{product.name}</h3>
+            <p className="mt-1 text-sm font-semibold text-stone-500">{product.vendor_name}</p>
           </div>
-          <strong className={`${compact ? 'text-xl' : 'text-2xl'} font-black text-[#2a190f]`}>{formatPrice(product.price)}</strong>
+          <strong className={`${compact ? 'text-xl' : 'text-2xl'} whitespace-nowrap font-black text-[#2a190f]`}>{formatPrice(product.price)}</strong>
+        </div>
+        <div className="grid grid-cols-2 gap-2 text-xs font-black uppercase tracking-[0.14em]">
+          <span className="rounded-2xl bg-slate-100 px-3 py-2 text-slate-700">{product.zone_label || '[À VALIDER]'}</span>
+          <span className="rounded-2xl bg-emerald-50 px-3 py-2 text-emerald-700">{product.available ? 'Disponible' : 'À confirmer'}</span>
         </div>
         <button onClick={onAdd} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white">
-          Ajouter au panier <ArrowRight className="h-4 w-4" />
+          Ajouter <ArrowRight className="h-4 w-4" />
         </button>
       </div>
     </article>
@@ -1108,12 +1220,16 @@ function SelectionPanel({
   products,
   summary,
   orderLink,
+  fulfillmentMode,
+  onFulfillmentModeChange,
   onRemove,
   onClear,
 }: {
   products: PublicCatalogProduct[];
   summary: ReturnType<typeof calculateOrderEconomics>;
   orderLink: string;
+  fulfillmentMode: 'delivery' | 'pickup';
+  onFulfillmentModeChange: (mode: 'delivery' | 'pickup') => void;
   onRemove: (index: number) => void;
   onClear: () => void;
 }) {
@@ -1145,11 +1261,42 @@ function SelectionPanel({
             </div>
           ))}
 
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              ['delivery', 'Livraison'],
+              ['pickup', 'Retrait'],
+            ].map(([mode, label]) => {
+              const active = fulfillmentMode === mode;
+              return (
+                <button
+                  key={mode}
+                  onClick={() => onFulfillmentModeChange(mode as 'delivery' | 'pickup')}
+                  className={`rounded-2xl border px-3 py-3 text-sm font-black ${
+                    active ? 'border-[#d95f2d] bg-[#fff3e5] text-[#7c2d12]' : 'border-orange-100 bg-white text-stone-500'
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+
           <div className="rounded-2xl border border-orange-100 bg-white p-4 text-sm">
             <PriceLine label="Sous-total" value={formatPrice(summary.subtotal_produits)} />
-            <PriceLine label="Livraison" value="[À VALIDER]" />
-            <PriceLine label="Minimum commande" value="[À VALIDER]" />
-            <PriceLine label="Total panier" value={formatPrice(summary.total_client)} strong />
+            <PriceLine label={fulfillmentMode === 'delivery' ? 'Livraison' : 'Retrait'} value={fulfillmentMode === 'delivery' ? '[À VALIDER]' : '0,00 €'} />
+            <div className="mt-3 rounded-2xl bg-[#2a190f] px-4 py-3 text-white">
+              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-orange-200">Total estimé</p>
+              <p className="mt-1 text-3xl font-black">{formatPrice(summary.total_client)}</p>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-orange-100 bg-white p-4">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">Paiement</p>
+            <div className="mt-3 grid gap-2 text-sm font-bold text-[#2a190f]">
+              <span className="rounded-xl bg-[#fff8ef] px-3 py-2">PayPal</span>
+              <span className="rounded-xl bg-[#fff8ef] px-3 py-2">Carte via lien sécurisé</span>
+              <span className="rounded-xl bg-[#fff8ef] px-3 py-2">Assistance WhatsApp</span>
+            </div>
           </div>
 
           <a href={orderLink} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-5 py-3 font-black uppercase tracking-[0.14em] text-white">
