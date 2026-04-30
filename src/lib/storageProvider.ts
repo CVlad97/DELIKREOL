@@ -41,7 +41,9 @@ export interface PartnerDocument {
   id: string;
   user_id?: string | null;
   partner_application_id?: string | null;
+  uploaded_by?: string | null;
   document_type: PartnerDocumentType;
+  status?: PartnerDocumentStatus;
   verification_status: PartnerDocumentStatus;
   file_name?: string | null;
   file_path?: string | null;
@@ -194,7 +196,9 @@ class DemoStorageProvider implements StorageProvider {
     const doc: PartnerDocument = {
       id: `doc_${Date.now()}`,
       user_id: input.userId,
+      uploaded_by: input.userId,
       document_type: input.documentType,
+      status: 'uploaded',
       verification_status: 'uploaded',
       file_name: input.file.name,
       file_path: `demo/${input.userId}/${input.documentType}/${input.file.name}`,
@@ -233,11 +237,16 @@ class SupabaseStorageProvider implements StorageProvider {
     const { data, error } = await supabase
       .from('partner_documents')
       .select('*')
-      .eq('user_id', userId)
-      .order('uploaded_at', { ascending: false });
+      .eq('uploaded_by', userId)
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return (data || []) as PartnerDocument[];
+    return (data || []).map((document: any) => ({
+      ...document,
+      user_id: document.user_id ?? document.uploaded_by,
+      uploaded_at: document.uploaded_at ?? document.created_at,
+      verification_status: document.verification_status ?? document.status ?? 'uploaded',
+    })) as PartnerDocument[];
   }
 
   async uploadDocument(input: {
@@ -265,17 +274,19 @@ class SupabaseStorageProvider implements StorageProvider {
       .from('partner_documents')
       .insert({
         user_id: input.userId,
+        uploaded_by: input.userId,
         document_type: input.documentType,
+        status: 'uploaded',
         verification_status: 'uploaded',
         file_name: input.file.name,
         file_path: path,
-        file_url: publicUrl ?? path,
         bucket_id: bucketId,
         is_sensitive: requirement?.sensitive ?? true,
         file_size: input.file.size,
         mime_type: input.file.type,
         expires_at: input.expiresAt || null,
         metadata: {
+          public_url: publicUrl,
           partner_role: input.role,
           minimization: 'required_for_role',
         },
@@ -292,6 +303,7 @@ class SupabaseStorageProvider implements StorageProvider {
       .from('partner_documents')
       .update({
         verification_status: status,
+        status,
         review_note: reviewNote || null,
         reviewed_at: new Date().toISOString(),
       })

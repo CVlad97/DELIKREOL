@@ -29,6 +29,12 @@ alter table public.partner_documents
   add column if not exists metadata jsonb not null default '{}'::jsonb;
 
 alter table public.partner_documents
+  alter column partner_id drop not null;
+
+alter table public.partner_documents
+  alter column uploaded_by drop not null;
+
+alter table public.partner_documents
   drop constraint if exists valid_document_type;
 
 alter table public.partner_documents
@@ -73,6 +79,21 @@ alter table public.partner_documents
     'expired'
   ));
 
+alter table public.partner_documents
+  drop constraint if exists partner_documents_status_check;
+
+alter table public.partner_documents
+  add constraint partner_documents_status_check check (status in (
+    'missing',
+    'uploaded',
+    'under_review',
+    'approved',
+    'rejected',
+    'expired',
+    'pending',
+    'validated'
+  ));
+
 create index if not exists idx_partner_documents_user_id
   on public.partner_documents(user_id);
 
@@ -88,22 +109,22 @@ create policy "Partner owner can view own documents by user"
   on public.partner_documents
   for select
   to authenticated
-  using (user_id = auth.uid());
+  using (user_id = auth.uid() or uploaded_by = auth.uid());
 
 drop policy if exists "Partner owner can insert own documents by user" on public.partner_documents;
 create policy "Partner owner can insert own documents by user"
   on public.partner_documents
   for insert
   to authenticated
-  with check (user_id = auth.uid());
+  with check (user_id = auth.uid() or uploaded_by = auth.uid());
 
 drop policy if exists "Partner owner can update own uploaded documents" on public.partner_documents;
 create policy "Partner owner can update own uploaded documents"
   on public.partner_documents
   for update
   to authenticated
-  using (user_id = auth.uid() and verification_status in ('uploaded', 'rejected', 'expired'))
-  with check (user_id = auth.uid() and verification_status in ('uploaded', 'under_review'));
+  using ((user_id = auth.uid() or uploaded_by = auth.uid()) and coalesce(verification_status, status) in ('uploaded', 'rejected', 'expired'))
+  with check ((user_id = auth.uid() or uploaded_by = auth.uid()) and coalesce(verification_status, status) in ('uploaded', 'under_review'));
 
 drop policy if exists "Admins can update partner document verification" on public.partner_documents;
 create policy "Admins can update partner document verification"
