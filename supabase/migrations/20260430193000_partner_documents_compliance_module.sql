@@ -114,14 +114,14 @@ create policy "Admins can update partner document verification"
     exists (
       select 1 from public.profiles
       where profiles.id = auth.uid()
-      and profiles.user_type = 'admin'
+      and profiles.role = 'admin'
     )
   )
   with check (
     exists (
       select 1 from public.profiles
       where profiles.id = auth.uid()
-      and profiles.user_type = 'admin'
+      and profiles.role = 'admin'
     )
   );
 
@@ -147,7 +147,7 @@ create policy "Partner private docs own read"
       or exists (
         select 1 from public.profiles
         where profiles.id = auth.uid()
-        and profiles.user_type = 'admin'
+        and profiles.role = 'admin'
       )
     )
   );
