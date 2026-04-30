@@ -80,6 +80,15 @@ type NotificationPreferences = {
   promos: boolean;
 };
 
+type CustomerLocation = {
+  lat: number;
+  lng: number;
+  accuracy?: number;
+  mapsUrl: string;
+};
+
+type GeoStatus = 'idle' | 'loading' | 'success' | 'error' | 'unsupported';
+
 const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 const whatsappBase = `https://wa.me/${whatsappNumber}`;
 const fallbackZones = ['Fort-de-France', 'Le Lamentin', 'Schoelcher', 'Ducos', 'Rivière-Salée', 'Sainte-Luce', 'Le Marin', 'Le François'];
@@ -243,8 +252,16 @@ export function PublicHomePage() {
   const [budgetFilter, setBudgetFilter] = useState('Tous');
   const [selectedProducts, setSelectedProducts] = useState<PublicCatalogProduct[]>([]);
   const [fulfillmentMode, setFulfillmentMode] = useState<'delivery' | 'pickup'>('delivery');
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [deliveryNotes, setDeliveryNotes] = useState('');
   const [deliverySlot, setDeliverySlot] = useState('');
+  const [customerLocation, setCustomerLocation] = useState<CustomerLocation | null>(null);
+  const [geoStatus, setGeoStatus] = useState<GeoStatus>('idle');
+  const [geoError, setGeoError] = useState('');
+  const [vendorAvailabilityStatus, setVendorAvailabilityStatus] = useState('À confirmer par DELIKREOL');
+  const [copyStatus, setCopyStatus] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('Carte via lien sécurisé');
   const [orderConfirmed, setOrderConfirmed] = useState(false);
   const [activeScenario, setActiveScenario] = useState(0);
@@ -344,47 +361,160 @@ export function PublicHomePage() {
 
   const orderNumber = useMemo(() => `DK-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${String(selectedProducts.length || 1).padStart(2, '0')}`, [selectedProducts.length]);
 
+  const deliveryLabel = fulfillmentMode === 'delivery' ? 'Livraison' : 'Retrait';
+  const deliverySlotLabel = deliverySlot || 'Créneau à confirmer';
+  const customerMapsLabel = customerLocation?.mapsUrl || 'Position GPS non fournie — confirmer adresse manuellement';
+  const customerAccuracyLabel = customerLocation?.accuracy ? `${Math.round(customerLocation.accuracy)} m` : 'Non fournie';
+  const productLines = useMemo(
+    () =>
+      selectedProducts.length
+        ? selectedProducts.map((product) => `- ${product.name} x1 — ${product.vendor_name} — ${formatPrice(product.price)}`)
+        : ['- Disponibilités du moment à proposer'],
+    [selectedProducts],
+  );
+
+  const centralOrderMessage = useMemo(
+    () =>
+      [
+        '🧾 COMMANDE DELIKREOL',
+        `N° commande : ${orderNumber}`,
+        `Date : ${new Date().toLocaleString('fr-FR')}`,
+        'Statut : à confirmer',
+        '',
+        '👤 CLIENT',
+        `Nom : ${customerName || 'Non renseigné'}`,
+        `Téléphone : ${customerPhone || 'Non renseigné'}`,
+        '',
+        '📍 LIVRAISON / RETRAIT',
+        `Mode : ${deliveryLabel}`,
+        `Adresse : ${deliveryAddress || 'Adresse non fournie'}`,
+        `Repère / instructions : ${deliveryNotes || 'Aucune instruction'}`,
+        `Position GPS : ${customerMapsLabel}`,
+        `Précision : ${customerAccuracyLabel}`,
+        `Créneau souhaité : ${deliverySlotLabel}`,
+        '',
+        '🛒 PRODUITS',
+        ...productLines,
+        '',
+        '💰 TOTAL',
+        `Sous-total : ${formatPrice(selectionEconomics.subtotal_produits)}`,
+        `Frais livraison : ${formatPrice(selectionEconomics.frais_livraison)}`,
+        `Frais service : ${formatPrice(selectionEconomics.frais_service)}`,
+        `Total estimé : ${formatPrice(selectionEconomics.total_client)}`,
+        `Paiement souhaité : ${paymentMethod}`,
+        '',
+        '✅ ACTION DELIKREOL',
+        '1. Vérifier disponibilité vendeur',
+        '2. Confirmer préparation / délai',
+        '3. Confirmer livraison ou retrait',
+        '4. Envoyer mission au livreur si livraison',
+      ].join('\n'),
+    [
+      customerAccuracyLabel,
+      customerMapsLabel,
+      customerName,
+      customerPhone,
+      deliveryAddress,
+      deliveryLabel,
+      deliveryNotes,
+      deliverySlotLabel,
+      orderNumber,
+      paymentMethod,
+      productLines,
+      selectionEconomics,
+    ],
+  );
+
+  const vendorMessage = useMemo(
+    () =>
+      [
+        '📩 DEMANDE DISPONIBILITE VENDEUR',
+        `Commande : ${orderNumber}`,
+        'Produits à préparer :',
+        ...productLines,
+        `Créneau client : ${deliverySlotLabel}`,
+        `Mode : ${deliveryLabel}`,
+        `Adresse ou zone client : ${deliveryAddress || 'Adresse non fournie'}`,
+        `Position Maps : ${customerMapsLabel}`,
+        `Total : ${formatPrice(selectionEconomics.total_client)}`,
+        `Statut disponibilité : ${vendorAvailabilityStatus}`,
+        '',
+        'Merci de répondre :',
+        'OK disponible + délai préparation',
+        'ou',
+        'KO indisponible / alternative possible',
+      ].join('\n'),
+    [
+      customerMapsLabel,
+      deliveryAddress,
+      deliveryLabel,
+      deliverySlotLabel,
+      orderNumber,
+      productLines,
+      selectionEconomics.total_client,
+      vendorAvailabilityStatus,
+    ],
+  );
+
+  const driverMessage = useMemo(
+    () =>
+      [
+        '🚚 MISSION LIVRAISON DELIKREOL',
+        `Commande : ${orderNumber}`,
+        `Pickup : ${selectedProducts[0]?.vendor_name || 'Vendeur à confirmer'} / adresse vendeur si disponible`,
+        `Drop client : ${deliveryAddress || 'Adresse client non fournie'}`,
+        `Position client : ${customerMapsLabel}`,
+        `Créneau : ${deliverySlotLabel}`,
+        `Instructions : ${deliveryNotes || 'Aucune instruction'}`,
+        `Montant commande : ${formatPrice(selectionEconomics.total_client)}`,
+        'Statut : attendre confirmation vendeur avant départ',
+      ].join('\n'),
+    [customerMapsLabel, deliveryAddress, deliveryNotes, deliverySlotLabel, orderNumber, selectedProducts, selectionEconomics.total_client],
+  );
+
   const partnerDispatchMessage = useMemo(
     () =>
       buildPartnerDispatchMessage({
         orderNumber,
         products: selectedProducts,
-        deliveryMode: fulfillmentMode === 'delivery' ? 'Livraison' : 'Retrait',
+        deliveryMode: deliveryLabel,
         deliveryFee: selectionEconomics.frais_livraison,
         serviceFee: selectionEconomics.frais_service,
         total: selectionEconomics.total_client,
         paymentStatus: paymentMethod,
-        slot: deliverySlot || 'Créneau à confirmer',
+        slot: deliverySlotLabel,
+        customerName,
+        customerPhone,
+        deliveryAddress,
+        deliveryNotes,
+        customerMapsUrl: customerLocation?.mapsUrl,
+        customerLat: customerLocation?.lat,
+        customerLng: customerLocation?.lng,
+        customerAccuracy: customerLocation?.accuracy,
       }),
-    [deliverySlot, fulfillmentMode, orderNumber, paymentMethod, selectedProducts, selectionEconomics],
+    [
+      customerLocation,
+      customerName,
+      customerPhone,
+      deliveryAddress,
+      deliveryLabel,
+      deliveryNotes,
+      deliverySlotLabel,
+      orderNumber,
+      paymentMethod,
+      selectedProducts,
+      selectionEconomics,
+    ],
   );
 
-  const orderLink = useMemo(() => {
-    const lines = selectedProducts.map((product) => `- ${product.name} — ${product.vendor_name} — ${formatPrice(product.price)}`);
-    const body = [
-      'Bonjour DELIKREOL, je souhaite commander.',
-      '',
-      `Mode : ${fulfillmentMode === 'delivery' ? 'Livraison' : 'Retrait'}`,
-      deliveryAddress && `Adresse / commune : ${deliveryAddress}`,
-      deliverySlot && `Créneau : ${deliverySlot}`,
-      `Paiement souhaité : ${paymentMethod}`,
-      '',
-      selectedProducts.length ? 'Sélection :' : 'Je souhaite connaître les disponibilités du moment.',
-      ...lines,
-      '',
-      `Total estimé : ${formatPrice(selectionEconomics.total_client)}`,
-      'Merci de confirmer la disponibilité, la commune et le mode de retrait / livraison.',
-    ]
-      .filter(Boolean)
-      .join('\n');
-
-    return `${whatsappBase}?text=${encodeURIComponent(body)}`;
-  }, [deliveryAddress, deliverySlot, fulfillmentMode, paymentMethod, selectedProducts, selectionEconomics.total_client]);
+  const orderLink = useMemo(() => `${whatsappBase}?text=${encodeURIComponent(centralOrderMessage)}`, [centralOrderMessage]);
 
   const partnerDispatchLink = useMemo(() => {
     const subject = `Commande DELIKREOL ${orderNumber}`;
     return `mailto:operations@delikreol.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(partnerDispatchMessage)}`;
   }, [orderNumber, partnerDispatchMessage]);
+
+  const driverMissionLink = useMemo(() => `${whatsappBase}?text=${encodeURIComponent(driverMessage)}`, [driverMessage]);
 
   const partnerLink = `${whatsappBase}?text=${encodeURIComponent('Bonjour DELIKREOL, je souhaite devenir partenaire.')}`;
 
@@ -505,16 +635,76 @@ export function PublicHomePage() {
     setNotificationPermission(permission);
   }
 
+  function useCustomerPosition() {
+    if (!('geolocation' in navigator)) {
+      setGeoStatus('unsupported');
+      setGeoError('Géolocalisation non supportée par ce navigateur. Saisissez l’adresse manuellement.');
+      return;
+    }
+
+    setGeoStatus('loading');
+    setGeoError('');
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setCustomerLocation({
+          lat: coords.latitude,
+          lng: coords.longitude,
+          accuracy: coords.accuracy,
+          mapsUrl: `https://www.google.com/maps?q=${coords.latitude},${coords.longitude}`,
+        });
+        setGeoStatus('success');
+      },
+      (positionError) => {
+        setGeoStatus('error');
+        setGeoError(
+          positionError.code === positionError.PERMISSION_DENIED
+            ? 'Permission refusée. Saisissez l’adresse manuellement.'
+            : 'Position indisponible. Saisissez l’adresse manuellement.',
+        );
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
+    );
+  }
+
+  async function copyOperationalMessage(message: string, label: string) {
+    try {
+      if ('clipboard' in navigator && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(message);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = message;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setCopyStatus(`${label} copié. Validez humainement avant envoi.`);
+    } catch {
+      setCopyStatus(`Copie impossible pour ${label}. Utilisez le bouton WhatsApp ou email.`);
+    }
+  }
+
   function handleDownloadOrderPdf() {
     downloadOrderPdf({
       orderNumber,
       products: selectedProducts,
-      deliveryMode: fulfillmentMode === 'delivery' ? 'Livraison' : 'Retrait',
+      deliveryMode: deliveryLabel,
       deliveryFee: selectionEconomics.frais_livraison,
       serviceFee: selectionEconomics.frais_service,
       total: selectionEconomics.total_client,
       paymentStatus: paymentMethod,
-      slot: deliverySlot || 'Créneau à confirmer',
+      slot: deliverySlotLabel,
+      customerName,
+      customerPhone,
+      deliveryAddress,
+      deliveryNotes,
+      customerMapsUrl: customerLocation?.mapsUrl,
+      customerLat: customerLocation?.lat,
+      customerLng: customerLocation?.lng,
+      customerAccuracy: customerLocation?.accuracy,
     });
   }
 
@@ -754,17 +944,35 @@ export function PublicHomePage() {
                         summary={selectionEconomics}
                         orderLink={orderLink}
                         partnerDispatchLink={partnerDispatchLink}
+                        driverMissionLink={driverMissionLink}
+                        vendorMessage={vendorMessage}
+                        driverMessage={driverMessage}
+                        copyStatus={copyStatus}
+                        customerName={customerName}
+                        customerPhone={customerPhone}
                         deliveryAddress={deliveryAddress}
+                        deliveryNotes={deliveryNotes}
                         deliverySlot={deliverySlot}
+                        customerLocation={customerLocation}
+                        geoStatus={geoStatus}
+                        geoError={geoError}
                         fulfillmentMode={fulfillmentMode}
                         paymentMethod={paymentMethod}
+                        vendorAvailabilityStatus={vendorAvailabilityStatus}
                         notificationPermission={notificationPermission}
                         notificationPrefs={notificationPrefs}
                         orderConfirmed={orderConfirmed}
+                        onCustomerNameChange={setCustomerName}
+                        onCustomerPhoneChange={setCustomerPhone}
                         onDeliveryAddressChange={setDeliveryAddress}
+                        onDeliveryNotesChange={setDeliveryNotes}
                         onDeliverySlotChange={setDeliverySlot}
+                        onCustomerPositionRequest={useCustomerPosition}
                         onFulfillmentModeChange={setFulfillmentMode}
                         onPaymentMethodChange={setPaymentMethod}
+                        onVendorAvailabilityStatusChange={setVendorAvailabilityStatus}
+                        onCopyVendorMessage={() => copyOperationalMessage(vendorMessage, 'Message vendeur')}
+                        onCopyDriverMessage={() => copyOperationalMessage(driverMessage, 'Mission livreur')}
                         onNotificationPreferenceChange={(key, value) => setNotificationPrefs((current) => ({ ...current, [key]: value }))}
                         onRequestNotifications={requestNotifications}
                         onDownloadPdf={handleDownloadOrderPdf}
@@ -1368,17 +1576,35 @@ function SelectionPanel({
   summary,
   orderLink,
   partnerDispatchLink,
+  driverMissionLink,
+  vendorMessage,
+  driverMessage,
+  copyStatus,
+  customerName,
+  customerPhone,
   deliveryAddress,
+  deliveryNotes,
   deliverySlot,
+  customerLocation,
+  geoStatus,
+  geoError,
   fulfillmentMode,
   paymentMethod,
+  vendorAvailabilityStatus,
   notificationPermission,
   notificationPrefs,
   orderConfirmed,
+  onCustomerNameChange,
+  onCustomerPhoneChange,
   onDeliveryAddressChange,
+  onDeliveryNotesChange,
   onDeliverySlotChange,
+  onCustomerPositionRequest,
   onFulfillmentModeChange,
   onPaymentMethodChange,
+  onVendorAvailabilityStatusChange,
+  onCopyVendorMessage,
+  onCopyDriverMessage,
   onNotificationPreferenceChange,
   onRequestNotifications,
   onDownloadPdf,
@@ -1390,17 +1616,35 @@ function SelectionPanel({
   summary: ReturnType<typeof calculateOrderEconomics>;
   orderLink: string;
   partnerDispatchLink: string;
+  driverMissionLink: string;
+  vendorMessage: string;
+  driverMessage: string;
+  copyStatus: string;
+  customerName: string;
+  customerPhone: string;
   deliveryAddress: string;
+  deliveryNotes: string;
   deliverySlot: string;
+  customerLocation: CustomerLocation | null;
+  geoStatus: GeoStatus;
+  geoError: string;
   fulfillmentMode: 'delivery' | 'pickup';
   paymentMethod: string;
+  vendorAvailabilityStatus: string;
   notificationPermission: NotificationPermission | 'unsupported';
   notificationPrefs: NotificationPreferences;
   orderConfirmed: boolean;
+  onCustomerNameChange: (value: string) => void;
+  onCustomerPhoneChange: (value: string) => void;
   onDeliveryAddressChange: (value: string) => void;
+  onDeliveryNotesChange: (value: string) => void;
   onDeliverySlotChange: (value: string) => void;
+  onCustomerPositionRequest: () => void;
   onFulfillmentModeChange: (mode: 'delivery' | 'pickup') => void;
   onPaymentMethodChange: (value: string) => void;
+  onVendorAvailabilityStatusChange: (value: string) => void;
+  onCopyVendorMessage: () => void;
+  onCopyDriverMessage: () => void;
   onNotificationPreferenceChange: (key: keyof NotificationPreferences, value: boolean) => void;
   onRequestNotifications: () => void;
   onDownloadPdf: () => void;
@@ -1458,9 +1702,29 @@ function SelectionPanel({
 
           <div className="grid gap-2">
             <input
+              value={customerName}
+              onChange={(event) => onCustomerNameChange(event.target.value)}
+              placeholder="Nom"
+              className="rounded-2xl border border-orange-100 bg-white px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
+            />
+            <input
+              value={customerPhone}
+              onChange={(event) => onCustomerPhoneChange(event.target.value)}
+              placeholder="Téléphone"
+              inputMode="tel"
+              className="rounded-2xl border border-orange-100 bg-white px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
+            />
+            <input
               value={deliveryAddress}
               onChange={(event) => onDeliveryAddressChange(event.target.value)}
-              placeholder={fulfillmentMode === 'delivery' ? 'Adresse ou commune de livraison' : 'Commune de retrait'}
+              placeholder={fulfillmentMode === 'delivery' ? 'Adresse complète / repère' : 'Commune de retrait'}
+              className="rounded-2xl border border-orange-100 bg-white px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
+            />
+            <textarea
+              value={deliveryNotes}
+              onChange={(event) => onDeliveryNotesChange(event.target.value)}
+              placeholder="Instructions livraison: bâtiment, portail, repère, appel avant arrivée..."
+              rows={3}
               className="rounded-2xl border border-orange-100 bg-white px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
             />
             <input
@@ -1469,6 +1733,39 @@ function SelectionPanel({
               placeholder="Créneau souhaité: aujourd’hui 12h30, demain matin..."
               className="rounded-2xl border border-orange-100 bg-white px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
             />
+          </div>
+
+          <div className="rounded-2xl border border-orange-100 bg-white p-4 text-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">Position client</p>
+                <p className="mt-1 text-xs leading-5 text-stone-500">
+                  Votre position sert uniquement à estimer la livraison et faciliter le retrait/livraison. Vous pouvez aussi saisir votre adresse manuellement.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={onCustomerPositionRequest}
+                disabled={geoStatus === 'loading'}
+                className="shrink-0 rounded-xl bg-[#2a190f] px-3 py-2 text-xs font-black text-white disabled:opacity-60"
+              >
+                {geoStatus === 'loading' ? 'Localisation...' : 'Utiliser ma position'}
+              </button>
+            </div>
+            {fulfillmentMode === 'delivery' && (
+              <div className="mt-3 grid gap-1 rounded-xl bg-[#fff8ef] p-3 text-xs font-bold text-[#7c2d12]">
+                <span>Adresse obligatoire</span>
+                <span>Position GPS recommandée</span>
+                {customerLocation ? (
+                  <a href={customerLocation.mapsUrl} target="_blank" rel="noreferrer" className="text-[#0f766e] underline">
+                    Lien Maps généré - précision {customerLocation.accuracy ? `${Math.round(customerLocation.accuracy)} m` : 'non fournie'}
+                  </a>
+                ) : (
+                  <span>Position GPS non fournie — confirmer adresse manuellement.</span>
+                )}
+              </div>
+            )}
+            {geoError && <p className="mt-2 text-xs font-bold text-red-700">{geoError}</p>}
           </div>
 
           <div className="rounded-2xl border border-orange-100 bg-white p-4 text-sm">
@@ -1495,6 +1792,40 @@ function SelectionPanel({
                 </button>
               ))}
             </div>
+          </div>
+
+          <div className="rounded-2xl border border-orange-100 bg-white p-4">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">Orchestration</p>
+            <select
+              value={vendorAvailabilityStatus}
+              onChange={(event) => onVendorAvailabilityStatusChange(event.target.value)}
+              className="mt-3 w-full rounded-xl border border-orange-100 bg-[#fff8ef] px-3 py-3 text-sm font-bold text-[#2a190f] outline-none"
+            >
+              <option>À confirmer par DELIKREOL</option>
+              <option>Demande envoyée au vendeur</option>
+              <option>Vendeur disponible</option>
+              <option>Vendeur indisponible</option>
+            </select>
+            <div className="mt-3 grid gap-2">
+              <a href={orderLink} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#d95f2d] px-4 py-3 text-sm font-black text-white">
+                <MessageCircle className="h-4 w-4" /> Envoyer commande à DELIKREOL sur WhatsApp
+              </a>
+              <button type="button" onClick={onCopyVendorMessage} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#fff8ef] px-4 py-3 text-sm font-black text-[#2a190f]">
+                <Mail className="h-4 w-4" /> Préparer message vendeur
+              </button>
+              <button type="button" onClick={onCopyDriverMessage} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#fff8ef] px-4 py-3 text-sm font-black text-[#2a190f]">
+                <Truck className="h-4 w-4" /> Préparer mission livreur
+              </button>
+              <a href={driverMissionLink} className="inline-flex items-center justify-center gap-2 rounded-xl border border-orange-200 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]">
+                Ouvrir mission livreur sur WhatsApp central
+              </a>
+            </div>
+            {copyStatus && <p className="mt-2 text-xs font-bold text-emerald-800">{copyStatus}</p>}
+            <details className="mt-3 rounded-xl bg-[#fff8ef] p-3 text-xs text-stone-600">
+              <summary className="cursor-pointer font-black text-[#7c2d12]">Aperçu vendeur / livreur</summary>
+              <pre className="mt-3 max-h-48 overflow-auto whitespace-pre-wrap font-sans">{vendorMessage}</pre>
+              <pre className="mt-3 max-h-48 overflow-auto whitespace-pre-wrap font-sans">{driverMessage}</pre>
+            </details>
           </div>
 
           <div className="rounded-2xl border border-orange-100 bg-white p-4">

@@ -9,6 +9,14 @@ type OrderPdfInput = {
   total: number;
   paymentStatus: string;
   slot: string;
+  customerName?: string;
+  customerPhone?: string;
+  deliveryAddress?: string;
+  deliveryNotes?: string;
+  customerMapsUrl?: string;
+  customerLat?: number;
+  customerLng?: number;
+  customerAccuracy?: number;
 };
 
 export function downloadOrderPdf(input: OrderPdfInput) {
@@ -40,10 +48,30 @@ export function buildPartnerDispatchMessage(input: OrderPdfInput) {
 }
 
 function buildInvoiceLines(input: OrderPdfInput) {
+  const address = input.deliveryAddress || 'Adresse non fournie';
+  const notes = input.deliveryNotes || 'Aucune instruction';
+  const mapsUrl = input.customerMapsUrl || 'Position GPS non fournie - confirmer adresse manuellement';
+  const coordinates =
+    typeof input.customerLat === 'number' && typeof input.customerLng === 'number'
+      ? `${input.customerLat.toFixed(6)}, ${input.customerLng.toFixed(6)}`
+      : 'Non fournies';
+  const accuracy = typeof input.customerAccuracy === 'number' ? `${Math.round(input.customerAccuracy)} m` : 'Non fournie';
+
   return [
     `Commande: ${input.orderNumber}`,
     `Date: ${new Date().toLocaleDateString('fr-FR')}`,
+    '',
+    'Client:',
+    `Nom: ${input.customerName || 'Non renseigne'}`,
+    `Telephone: ${input.customerPhone || 'Non renseigne'}`,
+    '',
+    'Livraison / retrait:',
     `Mode: ${input.deliveryMode}`,
+    `Adresse: ${address}`,
+    `Instructions: ${notes}`,
+    `Position GPS: ${mapsUrl}`,
+    `Coordonnees: ${coordinates}`,
+    `Precision: ${accuracy}`,
     `Creneau: ${input.slot}`,
     `Paiement: ${input.paymentStatus}`,
     '',
@@ -54,7 +82,8 @@ function buildInvoiceLines(input: OrderPdfInput) {
     `Frais service: ${formatMoney(input.serviceFee)}`,
     `Total: ${formatMoney(input.total)}`,
     '',
-    'A preparer par le partenaire: confirmer disponibilite, heure de retrait/livraison et statut paiement.',
+    'Action vendeur: confirmer disponibilite, delai de preparation ou alternative possible.',
+    'Action livreur: attendre confirmation vendeur, puis utiliser adresse, instructions et lien Maps.',
   ];
 }
 
