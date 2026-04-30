@@ -147,9 +147,10 @@ export async function uploadPartnerDocument(
       .insert({
         partner_application_id: partnerApplicationId,
         user_id: authData.user?.id,
+        uploaded_by: authData.user?.id,
         document_type: documentType,
+        status: 'uploaded',
         verification_status: 'uploaded',
-        file_url: fileName,
         file_path: fileName,
         bucket_id: bucketId,
         is_sensitive: !isPublicPhoto,
@@ -366,6 +367,7 @@ export async function updatePartnerDocumentVerification(
       .from('partner_documents')
       .update({
         verification_status: status,
+        status,
         review_note: reviewNote || null,
         reviewed_at: new Date().toISOString(),
       })
