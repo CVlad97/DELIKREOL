@@ -7,10 +7,8 @@ export type ZoneVendor = {
   zone_label?: string | null;
 };
 
-const MARTINIQUE_ZONES = ['Fort-de-France', 'Le Lamentin', 'Schoelcher', 'Ducos', 'Riviere-Salee', 'Le Robert'];
-
 export function getMartiniqueServiceZones(vendorZones: Array<string | null | undefined> = []) {
-  const zones = new Set(MARTINIQUE_ZONES);
+  const zones = new Set<string>();
   vendorZones.filter(Boolean).forEach((zone) => zones.add(String(zone)));
   return Array.from(zones);
 }
