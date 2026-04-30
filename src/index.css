@@ -122,6 +122,36 @@
     box-shadow: var(--shadow-elegant);
     border: 1px solid rgba(249,115,22,0.16);
   }
+
+  .island-hero-surface {
+    background:
+      radial-gradient(circle at 18% 18%, rgba(255, 214, 140, 0.72), transparent 28%),
+      radial-gradient(circle at 85% 8%, rgba(15, 118, 110, 0.32), transparent 26%),
+      radial-gradient(circle at 72% 76%, rgba(217, 95, 45, 0.22), transparent 28%),
+      linear-gradient(135deg, #fff8ec 0%, #fffdf8 42%, #e9f8ef 100%);
+  }
+
+  .island-map-surface {
+    background:
+      linear-gradient(120deg, rgba(255,255,255,0.92), rgba(255,248,237,0.72)),
+      radial-gradient(circle at 18% 20%, rgba(217,95,45,0.18), transparent 24%),
+      radial-gradient(circle at 80% 70%, rgba(15,118,110,0.16), transparent 26%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .island-map-surface::before {
+    content: '';
+    position: absolute;
+    inset: 16px;
+    border-radius: 2rem;
+    border: 1px dashed rgba(124, 45, 18, 0.18);
+    pointer-events: none;
+  }
+
+  .premium-card {
+    box-shadow: 0 24px 70px -40px rgba(42, 25, 15, 0.55);
+  }
 }
 
 .madras-accent {
