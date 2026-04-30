@@ -9,6 +9,7 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, fullName: string, phone: string) => Promise<{ error: AuthError | null }>;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signInWithGoogleCredential: (credential: string) => Promise<{ error: AuthError | Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -222,8 +223,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
   };
 
+  const signInWithGoogleCredential = async (credential: string) => {
+    if (isDemoMode) {
+      return { error: new Error('Connexion Google indisponible en mode test local.') };
+    }
+
+    try {
+      const { error } = await supabase.auth.signInWithIdToken({
+        provider: 'google',
+        token: credential,
+      });
+      return { error };
+    } catch (err: any) {
+      return { error: err };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, profile, session, loading, signUp, signIn, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ user, profile, session, loading, signUp, signIn, signInWithGoogleCredential, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
