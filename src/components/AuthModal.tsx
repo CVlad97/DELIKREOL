@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, X, LogIn, UserPlus } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -19,12 +19,60 @@ export function AuthModal({ isOpen, onClose, onBack, initialMode = 'signin' }: A
   const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const googleButtonRef = useRef<HTMLDivElement | null>(null);
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithGoogleCredential } = useAuth();
   const handleBack = onBack ?? onClose;
   const demoOverride =
     typeof window !== 'undefined' &&
     window.localStorage.getItem('delikreol_demo_override') === 'true';
+
+  useEffect(() => {
+    if (!isOpen || !googleClientId || !googleButtonRef.current) return;
+
+    const renderGoogleButton = () => {
+      if (!window.google || !googleButtonRef.current) return;
+      googleButtonRef.current.innerHTML = '';
+      window.google.accounts.id.initialize({
+        client_id: googleClientId,
+        ux_mode: 'popup',
+        callback: async (response) => {
+          if (!response.credential) {
+            setError('Connexion Google interrompue.');
+            return;
+          }
+          setLoading(true);
+          const { error } = await signInWithGoogleCredential(response.credential);
+          setLoading(false);
+          if (error) {
+            setError(error.message || 'Connexion Google impossible pour le moment.');
+            return;
+          }
+          onClose();
+        },
+      });
+      window.google.accounts.id.renderButton(googleButtonRef.current, {
+        theme: 'outline',
+        size: 'large',
+        text: mode === 'signin' ? 'signin_with' : 'signup_with',
+        shape: 'rectangular',
+        width: 320,
+      });
+    };
+
+    if (window.google) {
+      renderGoogleButton();
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = renderGoogleButton;
+    document.head.appendChild(script);
+  }, [googleClientId, isOpen, mode, onClose, signInWithGoogleCredential]);
 
   if (!isOpen) return null;
 
@@ -58,7 +106,7 @@ export function AuthModal({ isOpen, onClose, onBack, initialMode = 'signin' }: A
       window.location.reload();
     } catch (err) {
       console.error('Demo access error:', err);
-      setError('Impossible d\'activer le mode demo. Veuillez reessayer.');
+      setError('Impossible d’activer l’espace de test. Veuillez réessayer.');
     }
   };
 
@@ -171,6 +219,19 @@ export function AuthModal({ isOpen, onClose, onBack, initialMode = 'signin' }: A
           </button>
         </div>
 
+        <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-3">
+          {googleClientId ? (
+            <div ref={googleButtonRef} className="flex justify-center" />
+          ) : (
+            <p className="text-center text-xs font-semibold text-muted-foreground">
+              Connexion Google disponible après configuration de VITE_GOOGLE_CLIENT_ID.
+            </p>
+          )}
+          <p className="mt-3 text-center text-[11px] font-semibold text-muted-foreground">
+            Google ne se lance jamais automatiquement.
+          </p>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {mode === 'signup' && (
             <>
@@ -246,20 +307,20 @@ export function AuthModal({ isOpen, onClose, onBack, initialMode = 'signin' }: A
             {loading
               ? 'Chargement...'
               : mode === 'signin'
-              ? 'Démarrer'
+              ? 'Me connecter'
               : "Créer mon compte"}
           </button>
         </form>
 
         <div className="mt-6 border-t border-gray-200 pt-4">
           <div className="mb-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
-            <p className="text-[11px] font-black uppercase tracking-[0.25em] text-emerald-600">Mode test prioritaire</p>
+            <p className="text-[11px] font-black uppercase tracking-[0.25em] text-emerald-600">Espace de test interne</p>
             <p className="mt-2 text-sm font-medium text-slate-700">
-              Pour aller vite, ouvre directement un profil demo. Tu pourras tester le parcours client ou pro sans attendre Supabase.
+              Accès réservé aux vérifications fonctionnelles avant publication opérationnelle.
             </p>
           </div>
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
-            Acces demo (sans compte)
+            Scénarios contrôlés
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <button
@@ -267,39 +328,39 @@ export function AuthModal({ isOpen, onClose, onBack, initialMode = 'signin' }: A
               onClick={() => handleDemoAccess('customer')}
               className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
             >
-              Client demo
+              Client
             </button>
             <button
               type="button"
               onClick={() => handleDemoAccess('vendor')}
               className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
             >
-              Vendeur demo
+              Vendeur
             </button>
             <button
               type="button"
               onClick={() => handleDemoAccess('relay_host')}
               className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
             >
-              Hote relais demo
+              Hôte relais
             </button>
             <button
               type="button"
               onClick={() => handleDemoAccess('driver')}
               className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
             >
-              Livreur demo
+              Livreur
             </button>
             <button
               type="button"
               onClick={() => handleDemoAccess('admin')}
               className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
             >
-              Admin demo
+              Admin
             </button>
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            Active un mode demo local et ouvre directement l&apos;espace choisi.
+            Active un environnement local de vérification, sans modifier les données publiques.
           </p>
           {demoOverride && (
             <button
@@ -307,7 +368,7 @@ export function AuthModal({ isOpen, onClose, onBack, initialMode = 'signin' }: A
               onClick={handleExitDemo}
               className="mt-3 text-xs text-gray-500 underline hover:text-gray-700"
             >
-              Quitter le mode demo
+              Quitter l’espace de test
             </button>
           )}
         </div>

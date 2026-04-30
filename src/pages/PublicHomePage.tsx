@@ -2,10 +2,13 @@ import { FormEvent, ReactNode, useEffect, useMemo, useState, type ComponentType 
 import {
   ArrowRight,
   BadgeCheck,
+  Bell,
   Briefcase,
   ChevronRight,
+  Download,
   Filter,
   Home,
+  Mail,
   MapPin,
   MessageCircle,
   Package,
@@ -23,6 +26,7 @@ import { calculateOrderEconomics } from '../services/orderEconomics';
 import { getMartiniqueServiceZones } from '../services/serviceZones';
 import { submitPartnerLead, submitPartnerProduct, uploadPartnerProductPhoto } from '../services/partnerPortalService';
 import { createBusinessRequest } from '../services/liteOrdersService';
+import { buildPartnerDispatchMessage, downloadOrderPdf } from '../utils/orderPdf';
 
 type CatalogState = {
   configured: boolean;
@@ -67,6 +71,13 @@ type BusinessRequestForm = {
 type SubmitStatus = {
   kind: 'idle' | 'saving' | 'success' | 'error';
   message?: string;
+};
+
+type NotificationPreferences = {
+  commande: boolean;
+  partenaire: boolean;
+  livreur: boolean;
+  promos: boolean;
 };
 
 const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
@@ -158,6 +169,14 @@ const driverHighlights = [
   ['Véhicule', 'Scooter, voiture ou vélo'],
 ];
 
+const simulationScenarios = [
+  ['Client commande', 'Produit ajouté, mode livraison ou retrait choisi, confirmation prête avec PDF.'],
+  ['Vendeur reçoit', 'Détails produits, quantités, créneau, total et statut paiement lisibles.'],
+  ['Livreur voit sa mission', 'Zone, rayon, mode de retrait et rémunération estimée visibles.'],
+  ['Partenaire voit son gain', 'Sous-total, frais, commission estimée et montant à préparer.'],
+  ['Entreprise envoie une demande', 'Nombre de personnes, date, lieu, budget et fréquence structurés.'],
+];
+
 const faqItems = [
   {
     question: 'DELIKREOL est-il un simple traiteur ?',
@@ -173,7 +192,7 @@ const faqItems = [
   },
   {
     question: 'Quels modes de paiement sont disponibles ?',
-    answer: 'Les modes proposés sont affichés au niveau des fiches et du panier. Si une donnée manque, elle doit rester en [À VALIDER].',
+    answer: 'Les modes proposés sont affichés au niveau du panier : PayPal, carte via lien sécurisé ou assistance WhatsApp.',
   },
   {
     question: 'Comment rejoindre la plateforme ?',
@@ -224,6 +243,20 @@ export function PublicHomePage() {
   const [budgetFilter, setBudgetFilter] = useState('Tous');
   const [selectedProducts, setSelectedProducts] = useState<PublicCatalogProduct[]>([]);
   const [fulfillmentMode, setFulfillmentMode] = useState<'delivery' | 'pickup'>('delivery');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [deliverySlot, setDeliverySlot] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('Carte via lien sécurisé');
+  const [orderConfirmed, setOrderConfirmed] = useState(false);
+  const [activeScenario, setActiveScenario] = useState(0);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | 'unsupported'>(
+    typeof window === 'undefined' || !('Notification' in window) ? 'unsupported' : Notification.permission,
+  );
+  const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreferences>({
+    commande: true,
+    partenaire: true,
+    livreur: true,
+    promos: false,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [partnerLeadForm, setPartnerLeadForm] = useState<PartnerLeadForm>(defaultPartnerLeadForm);
@@ -303,8 +336,27 @@ export function PublicHomePage() {
     () =>
       calculateOrderEconomics({
         items: selectedProducts.map((product) => ({ price: product.price, commissionRate: 0.15 })),
+        deliveryFee: fulfillmentMode === 'delivery' && selectedProducts.length > 0 ? 3.5 : 0,
+        serviceFee: selectedProducts.length > 0 ? 1 : 0,
       }),
-    [selectedProducts],
+    [fulfillmentMode, selectedProducts],
+  );
+
+  const orderNumber = useMemo(() => `DK-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${String(selectedProducts.length || 1).padStart(2, '0')}`, [selectedProducts.length]);
+
+  const partnerDispatchMessage = useMemo(
+    () =>
+      buildPartnerDispatchMessage({
+        orderNumber,
+        products: selectedProducts,
+        deliveryMode: fulfillmentMode === 'delivery' ? 'Livraison' : 'Retrait',
+        deliveryFee: selectionEconomics.frais_livraison,
+        serviceFee: selectionEconomics.frais_service,
+        total: selectionEconomics.total_client,
+        paymentStatus: paymentMethod,
+        slot: deliverySlot || 'Créneau à confirmer',
+      }),
+    [deliverySlot, fulfillmentMode, orderNumber, paymentMethod, selectedProducts, selectionEconomics],
   );
 
   const orderLink = useMemo(() => {
@@ -312,14 +364,27 @@ export function PublicHomePage() {
     const body = [
       'Bonjour DELIKREOL, je souhaite commander.',
       '',
+      `Mode : ${fulfillmentMode === 'delivery' ? 'Livraison' : 'Retrait'}`,
+      deliveryAddress && `Adresse / commune : ${deliveryAddress}`,
+      deliverySlot && `Créneau : ${deliverySlot}`,
+      `Paiement souhaité : ${paymentMethod}`,
+      '',
       selectedProducts.length ? 'Sélection :' : 'Je souhaite connaître les disponibilités du moment.',
       ...lines,
       '',
+      `Total estimé : ${formatPrice(selectionEconomics.total_client)}`,
       'Merci de confirmer la disponibilité, la commune et le mode de retrait / livraison.',
-    ].join('\n');
+    ]
+      .filter(Boolean)
+      .join('\n');
 
     return `${whatsappBase}?text=${encodeURIComponent(body)}`;
-  }, [selectedProducts]);
+  }, [deliveryAddress, deliverySlot, fulfillmentMode, paymentMethod, selectedProducts, selectionEconomics.total_client]);
+
+  const partnerDispatchLink = useMemo(() => {
+    const subject = `Commande DELIKREOL ${orderNumber}`;
+    return `mailto:operations@delikreol.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(partnerDispatchMessage)}`;
+  }, [orderNumber, partnerDispatchMessage]);
 
   const partnerLink = `${whatsappBase}?text=${encodeURIComponent('Bonjour DELIKREOL, je souhaite devenir partenaire.')}`;
 
@@ -419,6 +484,7 @@ export function PublicHomePage() {
 
   function addToSelection(product: PublicCatalogProduct) {
     setSelectedProducts((current) => [...current, product]);
+    setOrderConfirmed(false);
   }
 
   function removeFromSelection(index: number) {
@@ -427,6 +493,33 @@ export function PublicHomePage() {
 
   function clearSelection() {
     setSelectedProducts([]);
+    setOrderConfirmed(false);
+  }
+
+  async function requestNotifications() {
+    if (!('Notification' in window)) {
+      setNotificationPermission('unsupported');
+      return;
+    }
+    const permission = await Notification.requestPermission();
+    setNotificationPermission(permission);
+  }
+
+  function handleDownloadOrderPdf() {
+    downloadOrderPdf({
+      orderNumber,
+      products: selectedProducts,
+      deliveryMode: fulfillmentMode === 'delivery' ? 'Livraison' : 'Retrait',
+      deliveryFee: selectionEconomics.frais_livraison,
+      serviceFee: selectionEconomics.frais_service,
+      total: selectionEconomics.total_client,
+      paymentStatus: paymentMethod,
+      slot: deliverySlot || 'Créneau à confirmer',
+    });
+  }
+
+  function confirmOrderLocally() {
+    setOrderConfirmed(true);
   }
 
   return (
@@ -660,8 +753,22 @@ export function PublicHomePage() {
                         products={selectedProducts}
                         summary={selectionEconomics}
                         orderLink={orderLink}
+                        partnerDispatchLink={partnerDispatchLink}
+                        deliveryAddress={deliveryAddress}
+                        deliverySlot={deliverySlot}
                         fulfillmentMode={fulfillmentMode}
+                        paymentMethod={paymentMethod}
+                        notificationPermission={notificationPermission}
+                        notificationPrefs={notificationPrefs}
+                        orderConfirmed={orderConfirmed}
+                        onDeliveryAddressChange={setDeliveryAddress}
+                        onDeliverySlotChange={setDeliverySlot}
                         onFulfillmentModeChange={setFulfillmentMode}
+                        onPaymentMethodChange={setPaymentMethod}
+                        onNotificationPreferenceChange={(key, value) => setNotificationPrefs((current) => ({ ...current, [key]: value }))}
+                        onRequestNotifications={requestNotifications}
+                        onDownloadPdf={handleDownloadOrderPdf}
+                        onConfirmOrder={confirmOrderLocally}
                         onRemove={removeFromSelection}
                         onClear={clearSelection}
                       />
@@ -769,6 +876,46 @@ export function PublicHomePage() {
           </div>
         </section>
 
+        <section className="mx-auto max-w-7xl px-4 py-14">
+          <div className="rounded-[2rem] border border-orange-100 bg-[#24170f] p-5 text-white shadow-elegant lg:p-8">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-300">Vérification opérationnelle</p>
+                <h2 className="mt-3 font-display text-4xl font-black tracking-tight sm:text-5xl">Tester le parcours complet sans toucher aux données publiques.</h2>
+                <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-300">
+                  Ce mode sert à contrôler les enchaînements client, vendeur, livreur, partenaire et entreprise avant mise en production.
+                </p>
+              </div>
+              <span className="w-fit rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-100">
+                Accès interne
+              </span>
+            </div>
+            <div className="mt-6 grid gap-3 lg:grid-cols-[320px_1fr]">
+              <div className="grid gap-2">
+                {simulationScenarios.map(([title], index) => (
+                  <button
+                    key={title}
+                    onClick={() => setActiveScenario(index)}
+                    className={`rounded-2xl px-4 py-3 text-left text-sm font-black ${activeScenario === index ? 'bg-orange-300 text-[#24170f]' : 'bg-white/10 text-white'}`}
+                  >
+                    {title}
+                  </button>
+                ))}
+              </div>
+              <div className="rounded-[1.5rem] border border-white/10 bg-white/8 p-5">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-200">Scénario actif</p>
+                <h3 className="mt-2 text-2xl font-black">{simulationScenarios[activeScenario][0]}</h3>
+                <p className="mt-3 text-sm leading-6 text-stone-200">{simulationScenarios[activeScenario][1]}</p>
+                <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                  <MiniMetric label="Commande" value={selectedProducts.length ? `${selectedProducts.length} article(s)` : 'À sélectionner'} />
+                  <MiniMetric label="Total" value={formatPrice(selectionEconomics.total_client)} />
+                  <MiniMetric label="Paiement" value={paymentMethod} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section className="mx-auto max-w-7xl px-4 py-10">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {reassurance.map((item) => (
@@ -795,10 +942,10 @@ export function PublicHomePage() {
               </div>
               <div className="mt-6 rounded-[1.5rem] border border-white/10 bg-white/8 p-5">
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  <MiniMetric label="Frais livraison" value="[À VALIDER]" />
-                  <MiniMetric label="Mode de paiement" value="[À VALIDER]" />
+                  <MiniMetric label="Frais livraison" value="Selon commune" />
+                  <MiniMetric label="Mode de paiement" value="Lien sécurisé" />
                   <MiniMetric label="Confirmation" value="WhatsApp + email" />
-                  <MiniMetric label="Délai" value="[À VALIDER]" />
+                  <MiniMetric label="Délai" value="Confirmé à la commande" />
                 </div>
               </div>
             </div>
@@ -898,7 +1045,7 @@ export function PublicHomePage() {
               <form onSubmit={handleProductSubmit} className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-soft">
                 <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">Proposer un produit</p>
                 <p className="mt-2 text-sm leading-6 text-stone-600">
-                  Ajoutez une offre ou une carte produit pour enrichir le catalogue local. Les champs manquants restent visibles en [À VALIDER].
+                  Ajoutez une offre ou une carte produit pour enrichir le catalogue local avec photo, prix et disponibilité.
                 </p>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <Input value={productSubmissionForm.business_name} onChange={(value) => setProductSubmissionForm((current) => ({ ...current, business_name: value }))} placeholder="Nom de l’établissement" required className="sm:col-span-2" />
@@ -939,7 +1086,7 @@ export function PublicHomePage() {
           <SectionTitle
             eyebrow="Preuves et confiance"
             title="Le site doit rassurer au premier regard."
-            text="Les preuves affichées ici sont visibles, simples et honnêtes. Lorsqu’une donnée n’est pas encore confirmée, elle reste en [À VALIDER]."
+            text="Les preuves affichées restent simples, lisibles et vérifiables."
           />
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {[
@@ -987,11 +1134,11 @@ export function PublicHomePage() {
                 Demande entreprise
               </a>
               <div className="rounded-2xl bg-white/10 px-5 py-4 text-sm leading-6 text-stone-100">
-                Email: <span className="font-bold">[À VALIDER]</span>
+                Email: <span className="font-bold">operations@delikreol.com</span>
                 <br />
-                Frais de livraison: <span className="font-bold">[À VALIDER]</span>
+                Frais de livraison: <span className="font-bold">selon commune</span>
                 <br />
-                Minimum de commande: <span className="font-bold">[À VALIDER]</span>
+                Minimum de commande: <span className="font-bold">confirmé avant paiement</span>
               </div>
             </div>
           </div>
@@ -1185,7 +1332,7 @@ function ProductCard({
           <strong className={`${compact ? 'text-xl' : 'text-2xl'} whitespace-nowrap font-black text-[#2a190f]`}>{formatPrice(product.price)}</strong>
         </div>
         <div className="grid grid-cols-2 gap-2 text-xs font-black uppercase tracking-[0.14em]">
-          <span className="rounded-2xl bg-slate-100 px-3 py-2 text-slate-700">{product.zone_label || '[À VALIDER]'}</span>
+          <span className="rounded-2xl bg-slate-100 px-3 py-2 text-slate-700">{product.zone_label || 'Martinique'}</span>
           <span className="rounded-2xl bg-emerald-50 px-3 py-2 text-emerald-700">{product.available ? 'Disponible' : 'À confirmer'}</span>
         </div>
         <button onClick={onAdd} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white">
@@ -1208,9 +1355,9 @@ function VendorCard({ vendor }: { vendor: PublicCatalogVendor }) {
       </div>
       <p className="mt-3 text-sm leading-6 text-stone-600">{vendor.description}</p>
       <div className="mt-4 grid gap-2 text-sm">
-        <InfoLine label="Commune" value={vendor.zone_label || '[À VALIDER]'} />
+        <InfoLine label="Commune" value={vendor.zone_label || 'Martinique'} />
         <InfoLine label="Rayon" value={`${vendor.delivery_radius_km} km`} />
-        <InfoLine label="Adresse" value={vendor.address || '[À VALIDER]'} />
+        <InfoLine label="Adresse" value={vendor.address || 'Adresse confirmée à la commande'} />
       </div>
     </article>
   );
@@ -1220,16 +1367,44 @@ function SelectionPanel({
   products,
   summary,
   orderLink,
+  partnerDispatchLink,
+  deliveryAddress,
+  deliverySlot,
   fulfillmentMode,
+  paymentMethod,
+  notificationPermission,
+  notificationPrefs,
+  orderConfirmed,
+  onDeliveryAddressChange,
+  onDeliverySlotChange,
   onFulfillmentModeChange,
+  onPaymentMethodChange,
+  onNotificationPreferenceChange,
+  onRequestNotifications,
+  onDownloadPdf,
+  onConfirmOrder,
   onRemove,
   onClear,
 }: {
   products: PublicCatalogProduct[];
   summary: ReturnType<typeof calculateOrderEconomics>;
   orderLink: string;
+  partnerDispatchLink: string;
+  deliveryAddress: string;
+  deliverySlot: string;
   fulfillmentMode: 'delivery' | 'pickup';
+  paymentMethod: string;
+  notificationPermission: NotificationPermission | 'unsupported';
+  notificationPrefs: NotificationPreferences;
+  orderConfirmed: boolean;
+  onDeliveryAddressChange: (value: string) => void;
+  onDeliverySlotChange: (value: string) => void;
   onFulfillmentModeChange: (mode: 'delivery' | 'pickup') => void;
+  onPaymentMethodChange: (value: string) => void;
+  onNotificationPreferenceChange: (key: keyof NotificationPreferences, value: boolean) => void;
+  onRequestNotifications: () => void;
+  onDownloadPdf: () => void;
+  onConfirmOrder: () => void;
   onRemove: (index: number) => void;
   onClear: () => void;
 }) {
@@ -1281,9 +1456,25 @@ function SelectionPanel({
             })}
           </div>
 
+          <div className="grid gap-2">
+            <input
+              value={deliveryAddress}
+              onChange={(event) => onDeliveryAddressChange(event.target.value)}
+              placeholder={fulfillmentMode === 'delivery' ? 'Adresse ou commune de livraison' : 'Commune de retrait'}
+              className="rounded-2xl border border-orange-100 bg-white px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
+            />
+            <input
+              value={deliverySlot}
+              onChange={(event) => onDeliverySlotChange(event.target.value)}
+              placeholder="Créneau souhaité: aujourd’hui 12h30, demain matin..."
+              className="rounded-2xl border border-orange-100 bg-white px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
+            />
+          </div>
+
           <div className="rounded-2xl border border-orange-100 bg-white p-4 text-sm">
             <PriceLine label="Sous-total" value={formatPrice(summary.subtotal_produits)} />
-            <PriceLine label={fulfillmentMode === 'delivery' ? 'Livraison' : 'Retrait'} value={fulfillmentMode === 'delivery' ? '[À VALIDER]' : '0,00 €'} />
+            <PriceLine label={fulfillmentMode === 'delivery' ? 'Livraison' : 'Retrait'} value={formatPrice(summary.frais_livraison)} />
+            <PriceLine label="Frais service" value={formatPrice(summary.frais_service)} />
             <div className="mt-3 rounded-2xl bg-[#2a190f] px-4 py-3 text-white">
               <p className="text-[11px] font-black uppercase tracking-[0.18em] text-orange-200">Total estimé</p>
               <p className="mt-1 text-3xl font-black">{formatPrice(summary.total_client)}</p>
@@ -1293,19 +1484,74 @@ function SelectionPanel({
           <div className="rounded-2xl border border-orange-100 bg-white p-4">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">Paiement</p>
             <div className="mt-3 grid gap-2 text-sm font-bold text-[#2a190f]">
-              <span className="rounded-xl bg-[#fff8ef] px-3 py-2">PayPal</span>
-              <span className="rounded-xl bg-[#fff8ef] px-3 py-2">Carte via lien sécurisé</span>
-              <span className="rounded-xl bg-[#fff8ef] px-3 py-2">Assistance WhatsApp</span>
+              {['PayPal', 'Carte via lien sécurisé', 'Assistance WhatsApp'].map((method) => (
+                <button
+                  key={method}
+                  type="button"
+                  onClick={() => onPaymentMethodChange(method)}
+                  className={`rounded-xl px-3 py-2 text-left ${paymentMethod === method ? 'bg-[#2a190f] text-white' : 'bg-[#fff8ef] text-[#2a190f]'}`}
+                >
+                  {method}
+                </button>
+              ))}
             </div>
           </div>
 
-          <a href={orderLink} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-5 py-3 font-black uppercase tracking-[0.14em] text-white">
-            Commander par WhatsApp <MessageCircle className="h-4 w-4" />
-          </a>
+          <div className="rounded-2xl border border-orange-100 bg-white p-4">
+            <div className="flex items-center gap-2">
+              <Bell className="h-4 w-4 text-[#d95f2d]" />
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">Alertes utiles</p>
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {(Object.keys(notificationPrefs) as Array<keyof NotificationPreferences>).map((key) => (
+                <label key={key} className="flex items-center gap-2 rounded-xl bg-[#fff8ef] px-3 py-2 text-xs font-bold capitalize text-[#2a190f]">
+                  <input
+                    type="checkbox"
+                    checked={notificationPrefs[key]}
+                    onChange={(event) => onNotificationPreferenceChange(key, event.target.checked)}
+                  />
+                  {key}
+                </label>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={onRequestNotifications}
+              disabled={notificationPermission === 'granted' || notificationPermission === 'unsupported'}
+              className="mt-3 w-full rounded-2xl border border-orange-200 bg-white px-4 py-3 text-sm font-black text-[#7c2d12] disabled:opacity-60"
+            >
+              {notificationPermission === 'granted'
+                ? 'Notifications activées'
+                : notificationPermission === 'unsupported'
+                  ? 'Notifications non supportées'
+                  : 'Activer les notifications'}
+            </button>
+          </div>
+
+          <button onClick={onConfirmOrder} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-5 py-3 font-black uppercase tracking-[0.14em] text-white">
+            Confirmer la commande <ArrowRight className="h-4 w-4" />
+          </button>
+          {orderConfirmed && (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+              <p className="font-black">Commande prête à transmettre.</p>
+              <p className="mt-1">Téléchargez le PDF, envoyez l’email partenaire ou utilisez WhatsApp si besoin.</p>
+              <div className="mt-3 grid gap-2">
+                <button onClick={onDownloadPdf} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-[#2a190f]">
+                  <Download className="h-4 w-4" /> Télécharger le PDF
+                </button>
+                <a href={partnerDispatchLink} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-[#2a190f]">
+                  <Mail className="h-4 w-4" /> Email partenaire
+                </a>
+                <a href={orderLink} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-[#2a190f]">
+                  <MessageCircle className="h-4 w-4" /> Fallback WhatsApp
+                </a>
+              </div>
+            </div>
+          )}
           <button onClick={onClear} className="w-full rounded-2xl border border-orange-200 bg-white px-5 py-3 text-sm font-black text-[#7c2d12]">
             Vider le panier
           </button>
-          <p className="text-xs font-medium text-stone-500">La disponibilité, le retrait ou la livraison sont confirmés selon votre commune.</p>
+          <p className="text-xs font-medium text-stone-500">La commande peut être envoyée par email avec PDF, puis relayée sur WhatsApp si le partenaire le préfère.</p>
         </div>
       )}
     </aside>
@@ -1351,7 +1597,7 @@ function ProofCard({ title }: { title: string }) {
       </div>
       <h3 className="mt-4 text-lg font-black text-[#2a190f]">{title}</h3>
       <p className="mt-2 text-sm leading-6 text-stone-600">
-        [À VALIDER] Cette preuve sera remplacée par des témoignages et des chiffres réels dès que les premières ventes sont remontées.
+        Information vérifiable avant paiement, avec confirmation par email ou WhatsApp selon le canal choisi.
       </p>
     </div>
   );
