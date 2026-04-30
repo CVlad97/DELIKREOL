@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { loadPublicCatalog, PublicCatalogProduct, PublicCatalogVendor } from '../services/publicCatalogService';
 import { calculateOrderEconomics } from '../services/orderEconomics';
-import { getMartiniqueServiceZones } from '../services/serviceZones';
+import { distanceKm, getMartiniqueServiceZones, vendorServesPoint } from '../services/serviceZones';
 import { submitPartnerLead, submitPartnerProduct, uploadPartnerProductPhoto } from '../services/partnerPortalService';
 import { createBusinessRequest } from '../services/liteOrdersService';
 import { buildPartnerDispatchMessage, downloadOrderPdf } from '../utils/orderPdf';
@@ -91,7 +91,6 @@ type GeoStatus = 'idle' | 'loading' | 'success' | 'error' | 'unsupported';
 
 const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 const whatsappBase = `https://wa.me/${whatsappNumber}`;
-const fallbackZones = ['Fort-de-France', 'Le Lamentin', 'Schoelcher', 'Ducos', 'Rivière-Salée', 'Sainte-Luce', 'Le Marin', 'Le François'];
 const featuredCategories = ['plats créoles', 'traiteurs', 'box / plateaux', 'desserts', 'boissons', 'commande entreprise'];
 const budgetRanges = ['Tous', '≤ 15 €', '15 € - 30 €', '30 € et plus'];
 
@@ -218,7 +217,7 @@ const defaultPartnerLeadForm: PartnerLeadForm = {
   commune: '',
   zone_label: '',
   activity_type: 'restaurant',
-  delivery_radius_km: '8',
+  delivery_radius_km: '3',
   opening_hours: '',
   description: '',
 };
@@ -315,7 +314,7 @@ export function PublicHomePage() {
 
   const serviceZones = useMemo(() => {
     const vendorZones = catalog.vendors.map((vendor) => vendor.zone_label).filter(Boolean);
-    return Array.from(new Set([...getMartiniqueServiceZones(vendorZones), ...fallbackZones]));
+    return getMartiniqueServiceZones(vendorZones);
   }, [catalog.vendors]);
 
   const categoryOptions = useMemo(() => {
@@ -325,25 +324,57 @@ export function PublicHomePage() {
 
   const filteredProducts = useMemo(() => {
     const needle = query.trim().toLowerCase();
+    const customerPoint = customerLocation ? { latitude: customerLocation.lat, longitude: customerLocation.lng } : null;
 
-    return catalog.products.filter((product) => {
-      const zone = product.zone_label || '';
+    return catalog.products
+      .map((product) => {
+        const hasVendorGeo = product.vendor_latitude != null && product.vendor_longitude != null;
+        const distanceToCustomerKm =
+          customerPoint && hasVendorGeo
+            ? distanceKm(customerPoint, { latitude: product.vendor_latitude!, longitude: product.vendor_longitude! })
+            : null;
+        return { product, distanceToCustomerKm };
+      })
+      .filter(({ product }) => {
+        const zone = product.zone_label || '';
       const matchQuery =
         !needle ||
         `${product.name} ${product.vendor_name} ${product.category} ${product.description} ${zone}`
           .toLowerCase()
           .includes(needle);
       const matchCategory = categoryFilter === 'Tous' || product.category === categoryFilter;
-      const matchCommune = communeFilter === 'Tous' || zone.toLowerCase().includes(communeFilter.toLowerCase());
+        const matchCoverage =
+          communeFilter === 'Tous'
+            ? true
+            : customerPoint
+              ? vendorServesPoint(
+                  {
+                    id: product.vendor_id,
+                    latitude: product.vendor_latitude,
+                    longitude: product.vendor_longitude,
+                    delivery_radius_km: product.vendor_delivery_radius_km,
+                    zone_label: product.zone_label,
+                  },
+                  customerPoint,
+                  communeFilter,
+                )
+              : zone.toLowerCase().includes(communeFilter.toLowerCase());
       const price = product.price;
       const matchBudget =
         budgetFilter === 'Tous' ||
         (budgetFilter === '≤ 15 €' && price <= 15) ||
         (budgetFilter === '15 € - 30 €' && price > 15 && price <= 30) ||
         (budgetFilter === '30 € et plus' && price > 30);
-      return matchQuery && matchCategory && matchCommune && matchBudget;
-    });
-  }, [catalog.products, categoryFilter, communeFilter, budgetFilter, query]);
+        return matchQuery && matchCategory && matchCoverage && matchBudget;
+      })
+      .sort((a, b) => {
+        if (a.distanceToCustomerKm == null && b.distanceToCustomerKm == null) return 0;
+        if (a.distanceToCustomerKm == null) return 1;
+        if (b.distanceToCustomerKm == null) return -1;
+        return a.distanceToCustomerKm - b.distanceToCustomerKm;
+      })
+      .map(({ product }) => product);
+  }, [catalog.products, categoryFilter, communeFilter, budgetFilter, query, customerLocation]);
 
   const featuredProducts = useMemo(() => filteredProducts.slice(0, 6), [filteredProducts]);
   const heroProduct = featuredProducts[0] ?? catalog.products[0] ?? null;
@@ -789,7 +820,7 @@ export function PublicHomePage() {
                   </a>
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-black uppercase tracking-[0.16em] text-stone-400">Zones rapides</span>
+                  <span className="text-xs font-black uppercase tracking-[0.16em] text-stone-400">Communes partenaires</span>
                   {serviceZones.slice(0, 4).map((zone) => (
                     <button
                       key={zone}
@@ -832,7 +863,7 @@ export function PublicHomePage() {
                       <h2 className="mt-2 max-w-md text-3xl font-black sm:text-4xl">{heroProduct.name}</h2>
                       <div className="mt-2 flex flex-wrap gap-2 text-xs font-black uppercase tracking-[0.16em]">
                         <span className="rounded-full bg-white/10 px-3 py-1">{heroProduct.vendor_name}</span>
-                        <span className="rounded-full bg-white/10 px-3 py-1">{heroProduct.zone_label}</span>
+                        <span className="rounded-full bg-white/10 px-3 py-1">Rayon {heroProduct.vendor_delivery_radius_km} km</span>
                       </div>
                       <div className="mt-4 flex items-end justify-between gap-3">
                         <strong className="text-3xl font-black text-orange-200">{formatPrice(heroProduct.price)}</strong>
@@ -882,7 +913,7 @@ export function PublicHomePage() {
               </a>
             </div>
 
-            <div className="mt-8 grid gap-4 rounded-[2rem] border border-orange-100 bg-[#24170f] p-4 shadow-elegant lg:grid-cols-[1fr_220px_220px]">
+            <div className="mt-8 grid gap-4 rounded-[2rem] border border-orange-100 bg-[#24170f] p-4 shadow-elegant lg:grid-cols-[1fr_220px_220px_220px]">
               <label className="relative block">
                 <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#c2410c]" />
                 <input
@@ -893,10 +924,10 @@ export function PublicHomePage() {
                 />
               </label>
               <Select value={communeFilter} onChange={setCommuneFilter}>
-                <option value="Tous">Toutes les communes</option>
+                <option value="Tous">Selon votre adresse / position</option>
                 {serviceZones.map((zone) => (
                   <option key={zone} value={zone}>
-                    {zone}
+                    Fallback commune : {zone}
                   </option>
                 ))}
               </Select>
@@ -907,7 +938,18 @@ export function PublicHomePage() {
                   </option>
                 ))}
               </Select>
+              <button
+                type="button"
+                onClick={useCustomerPosition}
+                disabled={geoStatus === 'loading'}
+                className="rounded-2xl border border-white/10 bg-white px-4 py-3 text-sm font-black text-[#2a190f] transition hover:-translate-y-0.5 disabled:opacity-60"
+              >
+                {customerLocation ? 'Position active' : geoStatus === 'loading' ? 'Localisation...' : 'Voir autour de moi'}
+              </button>
             </div>
+            <p className="mt-3 text-sm font-semibold text-stone-600">
+              La livraison est calculée autour de chaque partenaire avec son rayon réel. La commune sert seulement de fallback si la position manque.
+            </p>
 
             <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {categoryOptions.slice(0, 12).map((category) => {
@@ -1027,9 +1069,9 @@ export function PublicHomePage() {
                       <h4 className="text-xl font-black text-[#2a190f]">{heroProduct.name}</h4>
                       <p className="text-sm text-stone-600">{heroProduct.vendor_name}</p>
                       <div className="grid gap-2 text-sm text-stone-600">
-                        <InfoLine label="Commune" value={heroProduct.zone_label} />
+                        <InfoLine label="Couverture" value={`Livraison autour du partenaire - ${heroProduct.vendor_delivery_radius_km} km`} />
                         <InfoLine label="Prix" value={formatPrice(heroProduct.price)} />
-                        <InfoLine label="Service" value="Retrait / livraison selon zone" />
+                        <InfoLine label="Service" value="Retrait / livraison selon adresse client" />
                         <InfoLine label="Disponibilité" value={heroProduct.available ? 'Disponible' : 'À confirmer'} />
                       </div>
                       <a href={orderLink} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white">
@@ -1053,7 +1095,7 @@ export function PublicHomePage() {
               <SectionTitle
                 eyebrow="Zones desservies"
                 title="Une carte locale claire."
-                text="Les communes et partenaires sont présentés comme une zone de service premium, sans friction au moment de commander."
+                text="La couverture se base sur la position de chaque partenaire et son rayon de livraison. La commune reste un repère de secours."
               />
               <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {serviceZones.slice(0, 8).map((zone) => (
@@ -1252,8 +1294,8 @@ export function PublicHomePage() {
                   <Input value={partnerLeadForm.whatsapp} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, whatsapp: value }))} placeholder="WhatsApp" />
                   <Input value={partnerLeadForm.email} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, email: value }))} placeholder="Email" />
                   <Input value={partnerLeadForm.commune} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, commune: value }))} placeholder="Commune" />
-                  <Input value={partnerLeadForm.zone_label} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, zone_label: value }))} placeholder="Zone servie" />
-                  <Input value={partnerLeadForm.delivery_radius_km} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, delivery_radius_km: value }))} placeholder="Rayon (km)" />
+                  <Input value={partnerLeadForm.zone_label} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, zone_label: value }))} placeholder="Commune fallback" />
+                  <Input value={partnerLeadForm.delivery_radius_km} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, delivery_radius_km: value }))} placeholder="Rayon livraison pilote (3 km conseillé)" />
                   <Input value={partnerLeadForm.activity_type} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, activity_type: value }))} placeholder="Type d’activité" />
                   <Input value={partnerLeadForm.opening_hours} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, opening_hours: value }))} placeholder="Horaires" className="sm:col-span-2" />
                   <Textarea
@@ -1369,7 +1411,7 @@ export function PublicHomePage() {
               <div className="rounded-2xl bg-white/10 px-5 py-4 text-sm leading-6 text-stone-100">
                 Email: <span className="font-bold">operations@delikreol.com</span>
                 <br />
-                Frais de livraison: <span className="font-bold">selon commune</span>
+                Frais de livraison: <span className="font-bold">selon distance et rayon partenaire</span>
                 <br />
                 Minimum de commande: <span className="font-bold">confirmé avant paiement</span>
               </div>
@@ -1392,11 +1434,12 @@ export function PublicHomePage() {
               Commande locale, partenaires visibles, demandes entreprises et parcours mobile-first pour faire de DELIKREOL une vraie plateforme opérationnelle.
             </p>
           </div>
-          <FooterBlock title="Zones et services">
+          <FooterBlock title="Couverture partenaires">
             {serviceZones.slice(0, 6).map((zone) => (
               <FooterLink key={zone} label={zone} />
             ))}
-            <FooterLink label="Retrait / livraison" />
+            <FooterLink label="Rayon réel par partenaire" />
+            <FooterLink label="Fallback commune si géoloc absente" />
             <FooterLink label="Entreprise / devis" />
           </FooterBlock>
           <FooterBlock title="Liens utiles">
@@ -1483,7 +1526,7 @@ function ZoneCard({ zone }: { zone: string }) {
         <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">commune</p>
       </div>
       <p className="mt-3 text-base font-black text-[#2a190f]">{zone}</p>
-      <p className="mt-1 text-xs leading-5 text-stone-500">Retrait ou livraison selon l’offre visible sur la fiche.</p>
+      <p className="mt-1 text-xs leading-5 text-stone-500">Fallback commune si aucune position client n’est disponible.</p>
     </div>
   );
 }
@@ -1571,8 +1614,8 @@ function ProductCard({
           <strong className={`${compact ? 'text-xl' : 'text-2xl'} whitespace-nowrap font-black text-[#2a190f]`}>{formatPrice(product.price)}</strong>
         </div>
         <div className="grid grid-cols-2 gap-2 text-xs font-black uppercase tracking-[0.14em]">
-          <span className="rounded-2xl bg-[#fff4e7] px-3 py-2 text-[#7c2d12]">{product.zone_label || 'Martinique'}</span>
-          <span className="rounded-2xl bg-emerald-50 px-3 py-2 text-emerald-700">Retrait / livraison</span>
+          <span className="rounded-2xl bg-[#fff4e7] px-3 py-2 text-[#7c2d12]">Rayon {product.vendor_delivery_radius_km} km</span>
+          <span className="rounded-2xl bg-emerald-50 px-3 py-2 text-emerald-700">Selon position</span>
         </div>
         <button onClick={onAdd} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-orange-500/20">
           Ajouter <ArrowRight className="h-4 w-4" />
@@ -1594,8 +1637,9 @@ function VendorCard({ vendor }: { vendor: PublicCatalogVendor }) {
       </div>
       <p className="mt-3 text-sm leading-6 text-stone-600">{vendor.description}</p>
       <div className="mt-4 grid gap-2 text-sm">
-        <InfoLine label="Commune" value={vendor.zone_label || 'Martinique'} />
+        <InfoLine label="Couverture" value="Livraison autour de ce partenaire" />
         <InfoLine label="Rayon" value={`${vendor.delivery_radius_km} km`} />
+        <InfoLine label="Position" value={vendor.latitude != null && vendor.longitude != null ? 'Géolocalisée' : 'Fallback commune'} />
         <InfoLine label="Adresse" value={vendor.address || 'Adresse confirmée à la commande'} />
       </div>
     </article>

@@ -47,6 +47,9 @@ export type PublicCatalogProduct = {
   id: string;
   vendor_id: string;
   vendor_name: string;
+  vendor_latitude: number | null;
+  vendor_longitude: number | null;
+  vendor_delivery_radius_km: number;
   name: string;
   description: string;
   category: string;
@@ -100,7 +103,7 @@ function normalizeVendor(row: PublicVendorRow): PublicCatalogVendor {
     latitude: row.latitude ?? null,
     longitude: row.longitude ?? null,
     commission_rate: numberOr(row.commission_rate, 0.15),
-    delivery_radius_km: numberOr(row.delivery_radius_km, 8),
+    delivery_radius_km: numberOr(row.delivery_radius_km, 3),
     zone_label: row.zone_label ?? row.service_zone ?? row.address ?? 'Martinique',
   };
 }
@@ -110,6 +113,9 @@ function normalizeProduct(row: PublicProductRow, vendor: PublicCatalogVendor): P
     id: row.id,
     vendor_id: row.vendor_id ?? row.vendorId ?? vendor.id,
     vendor_name: vendor.business_name,
+    vendor_latitude: vendor.latitude,
+    vendor_longitude: vendor.longitude,
+    vendor_delivery_radius_km: vendor.delivery_radius_km,
     name: row.name ?? 'Produit local',
     description: row.description ?? 'Disponibilite confirmee par le partenaire.',
     category: row.category ?? 'Cuisine locale',
