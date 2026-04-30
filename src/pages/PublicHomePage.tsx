@@ -714,17 +714,23 @@ export function PublicHomePage() {
 
   return (
     <div className="min-h-screen bg-[#fbf4ea] text-[#2a190f]">
-      <header className="sticky top-0 z-50 border-b border-white/80 bg-[#fbf4ea]/95 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
-          <a href="#accueil" className="flex items-center gap-3" aria-label="DELIKREOL accueil">
-            <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-11 w-11 rounded-2xl bg-white p-1.5 shadow-lg" />
-            <div className="hidden sm:block">
-              <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">Martinique locale premium</p>
-              <p className="text-sm font-bold text-[#2a190f]">DELIKREOL</p>
+      <header className="sticky top-0 z-50 border-b border-white/80 bg-[#fff8ec]/92 backdrop-blur-xl">
+        <div className="relative mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-3">
+          <div className="hidden items-center gap-2 sm:flex">
+            <span className="rounded-full border border-orange-200 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-[#7c2d12] shadow-sm">
+              Martinique
+            </span>
+          </div>
+
+          <a href="#accueil" className="brand-logo-frame flex items-center gap-3 rounded-full px-3 py-2" aria-label="DELIKREOL accueil">
+            <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-12 w-12 rounded-2xl bg-white p-1.5 shadow-lg sm:h-14 sm:w-14" />
+            <div className="leading-none">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#c2410c]">Local premium</p>
+              <p className="text-lg font-black tracking-tight text-[#2a190f] sm:text-xl">DELIKREOL</p>
             </div>
           </a>
 
-          <nav className="hidden items-center gap-2 lg:flex">
+          <nav className="absolute left-1/2 top-full hidden -translate-x-1/2 items-center gap-2 rounded-b-[1.5rem] border border-t-0 border-orange-100 bg-[#fff8ec]/95 px-4 py-2 shadow-soft backdrop-blur lg:flex">
             <NavLink href="#catalogue">Catalogue</NavLink>
             <NavLink href="#zones">Zones</NavLink>
             <NavLink href="#entreprises">Entreprises</NavLink>
@@ -732,7 +738,7 @@ export function PublicHomePage() {
             <NavLink href="#faq">FAQ</NavLink>
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-2">
             <a
               href={partnerLink}
               className="hidden rounded-full border border-orange-200 bg-white px-4 py-2 text-sm font-black text-[#7c2d12] shadow-sm transition hover:-translate-y-0.5 sm:inline-flex"
@@ -750,30 +756,35 @@ export function PublicHomePage() {
       </header>
 
       <main id="accueil">
-        <section className="relative overflow-hidden border-b border-orange-100 bg-[radial-gradient(circle_at_top_left,_rgba(217,95,45,0.18),_transparent_34%),radial-gradient(circle_at_top_right,_rgba(10,77,62,0.12),_transparent_28%),linear-gradient(135deg,_#fff8ee_0%,_#fffdf9_50%,_#fff3e7_100%)]">
+        <section className="island-hero-surface relative overflow-hidden border-b border-orange-100">
           <div className="madras-strip" />
-          <div className="mx-auto grid max-w-7xl gap-7 px-4 py-7 sm:py-10 lg:grid-cols-[1.08fr_0.92fr] lg:py-14">
-            <div className="flex flex-col justify-center">
-              <BadgeRow />
-              <h1 className="mt-5 max-w-4xl font-display text-4xl font-black leading-[0.96] tracking-tight text-[#2a190f] sm:text-5xl lg:text-7xl">
+          <div className="pointer-events-none absolute -left-24 top-24 h-72 w-72 rounded-full bg-orange-300/25 blur-3xl" />
+          <div className="pointer-events-none absolute -right-24 bottom-10 h-80 w-80 rounded-full bg-emerald-500/15 blur-3xl" />
+          <div className="mx-auto grid max-w-7xl gap-7 px-4 py-8 sm:py-12 lg:grid-cols-[0.95fr_1.05fr] lg:py-16">
+            <div className="brand-hero-glow flex flex-col justify-center">
+              <div className="mx-auto flex w-fit flex-col items-center text-center lg:mx-0 lg:items-start lg:text-left">
+                <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-20 w-20 rounded-[1.6rem] bg-white p-2 shadow-2xl shadow-orange-900/10 sm:h-24 sm:w-24" />
+                <BadgeRow />
+              </div>
+              <h1 className="mt-5 max-w-4xl text-center font-display text-4xl font-black leading-[0.94] tracking-tight text-[#2a190f] sm:text-6xl lg:text-left lg:text-7xl">
                 Commandez local en Martinique.
               </h1>
-              <p className="mt-4 max-w-xl text-base leading-7 text-[#5a4334] sm:text-lg">
+              <p className="mx-auto mt-4 max-w-xl text-center text-base leading-7 text-[#5a4334] sm:text-lg lg:mx-0 lg:text-left">
                 Trouvez un plat, un produit ou un traiteur disponible près de votre commune. Retrait ou livraison selon l’offre.
               </p>
 
-              <div className="mt-6 rounded-[1.75rem] border border-orange-100 bg-white p-3 shadow-elegant">
-                <div className="grid gap-3 lg:grid-cols-[1fr_190px]">
+              <div className="mt-7 rounded-[2rem] border border-white/80 bg-white/88 p-3 shadow-2xl shadow-orange-900/10 backdrop-blur">
+                <div className="grid gap-3 lg:grid-cols-[1fr_210px]">
                   <label className="relative block">
-                    <MapPin className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#c2410c]" />
+                    <Search className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-[#c2410c]" />
                     <input
                       value={query}
                       onChange={(event) => setQuery(event.target.value)}
-                      placeholder="Votre commune, adresse ou produit"
-                      className="h-14 w-full rounded-2xl border border-orange-100 bg-[#fffaf4] pl-12 pr-4 text-base font-black text-[#2a190f] outline-none ring-orange-200 placeholder:text-stone-400 focus:ring-4"
+                      placeholder="Adresse, commune ou produit"
+                      className="h-16 w-full rounded-[1.35rem] border border-orange-100 bg-[#fffaf4] pl-14 pr-4 text-base font-black text-[#2a190f] outline-none ring-orange-200 placeholder:text-stone-400 focus:ring-4"
                     />
                   </label>
-                  <a href="#catalogue" className="inline-flex h-14 items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-5 text-sm font-black uppercase tracking-[0.12em] text-white shadow-xl shadow-orange-500/25 transition hover:-translate-y-0.5">
+                  <a href="#catalogue" className="inline-flex h-16 items-center justify-center gap-2 rounded-[1.35rem] bg-[#d95f2d] px-5 text-sm font-black uppercase tracking-[0.12em] text-white shadow-xl shadow-orange-500/25 transition hover:-translate-y-0.5">
                     Commander <ArrowRight className="h-5 w-5" />
                   </a>
                 </div>
@@ -794,23 +805,31 @@ export function PublicHomePage() {
                 </div>
               </div>
 
-              <a href="#partenaires" className="mt-4 inline-flex w-fit items-center justify-center gap-2 rounded-full border border-orange-200 bg-white/80 px-5 py-3 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5">
-                Devenir partenaire <ChevronRight className="h-4 w-4" />
-              </a>
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                <a href={orderLink} className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2a190f] px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-stone-900/15">
+                  WhatsApp direct <MessageCircle className="h-4 w-4" />
+                </a>
+                <a href="#partenaires" className="inline-flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-white/80 px-6 py-4 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5">
+                  Devenir partenaire <ChevronRight className="h-4 w-4" />
+                </a>
+              </div>
             </div>
 
-            <div className="brand-panel rounded-[2rem] p-4 shadow-elegant">
+            <div className="premium-card relative rounded-[2.4rem] border border-white/80 bg-white/75 p-3 shadow-elegant backdrop-blur">
               {heroProduct ? (
-                <div className="overflow-hidden rounded-[1.75rem] bg-[#20150f] text-white shadow-2xl">
-                  <div className="relative aspect-[4/3]">
+                <div className="overflow-hidden rounded-[2rem] bg-[#20150f] text-white shadow-2xl">
+                  <div className="relative aspect-[4/4] sm:aspect-[16/13] lg:aspect-[4/3]">
                     {heroProduct.image_url ? (
                       <img src={heroProduct.image_url} alt={heroProduct.name} className="h-full w-full object-cover" />
                     ) : (
                       <HeroFallback name={heroProduct.name} />
                     )}
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/45 to-transparent p-5">
+                    <div className="absolute left-4 top-4 rounded-full bg-white/92 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#7c2d12] shadow-lg">
+                      Ambiance Martinique
+                    </div>
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/88 via-black/48 to-transparent p-5 sm:p-7">
                       <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-200">Produit phare</p>
-                      <h2 className="mt-2 text-2xl font-black sm:text-3xl">{heroProduct.name}</h2>
+                      <h2 className="mt-2 max-w-md text-3xl font-black sm:text-4xl">{heroProduct.name}</h2>
                       <div className="mt-2 flex flex-wrap gap-2 text-xs font-black uppercase tracking-[0.16em]">
                         <span className="rounded-full bg-white/10 px-3 py-1">{heroProduct.vendor_name}</span>
                         <span className="rounded-full bg-white/10 px-3 py-1">{heroProduct.zone_label}</span>
@@ -828,7 +847,7 @@ export function PublicHomePage() {
                 <HeroFallback name="DELIKREOL" loading={loading} configured={catalog.configured} />
               )}
 
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 {trustPills.map((pill) => (
                   <TrustCard key={pill} label={pill} />
                 ))}
@@ -850,27 +869,27 @@ export function PublicHomePage() {
           </div>
         </section>
 
-        <section id="catalogue" className="bg-white py-14">
+        <section id="catalogue" className="bg-[#fffdf8] py-14">
           <div className="mx-auto max-w-7xl px-4">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="flex flex-col gap-5 rounded-[2.25rem] border border-orange-100 bg-white p-5 shadow-soft lg:flex-row lg:items-end lg:justify-between lg:p-7">
               <SectionTitle
                 eyebrow="Catalogue"
-                title="Les offres disponibles."
-                text="Photo, prix, zone, disponibilité, action."
+                title="Choisir vite, commander clair."
+                text="Des cartes directes avec photo, prix, zone, disponibilité et bouton d’ajout."
               />
               <a href={orderLink} className="inline-flex w-fit items-center gap-2 rounded-full bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25">
                 Commander par WhatsApp <MessageCircle className="h-5 w-5" />
               </a>
             </div>
 
-            <div className="mt-8 grid gap-4 rounded-[1.75rem] border border-orange-100 bg-[#fff8ef] p-4 shadow-soft lg:grid-cols-[1fr_220px_220px]">
+            <div className="mt-8 grid gap-4 rounded-[2rem] border border-orange-100 bg-[#24170f] p-4 shadow-elegant lg:grid-cols-[1fr_220px_220px]">
               <label className="relative block">
-                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#c2410c]" />
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Rechercher un plat, un traiteur, un produit ou une commune"
-                  className="w-full rounded-2xl border border-orange-100 bg-white py-4 pl-12 pr-4 text-sm font-semibold outline-none ring-orange-200 focus:ring-4"
+                  className="w-full rounded-2xl border border-white/10 bg-white py-4 pl-12 pr-4 text-sm font-black text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
                 />
               </label>
               <Select value={communeFilter} onChange={setCommuneFilter}>
@@ -1029,34 +1048,40 @@ export function PublicHomePage() {
         </section>
 
         <section id="zones" className="mx-auto max-w-7xl px-4 py-14">
-          <SectionTitle
-            eyebrow="Zones desservies"
-            title="La couverture est lisible, simple et locale."
-            text="Les communes apparaissent clairement pour éviter les frictions au moment de commander ou de demander un devis."
-          />
-          <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {serviceZones.slice(0, 8).map((zone) => (
-              <ZoneCard key={zone} zone={zone} />
-            ))}
-          </div>
-          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {highlightedVendors.map((vendor) => (
-              <VendorCard key={vendor.id} vendor={vendor} />
-            ))}
+          <div className="island-map-surface rounded-[2.5rem] border border-orange-100 p-5 shadow-elegant lg:p-8">
+            <div className="relative z-10">
+              <SectionTitle
+                eyebrow="Zones desservies"
+                title="Une carte locale claire."
+                text="Les communes et partenaires sont présentés comme une zone de service premium, sans friction au moment de commander."
+              />
+              <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                {serviceZones.slice(0, 8).map((zone) => (
+                  <ZoneCard key={zone} zone={zone} />
+                ))}
+              </div>
+              <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {highlightedVendors.map((vendor) => (
+                  <VendorCard key={vendor.id} vendor={vendor} />
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
         <section className="bg-[#fff8ef] py-14">
           <div className="mx-auto max-w-7xl px-4">
-            <SectionTitle
-              eyebrow="Rôles"
-              title="Un accès clair pour chaque profil."
-              text="Chaque rôle a une action unique. Le parcours client reste prioritaire."
-            />
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {roleCards.map((role) => (
-                <RoleCard key={role.title} {...role} />
-              ))}
+            <div className="rounded-[2.4rem] border border-orange-100 bg-white p-5 shadow-soft lg:p-8">
+              <SectionTitle
+                eyebrow="Partenaires"
+                title="Un accès propre pour chaque rôle."
+                text="Vendeur, livreur, point relais ou entreprise : une carte courte, une action claire."
+              />
+              <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {roleCards.map((role) => (
+                  <RoleCard key={role.title} {...role} />
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -1444,7 +1469,7 @@ function InfoLine({ label, value }: { label: string; value: string }) {
 
 function TrustCard({ label }: { label: string }) {
   return (
-    <div className="rounded-[1.4rem] border border-orange-100 bg-white px-4 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-[#c2410c] shadow-soft">
+    <div className="rounded-[1.4rem] border border-white/20 bg-white/92 px-4 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-[#7c2d12] shadow-soft backdrop-blur">
       {label}
     </div>
   );
@@ -1452,9 +1477,12 @@ function TrustCard({ label }: { label: string }) {
 
 function ZoneCard({ zone }: { zone: string }) {
   return (
-    <div className="rounded-[1.4rem] border border-orange-100 bg-white px-4 py-3 shadow-soft">
-      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">commune</p>
-      <p className="mt-2 text-sm font-black text-[#2a190f]">{zone}</p>
+    <div className="rounded-[1.6rem] border border-white/70 bg-white/88 px-4 py-4 shadow-soft backdrop-blur">
+      <div className="flex items-center gap-2">
+        <span className="h-2.5 w-2.5 rounded-full bg-[#d95f2d] shadow-[0_0_0_5px_rgba(217,95,45,0.12)]" />
+        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">commune</p>
+      </div>
+      <p className="mt-3 text-base font-black text-[#2a190f]">{zone}</p>
       <p className="mt-1 text-xs leading-5 text-stone-500">Retrait ou livraison selon l’offre visible sur la fiche.</p>
     </div>
   );
@@ -1486,7 +1514,7 @@ function RoleCard({
   icon: ComponentType<{ className?: string }>;
 }) {
   return (
-    <article className="rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
+    <article className="rounded-[1.9rem] border border-orange-100 bg-[#fffaf4] p-5 shadow-soft transition hover:-translate-y-1 hover:bg-white hover:shadow-elegant">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-xl font-black text-[#2a190f]">{title}</h3>
@@ -1496,7 +1524,7 @@ function RoleCard({
           <Icon className="h-5 w-5" />
         </span>
       </div>
-      <a href={href} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-[#fffaf4] px-4 py-3 text-sm font-black text-[#7c2d12]">
+      <a href={href} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]">
         {cta} <ChevronRight className="h-4 w-4" />
       </a>
     </article>
@@ -1523,13 +1551,16 @@ function ProductCard({
   compact?: boolean;
 }) {
   return (
-    <article className="overflow-hidden rounded-[1.75rem] border border-orange-100 bg-white shadow-soft transition hover:-translate-y-1 hover:shadow-xl">
-      <div className={`${compact ? 'aspect-[16/11]' : 'aspect-[4/3]'} bg-[#fff4e7]`}>
+    <article className="premium-card group overflow-hidden rounded-[2rem] border border-orange-100 bg-white shadow-soft transition hover:-translate-y-1 hover:shadow-2xl">
+      <div className={`${compact ? 'aspect-[16/11]' : 'aspect-[4/3]'} relative bg-[#fff4e7]`}>
         {product.image_url ? (
-          <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
+          <img src={product.image_url} alt={product.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
         ) : (
           <HeroFallback name={product.name} />
         )}
+        <div className="absolute left-3 top-3 rounded-full bg-white/92 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-emerald-700 shadow-lg">
+          {product.available ? 'Disponible' : 'À confirmer'}
+        </div>
       </div>
       <div className="space-y-4 p-4 sm:p-5">
         <div className="flex items-start justify-between gap-3">
@@ -1540,10 +1571,10 @@ function ProductCard({
           <strong className={`${compact ? 'text-xl' : 'text-2xl'} whitespace-nowrap font-black text-[#2a190f]`}>{formatPrice(product.price)}</strong>
         </div>
         <div className="grid grid-cols-2 gap-2 text-xs font-black uppercase tracking-[0.14em]">
-          <span className="rounded-2xl bg-slate-100 px-3 py-2 text-slate-700">{product.zone_label || 'Martinique'}</span>
-          <span className="rounded-2xl bg-emerald-50 px-3 py-2 text-emerald-700">{product.available ? 'Disponible' : 'À confirmer'}</span>
+          <span className="rounded-2xl bg-[#fff4e7] px-3 py-2 text-[#7c2d12]">{product.zone_label || 'Martinique'}</span>
+          <span className="rounded-2xl bg-emerald-50 px-3 py-2 text-emerald-700">Retrait / livraison</span>
         </div>
-        <button onClick={onAdd} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white">
+        <button onClick={onAdd} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-orange-500/20">
           Ajouter <ArrowRight className="h-4 w-4" />
         </button>
       </div>
@@ -1553,7 +1584,7 @@ function ProductCard({
 
 function VendorCard({ vendor }: { vendor: PublicCatalogVendor }) {
   return (
-    <article className="rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
+    <article className="rounded-[1.9rem] border border-white/80 bg-white/90 p-5 shadow-soft backdrop-blur">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">{vendor.business_type}</p>
@@ -1653,11 +1684,16 @@ function SelectionPanel({
   onClear: () => void;
 }) {
   return (
-    <aside className="h-fit rounded-[1.75rem] border border-orange-100 bg-[#fffaf4] p-5 shadow-soft lg:sticky lg:top-24">
+    <aside className="h-fit rounded-[2rem] border border-orange-100 bg-white p-5 shadow-elegant lg:sticky lg:top-28">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <ShoppingBag className="h-5 w-5 text-[#d95f2d]" />
-          <h3 className="text-lg font-black text-[#2a190f]">Panier</h3>
+          <span className="rounded-2xl bg-[#fff3e5] p-3 text-[#d95f2d]">
+            <ShoppingBag className="h-5 w-5" />
+          </span>
+          <div>
+            <h3 className="text-lg font-black text-[#2a190f]">Panier sécurisé</h3>
+            <p className="text-xs font-semibold text-stone-500">Validation humaine avant préparation.</p>
+          </div>
         </div>
         <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">{products.length} article(s)</span>
       </div>
