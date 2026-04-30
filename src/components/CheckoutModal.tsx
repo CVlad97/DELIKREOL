@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Banknote, CreditCard, MessageCircle, ReceiptText, X, MapPin, Store, Package } from 'lucide-react';
+import { Banknote, CreditCard, MessageCircle, X, MapPin, Store, Package } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { ordersService } from '../services/ordersService';
@@ -9,7 +9,7 @@ interface CheckoutModalProps {
   onClose: () => void;
 }
 
-type PaymentMode = 'paypal' | 'bank_revolut' | 'stripe_pending' | 'whatsapp';
+type PaymentMode = 'paypal' | 'secure_card_link' | 'whatsapp';
 
 export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const { items, total, clearCart } = useCart();
@@ -30,25 +30,19 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       {
         id: 'paypal' as const,
         title: 'PayPal',
-        subtitle: 'Lien transitoire a envoyer au client',
+        subtitle: 'Paiement confirmé par lien PayPal',
         icon: CreditCard,
       },
       {
-        id: 'bank_revolut' as const,
-        title: 'Bancaire / Revolut',
-        subtitle: 'Coordonnees a confirmer par WhatsApp',
+        id: 'secure_card_link' as const,
+        title: 'Carte via lien sécurisé',
+        subtitle: 'Lien de paiement transmis après validation',
         icon: Banknote,
       },
       {
-        id: 'stripe_pending' as const,
-        title: 'Stripe en attente',
-        subtitle: 'Conserve pour la phase suivante',
-        icon: ReceiptText,
-      },
-      {
         id: 'whatsapp' as const,
-        title: 'WhatsApp',
-        subtitle: 'Confirmation manuelle rapide',
+        title: 'Assistance WhatsApp',
+        subtitle: 'Confirmation humaine et accompagnement client',
         icon: MessageCircle,
       },
     ],
@@ -73,9 +67,9 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       const orderNumber = `DK${Date.now().toString().slice(-8)}`;
       const paymentLabel = paymentOptions.find((option) => option.id === paymentMode)?.title ?? 'WhatsApp';
       const paymentNotes = [
-        `Mode de paiement transitoire: ${paymentLabel}`,
-        `Confirmation WhatsApp: https://wa.me/${whatsappNumber}`,
-        'Stripe conserve en attente pour integration future.',
+        `Mode de paiement souhaite: ${paymentLabel}`,
+        `Assistance WhatsApp: https://wa.me/${whatsappNumber}`,
+        'Paiement final confirme avant preparation.',
       ].join('\n');
 
       const orderItems = items.map((item) => ({
@@ -154,9 +148,9 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
           </div>
 
           <div>
-            <h3 className="font-bold text-lg mb-3">Paiement transitoire</h3>
+            <h3 className="font-bold text-lg mb-3">Paiement</h3>
             <p className="text-sm text-gray-600 mb-3">
-              Choisissez un mode simple pour la phase actuelle. Stripe reste en attente.
+              Choisissez le mode le plus simple. La commande est confirmée avant préparation.
             </p>
             <div className="grid gap-3 sm:grid-cols-2">
               {paymentOptions.map((option) => {
@@ -185,7 +179,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
               })}
             </div>
             <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
-              La commande est enregistrée avec le mode choisi et peut ensuite être confirmée sur WhatsApp si besoin.
+              La commande est enregistrée avec le mode choisi et peut être confirmée sur WhatsApp si besoin.
             </div>
           </div>
 
