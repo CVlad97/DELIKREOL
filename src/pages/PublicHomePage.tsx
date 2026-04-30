@@ -1091,7 +1091,7 @@ export function PublicHomePage() {
                 <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-300">Vérification opérationnelle</p>
                 <h2 className="mt-3 font-display text-4xl font-black tracking-tight sm:text-5xl">Tester le parcours complet sans toucher aux données publiques.</h2>
                 <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-300">
-                  Ce mode sert à contrôler les enchaînements client, vendeur, livreur, partenaire et entreprise avant mise en production.
+                  Cet espace sert à contrôler les enchaînements client, vendeur, livreur, partenaire et entreprise sans modifier les données publiques.
                 </p>
               </div>
               <span className="w-fit rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-100">
