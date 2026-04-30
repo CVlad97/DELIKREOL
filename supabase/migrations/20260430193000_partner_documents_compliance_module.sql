@@ -38,6 +38,9 @@ alter table public.partner_documents
   drop constraint if exists valid_document_type;
 
 alter table public.partner_documents
+  drop constraint if exists partner_documents_document_type_check;
+
+alter table public.partner_documents
   drop constraint if exists valid_partner_document_type;
 
 alter table public.partner_documents
