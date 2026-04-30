@@ -1,4 +1,4 @@
-import { Home, Store, MapPin, Truck, Settings, User, LogIn, FileText, Heart, Package, Activity } from 'lucide-react';
+import { Home, Store, MapPin, Truck, User, LogIn, FileText, Heart, Package, Activity } from 'lucide-react';
 import { UserType } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useState } from 'react';
@@ -36,22 +36,22 @@ export function Navigation({ userType, currentView, onNavigate }: NavigationProp
         return [
           { id: 'dashboard', label: 'Tableau de bord', icon: Home },
           { id: 'products', label: 'Produits', icon: Store },
+          { id: 'documents', label: 'Documents', icon: FileText },
           { id: 'orders', label: 'Commandes', icon: Store },
-          { id: 'stats', label: 'Statistiques', icon: Settings },
         ];
       case 'relay_host':
         return [
           { id: 'dashboard', label: 'Tableau de bord', icon: Home },
           { id: 'deposits', label: 'Dépôts', icon: MapPin },
+          { id: 'documents', label: 'Documents', icon: FileText },
           { id: 'capacity', label: 'Capacité', icon: Store },
-          { id: 'earnings', label: 'Gains', icon: Settings },
         ];
       case 'driver':
         return [
           { id: 'available', label: 'Courses', icon: Truck },
           { id: 'active', label: 'En cours', icon: MapPin },
+          { id: 'documents', label: 'Documents', icon: FileText },
           { id: 'history', label: 'Historique', icon: Store },
-          { id: 'earnings', label: 'Gains', icon: Settings },
         ];
       case 'admin':
         return [

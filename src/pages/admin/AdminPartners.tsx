@@ -1,7 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Store, FileText, Calendar, MapPin, CheckCircle, XCircle, AlertCircle, ExternalLink, Package } from 'lucide-react';
-import { listPartnerApplications, getPartnerApplication, updatePartnerApplicationStatus } from '../../services/partnerOnboardingService';
+import {
+  createPartnerDocumentAccessUrl,
+  listPartnerApplications,
+  getPartnerApplication,
+  updatePartnerApplicationStatus,
+  updatePartnerDocumentVerification,
+} from '../../services/partnerOnboardingService';
 import { useToast } from '../../contexts/ToastContext';
+import { buildCompliance, getDocumentLabel, PartnerDocumentStatus, PartnerRole } from '../../lib/storageProvider';
 
 export function AdminPartners() {
   const [applications, setApplications] = useState<any[]>([]);
@@ -44,6 +51,50 @@ export function AdminPartners() {
     } else {
       showError(result.error || 'Erreur');
     }
+  };
+
+  const handleDocumentStatus = async (
+    documentId: string,
+    status: 'under_review' | 'approved' | 'rejected' | 'expired'
+  ) => {
+    const note = status === 'rejected' ? adminNotes : undefined;
+    const result = await updatePartnerDocumentVerification(documentId, status, note);
+    if (result.success) {
+      showSuccess('Statut document mis à jour');
+      if (selectedApp) loadDetailedApplication(selectedApp.id);
+    } else {
+      showError(result.error || 'Erreur document');
+    }
+  };
+
+  const openSecureDocument = async (doc: any) => {
+    const result = await createPartnerDocumentAccessUrl(doc);
+    if (result.success && result.data?.url) {
+      window.open(result.data.url, '_blank', 'noopener,noreferrer');
+    } else {
+      showError(result.error || 'Lien sécurisé indisponible');
+    }
+  };
+
+  const getDocumentStatusBadge = (status: PartnerDocumentStatus | undefined) => {
+    const value = status || 'uploaded';
+    const labels: Record<PartnerDocumentStatus, string> = {
+      missing: 'Manquant',
+      uploaded: 'Déposé',
+      under_review: 'En contrôle',
+      approved: 'Validé',
+      rejected: 'Rejeté',
+      expired: 'Expiré',
+    };
+    const styles: Record<PartnerDocumentStatus, string> = {
+      missing: 'bg-slate-500/20 text-slate-300',
+      uploaded: 'bg-blue-500/20 text-blue-300',
+      under_review: 'bg-yellow-500/20 text-yellow-300',
+      approved: 'bg-green-500/20 text-green-300',
+      rejected: 'bg-red-500/20 text-red-300',
+      expired: 'bg-orange-500/20 text-orange-300',
+    };
+    return <span className={`rounded-full px-3 py-1 text-xs font-black ${styles[value]}`}>{labels[value]}</span>;
   };
 
   const getStatusBadge = (status: string) => {
@@ -92,6 +143,18 @@ export function AdminPartners() {
     accepted: applications.filter(a => a.status === 'accepted').length,
     rejected: applications.filter(a => a.status === 'rejected').length,
   };
+
+  const selectedPartnerRole: PartnerRole | null = selectedApp?.business_type === 'driver'
+    ? 'driver'
+    : selectedApp?.business_type === 'relay_host'
+      ? 'relay_host'
+      : selectedApp
+        ? 'vendor'
+        : null;
+
+  const selectedCompliance = selectedPartnerRole
+    ? buildCompliance(selectedPartnerRole, selectedApp.partner_documents || [])
+    : null;
 
   return (
     <div className="p-6 space-y-6">
@@ -277,30 +340,64 @@ export function AdminPartners() {
                     <FileText className="w-5 h-5" />
                     Documents Administratifs ({selectedApp.partner_documents.length})
                   </h3>
-                  <div className="space-y-2">
+                  {selectedCompliance && (
+                    <div className="mb-4 rounded-lg border border-slate-700 bg-slate-800/70 p-4 text-sm text-slate-300">
+                      Statut conformité : <span className="font-bold text-slate-50">{selectedCompliance.status}</span>
+                      <span className="ml-2 text-slate-400">({selectedCompliance.approved}/{selectedCompliance.total} validés)</span>
+                    </div>
+                  )}
+                  <div className="space-y-3">
                     {selectedApp.partner_documents.map((doc: any) => (
-                      <div key={doc.id} className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                      <div key={doc.id} className="rounded-lg bg-slate-800 p-4">
                         <div className="flex items-center gap-3">
                           <FileText className="w-4 h-4 text-slate-400" />
-                          <div>
+                          <div className="min-w-0 flex-1">
                             <div className="text-slate-200 text-sm font-medium">
-                              {doc.document_type === 'kbis' && 'Kbis / Extrait K'}
-                              {doc.document_type === 'id_card' && 'Pièce d\'identité'}
-                              {doc.document_type === 'insurance' && 'Attestation d\'assurance'}
-                              {doc.document_type === 'other' && 'Autre document'}
+                              {getDocumentLabel(doc.document_type)}
                             </div>
-                            <div className="text-xs text-slate-400">{doc.file_name}</div>
+                            <div className="text-xs text-slate-400">
+                              {doc.file_name}
+                              {doc.expires_at && ` • Expire le ${new Date(doc.expires_at).toLocaleDateString('fr-FR')}`}
+                            </div>
                           </div>
+                          {getDocumentStatusBadge(doc.verification_status)}
                         </div>
-                        <a
-                          href={doc.file_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 text-sm"
-                        >
-                          Ouvrir
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
+                        {doc.review_note && (
+                          <p className="mt-3 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-200">
+                            Note de rejet : {doc.review_note}
+                          </p>
+                        )}
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => openSecureDocument(doc)}
+                            className="flex items-center gap-2 rounded-lg bg-slate-700 px-3 py-2 text-sm text-slate-100 hover:bg-slate-600"
+                          >
+                            Ouvrir lien sécurisé
+                            <ExternalLink className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDocumentStatus(doc.id, 'under_review')}
+                            className="rounded-lg bg-yellow-500/20 px-3 py-2 text-sm font-bold text-yellow-200"
+                          >
+                            En contrôle
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDocumentStatus(doc.id, 'approved')}
+                            className="rounded-lg bg-green-500/20 px-3 py-2 text-sm font-bold text-green-200"
+                          >
+                            Valider
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDocumentStatus(doc.id, 'rejected')}
+                            className="rounded-lg bg-red-500/20 px-3 py-2 text-sm font-bold text-red-200"
+                          >
+                            Rejeter
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

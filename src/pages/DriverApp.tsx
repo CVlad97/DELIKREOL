@@ -4,6 +4,7 @@ import { Navigation as NavBar } from '../components/Navigation';
 import { MapView } from '../components/Map/MapView';
 import { QRScanner } from '../components/QRScanner';
 import { ProDashboard } from './ProDashboard';
+import { PartnerDashboardPage } from './PartnerDashboardPage';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Driver, Delivery, Location } from '../types';
@@ -562,6 +563,8 @@ export function DriverApp() {
         return renderAvailable();
       case 'active':
         return renderActive();
+      case 'documents':
+        return <PartnerDashboardPage />;
       case 'history':
         return renderHistory();
       case 'earnings':

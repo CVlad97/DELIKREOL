@@ -21,9 +21,27 @@ export interface PartnerApplicationInput {
 }
 
 export interface PartnerDocumentInput {
-  documentType: 'kbis' | 'id_card' | 'hygiene_cert' | 'insurance' | 'tax_cert' | 'license' | 'other';
+  documentType:
+    | 'siret'
+    | 'operating_address'
+    | 'haccp'
+    | 'product_photos'
+    | 'establishment_photo'
+    | 'production_capacity'
+    | 'driving_license'
+    | 'insurance'
+    | 'vehicle_photo'
+    | 'vehicle_type'
+    | 'availability'
+    | 'transport_capacity'
+    | 'relay_address'
+    | 'local_photo'
+    | 'storage_capacity'
+    | 'opening_hours'
+    | 'other';
   file: File;
   description?: string;
+  expiresAt?: string;
 }
 
 export interface PartnerCatalogFileInput {
@@ -105,12 +123,15 @@ export async function uploadPartnerDocument(
 ): Promise<ServiceResponse<{ id: string; url: string }>> {
   try {
     const { file, documentType } = documentInput;
+    const { data: authData } = await supabase.auth.getUser();
+    const isPublicPhoto = documentType === 'product_photos' || documentType === 'establishment_photo';
+    const bucketId = isPublicPhoto ? 'product-photos' : 'partner-documents-private';
 
     const fileExt = file.name.split('.').pop();
-    const fileName = `${partnerApplicationId}/${documentType}_${Date.now()}.${fileExt}`;
+    const fileName = `${authData.user?.id || partnerApplicationId}/${documentType}_${Date.now()}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
-      .from('partner-docs')
+      .from(bucketId)
       .upload(fileName, file, {
         cacheControl: '3600',
         upsert: false,
@@ -121,19 +142,21 @@ export async function uploadPartnerDocument(
       return { success: false, error: 'Erreur lors de l\'upload du document' };
     }
 
-    const { data: urlData } = supabase.storage
-      .from('partner-docs')
-      .getPublicUrl(fileName);
-
     const { data, error } = await supabase
       .from('partner_documents')
       .insert({
         partner_application_id: partnerApplicationId,
+        user_id: authData.user?.id,
         document_type: documentType,
-        file_url: urlData.publicUrl,
+        verification_status: 'uploaded',
+        file_url: fileName,
+        file_path: fileName,
+        bucket_id: bucketId,
+        is_sensitive: !isPublicPhoto,
         file_name: file.name,
         file_size: file.size,
         mime_type: file.type,
+        expires_at: documentInput.expiresAt,
       })
       .select('id')
       .single();
@@ -145,7 +168,7 @@ export async function uploadPartnerDocument(
 
     return {
       success: true,
-      data: { id: data.id, url: urlData.publicUrl },
+      data: { id: data.id, url: fileName },
     };
   } catch (error) {
     console.error('Unexpected error:', error);
@@ -327,6 +350,63 @@ export async function updatePartnerApplicationStatus(
     }
 
     return { success: true };
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    return { success: false, error: 'Erreur inattendue' };
+  }
+}
+
+export async function updatePartnerDocumentVerification(
+  documentId: string,
+  status: 'under_review' | 'approved' | 'rejected' | 'expired',
+  reviewNote?: string
+): Promise<ServiceResponse> {
+  try {
+    const { error } = await supabase
+      .from('partner_documents')
+      .update({
+        verification_status: status,
+        review_note: reviewNote || null,
+        reviewed_at: new Date().toISOString(),
+      })
+      .eq('id', documentId);
+
+    if (error) {
+      console.error('Error updating document verification:', error);
+      return { success: false, error: 'Erreur lors de la validation du document' };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    return { success: false, error: 'Erreur inattendue' };
+  }
+}
+
+export async function createPartnerDocumentAccessUrl(document: {
+  bucket_id?: string | null;
+  file_path?: string | null;
+  file_url?: string | null;
+}): Promise<ServiceResponse<{ url: string }>> {
+  try {
+    if (document.file_url?.startsWith('http')) {
+      return { success: true, data: { url: document.file_url } };
+    }
+
+    const bucket = document.bucket_id || 'partner-docs';
+    const path = document.file_path || document.file_url;
+
+    if (!path) {
+      return { success: false, error: 'Chemin du document indisponible' };
+    }
+
+    const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 5);
+    if (error) {
+      console.error('Error creating signed URL:', error);
+      return { success: false, error: 'Impossible de générer le lien sécurisé' };
+    }
+
+    return { success: true, data: { url: data.signedUrl } };
   } catch (error) {
     console.error('Unexpected error:', error);
     return { success: false, error: 'Erreur inattendue' };
