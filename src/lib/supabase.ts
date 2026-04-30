@@ -80,7 +80,7 @@ if (isSupabaseConfigured) {
 
 export const supabase = client;
 
-export type UserType = 'customer' | 'vendor' | 'driver' | 'admin';
+export type UserType = 'customer' | 'vendor' | 'driver' | 'relay_host' | 'admin';
 export type BusinessType = 'restaurant' | 'producer' | 'merchant';
 export type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'in_delivery' | 'delivered' | 'cancelled';
 export type DeliveryType = 'home_delivery' | 'pickup' | 'relay_point';

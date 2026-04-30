@@ -3,6 +3,7 @@ import { Navigation } from '../components/Navigation';
 import { QRScanner } from '../components/QRScanner';
 import { ProDashboard } from './ProDashboard';
 import { supabase } from '../lib/supabase';
+import { PartnerDashboardPage } from './PartnerDashboardPage';
 
 export function RelayHostApp() {
   const [currentView, setCurrentView] = useState('dashboard');
@@ -66,6 +67,8 @@ export function RelayHostApp() {
         return renderDashboard();
       case 'deposits':
         return <div className="p-4">Deposits View (TODO)</div>;
+      case 'documents':
+        return <PartnerDashboardPage />;
       case 'capacity':
         return <div className="p-4">Capacity View (TODO)</div>;
       case 'scanner':

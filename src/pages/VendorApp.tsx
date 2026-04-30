@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Navigation } from '../components/Navigation';
 import { ProDashboard } from './ProDashboard';
 import { VendorProducts } from './vendor/VendorProducts';
+import { PartnerDashboardPage } from './PartnerDashboardPage';
 
 export function VendorApp() {
   const [currentView, setCurrentView] = useState('dashboard');
@@ -16,6 +17,8 @@ export function VendorApp() {
         return renderDashboard();
       case 'products':
         return <VendorProducts />;
+      case 'documents':
+        return <PartnerDashboardPage />;
       case 'orders':
         return <div className="p-4">Commandes (TODO)</div>;
       case 'stats':
