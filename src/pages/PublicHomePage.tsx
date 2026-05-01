@@ -27,6 +27,7 @@ import { distanceKm, getMartiniqueServiceZones, vendorServesPoint } from '../ser
 import { submitPartnerLead, submitPartnerProduct, uploadPartnerProductPhoto } from '../services/partnerPortalService';
 import { createBusinessRequest } from '../services/liteOrdersService';
 import { buildPartnerDispatchMessage, downloadOrderPdf } from '../utils/orderPdf';
+import { publicSupabase } from '../lib/publicSupabase';
 
 type CatalogState = {
   configured: boolean;
@@ -71,6 +72,10 @@ type BusinessRequestForm = {
 type SubmitStatus = {
   kind: 'idle' | 'saving' | 'success' | 'error';
   message?: string;
+};
+
+type CheckoutStatus = SubmitStatus & {
+  orderNumber?: string;
 };
 
 type NotificationPreferences = {
@@ -263,6 +268,7 @@ export function PublicHomePage() {
   const [copyStatus, setCopyStatus] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('Carte via lien sécurisé');
   const [orderConfirmed, setOrderConfirmed] = useState(false);
+  const [checkoutStatus, setCheckoutStatus] = useState<CheckoutStatus>({ kind: 'idle' });
   const [activeScenario, setActiveScenario] = useState(0);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | 'unsupported'>(
     typeof window === 'undefined' || !('Notification' in window) ? 'unsupported' : Notification.permission,
@@ -395,65 +401,12 @@ export function PublicHomePage() {
   const deliveryLabel = fulfillmentMode === 'delivery' ? 'Livraison' : 'Retrait';
   const deliverySlotLabel = deliverySlot || 'Créneau à confirmer';
   const customerMapsLabel = customerLocation?.mapsUrl || 'Position GPS non fournie — confirmer adresse manuellement';
-  const customerAccuracyLabel = customerLocation?.accuracy ? `${Math.round(customerLocation.accuracy)} m` : 'Non fournie';
   const productLines = useMemo(
     () =>
       selectedProducts.length
         ? selectedProducts.map((product) => `- ${product.name} x1 — ${product.vendor_name} — ${formatPrice(product.price)}`)
         : ['- Disponibilités du moment à proposer'],
     [selectedProducts],
-  );
-
-  const centralOrderMessage = useMemo(
-    () =>
-      [
-        '🧾 COMMANDE DELIKREOL',
-        `N° commande : ${orderNumber}`,
-        `Date : ${new Date().toLocaleString('fr-FR')}`,
-        'Statut : à confirmer',
-        '',
-        '👤 CLIENT',
-        `Nom : ${customerName || 'Non renseigné'}`,
-        `Téléphone : ${customerPhone || 'Non renseigné'}`,
-        '',
-        '📍 LIVRAISON / RETRAIT',
-        `Mode : ${deliveryLabel}`,
-        `Adresse : ${deliveryAddress || 'Adresse non fournie'}`,
-        `Repère / instructions : ${deliveryNotes || 'Aucune instruction'}`,
-        `Position GPS : ${customerMapsLabel}`,
-        `Précision : ${customerAccuracyLabel}`,
-        `Créneau souhaité : ${deliverySlotLabel}`,
-        '',
-        '🛒 PRODUITS',
-        ...productLines,
-        '',
-        '💰 TOTAL',
-        `Sous-total : ${formatPrice(selectionEconomics.subtotal_produits)}`,
-        `Frais livraison : ${formatPrice(selectionEconomics.frais_livraison)}`,
-        `Frais service : ${formatPrice(selectionEconomics.frais_service)}`,
-        `Total estimé : ${formatPrice(selectionEconomics.total_client)}`,
-        `Paiement souhaité : ${paymentMethod}`,
-        '',
-        '✅ ACTION DELIKREOL',
-        '1. Vérifier disponibilité vendeur',
-        '2. Confirmer préparation / délai',
-        '3. Confirmer livraison ou retrait',
-        '4. Envoyer mission au livreur si livraison',
-      ].join('\n'),
-    [
-      customerAccuracyLabel,
-      customerMapsLabel,
-      customerName,
-      customerPhone,
-      deliveryAddress,
-      deliveryLabel,
-      deliveryNotes,
-      deliverySlotLabel,
-      orderNumber,
-      paymentMethod,
-      productLines,
-      selectionEconomics,
-    ],
   );
 
   const vendorMessage = useMemo(
@@ -538,7 +491,13 @@ export function PublicHomePage() {
     ],
   );
 
-  const orderLink = useMemo(() => `${whatsappBase}?text=${encodeURIComponent(centralOrderMessage)}`, [centralOrderMessage]);
+  const supportLink = useMemo(
+    () =>
+      `${whatsappBase}?text=${encodeURIComponent(
+        `Bonjour DELIKREOL, j’ai besoin d’aide pour finaliser ma commande ${orderNumber}.`,
+      )}`,
+    [orderNumber],
+  );
 
   const partnerDispatchLink = useMemo(() => {
     const subject = `Commande DELIKREOL ${orderNumber}`;
@@ -646,15 +605,102 @@ export function PublicHomePage() {
   function addToSelection(product: PublicCatalogProduct) {
     setSelectedProducts((current) => [...current, product]);
     setOrderConfirmed(false);
+    setCheckoutStatus({ kind: 'idle' });
   }
 
   function removeFromSelection(index: number) {
     setSelectedProducts((current) => current.filter((_, currentIndex) => currentIndex !== index));
+    setOrderConfirmed(false);
+    setCheckoutStatus({ kind: 'idle' });
   }
 
   function clearSelection() {
     setSelectedProducts([]);
     setOrderConfirmed(false);
+    setCheckoutStatus({ kind: 'idle' });
+  }
+
+  async function handleCheckout() {
+    if (!publicSupabase) {
+      setCheckoutStatus({ kind: 'error', message: 'Commande indisponible : Supabase n’est pas configuré.' });
+      return;
+    }
+
+    if (selectedProducts.length === 0) {
+      setCheckoutStatus({ kind: 'error', message: 'Ajoutez au moins un produit au panier.' });
+      return;
+    }
+
+    if (!customerName.trim() || !customerPhone.trim()) {
+      setCheckoutStatus({ kind: 'error', message: 'Nom et téléphone sont obligatoires pour confirmer la commande.' });
+      return;
+    }
+
+    if (fulfillmentMode === 'delivery' && !deliveryAddress.trim()) {
+      setCheckoutStatus({ kind: 'error', message: 'Adresse obligatoire pour une livraison.' });
+      return;
+    }
+
+    const checkoutOrderId = crypto.randomUUID();
+    const checkoutOrderNumber = `DK-${Date.now().toString(36).toUpperCase()}`;
+
+    setCheckoutStatus({ kind: 'saving', message: 'Création de la commande...' });
+
+    const orderPayload = {
+      id: checkoutOrderId,
+      order_number: checkoutOrderNumber,
+      customer_name: customerName.trim(),
+      customer_phone: customerPhone.trim(),
+      status: 'pending',
+      payment_status: 'pending',
+      delivery_status: 'pending',
+      delivery_type: fulfillmentMode === 'delivery' ? 'home_delivery' : 'pickup',
+      delivery_address: deliveryAddress.trim() || null,
+      delivery_latitude: customerLocation?.lat ?? null,
+      delivery_longitude: customerLocation?.lng ?? null,
+      scheduled_time: deliverySlot.trim() || null,
+      delivery_fee: selectionEconomics.frais_livraison,
+      total_amount: selectionEconomics.total_client,
+      source: 'public_checkout',
+      notes: [
+        deliveryNotes && `Instructions: ${deliveryNotes}`,
+        customerLocation?.mapsUrl && `Maps: ${customerLocation.mapsUrl}`,
+        `Paiement souhaité: ${paymentMethod}`,
+        `Statut vendeur: ${vendorAvailabilityStatus}`,
+      ]
+        .filter(Boolean)
+        .join('\n') || null,
+    };
+
+    const orderItemsPayload = selectedProducts.map((product) => ({
+      order_id: checkoutOrderId,
+      product_id: product.id,
+      vendor_id: product.vendor_id,
+      product_name: product.name,
+      vendor_name: product.vendor_name,
+      quantity: 1,
+      unit_price: product.price,
+      vendor_commission: Number((product.price * 0.15).toFixed(2)),
+    }));
+
+    const { error: orderError } = await publicSupabase.from('orders').insert(orderPayload);
+    if (orderError) {
+      setCheckoutStatus({ kind: 'error', message: `Commande non créée : ${orderError.message}` });
+      return;
+    }
+
+    const { error: itemsError } = await publicSupabase.from('order_items').insert(orderItemsPayload);
+    if (itemsError) {
+      setCheckoutStatus({ kind: 'error', message: `Produits non enregistrés : ${itemsError.message}` });
+      return;
+    }
+
+    setOrderConfirmed(true);
+    setCheckoutStatus({
+      kind: 'success',
+      orderNumber: checkoutOrderNumber,
+      message: `Commande ${checkoutOrderNumber} enregistrée. Statut : pending. Paiement : pending.`,
+    });
   }
 
   async function requestNotifications() {
@@ -777,7 +823,7 @@ export function PublicHomePage() {
               Devenir partenaire
             </a>
             <a
-              href={orderLink}
+              href="#catalogue"
               className="inline-flex rounded-full bg-[#d95f2d] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/25 transition hover:-translate-y-0.5"
             >
               Commander
@@ -837,8 +883,8 @@ export function PublicHomePage() {
               </div>
 
               <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                <a href={orderLink} className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2a190f] px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-stone-900/15">
-                  WhatsApp direct <MessageCircle className="h-4 w-4" />
+                <a href="#catalogue" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2a190f] px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-stone-900/15">
+                  Commander maintenant <ShoppingBag className="h-4 w-4" />
                 </a>
                 <a href="#partenaires" className="inline-flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-white/80 px-6 py-4 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5">
                   Devenir partenaire <ChevronRight className="h-4 w-4" />
@@ -908,8 +954,8 @@ export function PublicHomePage() {
                 title="Choisir vite, commander clair."
                 text="Des cartes directes avec photo, prix, zone, disponibilité et bouton d’ajout."
               />
-              <a href={orderLink} className="inline-flex w-fit items-center gap-2 rounded-full bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25">
-                Commander par WhatsApp <MessageCircle className="h-5 w-5" />
+                <a href="#catalogue" className="inline-flex w-fit items-center gap-2 rounded-full bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25">
+                Commander maintenant <ShoppingBag className="h-5 w-5" />
               </a>
             </div>
 
@@ -1003,7 +1049,7 @@ export function PublicHomePage() {
                       <SelectionPanel
                         products={selectedProducts}
                         summary={selectionEconomics}
-                        orderLink={orderLink}
+                        supportLink={supportLink}
                         partnerDispatchLink={partnerDispatchLink}
                         driverMissionLink={driverMissionLink}
                         vendorMessage={vendorMessage}
@@ -1023,6 +1069,7 @@ export function PublicHomePage() {
                         notificationPermission={notificationPermission}
                         notificationPrefs={notificationPrefs}
                         orderConfirmed={orderConfirmed}
+                        checkoutStatus={checkoutStatus}
                         onCustomerNameChange={setCustomerName}
                         onCustomerPhoneChange={setCustomerPhone}
                         onDeliveryAddressChange={setDeliveryAddress}
@@ -1037,7 +1084,7 @@ export function PublicHomePage() {
                         onNotificationPreferenceChange={(key, value) => setNotificationPrefs((current) => ({ ...current, [key]: value }))}
                         onRequestNotifications={requestNotifications}
                         onDownloadPdf={handleDownloadOrderPdf}
-                        onConfirmOrder={confirmOrderLocally}
+                        onConfirmOrder={handleCheckout}
                         onRemove={removeFromSelection}
                         onClear={clearSelection}
                       />
@@ -1074,9 +1121,9 @@ export function PublicHomePage() {
                         <InfoLine label="Service" value="Retrait / livraison selon adresse client" />
                         <InfoLine label="Disponibilité" value={heroProduct.available ? 'Disponible' : 'À confirmer'} />
                       </div>
-                      <a href={orderLink} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white">
+                      <button type="button" onClick={() => addToSelection(heroProduct)} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white">
                         Ajouter et commander
-                      </a>
+                      </button>
                     </div>
                   </div>
                 ) : (
@@ -1395,12 +1442,12 @@ export function PublicHomePage() {
               <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-200">Contact / WhatsApp</p>
               <h2 className="mt-3 text-3xl font-black sm:text-5xl">Une réponse rapide, directe, locale.</h2>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-200 sm:text-base sm:leading-7">
-                En cas de doute, l’utilisateur doit pouvoir joindre DELIKREOL immédiatement. Le bouton WhatsApp reste l’action la plus rentable pour convertir.
+                En cas de doute, l’utilisateur peut joindre DELIKREOL immédiatement. La commande principale reste enregistrée dans l’application.
               </p>
             </div>
             <div className="grid gap-3">
-              <a href={orderLink} className="rounded-2xl bg-white px-5 py-4 text-center font-black text-[#24170f]">
-                Commander sur WhatsApp
+              <a href={supportLink} className="rounded-2xl bg-white px-5 py-4 text-center font-black text-[#24170f]">
+                Besoin d’aide
               </a>
               <a href={partnerLink} className="rounded-2xl border border-white/20 px-5 py-4 text-center font-black text-white">
                 Devenir partenaire
@@ -1460,9 +1507,9 @@ export function PublicHomePage() {
               <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">{selectedProducts.length} article(s)</p>
               <p className="text-sm font-bold text-[#2a190f]">{formatPrice(selectionEconomics.subtotal_produits)} hors livraison</p>
             </div>
-            <a href={orderLink} className="rounded-full bg-[#d95f2d] px-4 py-3 text-sm font-black text-white">
+            <button type="button" onClick={handleCheckout} className="rounded-full bg-[#d95f2d] px-4 py-3 text-sm font-black text-white">
               Commander
-            </a>
+            </button>
           </div>
         </div>
       )}
@@ -1649,7 +1696,7 @@ function VendorCard({ vendor }: { vendor: PublicCatalogVendor }) {
 function SelectionPanel({
   products,
   summary,
-  orderLink,
+  supportLink,
   partnerDispatchLink,
   driverMissionLink,
   vendorMessage,
@@ -1669,6 +1716,7 @@ function SelectionPanel({
   notificationPermission,
   notificationPrefs,
   orderConfirmed,
+  checkoutStatus,
   onCustomerNameChange,
   onCustomerPhoneChange,
   onDeliveryAddressChange,
@@ -1689,7 +1737,7 @@ function SelectionPanel({
 }: {
   products: PublicCatalogProduct[];
   summary: ReturnType<typeof calculateOrderEconomics>;
-  orderLink: string;
+  supportLink: string;
   partnerDispatchLink: string;
   driverMissionLink: string;
   vendorMessage: string;
@@ -1709,6 +1757,7 @@ function SelectionPanel({
   notificationPermission: NotificationPermission | 'unsupported';
   notificationPrefs: NotificationPreferences;
   orderConfirmed: boolean;
+  checkoutStatus: CheckoutStatus;
   onCustomerNameChange: (value: string) => void;
   onCustomerPhoneChange: (value: string) => void;
   onDeliveryAddressChange: (value: string) => void;
@@ -1887,8 +1936,11 @@ function SelectionPanel({
               <option>Vendeur indisponible</option>
             </select>
             <div className="mt-3 grid gap-2">
-              <a href={orderLink} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#d95f2d] px-4 py-3 text-sm font-black text-white">
-                <MessageCircle className="h-4 w-4" /> Envoyer commande à DELIKREOL sur WhatsApp
+              <button type="button" onClick={onConfirmOrder} disabled={checkoutStatus.kind === 'saving'} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#d95f2d] px-4 py-3 text-sm font-black text-white disabled:opacity-60">
+                <ShoppingBag className="h-4 w-4" /> Enregistrer la commande
+              </button>
+              <a href={supportLink} className="inline-flex items-center justify-center gap-2 rounded-xl border border-orange-200 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]">
+                <MessageCircle className="h-4 w-4" /> Besoin d’aide
               </a>
               <button type="button" onClick={onCopyVendorMessage} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#fff8ef] px-4 py-3 text-sm font-black text-[#2a190f]">
                 <Mail className="h-4 w-4" /> Préparer message vendeur
@@ -1939,13 +1991,23 @@ function SelectionPanel({
             </button>
           </div>
 
-          <button onClick={onConfirmOrder} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-5 py-3 font-black uppercase tracking-[0.14em] text-white">
-            Confirmer la commande <ArrowRight className="h-4 w-4" />
+          <button onClick={onConfirmOrder} disabled={checkoutStatus.kind === 'saving'} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-5 py-3 font-black uppercase tracking-[0.14em] text-white disabled:opacity-60">
+            {checkoutStatus.kind === 'saving' ? 'Enregistrement...' : 'Confirmer la commande'} <ArrowRight className="h-4 w-4" />
           </button>
+          {checkoutStatus.kind === 'error' && (
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-800">
+              {checkoutStatus.message}
+            </div>
+          )}
+          {checkoutStatus.kind === 'success' && (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-bold text-emerald-900">
+              {checkoutStatus.message}
+            </div>
+          )}
           {orderConfirmed && (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-              <p className="font-black">Commande prête à transmettre.</p>
-              <p className="mt-1">Téléchargez le PDF, envoyez l’email partenaire ou utilisez WhatsApp si besoin.</p>
+              <p className="font-black">Commande enregistrée dans DELIKREOL.</p>
+              <p className="mt-1">Téléchargez le PDF ou envoyez l’email partenaire. WhatsApp reste disponible uniquement en support.</p>
               <div className="mt-3 grid gap-2">
                 <button onClick={onDownloadPdf} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-[#2a190f]">
                   <Download className="h-4 w-4" /> Télécharger le PDF
@@ -1953,8 +2015,8 @@ function SelectionPanel({
                 <a href={partnerDispatchLink} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-[#2a190f]">
                   <Mail className="h-4 w-4" /> Email partenaire
                 </a>
-                <a href={orderLink} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-[#2a190f]">
-                  <MessageCircle className="h-4 w-4" /> Fallback WhatsApp
+                <a href={supportLink} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-[#2a190f]">
+                  <MessageCircle className="h-4 w-4" /> Besoin d’aide
                 </a>
               </div>
             </div>
