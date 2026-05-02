@@ -2,6 +2,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { AdminPartners } from './pages/admin/AdminPartners';
+import { InvestorOpsPage } from './pages/InvestorOpsPage';
 import { PartnerDashboardPage } from './pages/PartnerDashboardPage';
 import { PublicHomePage } from './pages/PublicHomePage';
 
@@ -14,7 +15,9 @@ function App() {
     ? <PartnerDashboardPage />
     : view === 'admin-documents' || pathname.endsWith('/admin-documents')
       ? <AdminPartners />
-      : <PublicHomePage />;
+      : view === 'investor-ops' || pathname.endsWith('/investor-ops')
+        ? <InvestorOpsPage />
+        : <PublicHomePage />;
 
   return (
     <ErrorBoundary>
