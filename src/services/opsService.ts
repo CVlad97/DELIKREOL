@@ -75,6 +75,26 @@ export interface OpsAlert {
   actionView?: string;
 }
 
+export type ProactiveDeliveryOwner = 'ops' | 'partner' | 'driver' | 'support';
+
+export interface ProactiveDeliveryStep {
+  id: string;
+  trigger: string;
+  owner: ProactiveDeliveryOwner;
+  targetMinutes: number;
+  action: string;
+  evidence: string;
+  fallback: string;
+}
+
+export interface OpsInvestorReadiness {
+  score: number;
+  level: 'pilot-ready' | 'needs-attention' | 'blocked';
+  summary: string;
+  blockers: string[];
+  nextActions: string[];
+}
+
 export interface OpsDashboardSnapshot {
   generatedAt: string;
   kpis: {
@@ -108,6 +128,54 @@ const missionStageLabels: Record<MissionStage, string> = {
 };
 
 export const opsMissionStageLabels = missionStageLabels;
+
+export const proactiveDeliveryPlaybook: ProactiveDeliveryStep[] = [
+  {
+    id: 'order-capture',
+    trigger: 'Commande client enregistree',
+    owner: 'ops',
+    targetMinutes: 3,
+    action: 'Verifier adresse, panier, mode livraison/retrait et statut paiement avant transmission.',
+    evidence: 'Commande pending avec total, produits, client et instructions lisibles.',
+    fallback: 'Appeler ou envoyer un message support si adresse incomplete.',
+  },
+  {
+    id: 'partner-confirmation',
+    trigger: 'Commande qualifiee',
+    owner: 'partner',
+    targetMinutes: 7,
+    action: 'Confirmer disponibilite, delai de preparation, substitution eventuelle et heure de retrait.',
+    evidence: 'Reponse partenaire OK disponible + delai preparation.',
+    fallback: 'Basculer vers alternative ou prevenir le client avant paiement final.',
+  },
+  {
+    id: 'driver-preassign',
+    trigger: 'Commande en preparation avec livraison',
+    owner: 'driver',
+    targetMinutes: 5,
+    action: 'Pre-affecter un livreur dans le rayon partenaire et partager pickup/drop sans depart anticipe.',
+    evidence: 'Livreur identifie, zone compatible, vehicule adapte.',
+    fallback: 'Proposer retrait client ou replanifier le creneau.',
+  },
+  {
+    id: 'eta-control',
+    trigger: 'Commande prete',
+    owner: 'ops',
+    targetMinutes: 4,
+    action: 'Confirmer depart, ETA client, lien Maps et consigne de remise.',
+    evidence: 'Statut in_delivery, ETA communique, incident note si retard.',
+    fallback: 'Escalade support si ETA depasse le creneau annonce.',
+  },
+  {
+    id: 'delivery-proof',
+    trigger: 'Remise client',
+    owner: 'support',
+    targetMinutes: 2,
+    action: 'Cloturer livraison, verifier satisfaction courte et archiver preuve operationnelle.',
+    evidence: 'Commande delivered avec horodatage et commentaire si incident.',
+    fallback: 'Ouvrir litige manuel si client ou livreur signale un probleme.',
+  },
+];
 
 function inferZoneFromAddress(address: string | undefined): string {
   if (!address) return 'Centre Martinique';
@@ -388,6 +456,63 @@ export async function getOpsDashboardSnapshot(): Promise<OpsDashboardSnapshot> {
     partners,
     finance,
     alerts,
+  };
+}
+
+export function getOpsInvestorReadiness(snapshot: OpsDashboardSnapshot): OpsInvestorReadiness {
+  const pendingWeight = snapshot.kpis.awaitingQualification * 7;
+  const complianceWeight = snapshot.kpis.nonCompliantPartners * 6;
+  const incidentWeight = snapshot.kpis.incidents * 10;
+  const partnerCoverageWeight = snapshot.kpis.availablePartners < 3 ? 14 : 0;
+  const marginWeight = snapshot.finance.marginToday < 20 ? 8 : 0;
+  const rawScore = 100 - pendingWeight - complianceWeight - incidentWeight - partnerCoverageWeight - marginWeight;
+  const score = Math.max(0, Math.min(100, Math.round(rawScore)));
+  const blockers: string[] = [];
+  const nextActions: string[] = [];
+
+  if (snapshot.kpis.awaitingQualification > 0) {
+    blockers.push(`${snapshot.kpis.awaitingQualification} demande(s) a qualifier avant execution terrain.`);
+    nextActions.push('Traiter les commandes pending et confirmer panier, adresse, paiement et partenaire.');
+  }
+
+  if (snapshot.kpis.nonCompliantPartners > 0) {
+    blockers.push(`${snapshot.kpis.nonCompliantPartners} partenaire(s) avec dossier documentaire incomplet ou expirant.`);
+    nextActions.push('Prioriser la validation documentaire des partenaires visibles publiquement.');
+  }
+
+  if (snapshot.kpis.availablePartners < 3) {
+    blockers.push('Couverture pilote trop courte pour rassurer un investisseur terrain.');
+    nextActions.push('Activer au moins trois partenaires dans des rayons de livraison testables.');
+  }
+
+  if (snapshot.finance.marginToday < 20) {
+    blockers.push('Marge operationnelle encore fragile sur les missions pilotes.');
+    nextActions.push('Revoir frais de service, frais livraison et panier minimum avant extension.');
+  }
+
+  if (nextActions.length === 0) {
+    nextActions.push('Lancer un test reel controle avec client, vendeur, livreur et preuve de remise.');
+    nextActions.push('Documenter delai moyen, taux de confirmation et marge par mission.');
+  }
+
+  const level = score >= 78
+    ? 'pilot-ready'
+    : score >= 48
+      ? 'needs-attention'
+      : 'blocked';
+
+  const summary = level === 'pilot-ready'
+    ? 'Pret pour une demonstration investisseur en mode pilote controle.'
+    : level === 'needs-attention'
+      ? 'Demontrable, mais les points de qualification doivent etre traites avant extension.'
+      : 'Trop de risques operationnels pour presenter comme pilote stable.';
+
+  return {
+    score,
+    level,
+    summary,
+    blockers,
+    nextActions: nextActions.slice(0, 4),
   };
 }
 
