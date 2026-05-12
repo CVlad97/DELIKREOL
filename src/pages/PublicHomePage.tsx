@@ -178,18 +178,36 @@ const howItWorks = [
 const reassurance = [
   {
     title: 'Local et crédible',
-    text: 'Le site met en avant des partenaires visibles, des zones servies lisibles et des informations utiles au premier regard.',
+    text: 'Partenaires visibles, communes servies, contact direct et infos utiles dès le premier écran.',
     icon: ShieldCheck,
   },
   {
     title: 'Simple et rapide',
-    text: 'Un parcours direct sur mobile, avec des CTA visibles et une conversion pensée pour aller droit au devis ou à la commande.',
+    text: 'Un seul chemin principal sur mobile: voir les offres, ajouter, confirmer ou parler à DELIKREOL.',
     icon: Sparkles,
   },
   {
     title: 'Pensé pour la Martinique',
-    text: 'Le vocabulaire, les communes, les besoins et les usages sont adaptés à un usage local réel.',
+    text: 'Rayon réel, fallback commune si la géoloc manque et commandes entreprises adaptées aux usages locaux.',
     icon: MapPin,
+  },
+];
+
+const localGapSolutions = [
+  {
+    gap: 'Pas assez de preuve immédiate',
+    fix: 'Montrer tout de suite les partenaires visibles, les zones servies et le contact WhatsApp.',
+    impact: 'L’utilisateur comprend vite que DELIKREOL existe vraiment et peut être utilisé maintenant.',
+  },
+  {
+    gap: 'CTA trop dispersés',
+    fix: 'Garder un chemin principal vers le catalogue puis la commande, avec les autres options en soutien.',
+    impact: 'La page convertit mieux parce que l’action suivante est évidente.',
+  },
+  {
+    gap: 'Faisabilité locale à rassurer',
+    fix: 'Afficher le rayon réel par partenaire, la commune de secours et la logique livraison/retrait.',
+    impact: 'Le modèle paraît réaliste pour la Martinique avant même la première commande.',
   },
 ];
 
@@ -923,10 +941,10 @@ export function PublicHomePage() {
                 Le réflexe local qui donne envie de commander.
               </h1>
               <p className="mx-auto mt-4 max-w-xl text-center text-base leading-7 text-[#5a4334] sm:text-lg lg:mx-0 lg:text-left">
-                Découvrez des plats créoles, produits locaux et partenaires de confiance en Martinique, avec un parcours clair du choix à la confirmation.
+                DELIKREOL relie Martinique, plats créoles, produits locaux et partenaires visibles avec un parcours simple du choix à la confirmation.
               </p>
               <p className="mx-auto mt-3 max-w-xl text-center text-sm font-semibold leading-6 text-[#6b4f3f] lg:mx-0 lg:text-left">
-                Une vitrine pensée pour rassurer vite, séduire immédiatement et convertir sans friction.
+                Premier objectif: rassurer vite, montrer la faisabilité locale et amener l’utilisateur au catalogue.
               </p>
 
               <div className="mt-7 rounded-[2rem] border border-white/80 bg-white/88 p-3 shadow-2xl shadow-orange-900/10 backdrop-blur">
@@ -963,7 +981,7 @@ export function PublicHomePage() {
 
               <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                 <a href="#catalogue" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2a190f] px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-stone-900/15 transition hover:-translate-y-0.5">
-                  Découvrir le catalogue <ShoppingBag className="h-4 w-4" />
+                  Commander maintenant <ShoppingBag className="h-4 w-4" />
                 </a>
                 <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Bonjour DELIKREOL, je veux être orienté vers l’offre la plus adaptée.')}`} className="inline-flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-white/80 px-6 py-4 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5">
                   Parler à DELIKREOL <MessageCircle className="h-4 w-4" />
@@ -1039,6 +1057,38 @@ export function PublicHomePage() {
               <StepCard key={step.title} index={index + 1} title={step.title} text={step.text} />
             ))}
           </div>
+          <div className="mt-6 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">Gaps / corrections</p>
+              <h3 className="mt-2 text-2xl font-black text-[#2a190f]">Ce qui manque face à un benchmark local.</h3>
+              <div className="mt-4 space-y-3">
+                {localGapSolutions.map((item) => (
+                  <div key={item.gap} className="rounded-[1.35rem] border border-orange-100 bg-[#fffaf4] p-4">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">Gap</p>
+                    <p className="mt-1 font-bold text-[#2a190f]">{item.gap}</p>
+                    <p className="mt-2 text-sm leading-6 text-stone-600">Correction: {item.fix}</p>
+                    <p className="mt-2 text-sm leading-6 text-stone-500">Impact: {item.impact}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">Faisabilité Martinique</p>
+              <h3 className="mt-2 text-2xl font-black text-[#2a190f]">Le modèle tient s’il reste simple.</h3>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <GapMetric label="Zone" value="Rayon réel par partenaire" />
+                <GapMetric label="Secours" value="Commune fallback si GPS absent" />
+                <GapMetric label="Commande" value="Catalogue + WhatsApp + panier" />
+                <GapMetric label="Partenaire" value="Formulaire court mobile-first" />
+              </div>
+              <div className="mt-4 rounded-[1.35rem] bg-[#24170f] p-4 text-white">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-300">Lecture business</p>
+                <p className="mt-2 text-sm leading-6 text-stone-200">
+                  En Martinique, la meilleure conversion vient d’un service lisible, local, et immédiatement utile sur téléphone. DELIKREOL doit vendre la confiance avant la complexité.
+                </p>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section id="catalogue" className="bg-[#fffdf8] py-14">
@@ -1049,9 +1099,9 @@ export function PublicHomePage() {
                 title="Choisir vite, commander clair."
                 text="Des cartes directes avec photo, prix, zone, disponibilité et bouton d’ajout."
               />
-                <a href={customerPath} onClick={handleCommanderClick} className="inline-flex w-fit items-center gap-2 rounded-full bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25">
-                  Commander maintenant <ShoppingBag className="h-5 w-5" />
-                </a>
+              <a href={customerPath} onClick={handleCommanderClick} className="inline-flex w-fit items-center gap-2 rounded-full bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25">
+                Commander maintenant <ShoppingBag className="h-5 w-5" />
+              </a>
             </div>
 
             <div className="mt-8 grid gap-4 rounded-[2rem] border border-orange-100 bg-[#24170f] p-4 shadow-elegant lg:grid-cols-[1fr_220px_220px_220px]">
@@ -1701,6 +1751,15 @@ function TrustCard({ label }: { label: string }) {
   return (
     <div className="rounded-[1.4rem] border border-white/20 bg-white/92 px-4 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-[#7c2d12] shadow-soft backdrop-blur">
       {label}
+    </div>
+  );
+}
+
+function GapMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[1.35rem] border border-orange-100 bg-[#fffaf4] p-4">
+      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">{label}</p>
+      <p className="mt-2 text-lg font-black text-[#2a190f]">{value}</p>
     </div>
   );
 }
