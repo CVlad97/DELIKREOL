@@ -12,15 +12,13 @@ function App() {
   const view = params.get('view');
   const pathname = window.location.pathname;
 
-  const content = view === 'customer' || pathname.endsWith('/customer')
-    ? <CustomerApp />
-    : view === 'partner-documents' || pathname.endsWith('/partner-documents')
-      ? <PartnerDashboardPage />
-      : view === 'admin-documents' || pathname.endsWith('/admin-documents')
-        ? <AdminPartners />
-        : view === 'investor-ops' || pathname.endsWith('/investor-ops')
-          ? <InvestorOpsPage />
-          : <PublicHomePage />;
+  const content = view === 'partner-documents' || pathname.endsWith('/partner-documents')
+    ? <PartnerDashboardPage />
+    : view === 'admin-documents' || pathname.endsWith('/admin-documents')
+      ? <AdminPartners />
+      : view === 'investor-ops' || pathname.endsWith('/investor-ops')
+        ? <InvestorOpsPage />
+        : <PublicHomePage />;
 
   return (
     <ErrorBoundary>
