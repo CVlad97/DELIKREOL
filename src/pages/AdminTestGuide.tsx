@@ -91,10 +91,16 @@ export function AdminTestGuide() {
   ];
 
   const progress = (completedSteps.size / testSteps.length) * 100;
+  const quickSearchChecks = [
+    { input: 'Fort-de-France', expected: 'Une suggestion exacte apparaît' },
+    { input: 'riviere pilote', expected: 'Rivière-Pilote apparaît même sans accent' },
+    { input: 'Sainte-Anne', expected: 'La commune est trouvée et sélectionnable' },
+  ];
 
   return (
     <div className="p-6 space-y-6">
       <div className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 backdrop-blur border border-purple-700/50 rounded-2xl p-6">
+
         <div className="flex items-start gap-4">
           <div className="flex-shrink-0 w-12 h-12 rounded-full bg-purple-500/20 border-2 border-purple-500 flex items-center justify-center">
             <HelpCircle className="w-6 h-6 text-purple-400" />
@@ -123,9 +129,25 @@ export function AdminTestGuide() {
       </div>
 
       <div className="bg-slate-900/30 backdrop-blur border border-slate-800 rounded-xl p-6">
+        <h2 className="text-xl font-bold text-slate-50 mb-4">🔎 Test rapide de recherche</h2>
+        <p className="text-slate-400 mb-6">
+          Entrez ces exemples dans la barre de recherche pour vérifier que la saisie fonctionne bien, avec ou sans accents.
+        </p>
+        <div className="grid md:grid-cols-3 gap-4">
+          {quickSearchChecks.map((check) => (
+            <div key={check.input} className="bg-slate-800/60 border border-slate-700 rounded-xl p-4">
+              <div className="text-xs font-black uppercase tracking-widest text-slate-500 mb-2">À taper</div>
+              <div className="font-semibold text-slate-100 mb-2">{check.input}</div>
+              <div className="text-sm text-slate-400">{check.expected}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-slate-900/30 backdrop-blur border border-slate-800 rounded-xl p-6">
         <h2 className="text-xl font-bold text-slate-50 mb-4">📋 Checklist de vérification</h2>
         <p className="text-slate-400 mb-6">
-          Cette checklist ne crée PAS de données automatiquement dans la base.
+          Cette checklist ne crée pas de données automatiquement dans la base.
           Tout est guidé mais manuel pour que vous compreniez le flux complet.
         </p>
 

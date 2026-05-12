@@ -185,7 +185,8 @@ export default function PrivacyPolicy() {
             Pour toute question concernant cette politique ou l'exercice de vos droits :
           </p>
           <ul>
-            <li>Email : contact@delikreol.com</li>
+            <li>Email : contact@delikreol.mq</li>
+            <li>Messages : relayés vers le compte Gmail de gestion</li>
             <li>Formulaire de contact : <Link to="/contact" className="text-emerald-600 hover:text-emerald-700">cliquez ici</Link></li>
           </ul>
           <p>

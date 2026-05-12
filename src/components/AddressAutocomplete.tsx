@@ -61,11 +61,11 @@ export function AddressAutocomplete({ value, onChange, onSelectAddress, error }:
   const getConfidenceBadge = (confidence: string) => {
     switch (confidence) {
       case 'high':
-        return <span className="text-xs text-emerald-400">✓ Exacte</span>;
+        return <span className="text-xs text-emerald-400">Correspondance exacte</span>;
       case 'medium':
-        return <span className="text-xs text-blue-400">Probable</span>;
+        return <span className="text-xs text-blue-400">Bon match</span>;
       default:
-        return <span className="text-xs text-slate-400">Approximative</span>;
+        return <span className="text-xs text-slate-400">Match approximatif</span>;
     }
   };
 
@@ -78,7 +78,7 @@ export function AddressAutocomplete({ value, onChange, onSelectAddress, error }:
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Entrez votre adresse ou commune..."
+          placeholder="Tapez votre adresse ou votre commune"
           className={`w-full pl-10 pr-4 py-3 bg-slate-900 border ${
             error ? 'border-red-500' : 'border-slate-700'
           } rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors`}
@@ -118,12 +118,12 @@ export function AddressAutocomplete({ value, onChange, onSelectAddress, error }:
                   {inZone ? (
                     <div className="flex items-center gap-1 mt-1 text-xs text-emerald-400">
                       <Check className="w-3 h-3" />
-                      Zone de livraison couverte
+                      Zone couverte
                     </div>
                   ) : (
                     <div className="flex items-center gap-1 mt-1 text-xs text-orange-400">
                       <AlertCircle className="w-3 h-3" />
-                      Hors zone - livraison sous réserve
+                      Hors zone pour l'instant
                     </div>
                   )}
                 </div>
@@ -135,7 +135,7 @@ export function AddressAutocomplete({ value, onChange, onSelectAddress, error }:
 
       {showSuggestions && value.length >= 3 && suggestions.length === 0 && !loading && (
         <div className="absolute z-50 w-full mt-2 bg-slate-800 border border-slate-700 rounded-lg shadow-xl p-4 text-center text-slate-400">
-          Aucune commune trouvée. Essayez une autre recherche.
+          On ne trouve pas encore cette commune. Essayez un autre nom.
         </div>
       )}
     </div>

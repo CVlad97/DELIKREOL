@@ -2,6 +2,17 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase, Profile, isDemoMode } from '../lib/supabase';
 
+const allowedGoogleEmails = new Set(
+  (import.meta.env.VITE_GOOGLE_ALLOWED_EMAILS || 'vladimir.claveau@gmail.com')
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean)
+);
+
+const normalizeEmail = (email?: string | null) => email?.trim().toLowerCase() || '';
+const isAllowedGoogleEmail = (email?: string | null) => allowedGoogleEmails.has(normalizeEmail(email));
+const googleAccessError = new Error('Cette connexion Google n\'est pas encore autorisée.');
+
 interface AuthContextType {
   user: User | null;
   profile: Profile | null;
@@ -229,11 +240,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const { error } = await supabase.auth.signInWithIdToken({
+      const { data, error } = await supabase.auth.signInWithIdToken({
         provider: 'google',
         token: credential,
       });
-      return { error };
+
+      if (error) {
+        return { error };
+      }
+
+      const signedInUser = data.user ?? data.session?.user ?? null;
+      const signedInEmail = normalizeEmail(signedInUser?.email ?? null);
+
+      if (!isAllowedGoogleEmail(signedInEmail)) {
+        await supabase.auth.signOut();
+        setUser(null);
+        setSession(null);
+        setProfile(null);
+        return { error: googleAccessError };
+      }
+
+      setSession(data.session ?? null);
+      setUser(signedInUser);
+      if (signedInUser?.id) {
+        await fetchProfile(signedInUser.id);
+      }
+
+      return { error: null };
     } catch (err: any) {
       return { error: err };
     }

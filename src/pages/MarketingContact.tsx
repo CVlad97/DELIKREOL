@@ -17,16 +17,13 @@ export default function MarketingContact() {
     setLoading(true);
 
     try {
-      const { error } = await supabase
-        .from('contact_messages')
-        .insert([
-          {
-            name: formData.name,
-            email: formData.email,
-            message: formData.message,
-            status: 'new',
-          },
-        ]);
+      const { error } = await supabase.functions.invoke('contact-message', {
+        body: {
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+        },
+      });
 
       if (error) throw error;
 
@@ -133,9 +130,9 @@ export default function MarketingContact() {
                   </div>
                   <div className="ml-4">
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">Email</h3>
-                    <p className="text-gray-600">contact@delikreol.com</p>
+                    <p className="text-gray-600">contact@delikreol.mq</p>
                     <p className="text-sm text-gray-500 mt-1">
-                      Nous répondons sous 24-48h
+                      Les messages sont relayés vers le compte Gmail en charge.
                     </p>
                   </div>
                 </div>

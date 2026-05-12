@@ -44,9 +44,18 @@ const MARTINIQUE_COMMUNES = [
   { name: 'Morne-Vert', lat: 14.7000, lon: -61.1000, postal: '97226' },
 ];
 
+const normalizeSearchTerm = (value: string) =>
+  value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
+
 export async function geocodeAddress(query: string): Promise<GeocodeResult[]> {
-  const normalizedQuery = query.toLowerCase().trim();
-  
+  const normalizedQuery = normalizeSearchTerm(query);
+
   if (normalizedQuery.length < 3) {
     return [];
   }
@@ -54,13 +63,17 @@ export async function geocodeAddress(query: string): Promise<GeocodeResult[]> {
   const results: GeocodeResult[] = [];
 
   for (const commune of MARTINIQUE_COMMUNES) {
-    const communeName = commune.name.toLowerCase();
-    
-    if (communeName.includes(normalizedQuery) || normalizedQuery.includes(communeName)) {
-      const confidence: 'high' | 'medium' | 'low' = 
-        communeName === normalizedQuery ? 'high' :
-        communeName.startsWith(normalizedQuery) ? 'high' :
-        'medium';
+    const normalizedCommuneName = normalizeSearchTerm(commune.name);
+    const normalizedPostal = normalizeSearchTerm(commune.postal);
+    const matched =
+      normalizedCommuneName.includes(normalizedQuery) ||
+      normalizedQuery.includes(normalizedCommuneName) ||
+      normalizedPostal.includes(normalizedQuery);
+
+    if (matched) {
+      const exactMatch = normalizedCommuneName === normalizedQuery;
+      const startsWith = normalizedCommuneName.startsWith(normalizedQuery);
+      const confidence: 'high' | 'medium' | 'low' = exactMatch || startsWith ? 'high' : 'medium';
 
       results.push({
         address: commune.name,
@@ -74,7 +87,7 @@ export async function geocodeAddress(query: string): Promise<GeocodeResult[]> {
     }
   }
 
-  const exactMatch = results.find(r => r.address.toLowerCase() === normalizedQuery);
+  const exactMatch = results.find(r => normalizeSearchTerm(r.address) === normalizedQuery);
   if (exactMatch) {
     return [exactMatch, ...results.filter(r => r !== exactMatch)];
   }
