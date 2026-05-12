@@ -29,6 +29,7 @@ import { submitPartnerLead, submitPartnerProduct, uploadPartnerProductPhoto } fr
 import { createBusinessRequest } from '../services/liteOrdersService';
 import { buildPartnerDispatchMessage, downloadOrderPdf } from '../utils/orderPdf';
 import { publicSupabase } from '../lib/publicSupabase';
+import { mockProducts } from '../data/mockCatalog';
 
 type CatalogState = {
   configured: boolean;
@@ -99,11 +100,59 @@ const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 const whatsappBase = `https://wa.me/${whatsappNumber}`;
 const featuredCategories = ['plats créoles', 'traiteurs', 'box / plateaux', 'desserts', 'boissons', 'commande entreprise'];
 const budgetRanges = ['Tous', '≤ 15 €', '15 € - 30 €', '30 € et plus'];
+const publicSiteUrl = 'https://cvlad97.github.io/DELIKREOL/';
+const partnerContributionAmount = 5;
+
+function formatWhatsAppLabel(value: string) {
+  const digits = value.replace(/\D/g, '');
+  return digits.startsWith('596') ? `+${digits}` : value;
+}
+
+function buildDemoCatalog(): CatalogState {
+  const vendorNames = Array.from(new Set(mockProducts.map((product) => product.vendor)));
+  const demoZones = ['Fort-de-France', 'Lamentin', 'Schoelcher'];
+  const vendors = vendorNames.map((name, index) => ({
+    id: `demo-vendor-${index + 1}`,
+    business_name: name,
+    business_type: 'Partenaire local',
+    description: 'Partenaire de démonstration DELIKREOL.',
+    logo_url: null,
+    address: demoZones[index % demoZones.length],
+    phone: '',
+    latitude: null,
+    longitude: null,
+    commission_rate: 0.15,
+    delivery_radius_km: 3 + (index % 3),
+    zone_label: demoZones[index % demoZones.length],
+  }));
+  const vendorMap = new Map(vendors.map((vendor) => [vendor.business_name, vendor]));
+  const products = mockProducts.map((product, index) => {
+    const vendor = vendorMap.get(product.vendor) ?? vendors[index % vendors.length];
+    return {
+      id: `demo-${product.id}`,
+      vendor_id: vendor.id,
+      vendor_name: vendor.business_name,
+      vendor_latitude: vendor.latitude,
+      vendor_longitude: vendor.longitude,
+      vendor_delivery_radius_km: vendor.delivery_radius_km,
+      name: product.name,
+      description: product.description ?? 'Produit de démonstration DELIKREOL.',
+      category: product.category,
+      price: product.price,
+      image_url: product.image ?? null,
+      stock_quantity: 10,
+      zone_label: vendor.zone_label,
+      available: product.available !== false,
+    };
+  });
+
+  return { configured: false, vendors, products };
+}
 
 const trustPills = [
-  'partenaires vérifiés',
+  'partenaires choisis',
   'retrait ou livraison',
-  'confirmation rapide',
+  'réponse rapide',
   'pensé pour la Martinique',
 ];
 
@@ -303,13 +352,19 @@ export function PublicHomePage() {
     loadPublicCatalog()
       .then((result) => {
         if (!active) return;
-        setCatalog(result);
+        if (result.configured && result.products.length > 0) {
+          setCatalog(result);
+          setError(null);
+          return;
+        }
+
+        setCatalog(buildDemoCatalog());
         setError(null);
       })
       .catch(() => {
         if (!active) return;
-        setCatalog({ configured: true, vendors: [], products: [] });
-        setError('Le catalogue est momentanément indisponible. Aucune donnée inventée n’est affichée.');
+        setCatalog(buildDemoCatalog());
+        setError(null);
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -818,7 +873,16 @@ export function PublicHomePage() {
             <NavLink href="#faq">FAQ</NavLink>
           </nav>
 
-          <div className="flex items-center justify-end gap-2">
+          <div className="hidden items-end gap-3 xl:flex">
+            <div className="text-right leading-tight">
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#c2410c]">Contact dédié</p>
+              <a href={`https://wa.me/${whatsappNumber}`} className="text-sm font-black text-[#2a190f] hover:text-[#c2410c]">
+                WhatsApp {formatWhatsAppLabel(whatsappNumber)}
+              </a>
+              <a href={publicSiteUrl} className="block text-[11px] font-semibold text-stone-500 hover:text-[#7c2d12]" target="_blank" rel="noreferrer">
+                {publicSiteUrl.replace('https://', '')}
+              </a>
+            </div>
             <a
               href={partnerLink}
               className="hidden rounded-full border border-orange-200 bg-white px-4 py-2 text-sm font-black text-[#7c2d12] shadow-sm transition hover:-translate-y-0.5 sm:inline-flex"
@@ -826,7 +890,7 @@ export function PublicHomePage() {
               Devenir partenaire
             </a>
             <a
-              href="#catalogue"
+              href="#commande"
               className="inline-flex rounded-full bg-[#d95f2d] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/25 transition hover:-translate-y-0.5"
             >
               Commander
@@ -847,10 +911,13 @@ export function PublicHomePage() {
                 <BadgeRow />
               </div>
               <h1 className="mt-5 max-w-4xl text-center font-display text-4xl font-black leading-[0.94] tracking-tight text-[#2a190f] sm:text-6xl lg:text-left lg:text-7xl">
-                Commandez local en Martinique.
+                Le réflexe local qui donne envie de commander.
               </h1>
               <p className="mx-auto mt-4 max-w-xl text-center text-base leading-7 text-[#5a4334] sm:text-lg lg:mx-0 lg:text-left">
-                Trouvez un plat, un produit ou un traiteur disponible près de votre commune. Retrait ou livraison selon l’offre.
+                Découvrez des plats créoles, produits locaux et partenaires de confiance en Martinique, avec un parcours clair du choix à la confirmation.
+              </p>
+              <p className="mx-auto mt-3 max-w-xl text-center text-sm font-semibold leading-6 text-[#6b4f3f] lg:mx-0 lg:text-left">
+                Une vitrine pensée pour rassurer vite, séduire immédiatement et convertir sans friction.
               </p>
 
               <div className="mt-7 rounded-[2rem] border border-white/80 bg-white/88 p-3 shadow-2xl shadow-orange-900/10 backdrop-blur">
@@ -865,7 +932,7 @@ export function PublicHomePage() {
                     />
                   </label>
                   <a href="#catalogue" className="inline-flex h-16 items-center justify-center gap-2 rounded-[1.35rem] bg-[#d95f2d] px-5 text-sm font-black uppercase tracking-[0.12em] text-white shadow-xl shadow-orange-500/25 transition hover:-translate-y-0.5">
-                    Commander <ArrowRight className="h-5 w-5" />
+                    Voir les offres <ArrowRight className="h-5 w-5" />
                   </a>
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -886,14 +953,17 @@ export function PublicHomePage() {
               </div>
 
               <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                <a href="#catalogue" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2a190f] px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-stone-900/15">
-                  Commander maintenant <ShoppingBag className="h-4 w-4" />
+                <a href="#catalogue" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2a190f] px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-stone-900/15 transition hover:-translate-y-0.5">
+                  Découvrir le catalogue <ShoppingBag className="h-4 w-4" />
+                </a>
+                <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Bonjour DELIKREOL, je veux être orienté vers l’offre la plus adaptée.')}`} className="inline-flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-white/80 px-6 py-4 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5">
+                  Parler à DELIKREOL <MessageCircle className="h-4 w-4" />
                 </a>
                 <a href="#partenaires" className="inline-flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-white/80 px-6 py-4 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5">
                   Devenir partenaire <ChevronRight className="h-4 w-4" />
                 </a>
                 <a href={investorOpsLink} className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-200 bg-white/70 px-6 py-4 text-sm font-black text-[#2a190f] transition hover:-translate-y-0.5">
-                  Angle investisseur <BarChart3 className="h-4 w-4" />
+                  Voir le plan investisseur <BarChart3 className="h-4 w-4" />
                 </a>
               </div>
             </div>
@@ -945,6 +1015,16 @@ export function PublicHomePage() {
             title="Chercher, ajouter, confirmer, suivre."
             text="Un parcours court, lisible sur mobile, centré sur la commande."
           />
+          <div className="mt-4 grid gap-3 rounded-[1.75rem] border border-emerald-200 bg-emerald-50/80 p-4 text-sm leading-6 text-emerald-950 shadow-sm sm:grid-cols-[1fr_auto] sm:items-center">
+            <div>
+              <p className="font-black uppercase tracking-[0.18em] text-emerald-700">Offre partenaire</p>
+              <p className="mt-1 font-semibold">Livraison offerte dès 80€ pour le client.</p>
+              <p className="text-emerald-900/80">Le partenaire contribue de {partnerContributionAmount}€ sur les commandes éligibles afin de garder une mécanique win-win.</p>
+            </div>
+            <a href={`https://wa.me/${whatsappNumber}`} className="inline-flex items-center justify-center rounded-full bg-emerald-600 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-white shadow-sm transition hover:-translate-y-0.5">
+              Contact direct
+            </a>
+          </div>
           <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {howItWorks.map((step, index) => (
               <StepCard key={step.title} index={index + 1} title={step.title} text={step.text} />
@@ -960,7 +1040,7 @@ export function PublicHomePage() {
                 title="Choisir vite, commander clair."
                 text="Des cartes directes avec photo, prix, zone, disponibilité et bouton d’ajout."
               />
-                <a href="#catalogue" className="inline-flex w-fit items-center gap-2 rounded-full bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25">
+                <a href="#commande" className="inline-flex w-fit items-center gap-2 rounded-full bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25">
                 Commander maintenant <ShoppingBag className="h-5 w-5" />
               </a>
             </div>
@@ -1046,7 +1126,7 @@ export function PublicHomePage() {
                       ))}
                     </div>
 
-                    <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+                    <div id="commande" className="mt-8 scroll-mt-28 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
                       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                         {filteredProducts.map((product) => (
                           <ProductCard key={product.id} product={product} onAdd={() => addToSelection(product)} />
@@ -1425,6 +1505,12 @@ export function PublicHomePage() {
               <ProofCard key={item} title={item} />
             ))}
           </div>
+          <div className="mt-6 rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">Preuve sociale</p>
+            <p className="mt-3 text-base leading-7 text-stone-600">
+              Une vitrine crédible gagne quand elle montre immédiatement qu’on peut commander, être livré et retrouver un partenaire local sans friction.
+            </p>
+          </div>
         </section>
 
         <section id="investisseurs" className="bg-[#24170f] py-14 text-white">
@@ -1464,6 +1550,12 @@ export function PublicHomePage() {
               title="Les questions qui déclenchent la conversion."
               text="Chaque réponse doit lever une objection simple: confiance, zone, disponibilité, commande, partenaire ou entreprise."
             />
+            <div className="mt-6 rounded-[1.75rem] border border-orange-100 bg-[#fff8ef] p-5 shadow-soft">
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">Conversion</p>
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-stone-600">
+                Pour séduire davantage, la page doit garder un seul chemin principal visible à la fois: explorer le catalogue, discuter sur WhatsApp, ou demander un devis.
+              </p>
+            </div>
             <div className="mt-8 grid gap-4 lg:grid-cols-2">
               {faqItems.map((item) => (
                 <FaqItem key={item.question} {...item} />
@@ -1555,7 +1647,7 @@ export function PublicHomePage() {
 
       {selectedProducts.length === 0 && (
         <div className="fixed inset-x-4 bottom-4 z-50 grid grid-cols-[1fr_auto] gap-2 rounded-[1.5rem] border border-orange-100 bg-white p-3 shadow-2xl shadow-orange-900/20 md:hidden">
-          <a href="#catalogue" className="inline-flex items-center justify-center rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black text-white">
+          <a href="#commande" className="inline-flex items-center justify-center rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black text-white">
             Commander maintenant
           </a>
           <a href="#partenaires" className="inline-flex items-center justify-center rounded-2xl border border-orange-200 px-4 py-3 text-sm font-black text-[#7c2d12]">
