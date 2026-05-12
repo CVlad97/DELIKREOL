@@ -41,6 +41,17 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showCart, setShowCart] = useState(false);
   const [loading, setLoading] = useState(true);
+  const isPresentationMode = isDemoMode || new URL(window.location.href).searchParams.get('mode') === 'simulation';
+  const presentationLabel = isPresentationMode ? 'Mode simulation actif' : 'Mode test actif';
+  const presentationNote = isPresentationMode
+    ? 'Parcours guidé pour présenter la commande sans side effect réel.'
+    : "Catalogue, demandes et points relais fonctionnent sans backend pour valider l'offre des demain.";
+
+  useEffect(() => {
+    if (isPresentationMode) {
+      localStorage.setItem('delikreol_demo_override', 'true');
+    }
+  }, [isPresentationMode]);
 
   useEffect(() => {
     getUserLocation();
@@ -64,6 +75,12 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
   };
 
   const loadProducts = async () => {
+    if (isPresentationMode) {
+      const data = await productsService.listAll();
+      setProducts(data || []);
+      setLoading(false);
+      return;
+    }
     try {
       if (isErpConfigured) {
         const data = await catalogService.listProducts();
@@ -150,6 +167,11 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
   };
 
   const loadOrders = async () => {
+    if (isPresentationMode) {
+      setOrders(await ordersService.listAll());
+      setLoading(false);
+      return;
+    }
     if (!user) return;
 
     try {
@@ -214,11 +236,11 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
   const renderHome = () => (
     <div className="pb-24">
       <div className="bg-primary rounded-b-[2rem] p-6 pb-8 shadow-elegant">
-        {isDemoMode && (
+        {(isDemoMode || isPresentationMode) && (
           <div className="mb-4 rounded-2xl border border-primary-foreground/20 bg-primary-foreground/10 px-4 py-3 text-primary-foreground">
-            <p className="text-xs font-black uppercase tracking-[0.25em]">Mode test actif</p>
+            <p className="text-xs font-black uppercase tracking-[0.25em]">{presentationLabel}</p>
             <p className="mt-1 text-sm font-medium text-primary-foreground/80">
-              Catalogue, demandes et points relais fonctionnent sans backend pour valider l'offre des demain.
+              {presentationNote}
             </p>
           </div>
         )}

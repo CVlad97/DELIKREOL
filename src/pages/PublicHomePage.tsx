@@ -327,6 +327,12 @@ export function PublicHomePage() {
     event.preventDefault();
     window.location.assign(customerPath);
   };
+
+  const handleSimulationClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    localStorage.setItem('delikreol_demo_override', 'true');
+    window.location.assign(customerPath);
+  };
   const [catalog, setCatalog] = useState<CatalogState>({ configured: false, vendors: [], products: [] });
   const [query, setQuery] = useState('');
   const [communeFilter, setCommuneFilter] = useState('Tous');
@@ -1099,9 +1105,14 @@ export function PublicHomePage() {
                 title="Choisir vite, commander clair."
                 text="Des cartes directes avec photo, prix, zone, disponibilité et bouton d’ajout."
               />
-              <a href={customerPath} onClick={handleCommanderClick} className="inline-flex w-fit items-center gap-2 rounded-full bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25">
-                Commander maintenant <ShoppingBag className="h-5 w-5" />
-              </a>
+              <div className="flex flex-wrap gap-3">
+                <a href={customerPath} onClick={handleCommanderClick} className="inline-flex w-fit items-center gap-2 rounded-full bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25">
+                  Commander maintenant <ShoppingBag className="h-5 w-5" />
+                </a>
+                <a href={customerPath} onClick={handleSimulationClick} className="inline-flex w-fit items-center gap-2 rounded-full border border-orange-200 bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-[#7c2d12] shadow-sm">
+                  Lancer la simulation <Sparkles className="h-5 w-5" />
+                </a>
+              </div>
             </div>
 
             <div className="mt-8 grid gap-4 rounded-[2rem] border border-orange-100 bg-[#24170f] p-4 shadow-elegant lg:grid-cols-[1fr_220px_220px_220px]">
