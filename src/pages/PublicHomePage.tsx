@@ -300,6 +300,7 @@ const defaultBusinessRequestForm: BusinessRequestForm = {
 export function PublicHomePage() {
   const baseUrl = import.meta.env.BASE_URL || '/';
   const investorOpsLink = `${baseUrl}?view=investor-ops`;
+  const customerLink = `${baseUrl}?view=customer`;
   const [catalog, setCatalog] = useState<CatalogState>({ configured: false, vendors: [], products: [] });
   const [query, setQuery] = useState('');
   const [communeFilter, setCommuneFilter] = useState('Tous');
@@ -890,7 +891,7 @@ export function PublicHomePage() {
               Devenir partenaire
             </a>
             <a
-              href="#commande"
+              href={customerLink}
               className="inline-flex rounded-full bg-[#d95f2d] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/25 transition hover:-translate-y-0.5"
             >
               Commander
@@ -1040,9 +1041,9 @@ export function PublicHomePage() {
                 title="Choisir vite, commander clair."
                 text="Des cartes directes avec photo, prix, zone, disponibilité et bouton d’ajout."
               />
-                <a href="#commande" className="inline-flex w-fit items-center gap-2 rounded-full bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25">
-                Commander maintenant <ShoppingBag className="h-5 w-5" />
-              </a>
+                <a href={customerLink} className="inline-flex w-fit items-center gap-2 rounded-full bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25">
+                  Commander maintenant <ShoppingBag className="h-5 w-5" />
+                </a>
             </div>
 
             <div className="mt-8 grid gap-4 rounded-[2rem] border border-orange-100 bg-[#24170f] p-4 shadow-elegant lg:grid-cols-[1fr_220px_220px_220px]">
@@ -1647,7 +1648,7 @@ export function PublicHomePage() {
 
       {selectedProducts.length === 0 && (
         <div className="fixed inset-x-4 bottom-4 z-50 grid grid-cols-[1fr_auto] gap-2 rounded-[1.5rem] border border-orange-100 bg-white p-3 shadow-2xl shadow-orange-900/20 md:hidden">
-          <a href="#commande" className="inline-flex items-center justify-center rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black text-white">
+          <a href={customerLink} className="inline-flex items-center justify-center rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black text-white">
             Commander maintenant
           </a>
           <a href="#partenaires" className="inline-flex items-center justify-center rounded-2xl border border-orange-200 px-4 py-3 text-sm font-black text-[#7c2d12]">
