@@ -42,6 +42,7 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
   const [showCart, setShowCart] = useState(false);
   const [loading, setLoading] = useState(true);
   const isPresentationMode = isDemoMode || new URL(window.location.href).searchParams.get('mode') === 'simulation';
+  const presentationHint = isPresentationMode ? 'simulation' : 'standard';
   const presentationLabel = isPresentationMode ? 'Mode simulation actif' : 'Mode test actif';
   const presentationNote = isPresentationMode
     ? 'Parcours guidé pour présenter la commande sans side effect réel.'
@@ -50,6 +51,12 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
   useEffect(() => {
     if (isPresentationMode) {
       localStorage.setItem('delikreol_demo_override', 'true');
+    }
+  }, [isPresentationMode]);
+
+  useEffect(() => {
+    if (isPresentationMode) {
+      document.title = 'DELIKREOL | Mode simulation';
     }
   }, [isPresentationMode]);
 

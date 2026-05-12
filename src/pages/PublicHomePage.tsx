@@ -331,7 +331,7 @@ export function PublicHomePage() {
   const handleSimulationClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     localStorage.setItem('delikreol_demo_override', 'true');
-    window.location.assign(customerPath);
+    window.location.assign(`${customerPath}?mode=simulation`);
   };
   const [catalog, setCatalog] = useState<CatalogState>({ configured: false, vendors: [], products: [] });
   const [query, setQuery] = useState('');
