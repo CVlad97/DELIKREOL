@@ -59,20 +59,20 @@ export function ClientRequestForm({ initialProducts = [] }: ClientRequestFormPro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      showError('Vous devez être connecté');
+      showError('Vous devez être connecté pour continuer');
       return;
     }
 
     if (!addressVerified || !geocodeData) {
-      setAddressError('Veuillez sélectionner une adresse dans la liste');
-      showError('Veuillez sélectionner et vérifier votre adresse');
+      setAddressError('Choisissez une adresse dans la liste');
+      showError('Choisissez une adresse dans la liste pour continuer');
       return;
     }
 
     const inZone = isInDeliveryZone(geocodeData.latitude, geocodeData.longitude);
     if (!inZone) {
       const confirmOutOfZone = window.confirm(
-        'Votre adresse est hors de notre zone de livraison principale. La livraison est sous réserve de disponibilité. Voulez-vous continuer ?'
+        'Cette adresse est hors de notre zone principale. La livraison reste possible selon les disponibilités. Voulez-vous continuer ?'
       );
       if (!confirmOutOfZone) return;
     }
@@ -88,7 +88,7 @@ export function ClientRequestForm({ initialProducts = [] }: ClientRequestFormPro
         status: 'pending_admin_review',
       });
 
-      showSuccess('Votre demande a bien ete enregistree.');
+      showSuccess('Votre demande a bien été enregistrée.');
       setFormData({
         address: '',
         deliveryPreference: 'home_delivery',
@@ -110,14 +110,14 @@ export function ClientRequestForm({ initialProducts = [] }: ClientRequestFormPro
           <Sparkles className="w-6 h-6" />
           <h2 className="text-3xl font-black text-foreground tracking-tighter uppercase">Demande Libre</h2>
         </div>
-        <p className="text-muted-foreground font-medium">Vous ne trouvez pas votre bonheur ? Nos agents s'occupent de tout pour vous.</p>
+        <p className="text-muted-foreground font-medium">Vous cherchez un produit ou un service ? Décrivez-le simplement, on s’occupe du reste.</p>
       </div>
 
       {initialProducts.length > 0 && (
         <div className="p-6 bg-primary/5 border border-primary/10 rounded-3xl space-y-4">
           <div className="flex items-center gap-3 text-primary font-black uppercase tracking-widest text-xs">
             <ShoppingBag className="w-4 h-4" />
-            Selection en cours ({initialProducts.length})
+            Sélection en cours ({initialProducts.length})
           </div>
           <div className="grid gap-2">
             {initialProducts.map((p, idx) => (
@@ -134,7 +134,7 @@ export function ClientRequestForm({ initialProducts = [] }: ClientRequestFormPro
         <div className="space-y-4">
           <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">
             <MapPin className="inline w-3 h-3 mr-2" />
-            Lieu de livraison
+            Où livrer ?
           </label>
           <AddressAutocomplete
             value={formData.address}
@@ -151,7 +151,7 @@ export function ClientRequestForm({ initialProducts = [] }: ClientRequestFormPro
               <div className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-accent mt-0.5" />
                 <div>
-                  <div className="text-accent font-black uppercase tracking-widest text-[10px] mb-1">Localisation Validée</div>
+                  <div className="text-accent font-black uppercase tracking-widest text-[10px] mb-1">Adresse repérée</div>
                   <div className="text-foreground font-bold text-sm">{geocodeData.displayName}</div>
                 </div>
               </div>
@@ -161,7 +161,7 @@ export function ClientRequestForm({ initialProducts = [] }: ClientRequestFormPro
 
         <div className="space-y-4">
           <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">
-            Mode de Récupération
+            Comment voulez-vous recevoir ?
           </label>
           <div className="grid grid-cols-2 gap-4">
             <button
@@ -234,7 +234,7 @@ export function ClientRequestForm({ initialProducts = [] }: ClientRequestFormPro
           {loading ? (
             <>
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-background"></div>
-              Traitement IA...
+              Recherche en cours...
             </>
           ) : (
             <>

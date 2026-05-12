@@ -26,5 +26,6 @@ npm run dev
 - Commits conventionnels (feat, fix, docs, chore)
 
 ## Contact
-- Email : vladimir.claveau@gmail.com
+- Email : contact@delikreol.mq (messages relayés vers le compte Gmail de gestion)
+- Gmail de réception : vladimir.claveau@gmail.com
 - Repo : https://github.com/CVlad97/DELIKREOL

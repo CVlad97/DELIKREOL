@@ -228,6 +228,9 @@ export function AuthModal({ isOpen, onClose, onBack, initialMode = 'signin' }: A
             </p>
           )}
           <p className="mt-3 text-center text-[11px] font-semibold text-muted-foreground">
+            Accès Google réservé à votre compte pour le moment.
+          </p>
+          <p className="mt-1 text-center text-[11px] font-semibold text-muted-foreground">
             Google ne se lance jamais automatiquement.
           </p>
         </div>

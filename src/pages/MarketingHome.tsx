@@ -169,7 +169,8 @@ export default function MarketingHome() {
             <div>
               <h4 className="text-white font-semibold mb-4">Contact</h4>
               <ul className="space-y-2 text-sm">
-                <li>Email: contact@delikreol.com</li>
+                <li>Email: contact@delikreol.mq</li>
+                <li>Messages relayés vers le compte Gmail de gestion</li>
                 <li>Guadeloupe</li>
               </ul>
             </div>
