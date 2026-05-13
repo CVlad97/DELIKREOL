@@ -1,5 +1,6 @@
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
+import { CartProvider } from './contexts/CartContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { AdminPartners } from './pages/admin/AdminPartners';
 import { CustomerApp } from './pages/CustomerApp';
@@ -29,7 +30,9 @@ function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <ToastProvider>{content}</ToastProvider>
+        <CartProvider>
+          <ToastProvider>{content}</ToastProvider>
+        </CartProvider>
       </AuthProvider>
     </ErrorBoundary>
   );
