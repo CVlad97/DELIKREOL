@@ -11,14 +11,18 @@ function App() {
   const params = new URLSearchParams(window.location.search);
   const view = params.get('view');
   const pathname = window.location.pathname;
+  const legacyPath = window.location.search.startsWith('?/')
+    ? `/${window.location.search.slice(2).split('&')[0].split('#')[0]}`
+    : '';
+  const effectivePathname = legacyPath || pathname;
 
-  const content = view === 'customer' || pathname.endsWith('/customer')
+  const content = view === 'customer' || effectivePathname.endsWith('/customer')
     ? <CustomerApp />
-    : view === 'partner-documents' || pathname.endsWith('/partner-documents')
+    : view === 'partner-documents' || effectivePathname.endsWith('/partner-documents')
       ? <PartnerDashboardPage />
-      : view === 'admin-documents' || pathname.endsWith('/admin-documents')
+      : view === 'admin-documents' || effectivePathname.endsWith('/admin-documents')
         ? <AdminPartners />
-        : view === 'investor-ops' || pathname.endsWith('/investor-ops')
+        : view === 'investor-ops' || effectivePathname.endsWith('/investor-ops')
           ? <InvestorOpsPage />
           : <PublicHomePage />;
 
