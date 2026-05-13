@@ -20,9 +20,9 @@ export function VendorApp() {
       case 'documents':
         return <PartnerDashboardPage />;
       case 'orders':
-        return <div className="p-4">Commandes (TODO)</div>;
+        return <VendorProducts />;
       case 'stats':
-        return <div className="p-4">Statistiques (TODO)</div>;
+        return <ProDashboard onNavigate={setCurrentView} />;
       default:
         return renderDashboard();
     }
