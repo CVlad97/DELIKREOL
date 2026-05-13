@@ -318,7 +318,6 @@ const defaultBusinessRequestForm: BusinessRequestForm = {
 export function PublicHomePage() {
   const baseUrl = import.meta.env.BASE_URL || '/';
   const investorOpsLink = `${baseUrl}?view=investor-ops`;
-  const customerLink = `${baseUrl}?view=customer`;
   const customerPath = `${baseUrl}customer`;
   const handleCommanderClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (window.location.pathname.endsWith('/customer') || new URL(window.location.href).searchParams.get('view') === 'customer') {

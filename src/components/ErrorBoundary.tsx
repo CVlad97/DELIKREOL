@@ -26,7 +26,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   handleReset = () => {
     this.setState({ hasError: false, error: null });
-    window.location.href = '/';
+    window.location.href = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
   };
 
   render() {

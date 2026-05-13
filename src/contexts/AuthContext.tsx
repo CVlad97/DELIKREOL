@@ -5,7 +5,7 @@ import { supabase, Profile, isDemoMode } from '../lib/supabase';
 const allowedGoogleEmails = new Set(
   (import.meta.env.VITE_GOOGLE_ALLOWED_EMAILS || 'vladimir.claveau@gmail.com')
     .split(',')
-    .map((email) => email.trim().toLowerCase())
+    .map((email: string) => email.trim().toLowerCase())
     .filter(Boolean)
 );
 
