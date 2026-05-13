@@ -922,7 +922,8 @@ export function PublicHomePage() {
               Devenir partenaire
             </a>
             <a
-              href="#commande"
+              href={customerPath}
+              onClick={handleCommanderClick}
               className="inline-flex rounded-full bg-[#d95f2d] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/25 transition hover:-translate-y-0.5"
             >
               Commander
@@ -963,7 +964,7 @@ export function PublicHomePage() {
                       className="h-16 w-full rounded-[1.35rem] border border-orange-100 bg-[#fffaf4] pl-14 pr-4 text-base font-black text-[#2a190f] outline-none ring-orange-200 placeholder:text-stone-400 focus:ring-4"
                     />
                   </label>
-                  <a href="#catalogue" className="inline-flex h-16 items-center justify-center gap-2 rounded-[1.35rem] bg-[#d95f2d] px-5 text-sm font-black uppercase tracking-[0.12em] text-white shadow-xl shadow-orange-500/25 transition hover:-translate-y-0.5">
+                  <a href={customerPath} onClick={handleCommanderClick} className="inline-flex h-16 items-center justify-center gap-2 rounded-[1.35rem] bg-[#d95f2d] px-5 text-sm font-black uppercase tracking-[0.12em] text-white shadow-xl shadow-orange-500/25 transition hover:-translate-y-0.5">
                     Voir les offres <ArrowRight className="h-5 w-5" />
                   </a>
                 </div>
@@ -985,7 +986,7 @@ export function PublicHomePage() {
               </div>
 
               <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                <a href="#catalogue" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2a190f] px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-stone-900/15 transition hover:-translate-y-0.5">
+                <a href={customerPath} onClick={handleCommanderClick} className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2a190f] px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-stone-900/15 transition hover:-translate-y-0.5">
                   Commander maintenant <ShoppingBag className="h-4 w-4" />
                 </a>
                 <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Bonjour DELIKREOL, je veux être orienté vers l’offre la plus adaptée.')}`} className="inline-flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-white/80 px-6 py-4 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5">

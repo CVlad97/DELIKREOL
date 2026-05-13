@@ -66,13 +66,13 @@ export function RelayHostApp() {
       case 'dashboard':
         return renderDashboard();
       case 'deposits':
-        return <div className="p-4">Deposits View (TODO)</div>;
+        return <PartnerDashboardPage />;
       case 'documents':
         return <PartnerDashboardPage />;
       case 'capacity':
-        return <div className="p-4">Capacity View (TODO)</div>;
+        return <ProDashboard onNavigate={setCurrentView} />;
       case 'scanner':
-        return <div className="p-4">QR Scanner (TODO)</div>;
+        return <ProDashboard onNavigate={setCurrentView} />;
       default:
         return renderDashboard();
     }
