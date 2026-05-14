@@ -42,6 +42,7 @@ export function ProductCard({ product }: ProductCardProps) {
             {product.price.toFixed(2)} €
           </div>
           <button
+            type="button"
             onClick={() => addItem(product)}
             disabled={!product.is_available}
             className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:shadow-warm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -52,6 +53,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         <button
+          type="button"
           onClick={() => setShowSim(!showSim)}
           className="inline-flex items-center gap-2 text-xs font-semibold text-primary"
         >

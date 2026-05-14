@@ -170,7 +170,7 @@ export default function MarketingHome() {
               <h4 className="text-white font-semibold mb-4">Contact</h4>
               <ul className="space-y-2 text-sm">
                 <li>Email: contact@delikreol.mq</li>
-                <li>Messages relayés vers le compte Gmail de gestion</li>
+                <li>Messages relayés vers vladimir.claveau@gmail.com</li>
                 <li>Guadeloupe</li>
               </ul>
             </div>

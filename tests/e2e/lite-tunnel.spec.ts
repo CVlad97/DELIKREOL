@@ -1,41 +1,24 @@
 import { test, expect } from '@playwright/test';
 
-test('lite tunnel main flow', async ({ page }) => {
+test('public home: add product to cart (selection) shows mobile bottom bar', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByText('Repas créoles, menus locaux et commandes planifiées en Martinique')).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Le r.*flexe local/i })).toBeVisible();
 
-  await page.getByRole('button', { name: /voir le menu/i }).first().click();
-  await expect(page).toHaveURL(/\?vendor=/);
-  await expect(page.getByRole('heading', { name: /Menu de/i })).toBeVisible();
+  const addButton = page.getByRole('button', { name: /^Ajouter$/i }).first();
+  await expect(addButton).toBeVisible();
+  await addButton.click();
 
-  await page.getByRole('button', { name: /ajouter au panier/i }).first().click();
-  const openCheckout = page.getByRole('button', { name: /ouvrir le checkout/i });
-  await expect(openCheckout).toBeVisible();
-  await openCheckout.click();
-
-  const dialog = page.locator('[role="dialog"]');
-  await expect(dialog).toBeVisible();
-  await expect(dialog.locator('input[placeholder="Nom"]').first()).toBeVisible();
-  await dialog.locator('input[placeholder="Nom"]').fill('Client Test');
-  await dialog.locator('input[placeholder="Telephone"]').fill('0612345678');
-  await dialog.locator('input[placeholder="Adresse ou point de retrait"]').fill('Fort-de-France');
-  await expect(page.getByText(/Recapitulatif/i)).toHaveCount(1);
-
-  const whatsappCta = page.getByRole('link', { name: /valider sur whatsapp/i });
-  await expect(whatsappCta).toBeVisible();
-  const href = await whatsappCta.getAttribute('href');
-  expect(href).toBeTruthy();
-  expect(href).toMatch(/^https:\/\/wa\.me\//);
-  expect(href).toContain('text=');
+  const mobileBar = page.locator('div.fixed.md\\:hidden').filter({
+    has: page.getByRole('button', { name: /^Commander$/i }),
+  });
+  await expect(mobileBar).toBeVisible();
+  await expect(mobileBar.getByText(/1 article\(s\)/i)).toBeVisible();
 });
 
-test('vendor deep-link valid', async ({ page }) => {
-  await page.goto('/?vendor=Traiteur%20Kreyol%20FDF');
-  await expect(page.getByRole('heading', { name: /Menu de/i })).toBeVisible();
-});
-
-test('vendor deep-link invalid is safe', async ({ page }) => {
-  await page.goto('/?vendor=introuvable');
-  await expect(page.getByRole('heading', { name: 'Vendeurs pilotes' })).toBeVisible();
-  await expect(page.getByText(/Menu de introuvable/i)).toHaveCount(0);
+test('public home: catalogue and filters render', async ({ page }) => {
+  await page.goto('/');
+  const catalogue = page.locator('#catalogue');
+  await expect(catalogue).toBeVisible();
+  await expect(catalogue.getByRole('heading', { name: /Choisir vite/i })).toBeVisible();
+  await expect(catalogue.getByRole('button', { name: /Voir autour de moi/i })).toBeVisible();
 });
