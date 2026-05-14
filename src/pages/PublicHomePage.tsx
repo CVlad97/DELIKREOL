@@ -84,8 +84,42 @@ type CheckoutStatus = SubmitStatus & {
 function isSupabasePausedError(error: unknown) {
   if (!error || typeof error !== 'object') return false;
   const anyError = error as Record<string, unknown>;
+  const status = Number(anyError.status ?? anyError.statusCode ?? anyError.status_code ?? NaN);
+  if (status === 402 || status === 540) return true;
   const msg = String(anyError.message ?? anyError.error_description ?? anyError.details ?? anyError.hint ?? '').toLowerCase();
-  return msg.includes('paused') || msg.includes('payment required') || msg.includes('billing') || msg.includes('subscription');
+  return (
+    msg.includes('paused') ||
+    msg.includes('project paused') ||
+    msg.includes('payment required') ||
+    msg.includes('overdue_payment') ||
+    msg.includes('billing') ||
+    msg.includes('subscription') ||
+    msg.includes('invoice') ||
+    msg.includes('402') ||
+    msg.includes('540')
+  );
+}
+
+function isSupabaseUnavailableError(error: unknown) {
+  if (!error) return false;
+  if (typeof error === 'string') {
+    const msg = error.toLowerCase();
+    return msg.includes('failed to fetch') || msg.includes('network') || msg.includes('timeout') || msg.includes('dns');
+  }
+  if (typeof error !== 'object') return false;
+  const anyError = error as Record<string, unknown>;
+  const msg = String(anyError.message ?? anyError.error_description ?? anyError.details ?? anyError.hint ?? '').toLowerCase();
+  return (
+    msg.includes('failed to fetch') ||
+    msg.includes('networkerror') ||
+    msg.includes('network request failed') ||
+    msg.includes('fetch failed') ||
+    msg.includes('timeout') ||
+    msg.includes('timed out') ||
+    msg.includes('dns') ||
+    msg.includes('connection refused') ||
+    msg.includes('service unavailable')
+  );
 }
 
 type NotificationPreferences = {
@@ -418,7 +452,11 @@ export function PublicHomePage() {
   }, []);
 
   useEffect(() => {
-    if (!publicSupabase) return;
+    if (!publicSupabase) {
+      setSupabasePaused(true);
+      setSupabasePausedHint('Backend Supabase indisponible (pause ou configuration). Commande via WhatsApp activée temporairement.');
+      return;
+    }
     let mounted = true;
     (async () => {
       try {
@@ -768,15 +806,12 @@ export function PublicHomePage() {
   function handleWhatsAppCheckoutFallback() {
     const message = buildWhatsAppFallbackOrderMessage();
     const link = getWhatsAppBusinessLink(whatsappNumber, message);
+    // Aggressive fallback: always copy message, then attempt to open WhatsApp.
+    void copyOperationalMessage(message, 'Message WhatsApp prêt. Collez-le si WhatsApp ne s’ouvre pas automatiquement.');
     window.location.href = link;
   }
 
   async function handleCheckout() {
-    if (!publicSupabase) {
-      setCheckoutStatus({ kind: 'error', message: 'Commande indisponible : Supabase n’est pas configuré.' });
-      return;
-    }
-
     if (selectedProducts.length === 0) {
       setCheckoutStatus({ kind: 'error', message: 'Ajoutez au moins un produit au panier.' });
       return;
@@ -789,6 +824,17 @@ export function PublicHomePage() {
 
     if (fulfillmentMode === 'delivery' && !deliveryAddress.trim()) {
       setCheckoutStatus({ kind: 'error', message: 'Adresse obligatoire pour une livraison.' });
+      return;
+    }
+
+    if (!publicSupabase || supabasePaused) {
+      setSupabasePaused(true);
+      setSupabasePausedHint(
+        !publicSupabase
+          ? 'Backend Supabase indisponible (configuration). Commande via WhatsApp activée.'
+          : 'Supabase est en pause. Commande via WhatsApp activée.',
+      );
+      handleWhatsAppCheckoutFallback();
       return;
     }
 
@@ -834,27 +880,41 @@ export function PublicHomePage() {
       vendor_commission: Number((product.price * 0.15).toFixed(2)),
     }));
 
-    const { error: orderError } = await publicSupabase.from('orders').insert(orderPayload);
-    if (orderError) {
-      if (isSupabasePausedError(orderError)) {
-        setSupabasePaused(true);
-        setSupabasePausedHint('Supabase est en pause. Bascule automatique sur WhatsApp support.');
-        handleWhatsAppCheckoutFallback();
+    try {
+      const { error: orderError } = await publicSupabase.from('orders').insert(orderPayload);
+      if (orderError) {
+        if (isSupabasePausedError(orderError) || isSupabaseUnavailableError(orderError)) {
+          setSupabasePaused(true);
+          setSupabasePausedHint('Supabase indisponible. Bascule automatique sur WhatsApp support.');
+          handleWhatsAppCheckoutFallback();
+          return;
+        }
+        setCheckoutStatus({ kind: 'error', message: `Commande non créée : ${orderError.message}` });
         return;
       }
-      setCheckoutStatus({ kind: 'error', message: `Commande non créée : ${orderError.message}` });
-      return;
-    }
 
-    const { error: itemsError } = await publicSupabase.from('order_items').insert(orderItemsPayload);
-    if (itemsError) {
-      if (isSupabasePausedError(itemsError)) {
+      const { error: itemsError } = await publicSupabase.from('order_items').insert(orderItemsPayload);
+      if (itemsError) {
+        if (isSupabasePausedError(itemsError) || isSupabaseUnavailableError(itemsError)) {
+          setSupabasePaused(true);
+          setSupabasePausedHint('Supabase indisponible. Bascule automatique sur WhatsApp support.');
+          handleWhatsAppCheckoutFallback();
+          return;
+        }
+        setCheckoutStatus({ kind: 'error', message: `Produits non enregistrés : ${itemsError.message}` });
+        return;
+      }
+    } catch (unexpectedError) {
+      if (isSupabasePausedError(unexpectedError) || isSupabaseUnavailableError(unexpectedError)) {
         setSupabasePaused(true);
-        setSupabasePausedHint('Supabase est en pause. Bascule automatique sur WhatsApp support.');
+        setSupabasePausedHint('Supabase indisponible. Bascule automatique sur WhatsApp support.');
         handleWhatsAppCheckoutFallback();
         return;
       }
-      setCheckoutStatus({ kind: 'error', message: `Produits non enregistrés : ${itemsError.message}` });
+      setCheckoutStatus({
+        kind: 'error',
+        message: `Erreur checkout : ${String((unexpectedError as any)?.message ?? unexpectedError)}`,
+      });
       return;
     }
 
@@ -1951,7 +2011,7 @@ function ProductCard({
           <span className="rounded-2xl bg-[#fff4e7] px-3 py-2 text-[#7c2d12]">Rayon {product.vendor_delivery_radius_km} km</span>
           <span className="rounded-2xl bg-emerald-50 px-3 py-2 text-emerald-700">Selon position</span>
         </div>
-        <button onClick={onAdd} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-orange-500/20">
+        <button type="button" onClick={onAdd} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-orange-500/20">
           Ajouter <ArrowRight className="h-4 w-4" />
         </button>
       </div>

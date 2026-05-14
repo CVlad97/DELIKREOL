@@ -19,6 +19,8 @@ import { ordersService } from '../services/ordersService';
 import { isErpConfigured } from '../lib/erpClient';
 import { pointsRelais } from '../pointsRelais';
 import { Product, RelayPoint, Location, Order } from '../types';
+import { activateDemoOverride, shouldFallbackToDemo } from '../utils/supabaseFallback';
+import { readDemoOrders, readDemoProducts, seedDemoData } from '../data/demoDb';
 
 interface CustomerAppProps {
   initialDraftProducts?: any[];
@@ -112,6 +114,15 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
       setProducts(data || []);
     } catch (error) {
       console.error('Error loading products:', error);
+      if (shouldFallbackToDemo(error)) {
+        activateDemoOverride('Supabase indisponible: catalogue en mode demo.');
+        try {
+          seedDemoData();
+          setProducts(readDemoProducts());
+        } catch (demoError) {
+          console.error('Error loading demo products fallback:', demoError);
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -170,6 +181,35 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
       setRelayPoints(pointsWithDistance);
     } catch (error) {
       console.error('Error loading relay points:', error);
+      if (shouldFallbackToDemo(error)) {
+        activateDemoOverride('Supabase indisponible: points relais en mode demo.');
+        try {
+          const demoRelayPoints: RelayPoint[] = pointsRelais.map((point) => ({
+            id: String(point.id),
+            name: point.name,
+            address: point.adresse,
+            latitude: point.lat,
+            longitude: point.lng,
+            type: 'relay_point',
+            is_active: point.statut === 'Ouvert',
+            parking_available: true,
+            pmr_accessible: true,
+            rating: point.statut === 'Ouvert' ? 4.8 : 4.2,
+            total_pickups: point.capacite * 3,
+            created_at: new Date().toISOString(),
+            distance: calculateDistance(
+              userLocation.latitude,
+              userLocation.longitude,
+              point.lat,
+              point.lng
+            ),
+          }));
+          demoRelayPoints.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+          setRelayPoints(demoRelayPoints);
+        } catch (demoError) {
+          console.error('Error loading demo relay points fallback:', demoError);
+        }
+      }
     }
   };
 
@@ -217,6 +257,19 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
       setOrders(data || []);
     } catch (error) {
       console.error('Error loading orders:', error);
+      if (shouldFallbackToDemo(error)) {
+        activateDemoOverride('Supabase indisponible: commandes en mode demo.');
+        try {
+          seedDemoData();
+          const all = readDemoOrders();
+          const mine = user ? all.filter((o) => o.customer_id === user.id) : all;
+          setOrders(mine);
+        } catch (demoError) {
+          console.error('Error loading demo orders fallback:', demoError);
+        } finally {
+          setLoading(false);
+        }
+      }
     }
   };
 

@@ -26,7 +26,7 @@ export default function PrivacyPolicy() {
 
           <h2>2. Responsable du traitement</h2>
           <p>
-            Le responsable du traitement des données est Delikreol, joignable à l'adresse : contact@delikreol.com
+            Le responsable du traitement des données est Delikreol, joignable à l'adresse : contact@delikreol.mq
           </p>
 
           <h2>3. Données collectées</h2>
@@ -128,7 +128,7 @@ export default function PrivacyPolicy() {
             <li><strong>Droit de retirer votre consentement</strong> : à tout moment</li>
           </ul>
           <p>
-            Pour exercer vos droits, contactez-nous à : contact@delikreol.com
+            Pour exercer vos droits, contactez-nous à : contact@delikreol.mq
           </p>
 
           <h2>9. Sécurité des données</h2>

@@ -274,7 +274,7 @@ export function TermsOfUsePage() {
               <div>
                 <h3 className="font-semibold text-slate-200 mb-2">12.1. Réclamations</h3>
                 <p className="text-sm">
-                  Toute réclamation doit être adressée à : <strong className="text-emerald-400">contact@delikreol.com</strong>
+                  Toute réclamation doit être adressée à : <strong className="text-emerald-400">contact@delikreol.mq</strong>
                 </p>
                 <p className="text-sm mt-2">
                   Nous nous engageons à répondre sous 48h ouvrées.

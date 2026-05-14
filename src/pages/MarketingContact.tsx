@@ -132,7 +132,7 @@ export default function MarketingContact() {
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">Email</h3>
                     <p className="text-gray-600">contact@delikreol.mq</p>
                     <p className="text-sm text-gray-500 mt-1">
-                      Les messages sont relayés vers le compte Gmail en charge.
+                      Les messages sont relayés vers vladimir.claveau@gmail.com.
                     </p>
                   </div>
                 </div>
