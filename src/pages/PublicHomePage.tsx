@@ -361,18 +361,12 @@ export function PublicHomePage() {
   const baseUrl = import.meta.env.BASE_URL || '/';
   const investorOpsLink = `${baseUrl}?view=investor-ops`;
   const customerPath = `${baseUrl}customer`;
-  const handleCommanderClick = (event: MouseEvent<HTMLAnchorElement>) => {
+  const gotoCustomer = (mode?: 'simulation') => {
     if (window.location.pathname.endsWith('/customer') || new URL(window.location.href).searchParams.get('view') === 'customer') {
       return;
     }
-    event.preventDefault();
-    window.location.assign(customerPath);
-  };
-
-  const handleSimulationClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
-    localStorage.setItem('delikreol_demo_override', 'true');
-    window.location.assign(`${customerPath}?mode=simulation`);
+    if (mode === 'simulation') localStorage.setItem('delikreol_demo_override', 'true');
+    window.location.assign(mode === 'simulation' ? `${customerPath}?mode=simulation` : customerPath);
   };
   const [catalog, setCatalog] = useState<CatalogState>({ configured: false, vendors: [], products: [] });
   const [query, setQuery] = useState('');
@@ -1057,7 +1051,10 @@ export function PublicHomePage() {
             </a>
             <a
               href={customerPath}
-              onClick={handleCommanderClick}
+              onClick={(event) => {
+                event.preventDefault();
+                gotoCustomer();
+              }}
               className="inline-flex rounded-full bg-[#d95f2d] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/25 transition hover:-translate-y-0.5"
             >
               Commander
@@ -1081,10 +1078,7 @@ export function PublicHomePage() {
                 Le réflexe local qui donne envie de commander.
               </h1>
               <p className="mx-auto mt-4 max-w-xl text-center text-base leading-7 text-[#5a4334] sm:text-lg lg:mx-0 lg:text-left">
-                DELIKREOL relie Martinique, plats créoles, produits locaux et partenaires visibles avec un parcours simple du choix à la confirmation.
-              </p>
-              <p className="mx-auto mt-3 max-w-xl text-center text-sm font-semibold leading-6 text-[#6b4f3f] lg:mx-0 lg:text-left">
-                Premier objectif: rassurer vite, montrer la faisabilité locale et amener l’utilisateur au catalogue.
+                Plats créoles, produits locaux, partenaires visibles. Vous choisissez, vous ajoutez, vous confirmez.
               </p>
 
               <div className="mt-7 rounded-[2rem] border border-white/80 bg-white/88 p-3 shadow-2xl shadow-orange-900/10 backdrop-blur">
@@ -1098,14 +1092,19 @@ export function PublicHomePage() {
                       className="h-16 w-full rounded-[1.35rem] border border-orange-100 bg-[#fffaf4] pl-14 pr-4 text-base font-black text-[#2a190f] outline-none ring-orange-200 placeholder:text-stone-400 focus:ring-4"
                     />
                   </label>
-                  <a href={customerPath} onClick={handleCommanderClick} className="inline-flex h-16 items-center justify-center gap-2 rounded-[1.35rem] bg-[#d95f2d] px-5 text-sm font-black uppercase tracking-[0.12em] text-white shadow-xl shadow-orange-500/25 transition hover:-translate-y-0.5">
+                  <button
+                    type="button"
+                    onClick={() => gotoCustomer()}
+                    className="inline-flex h-16 items-center justify-center gap-2 rounded-[1.35rem] bg-[#d95f2d] px-5 text-sm font-black uppercase tracking-[0.12em] text-white shadow-xl shadow-orange-500/25 transition hover:-translate-y-0.5"
+                  >
                     Voir les offres <ArrowRight className="h-5 w-5" />
-                  </a>
+                  </button>
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <span className="text-xs font-black uppercase tracking-[0.16em] text-stone-400">Communes partenaires</span>
                   {serviceZones.slice(0, 4).map((zone) => (
                     <button
+                      type="button"
                       key={zone}
                       onClick={() => {
                         setCommuneFilter(zone);
@@ -1120,9 +1119,13 @@ export function PublicHomePage() {
               </div>
 
               <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                <a href={customerPath} onClick={handleCommanderClick} className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2a190f] px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-stone-900/15 transition hover:-translate-y-0.5">
+                <button
+                  type="button"
+                  onClick={() => gotoCustomer()}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2a190f] px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-stone-900/15 transition hover:-translate-y-0.5"
+                >
                   Commander maintenant <ShoppingBag className="h-4 w-4" />
-                </a>
+                </button>
                 <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Bonjour DELIKREOL, je veux être orienté vers l’offre la plus adaptée.')}`} className="inline-flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-white/80 px-6 py-4 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5">
                   Parler à DELIKREOL <MessageCircle className="h-4 w-4" />
                 </a>
@@ -1180,7 +1183,7 @@ export function PublicHomePage() {
           <SectionTitle
             eyebrow="Comment ça marche"
             title="Chercher, ajouter, confirmer, suivre."
-            text="Un parcours court, lisible sur mobile, centré sur la commande."
+            text="Un parcours court, lisible sur mobile."
           />
           <div className="mt-4 grid gap-3 rounded-[1.75rem] border border-emerald-200 bg-emerald-50/80 p-4 text-sm leading-6 text-emerald-950 shadow-sm sm:grid-cols-[1fr_auto] sm:items-center">
             <div>
@@ -1197,38 +1200,30 @@ export function PublicHomePage() {
               <StepCard key={step.title} index={index + 1} title={step.title} text={step.text} />
             ))}
           </div>
-          <div className="mt-6 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">Gaps / corrections</p>
-              <h3 className="mt-2 text-2xl font-black text-[#2a190f]">Ce qui manque face à un benchmark local.</h3>
-              <div className="mt-4 space-y-3">
-                {localGapSolutions.map((item) => (
-                  <div key={item.gap} className="rounded-[1.35rem] border border-orange-100 bg-[#fffaf4] p-4">
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">Gap</p>
-                    <p className="mt-1 font-bold text-[#2a190f]">{item.gap}</p>
-                    <p className="mt-2 text-sm leading-6 text-stone-600">Correction: {item.fix}</p>
-                    <p className="mt-2 text-sm leading-6 text-stone-500">Impact: {item.impact}</p>
-                  </div>
-                ))}
+          <details className="mt-6 rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
+            <summary className="cursor-pointer text-sm font-black uppercase tracking-[0.18em] text-[#c2410c]">Détails (optionnel)</summary>
+            <div className="mt-4 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
+              <div className="rounded-[1.5rem] border border-orange-100 bg-[#fffaf4] p-4">
+                <h3 className="text-lg font-black text-[#2a190f]">Faisabilité</h3>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <GapMetric label="Zone" value="Rayon réel par partenaire" />
+                  <GapMetric label="Secours" value="Commune fallback si GPS absent" />
+                  <GapMetric label="Commande" value="Catalogue + panier" />
+                  <GapMetric label="Support" value="WhatsApp en secondaire" />
+                </div>
+              </div>
+              <div className="rounded-[1.5rem] border border-orange-100 bg-[#fffaf4] p-4">
+                <h3 className="text-lg font-black text-[#2a190f]">Améliorations</h3>
+                <div className="mt-3 space-y-2">
+                  {localGapSolutions.slice(0, 2).map((item) => (
+                    <p key={item.gap} className="text-sm font-semibold text-stone-700">
+                      {item.fix}
+                    </p>
+                  ))}
+                </div>
               </div>
             </div>
-            <div className="rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">Faisabilité Martinique</p>
-              <h3 className="mt-2 text-2xl font-black text-[#2a190f]">Le modèle tient s’il reste simple.</h3>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <GapMetric label="Zone" value="Rayon réel par partenaire" />
-                <GapMetric label="Secours" value="Commune fallback si GPS absent" />
-                <GapMetric label="Commande" value="Catalogue + WhatsApp + panier" />
-                <GapMetric label="Partenaire" value="Formulaire court mobile-first" />
-              </div>
-              <div className="mt-4 rounded-[1.35rem] bg-[#24170f] p-4 text-white">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-300">Lecture business</p>
-                <p className="mt-2 text-sm leading-6 text-stone-200">
-                  En Martinique, la meilleure conversion vient d’un service lisible, local, et immédiatement utile sur téléphone. DELIKREOL doit vendre la confiance avant la complexité.
-                </p>
-              </div>
-            </div>
-          </div>
+          </details>
         </section>
 
         <section id="catalogue" className="bg-[#fffdf8] py-14">
@@ -1240,12 +1235,20 @@ export function PublicHomePage() {
                 text="Des cartes directes avec photo, prix, zone, disponibilité et bouton d’ajout."
               />
               <div className="flex flex-wrap gap-3">
-                <a href={customerPath} onClick={handleCommanderClick} className="inline-flex w-fit items-center gap-2 rounded-full bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25">
+                <button
+                  type="button"
+                  onClick={() => gotoCustomer()}
+                  className="inline-flex w-fit items-center gap-2 rounded-full bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25"
+                >
                   Commander maintenant <ShoppingBag className="h-5 w-5" />
-                </a>
-                <a href={customerPath} onClick={handleSimulationClick} className="inline-flex w-fit items-center gap-2 rounded-full border border-orange-200 bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-[#7c2d12] shadow-sm">
-                  Lancer la simulation <Sparkles className="h-5 w-5" />
-                </a>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => gotoCustomer('simulation')}
+                  className="inline-flex w-fit items-center gap-2 rounded-full border border-orange-200 bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-[#7c2d12] shadow-sm"
+                >
+                  Simulation <Sparkles className="h-5 w-5" />
+                </button>
               </div>
             </div>
 
@@ -1854,9 +1857,13 @@ export function PublicHomePage() {
 
       {selectedProducts.length === 0 && (
         <div className="fixed inset-x-4 bottom-4 z-50 grid grid-cols-[1fr_auto] gap-2 rounded-[1.5rem] border border-orange-100 bg-white p-3 shadow-2xl shadow-orange-900/20 md:hidden">
-          <a href={customerPath} onClick={handleCommanderClick} className="inline-flex items-center justify-center rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black text-white">
+          <button
+            type="button"
+            onClick={() => gotoCustomer()}
+            className="inline-flex items-center justify-center rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black text-white"
+          >
             Commander maintenant
-          </a>
+          </button>
           <a href="#partenaires" className="inline-flex items-center justify-center rounded-2xl border border-orange-200 px-4 py-3 text-sm font-black text-[#7c2d12]">
             Partenaire
           </a>
