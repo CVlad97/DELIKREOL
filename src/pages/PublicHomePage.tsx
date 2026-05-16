@@ -2302,23 +2302,32 @@ function SelectionPanel({
               <option>Vendeur indisponible</option>
             </select>
             <div className="mt-3 grid gap-2">
-              {supabasePaused ? (
+              <button
+                type="button"
+                onClick={supabasePaused ? onWhatsAppFallback : onConfirmOrder}
+                disabled={checkoutStatus.kind === 'saving'}
+                className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-black text-white disabled:opacity-60 ${
+                  supabasePaused ? 'bg-[#1f8f5f]' : 'bg-[#d95f2d]'
+                }`}
+              >
+                {supabasePaused ? (
+                  <>
+                    <MessageCircle className="h-4 w-4" /> Envoyer sur WhatsApp
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag className="h-4 w-4" /> Enregistrer la commande
+                  </>
+                )}
+              </button>
+              {!supabasePaused && (
                 <button
                   type="button"
                   onClick={onWhatsAppFallback}
                   disabled={checkoutStatus.kind === 'saving'}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1f8f5f] px-4 py-3 text-sm font-black text-white disabled:opacity-60"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-800 disabled:opacity-60"
                 >
                   <MessageCircle className="h-4 w-4" /> Envoyer sur WhatsApp (support)
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={onConfirmOrder}
-                  disabled={checkoutStatus.kind === 'saving'}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#d95f2d] px-4 py-3 text-sm font-black text-white disabled:opacity-60"
-                >
-                  <ShoppingBag className="h-4 w-4" /> Enregistrer la commande
                 </button>
               )}
               <a href={supportLink} className="inline-flex items-center justify-center gap-2 rounded-xl border border-orange-200 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]">
