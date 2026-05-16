@@ -66,9 +66,9 @@ export function LegalMentionsPage() {
             </div>
             <div className="mt-4 space-y-2">
               <p><strong className="text-slate-200">Hébergement des paiements :</strong></p>
-              <p>Stripe, Inc.</p>
+              <p>Paiement par lien bancaire / virement (selon validation)</p>
               <p>510 Townsend Street, San Francisco, CA 94103, USA</p>
-              <p>Site web : <a href="https://stripe.com" target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline">https://stripe.com</a></p>
+              <p>Paiement : lien bancaire / virement (selon validation)</p>
             </div>
           </section>
 

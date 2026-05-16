@@ -321,14 +321,15 @@ class SheetsCatalogService implements CatalogService {
 
 const sheetsFallback = new SheetsCatalogService();
 
-// Live catalogue must read from Supabase first. ERP stays available for dedicated flows,
-// while Sheets remains a lightweight fallback if public catalogue reads fail.
-export const catalogService: CatalogService = isSupabaseConfigured
-  ? new SupabaseCatalogService()
-  : isErpConfigured
-    ? new ErpCatalogService()
-    : isSheetsConfigured
-      ? new SheetsCatalogService()
+// Catalogue source selection:
+// - User preference: Sheets should be the primary source when configured (public pilot),
+//   with Supabase/ERP remaining available for admin/backoffice flows.
+export const catalogService: CatalogService = isSheetsConfigured
+  ? new SheetsCatalogService()
+  : isSupabaseConfigured
+    ? new SupabaseCatalogService()
+    : isErpConfigured
+      ? new ErpCatalogService()
       : isDemoMode
         ? new DemoCatalogService()
         : new SupabaseCatalogService();

@@ -22,11 +22,13 @@ export interface IntegrationsConfig {
 
 export const integrations: IntegrationsConfig = {
   stripe: {
-    enabled: !!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
-    label: 'Stripe',
-    description: 'Paiements en ligne sécurisés',
-    publicKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
-    status: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ? 'configured' : 'pending',
+    // Stripe is no longer the primary payment path for the public pilot.
+    // We keep the entry for compatibility with existing admin screens, but default it off.
+    enabled: false,
+    label: 'Stripe (désactivé)',
+    description: 'Paiement désactivé (pivot vers lien bancaire / virement)',
+    publicKey: undefined,
+    status: 'pending',
   },
   qonto: {
     enabled: false,
@@ -57,11 +59,11 @@ export const integrations: IntegrationsConfig = {
     status: 'pending',
   },
   sheets: {
-    enabled: false,
+    enabled: !!import.meta.env.VITE_SHEETS_PUBLIC_URL || !!import.meta.env.VITE_SHEETS_API_URL,
     label: 'Google Sheets',
-    description: 'Export et synchronisation des données',
+    description: 'Catalogue public (source principale)',
     apiBaseUrl: import.meta.env.VITE_SHEETS_API_URL,
-    status: 'pending',
+    status: (import.meta.env.VITE_SHEETS_PUBLIC_URL || import.meta.env.VITE_SHEETS_API_URL) ? 'configured' : 'pending',
   },
   openai: {
     enabled: !!import.meta.env.VITE_OPENAI_API_KEY,
