@@ -96,7 +96,7 @@ export default function PrivacyPolicy() {
             <li><strong>Nos prestataires de services</strong> :
               <ul>
                 <li>Hébergement (Supabase)</li>
-                <li>Paiement (Stripe)</li>
+                <li>Paiement (lien bancaire ou virement)</li>
                 <li>Communication (services email/SMS)</li>
               </ul>
             </li>

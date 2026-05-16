@@ -173,7 +173,7 @@ export function TermsOfUsePage() {
               <div>
                 <h3 className="font-semibold text-slate-200 mb-2">7.2. Paiement</h3>
                 <p className="text-sm mb-2">
-                  Le paiement s'effectue en ligne via <strong className="text-slate-200">Stripe</strong>
+                  Le paiement s'effectue via un lien bancaire ou par virement après validation
                   (carte bancaire, Apple Pay, Google Pay).
                 </p>
                 <p className="text-sm">

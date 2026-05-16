@@ -5,6 +5,7 @@ import EnhancedMap from '../components/Map/EnhancedMap';
 import MapFilters from '../components/Map/MapFilters';
 import { ProductCard } from '../components/ProductCard';
 import { Cart } from '../components/Cart';
+import { CheckoutModal } from '../components/CheckoutModal';
 import { OrderTracking } from '../components/OrderTracking';
 import { UserProfile } from '../components/UserProfile';
 import { ClientRequestForm } from '../components/ClientRequestForm';
@@ -34,6 +35,7 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
   const [products, setProducts] = useState<Product[]>([]);
   const [relayPoints, setRelayPoints] = useState<RelayPoint[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [userLocation, setUserLocation] = useState<Location>({
     latitude: 14.6415,
     longitude: -61.0242,
@@ -91,6 +93,7 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
       return;
     }
     try {
+      // Catalogue: on passe par catalogService (Sheets possible), pas de select Supabase direct ici.
       if (isErpConfigured) {
         const data = await catalogService.listProducts();
         setProducts(data || []);
@@ -101,17 +104,8 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
         setProducts(data || []);
         return;
       }
-
-      const { data, error } = await supabase
-        .from('products')
-        .select(`
-          *,
-          vendor:vendors(*)
-        `)
-        .eq('is_available', true);
-
-      if (error) throw error;
-      setProducts(data || []);
+      const data = await catalogService.listProducts();
+      setProducts((data as unknown as Product[]) || []);
     } catch (error) {
       console.error('Error loading products:', error);
       if (shouldFallbackToDemo(error)) {
@@ -504,7 +498,16 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
     <div className="min-h-screen bg-background">
       {renderView()}
       <Navigation userType="customer" currentView={currentView} onNavigate={setCurrentView} />
-      {showCart && <Cart onClose={() => setShowCart(false)} />}
+      {showCart && (
+        <Cart
+          onClose={() => setShowCart(false)}
+          onCheckout={() => {
+            setShowCart(false);
+            setCheckoutOpen(true);
+          }}
+        />
+      )}
+      <CheckoutModal isOpen={checkoutOpen} onClose={() => setCheckoutOpen(false)} />
     </div>
   );
 }

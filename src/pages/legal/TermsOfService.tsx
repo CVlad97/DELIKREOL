@@ -70,7 +70,7 @@ export default function TermsOfService() {
 
           <h3>5.2 Modalités de paiement</h3>
           <p>
-            Le paiement s'effectue en ligne par carte bancaire via notre prestataire de paiement sécurisé Stripe. Le compte du Client est débité lors de la validation de la commande.
+            Le paiement s'effectue via un lien bancaire ou par virement après validation humaine de la commande. Le Client reçoit les modalités (lien ou coordonnées) avant préparation.
           </p>
 
           <h2>6. Livraison</h2>

@@ -56,7 +56,7 @@ export function PrivacyPolicyPage() {
                   <li>Numéro de téléphone</li>
                   <li>Adresse de livraison</li>
                   <li>Historique de commandes</li>
-                  <li>Données de paiement (traitées par Stripe)</li>
+                  <li>Données de paiement (lien bancaire ou virement)</li>
                 </ul>
               </div>
 
@@ -91,7 +91,7 @@ export function PrivacyPolicyPage() {
             <ul className="list-disc list-inside space-y-2">
               <li>Gérer les commandes et livraisons</li>
               <li>Faciliter la communication entre clients et partenaires</li>
-              <li>Traiter les paiements (via Stripe)</li>
+              <li>Traiter les paiements (lien bancaire ou virement)</li>
               <li>Vérifier l'éligibilité des partenaires (documents administratifs)</li>
               <li>Améliorer nos services et la plateforme</li>
               <li>Respecter nos obligations légales et réglementaires</li>
@@ -119,7 +119,7 @@ export function PrivacyPolicyPage() {
               <li><strong className="text-slate-200">Sous-traitants techniques :</strong>
                 <ul className="list-disc list-inside ml-6 mt-2 space-y-1 text-sm">
                   <li>Supabase (hébergement base de données)</li>
-                  <li>Stripe (paiements en ligne)</li>
+                  <li>Paiement (lien bancaire ou virement)</li>
                   <li>Services de communication (email, SMS)</li>
                 </ul>
               </li>
@@ -172,7 +172,7 @@ export function PrivacyPolicyPage() {
               <li>Divulgation non autorisée</li>
             </ul>
             <p className="mt-4">
-              Nos sous-traitants (Supabase, Stripe) sont conformes aux standards de sécurité internationaux.
+              Nos sous-traitants (Supabase, hébergement et services tiers éventuels) sont conformes aux standards de sécurité internationaux.
             </p>
           </section>
 
@@ -180,7 +180,7 @@ export function PrivacyPolicyPage() {
             <h2 className="text-2xl font-bold text-emerald-400 mb-4">9. Transferts hors UE</h2>
             <p className="mb-4">
               Certaines données peuvent être transférées vers des pays hors Union Européenne,
-              notamment vers les États-Unis (Supabase, Stripe).
+              notamment vers les États-Unis (ex: Supabase).
             </p>
             <p>
               Ces transferts sont encadrés par les clauses contractuelles types de la Commission Européenne

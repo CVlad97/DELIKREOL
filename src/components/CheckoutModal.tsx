@@ -1,15 +1,16 @@
 import { useMemo, useState } from 'react';
-import { Banknote, CreditCard, MessageCircle, X, MapPin, Store, Package } from 'lucide-react';
+import { Banknote, Landmark, MessageCircle, X, MapPin, Store, Package } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { ordersService } from '../services/ordersService';
+import { shouldFallbackToDemo } from '../utils/supabaseFallback';
 
 interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type PaymentMode = 'paypal' | 'secure_card_link' | 'whatsapp';
+type PaymentMode = 'bank_transfer' | 'whatsapp';
 
 export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const { items, total, clearCart } = useCart();
@@ -24,20 +25,20 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const deliveryFee = deliveryType === 'home_delivery' ? 5.0 : 0;
   const finalTotal = total + deliveryFee;
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
+  const bankPaymentUrl = (import.meta.env.VITE_BANK_PAYMENT_URL as string | undefined) || '';
+  const bankPaymentIban = (import.meta.env.VITE_BANK_IBAN as string | undefined) || '';
+  const bankPaymentBic = (import.meta.env.VITE_BANK_BIC as string | undefined) || '';
+  const bankPaymentLabel = (import.meta.env.VITE_BANK_PAYMENT_LABEL as string | undefined) || 'Virement / lien bancaire';
 
   const paymentOptions = useMemo(
     () => [
       {
-        id: 'paypal' as const,
-        title: 'PayPal',
-        subtitle: 'Paiement confirmé par lien PayPal',
-        icon: CreditCard,
-      },
-      {
-        id: 'secure_card_link' as const,
-        title: 'Carte via lien sécurisé',
-        subtitle: 'Lien de paiement transmis après validation',
-        icon: Banknote,
+        id: 'bank_transfer' as const,
+        title: bankPaymentLabel,
+        subtitle: bankPaymentUrl
+          ? 'Ouvrir le lien bancaire (si disponible)'
+          : 'Virement bancaire (IBAN/BIC) sur demande',
+        icon: Landmark,
       },
       {
         id: 'whatsapp' as const,
@@ -46,7 +47,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         icon: MessageCircle,
       },
     ],
-    [],
+    [bankPaymentLabel, bankPaymentUrl],
   );
 
   if (!isOpen) return null;
@@ -63,12 +64,16 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     setLoading(true);
     setError('');
 
+    const paymentLabel = paymentOptions.find((option) => option.id === paymentMode)?.title ?? 'WhatsApp';
+
     try {
       const orderNumber = `DK${Date.now().toString().slice(-8)}`;
-      const paymentLabel = paymentOptions.find((option) => option.id === paymentMode)?.title ?? 'WhatsApp';
       const paymentNotes = [
         `Mode de paiement souhaite: ${paymentLabel}`,
         `Assistance WhatsApp: https://wa.me/${whatsappNumber}`,
+        bankPaymentUrl ? `Lien bancaire: ${bankPaymentUrl}` : '',
+        bankPaymentIban ? `IBAN: ${bankPaymentIban}` : '',
+        bankPaymentBic ? `BIC: ${bankPaymentBic}` : '',
         'Paiement final confirme avant preparation.',
       ].join('\n');
 
@@ -97,6 +102,28 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       onClose();
     } catch (err: any) {
       console.error('Error creating order:', err);
+      // Si Supabase est en pause / indisponible, on ne bloque pas le client:
+      // on garde le panier et on bascule vers une confirmation WhatsApp.
+      if (shouldFallbackToDemo(err)) {
+        const waText = [
+          `Bonjour DELIKREOL, je souhaite confirmer une commande (${finalTotal.toFixed(2)} €).`,
+          '',
+          `Livraison: ${deliveryType === 'home_delivery' ? `domicile (${address || 'adresse à préciser'})` : 'retrait'}`,
+          '',
+          'Panier:',
+          ...items.map((i) => `- ${i.name} x${i.quantity} (${(i.price * i.quantity).toFixed(2)} €)`),
+          '',
+          notes.trim() ? `Note: ${notes.trim()}` : '',
+          '',
+          `Paiement souhaité: ${paymentLabel}`,
+        ]
+          .filter(Boolean)
+          .join('\n');
+        const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waText)}`;
+        setError("Backend indisponible: utilisez WhatsApp pour valider la commande (panier conservé).");
+        window.open(waUrl, '_blank', 'noopener,noreferrer');
+        return;
+      }
       setError('Erreur lors de la création de la commande');
     } finally {
       setLoading(false);
