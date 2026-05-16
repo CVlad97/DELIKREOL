@@ -31,6 +31,7 @@ import { buildPartnerDispatchMessage, downloadOrderPdf } from '../utils/orderPdf
 import { publicSupabase } from '../lib/publicSupabase';
 import { mockProducts } from '../data/mockCatalog';
 import { getWhatsAppBusinessLink } from '../utils/whatsapp';
+import { useToast } from '../contexts/ToastContext';
 
 type CatalogState = {
   configured: boolean;
@@ -409,6 +410,7 @@ export function PublicHomePage() {
   const [productPhoto, setProductPhoto] = useState<File | null>(null);
   const [supabasePaused, setSupabasePaused] = useState(false);
   const [supabasePausedHint, setSupabasePausedHint] = useState<string | null>(null);
+  const { showSuccess } = useToast();
 
   useEffect(() => {
     document.title = 'DELIKREOL Martinique | Plats créoles, traiteurs, produits locaux et entreprises';
@@ -757,6 +759,7 @@ export function PublicHomePage() {
     setSelectedProducts((current) => [...current, product]);
     setOrderConfirmed(false);
     setCheckoutStatus({ kind: 'idle' });
+    showSuccess('Ajouté au panier');
   }
 
   function removeFromSelection(index: number) {

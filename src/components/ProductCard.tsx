@@ -2,6 +2,7 @@ import { Plus, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { Product } from '../types';
 import { useCart } from '../contexts/CartContext';
+import { useToast } from '../contexts/ToastContext';
 
 interface ProductCardProps {
   product: Product;
@@ -9,6 +10,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
+  const { showSuccess } = useToast();
   const [showSim, setShowSim] = useState(false);
   const vendorLabel = product.vendor?.business_name ?? (product.vendor_id ? 'Vendeur local' : null);
 
@@ -43,7 +45,10 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
           <button
             type="button"
-            onClick={() => addItem(product)}
+            onClick={() => {
+              addItem(product);
+              showSuccess('Ajouté au panier');
+            }}
             disabled={!product.is_available}
             className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:shadow-warm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
