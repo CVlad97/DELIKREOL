@@ -524,7 +524,7 @@ dist/assets/index-[hash].js        ~400 kB │ gzip: ~120 kB (réduit avec lazy 
 Dans Netlify Dashboard → Site settings → Environment variables :
 
 ```env
-VITE_SUPABASE_URL=https://boihlgodmclljtckhmgz.supabase.co
+VITE_SUPABASE_URL=https://<YOUR_PROJECT_REF>.supabase.co
 VITE_SUPABASE_ANON_KEY=SUPABASE_ANON_KEY_REPLACE_ME
 VITE_STRIPE_PUBLISHABLE_KEY=STRIPE_PUBLISHABLE_KEY_REPLACE_ME
 VITE_APP_NAME=DELIKREOL
