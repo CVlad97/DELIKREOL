@@ -41,7 +41,7 @@ VITE_STRIPE_PUBLISHABLE_KEY=<<<COLLER_ICI_LA_CLE_PUBLIQUE_STRIPE>>>
 
 **Par ta vraie clé publique Stripe :**
 ```env
-VITE_STRIPE_PUBLISHABLE_KEY=STRIPE_PUBLISHABLE_KEY_REPLACE_ME...ta_cle_ici
+VITE_STRIPE_PUBLISHABLE_KEY=STRIPE_PUBLISHABLE_KEY_REPLACE_ME_REPLACE_ME
 ```
 
 📍 **Où trouver ta clé :** [Stripe Dashboard → API Keys](https://dashboard.stripe.com/test/apikeys)
