@@ -18,8 +18,10 @@ const REQUIRED_ENV_VARS = [
   {
     name: 'VITE_SUPABASE_ANON_KEY',
     description: 'Clé anonyme publique Supabase',
-    example: 'SUPABASE_ANON_KEY_REPLACE_ME
-    validation: (val) => val.startsWith('eyJ') && val.length > 100
+    example: 'SUPABASE_ANON_KEY_REPLACE_ME',
+    // Supabase anon keys often look like JWTs, but we don't enforce a JWT shape here
+    // to avoid encouraging token-like literals in docs/examples.
+    validation: (val) => typeof val === 'string' && val.length >= 20
   }
 ];
 
