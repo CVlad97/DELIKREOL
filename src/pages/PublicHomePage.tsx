@@ -144,7 +144,6 @@ const whatsappBase = `https://wa.me/${whatsappNumber}`;
 const featuredCategories = ['plats créoles', 'traiteurs', 'box / plateaux', 'desserts', 'boissons', 'commande entreprise'];
 const budgetRanges = ['Tous', '≤ 15 €', '15 € - 30 €', '30 € et plus'];
 const publicSiteUrl = 'https://cvlad97.github.io/DELIKREOL/';
-const partnerContributionAmount = 5;
 
 function formatWhatsAppLabel(value: string) {
   const digits = value.replace(/\D/g, '');
@@ -233,24 +232,6 @@ const reassurance = [
     title: 'Pensé pour la Martinique',
     text: 'Rayon réel, fallback commune si la géoloc manque et commandes entreprises adaptées aux usages locaux.',
     icon: MapPin,
-  },
-];
-
-const localGapSolutions = [
-  {
-    gap: 'Pas assez de preuve immédiate',
-    fix: 'Montrer tout de suite les partenaires visibles, les zones servies et le contact WhatsApp.',
-    impact: 'L’utilisateur comprend vite que DELIKREOL existe vraiment et peut être utilisé maintenant.',
-  },
-  {
-    gap: 'CTA trop dispersés',
-    fix: 'Garder un chemin principal vers le catalogue puis la commande, avec les autres options en soutien.',
-    impact: 'La page convertit mieux parce que l’action suivante est évidente.',
-  },
-  {
-    gap: 'Faisabilité locale à rassurer',
-    fix: 'Afficher le rayon réel par partenaire, la commune de secours et la logique livraison/retrait.',
-    impact: 'Le modèle paraît réaliste pour la Martinique avant même la première commande.',
   },
 ];
 
@@ -1014,12 +995,12 @@ export function PublicHomePage() {
       <header className="sticky top-0 z-50 border-b border-white/80 bg-[#fff8ec]/92 backdrop-blur-xl">
         <div className="relative mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-3">
           <div className="hidden items-center gap-2 sm:flex">
-            <span className="rounded-full border border-orange-200 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-[#7c2d12] shadow-sm">
+            <span className="rounded-xl border border-orange-200 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-[#7c2d12] shadow-sm">
               Martinique
             </span>
           </div>
 
-          <a href="#accueil" className="brand-logo-frame flex items-center gap-3 rounded-full px-3 py-2" aria-label="DELIKREOL accueil">
+          <a href="#accueil" className="brand-logo-frame flex items-center gap-3 rounded-2xl px-3 py-2" aria-label="DELIKREOL accueil">
             <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-12 w-12 rounded-2xl bg-white p-1.5 shadow-lg sm:h-14 sm:w-14" />
             <div className="leading-none">
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#c2410c]">Local premium</p>
@@ -1030,10 +1011,9 @@ export function PublicHomePage() {
           <nav className="absolute left-1/2 top-full hidden -translate-x-1/2 items-center gap-2 rounded-b-[1.5rem] border border-t-0 border-orange-100 bg-[#fff8ec]/95 px-4 py-2 shadow-soft backdrop-blur lg:flex">
             <NavLink href="#catalogue">Catalogue</NavLink>
             <NavLink href="#zones">Zones</NavLink>
-            <NavLink href="#entreprises">Entreprises</NavLink>
-            <NavLink href="#partenaires">Devenir partenaire</NavLink>
-            <NavLink href={investorOpsLink}>Investisseur</NavLink>
+            <NavLink href="#pro">Partenaires & entreprises</NavLink>
             <NavLink href="#faq">FAQ</NavLink>
+            <NavLink href="#contact">Contact</NavLink>
           </nav>
 
           <div className="hidden items-end gap-3 xl:flex">
@@ -1046,12 +1026,6 @@ export function PublicHomePage() {
                 {publicSiteUrl.replace('https://', '')}
               </a>
             </div>
-            <a
-              href={partnerLink}
-              className="hidden rounded-full border border-orange-200 bg-white px-4 py-2 text-sm font-black text-[#7c2d12] shadow-sm transition hover:-translate-y-0.5 sm:inline-flex"
-            >
-              Devenir partenaire
-            </a>
             <a
               href={customerPath}
               onClick={(event) => {
@@ -1106,17 +1080,9 @@ export function PublicHomePage() {
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <span className="text-xs font-black uppercase tracking-[0.16em] text-stone-400">Communes partenaires</span>
                   {serviceZones.slice(0, 4).map((zone) => (
-                    <button
-                      type="button"
-                      key={zone}
-                      onClick={() => {
-                        setCommuneFilter(zone);
-                        setQuery(zone);
-                      }}
-                      className="rounded-full border border-orange-100 bg-[#fff8ef] px-3 py-1.5 text-xs font-black text-[#7c2d12]"
-                    >
+                    <span key={zone} className="rounded-lg border border-orange-100 bg-[#fff8ef] px-3 py-1.5 text-xs font-black text-[#7c2d12]">
                       {zone}
-                    </button>
+                    </span>
                   ))}
                 </div>
               </div>
@@ -1131,12 +1097,6 @@ export function PublicHomePage() {
                 </button>
                 <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Bonjour DELIKREOL, je veux être orienté vers l’offre la plus adaptée.')}`} className="inline-flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-white/80 px-6 py-4 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5">
                   Parler à DELIKREOL <MessageCircle className="h-4 w-4" />
-                </a>
-                <a href="#partenaires" className="inline-flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-white/80 px-6 py-4 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5">
-                  Devenir partenaire <ChevronRight className="h-4 w-4" />
-                </a>
-                <a href={investorOpsLink} className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-200 bg-white/70 px-6 py-4 text-sm font-black text-[#2a190f] transition hover:-translate-y-0.5">
-                  Voir le plan investisseur <BarChart3 className="h-4 w-4" />
                 </a>
               </div>
             </div>
@@ -1188,45 +1148,11 @@ export function PublicHomePage() {
             title="Chercher, ajouter, confirmer, suivre."
             text="Un parcours court, lisible sur mobile."
           />
-          <div className="mt-4 grid gap-3 rounded-[1.75rem] border border-emerald-200 bg-emerald-50/80 p-4 text-sm leading-6 text-emerald-950 shadow-sm sm:grid-cols-[1fr_auto] sm:items-center">
-            <div>
-              <p className="font-black uppercase tracking-[0.18em] text-emerald-700">Offre partenaire</p>
-              <p className="mt-1 font-semibold">Livraison offerte dès 80€ pour le client.</p>
-              <p className="text-emerald-900/80">Le partenaire contribue de {partnerContributionAmount}€ sur les commandes éligibles afin de garder une mécanique win-win.</p>
-            </div>
-            <a href={`https://wa.me/${whatsappNumber}`} className="inline-flex items-center justify-center rounded-full bg-emerald-600 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-white shadow-sm transition hover:-translate-y-0.5">
-              Contact direct
-            </a>
-          </div>
           <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {howItWorks.map((step, index) => (
+            {howItWorks.slice(0, 3).map((step, index) => (
               <StepCard key={step.title} index={index + 1} title={step.title} text={step.text} />
             ))}
           </div>
-          <details className="mt-6 rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
-            <summary className="cursor-pointer text-sm font-black uppercase tracking-[0.18em] text-[#c2410c]">Détails (optionnel)</summary>
-            <div className="mt-4 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-              <div className="rounded-[1.5rem] border border-orange-100 bg-[#fffaf4] p-4">
-                <h3 className="text-lg font-black text-[#2a190f]">Faisabilité</h3>
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <GapMetric label="Zone" value="Rayon réel par partenaire" />
-                  <GapMetric label="Secours" value="Commune fallback si GPS absent" />
-                  <GapMetric label="Commande" value="Catalogue + panier" />
-                  <GapMetric label="Support" value="WhatsApp en secondaire" />
-                </div>
-              </div>
-              <div className="rounded-[1.5rem] border border-orange-100 bg-[#fffaf4] p-4">
-                <h3 className="text-lg font-black text-[#2a190f]">Améliorations</h3>
-                <div className="mt-3 space-y-2">
-                  {localGapSolutions.slice(0, 2).map((item) => (
-                    <p key={item.gap} className="text-sm font-semibold text-stone-700">
-                      {item.fix}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </details>
         </section>
 
         <section id="catalogue" className="bg-[#fffdf8] py-14">
@@ -1457,6 +1383,15 @@ export function PublicHomePage() {
           </div>
         </section>
 
+        <section id="pro" className="mx-auto max-w-7xl px-4 pb-10">
+          <details className="rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
+            <summary className="cursor-pointer text-sm font-black uppercase tracking-[0.16em] text-[#7c2d12]">
+              Vous êtes partenaire, livreur ou entreprise ? Ouvrir l’espace pro
+            </summary>
+            <p className="mt-3 text-sm text-stone-600">
+              Cette zone est secondaire pour le public. Le flux principal reste le catalogue et la commande.
+            </p>
+            <div className="mt-6 space-y-8">
         <section className="bg-[#fff8ef] py-14">
           <div className="mx-auto max-w-7xl px-4">
             <div className="rounded-[2.4rem] border border-orange-100 bg-white p-5 shadow-soft lg:p-8">
@@ -1755,18 +1690,21 @@ export function PublicHomePage() {
             </div>
           </div>
         </section>
+            </div>
+          </details>
+        </section>
 
         <section id="faq" className="bg-white py-14">
           <div className="mx-auto max-w-7xl px-4">
             <SectionTitle
               eyebrow="FAQ"
               title="Les questions qui déclenchent la conversion."
-              text="Chaque réponse doit lever une objection simple: confiance, zone, disponibilité, commande, partenaire ou entreprise."
+              text="Chaque réponse doit lever une objection simple: confiance, zone, disponibilité et commande."
             />
             <div className="mt-6 rounded-[1.75rem] border border-orange-100 bg-[#fff8ef] p-5 shadow-soft">
               <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">Conversion</p>
               <p className="mt-3 max-w-3xl text-sm leading-6 text-stone-600">
-                Pour séduire davantage, la page doit garder un seul chemin principal visible à la fois: explorer le catalogue, discuter sur WhatsApp, ou demander un devis.
+                Le parcours public priorise une seule action: choisir un produit et valider la commande. Les autres besoins restent en accès secondaire.
               </p>
             </div>
             <div className="mt-8 grid gap-4 lg:grid-cols-2">
@@ -1790,11 +1728,8 @@ export function PublicHomePage() {
               <a href={supportLink} className="rounded-2xl bg-white px-5 py-4 text-center font-black text-[#24170f]">
                 Besoin d’aide
               </a>
-              <a href={partnerLink} className="rounded-2xl border border-white/20 px-5 py-4 text-center font-black text-white">
-                Devenir partenaire
-              </a>
-              <a href={businessLink} className="rounded-2xl border border-white/20 px-5 py-4 text-center font-black text-white">
-                Demande entreprise
+              <a href="#pro" className="rounded-2xl border border-white/20 px-5 py-4 text-center font-black text-white">
+                Accès partenaires & entreprises
               </a>
               <div className="rounded-2xl bg-white/10 px-5 py-4 text-sm leading-6 text-stone-100">
                 Email: <span className="font-bold">operations@delikreol.com</span>
@@ -1819,7 +1754,7 @@ export function PublicHomePage() {
               </div>
             </div>
             <p className="max-w-xl text-sm leading-6 text-stone-600">
-              Commande locale, partenaires visibles, demandes entreprises et parcours mobile-first pour faire de DELIKREOL une vraie plateforme opérationnelle.
+              DELIKREOL est prioritairement une plateforme de commande locale: catalogue visuel, panier simple et confirmation rapide sur mobile.
             </p>
           </div>
           <FooterBlock title="Couverture partenaires">
@@ -1834,8 +1769,8 @@ export function PublicHomePage() {
             <FooterLink label="CGV" />
             <FooterLink label="Mentions légales" />
             <FooterLink label="Confidentialité" />
-            <a href={investorOpsLink} className="block text-sm font-bold text-[#7c2d12]">
-              Investisseur / opérations
+            <a href="#pro" className="block text-sm font-bold text-[#7c2d12]">
+              Espace partenaires & entreprises
             </a>
             <a href={whatsappBase} className="inline-flex items-center gap-2 text-sm font-bold text-[#7c2d12]">
               WhatsApp <MessageCircle className="h-4 w-4" />
@@ -1867,8 +1802,8 @@ export function PublicHomePage() {
           >
             Commander maintenant
           </button>
-          <a href="#partenaires" className="inline-flex items-center justify-center rounded-2xl border border-orange-200 px-4 py-3 text-sm font-black text-[#7c2d12]">
-            Partenaire
+          <a href={supportLink} className="inline-flex items-center justify-center rounded-2xl border border-orange-200 px-4 py-3 text-sm font-black text-[#7c2d12]">
+            Aide
           </a>
         </div>
       )}
@@ -1886,10 +1821,10 @@ export function PublicHomePage() {
 function BadgeRow() {
   return (
     <div className="flex flex-wrap gap-2">
-      <span className="rounded-full border border-orange-200 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-[#c2410c] shadow-sm">
+      <span className="rounded-lg border border-orange-200 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-[#c2410c] shadow-sm">
         plateforme locale premium
       </span>
-      <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-800">
+      <span className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-800">
         pensée pour la Martinique
       </span>
     </div>
@@ -2642,7 +2577,7 @@ function HeroFallback({ name, loading, configured }: { name: string; loading?: b
 
 function NavLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <a href={href} className="rounded-full px-4 py-2 text-sm font-black text-[#5a4334] transition hover:bg-white hover:text-[#2a190f]">
+    <a href={href} className="rounded-lg px-4 py-2 text-sm font-black text-[#5a4334] transition hover:bg-white hover:text-[#2a190f]">
       {children}
     </a>
   );
