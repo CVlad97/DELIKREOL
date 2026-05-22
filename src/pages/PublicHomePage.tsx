@@ -352,7 +352,7 @@ const defaultBusinessRequestForm: BusinessRequestForm = {
 
 export function PublicHomePage() {
   const baseUrl = import.meta.env.BASE_URL || '/';
-  const customerPath = `${baseUrl}customer`;
+  const customerPath = `${baseUrl}?view=customer`;
   const orderFormUrl = ORDER_FORM_URL;
   const sheetsFirstMode = SHEETS_FIRST_MODE;
   const operationsEmail = PUBLIC_OPERATIONS_EMAIL;
@@ -363,7 +363,7 @@ export function PublicHomePage() {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       return;
     }
-    window.location.assign(mode === 'simulation' ? `${customerPath}?mode=simulation` : `${baseUrl}#catalogue`);
+    window.location.assign(mode === 'simulation' ? `${customerPath}&mode=simulation` : `${baseUrl}#catalogue`);
   };
   const [catalog, setCatalog] = useState<CatalogState>({ configured: false, vendors: [], products: [] });
   const [query, setQuery] = useState('');
@@ -419,7 +419,7 @@ export function PublicHomePage() {
   }, []);
 
   useEffect(() => {
-    if (window.location.pathname.endsWith('/customer') || window.location.hash === '#catalogue') {
+    if (window.location.pathname.endsWith('/customer') || new URL(window.location.href).searchParams.get('view') === 'customer' || window.location.hash === '#catalogue') {
       const timer = window.setTimeout(() => {
         const target = document.getElementById('catalogue');
         target?.scrollIntoView({ behavior: 'smooth', block: 'start' });

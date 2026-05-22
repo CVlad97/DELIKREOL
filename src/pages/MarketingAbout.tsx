@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import { Heart, Users, Leaf, TrendingUp } from 'lucide-react';
 
 export default function MarketingAbout() {
+  const customerEntry = `${import.meta.env.BASE_URL || '/'}?view=customer`;
+
   return (
     <div className="min-h-screen bg-white">
       <section className="relative bg-gradient-to-br from-emerald-50 to-teal-50 py-16 px-4">
@@ -120,7 +122,7 @@ export default function MarketingAbout() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              to="/customer"
+              to={customerEntry}
               className="inline-flex items-center justify-center px-8 py-3 bg-white text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors font-medium"
             >
               Commander

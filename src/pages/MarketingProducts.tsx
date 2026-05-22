@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import { Wine, Leaf, Hammer, Sprout, Package } from 'lucide-react';
 
 export default function MarketingProducts() {
+  const customerEntry = `${import.meta.env.BASE_URL || '/'}?view=customer`;
+
   const categories = [
     {
       icon: Wine,
@@ -151,7 +153,7 @@ export default function MarketingProducts() {
             Découvrez tous nos produits et commencez vos achats dès maintenant.
           </p>
           <Link
-            to="/customer"
+            to={customerEntry}
             className="inline-flex items-center justify-center px-8 py-3 bg-white text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors font-medium"
           >
             Voir tous les produits
