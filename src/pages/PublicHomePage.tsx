@@ -834,6 +834,50 @@ export function PublicHomePage() {
       .join('\n');
   }
 
+  function saveOrderLocally(params: {
+    orderId: string;
+    orderNumber: string;
+    source: string;
+    items: Array<{
+      product_id: string;
+      vendor_id: string;
+      product_name: string;
+      vendor_name: string;
+      quantity: number;
+      unit_price: number;
+    }>;
+  }) {
+    try {
+      const key = 'delikreol_local_orders_v1';
+      const raw = localStorage.getItem(key);
+      const parsed = raw ? JSON.parse(raw) : [];
+      const archive = Array.isArray(parsed) ? parsed : [];
+      const record = {
+        id: params.orderId,
+        order_number: params.orderNumber,
+        created_at: new Date().toISOString(),
+        customer_name: customerName.trim(),
+        customer_phone: customerPhone.trim(),
+        fulfillment_mode: fulfillmentMode,
+        delivery_address: deliveryAddress.trim() || null,
+        delivery_slot: deliverySlot.trim() || null,
+        payment_method: paymentMethod,
+        vendor_availability_status: vendorAvailabilityStatus,
+        total_amount: selectionEconomics.total_client,
+        source: params.source,
+        items: params.items,
+      };
+      const next = [record, ...archive].slice(0, 200);
+      localStorage.setItem(key, JSON.stringify(next));
+      return { saved: true as const };
+    } catch (error) {
+      return {
+        saved: false as const,
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
+
   function handleWhatsAppCheckoutFallback() {
     const message = buildWhatsAppFallbackOrderMessage();
     const link = getWhatsAppBusinessLink(whatsappNumber, message);
@@ -903,6 +947,47 @@ export function PublicHomePage() {
       return true;
     };
 
+    const fallbackToLocal = async (reason: string) => {
+      setSupabasePaused(true);
+      setSupabasePausedHint(reason);
+      const localSave = saveOrderLocally({
+        orderId: checkoutOrderId,
+        orderNumber: checkoutOrderNumber,
+        source: sheetsFirstMode ? 'public_checkout_local_sheets_first' : 'public_checkout_local_fallback',
+        items: orderItemsPayload.map((item) => ({
+          product_id: item.product_id,
+          vendor_id: item.vendor_id,
+          product_name: item.product_name,
+          vendor_name: item.vendor_name,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+        })),
+      });
+
+      const localSummary = [
+        'Commande enregistrée localement (mode secours).',
+        '',
+        buildOrderSummary(checkoutOrderNumber),
+      ].join('\n');
+      await copyOperationalMessage(localSummary, 'Récapitulatif commande');
+
+      setOrderConfirmed(true);
+      setCheckoutStatus({
+        kind: 'success',
+        orderNumber: checkoutOrderNumber,
+        message: localSave.saved
+          ? `Commande ${checkoutOrderNumber} enregistrée localement. Finalisation opérateur en cours.`
+          : `Commande ${checkoutOrderNumber} préparée. Sauvegarde locale partielle (${localSave.error || 'erreur locale'}).`,
+      });
+      trackCheckoutSuccess({
+        order_number: checkoutOrderNumber,
+        items_count: selectedProducts.length,
+        total_amount: selectionEconomics.total_client,
+        mode: `${fulfillmentMode}_local_backup`,
+      });
+      return true;
+    };
+
     const fallbackToSheets = async (reason: string) => {
       setSupabasePaused(true);
       setSupabasePausedHint(reason);
@@ -910,18 +995,10 @@ export function PublicHomePage() {
         if (await fallbackToOrderForm(`${reason} Endpoint Sheets non configuré.`)) {
           return true;
         }
-        setCheckoutStatus({
-          kind: 'saving',
-          message: 'Aucun endpoint configuré. Bascule en support WhatsApp...',
-        });
-        setOrderConfirmed(true);
-        setCheckoutStatus({
-          kind: 'success',
-          orderNumber: checkoutOrderNumber,
-          message: `Commande ${checkoutOrderNumber} transmise en mode secours WhatsApp. Configurez VITE_SHEETS_ORDERS_URL ou VITE_ORDER_FORM_URL pour l’enregistrement automatique.`,
-        });
-        handleWhatsAppCheckoutFallback();
-        return false;
+        await fallbackToLocal(
+          `${reason} Aucun endpoint Sheets/Form configuré. Sauvegarde locale activée, WhatsApp reste en support manuel.`,
+        );
+        return true;
       }
 
       const saved = await saveFallbackOrderToSheet({
@@ -950,13 +1027,10 @@ export function PublicHomePage() {
         if (await fallbackToOrderForm(`${reason} ${saved.error || 'Erreur endpoint Sheets.'}`)) {
           return true;
         }
-        setCheckoutStatus({
-          kind: 'error',
-          message:
-            `Commande applicative indisponible (${saved.error || 'endpoint secours absent'}). ` +
-            'Utilisez le bouton support.',
-        });
-        return false;
+        await fallbackToLocal(
+          `${reason} Endpoint Sheets indisponible (${saved.error || 'endpoint secours absent'}). Sauvegarde locale activée.`,
+        );
+        return true;
       }
 
       setOrderConfirmed(true);
