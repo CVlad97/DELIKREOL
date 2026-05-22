@@ -16,9 +16,13 @@ function App() {
     ? `/${window.location.search.slice(2).split('&')[0].split('#')[0]}`
     : '';
   const effectivePathname = legacyPath || pathname;
+  const isCustomerRoute = view === 'customer' || effectivePathname.endsWith('/customer');
+  const isLegacyCustomerAppRoute = view === 'customer-app' || effectivePathname.endsWith('/customer-app');
 
-  const content = view === 'customer' || effectivePathname.endsWith('/customer')
+  const content = isLegacyCustomerAppRoute
     ? <CustomerApp />
+    : isCustomerRoute
+      ? <PublicHomePage />
     : view === 'partner-documents' || effectivePathname.endsWith('/partner-documents')
       ? <PartnerDashboardPage />
       : view === 'admin-documents' || effectivePathname.endsWith('/admin-documents')

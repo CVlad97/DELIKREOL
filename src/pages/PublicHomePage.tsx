@@ -357,11 +357,13 @@ export function PublicHomePage() {
   const sheetsFirstMode = SHEETS_FIRST_MODE;
   const operationsEmail = PUBLIC_OPERATIONS_EMAIL;
   const gotoCustomer = (mode?: 'simulation') => {
-    if (window.location.pathname.endsWith('/customer') || new URL(window.location.href).searchParams.get('view') === 'customer') {
+    if (mode === 'simulation') localStorage.setItem('delikreol_demo_override', 'true');
+    const target = document.getElementById('commande') || document.getElementById('catalogue');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       return;
     }
-    if (mode === 'simulation') localStorage.setItem('delikreol_demo_override', 'true');
-    window.location.assign(mode === 'simulation' ? `${customerPath}?mode=simulation` : customerPath);
+    window.location.assign(mode === 'simulation' ? `${customerPath}?mode=simulation` : `${baseUrl}#catalogue`);
   };
   const [catalog, setCatalog] = useState<CatalogState>({ configured: false, vendors: [], products: [] });
   const [query, setQuery] = useState('');
@@ -414,6 +416,17 @@ export function PublicHomePage() {
     upsertMeta('og:title', 'DELIKREOL Martinique | Plateforme locale premium');
     upsertMeta('og:description', 'Commandez des plats créoles et produits locaux en Martinique, avec retrait ou livraison selon votre commune.');
     trackPublicView();
+  }, []);
+
+  useEffect(() => {
+    if (window.location.pathname.endsWith('/customer') || window.location.hash === '#catalogue') {
+      const timer = window.setTimeout(() => {
+        const target = document.getElementById('catalogue');
+        target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+      return () => window.clearTimeout(timer);
+    }
+    return undefined;
   }, []);
 
   useEffect(() => {
@@ -898,9 +911,16 @@ export function PublicHomePage() {
           return true;
         }
         setCheckoutStatus({
-          kind: 'error',
-          message: 'Commande indisponible: configurez VITE_SHEETS_ORDERS_URL ou VITE_ORDER_FORM_URL.',
+          kind: 'saving',
+          message: 'Aucun endpoint configuré. Bascule en support WhatsApp...',
         });
+        setOrderConfirmed(true);
+        setCheckoutStatus({
+          kind: 'success',
+          orderNumber: checkoutOrderNumber,
+          message: `Commande ${checkoutOrderNumber} transmise en mode secours WhatsApp. Configurez VITE_SHEETS_ORDERS_URL ou VITE_ORDER_FORM_URL pour l’enregistrement automatique.`,
+        });
+        handleWhatsAppCheckoutFallback();
         return false;
       }
 
