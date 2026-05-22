@@ -1,4 +1,5 @@
 import { FormEvent, ReactNode, useEffect, useMemo, useState, type ComponentType, type MouseEvent } from 'react';
+import { CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet';
 import {
   ArrowRight,
   BadgeCheck,
@@ -146,6 +147,7 @@ type CustomerLocation = {
 };
 
 type GeoStatus = 'idle' | 'loading' | 'success' | 'error' | 'unsupported';
+type GeoConsentState = 'idle' | 'ask' | 'declined' | 'granted';
 
 const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 const whatsappBase = `https://wa.me/${whatsappNumber}`;
@@ -370,7 +372,9 @@ export function PublicHomePage() {
   const [deliveryNotes, setDeliveryNotes] = useState('');
   const [deliverySlot, setDeliverySlot] = useState('');
   const [customerLocation, setCustomerLocation] = useState<CustomerLocation | null>(null);
+  const [pendingCustomerLocation, setPendingCustomerLocation] = useState<CustomerLocation | null>(null);
   const [geoStatus, setGeoStatus] = useState<GeoStatus>('idle');
+  const [geoConsentState, setGeoConsentState] = useState<GeoConsentState>('idle');
   const [geoError, setGeoError] = useState('');
   const [vendorAvailabilityStatus, setVendorAvailabilityStatus] = useState('À confirmer par DELIKREOL');
   const [copyStatus, setCopyStatus] = useState('');
@@ -980,27 +984,42 @@ export function PublicHomePage() {
     setNotificationPermission(permission);
   }
 
+  function askCustomerPosition() {
+    if (geoStatus === 'loading') return;
+    setGeoError('');
+    setGeoConsentState('ask');
+  }
+
+  function cancelCustomerPositionConsent() {
+    setGeoConsentState('declined');
+    setGeoError('');
+  }
+
   function useCustomerPosition() {
     if (!('geolocation' in navigator)) {
       setGeoStatus('unsupported');
+      setGeoConsentState('declined');
       setGeoError('Géolocalisation non supportée par ce navigateur. Saisissez l’adresse manuellement.');
       return;
     }
 
     setGeoStatus('loading');
+    setGeoConsentState('ask');
     setGeoError('');
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
-        setCustomerLocation({
+        setPendingCustomerLocation({
           lat: coords.latitude,
           lng: coords.longitude,
           accuracy: coords.accuracy,
           mapsUrl: `https://www.google.com/maps?q=${coords.latitude},${coords.longitude}`,
         });
         setGeoStatus('success');
+        setGeoConsentState('granted');
       },
       (positionError) => {
         setGeoStatus('error');
+        setGeoConsentState('declined');
         setGeoError(
           positionError.code === positionError.PERMISSION_DENIED
             ? 'Permission refusée. Saisissez l’adresse manuellement.'
@@ -1009,6 +1028,24 @@ export function PublicHomePage() {
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
     );
+  }
+
+  function confirmPendingCustomerPosition() {
+    if (!pendingCustomerLocation) {
+      setGeoError('Aucune position détectée à valider.');
+      return;
+    }
+    setCustomerLocation(pendingCustomerLocation);
+    setPendingCustomerLocation(null);
+    setGeoConsentState('granted');
+    setGeoError('');
+    showSuccess('Position validée.');
+  }
+
+  function rejectPendingCustomerPosition() {
+    setPendingCustomerLocation(null);
+    setGeoConsentState('declined');
+    if (!customerLocation) setGeoStatus('idle');
   }
 
   async function copyOperationalMessage(message: string, label: string) {
@@ -1284,11 +1321,11 @@ export function PublicHomePage() {
               </Select>
               <button
                 type="button"
-                onClick={useCustomerPosition}
+                onClick={askCustomerPosition}
                 disabled={geoStatus === 'loading'}
                 className="rounded-2xl border border-white/10 bg-white px-4 py-3 text-sm font-black text-[#2a190f] transition hover:-translate-y-0.5 disabled:opacity-60"
               >
-                {customerLocation ? 'Position active' : geoStatus === 'loading' ? 'Localisation...' : 'Voir autour de moi'}
+                {customerLocation ? 'Position validée' : pendingCustomerLocation ? 'Valider position' : geoStatus === 'loading' ? 'Localisation...' : 'Me géolocaliser'}
               </button>
             </div>
             <p className="mt-3 text-sm font-semibold text-stone-600">
@@ -1360,7 +1397,9 @@ export function PublicHomePage() {
                         deliverySlot={deliverySlot}
                         customerLocation={customerLocation}
                         geoStatus={geoStatus}
+                        geoConsentState={geoConsentState}
                         geoError={geoError}
+                        pendingCustomerLocation={pendingCustomerLocation}
                         fulfillmentMode={fulfillmentMode}
                         paymentMethod={paymentMethod}
                         vendorAvailabilityStatus={vendorAvailabilityStatus}
@@ -1375,7 +1414,11 @@ export function PublicHomePage() {
                         onDeliveryAddressChange={setDeliveryAddress}
                         onDeliveryNotesChange={setDeliveryNotes}
                         onDeliverySlotChange={setDeliverySlot}
-                        onCustomerPositionRequest={useCustomerPosition}
+                        onCustomerPositionRequest={askCustomerPosition}
+                        onConfirmCustomerPosition={useCustomerPosition}
+                        onCancelCustomerPosition={cancelCustomerPositionConsent}
+                        onValidatePendingCustomerPosition={confirmPendingCustomerPosition}
+                        onRejectPendingCustomerPosition={rejectPendingCustomerPosition}
                         onFulfillmentModeChange={setFulfillmentMode}
                         onPaymentMethodChange={setPaymentMethod}
                         onVendorAvailabilityStatusChange={setVendorAvailabilityStatus}
@@ -2072,7 +2115,9 @@ function SelectionPanel({
   deliverySlot,
   customerLocation,
   geoStatus,
+  geoConsentState,
   geoError,
+  pendingCustomerLocation,
   fulfillmentMode,
   paymentMethod,
   vendorAvailabilityStatus,
@@ -2088,6 +2133,10 @@ function SelectionPanel({
   onDeliveryNotesChange,
   onDeliverySlotChange,
   onCustomerPositionRequest,
+  onConfirmCustomerPosition,
+  onCancelCustomerPosition,
+  onValidatePendingCustomerPosition,
+  onRejectPendingCustomerPosition,
   onFulfillmentModeChange,
   onPaymentMethodChange,
   onVendorAvailabilityStatusChange,
@@ -2116,7 +2165,9 @@ function SelectionPanel({
   deliverySlot: string;
   customerLocation: CustomerLocation | null;
   geoStatus: GeoStatus;
+  geoConsentState: GeoConsentState;
   geoError: string;
+  pendingCustomerLocation: CustomerLocation | null;
   fulfillmentMode: 'delivery' | 'pickup';
   paymentMethod: string;
   vendorAvailabilityStatus: string;
@@ -2132,6 +2183,10 @@ function SelectionPanel({
   onDeliveryNotesChange: (value: string) => void;
   onDeliverySlotChange: (value: string) => void;
   onCustomerPositionRequest: () => void;
+  onConfirmCustomerPosition: () => void;
+  onCancelCustomerPosition: () => void;
+  onValidatePendingCustomerPosition: () => void;
+  onRejectPendingCustomerPosition: () => void;
   onFulfillmentModeChange: (mode: 'delivery' | 'pickup') => void;
   onPaymentMethodChange: (value: string) => void;
   onVendorAvailabilityStatusChange: (value: string) => void;
@@ -2145,6 +2200,8 @@ function SelectionPanel({
   onRemove: (index: number) => void;
   onClear: () => void;
 }) {
+  const mapPreviewLocation = pendingCustomerLocation ?? customerLocation;
+
   return (
     <aside data-testid="cart-panel" className="h-fit rounded-[2rem] border border-orange-100 bg-white p-5 shadow-elegant lg:sticky lg:top-28">
       <div className="flex items-center justify-between gap-3">
@@ -2253,9 +2310,78 @@ function SelectionPanel({
                 disabled={geoStatus === 'loading'}
                 className="shrink-0 rounded-xl bg-[#2a190f] px-3 py-2 text-xs font-black text-white disabled:opacity-60"
               >
-                {geoStatus === 'loading' ? 'Localisation...' : 'Utiliser ma position'}
+                {geoStatus === 'loading' ? 'Localisation...' : 'Me géolocaliser'}
               </button>
             </div>
+            {geoConsentState === 'ask' && (
+              <div className="mt-3 rounded-xl border border-orange-200 bg-[#fff8ef] p-3">
+                <p className="text-xs font-black text-[#7c2d12]">
+                  Souhaitez-vous être géolocalisé pour afficher votre position sur la carte ?
+                </p>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={onConfirmCustomerPosition}
+                    disabled={geoStatus === 'loading'}
+                    className="rounded-xl bg-[#d95f2d] px-3 py-2 text-xs font-black text-white disabled:opacity-60"
+                  >
+                    Oui, autoriser
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onCancelCustomerPosition}
+                    className="rounded-xl border border-orange-200 bg-white px-3 py-2 text-xs font-black text-[#7c2d12]"
+                  >
+                    Non, merci
+                  </button>
+                </div>
+              </div>
+            )}
+            {mapPreviewLocation && (
+              <div className="mt-3 overflow-hidden rounded-xl border border-orange-100">
+                <MapContainer
+                  center={[mapPreviewLocation.lat, mapPreviewLocation.lng]}
+                  zoom={16}
+                  scrollWheelZoom={false}
+                  className="h-44 w-full"
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <CircleMarker
+                    center={[mapPreviewLocation.lat, mapPreviewLocation.lng]}
+                    radius={8}
+                    pathOptions={{ color: '#d95f2d', fillColor: '#d95f2d', fillOpacity: 0.9 }}
+                  >
+                    <Popup>Votre position</Popup>
+                  </CircleMarker>
+                </MapContainer>
+              </div>
+            )}
+            {pendingCustomerLocation && (
+              <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+                <p className="text-xs font-bold text-emerald-900">
+                  Position détectée : {pendingCustomerLocation.lat.toFixed(6)}, {pendingCustomerLocation.lng.toFixed(6)}
+                </p>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={onValidatePendingCustomerPosition}
+                    className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white"
+                  >
+                    Valider ma position
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onRejectPendingCustomerPosition}
+                    className="rounded-xl border border-emerald-300 bg-white px-3 py-2 text-xs font-black text-emerald-800"
+                  >
+                    Rejeter
+                  </button>
+                </div>
+              </div>
+            )}
             {fulfillmentMode === 'delivery' && (
               <div className="mt-3 grid gap-1 rounded-xl bg-[#fff8ef] p-3 text-xs font-bold text-[#7c2d12]">
                 <span>Adresse obligatoire</span>
