@@ -1057,6 +1057,15 @@ export function PublicHomePage() {
     setOrderConfirmed(true);
   }
 
+  function scrollToCheckoutPanel() {
+    const target = document.getElementById('commande');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   return (
     <div className="min-h-screen bg-[#fbf4ea] text-[#2a190f]">
       <header className="sticky top-0 z-50 border-b border-white/80 bg-[#fff8ec]/92 backdrop-blur-xl">
@@ -1848,8 +1857,8 @@ export function PublicHomePage() {
               <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">{selectedProducts.length} article(s)</p>
               <p className="text-sm font-bold text-[#2a190f]">{formatPrice(selectionEconomics.subtotal_produits)} hors livraison</p>
             </div>
-            <button type="button" onClick={handleCheckout} className="rounded-full bg-[#d95f2d] px-4 py-3 text-sm font-black text-white">
-              Commander
+            <button type="button" onClick={scrollToCheckoutPanel} className="rounded-full bg-[#d95f2d] px-4 py-3 text-sm font-black text-white">
+              Voir panier
             </button>
           </div>
         </div>
