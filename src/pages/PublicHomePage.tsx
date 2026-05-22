@@ -349,7 +349,6 @@ const defaultBusinessRequestForm: BusinessRequestForm = {
 
 export function PublicHomePage() {
   const baseUrl = import.meta.env.BASE_URL || '/';
-  const investorOpsLink = `${baseUrl}?view=investor-ops`;
   const customerPath = `${baseUrl}customer`;
   const gotoCustomer = (mode?: 'simulation') => {
     if (window.location.pathname.endsWith('/customer') || new URL(window.location.href).searchParams.get('view') === 'customer') {
@@ -1729,26 +1728,21 @@ export function PublicHomePage() {
           </div>
         </section>
 
-        <section id="investisseurs" className="bg-[#24170f] py-14 text-white">
-          <div className="mx-auto grid max-w-7xl gap-8 px-4 lg:grid-cols-[0.95fr_1.05fr]">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-300">Investisseur Martinique</p>
-              <h2 className="mt-3 font-display text-4xl font-black leading-tight sm:text-5xl">
-                Le différentiel doit se prouver par l’exécution.
-              </h2>
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-300 sm:text-base">
-                DELIKREOL n’a pas besoin de promettre des volumes non prouvés. Le bon angle est un pilote local mesurable : commandes enregistrées, partenaires qualifiés, livraison proactive et marge suivie.
-              </p>
-              <a href={investorOpsLink} className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-orange-300 px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-[#24170f]">
-                Voir la page investisseur <ArrowRight className="h-4 w-4" />
-              </a>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+        <section className="bg-[#24170f] py-14 text-white">
+          <div className="mx-auto max-w-7xl px-4">
+            <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-300">Priorité client</p>
+            <h2 className="mt-2 max-w-3xl font-display text-3xl font-black tracking-tight text-white sm:text-4xl">
+              Commander vite, être livré, recommander.
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-300 sm:text-base sm:leading-7">
+              DELIKREOL garde un flux simple: catalogue clair, panier, confirmation rapide et assistance locale.
+            </p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {[
-                'Comparaison claire face aux alternatives informelles',
-                'Score de préparation opérationnelle',
-                'Playbook livraison proactive',
-                'KPI terrain à prouver avant extension',
+                'Catalogue visuel et prix clairs',
+                'Ajout au panier sans friction',
+                'Confirmation en quelques étapes',
+                'Support humain en option',
               ].map((item) => (
                 <div key={item} className="rounded-[1.35rem] border border-white/10 bg-white/8 p-5">
                   <BadgeCheck className="h-5 w-5 text-emerald-300" />

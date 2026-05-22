@@ -94,7 +94,7 @@ class ErpCatalogService implements CatalogService {
       category: product.category ?? product.categoryId ?? 'Divers',
       price: Number(product.price ?? 0),
       image_url: null,
-      is_available: !!product.isAvailable,
+      is_available: product.isAvailable !== false,
       stock_quantity: null,
       created_at: new Date(product.createdAt ?? Date.now()).toISOString(),
       vendor: vendorName
@@ -197,7 +197,10 @@ class SupabaseCatalogService implements CatalogService {
         .eq('is_available', true)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return data as Product[];
+      return (data ?? []).map((row: any) => ({
+        ...row,
+        is_available: row.is_available !== false,
+      })) as Product[];
     } catch (err) {
       if (allowSheetsFallback) return sheetsFallback.listProducts();
       throw err;
@@ -212,7 +215,10 @@ class SupabaseCatalogService implements CatalogService {
         .eq('is_available', true)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return data as Product[];
+      return (data ?? []).map((row: any) => ({
+        ...row,
+        is_available: row.is_available !== false,
+      })) as Product[];
     } catch (err) {
       if (allowSheetsFallback) return sheetsFallback.listProductsByVendor(vendorId);
       throw err;

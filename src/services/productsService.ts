@@ -67,7 +67,10 @@ class SupabaseProductsService implements ProductsService {
   async listAll() {
     const { data, error } = await supabase.from('products').select('*');
     if (error) throw error;
-    return data as Product[];
+    return ((data ?? []).map((row: any) => ({
+      ...row,
+      is_available: row.is_available !== false,
+    })) as Product[]);
   }
   async getById(id: string) {
     const { data, error } = await supabase.from('products').select('*').eq('id', id).maybeSingle();

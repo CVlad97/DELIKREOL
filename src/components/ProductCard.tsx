@@ -13,6 +13,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const { showSuccess } = useToast();
   const [showSim, setShowSim] = useState(false);
   const vendorLabel = product.vendor?.business_name ?? (product.vendor_id ? 'Vendeur local' : null);
+  const isAvailable = product.is_available !== false;
 
   return (
     <div className="group bg-card rounded-2xl border border-border hover:border-primary/40 transition-all duration-300 overflow-hidden shadow-soft madras-accent">
@@ -49,7 +50,7 @@ export function ProductCard({ product }: ProductCardProps) {
               addItem(product);
               showSuccess('Ajouté au panier');
             }}
-            disabled={!product.is_available}
+            disabled={!isAvailable}
             className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:shadow-warm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus className="w-4 h-4" />
@@ -71,7 +72,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         )}
 
-        {!product.is_available && (
+        {!isAvailable && (
           <div className="text-xs font-semibold text-destructive">Indisponible</div>
         )}
       </div>
