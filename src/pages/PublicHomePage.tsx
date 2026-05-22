@@ -547,6 +547,7 @@ export function PublicHomePage() {
   const deliveryLabel = fulfillmentMode === 'delivery' ? 'Livraison' : 'Retrait';
   const deliverySlotLabel = deliverySlot || 'Créneau à confirmer';
   const customerMapsLabel = customerLocation?.mapsUrl || 'Position GPS non fournie — confirmer adresse manuellement';
+  const customerMapPreviewLocation = pendingCustomerLocation ?? customerLocation;
   const productLines = useMemo(
     () =>
       selectedProducts.length
@@ -1331,6 +1332,63 @@ export function PublicHomePage() {
             <p className="mt-3 text-sm font-semibold text-stone-600">
               La livraison est calculée autour de chaque partenaire avec son rayon réel. La commune sert seulement de fallback si la position manque.
             </p>
+            {geoConsentState === 'ask' && (
+              <div className="mt-4 rounded-2xl border border-orange-200 bg-[#fff8ef] p-4">
+                <p className="text-sm font-black text-[#7c2d12]">Souhaitez-vous être géolocalisé et affiché sur la carte ?</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={useCustomerPosition}
+                    disabled={geoStatus === 'loading'}
+                    className="rounded-xl bg-[#d95f2d] px-4 py-2 text-sm font-black text-white disabled:opacity-60"
+                  >
+                    Oui, autoriser
+                  </button>
+                  <button
+                    type="button"
+                    onClick={cancelCustomerPositionConsent}
+                    className="rounded-xl border border-orange-200 bg-white px-4 py-2 text-sm font-black text-[#7c2d12]"
+                  >
+                    Non, merci
+                  </button>
+                </div>
+              </div>
+            )}
+            {customerMapPreviewLocation && (
+              <div className="mt-4 overflow-hidden rounded-2xl border border-orange-100">
+                <MapContainer center={[customerMapPreviewLocation.lat, customerMapPreviewLocation.lng]} zoom={16} scrollWheelZoom={false} className="h-52 w-full">
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <CircleMarker
+                    center={[customerMapPreviewLocation.lat, customerMapPreviewLocation.lng]}
+                    radius={8}
+                    pathOptions={{ color: '#d95f2d', fillColor: '#d95f2d', fillOpacity: 0.9 }}
+                  >
+                    <Popup>Votre position</Popup>
+                  </CircleMarker>
+                </MapContainer>
+                {pendingCustomerLocation && (
+                  <div className="grid grid-cols-1 gap-2 border-t border-orange-100 bg-orange-50 p-3 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={confirmPendingCustomerPosition}
+                      className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-black text-white"
+                    >
+                      Valider ma position
+                    </button>
+                    <button
+                      type="button"
+                      onClick={rejectPendingCustomerPosition}
+                      className="rounded-xl border border-emerald-300 bg-white px-4 py-2 text-sm font-black text-emerald-800"
+                    >
+                      Rejeter
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {categoryOptions.slice(0, 12).map((category) => {

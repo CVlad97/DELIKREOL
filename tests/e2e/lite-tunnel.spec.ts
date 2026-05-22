@@ -19,5 +19,8 @@ test('public home: catalogue and filters render', async ({ page }) => {
   const catalogue = page.locator('#catalogue');
   await expect(catalogue).toBeVisible();
   await expect(catalogue.getByRole('heading', { name: /Choisir vite/i })).toBeVisible();
-  await expect(catalogue.getByRole('button', { name: /Me géolocaliser/i })).toBeVisible();
+  const geoButton = catalogue.getByRole('button', { name: /Me géolocaliser/i });
+  await expect(geoButton).toBeVisible();
+  await geoButton.click();
+  await expect(catalogue.getByText(/Souhaitez-vous être géolocalisé/i)).toBeVisible();
 });
