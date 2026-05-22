@@ -1851,14 +1851,14 @@ export function PublicHomePage() {
       </footer>
 
       {selectedProducts.length > 0 && (
-        <div className="fixed inset-x-4 bottom-4 z-50 rounded-[1.5rem] border border-orange-100 bg-white p-4 shadow-2xl shadow-orange-900/20 md:hidden">
+        <div data-testid="mobile-cart-bar" className="fixed inset-x-4 bottom-4 z-50 rounded-[1.5rem] border border-orange-100 bg-white p-4 shadow-2xl shadow-orange-900/20 md:hidden">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">{selectedProducts.length} article(s)</p>
               <p className="text-sm font-bold text-[#2a190f]">{formatPrice(selectionEconomics.subtotal_produits)} hors livraison</p>
             </div>
             <button type="button" onClick={scrollToCheckoutPanel} className="rounded-full bg-[#d95f2d] px-4 py-3 text-sm font-black text-white">
-              Voir panier
+              Voir panier / commander
             </button>
           </div>
         </div>
@@ -2027,8 +2027,8 @@ function ProductCard({
           <span className="rounded-2xl bg-[#fff4e7] px-3 py-2 text-[#7c2d12]">Rayon {product.vendor_delivery_radius_km} km</span>
           <span className="rounded-2xl bg-emerald-50 px-3 py-2 text-emerald-700">Selon position</span>
         </div>
-        <button type="button" onClick={onAdd} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-orange-500/20">
-          Ajouter <ArrowRight className="h-4 w-4" />
+        <button data-testid="add-to-cart" type="button" onClick={onAdd} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-orange-500/20">
+          Ajouter au panier <ArrowRight className="h-4 w-4" />
         </button>
       </div>
     </article>
@@ -2146,7 +2146,7 @@ function SelectionPanel({
   onClear: () => void;
 }) {
   return (
-    <aside className="h-fit rounded-[2rem] border border-orange-100 bg-white p-5 shadow-elegant lg:sticky lg:top-28">
+    <aside data-testid="cart-panel" className="h-fit rounded-[2rem] border border-orange-100 bg-white p-5 shadow-elegant lg:sticky lg:top-28">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <span className="rounded-2xl bg-[#fff3e5] p-3 text-[#d95f2d]">
@@ -2157,7 +2157,7 @@ function SelectionPanel({
             <p className="text-xs font-semibold text-stone-500">Validation humaine avant préparation.</p>
           </div>
         </div>
-        <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">{products.length} article(s)</span>
+        <span data-testid="cart-badge" className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">{products.length} article(s)</span>
       </div>
 
       {supabasePaused && (

@@ -4,15 +4,14 @@ test('public home: add product to cart (selection) shows mobile bottom bar', asy
   await page.goto('/');
   await expect(page.getByRole('heading', { name: /Le r.*flexe local/i })).toBeVisible();
 
-  const addButton = page.getByRole('button', { name: /^Ajouter$/i }).first();
+  const addButton = page.getByTestId('add-to-cart').first();
   await expect(addButton).toBeVisible();
   await addButton.click();
 
-  const mobileBar = page.locator('div.fixed.md\\:hidden').filter({
-    has: page.getByRole('button', { name: /^Commander$/i }),
-  });
+  const mobileBar = page.getByTestId('mobile-cart-bar');
   await expect(mobileBar).toBeVisible();
   await expect(mobileBar.getByText(/1 article\(s\)/i)).toBeVisible();
+  await expect(mobileBar.getByRole('button', { name: /Voir panier/i })).toBeVisible();
 });
 
 test('public home: catalogue and filters render', async ({ page }) => {
