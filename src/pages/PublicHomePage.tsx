@@ -27,6 +27,7 @@ import { calculateOrderEconomics } from '../services/orderEconomics';
 import { distanceKm, getMartiniqueServiceZones, vendorServesPoint } from '../services/serviceZones';
 import { submitPartnerLead, submitPartnerProduct, uploadPartnerProductPhoto } from '../services/partnerPortalService';
 import { createBusinessRequest } from '../services/liteOrdersService';
+import { saveFallbackOrderToSheet } from '../services/orderFallbackService';
 import { buildPartnerDispatchMessage, downloadOrderPdf } from '../utils/orderPdf';
 import { publicSupabase } from '../lib/publicSupabase';
 import { mockProducts } from '../data/mockCatalog';
@@ -439,7 +440,7 @@ export function PublicHomePage() {
   useEffect(() => {
     if (!publicSupabase) {
       setSupabasePaused(true);
-      setSupabasePausedHint('Backend Supabase indisponible (pause ou configuration). Commande via WhatsApp activée temporairement.');
+      setSupabasePausedHint('Backend Supabase indisponible (pause ou configuration). Bascule sur enregistrement Sheets (si configuré), WhatsApp en support.');
       return;
     }
     let mounted = true;
@@ -449,7 +450,7 @@ export function PublicHomePage() {
         if (!mounted) return;
         if (pingError && isSupabasePausedError(pingError)) {
           setSupabasePaused(true);
-          setSupabasePausedHint('Supabase est en pause (facturation). Commande par WhatsApp activée temporairement.');
+          setSupabasePausedHint('Supabase est en pause (facturation). Bascule sur enregistrement Sheets (si configuré), WhatsApp en support.');
         }
       } catch {
         // Ignore ping failures; the UI will handle on-demand fallbacks.
@@ -795,7 +796,7 @@ export function PublicHomePage() {
       '',
       `Total estimé: ${total}`,
       '',
-      'Contexte: Supabase en pause, commande via WhatsApp temporairement.',
+      'Contexte: Supabase en pause, mode secours activé.',
     ]
       .filter(Boolean)
       .join('\n');
@@ -825,19 +826,77 @@ export function PublicHomePage() {
       return;
     }
 
-    if (!publicSupabase || supabasePaused) {
-      setSupabasePaused(true);
-      setSupabasePausedHint(
-        !publicSupabase
-          ? 'Backend Supabase indisponible (configuration). Commande via WhatsApp activée.'
-          : 'Supabase est en pause. Commande via WhatsApp activée.',
-      );
-      handleWhatsAppCheckoutFallback();
-      return;
-    }
-
     const checkoutOrderId = crypto.randomUUID();
     const checkoutOrderNumber = `DK-${Date.now().toString(36).toUpperCase()}`;
+    const orderItemsPayload = selectedProducts.map((product) => ({
+      order_id: checkoutOrderId,
+      product_id: product.id,
+      vendor_id: product.vendor_id,
+      product_name: product.name,
+      vendor_name: product.vendor_name,
+      quantity: 1,
+      unit_price: product.price,
+      vendor_commission: Number((product.price * 0.15).toFixed(2)),
+    }));
+
+    const fallbackToSheets = async (reason: string) => {
+      setSupabasePaused(true);
+      setSupabasePausedHint(reason);
+      const saved = await saveFallbackOrderToSheet({
+        order_id: checkoutOrderId,
+        order_number: checkoutOrderNumber,
+        customer_name: customerName.trim(),
+        customer_phone: customerPhone.trim(),
+        fulfillment_mode: fulfillmentMode,
+        delivery_address: deliveryAddress.trim() || null,
+        delivery_slot: deliverySlot.trim() || null,
+        payment_method: paymentMethod,
+        vendor_availability_status: vendorAvailabilityStatus,
+        total_amount: selectionEconomics.total_client,
+        source: 'public_checkout_fallback',
+        items: orderItemsPayload.map((item) => ({
+          product_id: item.product_id,
+          vendor_id: item.vendor_id,
+          product_name: item.product_name,
+          vendor_name: item.vendor_name,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+        })),
+      });
+
+      if (!saved.saved) {
+        setCheckoutStatus({
+          kind: 'error',
+          message:
+            `Commande applicative indisponible (${saved.error || 'endpoint secours absent'}). ` +
+            'Utilisez le bouton WhatsApp support.',
+        });
+        return false;
+      }
+
+      setOrderConfirmed(true);
+      setCheckoutStatus({
+        kind: 'success',
+        orderNumber: checkoutOrderNumber,
+        message: `Commande ${checkoutOrderNumber} enregistrée en mode secours (Sheets). Paiement : pending.`,
+      });
+      trackCheckoutSuccess({
+        order_number: checkoutOrderNumber,
+        items_count: selectedProducts.length,
+        total_amount: selectionEconomics.total_client,
+        mode: `${fulfillmentMode}_fallback`,
+      });
+      return true;
+    };
+
+    if (!publicSupabase || supabasePaused) {
+      await fallbackToSheets(
+        !publicSupabase
+          ? 'Backend Supabase indisponible (configuration). Bascule sur enregistrement Sheets.'
+          : 'Supabase est en pause. Bascule sur enregistrement Sheets.',
+      );
+      return;
+    }
 
     setCheckoutStatus({ kind: 'saving', message: 'Création de la commande...' });
 
@@ -867,24 +926,11 @@ export function PublicHomePage() {
         .join('\n') || null,
     };
 
-    const orderItemsPayload = selectedProducts.map((product) => ({
-      order_id: checkoutOrderId,
-      product_id: product.id,
-      vendor_id: product.vendor_id,
-      product_name: product.name,
-      vendor_name: product.vendor_name,
-      quantity: 1,
-      unit_price: product.price,
-      vendor_commission: Number((product.price * 0.15).toFixed(2)),
-    }));
-
     try {
       const { error: orderError } = await publicSupabase.from('orders').insert(orderPayload);
       if (orderError) {
         if (isSupabasePausedError(orderError) || isSupabaseUnavailableError(orderError)) {
-          setSupabasePaused(true);
-          setSupabasePausedHint('Supabase indisponible. Bascule automatique sur WhatsApp support.');
-          handleWhatsAppCheckoutFallback();
+          await fallbackToSheets('Supabase indisponible. Bascule sur enregistrement Sheets.');
           return;
         }
         setCheckoutStatus({ kind: 'error', message: `Commande non créée : ${orderError.message}` });
@@ -894,9 +940,7 @@ export function PublicHomePage() {
       const { error: itemsError } = await publicSupabase.from('order_items').insert(orderItemsPayload);
       if (itemsError) {
         if (isSupabasePausedError(itemsError) || isSupabaseUnavailableError(itemsError)) {
-          setSupabasePaused(true);
-          setSupabasePausedHint('Supabase indisponible. Bascule automatique sur WhatsApp support.');
-          handleWhatsAppCheckoutFallback();
+          await fallbackToSheets('Supabase indisponible. Bascule sur enregistrement Sheets.');
           return;
         }
         setCheckoutStatus({ kind: 'error', message: `Produits non enregistrés : ${itemsError.message}` });
@@ -904,9 +948,7 @@ export function PublicHomePage() {
       }
     } catch (unexpectedError) {
       if (isSupabasePausedError(unexpectedError) || isSupabaseUnavailableError(unexpectedError)) {
-        setSupabasePaused(true);
-        setSupabasePausedHint('Supabase indisponible. Bascule automatique sur WhatsApp support.');
-        handleWhatsAppCheckoutFallback();
+        await fallbackToSheets('Supabase indisponible. Bascule sur enregistrement Sheets.');
         return;
       }
       setCheckoutStatus({
