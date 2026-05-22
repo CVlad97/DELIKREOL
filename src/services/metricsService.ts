@@ -11,6 +11,7 @@ const METRICS_ENDPOINT = import.meta.env.VITE_METRICS_WEBHOOK_URL || import.meta
 const SESSION_ID_KEY = 'delikreol_public_session_id';
 const VIEW_SENT_KEY = 'delikreol_public_view_sent';
 const LOCAL_COUNTS_KEY = 'delikreol_local_metrics';
+const LOCAL_QUEUE_KEY = 'delikreol_pending_metrics_queue';
 
 type LocalCounts = {
   public_view: number;
@@ -18,6 +19,17 @@ type LocalCounts = {
   partner_lead_success: number;
   business_request_success: number;
   product_submission_success: number;
+};
+
+type QueuedMetric = {
+  event: MetricEvent;
+  at: string;
+  session_id: string;
+  path: string;
+  href: string;
+  referrer: string | null;
+  user_agent: string;
+  payload: MetricPayload;
 };
 
 function readCounts(): LocalCounts {
@@ -61,6 +73,58 @@ function incrementLocalCounter(event: MetricEvent) {
   writeCounts(counts);
 }
 
+function readQueue(): QueuedMetric[] {
+  try {
+    const raw = localStorage.getItem(LOCAL_QUEUE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as QueuedMetric[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeQueue(queue: QueuedMetric[]) {
+  localStorage.setItem(LOCAL_QUEUE_KEY, JSON.stringify(queue.slice(-500)));
+}
+
+function enqueueMetric(metric: QueuedMetric) {
+  const queue = readQueue();
+  queue.push(metric);
+  writeQueue(queue);
+}
+
+async function flushQueue() {
+  if (!METRICS_ENDPOINT) return;
+  const queue = readQueue();
+  if (queue.length === 0) return;
+  const remaining: QueuedMetric[] = [];
+  for (const metric of queue) {
+    try {
+      const response = await fetch(METRICS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: metric.event,
+          at: metric.at,
+          session_id: metric.session_id,
+          path: metric.path,
+          href: metric.href,
+          referrer: metric.referrer,
+          user_agent: metric.user_agent,
+          ...metric.payload,
+        }),
+      });
+      if (!response.ok) {
+        remaining.push(metric);
+      }
+    } catch {
+      remaining.push(metric);
+    }
+  }
+  writeQueue(remaining);
+}
+
 function getSessionId(): string {
   const existing = sessionStorage.getItem(SESSION_ID_KEY);
   if (existing) return existing;
@@ -71,8 +135,7 @@ function getSessionId(): string {
 
 function sendMetric(event: MetricEvent, payload: MetricPayload = {}) {
   incrementLocalCounter(event);
-  if (!METRICS_ENDPOINT) return;
-  const body = JSON.stringify({
+  const metric: QueuedMetric = {
     event,
     at: new Date().toISOString(),
     session_id: getSessionId(),
@@ -80,15 +143,11 @@ function sendMetric(event: MetricEvent, payload: MetricPayload = {}) {
     href: window.location.href,
     referrer: document.referrer || null,
     user_agent: navigator.userAgent,
-    ...payload,
-  });
-  void fetch(METRICS_ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body,
-  }).catch(() => {
-    // Keep UX non-blocking if metrics backend is unavailable.
-  });
+    payload,
+  };
+  enqueueMetric(metric);
+  if (!METRICS_ENDPOINT) return;
+  void flushQueue();
 }
 
 export function trackPublicView() {
@@ -115,4 +174,8 @@ export function trackProductSubmissionSuccess(payload: MetricPayload = {}) {
 
 export function getLocalMetrics() {
   return readCounts();
+}
+
+export function getPendingMetricsCount() {
+  return readQueue().length;
 }
