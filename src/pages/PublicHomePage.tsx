@@ -1125,8 +1125,6 @@ export function PublicHomePage() {
           <nav className="absolute left-1/2 top-full hidden -translate-x-1/2 items-center gap-2 rounded-b-[1.5rem] border border-t-0 border-orange-100 bg-[#fff8ec]/95 px-4 py-2 shadow-soft backdrop-blur lg:flex">
             <NavLink href="#catalogue">Catalogue</NavLink>
             <NavLink href="#zones">Zones</NavLink>
-            <NavLink href="#pro">Partenaires & entreprises</NavLink>
-            <NavLink href="#faq">FAQ</NavLink>
             <NavLink href="#contact">Contact</NavLink>
           </nav>
 
@@ -1169,7 +1167,7 @@ export function PublicHomePage() {
                 Le réflexe local qui donne envie de commander.
               </h1>
               <p className="mx-auto mt-4 max-w-xl text-center text-base leading-7 text-[#5a4334] sm:text-lg lg:mx-0 lg:text-left">
-                Plats créoles, produits locaux, partenaires visibles. Vous choisissez, vous ajoutez, vous confirmez.
+                Plats créoles et produits locaux en Martinique. Choisissez, ajoutez au panier, confirmez en moins de 2 minutes.
               </p>
 
               <div className="mt-7 rounded-[2rem] border border-white/80 bg-white/88 p-3 shadow-2xl shadow-orange-900/10 backdrop-blur">
@@ -1188,7 +1186,7 @@ export function PublicHomePage() {
                     onClick={() => gotoCustomer()}
                     className="inline-flex h-16 items-center justify-center gap-2 rounded-[1.35rem] bg-[#d95f2d] px-5 text-sm font-black uppercase tracking-[0.12em] text-white shadow-xl shadow-orange-500/25 transition hover:-translate-y-0.5"
                   >
-                    Voir les offres <ArrowRight className="h-5 w-5" />
+                    Commander maintenant <ArrowRight className="h-5 w-5" />
                   </button>
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -1210,7 +1208,7 @@ export function PublicHomePage() {
                   Commander maintenant <ShoppingBag className="h-4 w-4" />
                 </button>
                 <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Bonjour DELIKREOL, je veux être orienté vers l’offre la plus adaptée.')}`} className="inline-flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-white/80 px-6 py-4 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5">
-                  Parler à DELIKREOL <MessageCircle className="h-4 w-4" />
+                  Besoin d’aide <MessageCircle className="h-4 w-4" />
                 </a>
               </div>
             </div>
@@ -1275,7 +1273,7 @@ export function PublicHomePage() {
               <SectionTitle
                 eyebrow="Catalogue"
                 title="Choisir vite, commander clair."
-                text="Des cartes directes avec photo, prix, zone, disponibilité et bouton d’ajout."
+                text="Parcours client prioritaire: produits visibles, ajout au panier, validation."
               />
               <div className="flex flex-wrap gap-3">
                 <button
@@ -1285,13 +1283,12 @@ export function PublicHomePage() {
                 >
                   Commander maintenant <ShoppingBag className="h-5 w-5" />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => gotoCustomer('simulation')}
+                <a
+                  href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Bonjour DELIKREOL, j’ai besoin d’aide pour choisir une offre.')}`}
                   className="inline-flex w-fit items-center gap-2 rounded-full border border-orange-200 bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-[#7c2d12] shadow-sm"
                 >
-                  Simulation <Sparkles className="h-5 w-5" />
-                </button>
+                  Besoin d’aide
+                </a>
               </div>
             </div>
 
@@ -1416,8 +1413,8 @@ export function PublicHomePage() {
                 {!loading && !error && filteredProducts.length === 0 && (
                   <EmptyState
                     title="Aucune offre visible avec ces filtres"
-                    text="Affinez la commune, la catégorie ou le budget. Si vous êtes prestataire, la meilleure prochaine action est de devenir partenaire."
-                    action={partnerLink}
+                    text="Affinez la commune, la catégorie ou le budget. Vous pouvez aussi demander une orientation immédiate."
+                    action={supportLink}
                   />
                 )}
 
