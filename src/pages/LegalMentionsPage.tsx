@@ -1,4 +1,5 @@
 import { AlertTriangle, ArrowLeft } from 'lucide-react';
+import { PUBLIC_CONTACT_EMAIL } from '../config/publicRuntime';
 
 export function LegalMentionsPage() {
 
@@ -42,7 +43,7 @@ export function LegalMentionsPage() {
               <p><strong className="text-slate-200">N° TVA intracommunautaire :</strong> &#x3C;&#x3C;&#x3C;FR XX XXXXXXXXX&#x3E;&#x3E;&#x3E;</p>
               <p><strong className="text-slate-200">Adresse du siège social :</strong> &#x3C;&#x3C;&#x3C;ADRESSE COMPLÈTE&#x3E;&#x3E;&#x3E;</p>
               <p><strong className="text-slate-200">Téléphone :</strong> &#x3C;&#x3C;&#x3C;0596 XX XX XX&#x3E;&#x3E;&#x3E;</p>
-              <p><strong className="text-slate-200">Email :</strong> contact@delikreol.mq</p>
+              <p><strong className="text-slate-200">Email :</strong> {PUBLIC_CONTACT_EMAIL}</p>
               <p><strong className="text-slate-200">Messages :</strong> relayés vers le compte Gmail de gestion</p>
             </div>
           </section>
@@ -76,7 +77,7 @@ export function LegalMentionsPage() {
             <h2 className="text-2xl font-bold text-emerald-400 mb-4">Contact</h2>
             <div className="space-y-2">
               <p>Pour toute question concernant le site ou son contenu :</p>
-              <p><strong className="text-slate-200">Email :</strong> contact@delikreol.mq</p>
+              <p><strong className="text-slate-200">Email :</strong> {PUBLIC_CONTACT_EMAIL}</p>
               <p><strong className="text-slate-200">Messages :</strong> relayés vers le compte Gmail de gestion</p>
               <p><strong className="text-slate-200">Téléphone :</strong> &#x3C;&#x3C;&#x3C;0596 XX XX XX&#x3E;&#x3E;&#x3E;</p>
               <p><strong className="text-slate-200">Adresse postale :</strong> &#x3C;&#x3C;&#x3C;ADRESSE COMPLÈTE&#x3E;&#x3E;&#x3E;</p>

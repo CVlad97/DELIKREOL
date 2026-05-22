@@ -28,6 +28,9 @@ Deployer une version test/soft launch de DELIKREOL (front + ERP) avec cout minim
 - `VITE_ERP_FALLBACK_DEMO` (optionnel)
 - `VITE_SHEETS_PUBLIC_URL` (optionnel)
 - `VITE_SHEETS_ORDERS_URL` (optionnel)
+- `VITE_FREE_MODE` (optionnel)
+- `VITE_ORDER_FORM_URL` (optionnel)
+- `VITE_CONTACT_EMAIL` / `VITE_OPERATIONS_EMAIL` (optionnel)
 - `ADMIN_TOKEN` (ERP, optionnel)
 - `DB_FILE` (ERP, optionnel)
 

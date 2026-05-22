@@ -1,4 +1,5 @@
 import { AlertTriangle, ArrowLeft } from 'lucide-react';
+import { PUBLIC_CONTACT_EMAIL } from '../config/publicRuntime';
 
 export function TermsOfUsePage() {
   return (
@@ -274,7 +275,7 @@ export function TermsOfUsePage() {
               <div>
                 <h3 className="font-semibold text-slate-200 mb-2">12.1. Réclamations</h3>
                 <p className="text-sm">
-                  Toute réclamation doit être adressée à : <strong className="text-emerald-400">contact@delikreol.mq</strong>
+                  Toute réclamation doit être adressée à : <strong className="text-emerald-400">{PUBLIC_CONTACT_EMAIL}</strong>
                 </p>
                 <p className="text-sm mt-2">
                   Nous nous engageons à répondre sous 48h ouvrées.
@@ -315,7 +316,7 @@ export function TermsOfUsePage() {
             <p className="mb-2">
               Pour toute question concernant ces conditions :
             </p>
-            <p><strong className="text-slate-200">Email :</strong> legal@delikreol.com</p>
+            <p><strong className="text-slate-200">Email :</strong> {PUBLIC_CONTACT_EMAIL}</p>
             <p><strong className="text-slate-200">Téléphone :</strong> &#x3C;&#x3C;&#x3C;0596 XX XX XX&#x3E;&#x3E;&#x3E;</p>
             <p><strong className="text-slate-200">Adresse :</strong> &#x3C;&#x3C;&#x3C;ADRESSE COMPLÈTE&#x3E;&#x3E;&#x3E;</p>
           </section>

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Truck, MapPin, Users, ArrowRight } from 'lucide-react';
+import { PUBLIC_CONTACT_EMAIL } from '../config/publicRuntime';
 
 export default function MarketingHome() {
   return (
@@ -169,7 +170,7 @@ export default function MarketingHome() {
             <div>
               <h4 className="text-white font-semibold mb-4">Contact</h4>
               <ul className="space-y-2 text-sm">
-                <li>Email: contact@delikreol.mq</li>
+                <li>Email: {PUBLIC_CONTACT_EMAIL}</li>
                 <li>Messages relayés vers vladimir.claveau@gmail.com</li>
                 <li>Guadeloupe</li>
               </ul>

@@ -28,11 +28,12 @@ import { calculateOrderEconomics } from '../services/orderEconomics';
 import { distanceKm, getMartiniqueServiceZones, vendorServesPoint } from '../services/serviceZones';
 import { submitPartnerLead, submitPartnerProduct, uploadPartnerProductPhoto } from '../services/partnerPortalService';
 import { createBusinessRequest } from '../services/liteOrdersService';
-import { saveFallbackOrderToSheet } from '../services/orderFallbackService';
+import { getOrderFallbackEndpoint, saveFallbackOrderToSheet } from '../services/orderFallbackService';
 import { buildPartnerDispatchMessage, downloadOrderPdf } from '../utils/orderPdf';
 import { publicSupabase } from '../lib/publicSupabase';
 import { mockProducts } from '../data/mockCatalog';
 import { getWhatsAppBusinessLink } from '../utils/whatsapp';
+import { ORDER_FORM_URL, PUBLIC_OPERATIONS_EMAIL, SHEETS_FIRST_MODE } from '../config/publicRuntime';
 import {
   trackBusinessRequestSuccess,
   trackCheckoutSuccess,
@@ -352,6 +353,9 @@ const defaultBusinessRequestForm: BusinessRequestForm = {
 export function PublicHomePage() {
   const baseUrl = import.meta.env.BASE_URL || '/';
   const customerPath = `${baseUrl}customer`;
+  const orderFormUrl = ORDER_FORM_URL;
+  const sheetsFirstMode = SHEETS_FIRST_MODE;
+  const operationsEmail = PUBLIC_OPERATIONS_EMAIL;
   const gotoCustomer = (mode?: 'simulation') => {
     if (window.location.pathname.endsWith('/customer') || new URL(window.location.href).searchParams.get('view') === 'customer') {
       return;
@@ -648,8 +652,8 @@ export function PublicHomePage() {
 
   const partnerDispatchLink = useMemo(() => {
     const subject = `Commande DELIKREOL ${orderNumber}`;
-    return `mailto:operations@delikreol.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(partnerDispatchMessage)}`;
-  }, [orderNumber, partnerDispatchMessage]);
+    return `mailto:${operationsEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(partnerDispatchMessage)}`;
+  }, [operationsEmail, orderNumber, partnerDispatchMessage]);
 
   const driverMissionLink = useMemo(() => `${whatsappBase}?text=${encodeURIComponent(driverMessage)}`, [driverMessage]);
 
@@ -780,7 +784,7 @@ export function PublicHomePage() {
     setCheckoutStatus({ kind: 'idle' });
   }
 
-  function buildWhatsAppFallbackOrderMessage() {
+  function buildOrderSummary(orderNumberValue: string) {
     const lines = selectedProducts.map((product) => `- ${product.name} (${formatPrice(product.price)}) — ${product.vendor_name}`).join('\n');
     const total = formatPrice(selectionEconomics.total_client);
     const delivery = fulfillmentMode === 'delivery' ? `Livraison: ${deliveryAddress.trim() || '(adresse à confirmer)'}` : 'Retrait';
@@ -789,7 +793,7 @@ export function PublicHomePage() {
     const who = `Client: ${customerName.trim() || '(nom)'} | ${customerPhone.trim() || '(téléphone)'}`;
 
     return [
-      'Bonjour DELIKREOL, je souhaite commander.',
+      `Commande: ${orderNumberValue}`,
       who,
       delivery,
       slot,
@@ -799,6 +803,17 @@ export function PublicHomePage() {
       lines,
       '',
       `Total estimé: ${total}`,
+      `Paiement souhaité: ${paymentMethod}`,
+      `Statut vendeur: ${vendorAvailabilityStatus}`,
+    ]
+      .filter(Boolean)
+      .join('\n');
+  }
+
+  function buildWhatsAppFallbackOrderMessage() {
+    return [
+      'Bonjour DELIKREOL, je souhaite commander.',
+      buildOrderSummary(orderNumber),
       '',
       'Contexte: Supabase en pause, mode secours activé.',
     ]
@@ -832,6 +847,8 @@ export function PublicHomePage() {
 
     const checkoutOrderId = crypto.randomUUID();
     const checkoutOrderNumber = `DK-${Date.now().toString(36).toUpperCase()}`;
+    const hasSheetsEndpoint = Boolean(getOrderFallbackEndpoint());
+    const hasOrderFormFallback = Boolean(orderFormUrl);
     const orderItemsPayload = selectedProducts.map((product) => ({
       order_id: checkoutOrderId,
       product_id: product.id,
@@ -843,9 +860,50 @@ export function PublicHomePage() {
       vendor_commission: Number((product.price * 0.15).toFixed(2)),
     }));
 
+    const fallbackToOrderForm = async (reason: string) => {
+      if (!hasOrderFormFallback) return false;
+      setSupabasePaused(true);
+      setSupabasePausedHint(reason);
+
+      const formSummary = [
+        'Finalisez la commande via formulaire.',
+        '',
+        buildOrderSummary(checkoutOrderNumber),
+      ].join('\n');
+
+      await copyOperationalMessage(formSummary, 'Récapitulatif commande');
+      const opened = window.open(orderFormUrl, '_blank', 'noopener,noreferrer');
+      if (!opened) window.location.assign(orderFormUrl);
+
+      setOrderConfirmed(true);
+      setCheckoutStatus({
+        kind: 'success',
+        orderNumber: checkoutOrderNumber,
+        message: `Commande ${checkoutOrderNumber} préparée. Finalisez via le formulaire sécurisé.`,
+      });
+      trackCheckoutSuccess({
+        order_number: checkoutOrderNumber,
+        items_count: selectedProducts.length,
+        total_amount: selectionEconomics.total_client,
+        mode: `${fulfillmentMode}_form`,
+      });
+      return true;
+    };
+
     const fallbackToSheets = async (reason: string) => {
       setSupabasePaused(true);
       setSupabasePausedHint(reason);
+      if (!hasSheetsEndpoint) {
+        if (await fallbackToOrderForm(`${reason} Endpoint Sheets non configuré.`)) {
+          return true;
+        }
+        setCheckoutStatus({
+          kind: 'error',
+          message: 'Commande indisponible: configurez VITE_SHEETS_ORDERS_URL ou VITE_ORDER_FORM_URL.',
+        });
+        return false;
+      }
+
       const saved = await saveFallbackOrderToSheet({
         order_id: checkoutOrderId,
         order_number: checkoutOrderNumber,
@@ -857,7 +915,7 @@ export function PublicHomePage() {
         payment_method: paymentMethod,
         vendor_availability_status: vendorAvailabilityStatus,
         total_amount: selectionEconomics.total_client,
-        source: 'public_checkout_fallback',
+        source: sheetsFirstMode ? 'public_checkout_sheets_first' : 'public_checkout_fallback',
         items: orderItemsPayload.map((item) => ({
           product_id: item.product_id,
           vendor_id: item.vendor_id,
@@ -869,11 +927,14 @@ export function PublicHomePage() {
       });
 
       if (!saved.saved) {
+        if (await fallbackToOrderForm(`${reason} ${saved.error || 'Erreur endpoint Sheets.'}`)) {
+          return true;
+        }
         setCheckoutStatus({
           kind: 'error',
           message:
             `Commande applicative indisponible (${saved.error || 'endpoint secours absent'}). ` +
-            'Utilisez le bouton WhatsApp support.',
+            'Utilisez le bouton support.',
         });
         return false;
       }
@@ -882,16 +943,22 @@ export function PublicHomePage() {
       setCheckoutStatus({
         kind: 'success',
         orderNumber: checkoutOrderNumber,
-        message: `Commande ${checkoutOrderNumber} enregistrée en mode secours (Sheets). Paiement : pending.`,
+        message: `Commande ${checkoutOrderNumber} enregistrée en mode Sheets. Paiement : pending.`,
       });
       trackCheckoutSuccess({
         order_number: checkoutOrderNumber,
         items_count: selectedProducts.length,
         total_amount: selectionEconomics.total_client,
-        mode: `${fulfillmentMode}_fallback`,
+        mode: sheetsFirstMode ? `${fulfillmentMode}_sheets_first` : `${fulfillmentMode}_fallback`,
       });
       return true;
     };
+
+    if (sheetsFirstMode) {
+      setCheckoutStatus({ kind: 'saving', message: 'Enregistrement de la commande (mode gratuit)...' });
+      await fallbackToSheets('Mode gratuit actif. Enregistrement prioritaire sur Sheets.');
+      return;
+    }
 
     if (!publicSupabase || supabasePaused) {
       await fallbackToSheets(
@@ -1901,7 +1968,7 @@ export function PublicHomePage() {
                 Accès partenaires & entreprises
               </a>
               <div className="rounded-2xl bg-white/10 px-5 py-4 text-sm leading-6 text-stone-100">
-                Email: <span className="font-bold">operations@delikreol.com</span>
+                Email: <span className="font-bold">{operationsEmail}</span>
                 <br />
                 Frais de livraison: <span className="font-bold">selon distance et rayon partenaire</span>
                 <br />
@@ -2274,7 +2341,7 @@ function SelectionPanel({
 
       {supabasePaused && (
         <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs font-bold text-amber-900">
-          {supabasePausedHint ?? 'Commande applicative temporairement indisponible. Bascule WhatsApp activée.'}
+          {supabasePausedHint ?? 'Commande applicative temporairement indisponible. Bascule Sheets/Formulaire activée, WhatsApp reste en support.'}
         </div>
       )}
 
@@ -2494,32 +2561,20 @@ function SelectionPanel({
             <div className="mt-3 grid gap-2">
               <button
                 type="button"
-                onClick={supabasePaused ? onWhatsAppFallback : onConfirmOrder}
+                onClick={onConfirmOrder}
                 disabled={checkoutStatus.kind === 'saving'}
-                className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-black text-white disabled:opacity-60 ${
-                  supabasePaused ? 'bg-[#1f8f5f]' : 'bg-[#d95f2d]'
-                }`}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#d95f2d] px-4 py-3 text-sm font-black text-white disabled:opacity-60"
               >
-                {supabasePaused ? (
-                  <>
-                    <MessageCircle className="h-4 w-4" /> Envoyer sur WhatsApp
-                  </>
-                ) : (
-                  <>
-                    <ShoppingBag className="h-4 w-4" /> Enregistrer la commande
-                  </>
-                )}
+                <ShoppingBag className="h-4 w-4" /> Enregistrer la commande
               </button>
-              {!supabasePaused && (
-                <button
-                  type="button"
-                  onClick={onWhatsAppFallback}
-                  disabled={checkoutStatus.kind === 'saving'}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-800 disabled:opacity-60"
-                >
-                  <MessageCircle className="h-4 w-4" /> Envoyer sur WhatsApp (support)
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={onWhatsAppFallback}
+                disabled={checkoutStatus.kind === 'saving'}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-800 disabled:opacity-60"
+              >
+                <MessageCircle className="h-4 w-4" /> Envoyer sur WhatsApp (support)
+              </button>
               <a href={supportLink} className="inline-flex items-center justify-center gap-2 rounded-xl border border-orange-200 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]">
                 <MessageCircle className="h-4 w-4" /> Besoin d’aide
               </a>
@@ -2572,15 +2627,9 @@ function SelectionPanel({
             </button>
           </div>
 
-          {supabasePaused ? (
-            <button onClick={onWhatsAppFallback} disabled={checkoutStatus.kind === 'saving'} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#1f8f5f] px-5 py-3 font-black uppercase tracking-[0.14em] text-white disabled:opacity-60">
-              {checkoutStatus.kind === 'saving' ? 'Préparation...' : 'Envoyer sur WhatsApp'} <ArrowRight className="h-4 w-4" />
-            </button>
-          ) : (
-            <button onClick={onConfirmOrder} disabled={checkoutStatus.kind === 'saving'} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-5 py-3 font-black uppercase tracking-[0.14em] text-white disabled:opacity-60">
-              {checkoutStatus.kind === 'saving' ? 'Enregistrement...' : 'Confirmer la commande'} <ArrowRight className="h-4 w-4" />
-            </button>
-          )}
+          <button onClick={onConfirmOrder} disabled={checkoutStatus.kind === 'saving'} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-5 py-3 font-black uppercase tracking-[0.14em] text-white disabled:opacity-60">
+            {checkoutStatus.kind === 'saving' ? 'Enregistrement...' : 'Confirmer la commande'} <ArrowRight className="h-4 w-4" />
+          </button>
           {checkoutStatus.kind === 'error' && (
             <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-800">
               {checkoutStatus.message}

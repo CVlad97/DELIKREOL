@@ -27,10 +27,19 @@ type FallbackSaveResult = {
   error?: string;
 };
 
+export function getOrderFallbackEndpoint(): string {
+  return (
+    import.meta.env.VITE_SHEETS_ORDERS_URL ||
+    import.meta.env.VITE_SHEETS_API_URL ||
+    import.meta.env.VITE_METRICS_WEBHOOK_URL ||
+    ''
+  ).trim();
+}
+
 export async function saveFallbackOrderToSheet(payload: FallbackOrderPayload): Promise<FallbackSaveResult> {
-  const endpoint = import.meta.env.VITE_SHEETS_API_URL || import.meta.env.VITE_METRICS_WEBHOOK_URL;
+  const endpoint = getOrderFallbackEndpoint();
   if (!endpoint) {
-    return { saved: false, error: 'Aucun endpoint Sheets/Metrics configuré.' };
+    return { saved: false, error: 'Aucun endpoint commandes Sheets configuré.' };
   }
 
   try {

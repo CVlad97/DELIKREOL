@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useToast } from '../contexts/ToastContext';
+import { PUBLIC_CONTACT_EMAIL } from '../config/publicRuntime';
 
 export default function MarketingContact() {
   const [formData, setFormData] = useState({
@@ -130,7 +131,7 @@ export default function MarketingContact() {
                   </div>
                   <div className="ml-4">
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">Email</h3>
-                    <p className="text-gray-600">contact@delikreol.mq</p>
+                    <p className="text-gray-600">{PUBLIC_CONTACT_EMAIL}</p>
                     <p className="text-sm text-gray-500 mt-1">
                       Les messages sont relayés vers vladimir.claveau@gmail.com.
                     </p>

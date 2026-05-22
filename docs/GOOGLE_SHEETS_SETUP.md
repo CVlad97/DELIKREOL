@@ -68,6 +68,8 @@ Recommandees:
 
 Optionnel:
 - `VITE_SHEETS_ORDERS_URL="<endpoint post commandes>"`
+- `VITE_ORDER_FORM_URL="<url formulaire commande>"`
+- `VITE_FREE_MODE=true` (priorise le flux Sheets/Form)
 
 ## 6) Conseils de structure
 - Garder une ligne par produit

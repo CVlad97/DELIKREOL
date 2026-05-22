@@ -59,11 +59,11 @@ export const integrations: IntegrationsConfig = {
     status: 'pending',
   },
   sheets: {
-    enabled: !!import.meta.env.VITE_SHEETS_PUBLIC_URL || !!import.meta.env.VITE_SHEETS_API_URL,
+    enabled: !!import.meta.env.VITE_SHEETS_PUBLIC_URL || !!import.meta.env.VITE_SHEETS_ORDERS_URL || !!import.meta.env.VITE_SHEETS_API_URL,
     label: 'Google Sheets',
     description: 'Catalogue public (source principale)',
-    apiBaseUrl: import.meta.env.VITE_SHEETS_API_URL,
-    status: (import.meta.env.VITE_SHEETS_PUBLIC_URL || import.meta.env.VITE_SHEETS_API_URL) ? 'configured' : 'pending',
+    apiBaseUrl: import.meta.env.VITE_SHEETS_ORDERS_URL || import.meta.env.VITE_SHEETS_API_URL,
+    status: (import.meta.env.VITE_SHEETS_PUBLIC_URL || import.meta.env.VITE_SHEETS_ORDERS_URL || import.meta.env.VITE_SHEETS_API_URL) ? 'configured' : 'pending',
   },
   openai: {
     enabled: !!import.meta.env.VITE_OPENAI_API_KEY,

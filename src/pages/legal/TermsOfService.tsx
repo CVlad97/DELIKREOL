@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { PUBLIC_CONTACT_EMAIL } from '../../config/publicRuntime';
 
 export default function TermsOfService() {
   return (
@@ -107,7 +108,7 @@ export default function TermsOfService() {
           <h2>8. Réclamations, litiges et traitements</h2>
           <p>Pour toute réclamation concernant une commande, le Client peut contacter le service client :</p>
           <ul>
-            <li>Par email : contact@delikreol.mq</li>
+            <li>Par email : {PUBLIC_CONTACT_EMAIL}</li>
             <li>Via le formulaire de contact sur le site</li>
             <li>Via WhatsApp support pour ouverture d’un dossier</li>
           </ul>
@@ -166,7 +167,7 @@ export default function TermsOfService() {
             Pour toute question concernant les présentes CGV, vous pouvez nous contacter :
           </p>
           <ul>
-            <li>Email : contact@delikreol.mq</li>
+            <li>Email : {PUBLIC_CONTACT_EMAIL}</li>
             <li>Messages : relayés vers le compte Gmail de gestion</li>
             <li>Formulaire de contact : <Link to="/contact" className="text-emerald-600 hover:text-emerald-700">cliquez ici</Link></li>
           </ul>

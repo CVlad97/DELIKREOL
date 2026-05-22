@@ -29,6 +29,10 @@ Recommandees:
 Optionnelles:
 - `VITE_SHEETS_ORDERS_URL="<endpoint post commandes>"`
 - `VITE_SHEETS_FALLBACK=true` (fallback catalogue si Supabase indisponible)
+- `VITE_FREE_MODE=true` (force enregistrement prioritaire via Sheets/Form)
+- `VITE_ORDER_FORM_URL="<url formulaire commande>"`
+- `VITE_CONTACT_EMAIL=contact@delikreol.mq`
+- `VITE_OPERATIONS_EMAIL=operations@delikreol.mq`
 
 Important: avec Vite, les variables `VITE_*` sont lues au build. Sur GitHub Pages, le redeploiement est necessaire apres modification.
 
