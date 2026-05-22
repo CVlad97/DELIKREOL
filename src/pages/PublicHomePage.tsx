@@ -31,6 +31,13 @@ import { buildPartnerDispatchMessage, downloadOrderPdf } from '../utils/orderPdf
 import { publicSupabase } from '../lib/publicSupabase';
 import { mockProducts } from '../data/mockCatalog';
 import { getWhatsAppBusinessLink } from '../utils/whatsapp';
+import {
+  trackBusinessRequestSuccess,
+  trackCheckoutSuccess,
+  trackPartnerLeadSuccess,
+  trackProductSubmissionSuccess,
+  trackPublicView,
+} from '../services/metricsService';
 import { useToast } from '../contexts/ToastContext';
 
 type CatalogState = {
@@ -398,6 +405,7 @@ export function PublicHomePage() {
     upsertMeta('description', 'DELIKREOL est la plateforme locale premium pour commander des plats créoles, des produits locaux et des demandes entreprises en Martinique.');
     upsertMeta('og:title', 'DELIKREOL Martinique | Plateforme locale premium');
     upsertMeta('og:description', 'Commandez des plats créoles et produits locaux en Martinique, avec retrait ou livraison selon votre commune.');
+    trackPublicView();
   }, []);
 
   useEffect(() => {
@@ -679,6 +687,10 @@ export function PublicHomePage() {
         opening_hours: partnerLeadForm.opening_hours || undefined,
       });
       setPartnerStatus({ kind: 'success', message: 'Demande envoyée. Votre dossier sera examiné rapidement.' });
+      trackPartnerLeadSuccess({
+        activity_type: partnerLeadForm.activity_type || null,
+        commune: partnerLeadForm.commune || null,
+      });
       setPartnerLeadForm(defaultPartnerLeadForm);
     } catch (submitError) {
       setPartnerStatus({ kind: 'error', message: getErrorMessage(submitError, 'Impossible d’envoyer la demande pour le moment.') });
@@ -707,6 +719,10 @@ export function PublicHomePage() {
       });
 
       setProductStatus({ kind: 'success', message: 'Proposition envoyée. Elle sera vérifiée avant affichage.' });
+      trackProductSubmissionSuccess({
+        category: productSubmissionForm.category || null,
+        has_photo: Boolean(productPhoto),
+      });
       setProductSubmissionForm(defaultProductSubmissionForm);
       setProductPhoto(null);
     } catch (submitError) {
@@ -730,6 +746,10 @@ export function PublicHomePage() {
         frequency: businessRequestForm.frequency || null,
       });
       setBusinessStatus({ kind: 'success', message: 'Demande entreprise envoyée. Un retour rapide est attendu.' });
+      trackBusinessRequestSuccess({
+        company_name: businessRequestForm.company_name || null,
+        people_count: businessRequestForm.people_count ? Number(businessRequestForm.people_count) : null,
+      });
       setBusinessRequestForm(defaultBusinessRequestForm);
     } catch (submitError) {
       setBusinessStatus({ kind: 'error', message: getErrorMessage(submitError, 'Impossible d’envoyer la demande entreprise pour le moment.') });
@@ -901,6 +921,12 @@ export function PublicHomePage() {
       kind: 'success',
       orderNumber: checkoutOrderNumber,
       message: `Commande ${checkoutOrderNumber} enregistrée. Statut : pending. Paiement : pending.`,
+    });
+    trackCheckoutSuccess({
+      order_number: checkoutOrderNumber,
+      items_count: selectedProducts.length,
+      total_amount: selectionEconomics.total_client,
+      mode: fulfillmentMode,
     });
   }
 
