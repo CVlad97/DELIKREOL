@@ -22,9 +22,13 @@ jobs:
     env:
       VITE_BASE_PATH: /DELIKREOL/
       VITE_ERP_FALLBACK_DEMO: "false"
-      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || secrets.VITE_SUPABASE_URL }}
-      VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || vars.VITE_SUPABASE_ANON_KEY }}
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+      VITE_SUPABASE_URL_SECRET: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY_SECRET: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       VITE_SHEETS_PUBLIC_URL: ${{ vars.VITE_SHEETS_PUBLIC_URL }}
+      VITE_SHEETS_API_URL: ${{ vars.VITE_SHEETS_API_URL }}
+      VITE_METRICS_WEBHOOK_URL: ${{ vars.VITE_METRICS_WEBHOOK_URL }}
       VITE_WHATSAPP_NUMBER: ${{ vars.VITE_WHATSAPP_NUMBER }}
     steps:
       - name: Checkout
@@ -40,6 +44,28 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit --fund=false
+
+      - name: Prepare frontend env file
+        run: |
+          SUPABASE_URL="${VITE_SUPABASE_URL:-$VITE_SUPABASE_URL_SECRET}"
+          SUPABASE_ANON_KEY="${VITE_SUPABASE_ANON_KEY:-$VITE_SUPABASE_ANON_KEY_SECRET}"
+
+          {
+            echo "VITE_BASE_PATH=${VITE_BASE_PATH}"
+            echo "VITE_ERP_FALLBACK_DEMO=${VITE_ERP_FALLBACK_DEMO}"
+            echo "VITE_SUPABASE_URL=${SUPABASE_URL}"
+            echo "VITE_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}"
+            echo "VITE_SHEETS_PUBLIC_URL=${VITE_SHEETS_PUBLIC_URL}"
+            echo "VITE_SHEETS_API_URL=${VITE_SHEETS_API_URL}"
+            echo "VITE_METRICS_WEBHOOK_URL=${VITE_METRICS_WEBHOOK_URL}"
+            echo "VITE_WHATSAPP_NUMBER=${VITE_WHATSAPP_NUMBER}"
+          } > .env.production
+
+          if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_ANON_KEY" ]; then
+            echo "Supabase env ready for production build."
+          else
+            echo "Supabase env missing: build will fallback to demo/offline mode."
+          fi
 
       - name: Typecheck
         run: npm run typecheck --if-present
