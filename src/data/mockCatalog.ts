@@ -34,7 +34,7 @@ export const mockCategories: Category[] = [
 export const mockProducts: LocalProduct[] = [
   {
     id: 'ninice-colombo-deux-rives',
-    name: 'Colombo des deux rives',
+    name: 'Le Colombo des Deux Rives',
     vendor: 'Les Delices de Ninice',
     price: 14.00,
     category: 'plats',
@@ -46,7 +46,7 @@ export const mockProducts: LocalProduct[] = [
   },
   {
     id: 'ninice-moksi-veg',
-    name: 'Moksi Aleisi vegetarien',
+    name: 'Le Moksi Aleisi Vegetarien',
     vendor: 'Les Delices de Ninice',
     price: 7.00,
     category: 'plats',
@@ -58,7 +58,7 @@ export const mockProducts: LocalProduct[] = [
   },
   {
     id: 'ninice-moksi-poulet',
-    name: 'Moksi Aleisi + poulet',
+    name: 'Le Moksi Aleisi + Poulet',
     vendor: 'Les Delices de Ninice',
     price: 10.50,
     category: 'plats',
@@ -70,7 +70,7 @@ export const mockProducts: LocalProduct[] = [
   },
   {
     id: 'ninice-moksi-porc',
-    name: 'Moksi Aleisi + porc',
+    name: 'Le Moksi Aleisi + Porc',
     vendor: 'Les Delices de Ninice',
     price: 11.50,
     category: 'plats',
@@ -82,7 +82,7 @@ export const mockProducts: LocalProduct[] = [
   },
   {
     id: 'ninice-bami-iles',
-    name: 'Bami des iles',
+    name: 'Bami des Iles',
     vendor: 'Les Delices de Ninice',
     price: 14.00,
     category: 'plats',
@@ -106,11 +106,11 @@ export const mockProducts: LocalProduct[] = [
   },
   {
     id: 'ninice-gulab-amande',
-    name: 'Gulab Jamun amande',
+    name: 'Gulab Jamun Amande',
     vendor: 'Les Delices de Ninice',
     price: 0.80,
     category: 'desserts',
-    description: 'Dessert avec sirop maison.',
+    description: 'Amande, avec sirop maison.',
     image: assetFromPublic('vendors/ninice/ninice-07-card.jpg'),
     zone: 'Dillon',
     featured: true,
@@ -118,11 +118,11 @@ export const mockProducts: LocalProduct[] = [
   },
   {
     id: 'ninice-gulab-coco',
-    name: 'Gulab Jamun coco',
+    name: 'Gulab Jamun Coco',
     vendor: 'Les Delices de Ninice',
     price: 0.80,
     category: 'desserts',
-    description: 'Dessert avec sirop maison.',
+    description: 'Coco, avec sirop maison.',
     image: assetFromPublic('vendors/ninice/ninice-08-card.jpg'),
     zone: 'Dillon',
     featured: false,
@@ -130,7 +130,7 @@ export const mockProducts: LocalProduct[] = [
   },
   {
     id: 'ninice-mini-brochette-poulet',
-    name: 'Mini brochette Saoto poulet',
+    name: 'Mini brochette Saoto Poulet',
     vendor: 'Les Delices de Ninice',
     price: 2.50,
     category: 'snacking',
@@ -142,7 +142,7 @@ export const mockProducts: LocalProduct[] = [
   },
   {
     id: 'ninice-mini-brochette-porc',
-    name: 'Mini brochette Saoto porc',
+    name: 'Mini brochette Saoto Porc',
     vendor: 'Les Delices de Ninice',
     price: 3.00,
     category: 'snacking',
@@ -154,7 +154,7 @@ export const mockProducts: LocalProduct[] = [
   },
   {
     id: 'ninice-mini-brochette-boeuf',
-    name: 'Mini brochette Saoto boeuf',
+    name: 'Mini brochette Saoto Boeuf',
     vendor: 'Les Delices de Ninice',
     price: 3.50,
     category: 'snacking',

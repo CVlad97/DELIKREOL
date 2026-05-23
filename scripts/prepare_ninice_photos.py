@@ -5,35 +5,46 @@ Prepare des visuels produits "Les Delices de Ninice" pour usage web.
 Pipeline:
 - correction orientation EXIF
 - recadrage center-crop en 4:3
-- rendu "catalogue" avec sujet centre, fond floute et ombre douce
+- detourage automatique (fond retire) via rembg
+- composition sur fond propre avec ombre douce
 - amelioration luminosite/contraste/couleur/nettete
-- export JPEG optimisé + WebP
+- export JPEG optimise + WebP + PNG detoure
 """
 
 from __future__ import annotations
 
+import io
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
 
 from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter, ImageOps
+from rembg import new_session, remove
 
 
-# Mapping aligne avec le menu publie (WhatsApp 23/05).
-# On evite les photos hors produit (salade seule / boites fermees non vendeuses).
-PRODUCT_SOURCE_MAP: Dict[int, str] = {
-    1: "IMG-20260521-WA0071.jpg",  # Colombo des deux rives
-    2: "IMG-20260521-WA0070.jpg",  # Moksi Aleisi vegetarien
-    3: "IMG-20260521-WA0079.jpg",  # Moksi + poulet
-    4: "IMG-20260521-WA0074.jpg",  # Moksi + porc
-    5: "IMG-20260521-WA0074.jpg",  # Bami des iles
-    6: "IMG-20260521-WA0073.jpg",  # Bara
-    7: "IMG-20260521-WA0075.jpg",  # Gulab amande
-    8: "IMG-20260521-WA0075.jpg",  # Gulab coco
-    9: "IMG-20260521-WA0076.jpg",  # Mini brochette poulet
-    10: "IMG-20260521-WA0076.jpg",  # Mini brochette porc
-    11: "IMG-20260521-WA0076.jpg",  # Mini brochette boeuf
-}
+@dataclass(frozen=True)
+class ProductSpec:
+    index: int
+    slug: str
+    label: str
+    price_eur: float
+    source_file: str
+
+
+# Mapping valide contre la conversation WhatsApp du 23/05.
+PRODUCT_SPECS: List[ProductSpec] = [
+    ProductSpec(1, "colombo-deux-rives", "Le Colombo des Deux Rives", 14.00, "IMG-20260521-WA0071.jpg"),
+    ProductSpec(2, "moksi-veg", "Le Moksi Aleisi Vegetarien", 7.00, "IMG-20260521-WA0070.jpg"),
+    ProductSpec(3, "moksi-poulet", "Le Moksi Aleisi + Poulet", 10.50, "IMG-20260521-WA0070.jpg"),
+    ProductSpec(4, "moksi-porc", "Le Moksi Aleisi + Porc", 11.50, "IMG-20260521-WA0070.jpg"),
+    ProductSpec(5, "bami-iles", "Bami des Iles", 14.00, "IMG-20260521-WA0074.jpg"),
+    ProductSpec(6, "bara-signature", "Bara + sauce signature", 1.80, "IMG-20260521-WA0073.jpg"),
+    ProductSpec(7, "gulab-amande", "Gulab Jamun Amande", 0.80, "IMG-20260521-WA0075.jpg"),
+    ProductSpec(8, "gulab-coco", "Gulab Jamun Coco", 0.80, "IMG-20260521-WA0075.jpg"),
+    ProductSpec(9, "mini-brochette-poulet", "Mini brochette Saoto Poulet", 2.50, "IMG-20260521-WA0076.jpg"),
+    ProductSpec(10, "mini-brochette-porc", "Mini brochette Saoto Porc", 3.00, "IMG-20260521-WA0076.jpg"),
+    ProductSpec(11, "mini-brochette-boeuf", "Mini brochette Saoto Boeuf", 3.50, "IMG-20260521-WA0076.jpg"),
+]
 
 
 @dataclass(frozen=True)
@@ -76,6 +87,38 @@ def enhance(image: Image.Image) -> Image.Image:
     return image
 
 
+def remove_background_rgba(image_rgb: Image.Image, session) -> Image.Image:
+    buf = io.BytesIO()
+    image_rgb.save(buf, format="PNG")
+    out = remove(buf.getvalue(), session=session)
+    fg = Image.open(io.BytesIO(out)).convert("RGBA")
+    alpha = fg.getchannel("A").filter(ImageFilter.MedianFilter(size=3))
+
+    def _remap(a: int) -> int:
+        if a <= 56:
+            return 0
+        if a >= 170:
+            return 255
+        return int((a - 56) * 255 / (170 - 56))
+
+    alpha = alpha.point(_remap)
+    alpha = alpha.filter(ImageFilter.GaussianBlur(radius=0.5))
+    fg.putalpha(alpha)
+    return fg
+
+
+def trim_transparent(image_rgba: Image.Image, padding: int = 14) -> Image.Image:
+    alpha = image_rgba.getchannel("A")
+    bbox = alpha.getbbox()
+    if bbox is None:
+        return image_rgba
+    left = max(0, bbox[0] - padding)
+    top = max(0, bbox[1] - padding)
+    right = min(image_rgba.width, bbox[2] + padding)
+    bottom = min(image_rgba.height, bbox[3] + padding)
+    return image_rgba.crop((left, top, right, bottom))
+
+
 def _top_glow(size: Tuple[int, int]) -> Image.Image:
     w, h = size
     glow = Image.new("L", size, 0)
@@ -89,32 +132,46 @@ def _top_glow(size: Tuple[int, int]) -> Image.Image:
     return glow
 
 
-def render_catalog_image(image: Image.Image, target_size: Tuple[int, int]) -> Image.Image:
-    base = ImageOps.fit(image, target_size, Image.Resampling.LANCZOS)
-    base = enhance(base)
+def build_gradient_bg(size: Tuple[int, int]) -> Image.Image:
+    w, h = size
+    bg = Image.new("RGB", size, (255, 249, 241))
+    draw = ImageDraw.Draw(bg)
+    for y in range(h):
+        t = y / max(1, h - 1)
+        r = int(255 - (255 - 248) * t)
+        g = int(249 - (249 - 236) * t)
+        b = int(241 - (241 - 224) * t)
+        draw.line((0, y, w, y), fill=(r, g, b))
+    return bg
 
-    # Full-frame: on conserve la photo en plein format, on adoucit juste les bords.
-    blur = base.filter(ImageFilter.GaussianBlur(radius=max(4, int(min(target_size) * 0.009))))
 
-    mask = Image.new("L", target_size, 0)
-    draw = ImageDraw.Draw(mask)
-    margin_w = int(target_size[0] * 0.07)
-    margin_h = int(target_size[1] * 0.08)
-    draw.ellipse(
-        (
-            margin_w,
-            margin_h,
-            target_size[0] - margin_w,
-            target_size[1] - margin_h,
-        ),
-        fill=255,
-    )
-    mask = mask.filter(ImageFilter.GaussianBlur(radius=max(20, int(min(target_size) * 0.035))))
-    out = Image.composite(base, blur, mask).convert("RGBA")
+def render_catalog_image(fg_rgba: Image.Image, target_size: Tuple[int, int]) -> Image.Image:
+    bg = build_gradient_bg(target_size).convert("RGBA")
+
+    fit_w = int(target_size[0] * 0.82)
+    fit_h = int(target_size[1] * 0.78)
+    fg = trim_transparent(fg_rgba, padding=12)
+    fg = ImageOps.contain(fg, (fit_w, fit_h), Image.Resampling.LANCZOS)
+
+    # Ombre douce.
+    shadow_pad = max(18, int(min(target_size) * 0.02))
+    shadow = Image.new("RGBA", (fg.width + shadow_pad * 2, fg.height + shadow_pad * 2), (0, 0, 0, 0))
+    sh_mask = fg.getchannel("A")
+    sh_mask = sh_mask.filter(ImageFilter.GaussianBlur(radius=max(10, int(min(target_size) * 0.015))))
+    sh_layer = Image.new("RGBA", fg.size, (0, 0, 0, 105))
+    sh_layer.putalpha(sh_mask)
+    shadow.alpha_composite(sh_layer, (shadow_pad, shadow_pad))
 
     # Leger glow en haut pour un rendu plus premium.
     glow = Image.new("RGBA", target_size, (255, 255, 255, 0))
     glow.putalpha(_top_glow(target_size))
+
+    x = (target_size[0] - fg.width) // 2
+    y = (target_size[1] - fg.height) // 2
+
+    out = bg.copy()
+    out.alpha_composite(shadow, (x - shadow_pad + 4, y - shadow_pad + 9))
+    out.alpha_composite(fg, (x, y))
     out = Image.alpha_composite(out, glow)
 
     # Vignette subtile pour guider le regard.
@@ -129,16 +186,48 @@ def render_catalog_image(image: Image.Image, target_size: Tuple[int, int]) -> Im
     return out_rgb
 
 
-def process_image(src: Path, out_dir: Path, index: int) -> List[Path]:
+def render_fullframe_image(image_rgb: Image.Image, target_size: Tuple[int, int]) -> Image.Image:
+    base = ImageOps.fit(image_rgb, target_size, Image.Resampling.LANCZOS)
+    base = enhance(base)
+    blur = base.filter(ImageFilter.GaussianBlur(radius=max(4, int(min(target_size) * 0.01))))
+    mask = Image.new("L", target_size, 0)
+    draw = ImageDraw.Draw(mask)
+    mw = int(target_size[0] * 0.08)
+    mh = int(target_size[1] * 0.10)
+    draw.ellipse((mw, mh, target_size[0] - mw, target_size[1] - mh), fill=255)
+    mask = mask.filter(ImageFilter.GaussianBlur(radius=max(18, int(min(target_size) * 0.03))))
+    out = Image.composite(base, blur, mask).convert("RGBA")
+    glow = Image.new("RGBA", target_size, (255, 255, 255, 0))
+    glow.putalpha(_top_glow(target_size))
+    out = Image.alpha_composite(out, glow)
+    return out.convert("RGB")
+
+
+def process_image(src: Path, out_dir: Path, index: int, session) -> List[Path]:
     with Image.open(src) as original:
         img = ImageOps.exif_transpose(original).convert("RGB")
         img = center_crop_to_ratio(img, (4, 3))
+        img = enhance(img)
+        fg_rgba = remove_background_rgba(img, session=session)
+        alpha = fg_rgba.getchannel("A")
+        alpha_hist = alpha.histogram()
+        coverage = (sum(alpha_hist[1:])) / (img.width * img.height)
+        cutout = trim_transparent(fg_rgba, padding=4)
+        fallback_fullframe = coverage < 0.10 or cutout.width < 220 or cutout.height < 220
 
         outputs: List[Path] = []
         rendered_targets: Dict[str, Image.Image] = {}
 
+        if not fallback_fullframe:
+            cutout_path = out_dir / f"ninice-{index:02d}-cutout.png"
+            cutout.save(cutout_path, format="PNG", optimize=True)
+            outputs.append(cutout_path)
+
         for target in TARGETS:
-            rendered = render_catalog_image(img, target.size)
+            if fallback_fullframe:
+                rendered = render_fullframe_image(img, target.size)
+            else:
+                rendered = render_catalog_image(fg_rgba, target.size)
             rendered_targets[target.suffix] = rendered
 
             base_name = f"ninice-{index:02d}-{target.suffix}"
@@ -179,17 +268,20 @@ def process_image(src: Path, out_dir: Path, index: int) -> List[Path]:
         return outputs
 
 
-def generate_readme(out_dir: Path, pairs: Iterable[Tuple[str, str]]) -> None:
+def generate_readme(out_dir: Path, rows: Iterable[Tuple[ProductSpec, str]]) -> None:
     lines = [
         "# Les Delices de Ninice - Images Produits",
         "",
-        "Images retouchées automatiquement pour le catalogue DELIKREOL.",
+        "Images retouchees automatiquement pour le catalogue DELIKREOL.",
+        "Fonds retires + composition catalogue propre.",
         "",
-        "| Source WhatsApp | Image catalogue (JPEG) |",
-        "|---|---|",
+        "| Produit | Prix (EUR) | Source WhatsApp | Image catalogue (JPEG) |",
+        "|---|---:|---|---|",
     ]
-    for src_name, out_name in pairs:
-        lines.append(f"| `{src_name}` | `/vendors/ninice/{out_name}` |")
+    for spec, out_name in rows:
+        lines.append(
+            f"| {spec.label} | {spec.price_eur:.2f} | `{spec.source_file}` | `/vendors/ninice/{out_name}` |"
+        )
 
     (out_dir / "README.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -199,18 +291,19 @@ def main() -> int:
     out_dir = Path("/root/DELIKREOL/public/vendors/ninice")
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    mapping: List[Tuple[str, str]] = []
-    for i in range(1, 12):
-        filename = PRODUCT_SOURCE_MAP[i]
-        src = source_dir / filename
+    session = new_session("u2netp")
+
+    mapping: List[Tuple[ProductSpec, str]] = []
+    for spec in PRODUCT_SPECS:
+        src = source_dir / spec.source_file
         if not src.exists():
             print(f"[WARN] fichier absent: {src}")
             continue
-        outputs = process_image(src, out_dir, i)
+        outputs = process_image(src, out_dir, spec.index, session=session)
         jpg_card = next((path.name for path in outputs if path.name.endswith("-card.jpg")), None)
         if jpg_card:
-            mapping.append((filename, jpg_card))
-        print(f"[OK] {filename} -> {len(outputs)} fichiers")
+            mapping.append((spec, jpg_card))
+        print(f"[OK] {spec.source_file} -> ninice-{spec.index:02d} ({len(outputs)} fichiers)")
 
     generate_readme(out_dir, mapping)
     print(f"[DONE] export: {out_dir}")
