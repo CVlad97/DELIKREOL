@@ -1285,7 +1285,7 @@ export function PublicHomePage() {
 
           <nav className="absolute left-1/2 top-full hidden -translate-x-1/2 items-center gap-2 rounded-b-[1.5rem] border border-t-0 border-orange-100 bg-[#fff8ec]/95 px-4 py-2 shadow-soft backdrop-blur lg:flex">
             <NavLink href="#catalogue">Catalogue</NavLink>
-            <NavLink href="#zones">Zones</NavLink>
+            <NavLink href="#commande">Commander</NavLink>
             <NavLink href="#contact">Contact</NavLink>
           </nav>
 
@@ -1353,7 +1353,7 @@ export function PublicHomePage() {
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <span className="text-xs font-black uppercase tracking-[0.16em] text-stone-400">Communes partenaires</span>
                   {serviceZones.slice(0, 4).map((zone) => (
-                    <span key={zone} className="rounded-lg border border-orange-100 bg-[#fff8ef] px-3 py-1.5 text-xs font-black text-[#7c2d12]">
+                    <span key={zone} className="rounded-xl border border-orange-100 bg-[#fff8ef] px-3 py-1.5 text-xs font-black text-[#7c2d12]">
                       {zone}
                     </span>
                   ))}
@@ -1555,7 +1555,7 @@ export function PublicHomePage() {
                   <button
                     key={category}
                     onClick={() => setCategoryFilter(category)}
-                    className={`shrink-0 rounded-full border px-4 py-2 text-sm font-black transition ${
+                    className={`shrink-0 rounded-xl border px-4 py-2 text-sm font-black transition ${
                       active
                         ? 'border-transparent bg-[#d95f2d] text-white shadow-lg shadow-orange-500/20'
                         : 'border-orange-200 bg-white text-[#7c2d12] hover:-translate-y-0.5'
@@ -1696,9 +1696,12 @@ export function PublicHomePage() {
           </div>
         </section>
 
-        <section id="zones" className="mx-auto max-w-7xl px-4 py-14">
-          <div className="island-map-surface rounded-[2.5rem] border border-orange-100 p-5 shadow-elegant lg:p-8">
-            <div className="relative z-10">
+        <section id="zones" className="mx-auto max-w-7xl px-4 py-10">
+          <details className="rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
+            <summary className="cursor-pointer text-sm font-black uppercase tracking-[0.16em] text-[#7c2d12]">
+              Voir les zones, la carte et les partenaires pilotes
+            </summary>
+            <div className="mt-6 island-map-surface rounded-[2rem] border border-orange-100 p-5 lg:p-8">
               <SectionTitle
                 eyebrow="Zones desservies"
                 title="Une carte locale claire."
@@ -1715,7 +1718,7 @@ export function PublicHomePage() {
                 ))}
               </div>
             </div>
-          </div>
+          </details>
         </section>
 
         <section id="pro" className="mx-auto max-w-7xl px-4 pb-10">
@@ -2024,24 +2027,25 @@ export function PublicHomePage() {
           </details>
         </section>
 
-        <section id="faq" className="bg-white py-14">
+        <section id="faq" className="bg-white py-10">
           <div className="mx-auto max-w-7xl px-4">
-            <SectionTitle
-              eyebrow="FAQ"
-              title="Les questions qui déclenchent la conversion."
-              text="Chaque réponse doit lever une objection simple: confiance, zone, disponibilité et commande."
-            />
-            <div className="mt-6 rounded-[1.75rem] border border-orange-100 bg-[#fff8ef] p-5 shadow-soft">
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">Conversion</p>
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-stone-600">
-                Le parcours public priorise une seule action: choisir un produit et valider la commande. Les autres besoins restent en accès secondaire.
-              </p>
-            </div>
-            <div className="mt-8 grid gap-4 lg:grid-cols-2">
-              {faqItems.map((item) => (
-                <FaqItem key={item.question} {...item} />
-              ))}
-            </div>
+            <details className="rounded-[1.75rem] border border-orange-100 bg-[#fff8ef] p-5 shadow-soft">
+              <summary className="cursor-pointer text-sm font-black uppercase tracking-[0.16em] text-[#7c2d12]">
+                Questions fréquentes (ouvrir)
+              </summary>
+              <div className="mt-5">
+                <SectionTitle
+                  eyebrow="FAQ"
+                  title="Les questions qui déclenchent la conversion."
+                  text="Chaque réponse lève une objection simple: confiance, zone, disponibilité et commande."
+                />
+                <div className="mt-6 grid gap-4 lg:grid-cols-2">
+                  {faqItems.map((item) => (
+                    <FaqItem key={item.question} {...item} />
+                  ))}
+                </div>
+              </div>
+            </details>
           </div>
         </section>
 
