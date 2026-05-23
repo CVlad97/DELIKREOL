@@ -15,6 +15,20 @@ export type PartnerProfile = {
 
 export const partnerProfiles: PartnerProfile[] = [
   {
+    name: 'Les Delices de Ninice',
+    zone: 'Martinique centre / sud',
+    offer: 'Traiteur, boxes repas et snacking',
+    type: 'Traiteur',
+    availability: 'Preparation quotidienne',
+    story: 'Cuisine maison orientee portions genereuses et service de proximite.',
+    promise: 'Cuisine fraiche, portions regulieres, commande simple',
+    eta: 'Meme jour / J+1 selon flux',
+    specialty: 'Boxes creoles, accras, brochettes',
+    highlights: ['Cuisine maison', 'Traiteur', 'Commande groupe'],
+    planifiable: true,
+    enterprise: true
+  },
+  {
     name: 'Traiteur Kreyol FDF',
     zone: 'Fort-de-France',
     offer: 'Plats du jour et desserts',
