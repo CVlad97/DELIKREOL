@@ -1,5 +1,10 @@
 import { Wine, Leaf, Hammer, Sprout, Package } from 'lucide-react';
 
+const assetFromPublic = (relativePath: string): string => {
+  const clean = relativePath.replace(/^\/+/, '');
+  return `${import.meta.env.BASE_URL}${clean}`;
+};
+
 export interface LocalProduct {
   id: string;
   name: string;
@@ -36,7 +41,7 @@ export const mockProducts: LocalProduct[] = [
     price: 12.90,
     category: 'plats',
     description: 'Riz, proteine marinee et legumes. Tarif estimatif provisoire.',
-    image: '/vendors/ninice/ninice-01-card.jpg',
+    image: assetFromPublic('vendors/ninice/ninice-01-card.jpg'),
     featured: true,
     available: true,
   },
@@ -47,7 +52,7 @@ export const mockProducts: LocalProduct[] = [
     price: 13.90,
     category: 'plats',
     description: 'Portion complete cuisine maison. Tarif estimatif provisoire.',
-    image: '/vendors/ninice/ninice-02-card.jpg',
+    image: assetFromPublic('vendors/ninice/ninice-02-card.jpg'),
     featured: true,
     available: true,
   },
@@ -58,7 +63,7 @@ export const mockProducts: LocalProduct[] = [
     price: 7.90,
     category: 'snacking',
     description: 'Portion snacking avec sauce maison. Tarif estimatif provisoire.',
-    image: '/vendors/ninice/ninice-03-card.jpg',
+    image: assetFromPublic('vendors/ninice/ninice-03-card.jpg'),
     featured: true,
     available: true,
   },
@@ -69,7 +74,7 @@ export const mockProducts: LocalProduct[] = [
     price: 14.90,
     category: 'plats',
     description: 'Assortiment grille avec accompagnement. Tarif estimatif provisoire.',
-    image: '/vendors/ninice/ninice-04-card.jpg',
+    image: assetFromPublic('vendors/ninice/ninice-04-card.jpg'),
     featured: true,
     available: true,
   },
@@ -80,7 +85,7 @@ export const mockProducts: LocalProduct[] = [
     price: 13.50,
     category: 'plats',
     description: 'Assiette complete portion standard. Tarif estimatif provisoire.',
-    image: '/vendors/ninice/ninice-05-card.jpg',
+    image: assetFromPublic('vendors/ninice/ninice-05-card.jpg'),
     featured: true,
     available: true,
   },
@@ -91,7 +96,7 @@ export const mockProducts: LocalProduct[] = [
     price: 4.90,
     category: 'desserts',
     description: 'Dessert individuel maison. Tarif estimatif provisoire.',
-    image: '/vendors/ninice/ninice-06-card.jpg',
+    image: assetFromPublic('vendors/ninice/ninice-06-card.jpg'),
     featured: true,
     available: true,
   },
@@ -102,7 +107,7 @@ export const mockProducts: LocalProduct[] = [
     price: 10.90,
     category: 'plats',
     description: 'Brochettes marinees et cuisson minute. Tarif estimatif provisoire.',
-    image: '/vendors/ninice/ninice-07-card.jpg',
+    image: assetFromPublic('vendors/ninice/ninice-07-card.jpg'),
     featured: true,
     available: true,
   },
@@ -113,7 +118,7 @@ export const mockProducts: LocalProduct[] = [
     price: 4.50,
     category: 'accompagnements',
     description: 'Accompagnement leger et frais. Tarif estimatif provisoire.',
-    image: '/vendors/ninice/ninice-08-card.jpg',
+    image: assetFromPublic('vendors/ninice/ninice-08-card.jpg'),
     featured: true,
     available: true,
   },
@@ -124,7 +129,7 @@ export const mockProducts: LocalProduct[] = [
     price: 12.50,
     category: 'plats',
     description: 'Menu midi complet. Tarif estimatif provisoire.',
-    image: '/vendors/ninice/ninice-09-card.jpg',
+    image: assetFromPublic('vendors/ninice/ninice-09-card.jpg'),
     featured: true,
     available: true,
   },
@@ -135,7 +140,7 @@ export const mockProducts: LocalProduct[] = [
     price: 19.90,
     category: 'plats',
     description: 'Format duo a partager. Tarif estimatif provisoire.',
-    image: '/vendors/ninice/ninice-10-card.jpg',
+    image: assetFromPublic('vendors/ninice/ninice-10-card.jpg'),
     featured: false,
     available: true,
   },
@@ -146,7 +151,7 @@ export const mockProducts: LocalProduct[] = [
     price: 3.90,
     category: 'boissons',
     description: 'Boisson fraiche du jour. Tarif estimatif provisoire.',
-    image: '/vendors/ninice/ninice-11-card.jpg',
+    image: assetFromPublic('vendors/ninice/ninice-11-card.jpg'),
     featured: false,
     available: true,
   },
