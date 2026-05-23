@@ -16,7 +16,7 @@ export type PartnerProfile = {
 export const partnerProfiles: PartnerProfile[] = [
   {
     name: 'Les Delices de Ninice',
-    zone: 'Martinique centre / sud',
+    zone: 'Secteur Dillon',
     offer: 'Traiteur, boxes repas et snacking',
     type: 'Traiteur',
     availability: 'Preparation quotidienne',
@@ -24,7 +24,13 @@ export const partnerProfiles: PartnerProfile[] = [
     promise: 'Cuisine fraiche, portions regulieres, commande simple',
     eta: 'Meme jour / J+1 selon flux',
     specialty: 'Boxes creoles, accras, brochettes',
-    highlights: ['Cuisine maison', 'Traiteur', 'Commande groupe', 'Tarifs estimatifs provisoires'],
+    highlights: [
+      'Cuisine maison',
+      'Traiteur',
+      'Commande groupe',
+      'Point relais: Barber Shop de Dillon',
+      'Tarifs estimatifs provisoires',
+    ],
     planifiable: true,
     enterprise: true
   }

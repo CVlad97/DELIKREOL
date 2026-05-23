@@ -165,19 +165,41 @@ function buildDemoCatalog(): CatalogState {
   const vendorNames = Array.from(new Set(mockProducts.map((product) => product.vendor)));
   const demoZones = ['Fort-de-France', 'Lamentin', 'Schoelcher'];
   const vendors = vendorNames.map((name, index) => ({
-    id: `demo-vendor-${index + 1}`,
-    business_name: name,
-    business_type: 'Partenaire local',
-    description: 'Partenaire de démonstration DELIKREOL.',
-    logo_url: null,
-    address: demoZones[index % demoZones.length],
-    phone: '',
-    latitude: null,
-    longitude: null,
-    commission_rate: 0.15,
-    delivery_radius_km: 3 + (index % 3),
-    zone_label: demoZones[index % demoZones.length],
-  }));
+    isNinice: name.toLowerCase().includes('ninice'),
+    fallbackZone: demoZones[index % demoZones.length],
+  })).map(({ isNinice, fallbackZone }, index) => {
+    const name = vendorNames[index];
+    if (isNinice) {
+      return {
+        id: `demo-vendor-${index + 1}`,
+        business_name: name,
+        business_type: 'Traiteur local',
+        description: 'Partenaire actif DELIKREOL. Point relais pilote: Barber Shop de Dillon.',
+        logo_url: null,
+        address: 'Barber Shop de Dillon, Fort-de-France',
+        phone: '',
+        latitude: null,
+        longitude: null,
+        commission_rate: 0.15,
+        delivery_radius_km: 5,
+        zone_label: 'Dillon',
+      };
+    }
+    return {
+      id: `demo-vendor-${index + 1}`,
+      business_name: name,
+      business_type: 'Partenaire local',
+      description: 'Partenaire de démonstration DELIKREOL.',
+      logo_url: null,
+      address: fallbackZone,
+      phone: '',
+      latitude: null,
+      longitude: null,
+      commission_rate: 0.15,
+      delivery_radius_km: 3 + (index % 3),
+      zone_label: fallbackZone,
+    };
+  });
   const vendorMap = new Map(vendors.map((vendor) => [vendor.business_name, vendor]));
   const products = mockProducts.map((product, index) => {
     const vendor = vendorMap.get(product.vendor) ?? vendors[index % vendors.length];
