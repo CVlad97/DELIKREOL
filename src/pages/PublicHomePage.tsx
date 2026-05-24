@@ -1,5 +1,5 @@
-import { FormEvent, ReactNode, useEffect, useMemo, useState, type ComponentType, type MouseEvent } from 'react';
-import { CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet';
+import { FormEvent, Fragment, ReactNode, useEffect, useMemo, useState, type ComponentType, type MouseEvent } from 'react';
+import { Circle, CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet';
 import {
   ArrowRight,
   BadgeCheck,
@@ -32,6 +32,7 @@ import { getOrderFallbackEndpoint, saveFallbackOrderToSheet } from '../services/
 import { buildPartnerDispatchMessage, downloadOrderPdf } from '../utils/orderPdf';
 import { publicSupabase } from '../lib/publicSupabase';
 import { mockProducts } from '../data/mockCatalog';
+import { pointsRelais } from '../pointsRelais';
 import { getWhatsAppBusinessLink } from '../utils/whatsapp';
 import { ORDER_FORM_URL, PUBLIC_OPERATIONS_EMAIL, SHEETS_FIRST_MODE } from '../config/publicRuntime';
 import {
@@ -147,6 +148,15 @@ type CustomerLocation = {
   mapsUrl: string;
 };
 
+type MapVendor = {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  deliveryRadiusKm: number;
+  status: 'in_zone' | 'out_zone' | 'unknown';
+};
+
 type GeoStatus = 'idle' | 'loading' | 'success' | 'error' | 'unsupported';
 type GeoConsentState = 'idle' | 'ask' | 'declined' | 'granted';
 
@@ -155,10 +165,42 @@ const whatsappBase = `https://wa.me/${whatsappNumber}`;
 const featuredCategories = ['plats créoles', 'traiteurs', 'box / plateaux', 'desserts', 'boissons', 'commande entreprise'];
 const budgetRanges = ['Tous', '≤ 15 €', '15 € - 30 €', '30 € et plus'];
 const publicSiteUrl = 'https://cvlad97.github.io/DELIKREOL/';
+const defaultMapCenter: [number, number] = [14.6104, -61.0733];
+
+const zoneCenterByLabel: Record<string, [number, number]> = {
+  dillon: [14.6038, -61.0603],
+  'fort-de-france': [14.6104, -61.0733],
+  lamentin: [14.6109, -60.9976],
+  schoelcher: [14.624, -61.1045],
+  robert: [14.6764, -60.9394],
+  'riviere-salee': [14.5353, -60.9731],
+  'rivière-salée': [14.5353, -60.9731],
+  ducos: [14.595, -60.9702],
+  'trois-ilets': [14.5419, -61.0362],
+  'trois-îlets': [14.5419, -61.0362],
+};
+
+const pilotDrivers = [
+  { id: 'driver-1', name: 'Livreur pilote FDF', latitude: 14.612, longitude: -61.0708 },
+  { id: 'driver-2', name: 'Livreur pilote Lamentin', latitude: 14.6074, longitude: -61.0054 },
+];
 
 function formatWhatsAppLabel(value: string) {
   const digits = value.replace(/\D/g, '');
   return digits.startsWith('596') ? `+${digits}` : value;
+}
+
+function normalizeLabel(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+function getZoneFallbackCoordinates(zoneLabel?: string | null): [number, number] {
+  if (!zoneLabel) return defaultMapCenter;
+  return zoneCenterByLabel[normalizeLabel(zoneLabel)] ?? defaultMapCenter;
 }
 
 function buildDemoCatalog(): CatalogState {
@@ -181,7 +223,7 @@ function buildDemoCatalog(): CatalogState {
         latitude: null,
         longitude: null,
         commission_rate: 0.15,
-        delivery_radius_km: 5,
+        delivery_radius_km: 3,
         zone_label: 'Dillon',
       };
     }
@@ -196,7 +238,7 @@ function buildDemoCatalog(): CatalogState {
       latitude: null,
       longitude: null,
       commission_rate: 0.15,
-      delivery_radius_km: 3 + (index % 3),
+      delivery_radius_km: 3,
       zone_label: fallbackZone,
     };
   });
@@ -567,9 +609,52 @@ export function PublicHomePage() {
       .map(({ product }) => product);
   }, [catalog.products, categoryFilter, communeFilter, budgetFilter, query, customerLocation]);
 
-  const featuredProducts = useMemo(() => filteredProducts.slice(0, 6), [filteredProducts]);
-  const heroProduct = featuredProducts[0] ?? catalog.products[0] ?? null;
+  const filteredProductsUniqueImages = useMemo(() => {
+    const seenImage = new Set<string>();
+    return filteredProducts.map((product) => {
+      const imageKey = (product.image_url || '').trim().toLowerCase();
+      if (!imageKey) return product;
+      if (seenImage.has(imageKey)) {
+        return { ...product, image_url: null };
+      }
+      seenImage.add(imageKey);
+      return product;
+    });
+  }, [filteredProducts]);
+
+  const featuredProducts = useMemo(() => filteredProductsUniqueImages.slice(0, 3), [filteredProductsUniqueImages]);
+  const standardProducts = useMemo(() => {
+    const remaining = filteredProductsUniqueImages.filter((product) => !featuredProducts.some((item) => item.id === product.id));
+    return remaining.length > 0 ? remaining : filteredProductsUniqueImages;
+  }, [featuredProducts, filteredProductsUniqueImages]);
+  const heroProduct = featuredProducts[0] ?? filteredProductsUniqueImages[0] ?? catalog.products[0] ?? null;
   const highlightedVendors = useMemo(() => catalog.vendors.slice(0, 6), [catalog.vendors]);
+
+  const customerPoint = customerLocation ? { latitude: customerLocation.lat, longitude: customerLocation.lng } : null;
+
+  const mapVendors = useMemo<MapVendor[]>(
+    () =>
+      highlightedVendors.map((vendor) => {
+        const [fallbackLat, fallbackLng] = getZoneFallbackCoordinates(vendor.zone_label);
+        const latitude = vendor.latitude ?? fallbackLat;
+        const longitude = vendor.longitude ?? fallbackLng;
+        const deliveryRadiusKm = Number(vendor.delivery_radius_km || 3);
+        const status: MapVendor['status'] = customerPoint
+          ? distanceKm(customerPoint, { latitude, longitude }) <= deliveryRadiusKm
+            ? 'in_zone'
+            : 'out_zone'
+          : 'unknown';
+        return {
+          id: vendor.id,
+          name: vendor.business_name,
+          latitude,
+          longitude,
+          deliveryRadiusKm,
+          status,
+        };
+      }),
+    [customerPoint, highlightedVendors],
+  );
 
   const selectionEconomics = useMemo(
     () =>
@@ -1401,7 +1486,7 @@ export function PublicHomePage() {
                 <div className="overflow-hidden rounded-[2rem] bg-[#20150f] text-white shadow-2xl">
                   <div className="relative aspect-[4/4] sm:aspect-[16/13] lg:aspect-[4/3]">
                     {heroProduct.image_url ? (
-                      <img src={heroProduct.image_url} alt={heroProduct.name} className="h-full w-full object-cover" />
+                      <img src={heroProduct.image_url} alt={heroProduct.name} className="h-full w-full object-cover brightness-110 contrast-110 saturate-110" />
                     ) : (
                       <HeroFallback name={heroProduct.name} />
                     )}
@@ -1593,7 +1678,7 @@ export function PublicHomePage() {
               <div>
                 {loading && <EmptyState title="Catalogue en chargement" text="Les offres apparaîtront dès que les partenaires publiés sont récupérés." />}
                 {error && <EmptyState title="Catalogue indisponible" text={error} />}
-                {!loading && !error && filteredProducts.length === 0 && (
+                {!loading && !error && filteredProductsUniqueImages.length === 0 && (
                   <EmptyState
                     title="Aucune offre visible avec ces filtres"
                     text="Affinez la commune, la catégorie ou le budget. Vous pouvez aussi demander une orientation immédiate."
@@ -1601,7 +1686,7 @@ export function PublicHomePage() {
                   />
                 )}
 
-                {filteredProducts.length > 0 && (
+                {filteredProductsUniqueImages.length > 0 && (
                   <>
                     <div className="mb-4 flex items-center justify-between gap-3">
                       <p className="text-sm font-black uppercase tracking-[0.18em] text-[#c2410c]">Sélection en vedette</p>
@@ -1615,7 +1700,7 @@ export function PublicHomePage() {
 
                     <div id="commande" className="mt-8 scroll-mt-28 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
                       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                        {filteredProducts.map((product) => (
+                        {standardProducts.map((product) => (
                           <ProductCard key={product.id} product={product} onAdd={() => addToSelection(product)} />
                         ))}
                       </div>
@@ -1679,13 +1764,13 @@ export function PublicHomePage() {
                 <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">Fiche produit</p>
                 <h3 className="mt-2 text-2xl font-black text-[#2a190f]">Lecture rapide</h3>
                 <p className="mt-2 text-sm leading-6 text-stone-600">
-                  Chaque fiche affiche le vendeur, la commune, le prix et l’action de conversion la plus simple. C’est la vitrine la plus rentable du site.
+                  Chaque fiche montre l’essentiel: nom du plat, prix, vendeur, rayon de livraison et bouton direct pour commander.
                 </p>
                 {heroProduct ? (
                   <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-orange-100">
                     <div className="aspect-[4/3] bg-[#fff2e6]">
                       {heroProduct.image_url ? (
-                        <img src={heroProduct.image_url} alt={heroProduct.name} className="h-full w-full object-cover" />
+                        <img src={heroProduct.image_url} alt={heroProduct.name} className="h-full w-full object-cover brightness-110 contrast-110 saturate-110" />
                       ) : (
                         <HeroFallback name={heroProduct.name} />
                       )}
@@ -1738,6 +1823,104 @@ export function PublicHomePage() {
                 {highlightedVendors.map((vendor) => (
                   <VendorCard key={vendor.id} vendor={vendor} />
                 ))}
+              </div>
+              <div className="mt-8 overflow-hidden rounded-[1.5rem] border border-orange-100 bg-white">
+                <div className="border-b border-orange-100 bg-[#fff8ef] p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">Carte interactive</p>
+                  <p className="mt-1 text-sm text-stone-600">
+                    Bleu: vendeur (rayon 3 km). Vert: client en zone. Rouge: client hors zone. Violet: livreur pilote. Orange: point relais.
+                  </p>
+                </div>
+                <MapContainer
+                  center={
+                    customerLocation
+                      ? [customerLocation.lat, customerLocation.lng]
+                      : [mapVendors[0]?.latitude ?? defaultMapCenter[0], mapVendors[0]?.longitude ?? defaultMapCenter[1]]
+                  }
+                  zoom={13}
+                  scrollWheelZoom={false}
+                  className="h-[420px] w-full"
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+
+                  {mapVendors.map((vendor) => (
+                    <Fragment key={vendor.id}>
+                      <Circle
+                        center={[vendor.latitude, vendor.longitude]}
+                        radius={vendor.deliveryRadiusKm * 1000}
+                        pathOptions={{ color: '#1d4ed8', fillColor: '#60a5fa', fillOpacity: 0.1, weight: 2 }}
+                      />
+                      <CircleMarker
+                        center={[vendor.latitude, vendor.longitude]}
+                        radius={8}
+                        pathOptions={{ color: '#1d4ed8', fillColor: '#1d4ed8', fillOpacity: 0.95 }}
+                      >
+                        <Popup>
+                          <strong>{vendor.name}</strong>
+                          <br />
+                          Rayon: {vendor.deliveryRadiusKm} km
+                          <br />
+                        {vendor.status === 'in_zone' ? 'Client dans la zone' : vendor.status === 'out_zone' ? 'Client hors zone' : 'Position client non confirmée'}
+                        </Popup>
+                      </CircleMarker>
+                    </Fragment>
+                  ))}
+
+                  {pointsRelais.slice(0, 6).map((relay) => (
+                    <CircleMarker
+                      key={`relay-${relay.id}`}
+                      center={[relay.lat, relay.lng]}
+                      radius={7}
+                      pathOptions={{ color: '#ea580c', fillColor: '#f97316', fillOpacity: 0.9 }}
+                    >
+                      <Popup>
+                        <strong>{relay.name}</strong>
+                        <br />
+                        Point relais
+                        <br />
+                        {relay.adresse}
+                      </Popup>
+                    </CircleMarker>
+                  ))}
+
+                  {pilotDrivers.map((driver) => (
+                    <CircleMarker
+                      key={driver.id}
+                      center={[driver.latitude, driver.longitude]}
+                      radius={7}
+                      pathOptions={{ color: '#7c3aed', fillColor: '#8b5cf6', fillOpacity: 0.95 }}
+                    >
+                      <Popup>
+                        <strong>{driver.name}</strong>
+                        <br />
+                        Livreur pilote
+                      </Popup>
+                    </CircleMarker>
+                  ))}
+
+                  {customerLocation && (
+                    <CircleMarker
+                      center={[customerLocation.lat, customerLocation.lng]}
+                      radius={9}
+                      pathOptions={{
+                        color: mapVendors.some((vendor) => vendor.status === 'in_zone') ? '#059669' : '#dc2626',
+                        fillColor: mapVendors.some((vendor) => vendor.status === 'in_zone') ? '#10b981' : '#ef4444',
+                        fillOpacity: 1,
+                      }}
+                    >
+                      <Popup>
+                        <strong>Votre position</strong>
+                        <br />
+                        {mapVendors.some((vendor) => vendor.status === 'in_zone')
+                          ? 'Vous êtes dans au moins une zone de livraison'
+                          : 'Hors zone actuelle des vendeurs'}
+                      </Popup>
+                    </CircleMarker>
+                  )}
+                </MapContainer>
               </div>
             </div>
           </details>
@@ -2292,7 +2475,11 @@ function ProductCard({
     <article className="premium-card group overflow-hidden rounded-[2rem] border border-orange-100 bg-white shadow-soft transition hover:-translate-y-1 hover:shadow-2xl">
       <div className={`${compact ? 'aspect-[16/11]' : 'aspect-[4/3]'} relative bg-[#fff4e7]`}>
         {product.image_url ? (
-          <img src={product.image_url} alt={product.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+          <img
+            src={product.image_url}
+            alt={product.name}
+            className="h-full w-full object-cover brightness-110 contrast-110 saturate-110 transition duration-500 group-hover:scale-105"
+          />
         ) : (
           <HeroFallback name={product.name} />
         )}
