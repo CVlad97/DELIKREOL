@@ -159,6 +159,7 @@ type MapVendor = {
 
 type GeoStatus = 'idle' | 'loading' | 'success' | 'error' | 'unsupported';
 type GeoConsentState = 'idle' | 'ask' | 'declined' | 'granted';
+type DeliveryCoverageStatus = 'unknown' | 'in_zone' | 'out_zone';
 
 const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 const whatsappBase = `https://wa.me/${whatsappNumber}`;
@@ -666,6 +667,62 @@ export function PublicHomePage() {
     [fulfillmentMode, selectedProducts],
   );
 
+  const deliveryCoverage = useMemo(() => {
+    if (fulfillmentMode !== 'delivery' || selectedProducts.length === 0) {
+      return {
+        status: 'unknown' as DeliveryCoverageStatus,
+        message: '',
+      };
+    }
+
+    const fallbackZone =
+      communeFilter !== 'Tous'
+        ? communeFilter
+        : deliveryAddress.trim()
+            ? deliveryAddress.trim().split(',')[0]
+            : '';
+
+    const customerPoint = customerLocation ? { latitude: customerLocation.lat, longitude: customerLocation.lng } : null;
+    const failures: string[] = [];
+
+    for (const product of selectedProducts) {
+      const vendor = {
+        id: product.vendor_id,
+        latitude: product.vendor_latitude,
+        longitude: product.vendor_longitude,
+        delivery_radius_km: product.vendor_delivery_radius_km,
+        zone_label: product.zone_label,
+      };
+      const covered = customerPoint
+        ? vendorServesPoint(vendor, customerPoint, fallbackZone || undefined)
+        : fallbackZone
+          ? (product.zone_label || '').toLowerCase().includes(fallbackZone.toLowerCase())
+          : false;
+      if (!covered) failures.push(product.vendor_name);
+    }
+
+    if (failures.length > 0) {
+      return {
+        status: 'out_zone' as DeliveryCoverageStatus,
+        message: customerPoint
+          ? `Livraison impossible pour votre position actuelle avec: ${Array.from(new Set(failures)).join(', ')}. Choisissez retrait ou une autre adresse.`
+          : `Zone non couverte pour certains vendeurs (${Array.from(new Set(failures)).join(', ')}). Renseignez une adresse plus précise ou passez en retrait.`,
+      };
+    }
+
+    if (!customerPoint && !fallbackZone) {
+      return {
+        status: 'unknown' as DeliveryCoverageStatus,
+        message: 'Ajoutez votre adresse ou validez votre position pour confirmer la zone de livraison.',
+      };
+    }
+
+    return {
+      status: 'in_zone' as DeliveryCoverageStatus,
+      message: 'Votre commande est dans la zone de livraison.',
+    };
+  }, [communeFilter, customerLocation, deliveryAddress, fulfillmentMode, selectedProducts]);
+
   const orderNumber = useMemo(() => `DK-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${String(selectedProducts.length || 1).padStart(2, '0')}`, [selectedProducts.length]);
 
   const deliveryLabel = fulfillmentMode === 'delivery' ? 'Livraison' : 'Retrait';
@@ -1006,6 +1063,14 @@ export function PublicHomePage() {
 
     if (fulfillmentMode === 'delivery' && !deliveryAddress.trim()) {
       setCheckoutStatus({ kind: 'error', message: 'Adresse obligatoire pour une livraison.' });
+      return;
+    }
+
+    if (fulfillmentMode === 'delivery' && deliveryCoverage.status === 'out_zone') {
+      setCheckoutStatus({
+        kind: 'error',
+        message: deliveryCoverage.message || 'Livraison impossible pour cette adresse/position. Passez en retrait ou changez d’adresse.',
+      });
       return;
     }
 
@@ -1364,7 +1429,7 @@ export function PublicHomePage() {
   }
 
   function scrollToCheckoutPanel() {
-    const target = document.getElementById('commande');
+    const target = document.getElementById('commande') || document.querySelector('[data-testid="cart-panel"]');
     if (target) {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       return;
@@ -1754,6 +1819,9 @@ export function PublicHomePage() {
                         onWhatsAppFallback={handleWhatsAppCheckoutFallback}
                         onRemove={removeFromSelection}
                         onClear={clearSelection}
+                        deliveryCoverageStatus={deliveryCoverage.status}
+                        deliveryCoverageMessage={deliveryCoverage.message}
+                        orderTrackingUrl={checkoutStatus.orderNumber ? `${baseUrl}order-status?order=${encodeURIComponent(checkoutStatus.orderNumber)}` : `${baseUrl}order-status`}
                       />
                     </div>
                   </>
@@ -2578,6 +2646,9 @@ function SelectionPanel({
   onWhatsAppFallback,
   onRemove,
   onClear,
+  deliveryCoverageStatus,
+  deliveryCoverageMessage,
+  orderTrackingUrl,
 }: {
   products: PublicCatalogProduct[];
   summary: ReturnType<typeof calculateOrderEconomics>;
@@ -2628,6 +2699,9 @@ function SelectionPanel({
   onWhatsAppFallback: () => void;
   onRemove: (index: number) => void;
   onClear: () => void;
+  deliveryCoverageStatus: DeliveryCoverageStatus;
+  deliveryCoverageMessage: string;
+  orderTrackingUrl: string;
 }) {
   const mapPreviewLocation = pendingCustomerLocation ?? customerLocation;
 
@@ -2688,6 +2762,11 @@ function SelectionPanel({
                 </button>
               );
             })}
+          </div>
+
+          <div className="rounded-2xl border border-orange-100 bg-[#fff8ef] p-3 text-xs font-bold text-[#7c2d12]">
+            <p>Résumé commande: {products.length} article(s) • {formatPrice(summary.total_client)} estimé</p>
+            <p className="mt-1">Identification client obligatoire: nom + téléphone.</p>
           </div>
 
           <div className="grid gap-2">
@@ -2827,6 +2906,23 @@ function SelectionPanel({
             {geoError && <p className="mt-2 text-xs font-bold text-red-700">{geoError}</p>}
           </div>
 
+          {fulfillmentMode === 'delivery' && deliveryCoverageStatus !== 'unknown' && (
+            <div
+              className={`rounded-2xl border p-3 text-sm font-bold ${
+                deliveryCoverageStatus === 'in_zone'
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
+                  : 'border-red-200 bg-red-50 text-red-900'
+              }`}
+            >
+              {deliveryCoverageMessage}
+            </div>
+          )}
+          {fulfillmentMode === 'delivery' && deliveryCoverageStatus === 'unknown' && deliveryCoverageMessage && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-bold text-amber-900">
+              {deliveryCoverageMessage}
+            </div>
+          )}
+
           <div className="rounded-2xl border border-orange-100 bg-white p-4 text-sm">
             <PriceLine label="Sous-total" value={formatPrice(summary.subtotal_produits)} />
             <PriceLine label={fulfillmentMode === 'delivery' ? 'Livraison' : 'Retrait'} value={formatPrice(summary.frais_livraison)} />
@@ -2854,53 +2950,31 @@ function SelectionPanel({
           </div>
 
           <div className="rounded-2xl border border-orange-100 bg-white p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">Orchestration</p>
-            <select
-              value={vendorAvailabilityStatus}
-              onChange={(event) => onVendorAvailabilityStatusChange(event.target.value)}
-              className="mt-3 w-full rounded-xl border border-orange-100 bg-[#fff8ef] px-3 py-3 text-sm font-bold text-[#2a190f] outline-none"
-            >
-              <option>À confirmer par DELIKREOL</option>
-              <option>Demande envoyée au vendeur</option>
-              <option>Vendeur disponible</option>
-              <option>Vendeur indisponible</option>
-            </select>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">Commande client</p>
             <div className="mt-3 grid gap-2">
               <button
                 type="button"
                 onClick={onConfirmOrder}
-                disabled={checkoutStatus.kind === 'saving'}
+                disabled={checkoutStatus.kind === 'saving' || (fulfillmentMode === 'delivery' && deliveryCoverageStatus === 'out_zone')}
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#d95f2d] px-4 py-3 text-sm font-black text-white disabled:opacity-60"
               >
                 <ShoppingBag className="h-4 w-4" /> Enregistrer la commande
               </button>
+              <a href={orderTrackingUrl} className="inline-flex items-center justify-center gap-2 rounded-xl border border-orange-200 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]">
+                <Package className="h-4 w-4" /> Suivre ma commande
+              </a>
               <button
                 type="button"
                 onClick={onWhatsAppFallback}
                 disabled={checkoutStatus.kind === 'saving'}
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-800 disabled:opacity-60"
               >
-                <MessageCircle className="h-4 w-4" /> Envoyer sur WhatsApp (support)
+                <MessageCircle className="h-4 w-4" /> WhatsApp (support)
               </button>
               <a href={supportLink} className="inline-flex items-center justify-center gap-2 rounded-xl border border-orange-200 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]">
                 <MessageCircle className="h-4 w-4" /> Besoin d’aide
               </a>
-              <button type="button" onClick={onCopyVendorMessage} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#fff8ef] px-4 py-3 text-sm font-black text-[#2a190f]">
-                <Mail className="h-4 w-4" /> Préparer message vendeur
-              </button>
-              <button type="button" onClick={onCopyDriverMessage} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#fff8ef] px-4 py-3 text-sm font-black text-[#2a190f]">
-                <Truck className="h-4 w-4" /> Préparer mission livreur
-              </button>
-              <a href={driverMissionLink} className="inline-flex items-center justify-center gap-2 rounded-xl border border-orange-200 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]">
-                Ouvrir mission livreur sur WhatsApp central
-              </a>
             </div>
-            {copyStatus && <p className="mt-2 text-xs font-bold text-emerald-800">{copyStatus}</p>}
-            <details className="mt-3 rounded-xl bg-[#fff8ef] p-3 text-xs text-stone-600">
-              <summary className="cursor-pointer font-black text-[#7c2d12]">Aperçu vendeur / livreur</summary>
-              <pre className="mt-3 max-h-48 overflow-auto whitespace-pre-wrap font-sans">{vendorMessage}</pre>
-              <pre className="mt-3 max-h-48 overflow-auto whitespace-pre-wrap font-sans">{driverMessage}</pre>
-            </details>
           </div>
 
           <div className="rounded-2xl border border-orange-100 bg-white p-4">
@@ -2955,6 +3029,9 @@ function SelectionPanel({
                 <button onClick={onDownloadPdf} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-[#2a190f]">
                   <Download className="h-4 w-4" /> Télécharger le PDF
                 </button>
+                <a href={orderTrackingUrl} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-[#2a190f]">
+                  <Package className="h-4 w-4" /> Ouvrir mon suivi client
+                </a>
                 <a href={partnerDispatchLink} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-[#2a190f]">
                   <Mail className="h-4 w-4" /> Email partenaire
                 </a>

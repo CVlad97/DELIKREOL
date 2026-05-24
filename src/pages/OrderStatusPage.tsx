@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { erpRequest, isErpConfigured } from '../lib/erpClient';
 import { readDemoOrders, seedDemoData } from '../data/demoDb';
 
@@ -55,6 +55,12 @@ export function OrderStatusPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<any | null>(null);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const order = params.get('order');
+    if (order) setQuery(order);
+  }, []);
+
   const handleLookup = async () => {
     const trimmed = query.trim();
     if (!trimmed) {
@@ -109,6 +115,15 @@ export function OrderStatusPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.get('order')) return;
+    if (!query.trim()) return;
+    void handleLookup();
+    // intentionally reacts to initial query from URL
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
 
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     `Bonjour, je veux de l'aide pour la commande ${query.trim() || ''}.`
