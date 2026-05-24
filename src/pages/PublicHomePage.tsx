@@ -418,6 +418,8 @@ const defaultBusinessRequestForm: BusinessRequestForm = {
 export function PublicHomePage() {
   const baseUrl = import.meta.env.BASE_URL || '/';
   const customerPath = `${baseUrl}?view=customer`;
+  const proSpaceUrl = `${baseUrl}?view=partner-documents`;
+  const orderStatusBaseUrl = `${baseUrl}?view=order-status`;
   const orderFormUrl = ORDER_FORM_URL;
   const sheetsFirstMode = SHEETS_FIRST_MODE;
   const operationsEmail = PUBLIC_OPERATIONS_EMAIL;
@@ -1458,6 +1460,7 @@ export function PublicHomePage() {
           <nav className="absolute left-1/2 top-full hidden -translate-x-1/2 items-center gap-2 rounded-b-[1.5rem] border border-t-0 border-orange-100 bg-[#fff8ec]/95 px-4 py-2 shadow-soft backdrop-blur lg:flex">
             <NavLink href="#catalogue">Catalogue</NavLink>
             <NavLink href="#commande">Commander</NavLink>
+            <NavLink href={proSpaceUrl}>Espace pro</NavLink>
             <NavLink href="#contact">Contact</NavLink>
           </nav>
 
@@ -1821,7 +1824,11 @@ export function PublicHomePage() {
                         onClear={clearSelection}
                         deliveryCoverageStatus={deliveryCoverage.status}
                         deliveryCoverageMessage={deliveryCoverage.message}
-                        orderTrackingUrl={checkoutStatus.orderNumber ? `${baseUrl}order-status?order=${encodeURIComponent(checkoutStatus.orderNumber)}` : `${baseUrl}order-status`}
+                        orderTrackingUrl={
+                          checkoutStatus.orderNumber
+                            ? `${orderStatusBaseUrl}&order=${encodeURIComponent(checkoutStatus.orderNumber)}`
+                            : orderStatusBaseUrl
+                        }
                       />
                     </div>
                   </>
@@ -1995,309 +2002,27 @@ export function PublicHomePage() {
         </section>
 
         <section id="pro" className="mx-auto max-w-7xl px-4 pb-10">
-          <details className="rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
-            <summary className="cursor-pointer text-sm font-black uppercase tracking-[0.16em] text-[#7c2d12]">
-              Vous êtes partenaire, livreur ou entreprise ? Ouvrir l’espace pro
-            </summary>
-            <p className="mt-3 text-sm text-stone-600">
-              Cette zone est secondaire pour le public. Le flux principal reste le catalogue et la commande.
+          <div className="rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#7c2d12]">Accès séparé</p>
+            <h3 className="mt-2 text-2xl font-black text-[#2a190f]">Espace pro DELIKREOL</h3>
+            <p className="mt-2 text-sm text-stone-600">
+              Le portail partenaire et opérationnel est séparé de l’espace client. Aucun contenu admin n’est affiché ici.
             </p>
-            <div className="mt-6 space-y-8">
-        <section className="bg-[#fff8ef] py-14">
-          <div className="mx-auto max-w-7xl px-4">
-            <div className="rounded-[2.4rem] border border-orange-100 bg-white p-5 shadow-soft lg:p-8">
-              <SectionTitle
-                eyebrow="Partenaires"
-                title="Un accès propre pour chaque rôle."
-                text="Vendeur, livreur, point relais ou entreprise : une carte courte, une action claire."
-              />
-              <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                {roleCards.map((role) => (
-                  <RoleCard key={role.title} {...role} />
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="livreur" className="mx-auto max-w-7xl px-4 py-14">
-          <div className="grid gap-6 rounded-[2rem] border border-orange-100 bg-white p-5 shadow-elegant lg:grid-cols-[0.95fr_1.05fr] lg:p-8">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">Livreurs</p>
-              <h2 className="mt-3 font-display text-4xl font-black tracking-tight text-[#2a190f] sm:text-5xl">Un parcours livreur simple à comprendre.</h2>
-              <p className="mt-4 max-w-xl text-sm leading-6 text-stone-600 sm:text-base">
-                DELIKREOL doit afficher ce qui compte avant l’inscription: gains estimés, zone, rayon, disponibilités et véhicule.
-              </p>
-              <a href={`${whatsappBase}?text=${encodeURIComponent('Bonjour DELIKREOL, je souhaite devenir livreur.')}`} className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white">
-                Devenir livreur <Truck className="h-4 w-4" />
+            <div className="mt-4 flex flex-wrap gap-3">
+              <a
+                href={proSpaceUrl}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white"
+              >
+                Ouvrir espace pro <ChevronRight className="h-4 w-4" />
+              </a>
+              <a
+                href={partnerLink}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-white px-5 py-3 text-sm font-black text-[#7c2d12]"
+              >
+                WhatsApp partenaires
               </a>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {driverHighlights.map(([label, value]) => (
-                <div key={label} className="rounded-[1.35rem] border border-orange-100 bg-[#fffaf4] p-4">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">{label}</p>
-                  <p className="mt-2 text-lg font-black text-[#2a190f]">{value}</p>
-                </div>
-              ))}
-            </div>
           </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 py-14">
-          <div className="rounded-[2rem] border border-orange-100 bg-[#24170f] p-5 text-white shadow-elegant lg:p-8">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-300">Vérification opérationnelle</p>
-                <h2 className="mt-3 font-display text-4xl font-black tracking-tight sm:text-5xl">Tester le parcours complet sans toucher aux données publiques.</h2>
-                <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-300">
-                  Cet espace sert à contrôler les enchaînements client, vendeur, livreur, partenaire et entreprise sans modifier les données publiques.
-                </p>
-              </div>
-              <span className="w-fit rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-100">
-                Accès interne
-              </span>
-            </div>
-            <div className="mt-6 grid gap-3 lg:grid-cols-[320px_1fr]">
-              <div className="grid gap-2">
-                {simulationScenarios.map(([title], index) => (
-                  <button
-                    key={title}
-                    onClick={() => setActiveScenario(index)}
-                    className={`rounded-2xl px-4 py-3 text-left text-sm font-black ${activeScenario === index ? 'bg-orange-300 text-[#24170f]' : 'bg-white/10 text-white'}`}
-                  >
-                    {title}
-                  </button>
-                ))}
-              </div>
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/8 p-5">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-200">Scénario actif</p>
-                <h3 className="mt-2 text-2xl font-black">{simulationScenarios[activeScenario][0]}</h3>
-                <p className="mt-3 text-sm leading-6 text-stone-200">{simulationScenarios[activeScenario][1]}</p>
-                <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                  <MiniMetric label="Commande" value={selectedProducts.length ? `${selectedProducts.length} article(s)` : 'À sélectionner'} />
-                  <MiniMetric label="Total" value={formatPrice(selectionEconomics.total_client)} />
-                  <MiniMetric label="Paiement" value={paymentMethod} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 py-10">
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {reassurance.map((item) => (
-              <ValueCard key={item.title} {...item} />
-            ))}
-          </div>
-        </section>
-
-        <section id="entreprises" className="bg-[#24170f] py-14 text-white">
-          <div className="mx-auto grid max-w-7xl gap-8 px-4 lg:grid-cols-[1.05fr_0.95fr]">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-300">Entreprises & commandes groupées</p>
-              <h2 className="mt-3 max-w-2xl font-display text-4xl font-black leading-tight sm:text-5xl">
-                Repas d’équipe, commandes récurrentes, événements ou demandes urgentes.
-              </h2>
-              <p className="mt-4 max-w-2xl text-base leading-7 text-stone-300">
-                DELIKREOL permet à une entreprise de formuler une demande structurée, simple à traiter, avec un devis rapide et un suivi propre.
-              </p>
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <BusinessChip text="Repas d’équipe" />
-                <BusinessChip text="Commande récurrente" />
-                <BusinessChip text="Événement / cocktail" />
-                <BusinessChip text="Facturation" />
-              </div>
-              <div className="mt-6 rounded-[1.5rem] border border-white/10 bg-white/8 p-5">
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  <MiniMetric label="Frais livraison" value="Selon commune" />
-                  <MiniMetric label="Mode de paiement" value="Lien sécurisé" />
-                  <MiniMetric label="Confirmation" value="WhatsApp + email" />
-                  <MiniMetric label="Délai" value="Confirmé à la commande" />
-                </div>
-              </div>
-            </div>
-
-            <form onSubmit={handleBusinessRequestSubmit} className="rounded-[2rem] border border-white/10 bg-white/8 p-5 backdrop-blur">
-              <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-200">Demande entreprise</p>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <InputDark value={businessRequestForm.company_name} onChange={(value) => setBusinessRequestForm((current) => ({ ...current, company_name: value }))} placeholder="Entreprise" required />
-                <InputDark value={businessRequestForm.contact} onChange={(value) => setBusinessRequestForm((current) => ({ ...current, contact: value }))} placeholder="Contact" required />
-                <InputDark value={businessRequestForm.people_count} onChange={(value) => setBusinessRequestForm((current) => ({ ...current, people_count: value }))} placeholder="Nombre de personnes" />
-                <InputDark value={businessRequestForm.location} onChange={(value) => setBusinessRequestForm((current) => ({ ...current, location: value }))} placeholder="Commune / lieu" />
-                <InputDark value={businessRequestForm.requested_date} onChange={(value) => setBusinessRequestForm((current) => ({ ...current, requested_date: value }))} placeholder="Date souhaitée" />
-                <InputDark value={businessRequestForm.requested_time} onChange={(value) => setBusinessRequestForm((current) => ({ ...current, requested_time: value }))} placeholder="Heure souhaitée" />
-                <InputDark value={businessRequestForm.budget} onChange={(value) => setBusinessRequestForm((current) => ({ ...current, budget: value }))} placeholder="Budget" />
-                <InputDark value={businessRequestForm.frequency} onChange={(value) => setBusinessRequestForm((current) => ({ ...current, frequency: value }))} placeholder="Fréquence" />
-                <TextareaDark
-                  value={businessRequestForm.details}
-                  onChange={(value) => setBusinessRequestForm((current) => ({ ...current, details: value }))}
-                  placeholder="Repas d’équipe, buffet, commande récurrente, livraison..."
-                  className="sm:col-span-2"
-                  rows={4}
-                />
-              </div>
-              <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-                <button type="submit" disabled={businessStatus.kind === 'saving'} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-400 px-5 py-3 font-black text-emerald-950 disabled:opacity-70">
-                  {businessStatus.kind === 'saving' ? 'Envoi...' : 'Envoyer la demande'}
-                </button>
-                <a href={businessLink} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 px-5 py-3 font-black text-white">
-                  Copier sur WhatsApp
-                </a>
-              </div>
-              <StatusBanner status={businessStatus} />
-            </form>
-          </div>
-        </section>
-
-        <section id="partenaires" className="bg-[#fff4e2] py-14">
-          <div className="mx-auto max-w-7xl px-4">
-            <SectionTitle
-              eyebrow="Devenir partenaire"
-              title="Restaurants, traiteurs, vendeurs et prestataires locaux."
-              text="Le site permet de rejoindre la plateforme avec une fiche simple, un catalogue clair et une conversion pensée pour les smartphones."
-            />
-
-            <div className="mt-8 grid gap-6 xl:grid-cols-[0.92fr_1.08fr_1.08fr]">
-              <div className="rounded-[1.75rem] bg-[#20150f] p-6 text-white shadow-elegant">
-                <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-300">Pourquoi rejoindre DELIKREOL</p>
-                <h3 className="mt-3 text-3xl font-black leading-tight">Un site qui met en avant votre offre sans vous noyer.</h3>
-                <div className="mt-6 space-y-3">
-                  {[
-                    'Visibilité locale premium',
-                    'Fiche claire avec commune et zone',
-                    'CTA WhatsApp et devis rapide',
-                    'Catalogue produit ou service',
-                    'Parcours pensé pour la conversion mobile',
-                  ].map((item) => (
-                    <div key={item} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                      <BadgeCheck className="h-5 w-5 text-emerald-300" />
-                      <span className="text-sm font-semibold text-stone-100">{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <form onSubmit={handlePartnerLeadSubmit} className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-soft">
-                <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">Formulaire partenaire</p>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <Input value={partnerLeadForm.business_name} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, business_name: value }))} placeholder="Nom de l’établissement" required className="sm:col-span-2" />
-                  <Input value={partnerLeadForm.contact_name} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, contact_name: value }))} placeholder="Contact" required />
-                  <Input value={partnerLeadForm.phone} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, phone: value }))} placeholder="Téléphone" required />
-                  <Input value={partnerLeadForm.whatsapp} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, whatsapp: value }))} placeholder="WhatsApp" />
-                  <Input value={partnerLeadForm.email} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, email: value }))} placeholder="Email" />
-                  <Input value={partnerLeadForm.commune} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, commune: value }))} placeholder="Commune" />
-                  <Input value={partnerLeadForm.zone_label} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, zone_label: value }))} placeholder="Commune fallback" />
-                  <Input value={partnerLeadForm.delivery_radius_km} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, delivery_radius_km: value }))} placeholder="Rayon livraison pilote (3 km conseillé)" />
-                  <Input value={partnerLeadForm.activity_type} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, activity_type: value }))} placeholder="Type d’activité" />
-                  <Input value={partnerLeadForm.opening_hours} onChange={(value) => setPartnerLeadForm((current) => ({ ...current, opening_hours: value }))} placeholder="Horaires" className="sm:col-span-2" />
-                  <Textarea
-                    value={partnerLeadForm.description}
-                    onChange={(value) => setPartnerLeadForm((current) => ({ ...current, description: value }))}
-                    placeholder="Décrivez votre activité, vos produits, votre livraison..."
-                    className="sm:col-span-2"
-                    rows={4}
-                  />
-                </div>
-                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-                  <button type="submit" disabled={partnerStatus.kind === 'saving'} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-5 py-3 font-black text-white disabled:opacity-70">
-                    {partnerStatus.kind === 'saving' ? 'Envoi...' : 'Envoyer ma demande'}
-                  </button>
-                  <a href={partnerLink} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-[#fff8ef] px-5 py-3 font-black text-[#7c2d12]">
-                    WhatsApp partenaire
-                  </a>
-                </div>
-                <StatusBanner status={partnerStatus} />
-              </form>
-
-              <form onSubmit={handleProductSubmit} className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-soft">
-                <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">Proposer un produit</p>
-                <p className="mt-2 text-sm leading-6 text-stone-600">
-                  Ajoutez une offre ou une carte produit pour enrichir le catalogue local avec photo, prix et disponibilité.
-                </p>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <Input value={productSubmissionForm.business_name} onChange={(value) => setProductSubmissionForm((current) => ({ ...current, business_name: value }))} placeholder="Nom de l’établissement" required className="sm:col-span-2" />
-                  <Input value={productSubmissionForm.product_name} onChange={(value) => setProductSubmissionForm((current) => ({ ...current, product_name: value }))} placeholder="Nom du produit" required />
-                  <Input value={productSubmissionForm.category} onChange={(value) => setProductSubmissionForm((current) => ({ ...current, category: value }))} placeholder="Catégorie" />
-                  <Input value={productSubmissionForm.price} onChange={(value) => setProductSubmissionForm((current) => ({ ...current, price: value }))} placeholder="Prix" />
-                  <Textarea
-                    value={productSubmissionForm.description}
-                    onChange={(value) => setProductSubmissionForm((current) => ({ ...current, description: value }))}
-                    placeholder="Description courte"
-                    className="sm:col-span-2"
-                    rows={4}
-                  />
-                  <label className="sm:col-span-2 flex items-center justify-between rounded-2xl border border-dashed border-orange-200 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-600">
-                    <span className="inline-flex items-center gap-2">
-                      <Package className="h-4 w-4 text-[#c2410c]" />
-                      {productPhoto ? productPhoto.name : 'Ajouter une photo produit'}
-                    </span>
-                    <input type="file" accept="image/*" className="hidden" onChange={(event) => setProductPhoto(event.target.files?.[0] ?? null)} />
-                    <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">Choisir</span>
-                  </label>
-                </div>
-                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-                  <button type="submit" disabled={productStatus.kind === 'saving'} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 font-black text-white disabled:opacity-70">
-                    {productStatus.kind === 'saving' ? 'Envoi...' : 'Ajouter au catalogue'}
-                  </button>
-                  <span className="inline-flex items-center rounded-2xl border border-orange-100 px-4 py-3 text-xs font-black uppercase tracking-[0.16em] text-stone-500">
-                    Visibilité locale premium
-                  </span>
-                </div>
-                <StatusBanner status={productStatus} />
-              </form>
-            </div>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 py-14">
-          <SectionTitle
-            eyebrow="Preuves et confiance"
-            title="Le site doit rassurer au premier regard."
-            text="Les preuves affichées restent simples, lisibles et vérifiables."
-          />
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {[
-              'Partenaires visibles et vérifiés',
-              'Réponse rapide par WhatsApp',
-              'Commande entreprise simple à relancer',
-            ].map((item) => (
-              <ProofCard key={item} title={item} />
-            ))}
-          </div>
-          <div className="mt-6 rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">Preuve sociale</p>
-            <p className="mt-3 text-base leading-7 text-stone-600">
-              Une vitrine crédible gagne quand elle montre immédiatement qu’on peut commander, être livré et retrouver un partenaire local sans friction.
-            </p>
-          </div>
-        </section>
-
-        <section className="bg-[#24170f] py-14 text-white">
-          <div className="mx-auto max-w-7xl px-4">
-            <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-300">Priorité client</p>
-            <h2 className="mt-2 max-w-3xl font-display text-3xl font-black tracking-tight text-white sm:text-4xl">
-              Commander vite, être livré, recommander.
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-300 sm:text-base sm:leading-7">
-              DELIKREOL garde un flux simple: catalogue clair, panier, confirmation rapide et assistance locale.
-            </p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                'Catalogue visuel et prix clairs',
-                'Ajout au panier sans friction',
-                'Confirmation en quelques étapes',
-                'Support humain en option',
-              ].map((item) => (
-                <div key={item} className="rounded-[1.35rem] border border-white/10 bg-white/8 p-5">
-                  <BadgeCheck className="h-5 w-5 text-emerald-300" />
-                  <p className="mt-3 text-sm font-bold leading-6 text-stone-100">{item}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-            </div>
-          </details>
         </section>
 
         <section id="faq" className="bg-white py-10">
@@ -2376,8 +2101,8 @@ export function PublicHomePage() {
             <FooterLink label="CGV" />
             <FooterLink label="Mentions légales" />
             <FooterLink label="Confidentialité" />
-            <a href="#pro" className="block text-sm font-bold text-[#7c2d12]">
-              Espace partenaires & entreprises
+            <a href={proSpaceUrl} className="block text-sm font-bold text-[#7c2d12]">
+              Espace pro DELIKREOL
             </a>
             <a href={whatsappBase} className="inline-flex items-center gap-2 text-sm font-bold text-[#7c2d12]">
               WhatsApp <MessageCircle className="h-4 w-4" />

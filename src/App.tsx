@@ -5,6 +5,7 @@ import { ToastProvider } from './contexts/ToastContext';
 import { AdminPartners } from './pages/admin/AdminPartners';
 import { CustomerApp } from './pages/CustomerApp';
 import { InvestorOpsPage } from './pages/InvestorOpsPage';
+import { OrderStatusPage } from './pages/OrderStatusPage';
 import { PartnerDashboardPage } from './pages/PartnerDashboardPage';
 import { PublicHomePage } from './pages/PublicHomePage';
 
@@ -23,8 +24,10 @@ function App() {
     ? <CustomerApp />
     : isCustomerRoute
       ? <PublicHomePage />
-    : view === 'partner-documents' || effectivePathname.endsWith('/partner-documents')
+    : view === 'partner-documents' || view === 'pro' || effectivePathname.endsWith('/partner-documents')
       ? <PartnerDashboardPage />
+      : view === 'order-status' || effectivePathname.endsWith('/order-status')
+        ? <OrderStatusPage />
       : view === 'admin-documents' || effectivePathname.endsWith('/admin-documents')
         ? <AdminPartners />
         : view === 'investor-ops' || effectivePathname.endsWith('/investor-ops')
