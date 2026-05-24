@@ -418,7 +418,7 @@ const defaultBusinessRequestForm: BusinessRequestForm = {
 export function PublicHomePage() {
   const baseUrl = import.meta.env.BASE_URL || '/';
   const customerPath = `${baseUrl}?view=customer`;
-  const proSpaceUrl = `${baseUrl}?view=partner-documents`;
+  const proSpaceUrl = `${baseUrl}?view=pro`;
   const orderStatusBaseUrl = `${baseUrl}?view=order-status`;
   const orderFormUrl = ORDER_FORM_URL;
   const sheetsFirstMode = SHEETS_FIRST_MODE;
