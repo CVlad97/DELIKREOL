@@ -1,4 +1,5 @@
 import { publicSupabase, isPublicSupabaseConfigured } from '../lib/publicSupabase';
+import { isDemoMode } from '../lib/supabase';
 
 export type PartnerLeadInput = {
   business_name: string;
@@ -25,11 +26,71 @@ export type PartnerProductInput = {
   image_url?: string | null;
 };
 
+type LocalPartnerLead = Record<string, unknown> & {
+  id: string;
+  source: string;
+  status: string;
+  created_at: string;
+};
+
+type LocalPartnerProduct = Record<string, unknown> & {
+  id: string;
+  source: string;
+  status: string;
+  created_at: string;
+};
+
+const LEADS_KEY = 'delikreol_partner_leads_local_v1';
+const PRODUCTS_KEY = 'delikreol_partner_products_local_v1';
+
+function readLocalJson<T>(key: string): T[] {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeLocalJson<T>(key: string, rows: T[]) {
+  localStorage.setItem(key, JSON.stringify(rows));
+}
+
+function saveLeadLocally(input: Record<string, unknown>) {
+  const rows = readLocalJson<LocalPartnerLead>(LEADS_KEY);
+  rows.unshift({
+    ...input,
+    id: `lead_${Date.now()}`,
+    source: 'public_partner_portal_demo',
+    status: 'pending_review',
+    created_at: new Date().toISOString(),
+  });
+  writeLocalJson(LEADS_KEY, rows.slice(0, 200));
+}
+
+function saveProductLocally(input: Record<string, unknown>) {
+  const rows = readLocalJson<LocalPartnerProduct>(PRODUCTS_KEY);
+  rows.unshift({
+    ...input,
+    id: `prod_${Date.now()}`,
+    source: 'public_partner_portal_demo',
+    status: 'pending_review',
+    created_at: new Date().toISOString(),
+  });
+  writeLocalJson(PRODUCTS_KEY, rows.slice(0, 500));
+}
+
 function getClient() {
   if (!isPublicSupabaseConfigured || !publicSupabase) {
-    throw new Error('Supabase public non configure.');
+    return null;
   }
   return publicSupabase;
+}
+
+function toSafeRadius(value?: number) {
+  const n = Number(value ?? 8);
+  if (!Number.isFinite(n) || n <= 0) return 8;
+  return Math.min(40, n);
 }
 
 export async function submitPartnerLead(input: PartnerLeadInput) {
@@ -44,18 +105,29 @@ export async function submitPartnerLead(input: PartnerLeadInput) {
     commune: input.commune ?? null,
     zone_label: input.zone_label ?? input.commune ?? null,
     activity_type: input.activity_type ?? 'food_partner',
-    delivery_radius_km: input.delivery_radius_km ?? 8,
+    delivery_radius_km: toSafeRadius(input.delivery_radius_km),
     opening_hours: input.opening_hours ?? null,
     source: 'public_partner_portal',
     status: 'pending_review',
   };
 
+  if (!client || isDemoMode) {
+    saveLeadLocally(payload);
+    return;
+  }
+
   const { error } = await client.from('partner_applications').insert(payload);
-  if (error) throw error;
+  if (error) {
+    saveLeadLocally(payload);
+    throw error;
+  }
 }
 
 export async function uploadPartnerProductPhoto(file: File) {
   const client = getClient();
+  if (!client || isDemoMode) {
+    return { path: `demo/${Date.now()}-${file.name}`, publicUrl: '' };
+  }
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-');
   const path = `public/${Date.now()}-${safeName}`;
   const { error } = await client.storage.from('product-photos').upload(path, file, { upsert: false, cacheControl: '3600' });
@@ -79,6 +151,14 @@ export async function submitPartnerProduct(input: PartnerProductInput) {
     status: 'pending_review',
   };
 
+  if (!client || isDemoMode) {
+    saveProductLocally(payload);
+    return;
+  }
+
   const { error } = await client.from('partner_catalog_submissions').insert(payload);
-  if (error) throw error;
+  if (error) {
+    saveProductLocally(payload);
+    throw error;
+  }
 }
