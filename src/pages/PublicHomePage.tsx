@@ -32,6 +32,7 @@ import { getOrderFallbackEndpoint, saveFallbackOrderToSheet } from '../services/
 import { buildPartnerDispatchMessage, downloadOrderPdf } from '../utils/orderPdf';
 import { publicSupabase } from '../lib/publicSupabase';
 import { mockProducts } from '../data/mockCatalog';
+import { partnerProfiles } from '../data/partnerProfiles';
 import { pointsRelais } from '../pointsRelais';
 import { getWhatsAppBusinessLink } from '../utils/whatsapp';
 import { ORDER_FORM_URL, PUBLIC_OPERATIONS_EMAIL, SHEETS_FIRST_MODE } from '../config/publicRuntime';
@@ -2301,6 +2302,12 @@ function ProductCard({
 }
 
 function VendorCard({ vendor }: { vendor: PublicCatalogVendor }) {
+  const profile = partnerProfiles.find((partner) => normalizeLabel(partner.name) === normalizeLabel(vendor.business_name));
+  const instagramValue = profile?.instagram?.handle ?? profile?.instagram?.label;
+  const deliveryValue = profile?.deliveryContact?.phone
+    ? `${profile.deliveryContact.label} - ${formatWhatsAppLabel(profile.deliveryContact.phone)}`
+    : profile?.deliveryContact?.note;
+
   return (
     <article className="rounded-[1.9rem] border border-white/80 bg-white/90 p-5 shadow-soft backdrop-blur">
       <div className="flex items-start justify-between gap-4">
@@ -2316,7 +2323,31 @@ function VendorCard({ vendor }: { vendor: PublicCatalogVendor }) {
         <InfoLine label="Rayon" value={`${vendor.delivery_radius_km} km`} />
         <InfoLine label="Position" value={vendor.latitude != null && vendor.longitude != null ? 'Géolocalisée' : 'Fallback commune'} />
         <InfoLine label="Adresse" value={vendor.address || 'Adresse confirmée à la commande'} />
+        {instagramValue ? <InfoLine label="Instagram" value={instagramValue} /> : null}
+        {deliveryValue ? <InfoLine label="Livreur" value={deliveryValue} /> : null}
       </div>
+      {profile?.events?.length ? (
+        <div className="mt-4 rounded-[1.5rem] border border-emerald-100 bg-emerald-50/80 p-4">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-800">Ateliers culinaires</p>
+          <div className="mt-3 grid gap-3">
+            {profile.events.map((event) => (
+              <div key={`${vendor.id}-${event.title}`} className="rounded-2xl bg-white p-4 shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <h4 className="text-sm font-black text-[#2a190f]">{event.title}</h4>
+                  <span className="rounded-full bg-[#fff4e7] px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#c2410c]">
+                    {event.status}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm leading-6 text-stone-600">{event.description}</p>
+                <div className="mt-3 grid gap-2 text-xs font-bold text-stone-500">
+                  <span>{event.location}</span>
+                  <span>{event.schedule}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </article>
   );
 }

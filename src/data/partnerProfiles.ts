@@ -9,6 +9,23 @@ export type PartnerProfile = {
   eta: string;
   specialty: string;
   highlights: string[];
+  instagram?: {
+    label: string;
+    handle?: string;
+    url?: string;
+  };
+  deliveryContact?: {
+    label: string;
+    phone?: string;
+    note: string;
+  };
+  events?: Array<{
+    title: string;
+    description: string;
+    location: string;
+    schedule: string;
+    status: string;
+  }>;
   planifiable: boolean;
   enterprise: boolean;
 };
@@ -30,6 +47,29 @@ export const partnerProfiles: PartnerProfile[] = [
       'Commande groupe',
       'Point relais: Barber Shop de Dillon',
       'Tarifs estimatifs provisoires',
+    ],
+    instagram: {
+      label: 'Instagram a confirmer',
+    },
+    deliveryContact: {
+      label: 'Livreur relais Ninice',
+      note: 'Contact livreur a renseigner depuis la conversation WhatsApp avant affichage public.',
+    },
+    events: [
+      {
+        title: 'Atelier culinaire Ninice',
+        description: 'Initiation simple autour des saveurs surinamiennes et martiniquaises: preparation, degustation et conseils pratiques.',
+        location: 'Secteur Dillon / point relais Barber Shop de Dillon',
+        schedule: 'Date a confirmer - preinscription possible',
+        status: 'En preparation',
+      },
+      {
+        title: 'Atelier snack & douceurs',
+        description: 'Format court autour du bara, des mini brochettes Saoto et des douceurs type gulab jamun.',
+        location: 'Dillon',
+        schedule: 'Sur demande groupe ou entreprise',
+        status: 'A planifier',
+      },
     ],
     planifiable: true,
     enterprise: true
