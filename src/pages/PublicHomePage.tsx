@@ -2313,6 +2313,7 @@ function ProductCard({
 
 function VendorCard({ vendor }: { vendor: PublicCatalogVendor }) {
   const profile = partnerProfiles.find((partner) => normalizeLabel(partner.name) === normalizeLabel(vendor.business_name));
+  const contactPhone = profile?.contactPhone;
   const contactEmail = profile?.contactEmail;
   const instagramValue = profile?.instagram?.handle ?? profile?.instagram?.label;
   const deliveryValue = profile?.deliveryContact?.phone
@@ -2334,6 +2335,7 @@ function VendorCard({ vendor }: { vendor: PublicCatalogVendor }) {
         <InfoLine label="Rayon" value={`${vendor.delivery_radius_km} km`} />
         <InfoLine label="Position" value={vendor.latitude != null && vendor.longitude != null ? 'Géolocalisée' : 'Fallback commune'} />
         <InfoLine label="Adresse" value={vendor.address || 'Adresse confirmée à la commande'} />
+        {contactPhone ? <InfoLine label="Contact" value={formatWhatsAppLabel(contactPhone)} /> : null}
         {contactEmail ? <InfoLine label="Email" value={contactEmail} /> : null}
         {instagramValue ? <InfoLine label="Instagram" value={instagramValue} /> : null}
         {deliveryValue ? <InfoLine label="Livreur" value={deliveryValue} /> : null}

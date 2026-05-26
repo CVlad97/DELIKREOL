@@ -9,6 +9,7 @@ export type PartnerProfile = {
   eta: string;
   specialty: string;
   highlights: string[];
+  contactPhone?: string;
   contactEmail?: string;
   instagram?: {
     label: string;
@@ -75,6 +76,29 @@ export const partnerProfiles: PartnerProfile[] = [
       },
     ],
     planifiable: true,
-    enterprise: true
-  }
+    enterprise: true,
+  },
+  {
+    name: 'Saveurs d\'Afrique',
+    zone: 'Fort-de-France',
+    offer: 'Cuisine africaine, plats maison et boissons',
+    type: 'Traiteur',
+    availability: 'Commande sur demande',
+    story: 'Saveurs d\'Afrique propose des plats genereux et epices, pensés pour la commande locale, le retrait simple et les repas groupe.',
+    promise: 'Plats savoureux, portions généreuses, confirmation rapide',
+    eta: 'Sur commande',
+    specialty: 'Foutou banane, ablo, atassi, pate sauce legume, pate sauce gombo, jus de bissap et yaourts',
+    highlights: [
+      'Cuisine africaine',
+      'Menu riche',
+      'Commande groupe',
+      'Retrait ou livraison selon zone',
+    ],
+    contactPhone: '+596696677679',
+    instagram: {
+      label: 'Instagram a confirmer',
+    },
+    planifiable: true,
+    enterprise: true,
+  },
 ];
