@@ -20,10 +20,10 @@ export const partnerProfiles: PartnerProfile[] = [
     offer: 'Traiteur, boxes repas et snacking',
     type: 'Traiteur',
     availability: 'Preparation quotidienne',
-    story: 'Cuisine maison orientee portions genereuses et service de proximite.',
-    promise: 'Cuisine fraiche, portions regulieres, commande simple',
+    story: 'Ninice prepare une cuisine maison inspiree des saveurs surinamiennes et martiniquaises, avec des plats genereux, du snacking sale-sucre et un service de proximite depuis Dillon.',
+    promise: 'Cuisine fraiche, portions regulieres, retrait simple a Dillon',
     eta: 'Meme jour / J+1 selon flux',
-    specialty: 'Boxes creoles, accras, brochettes',
+    specialty: 'Colombo, moksi aleisi, bami, bara, gulab jamun et mini brochettes Saoto',
     highlights: [
       'Cuisine maison',
       'Traiteur',

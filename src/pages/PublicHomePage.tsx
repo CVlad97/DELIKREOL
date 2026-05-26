@@ -217,7 +217,7 @@ function buildDemoCatalog(): CatalogState {
         id: `demo-vendor-${index + 1}`,
         business_name: name,
         business_type: 'Traiteur local',
-        description: 'Partenaire actif DELIKREOL. Point relais pilote: Barber Shop de Dillon.',
+        description: 'Ninice prepare une cuisine maison inspiree des saveurs surinamiennes et martiniquaises: colombo, moksi aleisi, bami, bara, gulab jamun et brochettes Saoto. Retrait pilote au Barber Shop de Dillon.',
         logo_url: null,
         address: 'Barber Shop de Dillon, Fort-de-France',
         phone: '',
@@ -836,7 +836,7 @@ export function PublicHomePage() {
 
   const driverMissionLink = useMemo(() => `${whatsappBase}?text=${encodeURIComponent(driverMessage)}`, [driverMessage]);
 
-  const partnerLink = `${whatsappBase}?text=${encodeURIComponent('Bonjour DELIKREOL, je souhaite devenir partenaire.')}`;
+  const partnerLink = `${baseUrl}?view=launch-network`;
 
   const businessLink = useMemo(() => {
     const body = [
@@ -2019,7 +2019,7 @@ export function PublicHomePage() {
                 href={partnerLink}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-white px-5 py-3 text-sm font-black text-[#7c2d12]"
               >
-                WhatsApp partenaires
+                Inscription partenaire
               </a>
             </div>
           </div>

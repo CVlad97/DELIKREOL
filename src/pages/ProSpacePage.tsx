@@ -1,12 +1,8 @@
 import { Building2, ChevronRight, ShieldCheck, Store, Truck } from 'lucide-react';
 
-const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
-
 export function ProSpacePage() {
   const baseUrl = import.meta.env.BASE_URL || '/';
-  const whatsAppPartnerLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-    'Bonjour DELIKREOL, je souhaite rejoindre l’espace pro.',
-  )}`;
+  const partnerLaunchLink = `${baseUrl}?view=launch-network`;
 
   return (
     <div className="min-h-screen bg-[#fbf4ea] text-[#2a190f]">
@@ -20,7 +16,7 @@ export function ProSpacePage() {
 
           <div className="mt-8 grid gap-4 md:grid-cols-2">
             <a
-              href={whatsAppPartnerLink}
+              href={partnerLaunchLink}
               className="rounded-[1.4rem] border border-orange-200 bg-[#fff8ef] p-5 transition hover:-translate-y-0.5"
             >
               <div className="inline-flex rounded-xl bg-white p-2 text-[#d95f2d]">
@@ -29,7 +25,7 @@ export function ProSpacePage() {
               <h2 className="mt-3 text-xl font-black">Devenir partenaire</h2>
               <p className="mt-2 text-sm text-stone-600">Restaurant, traiteur, producteur, livreur ou point relais.</p>
               <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-[#7c2d12]">
-                Ouvrir WhatsApp <ChevronRight className="h-4 w-4" />
+                Ouvrir le formulaire <ChevronRight className="h-4 w-4" />
               </span>
             </a>
 
@@ -80,4 +76,3 @@ export function ProSpacePage() {
     </div>
   );
 }
-
