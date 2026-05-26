@@ -9,6 +9,7 @@ export type PartnerProfile = {
   eta: string;
   specialty: string;
   highlights: string[];
+  contactEmail?: string;
   instagram?: {
     label: string;
     handle?: string;
@@ -48,12 +49,14 @@ export const partnerProfiles: PartnerProfile[] = [
       'Point relais: Barber Shop de Dillon',
       'Tarifs estimatifs provisoires',
     ],
+    contactEmail: 'jereniceeduards@gmail.com',
     instagram: {
       label: 'Instagram a confirmer',
     },
     deliveryContact: {
-      label: 'Livreur relais Ninice',
-      note: 'Contact livreur a renseigner depuis la conversation WhatsApp avant affichage public.',
+      label: 'Orlanne BICTOLY',
+      phone: '+33769433729',
+      note: 'Livreuse sur le centre',
     },
     events: [
       {

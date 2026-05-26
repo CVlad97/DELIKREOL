@@ -2112,34 +2112,44 @@ export function PublicHomePage() {
         </div>
       </footer>
 
-      {selectedProducts.length > 0 && (
-        <div data-testid="mobile-cart-bar" className="fixed inset-x-4 bottom-4 z-50 rounded-[1.5rem] border border-orange-100 bg-white p-4 shadow-2xl shadow-orange-900/20 md:hidden">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">{selectedProducts.length} article(s)</p>
-              <p className="text-sm font-bold text-[#2a190f]">{formatPrice(selectionEconomics.subtotal_produits)} hors livraison</p>
+      <div data-testid="mobile-cart-bar" className="fixed inset-x-4 bottom-4 z-50 md:hidden">
+        <div className="rounded-[1.5rem] border border-orange-100 bg-white p-3 shadow-2xl shadow-orange-900/20">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#fff3e5] text-[#d95f2d]">
+              <ShoppingBag className="h-6 w-6" />
             </div>
-            <button type="button" onClick={scrollToCheckoutPanel} className="rounded-full bg-[#d95f2d] px-4 py-3 text-sm font-black text-white">
-              Voir panier / commander
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">
+                {selectedProducts.length > 0 ? `${selectedProducts.length} article(s)` : 'Panier vide'}
+              </p>
+              <p className="truncate text-sm font-bold text-[#2a190f]">
+                {selectedProducts.length > 0
+                  ? `${formatPrice(selectionEconomics.subtotal_produits)} hors livraison`
+                  : 'Ajoute un produit pour activer la commande'}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={selectedProducts.length > 0 ? scrollToCheckoutPanel : () => gotoCustomer()}
+              className="inline-flex items-center justify-center rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black text-white"
+            >
+              {selectedProducts.length > 0 ? 'Voir panier' : 'Commander'}
             </button>
           </div>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => gotoCustomer()}
+              className="inline-flex items-center justify-center rounded-2xl border border-orange-200 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]"
+            >
+              Catalogue
+            </button>
+            <a href={supportLink} className="inline-flex items-center justify-center rounded-2xl border border-orange-200 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]">
+              Aide
+            </a>
+          </div>
         </div>
-      )}
-
-      {selectedProducts.length === 0 && (
-        <div className="fixed inset-x-4 bottom-4 z-50 grid grid-cols-[1fr_auto] gap-2 rounded-[1.5rem] border border-orange-100 bg-white p-3 shadow-2xl shadow-orange-900/20 md:hidden">
-          <button
-            type="button"
-            onClick={() => gotoCustomer()}
-            className="inline-flex items-center justify-center rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black text-white"
-          >
-            Commander maintenant
-          </button>
-          <a href={supportLink} className="inline-flex items-center justify-center rounded-2xl border border-orange-200 px-4 py-3 text-sm font-black text-[#7c2d12]">
-            Aide
-          </a>
-        </div>
-      )}
+      </div>
 
       <a
         href={whatsappBase}
@@ -2303,6 +2313,7 @@ function ProductCard({
 
 function VendorCard({ vendor }: { vendor: PublicCatalogVendor }) {
   const profile = partnerProfiles.find((partner) => normalizeLabel(partner.name) === normalizeLabel(vendor.business_name));
+  const contactEmail = profile?.contactEmail;
   const instagramValue = profile?.instagram?.handle ?? profile?.instagram?.label;
   const deliveryValue = profile?.deliveryContact?.phone
     ? `${profile.deliveryContact.label} - ${formatWhatsAppLabel(profile.deliveryContact.phone)}`
@@ -2323,6 +2334,7 @@ function VendorCard({ vendor }: { vendor: PublicCatalogVendor }) {
         <InfoLine label="Rayon" value={`${vendor.delivery_radius_km} km`} />
         <InfoLine label="Position" value={vendor.latitude != null && vendor.longitude != null ? 'Géolocalisée' : 'Fallback commune'} />
         <InfoLine label="Adresse" value={vendor.address || 'Adresse confirmée à la commande'} />
+        {contactEmail ? <InfoLine label="Email" value={contactEmail} /> : null}
         {instagramValue ? <InfoLine label="Instagram" value={instagramValue} /> : null}
         {deliveryValue ? <InfoLine label="Livreur" value={deliveryValue} /> : null}
       </div>
