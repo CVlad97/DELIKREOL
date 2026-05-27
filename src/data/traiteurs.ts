@@ -27,12 +27,23 @@ export type TraiteurSpace = {
   startingAt: number;
   averageTicket: number;
   turnaround: string;
+  galleryImages: string[];
   profile: PartnerProfile;
   menuItems: TraiteurMenuItem[];
 };
 
 function resolveHeroImage(name: string) {
+  if (name === "Saveurs d'Afrique") {
+    return assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-board.jpg');
+  }
   return mockProducts.find((product) => product.vendor === name && product.image)?.image ?? null;
+}
+
+function resolveGalleryImages(name: string) {
+  if (name === "Saveurs d'Afrique") {
+    return [assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-pate.jpg')];
+  }
+  return [];
 }
 
 function resolveMenuItems(name: string): TraiteurMenuItem[] {
@@ -95,6 +106,7 @@ function buildSpace(profile: PartnerProfile, gradient: string, accent: string): 
     startingAt,
     averageTicket,
     turnaround: profile.eta,
+    galleryImages: resolveGalleryImages(profile.name),
     profile,
     menuItems,
   };
@@ -131,4 +143,9 @@ export function buildCustomerSpaceLink(baseUrl: string, slug: string) {
   const root = resolveBaseUrl(baseUrl);
   const params = new URLSearchParams({ view: 'customer', vendor: slug });
   return `${root}?${params.toString()}#catalogue`;
+}
+
+function assetFromPublic(relativePath: string): string {
+  const clean = relativePath.replace(/^\/+/, '');
+  return `${import.meta.env.BASE_URL}${clean}`;
 }

@@ -1666,12 +1666,34 @@ export function PublicHomePage() {
 
                     <div className="mt-5 space-y-2">
                       {space.menuItems.slice(0, 3).map((item) => (
-                        <div key={item.name} className="flex items-start justify-between gap-4 rounded-2xl border border-orange-100 bg-white p-3">
-                          <div>
-                            <p className="font-black text-[#2a190f]">{item.name}</p>
-                            <p className="mt-1 text-sm text-stone-600">{item.description}</p>
+                        <div key={item.name} className="overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-sm">
+                          <div className="flex gap-3 p-3">
+                            {item.image ? (
+                              <img
+                                src={item.image}
+                                alt={item.name}
+                                className="h-20 w-20 shrink-0 rounded-2xl object-cover"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="h-20 w-20 shrink-0 rounded-2xl bg-[#fff3e5]" />
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <p className="font-black text-[#2a190f]">{item.name}</p>
+                              <p className="mt-1 text-sm text-stone-600">{item.description}</p>
+                              <div className="mt-2 flex flex-wrap items-center gap-2">
+                                <span className="rounded-full border border-orange-200 bg-[#fffaf3] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#7c2d12]">
+                                  {item.category}
+                                </span>
+                                {item.featured && (
+                                  <span className="rounded-full bg-[#ecfeff] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#0f766e]">
+                                    Signature
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <strong className="shrink-0 text-lg font-black text-[#c2410c]">{formatEuro(item.price)}</strong>
                           </div>
-                          <strong className="shrink-0 text-[#c2410c]">{formatEuro(item.price)}</strong>
                         </div>
                       ))}
                     </div>

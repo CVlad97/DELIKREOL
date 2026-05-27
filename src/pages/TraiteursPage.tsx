@@ -17,6 +17,8 @@ import {
 export function TraiteursPage() {
   const baseUrl = import.meta.env.BASE_URL || '/';
   const [activeSlug, setActiveSlug] = useState(featuredTraiteurSpaces[0]?.slug ?? traiteurSpaces[0]?.slug ?? '');
+  const saveursDemoEmail = 'saveurs.afrique@demo.delikreol.local';
+  const saveursDemoUserId = 'demo_vendor_saveurs_afrique';
 
   useEffect(() => {
     document.title = 'DELIKREOL | Espaces traiteurs';
@@ -46,6 +48,7 @@ export function TraiteursPage() {
     () => getTraiteurSpaceBySlug(activeSlug) ?? featuredTraiteurSpaces[0] ?? traiteurSpaces[0],
     [activeSlug],
   );
+  const isSaveursAfrique = activeSpace.name === "Saveurs d'Afrique";
 
   const totalItems = useMemo(() => traiteurSpaces.reduce((sum, space) => sum + space.menuItems.length, 0), []);
   const lowestPrice = useMemo(() => {
@@ -56,6 +59,23 @@ export function TraiteursPage() {
     const total = traiteurSpaces.reduce((sum, space) => sum + space.averageTicket, 0);
     return traiteurSpaces.length ? total / traiteurSpaces.length : 0;
   }, []);
+
+  const activateSaveursDemoAccess = () => {
+    const demoProfile = {
+      id: saveursDemoUserId,
+      full_name: "Saveurs d'Afrique",
+      phone: '+596696677679',
+      user_type: 'vendor' as const,
+      avatar_url: null,
+      created_at: new Date().toISOString(),
+      email: saveursDemoEmail,
+    };
+
+    localStorage.setItem('delikreol_demo_profiles', JSON.stringify([demoProfile]));
+    localStorage.setItem('delikreol_demo_session', JSON.stringify({ userId: saveursDemoUserId, email: saveursDemoEmail }));
+    localStorage.setItem('delikreol_demo_override', 'true');
+    window.location.href = `${baseUrl}?view=partner-documents`;
+  };
 
   return (
     <div className="min-h-screen bg-[#fbf4ea] text-[#2a190f]">
@@ -74,6 +94,12 @@ export function TraiteursPage() {
               className="inline-flex items-center justify-center rounded-full border border-orange-200 bg-white px-4 py-2 text-sm font-black text-[#7c2d12] shadow-sm transition hover:-translate-y-0.5"
             >
               Retour catalogue
+            </a>
+            <a
+              href={`${baseUrl}?view=pro`}
+              className="inline-flex items-center justify-center rounded-full border border-orange-200 bg-white px-4 py-2 text-sm font-black text-[#7c2d12] shadow-sm transition hover:-translate-y-0.5"
+            >
+              Espace pro
             </a>
             <a
               href={`${baseUrl}?view=customer`}
@@ -146,6 +172,33 @@ export function TraiteursPage() {
                           <a href={buildTraiteurSpaceLink(baseUrl, activeSpace.slug)}>Ouvrir la vitrine</a>
                         </Button>
                       </div>
+
+                      {isSaveursAfrique && (
+                        <div className="mt-5 rounded-[1.4rem] border border-white/15 bg-white/10 p-4 backdrop-blur">
+                          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/70">
+                            Accès vendeur démo
+                          </p>
+                          <p className="mt-2 text-sm leading-6 text-white/90">
+                            Email: <span className="font-black">{saveursDemoEmail}</span> · Mot de passe au choix en mode test.
+                          </p>
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            <Button
+                              type="button"
+                              onClick={activateSaveursDemoAccess}
+                              className="bg-white text-[#2a190f] shadow-lg shadow-black/10 hover:bg-white/90"
+                            >
+                              Activer l’accès
+                            </Button>
+                            <Button
+                              asChild
+                              variant="outline"
+                              className="border-white/35 bg-white/5 text-white hover:bg-white/12 hover:text-white"
+                            >
+                              <a href={`${baseUrl}?view=pro`}>Voir l’espace pro</a>
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className="overflow-hidden rounded-[1.5rem] border border-white/15 bg-white/10 p-3 shadow-xl backdrop-blur">
@@ -187,6 +240,16 @@ export function TraiteursPage() {
                     ))}
                   </div>
                 </div>
+
+                {activeSpace.galleryImages.length > 0 && (
+                  <div className="grid gap-3 px-6 pb-6 sm:grid-cols-2">
+                    {activeSpace.galleryImages.map((image) => (
+                      <div key={image} className="overflow-hidden rounded-[1.4rem] border border-orange-100 bg-[#fffaf3] shadow-sm">
+                        <img src={image} alt={activeSpace.name} className="h-44 w-full object-cover" loading="lazy" />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -273,25 +336,30 @@ export function TraiteursPage() {
                     </CardHeader>
                     <CardContent className="space-y-3">
                       {space.menuItems.map((item) => (
-                        <div key={item.name} className="rounded-[1.25rem] border border-orange-100 bg-[#fffaf4] p-4 shadow-sm">
-                          <div className="flex items-start justify-between gap-4">
-                            <div>
-                              <div className="flex flex-wrap items-center gap-2">
-                                <p className="font-black text-[#2a190f]">{item.name}</p>
-                                {item.featured && (
-                                  <Badge variant="secondary" className="rounded-full bg-[#ecfeff] text-[#0f766e] hover:bg-[#ecfeff]">
-                                    Signature
-                                  </Badge>
-                                )}
+                        <div key={item.name} className="overflow-hidden rounded-[1.25rem] border border-orange-100 bg-[#fffaf4] shadow-sm">
+                          {item.image && (
+                            <img src={item.image} alt={item.name} className="h-44 w-full object-cover" loading="lazy" />
+                          )}
+                          <div className="p-4">
+                            <div className="flex items-start justify-between gap-4">
+                              <div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <p className="font-black text-[#2a190f]">{item.name}</p>
+                                  {item.featured && (
+                                    <Badge variant="secondary" className="rounded-full bg-[#ecfeff] text-[#0f766e] hover:bg-[#ecfeff]">
+                                      Signature
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="mt-1 text-sm leading-6 text-stone-600">{item.description}</p>
                               </div>
-                              <p className="mt-1 text-sm leading-6 text-stone-600">{item.description}</p>
+                              <p className="shrink-0 text-lg font-black text-[#c2410c]">{formatEuro(item.price)}</p>
                             </div>
-                            <p className="shrink-0 text-lg font-black text-[#c2410c]">{formatEuro(item.price)}</p>
-                          </div>
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            <Badge variant="outline" className="rounded-full border-orange-200 bg-white text-[#7c2d12]">
-                              {item.category}
-                            </Badge>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <Badge variant="outline" className="rounded-full border-orange-200 bg-white text-[#7c2d12]">
+                                {item.category}
+                              </Badge>
+                            </div>
                           </div>
                         </div>
                       ))}
