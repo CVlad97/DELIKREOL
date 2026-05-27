@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { callOpenAI } from '../utils/apiIntegrations';
+import { buildTraiteurConversationContext } from '../services/traiteurProfileService';
 
 export interface DailyMetrics {
   totalOrders: number;
@@ -109,6 +110,7 @@ export async function aggregateDailyMetrics(): Promise<DailyMetrics> {
 export async function generateCopilotSummary(metrics: DailyMetrics): Promise<CopilotResponse> {
   try {
     const saturatedRelays = metrics.relayUtilization.filter(r => r.utilizationRate > 80);
+    const traiteurContext = buildTraiteurConversationContext();
 
     const prompt = `Tu es un assistant logistique pour DELIKREOL, une plateforme de livraison en Martinique.
 
@@ -125,6 +127,9 @@ ${Object.entries(metrics.ordersByStatus).map(([status, count]) => `- ${status}: 
 
 Utilisation des relais:
 ${metrics.relayUtilization.map(r => `- ${r.name}: ${r.utilizationRate.toFixed(1)}% (${r.currentUsage}/${r.totalCapacity})`).join('\n')}
+
+Fiches traiteurs connues:
+${traiteurContext}
 
 Génère un résumé opérationnel concis avec:
 1. Un résumé de la situation (2-3 phrases)
@@ -179,6 +184,7 @@ Réponds en français, format concis et actionnable.`;
 
 export async function askCopilot(question: string, context?: DailyMetrics): Promise<string> {
   try {
+    const traiteurContext = buildTraiteurConversationContext();
     const contextStr = context ? `
 Contexte actuel:
 - Commandes: ${context.totalOrders}
@@ -188,7 +194,10 @@ Contexte actuel:
 
 ` : '';
 
-    const prompt = `${contextStr}Question de l'administrateur DELIKREOL: ${question}
+    const prompt = `${contextStr}Fiches traiteurs connues:
+${traiteurContext}
+
+Question de l'administrateur DELIKREOL: ${question}
 
 Réponds de manière concise et actionnable en français.`;
 

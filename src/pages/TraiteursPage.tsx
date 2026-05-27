@@ -8,14 +8,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   buildCustomerSpaceLink,
   buildTraiteurSpaceLink,
+  buildTraiteurSpaces,
   featuredTraiteurSpaces,
   formatEuro,
   getTraiteurSpaceBySlug,
   traiteurSpaces,
 } from '@/data/traiteurs';
+import { loadTraiteurProfiles } from '@/services/traiteurProfileService';
 
 export function TraiteursPage() {
   const baseUrl = import.meta.env.BASE_URL || '/';
+  const [traiteurSpacesState, setTraiteurSpacesState] = useState(traiteurSpaces);
+  const [catalogSource, setCatalogSource] = useState<'local' | 'backend'>('local');
   const [activeSlug, setActiveSlug] = useState(featuredTraiteurSpaces[0]?.slug ?? traiteurSpaces[0]?.slug ?? '');
   const saveursDemoEmail = 'saveurs.afrique@demo.delikreol.local';
   const saveursDemoUserId = 'demo_vendor_saveurs_afrique';
@@ -36,6 +40,24 @@ export function TraiteursPage() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
+    loadTraiteurProfiles().then((profiles) => {
+      if (cancelled) return;
+      const spaces = buildTraiteurSpaces(profiles);
+      setTraiteurSpacesState(spaces);
+      setCatalogSource(profiles.some((profile) => profile.source === 'backend') ? 'backend' : 'local');
+      if (!spaces.some((space) => space.slug === activeSlug) && spaces[0]) {
+        setActiveSlug(spaces[0].slug);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     if (!activeSlug) return;
     const params = new URLSearchParams(window.location.search);
     params.set('view', 'traiteurs');
@@ -45,20 +67,20 @@ export function TraiteursPage() {
   }, [activeSlug]);
 
   const activeSpace = useMemo(
-    () => getTraiteurSpaceBySlug(activeSlug) ?? featuredTraiteurSpaces[0] ?? traiteurSpaces[0],
-    [activeSlug],
+    () => traiteurSpacesState.find((space) => space.slug === activeSlug) ?? featuredTraiteurSpaces[0] ?? traiteurSpacesState[0],
+    [activeSlug, traiteurSpacesState],
   );
   const isSaveursAfrique = activeSpace.name === "Saveurs d'Afrique";
 
-  const totalItems = useMemo(() => traiteurSpaces.reduce((sum, space) => sum + space.menuItems.length, 0), []);
+  const totalItems = useMemo(() => traiteurSpacesState.reduce((sum, space) => sum + space.menuItems.length, 0), [traiteurSpacesState]);
   const lowestPrice = useMemo(() => {
-    const prices = traiteurSpaces.flatMap((space) => space.menuItems.map((item) => item.price));
+    const prices = traiteurSpacesState.flatMap((space) => space.menuItems.map((item) => item.price));
     return prices.length ? Math.min(...prices) : 0;
-  }, []);
+  }, [traiteurSpacesState]);
   const averageTicket = useMemo(() => {
-    const total = traiteurSpaces.reduce((sum, space) => sum + space.averageTicket, 0);
-    return traiteurSpaces.length ? total / traiteurSpaces.length : 0;
-  }, []);
+    const total = traiteurSpacesState.reduce((sum, space) => sum + space.averageTicket, 0);
+    return traiteurSpacesState.length ? total / traiteurSpacesState.length : 0;
+  }, [traiteurSpacesState]);
 
   const activateSaveursDemoAccess = () => {
     const demoProfile = {
@@ -118,10 +140,13 @@ export function TraiteursPage() {
               Espaces dédiés
             </Badge>
             <Badge variant="outline" className="rounded-full border-orange-200 text-[#7c2d12]">
-              {traiteurSpaces.length} traiteurs
+              {traiteurSpacesState.length} traiteurs
             </Badge>
             <Badge variant="outline" className="rounded-full border-orange-200 text-[#7c2d12]">
               {totalItems} références
+            </Badge>
+            <Badge variant="outline" className="rounded-full border-orange-200 text-[#7c2d12]">
+              Source {catalogSource === 'backend' ? 'backend' : 'locale'}
             </Badge>
           </div>
 
@@ -136,7 +161,7 @@ export function TraiteursPage() {
               </p>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <MetricCard icon={<UtensilsCrossed className="h-5 w-5" />} label="Espaces" value={`${traiteurSpaces.length}`} />
+                <MetricCard icon={<UtensilsCrossed className="h-5 w-5" />} label="Espaces" value={`${traiteurSpacesState.length}`} />
                 <MetricCard icon={<Sparkles className="h-5 w-5" />} label="Références" value={`${totalItems}`} />
                 <MetricCard icon={<Star className="h-5 w-5" />} label="À partir de" value={formatEuro(lowestPrice)} />
                 <MetricCard icon={<Clock3 className="h-5 w-5" />} label="Panier moyen" value={formatEuro(averageTicket)} />
@@ -259,7 +284,7 @@ export function TraiteursPage() {
           <Tabs value={activeSlug} onValueChange={setActiveSlug}>
             <div className="rounded-[2rem] border border-orange-100 bg-white p-4 shadow-soft">
               <TabsList className="flex w-full flex-col gap-2 bg-transparent p-0 sm:flex-row">
-                {traiteurSpaces.map((space) => (
+                {traiteurSpacesState.map((space) => (
                   <TabsTrigger
                     key={space.slug}
                     value={space.slug}
@@ -271,7 +296,7 @@ export function TraiteursPage() {
               </TabsList>
             </div>
 
-            {traiteurSpaces.map((space) => (
+            {traiteurSpacesState.map((space) => (
               <TabsContent key={space.slug} value={space.slug} className="mt-6">
                 <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
                   <Card className="overflow-hidden border-orange-100 bg-white shadow-soft">
@@ -285,7 +310,13 @@ export function TraiteursPage() {
                         </Badge>
                       </div>
                       <CardTitle className="mt-4 text-3xl text-white">{space.name}</CardTitle>
-                      <CardDescription className="max-w-xl text-white/90">{space.story}</CardDescription>
+                      {space.legalName && space.legalName !== space.name ? (
+                        <CardDescription className="max-w-xl text-white/90">
+                          {space.legalName} · {space.story}
+                        </CardDescription>
+                      ) : (
+                        <CardDescription className="max-w-xl text-white/90">{space.story}</CardDescription>
+                      )}
                     </CardHeader>
 
                     <CardContent className="space-y-5 p-6">
@@ -302,6 +333,30 @@ export function TraiteursPage() {
                       <div className="grid gap-3 sm:grid-cols-2">
                         <MiniStat label="Disponibilité" value={space.availability} />
                         <MiniStat label="Préparation" value={space.turnaround} />
+                      </div>
+
+                      <div className="rounded-[1.35rem] border border-orange-100 bg-[#fffaf3] p-4">
+                        <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">Coordonnées</p>
+                        <div className="mt-2 space-y-1 text-sm leading-6 text-stone-600">
+                          {space.legalName && (
+                            <p>
+                              Nom légal: <span className="font-black text-[#2a190f]">{space.legalName}</span>
+                            </p>
+                          )}
+                          <p>
+                            Zone: <span className="font-black text-[#2a190f]">{space.zone}</span>
+                          </p>
+                          {space.address && (
+                            <p>
+                              Adresse: <span className="font-black text-[#2a190f]">{space.address}</span>
+                            </p>
+                          )}
+                          {space.profile.contactPhone && (
+                            <p>
+                              Téléphone: <span className="font-black text-[#2a190f]">{space.profile.contactPhone}</span>
+                            </p>
+                          )}
+                        </div>
                       </div>
 
                       <div className="flex flex-wrap gap-2">

@@ -13,7 +13,9 @@ export type TraiteurMenuItem = {
 export type TraiteurSpace = {
   slug: string;
   name: string;
+  legalName?: string;
   zone: string;
+  address?: string;
   offer: string;
   description: string;
   story: string;
@@ -92,7 +94,9 @@ function buildSpace(profile: PartnerProfile, gradient: string, accent: string): 
   return {
     slug: normalizeSpaceSlug(profile.name),
     name: profile.name,
+    legalName: profile.legalName,
     zone: profile.zone,
+    address: profile.address,
     offer: profile.offer,
     description: profile.story,
     story: profile.story,
@@ -112,15 +116,19 @@ function buildSpace(profile: PartnerProfile, gradient: string, accent: string): 
   };
 }
 
-export const traiteurSpaces: TraiteurSpace[] = partnerProfiles
-  .filter((profile) => profile.type.toLowerCase() === 'traiteur')
-  .map((profile) => {
+export function buildTraiteurSpaces(profiles: PartnerProfile[] = partnerProfiles) {
+  return profiles
+    .filter((profile) => profile.type.toLowerCase() === 'traiteur')
+    .map((profile) => {
     if (profile.name === 'Les Delices de Ninice') {
       return buildSpace(profile, 'from-[#d95f2d] via-[#f49d4b] to-[#7c2d12]', '#fff7ed');
     }
 
     return buildSpace(profile, 'from-[#0f766e] via-[#14b8a6] to-[#14532d]', '#ecfeff');
   });
+}
+
+export const traiteurSpaces: TraiteurSpace[] = buildTraiteurSpaces();
 
 export const featuredTraiteurSpaces = traiteurSpaces.slice(0, 2);
 

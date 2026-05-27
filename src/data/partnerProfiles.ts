@@ -1,6 +1,8 @@
 export type PartnerProfile = {
   name: string;
+  legalName?: string;
   zone: string;
+  address?: string;
   offer: string;
   type: string;
   availability: string;
@@ -36,6 +38,7 @@ export const partnerProfiles: PartnerProfile[] = [
   {
     name: 'Les Delices de Ninice',
     zone: 'Secteur Dillon',
+    address: 'Barber Shop de Dillon, Fort-de-France',
     offer: 'Traiteur, boxes repas et snacking',
     type: 'Traiteur',
     availability: 'Preparation quotidienne',
@@ -80,23 +83,25 @@ export const partnerProfiles: PartnerProfile[] = [
   },
   {
     name: 'Saveurs d\'Afrique',
+    legalName: 'LODIKA SAVEURS D\'AFRIQUE',
     zone: 'Rivière-Salée — quartier Laugier',
-    offer: 'Cuisine africaine, plats maison, boissons et commandes groupe',
+    address: 'Chemin la Simon, quartier la Laugier, 97215 Rivière-Salée, Martinique',
+    offer: 'Cuisine africaine, buffet, traiteur et commandes groupe',
     type: 'Traiteur',
-    availability: 'Sur commande / horaires à confirmer',
-    story: 'Référencé comme Lodika Saveurs d’Afrique à Rivière-Salée, quartier Laugier / chemin de la Simon, ce traiteur est présenté comme une adresse conviviale de cuisine africaine maison, avec des plats généreux, une belle réputation locale et un service orienté commande et retrait.',
-    promise: 'Cuisine maison, portions généreuses, saveurs authentiques',
+    availability: 'Lundi, mardi, jeudi, vendredi 08:00-15:00',
+    story: 'Restaurant-traiteur de Rivière-Salée, identifié publiquement sous le nom Lodika Saveurs d’Afrique. L’adresse est connue pour une cuisine africaine maison, des portions généreuses et une offre orientée déjeuner, retrait et commande de groupe.',
+    promise: 'Cuisine maison, portions généreuses, accueil convivial',
     eta: 'Préparation sur commande',
-    specialty: 'Foutou banane, ablo, atassi, pâte sauce légume, pâte sauce gombo, pâte rouge, bissap, yaourts, petits cailloux et doko',
+    specialty: 'Matoutou de crabe, plats africains maison, boissons et desserts',
     highlights: [
       'Cuisine africaine',
-      'Adresse Rivière-Salée',
-      'Menu riche',
+      'Nom public: Lodika Saveurs d\'Afrique',
+      'Adresse publique vérifiée',
+      'Téléphone public disponible',
       'Commande groupe',
       'Retrait ou livraison selon zone',
-      'Référencé aussi comme Lodika',
     ],
-    contactPhone: '+596696677679',
+    contactPhone: '0596 68 12 25',
     instagram: {
       label: 'Instagram a confirmer',
     },
