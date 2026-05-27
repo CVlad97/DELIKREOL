@@ -37,6 +37,14 @@ import { pointsRelais } from '../pointsRelais';
 import { getWhatsAppBusinessLink } from '../utils/whatsapp';
 import { ORDER_FORM_URL, PUBLIC_OPERATIONS_EMAIL, SHEETS_FIRST_MODE } from '../config/publicRuntime';
 import {
+  buildCustomerSpaceLink,
+  buildTraiteurSpaceLink,
+  featuredTraiteurSpaces,
+  formatEuro,
+  getTraiteurSpaceBySlug,
+  normalizeSpaceSlug,
+} from '../data/traiteurs';
+import {
   trackBusinessRequestSuccess,
   trackCheckoutSuccess,
   trackPartnerLeadSuccess,
@@ -208,40 +216,25 @@ function getZoneFallbackCoordinates(zoneLabel?: string | null): [number, number]
 function buildDemoCatalog(): CatalogState {
   const vendorNames = Array.from(new Set(mockProducts.map((product) => product.vendor)));
   const demoZones = ['Fort-de-France', 'Lamentin', 'Schoelcher'];
-  const vendors = vendorNames.map((name, index) => ({
-    isNinice: name.toLowerCase().includes('ninice'),
-    fallbackZone: demoZones[index % demoZones.length],
-  })).map(({ isNinice, fallbackZone }, index) => {
-    const name = vendorNames[index];
-    if (isNinice) {
-      return {
-        id: `demo-vendor-${index + 1}`,
-        business_name: name,
-        business_type: 'Traiteur local',
-        description: 'Ninice prepare une cuisine maison inspiree des saveurs surinamiennes et martiniquaises: colombo, moksi aleisi, bami, bara, gulab jamun et brochettes Saoto. Retrait pilote au Barber Shop de Dillon.',
-        logo_url: null,
-        address: 'Barber Shop de Dillon, Fort-de-France',
-        phone: '',
-        latitude: null,
-        longitude: null,
-        commission_rate: 0.15,
-        delivery_radius_km: 3,
-        zone_label: 'Dillon',
-      };
-    }
+  const vendors = vendorNames.map((name, index) => {
+    const profile = partnerProfiles.find((item) => item.name === name);
+    const space = getTraiteurSpaceBySlug(normalizeSpaceSlug(name));
+    const fallbackZone = demoZones[index % demoZones.length];
+    const zoneLabel = profile?.zone ? profile.zone.replace(/^Secteur\s+/i, '') : fallbackZone;
+
     return {
       id: `demo-vendor-${index + 1}`,
       business_name: name,
-      business_type: 'Partenaire local',
-      description: 'Partenaire de démonstration DELIKREOL.',
+      business_type: profile?.type ?? 'Partenaire local',
+      description: space?.description ?? profile?.story ?? 'Partenaire de démonstration DELIKREOL.',
       logo_url: null,
-      address: fallbackZone,
-      phone: '',
+      address: profile?.zone ?? fallbackZone,
+      phone: profile?.contactPhone ?? '',
       latitude: null,
       longitude: null,
       commission_rate: 0.15,
       delivery_radius_km: 3,
-      zone_label: fallbackZone,
+      zone_label: zoneLabel,
     };
   });
   const vendorMap = new Map(vendors.map((vendor) => [vendor.business_name, vendor]));
@@ -495,6 +488,13 @@ export function PublicHomePage() {
       return () => window.clearTimeout(timer);
     }
     return undefined;
+  }, []);
+
+  useEffect(() => {
+    const vendorSlug = new URLSearchParams(window.location.search).get('vendor');
+    const vendorSpace = vendorSlug ? getTraiteurSpaceBySlug(vendorSlug) : null;
+    if (!vendorSpace) return;
+    setQuery((current) => current || vendorSpace.name);
   }, []);
 
   useEffect(() => {
@@ -1460,6 +1460,7 @@ export function PublicHomePage() {
 
           <nav className="absolute left-1/2 top-full hidden -translate-x-1/2 items-center gap-2 rounded-b-[1.5rem] border border-t-0 border-orange-100 bg-[#fff8ec]/95 px-4 py-2 shadow-soft backdrop-blur lg:flex">
             <NavLink href="#catalogue">Catalogue</NavLink>
+            <NavLink href="#traiteurs">Traiteurs</NavLink>
             <NavLink href="#commande">Commander</NavLink>
             <NavLink href={proSpaceUrl}>Espace pro</NavLink>
             <NavLink href="#contact">Contact</NavLink>
@@ -1601,6 +1602,98 @@ export function PublicHomePage() {
             {howItWorks.slice(0, 3).map((step, index) => (
               <StepCard key={step.title} index={index + 1} title={step.title} text={step.text} />
             ))}
+          </div>
+        </section>
+
+        <section id="traiteurs" className="mx-auto max-w-7xl px-4 py-10">
+          <div className="rounded-[2rem] border border-orange-100 bg-white p-5 shadow-soft lg:p-7">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <SectionTitle
+                eyebrow="Traiteurs"
+                title="Chaque traiteur a son espace."
+                text="Descriptions, prix et accès direct à la vitrine dédiée pour commander sans friction."
+              />
+              <div className="grid gap-3 sm:grid-cols-3">
+                <StatChip label="Espaces" value={`${featuredTraiteurSpaces.length}`} />
+                <StatChip label="Références" value={`${featuredTraiteurSpaces.reduce((sum, space) => sum + space.menuItems.length, 0)}`} />
+                <StatChip label="Prix dès" value={formatEuro(Math.min(...featuredTraiteurSpaces.flatMap((space) => space.menuItems.map((item) => item.price))))} />
+              </div>
+            </div>
+
+            <div className="mt-7 grid gap-4 lg:grid-cols-2">
+              {featuredTraiteurSpaces.map((space) => (
+                <article key={space.slug} className="overflow-hidden rounded-[1.75rem] border border-orange-100 bg-[#fffaf4] shadow-soft">
+                  <div className={`bg-gradient-to-br ${space.gradient} p-5 text-white`}>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-[0.16em]">
+                        {space.offer}
+                      </span>
+                      <span className="rounded-full border border-white/25 px-3 py-1 text-xs font-black uppercase tracking-[0.16em]">
+                        {space.zone}
+                      </span>
+                    </div>
+                    <div className="mt-5 grid gap-5 md:grid-cols-[1fr_180px]">
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-[0.22em] text-white/75">Espace dédié</p>
+                        <h3 className="mt-2 text-3xl font-black tracking-tight">{space.name}</h3>
+                        <p className="mt-3 text-sm leading-6 text-white/90">{space.description}</p>
+                      </div>
+                      <div className="overflow-hidden rounded-[1.4rem] border border-white/15 bg-white/10 p-2">
+                        {space.heroImage ? (
+                          <img src={space.heroImage} alt={space.name} className="h-full min-h-[170px] w-full rounded-[1rem] object-cover" />
+                        ) : (
+                          <div className="flex min-h-[170px] items-center justify-center rounded-[1rem] bg-white/10">
+                            <Sparkles className="h-10 w-10 text-white" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-5">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <StatChip label="À partir de" value={formatEuro(space.startingAt)} />
+                      <StatChip label="Panier moyen" value={formatEuro(space.averageTicket)} />
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {space.highlights.slice(0, 4).map((item) => (
+                        <span key={item} className="rounded-full border border-orange-200 bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="mt-5 space-y-2">
+                      {space.menuItems.slice(0, 3).map((item) => (
+                        <div key={item.name} className="flex items-start justify-between gap-4 rounded-2xl border border-orange-100 bg-white p-3">
+                          <div>
+                            <p className="font-black text-[#2a190f]">{item.name}</p>
+                            <p className="mt-1 text-sm text-stone-600">{item.description}</p>
+                          </div>
+                          <strong className="shrink-0 text-[#c2410c]">{formatEuro(item.price)}</strong>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-5 flex flex-wrap gap-3">
+                      <a
+                        href={buildTraiteurSpaceLink(baseUrl, space.slug)}
+                        className="inline-flex items-center justify-center gap-2 rounded-full bg-[#d95f2d] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/20 transition hover:-translate-y-0.5"
+                      >
+                        Ouvrir la vitrine <ArrowRight className="h-4 w-4" />
+                      </a>
+                      <a
+                        href={buildCustomerSpaceLink(baseUrl, space.slug)}
+                        className="inline-flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-white px-4 py-2 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5"
+                      >
+                        Commander
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -3009,6 +3102,15 @@ function MiniMetric({ label, value }: { label: string; value: string }) {
     <div className="rounded-2xl bg-white/10 px-3 py-3">
       <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-300">{label}</p>
       <p className="mt-1 text-sm font-bold text-white">{value}</p>
+    </div>
+  );
+}
+
+function StatChip({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[1.25rem] border border-orange-100 bg-[#fffaf4] px-4 py-3 shadow-sm">
+      <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#c2410c]">{label}</p>
+      <p className="mt-1 text-base font-black text-[#2a190f]">{value}</p>
     </div>
   );
 }

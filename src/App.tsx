@@ -10,6 +10,7 @@ import { OrderStatusPage } from './pages/OrderStatusPage';
 import { PartnerDashboardPage } from './pages/PartnerDashboardPage';
 import { ProSpacePage } from './pages/ProSpacePage';
 import { PublicHomePage } from './pages/PublicHomePage';
+import { TraiteursPage } from './pages/TraiteursPage';
 
 function App() {
   const params = new URLSearchParams(window.location.search);
@@ -34,6 +35,8 @@ function App() {
         ? <LaunchNetworkPage />
       : view === 'order-status' || effectivePathname.endsWith('/order-status')
         ? <OrderStatusPage />
+      : view === 'traiteurs' || effectivePathname.endsWith('/traiteurs')
+        ? <TraiteursPage />
       : view === 'admin-documents' || effectivePathname.endsWith('/admin-documents')
         ? <AdminPartners />
         : view === 'investor-ops' || effectivePathname.endsWith('/investor-ops')

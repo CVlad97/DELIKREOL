@@ -121,8 +121,6 @@ export function OrderStatusPage() {
     if (!params.get('order')) return;
     if (!query.trim()) return;
     void handleLookup();
-    // intentionally reacts to initial query from URL
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
