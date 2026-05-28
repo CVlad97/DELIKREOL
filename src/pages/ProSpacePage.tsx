@@ -76,3 +76,18 @@ export function ProSpacePage() {
     </div>
   );
 }
+
+// Ajout de la section pour les traiteurs
+<a
+  href={`${baseUrl}?view=traiteurs`}
+  className="rounded-[1.4rem] border border-orange-200 bg-white p-5 transition hover:-translate-y-0.5"
+>
+  <div className="inline-flex rounded-xl bg-[#fff3e5] p-2 text-[#d95f2d]">
+    <Store className="h-5 w-5" />
+  </div>
+  <h2 className="mt-3 text-xl font-black">Traiteurs</h2>
+  <p className="mt-2 text-sm text-stone-600">Accédez à la liste des traiteurs disponibles et gérez vos commandes.</p>
+  <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-[#7c2d12]">
+    Voir les traiteurs <ChevronRight className="h-4 w-4" />
+  </span>
+</a>
