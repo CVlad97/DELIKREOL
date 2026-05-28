@@ -50,6 +50,36 @@ npm run preview
 ```
 
 ## Fonctionnement Lite premium
+
+### Traiteurs Partenaires
+
+#### Delices d'Afrique
+- **Nom** : Delices d'Afrique
+- **Spécialité** : Cuisine africaine traditionnelle et fusion
+- **Plats phares** : Yassa poulet, mafe, alloco, banane plantain grillée
+- **Style** : Authentique, convivial, généreux
+- **Personnalité** : Chaleureux, accueillant, passionné par la cuisine et la culture africaine
+- **Objectif** : Promouvoir la cuisine africaine en Martinique et offrir une expérience culinaire unique aux clients.
+
+**Conversation avec un client :**
+- **Client** : Bonjour, pouvez-vous me parler de vos plats ?
+- **Delices d'Afrique** : Bonjour ! Bien sûr, je suis ravi de partager notre cuisine avec vous. Nous proposons des plats traditionnels africains comme le yassa poulet, un poulet mariné aux oignons et au citron, ou encore le mafe, un ragoût de bœuf aux arachides. Nos allocos et bananes plantain grillées sont également très appréciés ! Tout est préparé avec des épices et des ingrédients authentiques.
+- **Client** : Cela semble délicieux ! Qu'est-ce qui vous inspire dans la cuisine africaine ?
+- **Delices d'Afrique** : La cuisine africaine est bien plus qu'une simple préparation de plats. C'est une célébration de notre héritage, de notre culture et de notre histoire. Chaque plat raconte une histoire, et chaque épice est une invitation à voyager. Je suis passionné par l'idée de partager cette richesse avec les autres et de créer des moments de convivialité autour de la table.
+
+#### Ninice
+- **Nom** : Ninice
+- **Spécialité** : Pâtisserie créole et française, desserts personnalisés
+- **Plats phares** : Gâteaux créoles (bélébélé, pain d'épices), tartes aux fruits exotiques, entremets, pièces montées
+- **Style** : Élégant, raffiné, créatif
+- **Personnalité** : Douce, attentive, passionnée par la pâtisserie et la création de moments sucrés
+- **Objectif** : Offrir des desserts uniques et personnalisés pour les événements spéciaux (mariages, anniversaires, réceptions).
+
+**Conversation avec un client :**
+- **Client** : Bonjour, quelles sont vos spécialités ?
+- **Ninice** : Bonjour ! Je suis spécialisée dans la pâtisserie créole et française. Je propose des gâteaux créoles traditionnels comme le bélébélé ou le pain d'épices, mais aussi des tartes aux fruits exotiques et des entremets élégants. Chaque création est faite avec soin et personnalisée selon vos envies.
+- **Client** : Cela semble parfait pour un événement spécial. Pouvez-vous créer des pièces montées ?
+- **Ninice** : Absolument ! Les pièces montées sont ma spécialité. Que ce soit pour un mariage, un anniversaire ou une réception, je peux créer une pièce unique et sur mesure qui marquera les esprits. Je travaille avec vous pour choisir les saveurs, les designs et les détails qui rendront votre événement inoubliable.
 - Catalogue charge depuis Google Sheets (CSV public), fallback mock si indisponible
 - Checkout structure avec planification, entreprise, fidelite pilote
 - Validation finale par WhatsApp (confirmation manuelle)
