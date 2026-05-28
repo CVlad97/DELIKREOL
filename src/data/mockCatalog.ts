@@ -1,4 +1,5 @@
 import { Wine, Leaf, Hammer } from 'lucide-react';
+import { anTjeCocoAssets } from './partnerAssets';
 
 const assetFromPublic = (relativePath: string): string => {
   const clean = relativePath.replace(/^\/+/, '');
@@ -32,6 +33,30 @@ export const mockCategories: Category[] = [
 ];
 
 export const mockProducts: LocalProduct[] = [
+  {
+    id: 'antjecoco-box-salee',
+    name: 'Box 8 pépites salées',
+    vendor: 'An Tjè Coco',
+    price: 15.00,
+    category: 'Plats',
+    description: 'Pépites salées au sarrasin bio, à précommander du dimanche au mardi. Exemples: gratin de banane jaune, marlin fumé, rougail saucisses.',
+    image: anTjeCocoAssets.hero,
+    zone: 'Fort-de-France',
+    featured: true,
+    available: true,
+  },
+  {
+    id: 'antjecoco-box-sucree',
+    name: 'Box 8 pépites sucrées',
+    vendor: 'An Tjè Coco',
+    price: 13.00,
+    category: 'Desserts',
+    description: 'Pépites sucrées au froment, à précommander du dimanche au mardi. Saveurs signature: coco-passion, fleur d’oranger-pistache, crème brûlée passion.',
+    image: anTjeCocoAssets.gallery[0],
+    zone: 'Fort-de-France',
+    featured: true,
+    available: true,
+  },
   {
     id: 'ninice-colombo-deux-rives',
     name: 'Le Colombo des Deux Rives',

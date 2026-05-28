@@ -1,4 +1,5 @@
 import { mockProducts } from './mockCatalog';
+import { anTjeCocoAssets } from './partnerAssets';
 import { partnerProfiles, type PartnerProfile } from './partnerProfiles';
 
 export type TraiteurMenuItem = {
@@ -35,6 +36,9 @@ export type TraiteurSpace = {
 };
 
 function resolveHeroImage(name: string) {
+  if (name === 'An Tjè Coco') {
+    return anTjeCocoAssets.hero;
+  }
   if (name === "Saveurs d'Afrique") {
     return assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-board.jpg');
   }
@@ -42,6 +46,9 @@ function resolveHeroImage(name: string) {
 }
 
 function resolveGalleryImages(name: string) {
+  if (name === 'An Tjè Coco') {
+    return anTjeCocoAssets.gallery;
+  }
   if (name === "Saveurs d'Afrique") {
     return [assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-pate.jpg')];
   }
@@ -120,12 +127,16 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = partnerProfiles
   return profiles
     .filter((profile) => profile.type.toLowerCase() === 'traiteur')
     .map((profile) => {
-    if (profile.name === 'Les Delices de Ninice') {
-      return buildSpace(profile, 'from-[#d95f2d] via-[#f49d4b] to-[#7c2d12]', '#fff7ed');
-    }
+      if (profile.name === 'Les Delices de Ninice') {
+        return buildSpace(profile, 'from-[#d95f2d] via-[#f49d4b] to-[#7c2d12]', '#fff7ed');
+      }
 
-    return buildSpace(profile, 'from-[#0f766e] via-[#14b8a6] to-[#14532d]', '#ecfeff');
-  });
+      if (profile.name === 'An Tjè Coco') {
+        return buildSpace(profile, 'from-[#7c3aed] via-[#ec4899] to-[#c2410c]', '#fff1f2');
+      }
+
+      return buildSpace(profile, 'from-[#0f766e] via-[#14b8a6] to-[#14532d]', '#ecfeff');
+    });
 }
 
 export const traiteurSpaces: TraiteurSpace[] = buildTraiteurSpaces();

@@ -12,17 +12,38 @@ import {
   featuredTraiteurSpaces,
   formatEuro,
   getTraiteurSpaceBySlug,
+  normalizeSpaceSlug,
   traiteurSpaces,
 } from '@/data/traiteurs';
 import { loadTraiteurProfiles } from '@/services/traiteurProfileService';
+
+type DemoAccessConfig = {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+};
+
+const demoAccessBySlug: Record<string, DemoAccessConfig> = {
+  [normalizeSpaceSlug("Saveurs d'Afrique")]: {
+    id: 'demo_vendor_saveurs_afrique',
+    fullName: "Saveurs d'Afrique",
+    email: 'saveurs.afrique@demo.delikreol.local',
+    phone: '+596696677679',
+  },
+  [normalizeSpaceSlug('An Tjè Coco')]: {
+    id: 'demo_vendor_an_tje_coco',
+    fullName: 'An Tjè Coco',
+    email: 'antjecoco@gmail.com',
+    phone: '0696857077',
+  },
+};
 
 export function TraiteursPage() {
   const baseUrl = import.meta.env.BASE_URL || '/';
   const [traiteurSpacesState, setTraiteurSpacesState] = useState(traiteurSpaces);
   const [catalogSource, setCatalogSource] = useState<'local' | 'backend'>('local');
   const [activeSlug, setActiveSlug] = useState(featuredTraiteurSpaces[0]?.slug ?? traiteurSpaces[0]?.slug ?? '');
-  const saveursDemoEmail = 'saveurs.afrique@demo.delikreol.local';
-  const saveursDemoUserId = 'demo_vendor_saveurs_afrique';
 
   useEffect(() => {
     document.title = 'DELIKREOL | Espaces traiteurs';
@@ -70,7 +91,7 @@ export function TraiteursPage() {
     () => traiteurSpacesState.find((space) => space.slug === activeSlug) ?? featuredTraiteurSpaces[0] ?? traiteurSpacesState[0],
     [activeSlug, traiteurSpacesState],
   );
-  const isSaveursAfrique = activeSpace.name === "Saveurs d'Afrique";
+  const demoAccess = demoAccessBySlug[activeSpace.slug];
 
   const totalItems = useMemo(() => traiteurSpacesState.reduce((sum, space) => sum + space.menuItems.length, 0), [traiteurSpacesState]);
   const lowestPrice = useMemo(() => {
@@ -82,19 +103,20 @@ export function TraiteursPage() {
     return traiteurSpacesState.length ? total / traiteurSpacesState.length : 0;
   }, [traiteurSpacesState]);
 
-  const activateSaveursDemoAccess = () => {
+  const activateDemoAccess = () => {
+    if (!demoAccess) return;
     const demoProfile = {
-      id: saveursDemoUserId,
-      full_name: "Saveurs d'Afrique",
-      phone: '+596696677679',
+      id: demoAccess.id,
+      full_name: demoAccess.fullName,
+      phone: demoAccess.phone,
       user_type: 'vendor' as const,
       avatar_url: null,
       created_at: new Date().toISOString(),
-      email: saveursDemoEmail,
+      email: demoAccess.email,
     };
 
     localStorage.setItem('delikreol_demo_profiles', JSON.stringify([demoProfile]));
-    localStorage.setItem('delikreol_demo_session', JSON.stringify({ userId: saveursDemoUserId, email: saveursDemoEmail }));
+    localStorage.setItem('delikreol_demo_session', JSON.stringify({ userId: demoAccess.id, email: demoAccess.email }));
     localStorage.setItem('delikreol_demo_override', 'true');
     window.location.href = `${baseUrl}?view=partner-documents`;
   };
@@ -198,18 +220,18 @@ export function TraiteursPage() {
                         </Button>
                       </div>
 
-                      {isSaveursAfrique && (
+                      {demoAccess && (
                         <div className="mt-5 rounded-[1.4rem] border border-white/15 bg-white/10 p-4 backdrop-blur">
                           <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/70">
                             Accès vendeur démo
                           </p>
                           <p className="mt-2 text-sm leading-6 text-white/90">
-                            Email: <span className="font-black">{saveursDemoEmail}</span> · Mot de passe au choix en mode test.
+                            Email: <span className="font-black">{demoAccess.email}</span> · Téléphone: <span className="font-black">{demoAccess.phone}</span>
                           </p>
                           <div className="mt-4 flex flex-wrap gap-2">
                             <Button
                               type="button"
-                              onClick={activateSaveursDemoAccess}
+                              onClick={activateDemoAccess}
                               className="bg-white text-[#2a190f] shadow-lg shadow-black/10 hover:bg-white/90"
                             >
                               Activer l’accès
@@ -354,6 +376,11 @@ export function TraiteursPage() {
                           {space.profile.contactPhone && (
                             <p>
                               Téléphone: <span className="font-black text-[#2a190f]">{space.profile.contactPhone}</span>
+                            </p>
+                          )}
+                          {space.profile.contactEmail && (
+                            <p>
+                              Email: <span className="font-black text-[#2a190f]">{space.profile.contactEmail}</span>
                             </p>
                           )}
                         </div>
