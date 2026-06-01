@@ -105,10 +105,17 @@ export async function getWhatsAppMessages(userId: string) {
 export function getWhatsAppBusinessLink(phoneNumber: string, message: string = '') {
   const cleanNumber = phoneNumber.replace(/\D/g, '');
   const encodedMessage = encodeURIComponent(message);
-  return `https://wa.me/${cleanNumber}${message ? `?text=${encodedMessage}` : ''}`;
+  const businessIntent = `intent://send?phone=${cleanNumber}${message ? `&text=${encodedMessage}` : ''}#Intent;scheme=whatsapp;package=com.whatsapp.w4b;end`;
+  return typeof window !== 'undefined' && /Android/i.test(navigator.userAgent)
+    ? businessIntent
+    : `https://wa.me/${cleanNumber}${message ? `?text=${encodedMessage}` : ''}`;
 }
 
 export function openWhatsAppChat(phoneNumber: string, message: string = '') {
   const link = getWhatsAppBusinessLink(phoneNumber, message);
+  if (typeof window !== 'undefined' && /Android/i.test(navigator.userAgent)) {
+    window.location.href = link;
+    return;
+  }
   window.open(link, '_blank');
 }
