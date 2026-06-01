@@ -27,7 +27,8 @@ export function OpsEntitiesPanel({ snapshot }: OpsEntitiesPanelProps) {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-base font-black text-[#2f1911]">{client.name}</p>
-                  <p className="text-sm text-[#6d5c52]">{client.zone} · {client.phone}</p>
+                  <p className="text-sm text-[#6d5c52]">{client.zone} · {client.locality}</p>
+                  <p className="text-sm text-[#6d5c52]">{client.phone}</p>
                 </div>
                 <span className="rounded-full bg-[#f7ecdb] px-3 py-1 text-xs font-black text-[#7a4a25]">{client.priority}</span>
               </div>
@@ -53,6 +54,7 @@ export function OpsEntitiesPanel({ snapshot }: OpsEntitiesPanelProps) {
                 <div>
                   <p className="text-base font-black text-[#2f1911]">{partner.name}</p>
                   <p className="text-sm text-[#6d5c52]">{partner.category} · {partner.zone}</p>
+                  <p className="text-sm text-[#6d5c52]">Localité: {partner.locality}</p>
                 </div>
                 <span className={`rounded-full px-3 py-1 text-xs font-black ${partner.complianceStatus === 'valid' ? 'bg-emerald-100 text-emerald-800' : partner.complianceStatus === 'expiring' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}`}>
                   {partner.complianceStatus}

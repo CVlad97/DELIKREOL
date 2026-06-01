@@ -12,11 +12,14 @@ type OrderPdfInput = {
   customerName?: string;
   customerPhone?: string;
   deliveryAddress?: string;
+  customerLocality?: string;
   deliveryNotes?: string;
   customerMapsUrl?: string;
   customerLat?: number;
   customerLng?: number;
   customerAccuracy?: number;
+  partnerName?: string;
+  partnerLocality?: string;
 };
 
 export function downloadOrderPdf(input: OrderPdfInput) {
@@ -49,6 +52,9 @@ export function buildPartnerDispatchMessage(input: OrderPdfInput) {
 
 function buildInvoiceLines(input: OrderPdfInput) {
   const address = input.deliveryAddress || 'Adresse non fournie';
+  const customerLocality = input.customerLocality || extractLocality(address);
+  const partnerName = input.partnerName || input.products[0]?.vendor_name || 'Partenaire à confirmer';
+  const partnerLocality = input.partnerLocality || input.products[0]?.zone_label || 'Localité partenaire non fournie';
   const notes = input.deliveryNotes || 'Aucune instruction';
   const mapsUrl = input.customerMapsUrl || 'Position GPS non fournie - confirmer adresse manuellement';
   const coordinates =
@@ -67,7 +73,10 @@ function buildInvoiceLines(input: OrderPdfInput) {
     '',
     'Livraison / retrait:',
     `Mode: ${input.deliveryMode}`,
+    `Partenaire: ${partnerName}`,
+    `Localite partenaire: ${partnerLocality}`,
     `Adresse: ${address}`,
+    `Localite client: ${customerLocality}`,
     `Instructions: ${notes}`,
     `Position GPS: ${mapsUrl}`,
     `Coordonnees: ${coordinates}`,
@@ -121,6 +130,11 @@ function sanitize(value: string) {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^\x20-\x7E]/g, ' ');
+}
+
+function extractLocality(value: string) {
+  const firstSegment = value.split('—')[0]?.split(',')[0]?.trim();
+  return firstSegment || 'Localité client non fournie';
 }
 
 function formatMoney(value: number) {

@@ -60,7 +60,7 @@ const investorSignals = [
   {
     label: 'Couverture',
     value: 'Rayon partenaire',
-    detail: 'La livraison se calcule autour du partenaire, avec commune en fallback.',
+    detail: 'La livraison se calcule autour de la localité du partenaire et de celle du client, avec commune en fallback.',
   },
   {
     label: 'Controle risque',

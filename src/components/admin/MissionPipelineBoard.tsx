@@ -48,11 +48,22 @@ export function MissionPipelineBoard({ snapshot }: MissionPipelineBoardProps) {
                           <p className="text-sm font-black text-[#2e1b13]">{mission.reference}</p>
                           <p className="mt-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#9b4b28]">{mission.serviceType}</p>
                         </div>
-                        <span className="rounded-full bg-[#fff4df] px-2 py-1 text-[10px] font-black text-[#8e5419]">{mission.paymentStatus}</span>
+                        <div className="flex flex-col items-end gap-1">
+                          <span className={`rounded-full px-2 py-1 text-[10px] font-black ${mission.canTakeOrder ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
+                            {mission.canTakeOrder ? 'Peut prendre' : 'Hors zone'}
+                          </span>
+                          <span className="rounded-full bg-[#fff4df] px-2 py-1 text-[10px] font-black text-[#8e5419]">{mission.paymentStatus}</span>
+                        </div>
                       </div>
                       <p className="mt-3 text-sm font-semibold text-[#35231a]">{mission.clientName}</p>
-                      <p className="text-xs text-[#6c5c52]">{mission.partnerName} · {mission.zone}</p>
+                      <p className="text-xs text-[#6c5c52]">
+                        Client: {mission.clientLocality} · Partenaire: {mission.partnerName} ({mission.partnerLocality})
+                      </p>
+                      <p className="mt-1 text-xs text-[#6c5c52]">{mission.zone}</p>
                       <p className="mt-2 text-xs text-[#6c5c52]">{mission.dueLabel}</p>
+                      <p className="mt-2 rounded-xl bg-[#f8f2ea] px-2.5 py-2 text-[11px] font-semibold leading-5 text-[#6c5c52]">
+                        {mission.eligibilityReason}
+                      </p>
                       <div className="mt-3 flex items-center justify-between gap-2">
                         <span className="text-sm font-black text-[#1c6a45]">{mission.margin.toFixed(2)} EUR marge</span>
                         <a

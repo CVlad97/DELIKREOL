@@ -787,6 +787,20 @@ export function PublicHomePage() {
     [customerMapsLabel, deliveryAddress, deliveryNotes, deliverySlotLabel, orderNumber, selectedProducts, selectionEconomics.total_client],
   );
 
+  const partnerDispatchTarget = useMemo(() => {
+    const partnerName = selectedProducts[0]?.vendor_name || 'Partenaire à confirmer';
+    const partnerLocality = selectedProducts[0]?.zone_label || 'Localité partenaire non fournie';
+    const customerLocality = deliveryAddress.trim()
+      ? deliveryAddress.trim().split(',')[0]?.trim() || 'Localité client non fournie'
+      : 'Localité client non fournie';
+
+    return {
+      partnerName,
+      partnerLocality,
+      customerLocality,
+    };
+  }, [deliveryAddress, selectedProducts]);
+
   const partnerDispatchMessage = useMemo(
     () =>
       buildPartnerDispatchMessage({
@@ -801,11 +815,14 @@ export function PublicHomePage() {
         customerName,
         customerPhone,
         deliveryAddress,
+        customerLocality: partnerDispatchTarget.customerLocality,
         deliveryNotes,
         customerMapsUrl: customerLocation?.mapsUrl,
         customerLat: customerLocation?.lat,
         customerLng: customerLocation?.lng,
         customerAccuracy: customerLocation?.accuracy,
+        partnerName: partnerDispatchTarget.partnerName,
+        partnerLocality: partnerDispatchTarget.partnerLocality,
       }),
     [
       customerLocation,
@@ -819,6 +836,7 @@ export function PublicHomePage() {
       paymentMethod,
       selectedProducts,
       selectionEconomics,
+      partnerDispatchTarget,
     ],
   );
 

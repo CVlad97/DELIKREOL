@@ -10,6 +10,7 @@ export interface OpsClient {
   name: string;
   phone: string;
   zone: string;
+  locality: string;
   channel: 'site' | 'whatsapp' | 'telegram' | 'manual';
   requestCount: number;
   lastRequestAt: string;
@@ -22,6 +23,7 @@ export interface OpsPartner {
   name: string;
   category: string;
   zone: string;
+  locality: string;
   status: 'active' | 'pending' | 'suspended';
   commissionRate: number;
   contactPhone: string;
@@ -41,7 +43,11 @@ export interface OpsMission {
   stage: MissionStage;
   serviceType: 'meal' | 'groceries' | 'parcel' | 'service' | 'custom';
   clientName: string;
+  clientLocality: string;
   partnerName: string;
+  partnerLocality: string;
+  canTakeOrder: boolean;
+  eligibilityReason: string;
   zone: string;
   createdAt: string;
   dueLabel: string;
@@ -188,6 +194,57 @@ function inferZoneFromAddress(address: string | undefined): string {
   return 'Martinique';
 }
 
+function normalizeLocality(value: string | undefined): string {
+  return String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[’']/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+function localityFromText(value: string | undefined): string {
+  if (!value) return 'Martinique';
+  const firstSegment = value.split('—')[0]?.split(',')[0]?.trim() || value.trim();
+  return firstSegment || 'Martinique';
+}
+
+function isLocalityCompatible(partnerLocality: string, clientLocality: string) {
+  const partner = normalizeLocality(partnerLocality);
+  const client = normalizeLocality(clientLocality);
+
+  if (!partner || !client) return false;
+  if (partner === client) return true;
+  if (partner.includes(client) || client.includes(partner)) return true;
+  if (partner === 'martinique' || client === 'martinique') return true;
+  return false;
+}
+
+function buildPartnerLocalityIndex() {
+  const index = new Map<string, string>();
+
+  demoVendors.forEach((vendor) => {
+    index.set(normalizeLocality(vendor.business_name), localityFromText(inferZoneFromAddress(vendor.address)));
+  });
+
+  readDemoPartners().forEach((partner) => {
+    const name = String(partner.company_name ?? '').trim();
+    const locality = localityFromText(String(partner.address ?? partner.zone_label ?? 'Martinique'));
+    if (name) {
+      index.set(normalizeLocality(name), locality);
+    }
+  });
+
+  return index;
+}
+
+function resolvePartnerLocality(partnerName: string) {
+  const index = buildPartnerLocalityIndex();
+  return index.get(normalizeLocality(partnerName)) || inferZoneFromAddress(partnerName);
+}
+
 function mapOrderStatusToStage(status: string): MissionStage {
   switch (status) {
     case 'pending':
@@ -209,6 +266,7 @@ function mapOrderStatusToStage(status: string): MissionStage {
 }
 
 function buildOpsMissions(): OpsMission[] {
+  const partnerLocalityIndex = buildPartnerLocalityIndex();
   const localOrders = readDemoOrders();
   const sourceOrders = localOrders.length > 0
     ? localOrders
@@ -238,6 +296,14 @@ function buildOpsMissions(): OpsMission[] {
     const stage = mapOrderStatusToStage(order.status);
     const totalAmount = order.total_amount ?? 0;
     const deliveryFee = order.delivery_fee ?? 4;
+    const primaryVendorId = order.items?.[0]?.vendor_id;
+    const partnerName =
+      (order as { vendor_name?: string }).vendor_name ||
+      demoVendors.find((vendor) => vendor.id === primaryVendorId)?.business_name ||
+      `Partenaire ${index + 1}`;
+    const clientLocality = localityFromText(order.delivery_address);
+    const partnerLocality = partnerLocalityIndex.get(normalizeLocality(partnerName)) || resolvePartnerLocality(partnerName);
+    const canTakeOrder = isLocalityCompatible(partnerLocality, clientLocality);
     const partnerCost = Number((totalAmount * 0.72).toFixed(2));
     const commission = Number((totalAmount * 0.18).toFixed(2));
     const margin = Number((totalAmount + deliveryFee - partnerCost).toFixed(2));
@@ -248,7 +314,13 @@ function buildOpsMissions(): OpsMission[] {
       stage,
       serviceType: index % 5 === 0 ? 'groceries' : index % 4 === 0 ? 'parcel' : 'meal',
       clientName: index < demoOrders.length ? demoOrders[index].customer_name : `Client ${index + 1}`,
-      partnerName: index < demoOrders.length ? demoOrders[index].vendor_name : `Partenaire ${index + 1}`,
+      clientLocality,
+      partnerName,
+      partnerLocality,
+      canTakeOrder,
+      eligibilityReason: canTakeOrder
+        ? `OK zone: ${partnerLocality} vers ${clientLocality}`
+        : `Hors zone probable: ${partnerLocality} vs ${clientLocality}`,
       zone: inferZoneFromAddress(order.delivery_address),
       createdAt: order.created_at,
       dueLabel: stage === 'completed' ? 'Cloturee' : stage === 'in_progress' ? 'Moins de 20 min' : "A traiter aujourd'hui",
@@ -279,6 +351,7 @@ async function buildOpsClients(missions: OpsMission[]): Promise<OpsClient[]> {
     name: clientName,
     phone: `0696 ${String(10 + index).padStart(2, '0')} ${String(20 + index).padStart(2, '0')} ${String(30 + index).padStart(2, '0')}`,
     zone: items[0]?.zone || 'Martinique',
+    locality: items[0]?.clientLocality || items[0]?.zone || 'Martinique',
     channel: items[0]?.channel || 'site',
     requestCount: items.length + (index < localRequests.length ? 1 : 0),
     lastRequestAt: items[0]?.createdAt || new Date().toISOString(),
@@ -294,6 +367,7 @@ function buildOpsPartners(): OpsPartner[] {
     name: vendor.business_name,
     category: vendor.business_type,
     zone: inferZoneFromAddress(vendor.address),
+    locality: localityFromText(vendor.address),
     status: vendor.is_active ? 'active' as const : 'suspended' as const,
     commissionRate: vendor.commission_rate,
     contactPhone: vendor.phone,
@@ -312,6 +386,7 @@ function buildOpsPartners(): OpsPartner[] {
     name: partner.company_name,
     category: partner.partner_type,
     zone: inferZoneFromAddress(partner.address),
+    locality: localityFromText(partner.address),
     status: partner.status === 'submitted' ? 'pending' as const : 'active' as const,
     commissionRate: 15,
     contactPhone: partner.phone || 'N/A',
