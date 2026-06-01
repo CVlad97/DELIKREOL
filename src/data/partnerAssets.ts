@@ -9,3 +9,19 @@ export const anTjeCocoAssets = {
   ],
   event: 'https://api.cloudly.space/resize/crop/1200/627/60/aHR0cDovL21lZGlhcy50b3VyaXNtLXN5c3RlbS5jb20vNy8yLzgwNDcxN180MjIxMDY0NDlfMzgyMzMzMzc0NDkzOTczXzM3OTE3NTkwNjM3OTIwNjc4MzFfbi5qcGVn/image.jpg',
 };
+
+const assetFromPublic = (relativePath: string): string => {
+  const clean = relativePath.replace(/^\/+/, '');
+  return `${import.meta.env.BASE_URL}${clean}`;
+};
+
+export const cocoFoodAssets = {
+  hero: assetFromPublic('vendors/coco/coco-01-board.jpg'),
+  gallery: [
+    assetFromPublic('vendors/coco/coco-02-meat-rice.jpg'),
+    assetFromPublic('vendors/coco/coco-03-bowl.jpg'),
+    assetFromPublic('vendors/coco/coco-04-spaghetti.jpg'),
+    assetFromPublic('vendors/coco/coco-05-platter.jpg'),
+    assetFromPublic('vendors/coco/coco-06-platter.jpg'),
+  ],
+};

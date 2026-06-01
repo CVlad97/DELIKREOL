@@ -1,5 +1,5 @@
 import { mockProducts } from './mockCatalog';
-import { anTjeCocoAssets } from './partnerAssets';
+import { anTjeCocoAssets, cocoFoodAssets } from './partnerAssets';
 import { partnerProfiles, type PartnerProfile } from './partnerProfiles';
 
 export type TraiteurMenuItem = {
@@ -39,6 +39,9 @@ function resolveHeroImage(name: string) {
   if (name === 'An Tjè Coco') {
     return anTjeCocoAssets.hero;
   }
+  if (name === "Coco's Food") {
+    return cocoFoodAssets.hero;
+  }
   if (name === "Saveurs d'Afrique") {
     return assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-board.jpg');
   }
@@ -48,6 +51,9 @@ function resolveHeroImage(name: string) {
 function resolveGalleryImages(name: string) {
   if (name === 'An Tjè Coco') {
     return anTjeCocoAssets.gallery;
+  }
+  if (name === "Coco's Food") {
+    return cocoFoodAssets.gallery;
   }
   if (name === "Saveurs d'Afrique") {
     return [assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-pate.jpg')];
@@ -133,6 +139,10 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = partnerProfiles
 
       if (profile.name === 'An Tjè Coco') {
         return buildSpace(profile, 'from-[#7c3aed] via-[#ec4899] to-[#c2410c]', '#fff1f2');
+      }
+
+      if (profile.name === "Coco's Food") {
+        return buildSpace(profile, 'from-[#2b1b10] via-[#8b5e34] to-[#d97706]', '#fff7ed');
       }
 
       return buildSpace(profile, 'from-[#0f766e] via-[#14b8a6] to-[#14532d]', '#ecfeff');

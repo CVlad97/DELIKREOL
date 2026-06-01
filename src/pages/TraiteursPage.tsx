@@ -37,27 +37,25 @@ const demoAccessBySlug: Record<string, DemoAccessConfig> = {
     email: 'antjecoco@gmail.com',
     phone: '0696857077',
   },
+  [normalizeSpaceSlug("Coco's Food")]: {
+    id: 'demo_vendor_cocos_food',
+    fullName: "Coco's Food",
+    email: 'cocos.food@demo.delikreol.local',
+    phone: '+596 696 25 47 20',
+  },
 };
 
 export function TraiteursPage() {
   const baseUrl = import.meta.env.BASE_URL || '/';
   const [traiteurSpacesState, setTraiteurSpacesState] = useState(traiteurSpaces);
   const [catalogSource, setCatalogSource] = useState<'local' | 'backend'>('local');
-  const [activeSlug, setActiveSlug] = useState(featuredTraiteurSpaces[0]?.slug ?? traiteurSpaces[0]?.slug ?? '');
+  const [activeSlug, setActiveSlug] = useState(() => getInitialActiveSlug());
 
   useEffect(() => {
     document.title = 'DELIKREOL | Espaces traiteurs';
     upsertMeta('description', 'Découvrez les espaces traiteurs DELIKREOL avec description, prix, menu et accès commande direct.');
     upsertMeta('og:title', 'DELIKREOL | Espaces traiteurs');
     upsertMeta('og:description', 'Chaque traiteur dispose de son espace dédié avec ses plats, ses prix et ses accès commande.');
-  }, []);
-
-  useEffect(() => {
-    const vendorSlug = new URLSearchParams(window.location.search).get('vendor');
-    const vendorSpace = vendorSlug ? getTraiteurSpaceBySlug(vendorSlug) : null;
-    if (vendorSpace) {
-      setActiveSlug(vendorSpace.slug);
-    }
   }, []);
 
   useEffect(() => {
@@ -250,11 +248,29 @@ export function TraiteursPage() {
 
                     <div className="overflow-hidden rounded-[1.5rem] border border-white/15 bg-white/10 p-3 shadow-xl backdrop-blur">
                       {activeSpace.heroImage ? (
-                        <img
-                          src={activeSpace.heroImage}
-                          alt={activeSpace.name}
-                          className="h-full min-h-[200px] w-full rounded-[1.1rem] object-cover"
-                        />
+                        <div className="space-y-3">
+                          <div className="overflow-hidden rounded-[1.1rem] border border-white/15">
+                            <img
+                              src={activeSpace.heroImage}
+                              alt={activeSpace.name}
+                              className="aspect-[4/3] w-full object-cover"
+                            />
+                          </div>
+                          {activeSpace.galleryImages.length > 0 && (
+                            <div className="grid grid-cols-2 gap-3">
+                              {activeSpace.galleryImages.slice(0, 2).map((image, index) => (
+                                <div key={image} className="overflow-hidden rounded-[1.05rem] border border-white/15">
+                                  <img
+                                    src={image}
+                                    alt={`${activeSpace.name} - photo ${index + 1}`}
+                                    className="aspect-[4/3] w-full object-cover"
+                                    loading="lazy"
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       ) : (
                         <div className="flex min-h-[200px] items-center justify-center rounded-[1.1rem] bg-white/10">
                           <div className="text-center">
@@ -289,10 +305,15 @@ export function TraiteursPage() {
                 </div>
 
                 {activeSpace.galleryImages.length > 0 && (
-                  <div className="grid gap-3 px-6 pb-6 sm:grid-cols-2">
-                    {activeSpace.galleryImages.map((image) => (
+                  <div className="grid gap-3 px-6 pb-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {activeSpace.galleryImages.slice(0, 3).map((image, index) => (
                       <div key={image} className="overflow-hidden rounded-[1.4rem] border border-orange-100 bg-[#fffaf3] shadow-sm">
-                        <img src={image} alt={activeSpace.name} className="h-44 w-full object-cover" loading="lazy" />
+                        <img
+                          src={image}
+                          alt={`${activeSpace.name} - galerie ${index + 1}`}
+                          className="aspect-[4/3] w-full object-cover"
+                          loading="lazy"
+                        />
                       </div>
                     ))}
                   </div>
@@ -420,7 +441,7 @@ export function TraiteursPage() {
                       {space.menuItems.map((item) => (
                         <div key={item.name} className="overflow-hidden rounded-[1.25rem] border border-orange-100 bg-[#fffaf4] shadow-sm">
                           {item.image && (
-                            <img src={item.image} alt={item.name} className="h-44 w-full object-cover" loading="lazy" />
+                            <img src={item.image} alt={item.name} className="aspect-[4/3] w-full object-cover" loading="lazy" />
                           )}
                           <div className="p-4">
                             <div className="flex items-start justify-between gap-4">
@@ -485,4 +506,10 @@ function upsertMeta(name: string, content: string) {
     document.head.appendChild(element);
   }
   element.setAttribute('content', content);
+}
+
+function getInitialActiveSlug() {
+  const vendorSlug = new URLSearchParams(window.location.search).get('vendor');
+  const vendorSpace = vendorSlug ? getTraiteurSpaceBySlug(vendorSlug) : null;
+  return vendorSpace?.slug ?? featuredTraiteurSpaces[0]?.slug ?? traiteurSpaces[0]?.slug ?? '';
 }
