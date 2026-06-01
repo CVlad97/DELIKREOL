@@ -131,16 +131,16 @@ export const partnerProfiles: PartnerProfile[] = [
     offer: 'Traiteur, boxes repas et snacking',
     type: 'Traiteur',
     availability: 'Preparation quotidienne',
-    story: 'Ninice prepare une cuisine maison inspiree des saveurs surinamiennes et martiniquaises, avec des plats genereux, du snacking sale-sucre et un service de proximite depuis Dillon.',
-    promise: 'Cuisine fraiche, portions regulieres, retrait simple a Dillon',
+    story: 'Les Délices de Ninice mêle les épices du Suriname et la générosité caraïbe dans une cuisine maison simple, chaleureuse et pensée pour les repas du quotidien comme pour les événements.',
+    promise: 'Cuisine maison, saveurs surinamiennes et caraïbes, retrait facile à Dillon',
     eta: 'Meme jour / J+1 selon flux',
     specialty: 'Colombo, moksi aleisi, bami, bara, gulab jamun et mini brochettes Saoto',
     highlights: [
       'Cuisine maison',
-      'Traiteur',
-      'Commande groupe',
+      'Mélange Suriname / Caraïbes',
+      'Traiteur de proximité',
       'Point relais: Barber Shop de Dillon',
-      'Tarifs estimatifs provisoires',
+      'Commande groupe',
     ],
     contactEmail: 'jereniceeduards@gmail.com',
     instagram: {
@@ -154,7 +154,7 @@ export const partnerProfiles: PartnerProfile[] = [
     events: [
       {
         title: 'Atelier culinaire Ninice',
-        description: 'Initiation simple autour des saveurs surinamiennes et martiniquaises: preparation, degustation et conseils pratiques.',
+        description: 'Rencontre cuisine autour des saveurs surinamiennes et caraïbes: préparation, dégustation et conseils pratiques.',
         location: 'Secteur Dillon / point relais Barber Shop de Dillon',
         schedule: 'Date a confirmer - preinscription possible',
         status: 'En preparation',
