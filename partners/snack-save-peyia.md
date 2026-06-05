@@ -7,9 +7,17 @@ Nouveau partenaire a integrer dans DeliKreol.
 - Nom commercial : Snack Save Peyia
 - Commune : Riviere-Pilote
 - Repere : pres du Pont de Fer
-- Contact WhatsApp fourni : +596 696 00 27 64
 - Positionnement : snack local, cuisine maison, service simple et populaire
 - Slogan : Bon manje, bon service, an peyi a
+
+## Contact DeliKreol a utiliser sur le site
+- WhatsApp Business principal DeliKreol : +596 696 65 35 89
+- Email professionnel recommande : contact@delikreol.mq
+- Emails optionnels a creer plus tard : commandes@delikreol.mq, partenaires@delikreol.mq
+
+## Contact prestataire
+- Numero direct du snack : a confirmer avant affichage public
+- Si le numero direct n'est pas valide publiquement, utiliser uniquement le WhatsApp DeliKreol central.
 
 ## Menu visible sur le visuel transmis
 - Cote de porc : 12 EUR
@@ -36,7 +44,7 @@ Nouveau partenaire a integrer dans DeliKreol.
 ## Integration recommandee
 - Ajouter une fiche partenaire avec badge Nouveau
 - Ajouter les 3 menus au catalogue
-- Ajouter un bouton WhatsApp Contacter le snack
+- Ajouter un bouton WhatsApp vers le numero DeliKreol principal : +596 696 65 35 89
 - Afficher : horaires et livraison a confirmer avec le prestataire
 - Ne pas inventer d'avis client
 - Ne pas inventer de delai de livraison
