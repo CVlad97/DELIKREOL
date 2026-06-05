@@ -27,7 +27,7 @@ export interface Category {
 }
 
 export const mockCategories: Category[] = [
-  { id: 'plats', name: 'Plats', icon: Wine, count: 15 },
+  { id: 'plats', name: 'Plats', icon: Wine, count: 18 },
   { id: 'snacking', name: 'Snacking', icon: Leaf, count: 6 },
   { id: 'desserts', name: 'Desserts', icon: Hammer, count: 5 },
 ];
@@ -101,6 +101,39 @@ export const mockProducts: LocalProduct[] = [
     category: 'Plats',
     description: 'Viande mijotée, riz noir, salade croquante et accompagnements de saison.',
     image: assetFromPublic('vendors/coco/coco-05-platter.jpg'),
+    zone: 'Rivière-Pilote',
+    featured: true,
+    available: true,
+  },
+  {
+    id: 'snack-save-peyia-cote-porc',
+    name: 'Côte de porc',
+    vendor: 'Snack Savè Peyi’A',
+    price: 12.00,
+    category: 'Plats',
+    description: 'Plat du menu transmis. Accompagnements proposés: riz, lentilles, légumes pays et crudités. Horaires, retrait et livraison à confirmer avec le prestataire.',
+    zone: 'Rivière-Pilote',
+    featured: true,
+    available: true,
+  },
+  {
+    id: 'snack-save-peyia-filet-poulet',
+    name: 'Filet de poulet',
+    vendor: 'Snack Savè Peyi’A',
+    price: 10.00,
+    category: 'Plats',
+    description: 'Plat du menu transmis. Accompagnements proposés: riz, lentilles, légumes pays et crudités. Horaires, retrait et livraison à confirmer avec le prestataire.',
+    zone: 'Rivière-Pilote',
+    featured: true,
+    available: true,
+  },
+  {
+    id: 'snack-save-peyia-crevettes-grillees',
+    name: 'Crevettes grillées',
+    vendor: 'Snack Savè Peyi’A',
+    price: 14.00,
+    category: 'Plats',
+    description: 'Plat du menu transmis. Accompagnements proposés: riz, lentilles, légumes pays et crudités. Horaires, retrait et livraison à confirmer avec le prestataire.',
     zone: 'Rivière-Pilote',
     featured: true,
     available: true,
