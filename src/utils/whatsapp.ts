@@ -1,53 +1,22 @@
-import { supabase } from '../lib/supabase';
+export const DELIKREOL_MAIN_WHATSAPP = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 
 export async function sendWhatsAppNotification(
-  phoneNumber: string,
-  templateName: string,
-  variables: Record<string, string> = {}
+  _phoneNumber: string,
+  _templateName: string,
+  _variables: Record<string, string> = {},
 ) {
-  try {
-    const { data: template } = await supabase
-      .from('whatsapp_templates')
-      .select('*')
-      .eq('template_name', templateName)
-      .eq('is_active', true)
-      .single();
-
-    if (!template) {
-      console.error(`Template ${templateName} not found`);
-      return false;
-    }
-
-    let message = template.template_content;
-    Object.entries(variables).forEach(([key, value]) => {
-      message = message.replace(new RegExp(`{{${key}}}`, 'g'), value);
-    });
-
-    const { error } = await supabase.functions.invoke('whatsapp-send', {
-      body: {
-        to: phoneNumber,
-        message,
-      },
-    });
-
-    if (error) {
-      console.error('Error sending WhatsApp notification:', error);
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    console.error('Error in sendWhatsAppNotification:', error);
-    return false;
-  }
+  console.warn(
+    '[DELIKREOL] WhatsApp API non active en mode gratuit. Utiliser les liens wa.me et valider les messages manuellement.',
+  );
+  return false;
 }
 
 export async function notifyOrderConfirmed(phoneNumber: string, order: any) {
   return sendWhatsAppNotification(phoneNumber, 'order_confirmation', {
     order_number: order.order_number,
-    total: order.total_amount.toFixed(2),
-    delivery_type: order.delivery_type === 'home_delivery' ? 'Livraison à domicile' : 'Point relais',
-    estimated_time: '30-45 min',
+    total: Number(order.total_amount || 0).toFixed(2),
+    delivery_type: order.delivery_type === 'home_delivery' ? 'Livraison à domicile' : 'Retrait ou point relais à confirmer',
+    estimated_time: 'Créneau à confirmer par le prestataire',
   });
 }
 
@@ -69,13 +38,13 @@ export async function notifyDriverAssigned(
   orderNumber: string,
   driverName: string,
   driverPhone: string,
-  eta: string
+  eta: string,
 ) {
   return sendWhatsAppNotification(phoneNumber, 'driver_assigned', {
     order_number: orderNumber,
     driver_name: driverName,
     driver_phone: driverPhone,
-    eta,
+    eta: eta || 'Heure estimée à confirmer',
   });
 }
 
@@ -85,37 +54,17 @@ export async function notifyOrderDelivered(phoneNumber: string, orderNumber: str
   });
 }
 
-export async function getWhatsAppMessages(userId: string) {
-  try {
-    const { data, error } = await supabase
-      .from('whatsapp_messages')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(50);
-
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error('Error fetching WhatsApp messages:', error);
-    return [];
-  }
+export async function getWhatsAppMessages(_userId: string) {
+  return [];
 }
 
 export function getWhatsAppBusinessLink(phoneNumber: string, message: string = '') {
-  const cleanNumber = phoneNumber.replace(/\D/g, '');
+  const cleanNumber = (phoneNumber || DELIKREOL_MAIN_WHATSAPP).replace(/\D/g, '');
   const encodedMessage = encodeURIComponent(message);
-  const businessIntent = `intent://send?phone=${cleanNumber}${message ? `&text=${encodedMessage}` : ''}#Intent;scheme=whatsapp;package=com.whatsapp.w4b;end`;
-  return typeof window !== 'undefined' && /Android/i.test(navigator.userAgent)
-    ? businessIntent
-    : `https://wa.me/${cleanNumber}${message ? `?text=${encodedMessage}` : ''}`;
+  return `https://wa.me/${cleanNumber}${message ? `?text=${encodedMessage}` : ''}`;
 }
 
-export function openWhatsAppChat(phoneNumber: string, message: string = '') {
+export function openWhatsAppChat(phoneNumber: string = DELIKREOL_MAIN_WHATSAPP, message: string = '') {
   const link = getWhatsAppBusinessLink(phoneNumber, message);
-  if (typeof window !== 'undefined' && /Android/i.test(navigator.userAgent)) {
-    window.location.href = link;
-    return;
-  }
-  window.open(link, '_blank');
+  window.open(link, '_blank', 'noopener,noreferrer');
 }
