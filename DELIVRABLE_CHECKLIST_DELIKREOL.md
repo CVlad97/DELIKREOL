@@ -1,5 +1,12 @@
 # Checklist livrable DeliKreol.mq
 
+## Statut au dernier passage
+
+- GitHub Pages reste la priorite gratuite.
+- Hostinger/Hermes n'est pas prioritaire tant que les credits IA sont bloques.
+- Supabase Delikreol est repere mais inactif : le site doit rester utilisable en mode statique / WhatsApp-first.
+- Snack Save Peyia est ajoute au catalogue statique GitHub Pages avec les trois produits visibles du menu transmis.
+
 ## Priorite 1 — Contacts et securite
 
 - WhatsApp Business principal : +596 696 65 35 89.
@@ -27,29 +34,36 @@ A retirer ou masquer :
 
 ## Priorite 3 — Snack Save Peyia
 
-A integrer :
-- Nouveau partenaire, commune Riviere-Pilote, pres du Pont de Fer.
-- Style madras/local/tropical.
-- Produits : Cote de porc 12 EUR, Filet de poulet 10 EUR, Crevettes grillees 14 EUR.
+Integration deja faite dans `src/data/mockCatalog.ts` :
+- Cote de porc : 12 EUR.
+- Filet de poulet : 10 EUR.
+- Crevettes grillees : 14 EUR.
 - Accompagnements : riz, lentilles, legumes pays, crudites.
-- Conditions a confirmer : horaires, jours, livraison, retrait, delai preparation, photos separees.
+- Mention publique ajoutee : horaires, retrait et livraison a confirmer avec le prestataire.
+
+A faire ensuite :
+- Ajouter une fiche profil traiteur si l'ecriture sur `partnerProfiles.ts` passe.
+- Ajouter une image ou une affiche optimisee, seulement si les droits d'utilisation sont confirmes.
+- Confirmer horaires, jours de disponibilite, retrait, livraison et delai preparation.
 
 ## Priorite 4 — MemLife
 
 - Table Supabase project_memory creee par migration.
-- Page admin MemLife a creer dans Hostinger/Hermes.
+- Page admin MemLife a creer dans le site.
 - Categories : vision, partenaires, produits, photos, logistique, WhatsApp, marketing, finance, decisions, a confirmer, erreurs.
 
 ## Priorite 5 — Supabase
 
 - Projet Delikreol Supabase repere mais inactif.
 - Ne pas restaurer sans validation si cout possible.
-- Activer RLS sur toutes les tables publiques.
+- Activer RLS sur toutes les tables publiques avant usage reel.
 - Utiliser seulement les cles publiques cote frontend.
 
-## Priorite 6 — Hostinger/Hermes
+## Priorite 6 — Publication gratuite
 
-Prompt a lancer : lire ORCHESTRATION_CONNECTE_SECURITE.md, HERMES_BANKABLE_OPERATING_PROMPT.md, partners/snack-save-peyia.md et appliquer au site.
+- GitHub Pages doit rester le canal principal tant que Hostinger/Hermes est bloque.
+- Verifier l'URL publique apres chaque commit.
+- Ne pas publier officiellement le domaine delikreol.mq avant checklist finale.
 
 ## Validation avant publication
 
@@ -59,7 +73,8 @@ Prompt a lancer : lire ORCHESTRATION_CONNECTE_SECURITE.md, HERMES_BANKABLE_OPERA
 - Test panier.
 - Test bouton WhatsApp.
 - Test pages traiteurs.
-- Test page Snack Save Peyia.
+- Test recherche Snack Save Peyia.
+- Test page/catalogue avec Cote de porc, Filet de poulet, Crevettes grillees.
 - Verification absence de secrets.
 - Verification absence de faux contenu.
 - Verification mentions legales et confidentialite.
