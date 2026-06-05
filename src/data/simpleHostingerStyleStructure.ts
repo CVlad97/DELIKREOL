@@ -40,9 +40,9 @@ export const partnerProductSimulatorFields = [
 ];
 
 export const deliveryWinWinRules = {
-  extendedDeliveryThreshold: 100,
+  extendedDeliveryThreshold: 40,
   message:
-    'Livraison éloignée possible à partir de 100 € de commande, selon validation du prestataire et disponibilité DeliKreol.',
+    'Livraison éloignée possible à partir de 40 € de commande, selon validation du prestataire et disponibilité DeliKreol.',
   fallbackCta: 'Vérifier la possibilité par WhatsApp',
 };
 
