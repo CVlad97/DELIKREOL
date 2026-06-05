@@ -1,5 +1,12 @@
 import { publicSupabase, isPublicSupabaseConfigured } from '../lib/publicSupabase';
 
+const assetFromPublic = (relativePath: string): string => {
+  const clean = relativePath.replace(/^\/+/, '');
+  return `${import.meta.env.BASE_URL}${clean}`;
+};
+
+export const PRODUCT_IMAGE_FALLBACK = assetFromPublic('vendors/_fallback/photo-a-confirmer.svg');
+
 export type PublicVendorRow = {
   id: string;
   business_name?: string | null;
@@ -96,8 +103,8 @@ function normalizeVendor(row: PublicVendorRow): PublicCatalogVendor {
     id: row.id,
     business_name: row.business_name ?? row.name ?? 'Partenaire DELIKREOL',
     business_type: row.business_type ?? 'Partenaire local',
-    description: row.description ?? 'Partenaire verifie en Martinique.',
-    logo_url: row.logo_url ?? row.image_url ?? null,
+    description: row.description ?? 'Partenaire vérifié en Martinique.',
+    logo_url: row.logo_url ?? row.image_url ?? PRODUCT_IMAGE_FALLBACK,
     address: row.address ?? row.zone_label ?? row.service_zone ?? 'Martinique',
     phone: row.phone ?? '',
     latitude: row.latitude ?? null,
@@ -117,10 +124,10 @@ function normalizeProduct(row: PublicProductRow, vendor: PublicCatalogVendor): P
     vendor_longitude: vendor.longitude,
     vendor_delivery_radius_km: vendor.delivery_radius_km,
     name: row.name ?? 'Produit local',
-    description: row.description ?? 'Disponibilite confirmee par le partenaire.',
+    description: row.description ?? 'Disponibilité à confirmer par le partenaire.',
     category: row.category ?? 'Cuisine locale',
     price: numberOr(row.price, 0),
-    image_url: row.image_url ?? row.image ?? null,
+    image_url: row.image_url ?? row.image ?? PRODUCT_IMAGE_FALLBACK,
     stock_quantity: row.stock_quantity == null ? null : numberOr(row.stock_quantity, 0),
     zone_label: vendor.zone_label,
     available: true,
