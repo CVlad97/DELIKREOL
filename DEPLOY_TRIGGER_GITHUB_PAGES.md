@@ -1,6 +1,6 @@
 # GitHub Pages rebuild trigger
 
-Dernier declenchement manuel : 2026-06-05.
+Dernier declenchement manuel : 2026-06-05 — push GitHub Pages demandé.
 
 Objectif : forcer une reconstruction GitHub Pages apres les corrections gratuites :
 
@@ -11,4 +11,5 @@ Objectif : forcer une reconstruction GitHub Pages apres les corrections gratuite
 - mode local sans Supabase prepare ;
 - checklist livrable mise a jour ;
 - seuil livraison eloignee corrige a 40 EUR ;
-- structure simple type Hostinger preparee : menu, categories, filtres, ville/commune, espace partenaire.
+- structure simple type Hostinger preparee : menu, categories, filtres, ville/commune, espace partenaire ;
+- workflow de patch checkout 40 EUR pousse pour correction livraison eloignee.
