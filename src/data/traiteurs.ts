@@ -1,6 +1,7 @@
 import { mockProducts } from './mockCatalog';
 import { anTjeCocoAssets, cocoFoodAssets } from './partnerAssets';
 import { partnerProfiles, type PartnerProfile } from './partnerProfiles';
+import { additionalPartnerProfiles } from './additionalPartnerProfiles';
 
 export type TraiteurMenuItem = {
   name: string;
@@ -35,6 +36,8 @@ export type TraiteurSpace = {
   menuItems: TraiteurMenuItem[];
 };
 
+const allPartnerProfiles: PartnerProfile[] = [...partnerProfiles, ...additionalPartnerProfiles];
+
 function resolveHeroImage(name: string) {
   if (name === 'An Tjè Coco') {
     return anTjeCocoAssets.hero;
@@ -44,6 +47,9 @@ function resolveHeroImage(name: string) {
   }
   if (name === "Saveurs d'Afrique") {
     return assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-board.jpg');
+  }
+  if (name === 'Snack Savè Peyi’A') {
+    return null;
   }
   return mockProducts.find((product) => product.vendor === name && product.image)?.image ?? null;
 }
@@ -57,6 +63,9 @@ function resolveGalleryImages(name: string) {
   }
   if (name === "Saveurs d'Afrique") {
     return [assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-pate.jpg')];
+  }
+  if (name === 'Snack Savè Peyi’A') {
+    return [];
   }
   return [];
 }
@@ -129,7 +138,7 @@ function buildSpace(profile: PartnerProfile, gradient: string, accent: string): 
   };
 }
 
-export function buildTraiteurSpaces(profiles: PartnerProfile[] = partnerProfiles) {
+export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfiles) {
   return profiles
     .filter((profile) => profile.type.toLowerCase() === 'traiteur')
     .map((profile) => {
@@ -143,6 +152,10 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = partnerProfiles
 
       if (profile.name === "Coco's Food") {
         return buildSpace(profile, 'from-[#2b1b10] via-[#8b5e34] to-[#d97706]', '#fff7ed');
+      }
+
+      if (profile.name === 'Snack Savè Peyi’A') {
+        return buildSpace(profile, 'from-[#f59e0b] via-[#dc2626] to-[#15803d]', '#fff7ed');
       }
 
       return buildSpace(profile, 'from-[#0f766e] via-[#14b8a6] to-[#14532d]', '#ecfeff');
