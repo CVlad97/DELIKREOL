@@ -9,4 +9,6 @@ Objectif : forcer une reconstruction GitHub Pages apres les corrections gratuite
 - faux points relais retires ;
 - faux livreurs pilotes retires ;
 - mode local sans Supabase prepare ;
-- checklist livrable mise a jour.
+- checklist livrable mise a jour ;
+- seuil livraison eloignee corrige a 40 EUR ;
+- structure simple type Hostinger preparee : menu, categories, filtres, ville/commune, espace partenaire.
