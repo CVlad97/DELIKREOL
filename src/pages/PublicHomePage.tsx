@@ -190,10 +190,7 @@ const zoneCenterByLabel: Record<string, [number, number]> = {
   'trois-îlets': [14.5419, -61.0362],
 };
 
-const pilotDrivers = [
-  { id: 'driver-1', name: 'Livreur pilote FDF', latitude: 14.612, longitude: -61.0708 },
-  { id: 'driver-2', name: 'Livreur pilote Lamentin', latitude: 14.6074, longitude: -61.0054 },
-];
+const pilotDrivers: Array<{ id: string; name: string; latitude: number; longitude: number }> = [];
 
 function formatWhatsAppLabel(value: string) {
   const digits = value.replace(/\D/g, '');
