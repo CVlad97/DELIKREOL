@@ -6,6 +6,8 @@
 - Hostinger/Hermes n'est pas prioritaire tant que les credits IA sont bloques.
 - Supabase Delikreol est repere mais inactif : le site doit rester utilisable en mode statique / WhatsApp-first.
 - Snack Save Peyia est ajoute au catalogue statique GitHub Pages avec les trois produits visibles du menu transmis.
+- Les faux points relais ont ete remplaces par un reseau en constitution dans `src/pointsRelais.ts`.
+- Deux livreurs pilotes restent a retirer de `src/pages/PublicHomePage.tsx` des que la modification du fichier long est possible.
 
 ## Priorite 1 — Contacts et securite
 
@@ -27,7 +29,7 @@ Partenaires a conserver :
 
 A retirer ou masquer :
 - faux avis ;
-- faux livreurs ;
+- faux livreurs pilotes dans `PublicHomePage.tsx` ;
 - faux points relais ;
 - faux chiffres de traction ;
 - faux produits non rattaches.
