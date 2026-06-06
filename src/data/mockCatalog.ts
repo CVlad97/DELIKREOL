@@ -1,7 +1,4 @@
-const assetFromPublic = (relativePath: string): string => {
-  const clean = relativePath.replace(/^\/+/, '');
-  return `${import.meta.env.BASE_URL}${clean}`;
-};
+const assetFromPublic = (relativePath: string): string => `${import.meta.env.BASE_URL}${relativePath.replace(/^\/+/, '')}`;
 
 export const photoAConfirmer = assetFromPublic('vendors/_fallback/photo-a-confirmer.svg');
 
@@ -14,4 +11,7 @@ export interface LocalProduct {
   category: string;
   description?: string;
   zone?: string;
-  available?: boolean
+  available?: boolean;
+  featured?: boolean;
+  allergens?: string;
+  ingredients?: string
