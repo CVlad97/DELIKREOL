@@ -70,9 +70,14 @@ function resolveGalleryImages(name: string) {
   return [];
 }
 
+function normalizeVendorName(v: string) {
+  return v.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/['']/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
 function resolveMenuItems(name: string): TraiteurMenuItem[] {
+  const normalized = normalizeVendorName(name);
   return mockProducts
-    .filter((product) => product.vendor === name)
+    .filter((product) => normalizeVendorName(product.vendor) === normalized)
     .map((product) => ({
       name: product.name,
       description: product.description ?? 'Menu local disponible sur demande.',
