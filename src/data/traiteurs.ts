@@ -48,7 +48,10 @@ function resolveHeroImage(name: string) {
   if (name === "Saveurs d'Afrique") {
     return assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-board.jpg');
   }
-  if (name === 'Snack Savè Peyi’A') {
+  if (name === 'Les Delices de Ninice') {
+    return assetFromPublic('vendors/ninice/ninice-01-showcase.jpg');
+  }
+  if (name === 'Snack Savè Peyi\u2019A') {
     return null;
   }
   return mockProducts.find((product) => product.vendor === name && product.image)?.image ?? null;
@@ -62,9 +65,30 @@ function resolveGalleryImages(name: string) {
     return cocoFoodAssets.gallery;
   }
   if (name === "Saveurs d'Afrique") {
-    return [assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-pate.jpg')];
+    return [
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-pate.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-ablo.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-bissap.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-doko.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-foutou-banane.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-monyo.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-pate-legume.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-petits-cailloux.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-salade-beninoise.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-yaourt.jpg'),
+    ];
   }
-  if (name === 'Snack Savè Peyi’A') {
+  if (name === 'Les Delices de Ninice') {
+    return [
+      assetFromPublic('vendors/ninice/ninice-01-showcase.jpg'),
+      assetFromPublic('vendors/ninice/ninice-02-showcase.jpg'),
+      assetFromPublic('vendors/ninice/ninice-05-showcase.jpg'),
+      assetFromPublic('vendors/ninice/ninice-06-showcase.jpg'),
+      assetFromPublic('vendors/ninice/ninice-07-showcase.jpg'),
+      assetFromPublic('vendors/ninice/ninice-09-showcase.jpg'),
+    ];
+  }
+  if (name === 'Snack Savè Peyi\u2019A') {
     return [];
   }
   return [];

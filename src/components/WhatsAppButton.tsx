@@ -9,7 +9,7 @@ interface WhatsAppButtonProps {
 }
 
 export function WhatsAppButton({
-  phoneNumber = '+596696000000',
+  phoneNumber = '+596696653589',
   message = 'Bonjour, je souhaite passer une commande sur Delikreol !',
   className = '',
   variant = 'fixed',
