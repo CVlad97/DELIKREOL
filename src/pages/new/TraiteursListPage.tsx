@@ -21,7 +21,7 @@ export function TraiteursListPage() {
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {traiteurSpaces.map((traiteur) => {
-          const isVerified = traiteur.status !== 'à vérifier' && traiteur.status !== 'nouveau';
+          const isVerified = traiteur.status === 'public confirmé';
           const menuCount = traiteur.menuItems?.length || 0;
 
           return (

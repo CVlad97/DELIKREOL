@@ -416,10 +416,10 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { icon: ChefHat, label: 'Traiteurs partenaires', value: `${traiteurSpaces.length}+` },
-              { icon: MapPin, label: 'Communes couvertes', value: '34' },
+              { icon: ChefHat, label: 'Traiteurs partenaires', value: `${traiteurSpaces.length}` },
+              { icon: MapPin, label: 'Communes Martinique', value: '34' },
               { icon: Users, label: 'Commandes traitées', value: 'Bientôt' },
-              { icon: Heart, label: 'Satisfaction', value: '100%' },
+              { icon: Heart, label: 'Produits au catalogue', value: '14+' },
             ].map((stat, index) => {
               const Icon = stat.icon;
               return (

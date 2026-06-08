@@ -51,7 +51,7 @@ export function TraiteurDetailPage() {
     );
   }
 
-  const isVerified = traiteur.status !== 'à vérifier' && traiteur.status !== 'nouveau';
+  const isVerified = traiteur.status === 'public confirmé';
   const menuItems = traiteur.menuItems || [];
 
   const handleAddToCart = (item: any) => {

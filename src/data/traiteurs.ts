@@ -17,6 +17,7 @@ export type TraiteurSpace = {
   name: string;
   legalName?: string;
   zone: string;
+  commune?: string;
   address?: string;
   offer: string;
   description: string;
@@ -34,6 +35,8 @@ export type TraiteurSpace = {
   galleryImages: string[];
   profile: PartnerProfile;
   menuItems: TraiteurMenuItem[];
+  status: 'public confirmé' | 'public à vérifier' | 'brouillon';
+  photoStatus: 'confirmée' | 'à confirmer' | 'externe à vérifier';
 };
 
 const allPartnerProfiles: PartnerProfile[] = [...partnerProfiles, ...additionalPartnerProfiles];
@@ -137,16 +140,18 @@ function formatAverageTicket(menuItems: TraiteurMenuItem[]) {
   return menuItems.length ? total / menuItems.length : 0;
 }
 
-function buildSpace(profile: PartnerProfile, gradient: string, accent: string): TraiteurSpace {
+function buildSpace(profile: PartnerProfile, gradient: string, accent: string, status: TraiteurSpace['status'], photoStatus: TraiteurSpace['photoStatus']): TraiteurSpace {
   const menuItems = resolveMenuItems(profile.name);
   const startingAt = formatStartPrice(menuItems);
   const averageTicket = formatAverageTicket(menuItems);
+  const commune = profile.zone.split('—')[0].split('–')[0].trim();
 
   return {
     slug: normalizeSpaceSlug(profile.name),
     name: profile.name,
     legalName: profile.legalName,
     zone: profile.zone,
+    commune,
     address: profile.address,
     offer: profile.offer,
     description: profile.story,
@@ -164,6 +169,8 @@ function buildSpace(profile: PartnerProfile, gradient: string, accent: string): 
     galleryImages: resolveGalleryImages(profile.name),
     profile,
     menuItems,
+    status,
+    photoStatus,
   };
 }
 
@@ -172,22 +179,23 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
     .filter((profile) => profile.type.toLowerCase() === 'traiteur')
     .map((profile) => {
       if (profile.name === 'Les Delices de Ninice') {
-        return buildSpace(profile, 'from-[#d95f2d] via-[#f49d4b] to-[#7c2d12]', '#fff7ed');
+        return buildSpace(profile, 'from-[#d95f2d] via-[#f49d4b] to-[#7c2d12]', '#fff7ed', 'public à vérifier', 'confirmée');
       }
 
       if (profile.name === 'An Tjè Coco') {
-        return buildSpace(profile, 'from-[#7c3aed] via-[#ec4899] to-[#c2410c]', '#fff1f2');
+        return buildSpace(profile, 'from-[#7c3aed] via-[#ec4899] to-[#c2410c]', '#fff1f2', 'public à vérifier', 'externe à vérifier');
       }
 
       if (profile.name === "Coco's Food") {
-        return buildSpace(profile, 'from-[#2b1b10] via-[#8b5e34] to-[#d97706]', '#fff7ed');
+        return buildSpace(profile, 'from-[#2b1b10] via-[#8b5e34] to-[#d97706]', '#fff7ed', 'public à vérifier', 'confirmée');
       }
 
-      if (profile.name === 'Snack Savè Peyi’A') {
-        return buildSpace(profile, 'from-[#f59e0b] via-[#dc2626] to-[#15803d]', '#fff7ed');
+      if (profile.name === 'Snack Savè Peyi\u2019A') {
+        return buildSpace(profile, 'from-[#f59e0b] via-[#dc2626] to-[#15803d]', '#fff7ed', 'public à vérifier', 'à confirmer');
       }
 
-      return buildSpace(profile, 'from-[#0f766e] via-[#14b8a6] to-[#14532d]', '#ecfeff');
+      // Saveurs d'Afrique et autres
+      return buildSpace(profile, 'from-[#0f766e] via-[#14b8a6] to-[#14532d]', '#ecfeff', 'public à vérifier', 'confirmée');
     });
 }
 
