@@ -1,28 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
-  <title id="title">Photo à confirmer</title>
-  <desc id="desc">Visuel provisoire DeliKreol pour partenaire dont la photo officielle reste à valider.</desc>
+  <title id="title">Photo produit à confirmer</title>
+  <desc id="desc">Fond provisoire neutre pour produit en attente de photo officielle.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#15803d"/>
-      <stop offset="38%" stop-color="#f59e0b"/>
-      <stop offset="72%" stop-color="#dc2626"/>
-      <stop offset="100%" stop-color="#0f766e"/>
+      <stop offset="0%" stop-color="#fff7ed"/>
+      <stop offset="45%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#fed7aa"/>
     </linearGradient>
-    <pattern id="madras" width="90" height="90" patternUnits="userSpaceOnUse">
-      <rect width="90" height="90" fill="none"/>
-      <rect x="0" y="0" width="90" height="12" fill="#fde68a" opacity="0.45"/>
-      <rect x="0" y="42" width="90" height="10" fill="#ffffff" opacity="0.24"/>
-      <rect x="12" y="0" width="12" height="90" fill="#dc2626" opacity="0.35"/>
-      <rect x="52" y="0" width="10" height="90" fill="#22c55e" opacity="0.35"/>
+    <pattern id="madras" width="96" height="96" patternUnits="userSpaceOnUse">
+      <rect width="96" height="96" fill="none"/>
+      <rect x="0" y="0" width="96" height="9" fill="#15803d" opacity="0.22"/>
+      <rect x="0" y="34" width="96" height="9" fill="#f97316" opacity="0.24"/>
+      <rect x="0" y="70" width="96" height="8" fill="#dc2626" opacity="0.18"/>
+      <rect x="18" y="0" width="8" height="96" fill="#15803d" opacity="0.18"/>
+      <rect x="56" y="0" width="8" height="96" fill="#f97316" opacity="0.20"/>
     </pattern>
+    <radialGradient id="light" cx="50%" cy="38%" r="65%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.84"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
   </defs>
   <rect width="1200" height="800" rx="48" fill="url(#bg)"/>
-  <rect width="1200" height="800" rx="48" fill="url(#madras)" opacity="0.72"/>
-  <circle cx="170" cy="150" r="82" fill="#fff7ed" opacity="0.20"/>
-  <circle cx="1030" cy="640" r="140" fill="#fff7ed" opacity="0.16"/>
-  <rect x="110" y="120" width="980" height="560" rx="42" fill="#fff7ed" opacity="0.92"/>
-  <text x="600" y="310" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="70" font-weight="800" fill="#14532d">DeliKreol</text>
-  <text x="600" y="390" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="700" fill="#7c2d12">Photo à confirmer</text>
-  <text x="600" y="465" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="30" fill="#374151">Visuel provisoire — partenaire en cours de validation</text>
-  <text x="600" y="535" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#ea580c">Le meilleur est à venir</text>
+  <rect width="1200" height="800" rx="48" fill="url(#madras)" opacity="0.55"/>
+  <rect width="1200" height="800" rx="48" fill="url(#light)"/>
+  <circle cx="210" cy="170" r="96" fill="#ffffff" opacity="0.28"/>
+  <circle cx="1040" cy="645" r="150" fill="#ffffff" opacity="0.20"/>
 </svg>
