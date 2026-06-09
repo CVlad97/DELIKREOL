@@ -90,6 +90,178 @@ export const mockProducts: LocalProduct[] = [
   },
 
   // ═══════════════════════════════════════════════════════
+  // AN TJÈ COCO — Fort-de-France
+  // Pépites artisanales sucrées et salées — sur précommande
+  // Source : profil partenaire vérifié
+  // ═══════════════════════════════════════════════════════
+  {
+    id: 'antjecoco-pepite-gratin-banane',
+    name: 'Pépite façon gratin de banane jaune',
+    vendor: 'An Tjè Coco',
+    price: 0,
+    category: 'Plats',
+    image: vendorImage('vendors/an-tje-coco/hero.jpg'),
+    description: 'Pépite artisanale salée façon gratin de banane jaune. Sur précommande du dimanche au mardi 12h, retrait mercredi ou jeudi/vendredi.',
+    zone: 'Fort-de-France',
+    available: true,
+    featured: true,
+    ingredients: 'Banane jaune, fromage, épices antillaises. Composition à confirmer avec la prestataire.',
+    allergens: 'À confirmer.',
+  },
+  {
+    id: 'antjecoco-pepite-coco-passion',
+    name: 'Pépite coco-passion',
+    vendor: 'An Tjè Coco',
+    price: 0,
+    category: 'Desserts',
+    image: vendorImage('vendors/an-tje-coco/gallery-02.jpg'),
+    description: 'Pépite artisanale sucrée à la noix de coco et au fruit de la passion. Une douceur antillaise raffinée.',
+    zone: 'Fort-de-France',
+    available: true,
+    featured: true,
+    ingredients: 'Noix de coco, fruit de la passion, farine, œufs. Composition à confirmer.',
+    allergens: 'Gluten, œufs. Autres allergènes à confirmer.',
+  },
+  {
+    id: 'antjecoco-rougail-saucisses',
+    name: 'Pépite rougail saucisses',
+    vendor: 'An Tjè Coco',
+    price: 0,
+    category: 'Plats',
+    image: vendorImage('vendors/an-tje-coco/gallery-01.jpg'),
+    description: 'Pépite salée au rougail saucisses, une revisite créole de la crêpe gastronomique.',
+    zone: 'Fort-de-France',
+    available: true,
+    featured: false,
+    ingredients: 'Saucisses, tomate, oignons, épices. Composition à confirmer.',
+    allergens: 'Gluten. Autres allergènes à confirmer.',
+  },
+  {
+    id: 'antjecoco-tiramisu-cafe',
+    name: 'Pépite tiramisu café',
+    vendor: 'An Tjè Coco',
+    price: 0,
+    category: 'Desserts',
+    image: vendorImage('vendors/an-tje-coco/gallery-03.jpg'),
+    description: 'Pépite sucrée façon tiramisu au café. Une fusion italo-créole en format bouchée.',
+    zone: 'Fort-de-France',
+    available: true,
+    featured: false,
+    ingredients: 'Café, mascarpone, cacao. Composition à confirmer.',
+    allergens: 'Gluten, produits laitiers. Autres allergènes à confirmer.',
+  },
+
+  // ═══════════════════════════════════════════════════════
+  // COCO'S FOOD — Rivière-Pilote (Marché)
+  // Cuisine de marché — photos WhatsApp 2026
+  // Source : conversation WhatsApp mai 2026 — prix à confirmer
+  // ═══════════════════════════════════════════════════════
+  {
+    id: 'cocos-food-plat-jour-1',
+    name: 'Plat du jour',
+    vendor: "Coco's Food",
+    price: 0,
+    category: 'Plats',
+    image: vendorImage('vendors/coco/gallery-01.jpg'),
+    description: 'Plat du jour cuisine de marché, servi au Marché de Rivière-Pilote. Prix et composition à confirmer avec le traiteur.',
+    zone: 'Rivière-Pilote',
+    available: true,
+    featured: true,
+    ingredients: 'Composition à confirmer avec le prestataire.',
+    allergens: 'À confirmer.',
+  },
+  {
+    id: 'cocos-food-bowl',
+    name: 'Bowl frais du marché',
+    vendor: "Coco's Food",
+    price: 0,
+    category: 'Bowl',
+    image: vendorImage('vendors/coco/gallery-03.jpg'),
+    description: 'Bowl frais et complet. Prix et composition à confirmer avec le traiteur.',
+    zone: 'Rivière-Pilote',
+    available: true,
+    featured: true,
+    ingredients: 'Composition à confirmer.',
+    allergens: 'À confirmer.',
+  },
+  {
+    id: 'cocos-food-pates',
+    name: 'Assiette de pâtes',
+    vendor: "Coco's Food",
+    price: 0,
+    category: 'Pâtes',
+    image: vendorImage('vendors/coco/gallery-04.jpg'),
+    description: 'Assiette de pâtes généreuse, spécialité du marché. Prix à confirmer.',
+    zone: 'Rivière-Pilote',
+    available: true,
+    featured: false,
+    ingredients: 'Pâtes, sauce, accompagnements. Composition à confirmer.',
+    allergens: 'Gluten. Autres allergènes à confirmer.',
+  },
+
+  // ═══════════════════════════════════════════════════════
+  // SAVEURS D'AFRIQUE / LODIKA — Rivière-Salée
+  // Cuisine africaine maison — photos WhatsApp 2026
+  // Source : conversation WhatsApp — prix à confirmer
+  // ═══════════════════════════════════════════════════════
+  {
+    id: 'saveurs-afrique-matoutou',
+    name: 'Matoutou de crabe',
+    vendor: "Saveurs d'Afrique",
+    price: 0,
+    category: 'Plats',
+    image: vendorImage('vendors/saveurs-afrique/gallery-01.jpg'),
+    description: 'Matoutou de crabe, spécialité de Lodika Saveurs d\'Afrique. Cuisine africaine maison. Prix à confirmer.',
+    zone: 'Rivière-Salée',
+    available: true,
+    featured: true,
+    ingredients: 'Crabe, riz, légumes, épices africaines. Composition à confirmer.',
+    allergens: 'Crustacés. Autres allergènes à confirmer.',
+  },
+  {
+    id: 'saveurs-afrique-ablo',
+    name: 'Ablo',
+    vendor: "Saveurs d'Afrique",
+    price: 0,
+    category: 'Snacking',
+    image: vendorImage('vendors/saveurs-afrique/gallery-02.jpg'),
+    description: 'Ablo — pain vapeur ivoirien, servi avec sauce. Prix à confirmer.',
+    zone: 'Rivière-Salée',
+    available: true,
+    featured: true,
+    ingredients: 'Farine de maïs, semoule, levure. Composition à confirmer.',
+    allergens: 'Gluten. Autres allergènes à confirmer.',
+  },
+  {
+    id: 'saveurs-afrique-doko',
+    name: 'Doko',
+    vendor: "Saveurs d'Afrique",
+    price: 0,
+    category: 'Snacking',
+    image: vendorImage('vendors/saveurs-afrique/gallery-04.jpg'),
+    description: 'Doko — beignet africain moelleux. Prix à confirmer.',
+    zone: 'Rivière-Salée',
+    available: true,
+    featured: false,
+    ingredients: 'Farine, levure, sucre. Composition à confirmer.',
+    allergens: 'Gluten. Autres allergènes à confirmer.',
+  },
+  {
+    id: 'saveurs-afrique-bissap',
+    name: 'Bissap',
+    vendor: "Saveurs d'Afrique",
+    price: 0,
+    category: 'Boissons',
+    image: vendorImage('vendors/saveurs-afrique/gallery-03.jpg'),
+    description: 'Bissap — boisson rafraîchissante à l\'hibiscus, faite maison. Prix à confirmer.',
+    zone: 'Rivière-Salée',
+    available: true,
+    featured: false,
+    ingredients: 'Fleurs d\'hibiscus, sucre, eau, menthe.',
+    allergens: 'Aucun.',
+  },
+
+  // ═══════════════════════════════════════════════════════
   // LES DELICES DE NINICE — Fort-de-France (Dillon)
   // 11 produits avec photos professionnelles retouchées
   // Source : WhatsApp import mai 2026

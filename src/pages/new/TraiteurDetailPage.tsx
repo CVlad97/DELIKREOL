@@ -205,7 +205,7 @@ export function TraiteurDetailPage() {
                       {item.description || 'Description à compléter avec le prestataire.'}
                     </p>
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-primary">{item.price} €</span>
+                      <span className="font-bold text-primary">{item.price > 0 ? `${item.price} €` : 'Prix à confirmer'}</span>
                       <button
                         onClick={() => handleAddToCart(item)}
                         className="text-xs px-3 py-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors font-medium"
