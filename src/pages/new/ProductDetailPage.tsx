@@ -95,7 +95,7 @@ export function ProductDetailPage() {
       <div className="grid md:grid-cols-2 gap-8">
         {/* Image */}
         <div className="aspect-square rounded-2xl overflow-hidden bg-muted">
-          {hasRealImage ? (
+          {hasRealImage && product.image ? (
             <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50 text-amber-600">

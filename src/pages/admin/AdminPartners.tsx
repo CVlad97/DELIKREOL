@@ -503,3 +503,5 @@ export function AdminPartners() {
     </div>
   );
 }
+
+export default AdminPartners;

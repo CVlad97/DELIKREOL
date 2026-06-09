@@ -11,34 +11,34 @@ import { ProSpacePage } from './pages/ProSpacePage';
 import { OrderStatusPage } from './pages/OrderStatusPage';
 
 // New public pages — lazy loaded
-const HomePage = lazy(() => import('./pages/new/HomePage').then(m => ({ default: m.default ?? m.HomePage })));
-const CataloguePage = lazy(() => import('./pages/new/CataloguePage').then(m => ({ default: m.default ?? m.CataloguePage })));
-const ProductDetailPage = lazy(() => import('./pages/new/ProductDetailPage').then(m => ({ default: m.default ?? m.ProductDetailPage })));
-const TraiteursListPage = lazy(() => import('./pages/new/TraiteursListPage').then(m => ({ default: m.default ?? m.TraiteursListPage })));
-const TraiteurDetailPage = lazy(() => import('./pages/new/TraiteurDetailPage').then(m => ({ default: m.default ?? m.TraiteurDetailPage })));
-const CartPage = lazy(() => import('./pages/new/CartPage').then(m => ({ default: m.default ?? m.CartPage })));
-const DevisPage = lazy(() => import('./pages/new/DevisPage').then(m => ({ default: m.default ?? m.DevisPage })));
-const DevenirPartenairePage = lazy(() => import('./pages/new/DevenirPartenairePage').then(m => ({ default: m.default ?? m.DevenirPartenairePage })));
-const DevenirLivreurPage = lazy(() => import('./pages/new/DevenirLivreurPage').then(m => ({ default: m.default ?? m.DevenirLivreurPage })));
-const PointsRelaisPage = lazy(() => import('./pages/new/PointsRelaisPage').then(m => ({ default: m.default ?? m.PointsRelaisPage })));
-const AidePage = lazy(() => import('./pages/new/AidePage').then(m => ({ default: m.default ?? m.AidePage })));
-const LivraisonPage = lazy(() => import('./pages/new/LivraisonPage').then(m => ({ default: m.default ?? m.LivraisonPage })));
-const NotFoundPage = lazy(() => import('./pages/new/NotFoundPage').then(m => ({ default: m.default ?? m.NotFoundPage })));
+const HomePage = lazy(() => import('./pages/new/HomePage'));
+const CataloguePage = lazy(() => import('./pages/new/CataloguePage'));
+const ProductDetailPage = lazy(() => import('./pages/new/ProductDetailPage'));
+const TraiteursListPage = lazy(() => import('./pages/new/TraiteursListPage'));
+const TraiteurDetailPage = lazy(() => import('./pages/new/TraiteurDetailPage'));
+const CartPage = lazy(() => import('./pages/new/CartPage'));
+const DevisPage = lazy(() => import('./pages/new/DevisPage'));
+const DevenirPartenairePage = lazy(() => import('./pages/new/DevenirPartenairePage'));
+const DevenirLivreurPage = lazy(() => import('./pages/new/DevenirLivreurPage'));
+const PointsRelaisPage = lazy(() => import('./pages/new/PointsRelaisPage'));
+const AidePage = lazy(() => import('./pages/new/AidePage'));
+const LivraisonPage = lazy(() => import('./pages/new/LivraisonPage'));
+const NotFoundPage = lazy(() => import('./pages/new/NotFoundPage'));
 
 // Admin pages — fully lazy loaded
-const AdminLayout = lazy(() => import('./pages/admin/AdminLayout').then(m => ({ default: m.default ?? m.AdminLayout })));
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(m => ({ default: m.default ?? m.AdminDashboard })));
-const AdminCommandes = lazy(() => import('./pages/admin/AdminCommandes').then(m => ({ default: m.default ?? m.AdminCommandes })));
-const AdminCatalog = lazy(() => import('./pages/admin/AdminCatalog').then(m => ({ default: m.default ?? m.AdminCatalog })));
-const AdminPartners = lazy(() => import('./pages/admin/AdminPartners').then(m => ({ default: m.default ?? m.AdminPartners })));
-const AdminLivreurs = lazy(() => import('./pages/admin/AdminLivreurs').then(m => ({ default: m.default ?? m.AdminLivreurs })));
-const AdminRelais = lazy(() => import('./pages/admin/AdminRelais').then(m => ({ default: m.default ?? m.AdminRelais })));
-const AdminDevis = lazy(() => import('./pages/admin/AdminDevis').then(m => ({ default: m.default ?? m.AdminDevis })));
-const AdminLeads = lazy(() => import('./pages/admin/AdminLeads').then(m => ({ default: m.default ?? m.AdminLeads })));
-const AdminMemoire = lazy(() => import('./pages/admin/AdminMemoire').then(m => ({ default: m.default ?? m.AdminMemoire })));
-const AdminParametres = lazy(() => import('./pages/admin/AdminParametres').then(m => ({ default: m.default ?? m.AdminParametres })));
-const AdminOrchestrateur = lazy(() => import('./pages/admin/AdminOrchestrateur').then(m => ({ default: m.default ?? m.AdminOrchestrateur })));
-const AdminOffres = lazy(() => import('./pages/admin/AdminOffres').then(m => ({ default: m.default ?? m.AdminOffres })));
+const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminCommandes = lazy(() => import('./pages/admin/AdminCommandes'));
+const AdminCatalog = lazy(() => import('./pages/admin/AdminCatalog'));
+const AdminPartners = lazy(() => import('./pages/admin/AdminPartners'));
+const AdminLivreurs = lazy(() => import('./pages/admin/AdminLivreurs'));
+const AdminRelais = lazy(() => import('./pages/admin/AdminRelais'));
+const AdminDevis = lazy(() => import('./pages/admin/AdminDevis'));
+const AdminLeads = lazy(() => import('./pages/admin/AdminLeads'));
+const AdminMemoire = lazy(() => import('./pages/admin/AdminMemoire'));
+const AdminParametres = lazy(() => import('./pages/admin/AdminParametres'));
+const AdminOrchestrateur = lazy(() => import('./pages/admin/AdminOrchestrateur'));
+const AdminOffres = lazy(() => import('./pages/admin/AdminOffres'));
 
 const basePath = import.meta.env.VITE_BASE_PATH || import.meta.env.BASE_URL || '/';
 

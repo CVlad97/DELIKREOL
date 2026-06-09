@@ -11,7 +11,7 @@ export interface LocalProduct {
   vendor: string;
   price: number;
   category: string;
-  image?: string | null;
+  image?: string;
   description?: string;
   zone?: string;
   available?: boolean;
@@ -249,3 +249,7 @@ export const mockProducts: LocalProduct[] = [
     allergens: 'À confirmer.',
   },
 ];
+
+export function getFeaturedProducts(): LocalProduct[] {
+  return mockProducts.filter(p => p.featured);
+}
