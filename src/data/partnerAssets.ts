@@ -16,12 +16,12 @@ const assetFromPublic = (relativePath: string): string => {
 };
 
 export const cocoFoodAssets = {
-  hero: assetFromPublic('vendors/coco/coco-01-board.jpg'),
+  hero: assetFromPublic('vendors/coco/hero.jpg'),
   gallery: [
-    assetFromPublic('vendors/coco/coco-02-meat-rice.jpg'),
-    assetFromPublic('vendors/coco/coco-03-bowl.jpg'),
-    assetFromPublic('vendors/coco/coco-04-spaghetti.jpg'),
-    assetFromPublic('vendors/coco/coco-05-platter.jpg'),
-    assetFromPublic('vendors/coco/coco-06-platter.jpg'),
+    assetFromPublic('vendors/coco/gallery-01.jpg'),
+    assetFromPublic('vendors/coco/gallery-02.jpg'),
+    assetFromPublic('vendors/coco/gallery-03.jpg'),
+    assetFromPublic('vendors/coco/gallery-04.jpg'),
+    assetFromPublic('vendors/coco/gallery-05.jpg'),
   ],
 };
