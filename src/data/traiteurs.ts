@@ -201,7 +201,7 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
         return buildSpace(profile, 'from-[#2b1b10] via-[#8b5e34] to-[#d97706]', '#fff7ed', 'public confirmé', 'confirmée');
       }
 
-      if (profile.name === 'Snack Savè Peyi') {
+      if (profile.name.startsWith('Snack Savè Peyi')) {
         return buildSpace(profile, 'from-[#f59e0b] via-[#dc2626] to-[#15803d]', '#fff7ed', 'public confirmé', 'confirmée');
       }
 
