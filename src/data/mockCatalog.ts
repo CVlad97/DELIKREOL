@@ -41,7 +41,7 @@ export const mockCategories: Category[] = [
 export const mockProducts: LocalProduct[] = [
   // ═══════════════════════════════════════════════════════
   // SNACK SAVÈ PEYI'A — Rivière-Pilote (Pont de Fer)
-  // 3 produits confirmés — photos à confirmer
+  // 3 produits confirmés — photo flyer disponible
   // ═══════════════════════════════════════════════════════
   {
     id: 'save-peyia-cote-porc',
@@ -49,13 +49,13 @@ export const mockProducts: LocalProduct[] = [
     vendor: 'Snack Save Peyia',
     price: 12,
     category: 'Plats',
-    image: photoAConfirmer,
-    description: 'Côte de porc grillée avec accompagnements du jour. Horaires et livraison à confirmer.',
+    image: vendorImage('vendors/save-peyia/hero.jpg'),
+    description: 'Côte de porc grillée, servie avec riz, lentilles, légumes pays et crudités. Fait maison avec amour !',
     zone: 'Rivière-Pilote',
     available: true,
     featured: true,
     sides: ['riz', 'lentilles', 'légumes pays', 'crudités'],
-    ingredients: 'Côte de porc et accompagnements à confirmer.',
+    ingredients: 'Côte de porc grillée, accompagnée de riz, lentilles, légumes pays et crudités.',
     allergens: 'À confirmer.',
   },
   {
@@ -64,13 +64,13 @@ export const mockProducts: LocalProduct[] = [
     vendor: 'Snack Save Peyia',
     price: 10,
     category: 'Plats',
-    image: photoAConfirmer,
-    description: 'Filet de poulet avec accompagnements du jour. Horaires et livraison à confirmer.',
+    image: vendorImage('vendors/save-peyia/hero.jpg'),
+    description: 'Filet de poulet grillé aux herbes, servi avec riz, lentilles, légumes pays et crudités.',
     zone: 'Rivière-Pilote',
     available: true,
     featured: true,
     sides: ['riz', 'lentilles', 'légumes pays', 'crudités'],
-    ingredients: 'Poulet et accompagnements à confirmer.',
+    ingredients: 'Filet de poulet grillé, accompagné de riz, lentilles, légumes pays et crudités.',
     allergens: 'À confirmer.',
   },
   {
@@ -79,13 +79,13 @@ export const mockProducts: LocalProduct[] = [
     vendor: 'Snack Save Peyia',
     price: 14,
     category: 'Plats',
-    image: photoAConfirmer,
-    description: 'Crevettes grillées avec accompagnements du jour. Horaires et livraison à confirmer.',
+    image: vendorImage('vendors/save-peyia/hero.jpg'),
+    description: 'Crevettes grillées assaisonnées, servies avec riz, lentilles, légumes pays et crudités. La spécialité du Pont de Fer !',
     zone: 'Rivière-Pilote',
     available: true,
     featured: true,
     sides: ['riz', 'lentilles', 'légumes pays', 'crudités'],
-    ingredients: 'Crevettes et accompagnements à confirmer.',
+    ingredients: 'Crevettes grillées, accompagnées de riz, lentilles, légumes pays et crudités.',
     allergens: 'Crustacés. Autres allergènes à confirmer.',
   },
 

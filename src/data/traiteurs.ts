@@ -54,11 +54,11 @@ function resolveHeroImage(name: string) {
   if (name === "Saveurs d'Afrique") {
     return assetFromPublic('vendors/saveurs-afrique/hero.jpg');
   }
+  if (name === 'Snack Savè Peyi\\u2019A') {
+    return assetFromPublic('vendors/save-peyia/hero.jpg');
+  }
   if (name === 'Les Delices de Ninice') {
     return assetFromPublic('vendors/ninice/hero.jpg');
-  }
-  if (name === 'Snack Savè Peyi\u2019A') {
-    return null;
   }
   return mockProducts.find((product) => product.vendor === name && product.image)?.image ?? null;
 }
@@ -202,7 +202,7 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
       }
 
       if (profile.name === 'Snack Savè Peyi') {
-        return buildSpace(profile, 'from-[#f59e0b] via-[#dc2626] to-[#15803d]', '#fff7ed', 'public à vérifier', 'à confirmer');
+        return buildSpace(profile, 'from-[#f59e0b] via-[#dc2626] to-[#15803d]', '#fff7ed', 'public confirmé', 'confirmée');
       }
 
       // Saveurs d'Afrique — public confirmé
