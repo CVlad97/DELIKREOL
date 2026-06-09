@@ -27,5 +27,11 @@ playwright-report
 .bash_logout
 .profile
 
+# Build output
+dist/
+
+# Audit reports (generated)
+reports/
+
 # WhatsApp exported media (originals kept locally)
 public/vendors/**/IMG-*
