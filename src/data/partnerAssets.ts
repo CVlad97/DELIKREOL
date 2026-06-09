@@ -38,5 +38,10 @@ export const cocoFoodAssets = {
     assetFromPublic('vendors/coco/gallery-18.jpg'),
     assetFromPublic('vendors/coco/gallery-19.jpg'),
     assetFromPublic('vendors/coco/gallery-20.jpg'),
+    assetFromPublic('vendors/coco/gallery-21.jpg'),
+    assetFromPublic('vendors/coco/gallery-22.jpg'),
+    assetFromPublic('vendors/coco/gallery-23.jpg'),
+    assetFromPublic('vendors/coco/gallery-24.jpg'),
+    assetFromPublic('vendors/coco/gallery-25.jpg'),
   ],
 };
