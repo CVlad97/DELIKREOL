@@ -419,7 +419,7 @@ export default function HomePage() {
               { icon: ChefHat, label: 'Traiteurs partenaires', value: `${traiteurSpaces.length}` },
               { icon: MapPin, label: 'Communes Martinique', value: '34' },
               { icon: Users, label: 'Commandes traitées', value: 'Bientôt' },
-              { icon: Heart, label: 'Produits au catalogue', value: '14+' },
+              { icon: Heart, label: 'Produits au catalogue', value: '25+' },
             ].map((stat, index) => {
               const Icon = stat.icon;
               return (
