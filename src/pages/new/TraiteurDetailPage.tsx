@@ -90,10 +90,20 @@ export function TraiteurDetailPage() {
       <div className="mb-8">
         <div className="flex flex-wrap items-center gap-3 mb-3">
           <h1 className="text-3xl font-display font-bold">{traiteur.name}</h1>
-          {!isVerified && (
+          {isVerified ? (
+            <span className="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full flex items-center gap-1">
+              <Star className="w-3 h-3" />
+              Partenaire vérifié
+            </span>
+          ) : (
             <span className="text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded-full flex items-center gap-1">
               <AlertTriangle className="w-3 h-3" />
               À vérifier
+            </span>
+          )}
+          {traiteur.photoStatus && traiteur.photoStatus !== 'confirmée' && (
+            <span className="text-xs px-2 py-1 bg-orange-100 text-orange-600 rounded-full">
+              📸 {traiteur.photoStatus === 'externe à vérifier' ? 'Photos externes' : 'Photos à confirmer'}
             </span>
           )}
         </div>
@@ -106,6 +116,22 @@ export function TraiteurDetailPage() {
         <p className="text-muted-foreground mb-4">
           {traiteur.description || traiteur.offer || 'Découvrez les spécialités de ce prestataire.'}
         </p>
+
+        {/* Bio complète */}
+        {traiteur.story && traiteur.story !== traiteur.description && (
+          <div className="mb-4 p-4 bg-muted/30 rounded-xl">
+            <p className="text-sm text-muted-foreground leading-relaxed">{traiteur.story}</p>
+          </div>
+        )}
+
+        {/* Highlights */}
+        {traiteur.highlights && traiteur.highlights.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {traiteur.highlights.map((h, i) => (
+              <span key={i} className="text-xs px-2.5 py-1 bg-primary/5 text-primary rounded-full">{h}</span>
+            ))}
+          </div>
+        )}
 
         <p className="text-xs text-amber-600 flex items-center gap-1 mb-6">
           <AlertTriangle className="w-3 h-3" />
@@ -129,6 +155,28 @@ export function TraiteurDetailPage() {
           </a>
         </div>
       </div>
+
+      {/* Galerie photos */}
+      {traiteur.galleryImages && traiteur.galleryImages.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-2xl font-display font-bold mb-4">Galerie</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {traiteur.galleryImages.map((img, i) => (
+              <a key={i} href={img} target="_blank" rel="noopener noreferrer"
+                className="aspect-square rounded-xl overflow-hidden bg-muted group relative">
+                <img src={img} alt={`${traiteur.name} - ${i + 1}`}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+              </a>
+            ))}
+          </div>
+          {traiteur.photoStatus && traiteur.photoStatus !== 'confirmée' && (
+            <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
+              <AlertTriangle className="w-3 h-3" />
+              {traiteur.photoStatus === 'externe à vérifier' ? 'Photos externes — vérification en cours' : 'Photos à confirmer'}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Menu */}
       <div className="border-t pt-8">

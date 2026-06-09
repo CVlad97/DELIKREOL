@@ -45,6 +45,17 @@ export function TraiteursListPage() {
                     À vérifier
                   </div>
                 )}
+                {isVerified && (
+                  <div className="absolute top-3 left-3 bg-emerald-100 text-emerald-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    <Star className="w-3 h-3" />
+                    Partenaire
+                  </div>
+                )}
+                {traiteur.photoStatus && traiteur.photoStatus !== 'confirmée' && (
+                  <div className="absolute bottom-3 left-3 bg-orange-100 text-orange-600 text-xs px-2 py-1 rounded-full">
+                    📸 {traiteur.photoStatus === 'externe à vérifier' ? 'Externe' : 'À confirmer'}
+                  </div>
+                )}
               </div>
 
               {/* Content */}

@@ -212,7 +212,7 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
 
 export const traiteurSpaces: TraiteurSpace[] = buildTraiteurSpaces();
 
-export const featuredTraiteurSpaces = traiteurSpaces.slice(0, 2);
+export const featuredTraiteurSpaces = traiteurSpaces.filter(t => t.status === 'public confirmé');
 
 export function getTraiteurSpaceBySlug(slug: string) {
   const normalizedSlug = normalizeSpaceSlug(slug);
