@@ -26,6 +26,7 @@ export type TraiteurSpace = {
   availability: string;
   specialty: string;
   heroImage?: string | null;
+  portraitImage?: string | null;
   gradient: string;
   accent: string;
   highlights: string[];
@@ -37,6 +38,8 @@ export type TraiteurSpace = {
   menuItems: TraiteurMenuItem[];
   status: 'public confirmé' | 'public à vérifier' | 'brouillon';
   photoStatus: 'confirmée' | 'à confirmer' | 'externe à vérifier';
+  bioStatus?: 'confirmée' | 'à confirmer';
+  photoCredit?: string;
 };
 
 const allPartnerProfiles: PartnerProfile[] = [...partnerProfiles, ...additionalPartnerProfiles];
@@ -160,6 +163,7 @@ function buildSpace(profile: PartnerProfile, gradient: string, accent: string, s
     availability: profile.availability,
     specialty: profile.specialty,
     heroImage: resolveHeroImage(profile.name),
+    portraitImage: null,
     gradient,
     accent,
     highlights: profile.highlights,
@@ -171,6 +175,8 @@ function buildSpace(profile: PartnerProfile, gradient: string, accent: string, s
     menuItems,
     status,
     photoStatus,
+    bioStatus: 'confirmée',
+    photoCredit: undefined,
   };
 }
 
@@ -179,7 +185,7 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
     .filter((profile) => profile.type.toLowerCase() === 'traiteur')
     .map((profile) => {
       if (profile.name === 'Les Delices de Ninice') {
-        return buildSpace(profile, 'from-[#d95f2d] via-[#f49d4b] to-[#7c2d12]', '#fff7ed', 'public à vérifier', 'confirmée');
+        return buildSpace(profile, 'from-[#d95f2d] via-[#f49d4b] to-[#7c2d12]', '#fff7ed', 'public confirmé', 'confirmée');
       }
 
       if (profile.name === 'An Tjè Coco') {
@@ -187,15 +193,15 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
       }
 
       if (profile.name === "Coco's Food") {
-        return buildSpace(profile, 'from-[#2b1b10] via-[#8b5e34] to-[#d97706]', '#fff7ed', 'public à vérifier', 'confirmée');
+        return buildSpace(profile, 'from-[#2b1b10] via-[#8b5e34] to-[#d97706]', '#fff7ed', 'public confirmé', 'confirmée');
       }
 
-      if (profile.name === 'Snack Savè Peyi\u2019A') {
+      if (profile.name === 'Snack Savè Peyi') {
         return buildSpace(profile, 'from-[#f59e0b] via-[#dc2626] to-[#15803d]', '#fff7ed', 'public à vérifier', 'à confirmer');
       }
 
-      // Saveurs d'Afrique et autres
-      return buildSpace(profile, 'from-[#0f766e] via-[#14b8a6] to-[#14532d]', '#ecfeff', 'public à vérifier', 'confirmée');
+      // Saveurs d'Afrique — public confirmé
+      return buildSpace(profile, 'from-[#0f766e] via-[#14b8a6] to-[#14532d]', '#ecfeff', 'public confirmé', 'confirmée');
     });
 }
 
