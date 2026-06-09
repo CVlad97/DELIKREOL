@@ -7,7 +7,20 @@
 -- Utilise les noms de colonnes de l'ancien schéma si déjà existant.
 
 -- ============================================================
--- 1. NOUVELLES TABLES (uniquement si elles n'existent pas)
+-- 1. HELPER FUNCTION (is_admin)
+-- ============================================================
+create or replace function public.is_admin()
+returns boolean
+language sql stable
+as $$
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role = 'admin'
+  );
+$$;
+
+-- ============================================================
+-- 2. NOUVELLES TABLES (uniquement si elles n'existent pas)
 -- ============================================================
 
 -- Catering Requests (absente de l'ancien schema)
@@ -106,7 +119,7 @@ create table if not exists project_memory (
 );
 
 -- ============================================================
--- 2. COLONNES MANQUANTES DANS TABLES EXISTANTES
+-- 3. COLONNES MANQUANTES DANS TABLES EXISTANTES
 -- ============================================================
 do $$ begin
   -- profiles: ajouter role si user_type existe déjà
@@ -186,7 +199,7 @@ do $$ begin
 end $$;
 
 -- ============================================================
--- 3. INDEX
+-- 4. INDEX
 -- ============================================================
 create index if not exists idx_products_vendor_id on products(vendor_id);
 create index if not exists idx_orders_phone on orders(customer_phone);
@@ -194,7 +207,7 @@ create index if not exists idx_vendors_status on vendors(status);
 create index if not exists idx_catering_requests_phone on catering_requests(phone);
 
 -- ============================================================
--- 4. RLS (politiques uniquement pour les NOUVELLES tables)
+-- 5. RLS (politiques uniquement pour les NOUVELLES tables)
 -- ============================================================
 alter table if exists catering_requests enable row level security;
 alter table if exists driver_applications enable row level security;
@@ -225,7 +238,7 @@ create policy "Admin only settings" on admin_settings for all using (is_admin())
 create policy "Admin only memory" on project_memory for all using (is_admin());
 
 -- ============================================================
--- 5. SEED IDEMPOTENT
+-- 6. SEED IDEMPOTENT
 -- ============================================================
 insert into delivery_rules (commune, min_order_amount, status, message)
 values ('Martinique', 40, 'active',
