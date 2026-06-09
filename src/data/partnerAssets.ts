@@ -1,18 +1,18 @@
+function assetFromPublic(relativePath: string): string {
+  const clean = relativePath.replace(/^\//, '');
+  return `${import.meta.env.BASE_URL}${clean}`;
+}
+
 export const anTjeCocoAssets = {
-  hero: 'https://antilla-martinique.com/wp-content/uploads/2025/01/Photo-une2.jpg',
+  hero: assetFromPublic('vendors/an-tje-coco/hero.jpg'),
   gallery: [
-    'https://antilla-martinique.com/wp-content/uploads/2025/01/Pepite-Passion-Coulis-framboise-e1738112333674.jpg',
-    'https://antilla-martinique.com/wp-content/uploads/2025/01/Pepite-Pina-colada-e1738112614353.jpeg',
-    'https://antilla-martinique.com/wp-content/uploads/2025/01/Pepite-trois-chocolats.jpeg',
-    'https://antilla-martinique.com/wp-content/uploads/2025/01/Creme-brulee-Passion.jpeg',
-    'https://antilla-martinique.com/wp-content/uploads/2025/01/Montblanc-01.Post2_.jpeg',
+    assetFromPublic('vendors/an-tje-coco/gallery-01.jpg'),
+    assetFromPublic('vendors/an-tje-coco/gallery-02.jpg'),
+    assetFromPublic('vendors/an-tje-coco/gallery-03.jpg'),
+    assetFromPublic('vendors/an-tje-coco/gallery-04.jpg'),
+    assetFromPublic('vendors/an-tje-coco/gallery-05.jpg'),
   ],
   event: 'https://api.cloudly.space/resize/crop/1200/627/60/aHR0cDovL21lZGlhcy50b3VyaXNtLXN5c3RlbS5jb20vNy8yLzgwNDcxN180MjIxMDY0NDlfMzgyMzMzMzc0NDkzOTczXzM3OTE3NTkwNjM3OTIwNjc4MzFfbi5qcGVn/image.jpg',
-};
-
-const assetFromPublic = (relativePath: string): string => {
-  const clean = relativePath.replace(/^\/+/, '');
-  return `${import.meta.env.BASE_URL}${clean}`;
 };
 
 export const cocoFoodAssets = {

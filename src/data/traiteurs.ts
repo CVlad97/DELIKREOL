@@ -194,7 +194,7 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
       }
 
       if (profile.name === 'An Tjè Coco') {
-        return buildSpace(profile, 'from-[#7c3aed] via-[#ec4899] to-[#c2410c]', '#fff1f2', 'public à vérifier', 'externe à vérifier');
+        return buildSpace(profile, 'from-[#7c3aed] via-[#ec4899] to-[#c2410c]', '#fff1f2', 'public confirmé', 'confirmée');
       }
 
       if (profile.name === "Coco's Food") {
