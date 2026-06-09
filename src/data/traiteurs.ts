@@ -85,18 +85,18 @@ function resolveGalleryImages(name: string) {
     ];
   }
   if (name === 'Les Delices de Ninice') {
+    // 10 vraies photos WhatsApp mai 2026 — optimisées et rehaussées
     return [
-      assetFromPublic('vendors/ninice/gallery-01.jpg'),
-      assetFromPublic('vendors/ninice/gallery-02.jpg'),
-      assetFromPublic('vendors/ninice/gallery-03.jpg'),
-      assetFromPublic('vendors/ninice/gallery-04.jpg'),
-      assetFromPublic('vendors/ninice/gallery-05.jpg'),
-      assetFromPublic('vendors/ninice/gallery-06.jpg'),
-      assetFromPublic('vendors/ninice/gallery-07.jpg'),
-      assetFromPublic('vendors/ninice/gallery-08.jpg'),
-      assetFromPublic('vendors/ninice/gallery-09.jpg'),
-      assetFromPublic('vendors/ninice/gallery-10.jpg'),
-      assetFromPublic('vendors/ninice/gallery-11.jpg'),
+      assetFromPublic('vendors/ninice/gallery-01.jpg'),  // Colombo — ragoût poulet épicé
+      assetFromPublic('vendors/ninice/gallery-02.jpg'),  // Bami des Îles — bowl nouilles complet
+      assetFromPublic('vendors/ninice/gallery-03.jpg'),  // Brochettes Saoto — présentation traiteur
+      assetFromPublic('vendors/ninice/gallery-04.jpg'),  // Bowl complet poulet grillé + plantain
+      assetFromPublic('vendors/ninice/gallery-05.jpg'),  // Gulab Jamun — douceurs sucrées
+      assetFromPublic('vendors/ninice/gallery-06.jpg'),  // Bara — beignets croustillants
+      assetFromPublic('vendors/ninice/gallery-07.jpg'),  // Packaging + logo Les Délices de Ninice
+      assetFromPublic('vendors/ninice/gallery-08.jpg'),  // Moksi Aleisi — riz sauté végétarien
+      assetFromPublic('vendors/ninice/gallery-09.jpg'),  // Bara version traiteur en boîte
+      assetFromPublic('vendors/ninice/gallery-10.jpg'),  // Condiment mariné fait maison
     ];
   }
   if (name === 'Snack Savè Peyi\u2019A') {

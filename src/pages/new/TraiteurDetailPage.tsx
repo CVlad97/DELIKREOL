@@ -89,9 +89,9 @@ export function TraiteurDetailPage() {
       {/* Portrait + Bio */}
       <div className="flex flex-col sm:flex-row gap-6 mb-8 items-start">
         {traiteur.portraitImage && (
-          <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl overflow-hidden bg-muted flex-shrink-0 border-4 border-primary/10">
+          <div className="w-36 h-36 sm:w-48 sm:h-48 rounded-2xl overflow-hidden bg-muted flex-shrink-0 border-4 border-primary/10 shadow-lg ring-2 ring-amber-200/50">
             <img src={traiteur.portraitImage} alt={`Portrait ${traiteur.name}`}
-              className="w-full h-full object-cover" />
+              className="w-full h-full object-cover object-top" />
           </div>
         )}
         <div className="flex-1">
