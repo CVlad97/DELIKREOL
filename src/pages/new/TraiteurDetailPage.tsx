@@ -86,8 +86,15 @@ export function TraiteurDetailPage() {
         </div>
       </div>
 
-      {/* Info */}
-      <div className="mb-8">
+      {/* Portrait + Bio */}
+      <div className="flex flex-col sm:flex-row gap-6 mb-8 items-start">
+        {traiteur.portraitImage && (
+          <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl overflow-hidden bg-muted flex-shrink-0 border-4 border-primary/10">
+            <img src={traiteur.portraitImage} alt={`Portrait ${traiteur.name}`}
+              className="w-full h-full object-cover" />
+          </div>
+        )}
+        <div className="flex-1">
         <div className="flex flex-wrap items-center gap-3 mb-3">
           <h1 className="text-3xl font-display font-bold">{traiteur.name}</h1>
           {isVerified ? (
@@ -154,6 +161,7 @@ export function TraiteurDetailPage() {
             Demander un devis
           </a>
         </div>
+      </div>
       </div>
 
       {/* Galerie photos */}

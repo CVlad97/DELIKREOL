@@ -139,6 +139,13 @@ export function formatEuro(value: number) {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value);
 }
 
+function resolvePortraitImage(name: string) {
+  if (name === 'Les Delices de Ninice') {
+    return assetFromPublic('vendors/ninice/portrait.jpg');
+  }
+  return null;
+}
+
 function formatStartPrice(menuItems: TraiteurMenuItem[]) {
   return menuItems.length ? menuItems.reduce((lowest, item) => Math.min(lowest, item.price), Number.POSITIVE_INFINITY) : 0;
 }
@@ -168,7 +175,7 @@ function buildSpace(profile: PartnerProfile, gradient: string, accent: string, s
     availability: profile.availability,
     specialty: profile.specialty,
     heroImage: resolveHeroImage(profile.name),
-    portraitImage: null,
+    portraitImage: resolvePortraitImage(profile.name),
     gradient,
     accent,
     highlights: profile.highlights,
