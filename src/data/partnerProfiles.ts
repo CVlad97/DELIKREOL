@@ -131,7 +131,7 @@ export const partnerProfiles: PartnerProfile[] = [
     offer: 'Traiteur, boxes repas et snacking',
     type: 'Traiteur',
     availability: 'Preparation quotidienne',
-    story: 'Les Délices de Ninice mêle les épices du Suriname et la générosité caraïbe dans une cuisine maison simple, chaleureuse et pensée pour les repas du quotidien comme pour les événements.',
+    story: 'Les Délices de Ninice est une cuisine de rue surinamo-caraïbe, tenue par une passionnée qui réunit les épices du Suriname et la générosité antillaise dans des plats faits maison. Au menu : le Colombo des Deux Rives — un colombo signature entre deux mondes —, le Moksi Aleisi (riz sauté surinamais) décliné en versions poulet, porc ou végétarienne, le Bami des Îles, les bara (beignets croustillants) accompagnés de sauce maison, les mini brochettes Saoto, et les douceurs gulab jamun. Retrait au Barber Shop de Dillon, Fort-de-France. Service traiteur et ateliers culinaires sur demande.',
     promise: 'Cuisine maison, saveurs surinamiennes et caraïbes, retrait facile à Dillon',
     eta: 'Meme jour / J+1 selon flux',
     specialty: 'Colombo, moksi aleisi, bami, bara, gulab jamun et mini brochettes Saoto',

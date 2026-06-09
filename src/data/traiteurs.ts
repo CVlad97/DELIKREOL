@@ -55,7 +55,7 @@ function resolveHeroImage(name: string) {
     return assetFromPublic('vendors/saveurs-afrique/hero.jpg');
   }
   if (name === 'Les Delices de Ninice') {
-    return assetFromPublic('vendors/ninice/ninice-01-showcase.jpg');
+    return assetFromPublic('vendors/ninice/hero.jpg');
   }
   if (name === 'Snack Savè Peyi\u2019A') {
     return null;
@@ -86,12 +86,17 @@ function resolveGalleryImages(name: string) {
   }
   if (name === 'Les Delices de Ninice') {
     return [
-      assetFromPublic('vendors/ninice/ninice-01-showcase.jpg'),
-      assetFromPublic('vendors/ninice/ninice-02-showcase.jpg'),
-      assetFromPublic('vendors/ninice/ninice-05-showcase.jpg'),
-      assetFromPublic('vendors/ninice/ninice-06-showcase.jpg'),
-      assetFromPublic('vendors/ninice/ninice-07-showcase.jpg'),
-      assetFromPublic('vendors/ninice/ninice-09-showcase.jpg'),
+      assetFromPublic('vendors/ninice/gallery-01.jpg'),
+      assetFromPublic('vendors/ninice/gallery-02.jpg'),
+      assetFromPublic('vendors/ninice/gallery-03.jpg'),
+      assetFromPublic('vendors/ninice/gallery-04.jpg'),
+      assetFromPublic('vendors/ninice/gallery-05.jpg'),
+      assetFromPublic('vendors/ninice/gallery-06.jpg'),
+      assetFromPublic('vendors/ninice/gallery-07.jpg'),
+      assetFromPublic('vendors/ninice/gallery-08.jpg'),
+      assetFromPublic('vendors/ninice/gallery-09.jpg'),
+      assetFromPublic('vendors/ninice/gallery-10.jpg'),
+      assetFromPublic('vendors/ninice/gallery-11.jpg'),
     ];
   }
   if (name === 'Snack Savè Peyi\u2019A') {
