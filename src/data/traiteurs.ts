@@ -49,7 +49,7 @@ function resolveHeroImage(name: string) {
     return cocoFoodAssets.hero;
   }
   if (name === "Saveurs d'Afrique") {
-    return assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-board.jpg');
+    return assetFromPublic('vendors/saveurs-afrique/hero.jpg');
   }
   if (name === 'Les Delices de Ninice') {
     return assetFromPublic('vendors/ninice/ninice-01-showcase.jpg');
@@ -69,16 +69,16 @@ function resolveGalleryImages(name: string) {
   }
   if (name === "Saveurs d'Afrique") {
     return [
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-pate.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-ablo.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-bissap.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-doko.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-foutou-banane.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-monyo.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-pate-legume.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-petits-cailloux.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-salade-beninoise.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-yaourt.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/gallery-01.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/gallery-02.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/gallery-03.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/gallery-04.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/gallery-05.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/gallery-06.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/gallery-07.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/gallery-08.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/gallery-09.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/gallery-10.jpg'),
     ];
   }
   if (name === 'Les Delices de Ninice') {
