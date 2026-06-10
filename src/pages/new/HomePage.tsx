@@ -131,6 +131,10 @@ export default function HomePage() {
               <Sparkles className="w-4 h-4" />
               LOCAL PREMIUM
             </div>
+            {/* Badge phase pilote */}
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold mb-4">
+              🧪 Phase pilote — service en amélioration continue
+            </div>
             <h1 className="text-4xl md:text-6xl font-black text-gray-900 leading-tight mb-4">
               DeliKreol
             </h1>
