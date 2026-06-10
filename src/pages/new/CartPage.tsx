@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { validateMartiniquePhone, PHONE_ERROR_MESSAGE } from '../../utils/phone';
-import { DELIVERY_NOTICE, DELIVERY_PENDING_TEXT, PICKUP_TEXT } from '../../services/pricing';
+import { DELIVERY_FEES } from '../../services/pricing';
 import {
   ShoppingCart,
   Plus,
@@ -59,7 +59,7 @@ export default function CartPage() {
   const [commune, setCommune] = useState('');
   const [communeSuggestions, setCommuneSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [mode, setMode] = useState<'retrait' | 'livraison'>('retrait');
+  const [mode, setMode] = useState<'retrait' | 'relais' | 'livraison'>('retrait');
   const [selectedCreneaux, setSelectedCreneaux] = useState<string[]>([]);
   const [autreCreneau, setAutreCreneau] = useState('');
   const [notes, setNotes] = useState('');
@@ -160,7 +160,7 @@ export default function CartPage() {
       '',
       `Total : ${total.toFixed(2)} €`,
       `Commune : ${commune || 'Non précisée'}`,
-      `Type : ${mode === 'retrait' ? 'Retrait' : 'Livraison'}`,
+      {`Type : ${mode === 'retrait' ? 'Retrait' : mode === 'relais' ? 'Point relais' : 'Livraison'}`},
       `Créneau(x) souhaité(s) : ${creneauText || 'Non précisé'}`,
       `Traiteur : ${traiteurText}`,
       phone ? `Téléphone : ${phone}` : '',
@@ -404,17 +404,15 @@ export default function CartPage() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">
-                      {mode === 'livraison' ? 'Frais de livraison' : 'Retrait'}
+                      {mode === 'retrait' ? 'Retrait' : mode === 'relais' ? 'Point relais' : 'Livraison'}
                     </span>
                     <span className="text-gray-400 text-xs">
-                      {mode === 'livraison'
-                        ? DELIVERY_PENDING_TEXT
-                        : PICKUP_TEXT}
+                      {mode === 'retrait' ? 'Gratuit' : `+ ${DELIVERY_FEES[mode].fee.toFixed(2).replace('.', ',')} €`}
                     </span>
                   </div>
                   {mode === 'livraison' && total < 40 && (
                     <div className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2">
-                      {DELIVERY_NOTICE}
+                      Livraison éloignée possible à partir de 40 € de commande, sous réserve de validation.
                     </div>
                   )}
                   <hr className="border-orange-100" />
