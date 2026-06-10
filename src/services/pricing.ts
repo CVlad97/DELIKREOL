@@ -1,6 +1,43 @@
-// DeliKreol — Tarification plats
+// DeliKreol — Tarification
+// Source unique de vérité pour tous les calculs de prix
+
+// ═══════════════════════════════════════════════════
+// FRAIS LIVRAISON & SERVICE
+// ═══════════════════════════════════════
+
+/** Frais de livraison standard */
+export const DELIVERY_FEE_EUR = 3.5;
+
+/** Frais de service DeliKreol */
+export const SERVICE_FEE_EUR = 1;
+
+/** Seuil livraison éloignée */
+export const DELIVERY_THRESHOLD_EUR = 40;
+
+/** Message livraison éloignée */
+export const DELIVERY_NOTICE = `Livraison éloignée possible à partir de ${DELIVERY_THRESHOLD_EUR} € de commande, selon validation du prestataire et disponibilité DeliKreol.`;
+
+/** Texte quand livraison non calculée */
+export const DELIVERY_PENDING_TEXT = 'À confirmer sur WhatsApp selon commune et disponibilité';
+
+/** Texte quand retrait */
+export const PICKUP_TEXT = 'Frais de livraison non appliqués';
+
+/** Total estimé selon mode */
+export function estimateTotal(subtotal: number, mode: 'retrait' | 'livraison') {
+  const delivery = mode === 'livraison' ? DELIVERY_FEE_EUR : 0;
+  return {
+    subtotal,
+    deliveryFee: mode === 'livraison' ? DELIVERY_FEE_EUR : null,
+    serviceFee: SERVICE_FEE_EUR,
+    estimatedTotal: subtotal + delivery + SERVICE_FEE_EUR,
+  };
+}
+
+// ═══════════════════════════════════════════════════
+// TARIFICATION PLATS
 // Formule : prix_client = prix_net_vendeur / 0.85
-// Arrondi : 0,50 / 0,90 / euro supérieur
+// ═══════════════════════════════════════
 
 export function computeClientPrice(prixNetVendeur: number): number {
   const raw = prixNetVendeur / 0.85;
@@ -13,8 +50,8 @@ export function computeCommission(prixNetVendeur: number): number {
 
 function roundCommercial(price: number): number {
   const decimal = price - Math.floor(price);
-  if (decimal <= 0.25) return Math.floor(price) + 0.50;
-  if (decimal <= 0.60) return Math.floor(price) + 0.90;
+  if (decimal <= 0.25) return Math.floor(price) + 0.5;
+  if (decimal <= 0.6) return Math.floor(price) + 0.9;
   return Math.ceil(price);
 }
 
@@ -35,11 +72,14 @@ export function getPriceBreakdown(prixNetVendeur: number): PriceBreakdown {
     prixNetVendeur,
     commissionDelikreol: prixClient - prixNetVendeur,
     prixClient,
-    tauxCommission: 15, // 15%
+    tauxCommission: 15,
   };
 }
 
-// Forfaits partenaires
+// ═══════════════════════════════════════════════════
+// FORFAITS PARTENAIRES
+// ═══════════════════════════════════════
+
 export interface PartnerPlan {
   id: string;
   name: string;
