@@ -378,8 +378,9 @@ export default function HomePage() {
                     )}
                     <div className="flex items-center justify-between">
                       <span className="text-2xl font-black text-gray-900">
-                        {product.price.toFixed(2)} €
+                        {product.price.toFixed(2).replace('.', ',')} €
                       </span>
+                      <span className="text-[10px] text-gray-400 block -mt-1">Prix DELIKREOL</span>
                       <button
                         onClick={() => handleAddToCart(product)}
                         className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-sm transition-all hover:scale-105"

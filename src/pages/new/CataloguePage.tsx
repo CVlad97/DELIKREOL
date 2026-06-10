@@ -418,9 +418,12 @@ export default function CataloguePage() {
 
                     <div className="mt-auto space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-xl font-black text-gray-900">
-                          {product.price.toFixed(2)} €
-                        </span>
+                        <div>
+                                              <span className="text-2xl font-black text-gray-900">
+                                                {product.price.toFixed(2).replace('.', ',')} €
+                                              </span>
+                                              <span className="text-[10px] text-gray-400 block">Prix DELIKREOL</span>
+                                            </div>
                       </div>
                       <div className="flex gap-2">
                         <button
