@@ -230,8 +230,7 @@ export default function CartPage() {
     }
 
     // Tenter Supabase si configuré
-    try {
-      const { supabase } = await import('../../lib/supabase');
+    import('../../lib/supabase').then(({ supabase }) => {
       if (supabase) {
         supabase.from('orders').insert({
           id: orderId,
@@ -243,13 +242,13 @@ export default function CartPage() {
           notes,
         }).then(() => {
           console.log('[DELIKREOL] Commande créée dans Supabase:', orderId);
-        }).catch(err => {
+        }).catch((err: unknown) => {
           console.warn('[DELIKREOL] Échec Supabase, fallback localStorage:', err);
         });
       }
-    } catch (e) {
+    }).catch((e: unknown) => {
       console.warn('[DELIKREOL] Supabase non disponible, fallback localStorage');
-    }
+    });
 
     setCheckoutStatus('success');
     setMessageSent(true);
