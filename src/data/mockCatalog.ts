@@ -281,7 +281,7 @@ export const mockProducts: LocalProduct[] = [
     price: 15,
     category: 'Plats',
     image: vendorImage('vendors/saveurs-afrique/gallery-01.jpg'),
-    description: 'Matoutou de crabe — plat traditionnel africain aux épices, servi avec riz et légumes. Cuisine 100% maison par Lodika Saveurs d\'Afrique. Idéal pour découvrir les saveurs de l\'Afrique de l\'Ouest.'
+    description: 'Matoutou de crabe — plat traditionnel africain aux épices, servi avec riz et légumes. Cuisine 100% maison par Lodika Saveurs d\'Afrique. Idéal pour découvrir les saveurs de l\'Afrique de l\'Ouest.',
     zone: 'Rivière-Salée',
     available: true,
     featured: true,
@@ -295,7 +295,7 @@ export const mockProducts: LocalProduct[] = [
     price: 6,
     category: 'Snacking',
     image: vendorImage('vendors/saveurs-afrique/gallery-02.jpg'),
-    description: 'Ablo — pain vapeur ivoirien moelleux à base de maïs, servi avec une sauce parfumée. Accompagnement ou en-cas, parfait pour une pause gourmande.'
+    description: 'Ablo — pain vapeur ivoirien moelleux à base de maïs, servi avec une sauce parfumée. Accompagnement ou en-cas, parfait pour une pause gourmande.',
     zone: 'Rivière-Salée',
     available: true,
     featured: true,
@@ -309,7 +309,7 @@ export const mockProducts: LocalProduct[] = [
     price: 5,
     category: 'Snacking',
     image: vendorImage('vendors/saveurs-afrique/gallery-04.jpg'),
-    description: 'Doko — beignets africains moelleux et légèrement sucrés. Parfaits pour le petit-déjeuner ou la collation, à déguster avec du thé ou du café.'
+    description: 'Doko — beignets africains moelleux et légèrement sucrés. Parfaits pour le petit-déjeuner ou la collation, à déguster avec du thé ou du café.',
     zone: 'Rivière-Salée',
     available: true,
     featured: false,
@@ -323,7 +323,7 @@ export const mockProducts: LocalProduct[] = [
     price: 3,
     category: 'Boissons',
     image: vendorImage('vendors/saveurs-afrique/gallery-03.jpg'),
-    description: 'Bissap — boisson rafraîchissante à base de fleurs d\'hibiscus, faite maison. Naturelle, désaltérante et riche en vitamine C. La boisson phare de l\'Afrique de l\'Ouest.'
+    description: 'Bissap — boisson rafraîchissante à base de fleurs d\'hibiscus, faite maison. Naturelle, désaltérante et riche en vitamine C. La boisson phare de l\'Afrique de l\'Ouest.',
     zone: 'Rivière-Salée',
     available: true,
     featured: false,
