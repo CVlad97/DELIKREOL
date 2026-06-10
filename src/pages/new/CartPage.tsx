@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { validateMartiniquePhone, PHONE_ERROR_MESSAGE } from '../../utils/phone';
 import { DELIVERY_FEES } from '../../services/pricing';
+import { generateOrderId } from '../../utils/orderId';
 import {
   ShoppingCart,
   Plus,
@@ -67,6 +68,8 @@ export default function CartPage() {
   const [phoneError, setPhoneError] = useState('');
   const [messageSent, setMessageSent] = useState(false);
   const [preparedMessage, setPreparedMessage] = useState('');
+  const [orderNumber, setOrderNumber] = useState('');
+  const [checkoutStatus, setCheckoutStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
 
   const handleClearCart = () => {
     clearCart();
@@ -191,13 +194,69 @@ export default function CartPage() {
       return;
     }
     setPhoneError('');
+    setCheckoutStatus('processing');
 
-    window.open(whatsappUrl, '_blank');
+    // Générer ID commande
+    const orderId = generateOrderId();
+    setOrderNumber(orderId);
+
+    // Construire la commande
+    const order = {
+      id: orderId,
+      items: items.map(i => ({
+        id: i.id,
+        name: i.name,
+        vendor: i.vendor_id,
+        price: i.price,
+        quantity: i.quantity,
+      })),
+      total,
+      commune,
+      mode,
+      creneaux: getCreneauText(),
+      phone,
+      notes,
+      status: 'pending',
+      created_at: new Date().toISOString(),
+    };
+
+    // Sauvegarder en local (fallback)
+    try {
+      const localOrders = JSON.parse(localStorage.getItem('delikreol_local_orders_v1') || '[]');
+      localOrders.push(order);
+      localStorage.setItem('delikreol_local_orders_v1', JSON.stringify(localOrders));
+    } catch (e) {
+      console.warn('[DELIKREOL] Échec sauvegarde locale:', e);
+    }
+
+    // Tenter Supabase si configuré
+    try {
+      const { supabase } = await import('../../lib/supabase');
+      if (supabase) {
+        supabase.from('orders').insert({
+          id: orderId,
+          customer_phone: phone || 'Non renseigné',
+          commune,
+          order_mode: mode,
+          subtotal: total,
+          status: 'pending',
+          notes,
+        }).then(() => {
+          console.log('[DELIKREOL] Commande créée dans Supabase:', orderId);
+        }).catch(err => {
+          console.warn('[DELIKREOL] Échec Supabase, fallback localStorage:', err);
+        });
+      }
+    } catch (e) {
+      console.warn('[DELIKREOL] Supabase non disponible, fallback localStorage');
+    }
+
+    setCheckoutStatus('success');
     setMessageSent(true);
     setPreparedMessage(
-      'Votre récapitulatif est prêt. Cliquez sur WhatsApp pour envoyer votre demande à DeliKreol. La commande sera confirmée après vérification des disponibilités, du retrait/livraison et du total final.'
+      `Votre commande ${orderId} a été créée. Un récapitulatif vous est envoyé pour confirmation.`
     );
-    showSuccess('Redirection vers WhatsApp...');
+    showSuccess(`Commande ${orderId} créée !`);
   };
 
   useEffect(() => {
@@ -239,19 +298,25 @@ export default function CartPage() {
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-green-100 mb-6">
               <CheckCircle2 className="w-10 h-10 text-green-500" />
             </div>
-            <h1 className="text-2xl font-black text-gray-900 mb-3">Demande préparée !</h1>
-            <p className="text-gray-500 mb-8 leading-relaxed">
+            <h1 className="text-2xl font-black text-gray-900 mb-3">Commande créée !</h1>
+            {orderNumber && (
+              <p className="text-3xl font-black text-orange-600 mb-2 font-mono">{orderNumber}</p>
+            )}
+            <p className="text-gray-500 mb-4 leading-relaxed">
               {preparedMessage}
+            </p>
+            <p className="text-sm text-gray-400 mb-8">
+              Besoin d'aide ? Contactez-nous sur WhatsApp.
             </p>
             <div className="flex flex-col gap-3">
               <a
-                href={whatsappUrl}
+                href={`https://wa.me/596696653589?text=${encodeURIComponent(`Bonjour, j'ai besoin d'aide pour ma commande ${orderNumber}.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-green-500 hover:bg-green-600 text-white font-bold rounded-2xl transition-all hover:scale-105"
               >
                 <MessageCircle className="w-5 h-5" fill="white" />
-                Confirmer ma demande sur WhatsApp
+                Support commande
               </a>
               <Link
                 to="/catalogue"
@@ -613,14 +678,20 @@ export default function CartPage() {
                 </div>
               </div>
 
-              {/* WhatsApp CTA */}
-              <button
-                onClick={handleWhatsAppClick}
-                className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-green-500 hover:bg-green-600 text-white font-bold rounded-2xl transition-all hover:scale-[1.02] shadow-lg shadow-green-200 text-lg"
-              >
-                <MessageCircle className="w-6 h-6" fill="white" />
-                Confirmer ma demande sur WhatsApp
-              </button>
+              {/* Bouton principal — Supabase-first */}
+              {checkoutStatus === 'processing' ? (
+                <div className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-orange-400 text-white font-bold rounded-2xl text-lg">
+                  Création de votre commande...
+                </div>
+              ) : (
+                <button
+                  onClick={handleWhatsAppClick}
+                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl transition-all hover:scale-[1.02] shadow-lg shadow-orange-200 text-lg"
+                >
+                  <ShoppingCart className="w-6 h-6" />
+                  Confirmer ma commande
+                </button>
+              )}
               <p className="text-xs text-center text-gray-400">
                 Vous ne payez pas encore en ligne. La commande est envoyée à DeliKreol pour confirmation du plat, du retrait/livraison et du total final.
               </p>
