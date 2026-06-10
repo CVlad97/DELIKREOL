@@ -103,26 +103,42 @@ export default function HomePage() {
 
   return (
     <Layout>
-      {/* Hero Section */}
+      {/* Hero Section — Style original DeliKreol */}
       <section className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-amber-50 to-[#FFFBF0]">
+        {/* Madras pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `url(${import.meta.env.BASE_URL}branding/logo-madras.svg)`,
+            backgroundSize: '120px',
+            backgroundRepeat: 'repeat',
+          }}
+        />
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-20 left-10 w-64 h-64 bg-orange-400 rounded-full blur-3xl" />
           <div className="absolute bottom-10 right-20 w-96 h-96 bg-amber-300 rounded-full blur-3xl" />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
           <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-100 text-orange-700 text-sm font-semibold mb-6">
-              <Sparkles className="w-4 h-4" />
-              Martinique — Cuisine locale à portée de main
+            {/* Logo cloche */}
+            <div className="flex justify-center mb-8">
+              <img
+                src={`${import.meta.env.BASE_URL}branding/logo-mark.svg`}
+                alt="DeliKreol"
+                className="h-28 md:h-36 w-auto drop-shadow-xl animate-pulse"
+              />
             </div>
-            <h1 className="text-4xl md:text-6xl font-black text-gray-900 leading-tight mb-6">
-              Le goût local,{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">
-                simple à commander.
-              </span>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-100 text-orange-700 text-sm font-semibold mb-4 uppercase tracking-widest">
+              <Sparkles className="w-4 h-4" />
+              LOCAL PREMIUM
+            </div>
+            <h1 className="text-4xl md:text-6xl font-black text-gray-900 leading-tight mb-4">
+              DeliKreol
             </h1>
-            <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">
-              Choisissez un plat ou un traiteur, indiquez votre commune, puis DeliKreol vérifie la disponibilité avec le prestataire.
+            <p className="text-xl md:text-2xl text-gray-600 mb-6 font-semibold">
+              Le réflexe local qui donne envie de commander.
+            </p>
+            <p className="text-base text-gray-500 mb-8 max-w-2xl mx-auto">
+              Choisissez un plat ou un traiteur près de chez vous en Martinique. Commandez en un clic, confirmez par WhatsApp.
             </p>
 
             {/* Search Bar */}
