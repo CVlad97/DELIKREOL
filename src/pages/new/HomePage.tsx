@@ -253,12 +253,12 @@ export default function HomePage() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
               {featuredTraiteurs.map((traiteur) => (
                 <Link
                   key={traiteur.slug}
                   to={`/traiteur/${traiteur.slug}`}
-                  className="group bg-white rounded-3xl border border-orange-100 hover:border-orange-300 overflow-hidden shadow-sm hover:shadow-xl transition-all"
+                  className="snap-start flex-shrink-0 w-[260px] sm:w-[280px] group bg-white rounded-3xl border border-orange-100 hover:border-orange-300 overflow-hidden shadow-sm hover:shadow-xl transition-all"
                 >
                   <div className={`h-36 bg-gradient-to-br ${traiteur.gradient} relative overflow-hidden`}>
                     {traiteur.heroImage && (
@@ -308,7 +308,7 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* Featured Products */}
+      {/* Featured Products — Carrousel */}
       {featuredProducts.length > 0 && (
         <section className="py-16 md:py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -329,11 +329,11 @@ export default function HomePage() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
               {featuredProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="group bg-white rounded-3xl border border-orange-100 hover:border-orange-300 overflow-hidden shadow-sm hover:shadow-lg transition-all"
+                  className="snap-start flex-shrink-0 w-[280px] sm:w-[300px] group bg-white rounded-3xl border border-orange-100 hover:border-orange-300 overflow-hidden shadow-sm hover:shadow-lg transition-all"
                 >
                   <div className="relative aspect-[4/3] overflow-hidden bg-orange-50">
                     {product.image ? (
