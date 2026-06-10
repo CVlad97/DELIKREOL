@@ -56,7 +56,7 @@ export const mockProducts: LocalProduct[] = [
     featured: true,
     sides: ['riz', 'lentilles', 'légumes pays', 'crudités'],
     ingredients: 'Côte de porc grillée, accompagnée de riz, lentilles, légumes pays et crudités.',
-    allergens: 'À confirmer.',
+    allergens: 'À confirmer avec le prestataire.'
   },
   {
     id: 'save-peyia-filet-poulet',
@@ -71,7 +71,7 @@ export const mockProducts: LocalProduct[] = [
     featured: true,
     sides: ['riz', 'lentilles', 'légumes pays', 'crudités'],
     ingredients: 'Filet de poulet grillé, accompagné de riz, lentilles, légumes pays et crudités.',
-    allergens: 'À confirmer.',
+    allergens: 'À confirmer avec le prestataire.'
   },
   {
     id: 'save-peyia-crevettes',
@@ -106,7 +106,7 @@ export const mockProducts: LocalProduct[] = [
     available: true,
     featured: true,
     ingredients: 'Banane jaune, fromage, épices antillaises. Composition à confirmer avec la prestataire.',
-    allergens: 'À confirmer.',
+    allergens: 'À confirmer avec le prestataire.'
   },
   {
     id: 'antjecoco-pepite-coco-passion',
@@ -210,7 +210,7 @@ export const mockProducts: LocalProduct[] = [
     available: true,
     featured: true,
     ingredients: 'Poulet, riz aux pois, chou violet, carottes, maïs, laitue, herbes.',
-    allergens: 'À confirmer.',
+    allergens: 'À confirmer avec le prestataire.'
   },
   {
     id: 'cocos-food-plat-jour',
@@ -224,7 +224,7 @@ export const mockProducts: LocalProduct[] = [
     available: true,
     featured: false,
     ingredients: 'Viande, riz aux pois, maïs, betteraves, crudités. Variable selon le jour.',
-    allergens: 'À confirmer.',
+    allergens: 'À confirmer avec le prestataire.'
   },
   {
     id: 'cocos-food-box-grille',
@@ -238,7 +238,7 @@ export const mockProducts: LocalProduct[] = [
     available: true,
     featured: false,
     ingredients: 'Viande grillée, riz, maïs, chou, carottes, laitue.',
-    allergens: 'À confirmer.',
+    allergens: 'À confirmer avec le prestataire.'
   },
   {
     id: 'cocos-food-friture',
@@ -252,7 +252,7 @@ export const mockProducts: LocalProduct[] = [
     available: true,
     featured: false,
     ingredients: 'Viande ou poisson frit, oignons, herbes, sauce caramel.',
-    allergens: 'À confirmer.',
+    allergens: 'À confirmer avec le prestataire.'
   },
   {
     id: 'cocos-food-salade-viande',
@@ -266,7 +266,7 @@ export const mockProducts: LocalProduct[] = [
     available: true,
     featured: false,
     ingredients: 'Viande marinée, oignons rouges, cive, piment, vinaigrette.',
-    allergens: 'À confirmer.',
+    allergens: 'À confirmer avec le prestataire.'
   },
 
   // ═══════════════════════════════════════════════════════
@@ -281,7 +281,7 @@ export const mockProducts: LocalProduct[] = [
     price: 15,
     category: 'Plats',
     image: vendorImage('vendors/saveurs-afrique/gallery-01.jpg'),
-    description: 'Matoutou de crabe, spécialité de Lodika Saveurs d\'Afrique. Cuisine africaine maison. Prix à confirmer.',
+    description: 'Matoutou de crabe — plat traditionnel africain aux épices, servi avec riz et légumes. Cuisine 100% maison par Lodika Saveurs d\'Afrique. Idéal pour découvrir les saveurs de l\'Afrique de l\'Ouest.'
     zone: 'Rivière-Salée',
     available: true,
     featured: true,
@@ -295,7 +295,7 @@ export const mockProducts: LocalProduct[] = [
     price: 6,
     category: 'Snacking',
     image: vendorImage('vendors/saveurs-afrique/gallery-02.jpg'),
-    description: 'Ablo — pain vapeur ivoirien, servi avec sauce. Prix à confirmer.',
+    description: 'Ablo — pain vapeur ivoirien moelleux à base de maïs, servi avec une sauce parfumée. Accompagnement ou en-cas, parfait pour une pause gourmande.'
     zone: 'Rivière-Salée',
     available: true,
     featured: true,
@@ -309,7 +309,7 @@ export const mockProducts: LocalProduct[] = [
     price: 5,
     category: 'Snacking',
     image: vendorImage('vendors/saveurs-afrique/gallery-04.jpg'),
-    description: 'Doko — beignet africain moelleux. Prix à confirmer.',
+    description: 'Doko — beignets africains moelleux et légèrement sucrés. Parfaits pour le petit-déjeuner ou la collation, à déguster avec du thé ou du café.'
     zone: 'Rivière-Salée',
     available: true,
     featured: false,
@@ -323,7 +323,7 @@ export const mockProducts: LocalProduct[] = [
     price: 3,
     category: 'Boissons',
     image: vendorImage('vendors/saveurs-afrique/gallery-03.jpg'),
-    description: 'Bissap — boisson rafraîchissante à l\'hibiscus, faite maison. Prix à confirmer.',
+    description: 'Bissap — boisson rafraîchissante à base de fleurs d\'hibiscus, faite maison. Naturelle, désaltérante et riche en vitamine C. La boisson phare de l\'Afrique de l\'Ouest.'
     zone: 'Rivière-Salée',
     available: true,
     featured: false,
@@ -348,7 +348,7 @@ export const mockProducts: LocalProduct[] = [
     available: true,
     featured: true,
     ingredients: 'Viande, colombo, légumes, riz. Détails à confirmer avec le prestataire.',
-    allergens: 'À confirmer.',
+    allergens: 'À confirmer avec le prestataire.'
   },
   {
     id: 'ninice-moksi-vegetarien',
@@ -362,7 +362,7 @@ export const mockProducts: LocalProduct[] = [
     available: true,
     featured: false,
     ingredients: 'Riz, légumes variés, épices surinamaises.',
-    allergens: 'À confirmer.',
+    allergens: 'À confirmer avec le prestataire.'
   },
   {
     id: 'ninice-moksi-poulet',
@@ -376,7 +376,7 @@ export const mockProducts: LocalProduct[] = [
     available: true,
     featured: true,
     ingredients: 'Riz, poulet, légumes, épices surinamaises.',
-    allergens: 'À confirmer.',
+    allergens: 'À confirmer avec le prestataire.'
   },
   {
     id: 'ninice-moksi-porc',
@@ -390,7 +390,7 @@ export const mockProducts: LocalProduct[] = [
     available: true,
     featured: false,
     ingredients: 'Riz, porc, légumes, épices surinamaises.',
-    allergens: 'À confirmer.',
+    allergens: 'À confirmer avec le prestataire.'
   },
   {
     id: 'ninice-bami',
@@ -460,7 +460,7 @@ export const mockProducts: LocalProduct[] = [
     available: true,
     featured: false,
     ingredients: 'Poulet, marinade Saoto, épices.',
-    allergens: 'À confirmer.',
+    allergens: 'À confirmer avec le prestataire.'
   },
   {
     id: 'ninice-brochette-porc',
@@ -474,7 +474,7 @@ export const mockProducts: LocalProduct[] = [
     available: true,
     featured: false,
     ingredients: 'Porc, marinade Saoto, épices.',
-    allergens: 'À confirmer.',
+    allergens: 'À confirmer avec le prestataire.'
   },
   {
     id: 'ninice-brochette-boeuf',
@@ -488,7 +488,7 @@ export const mockProducts: LocalProduct[] = [
     available: true,
     featured: false,
     ingredients: 'Bœuf, marinade Saoto, épices.',
-    allergens: 'À confirmer.',
+    allergens: 'À confirmer avec le prestataire.'
   },
 ];
 
