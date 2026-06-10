@@ -213,6 +213,60 @@ export default function DevenirPartenairePage() {
           })}
         </div>
 
+        {/* Forfaits partenaires */}
+        <div className="mb-10">
+          <h2 className="text-xl font-display font-bold mb-2">Forfaits DELIKREOL</h2>
+          <p className="text-sm text-muted-foreground mb-6">Aucun frais d'accès pendant la phase pilote. Le partenaire peut modifier gratuitement sa fiche. L'aide DELIKREOL est une prestation optionnelle payante.</p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-5 relative">
+              <div className="absolute -top-2.5 left-4 px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full uppercase">Phase pilote</div>
+              <h3 className="font-bold text-lg mt-1">Accès autonome</h3>
+              <p className="text-3xl font-black text-emerald-600 my-2">0 €</p>
+              <p className="text-xs text-muted-foreground mb-3">Le partenaire modifie lui-même sa fiche gratuitement</p>
+              <ul className="text-xs space-y-1 text-emerald-700">
+                <li>✅ Modification libre de la fiche</li>
+                <li>✅ Photos, prix, description, bio</li>
+                <li>✅ Accès espace partenaire</li>
+                <li>✅ Support par email</li>
+              </ul>
+            </div>
+            <div className="rounded-2xl border border-orange-200 bg-white p-5">
+              <h3 className="font-bold text-lg">Mise en ligne</h3>
+              <p className="text-3xl font-black text-orange-600 my-2">49 €</p>
+              <p className="text-xs text-muted-foreground mb-3">Import jusqu'à 10 photos + correction descriptions</p>
+              <ul className="text-xs space-y-1 text-gray-600">
+                <li>📸 Import jusqu'à 10 photos</li>
+                <li>✏️ Correction descriptions principales</li>
+                <li>🚀 Mise en ligne complète</li>
+                <li>✅ Validation avant publication</li>
+              </ul>
+            </div>
+            <div className="rounded-2xl border border-orange-200 bg-white p-5">
+              <h3 className="font-bold text-lg">Catalogue optimisé</h3>
+              <p className="text-3xl font-black text-orange-600 my-2">89 €</p>
+              <p className="text-xs text-muted-foreground mb-3">Import 25 photos + rédaction complète + bio optimisée</p>
+              <ul className="text-xs space-y-1 text-gray-600">
+                <li>📸 Import jusqu'à 25 photos</li>
+                <li>✍️ Rédaction descriptions complètes</li>
+                <li>📂 Structuration catégories</li>
+                <li>🌟 Bio optimisée et fiche vendeuse</li>
+              </ul>
+            </div>
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+              <h3 className="font-bold text-lg">Gestion mensuelle</h3>
+              <p className="text-3xl font-black text-amber-600 my-2">39 €<span className="text-sm font-normal text-gray-500">/mois</span></p>
+              <p className="text-xs text-muted-foreground mb-3">Mise à jour régulière : nouveaux plats, prix, promos</p>
+              <ul className="text-xs space-y-1 text-amber-700">
+                <li>🔄 Mise à jour mensuelle</li>
+                <li>🍽️ Nouveaux plats et prix</li>
+                <li>📸 Photos et promos</li>
+                <li>⏰ Disponibilités en temps réel</li>
+              </ul>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground mt-4">💡 Partenaires pilotes existants (Coco's Food, Ninice, Saveurs d'Afrique) : codes accès déjà préparés. Contactez-nous pour les recevoir.</p>
+        </div>
+
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Identity */}
