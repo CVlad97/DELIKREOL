@@ -35,3 +35,9 @@ reports/
 
 # WhatsApp exported media (originals kept locally)
 public/vendors/**/IMG-*
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
