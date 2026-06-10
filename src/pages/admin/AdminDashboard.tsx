@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ShoppingCart, ChefHat, Truck, MapPin, FileText,
-  Target, AlertTriangle, ImageOff, Package
+  Target, AlertTriangle, ImageOff, Package, CheckCircle2,
 } from 'lucide-react';
+import { mockProducts } from '../../data/mockCatalog';
+import { traiteurSpaces } from '../../data/traiteurs';
+import { PARTNER_PLANS } from '../../services/pricing';
 
 function loadFromStorage(key: string): any[] {
   try { return JSON.parse(localStorage.getItem(key) || '[]'); }
@@ -28,10 +31,17 @@ export function AdminDashboard() {
     });
   }, []);
 
+  // Audit live depuis les données réelles
+  const productsSansDescription = mockProducts.filter(p => !p.description || p.description.includes('confirmer')).length;
+  const productsSansPrix = mockProducts.filter(p => !p.price || p.price === 0).length;
+  const partenairesActifs = traiteurSpaces.filter(t => t.status === 'public confirmé').length;
+  const partenairesAVerifier = traiteurSpaces.filter(t => t.status !== 'public confirmé').length;
+  const totalProduits = mockProducts.length;
+
   const cards = [
     { label: 'Commandes', value: stats.orders, icon: ShoppingCart, color: 'text-blue-600 bg-blue-50', link: '/admin/commandes' },
     { label: 'Devis traiteur', value: stats.cateringRequests, icon: FileText, color: 'text-purple-600 bg-purple-50', link: '/admin/devis' },
-    { label: 'Demandes partenaires', value: stats.partnerApplications, icon: ChefHat, color: 'text-orange-600 bg-orange-50', link: '/admin/partenaires' },
+    { label: 'Partenaires', value: stats.partnerApplications, icon: ChefHat, color: 'text-orange-600 bg-orange-50', link: '/admin/partenaires' },
     { label: 'Candidatures livreurs', value: stats.driverApplications, icon: Truck, color: 'text-emerald-600 bg-emerald-50', link: '/admin/livreurs' },
     { label: 'Candidatures relais', value: stats.relayApplications, icon: MapPin, color: 'text-amber-600 bg-amber-50', link: '/admin/points-relais' },
     { label: 'Leads', value: stats.leads, icon: Target, color: 'text-indigo-600 bg-indigo-50', link: '/admin/leads' },
@@ -41,6 +51,7 @@ export function AdminDashboard() {
     <div>
       <h1 className="text-2xl font-display font-bold mb-6">Vue d'ensemble</h1>
 
+      {/* Stats cards */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {cards.map(card => (
           <Link key={card.label} to={card.link} className="bg-card rounded-xl border p-5 hover:shadow-elegant transition-shadow group">
@@ -55,6 +66,39 @@ export function AdminDashboard() {
         ))}
       </div>
 
+      {/* Catalogue & Partenaires audit */}
+      <div className="grid md:grid-cols-2 gap-4 mb-8">
+        {/* Produits */}
+        <div className="bg-white rounded-xl border p-5">
+          <h2 className="font-semibold flex items-center gap-2 mb-3">
+            <Package className="w-5 h-5 text-orange-600" />
+            Produits au catalogue
+          </h2>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between"><span>Total produits</span><span className="font-bold">{totalProduits}</span></div>
+            <div className="flex justify-between text-amber-600"><span>⚠️ Descriptions à valider</span><span>{productsSansDescription}</span></div>
+            <div className="flex justify-between text-red-600"><span>❌ Prix à confirmer</span><span>{productsSansPrix}</span></div>
+            <div className="flex justify-between text-emerald-600"><span>✅ Produits OK</span><span>{totalProduits - productsSansDescription}</span></div>
+          </div>
+          <Link to="/admin/catalogue" className="mt-3 inline-block text-xs text-orange-600 font-semibold hover:underline">Gérer le catalogue →</Link>
+        </div>
+
+        {/* Partenaires */}
+        <div className="bg-white rounded-xl border p-5">
+          <h2 className="font-semibold flex items-center gap-2 mb-3">
+            <ChefHat className="w-5 h-5 text-orange-600" />
+            Partenaires
+          </h2>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between"><span>Total partenaires</span><span className="font-bold">{traiteurSpaces.length}</span></div>
+            <div className="flex justify-between text-emerald-600"><span>✅ Publiés</span><span>{partenairesActifs}</span></div>
+            <div className="flex justify-between text-amber-600"><span>⚠️ À vérifier</span><span>{partenairesAVerifier}</span></div>
+            <div className="flex justify-between"><span>Forfaits disponibles</span><span className="font-bold">{PARTNER_PLANS.length}</span></div>
+          </div>
+          <Link to="/admin/partenaires" className="mt-3 inline-block text-xs text-orange-600 font-semibold hover:underline">Voir les partenaires →</Link>
+        </div>
+      </div>
+
       {/* Alerts */}
       <div className="bg-amber-50 border border-amber-200 rounded-xl p-5">
         <h2 className="font-semibold text-amber-800 flex items-center gap-2 mb-3">
@@ -62,11 +106,16 @@ export function AdminDashboard() {
           Actions à faire
         </h2>
         <ul className="space-y-2 text-sm text-amber-700">
-          <li className="flex items-center gap-2"><ImageOff className="w-4 h-4" />Produits sans photo : vérifier les visuels</li>
-          <li className="flex items-center gap-2"><Package className="w-4 h-4" />Produits sans description : compléter avec les prestataires</li>
-          <li className="flex items-center gap-2"><ChefHat className="w-4 h-4" />Partenaires à contacter pour validation</li>
-          <li className="flex items-center gap-2"><Truck className="w-4 h-4" />Aucun livreur validé pour le moment</li>
-          <li className="flex items-center gap-2"><MapPin className="w-4 h-4" />Aucun point relais validé pour le moment</li>
+          {productsSansDescription > 0 && (
+            <li className="flex items-center gap-2"><ImageOff className="w-4 h-4" />{productsSansDescription} produit(s) sans description complète</li>
+          )}
+          {productsSansPrix > 0 && (
+            <li className="flex items-center gap-2"><AlertTriangle className="w-4 h-4" />{productsSansPrix} produit(s) sans prix défini</li>
+          )}
+          {partenairesAVerifier > 0 && (
+            <li className="flex items-center gap-2"><ChefHat className="w-4 h-4" />{partenairesAVerifier} partenaire(s) à vérifier avant publication</li>
+          )}
+          <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-600" />{partenairesActifs} partenaire(s) publié(s) et actif(s)</li>
         </ul>
       </div>
     </div>
