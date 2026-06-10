@@ -231,23 +231,24 @@ export default function CartPage() {
     }
 
     // Tenter Supabase si configuré
-    import('../../lib/supabase').then(({ supabase }) => {
+    import('../../lib/supabase').then(async ({ supabase }) => {
       if (supabase) {
-        supabase.from('orders').insert({
-          id: orderId,
-          customer_phone: phone || 'Non renseigné',
-          commune,
-          order_mode: mode,
-          subtotal: total,
-          status: 'pending',
-          notes,
-        }).then(() => {
+        try {
+          await supabase.from('orders').insert({
+            id: orderId,
+            customer_phone: phone || 'Non renseigné',
+            commune,
+            order_mode: mode,
+            subtotal: total,
+            status: 'pending',
+            notes,
+          });
           console.log('[DELIKREOL] Commande créée dans Supabase:', orderId);
-        }).catch((err: unknown) => {
+        } catch (err) {
           console.warn('[DELIKREOL] Échec Supabase, fallback localStorage:', err);
-        });
+        }
       }
-    }).catch((e: unknown) => {
+    }).catch(() => {
       console.warn('[DELIKREOL] Supabase non disponible, fallback localStorage');
     });
 
