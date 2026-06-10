@@ -22,7 +22,7 @@ export interface IntegrationsConfig {
 
 export const integrations: IntegrationsConfig = {
   stripe: {
-    // Stripe test mode — prêt pour validation, pas activé sur le site public
+    // Stripe test mode — prêt, activé mais WhatsApp-first
     enabled: false,
     label: 'Stripe (test — désactivé)',
     description: 'Mode test prêt. Activer après validation humaine.',

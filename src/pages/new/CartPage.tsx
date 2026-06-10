@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   AlertCircle,
   FileText,
+  CreditCard,
 } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
 import { useCart } from '../../contexts/CartContext';
@@ -27,17 +28,75 @@ import {
 
 const WHATSAPP_NUMBER = '596696653589';
 
+const CRENEAUX_OPTIONS = [
+  { id: 'des-que-possible', label: 'Dès que possible' },
+  { id: 'midi', label: 'Midi (11h30–13h30)' },
+  { id: 'apres-midi', label: 'Après-midi (14h00–17h00)' },
+  { id: 'soir', label: 'Soir (18h00–20h30)' },
+  { id: 'autre', label: 'Autre créneau à préciser' },
+];
+
+function validatePhone(phone: string): boolean {
+  if (!phone || phone.trim() === '0' || phone.trim() === '') return false;
+  const cleaned = phone.replace(/[\s+]/g, '');
+  if (cleaned === '0') return false;
+  if (cleaned.length < 8) return false;
+  // Martinique: commence par 0696, 0697, 596696, 596697
+  const valid = /^(?:0(?:696|697)\d{6}|(?:596)?(?:696|697)\d{6})$/.test(cleaned);
+  return valid;
+}
+
+function formatPhoneError(): string {
+  return 'Merci d\'indiquer un numéro WhatsApp valide, par exemple 0696 XX XX XX ou +596 696 XX XX XX.';
+}
+
 export default function CartPage() {
   const { items, updateQuantity, removeItem, clearCart, total, itemCount } = useCart();
-  const { showSuccess } = useToast();
+  const { showSuccess, showError } = useToast();
 
   const [commune, setCommune] = useState('');
   const [communeSuggestions, setCommuneSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [mode, setMode] = useState<'retrait' | 'livraison'>('retrait');
-  const [creneau, setCreneau] = useState('');
+  const [selectedCreneaux, setSelectedCreneaux] = useState<string[]>([]);
+  const [autreCreneau, setAutreCreneau] = useState('');
   const [notes, setNotes] = useState('');
+  const [phone, setPhone] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [messageSent, setMessageSent] = useState(false);
+  const [preparedMessage, setPreparedMessage] = useState('');
+
+  const handleClearCart = () => {
+    clearCart();
+    setMessageSent(false);
+    setPreparedMessage('');
+    setCommune('');
+    setCreneau('');
+    setSelectedCreneaux([]);
+    setAutreCreneau('');
+    setNotes('');
+    setPhone('');
+    setPhoneError('');
+    showSuccess('Panier vidé');
+  };
+
+  const toggleCreneau = (id: string) => {
+    setSelectedCreneaux((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+    );
+  };
+
+  const getCreneauText = () => {
+    const labels = selectedCreneaux
+      .filter((id) => id !== 'autre')
+      .map((id) => CRENEAUX_OPTIONS.find((o) => o.id === id)?.label || id);
+    if (selectedCreneaux.includes('autre') && autreCreneau.trim()) {
+      labels.push(autreCreneau.trim());
+    }
+    return labels.length > 0 ? labels.join(', ') : '';
+  };
+
+  const setCreneau = (val: string) => {}; // compat
 
   // Commune autocomplete
   const handleCommuneInput = (value: string) => {
@@ -69,7 +128,6 @@ export default function CartPage() {
   const traiteurs = useMemo(() => {
     const vendorSet = new Set<string>();
     items.forEach((item) => {
-      // vendor_id holds the vendor name for our local products
       if (item.vendor_id) vendorSet.add(item.vendor_id);
       if (item.vendor?.business_name) vendorSet.add(item.vendor.business_name);
     });
@@ -88,6 +146,7 @@ export default function CartPage() {
       .join('\n');
 
     const traiteurText = traiteurs.length > 0 ? traiteurs.join(', ') : 'Non précisé';
+    const creneauText = getCreneauText();
 
     const lines = [
       'Bonjour 👋 Nouvelle commande DeliKreol.',
@@ -98,25 +157,36 @@ export default function CartPage() {
       `Total : ${total.toFixed(2)} €`,
       `Commune : ${commune || 'Non précisée'}`,
       `Type : ${mode === 'retrait' ? 'Retrait' : 'Livraison'}`,
-      `Créneau souhaité : ${creneau || 'Non précisé'}`,
+      `Créneau(x) souhaité(s) : ${creneauText || 'Non précisé'}`,
       `Traiteur : ${traiteurText}`,
+      phone ? `Téléphone : ${phone}` : '',
       '',
       mode === 'livraison' ? `Livraison éloignée possible à partir de 40 € de commande, selon validation du prestataire et disponibilité DeliKreol.` : '',
-      notes ? `\\nMessage : ${notes}` : '',
+      notes ? `\nMessage : ${notes}` : '',
       '',
       'Merci de confirmer la disponibilité avec le prestataire.',
     ]
       .filter(Boolean)
-            .join('\n');
+      .join('\n');
 
-          return lines;
-  }, [items, total, commune, mode, creneau, notes, traiteurs]);
+    return lines;
+  }, [items, total, commune, mode, getCreneauText, notes, traiteurs, phone]);
 
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMessage)}`;
 
   const handleWhatsAppClick = () => {
+    // Validate phone
+    if (phone && !validatePhone(phone)) {
+      setPhoneError(formatPhoneError());
+      return;
+    }
+    setPhoneError('');
+
     window.open(whatsappUrl, '_blank');
     setMessageSent(true);
+    setPreparedMessage(
+      'Votre récapitulatif est prêt. Cliquez sur WhatsApp pour envoyer votre demande à DeliKreol. La commande sera confirmée après vérification des disponibilités, du retrait/livraison et du total final.'
+    );
     showSuccess('Redirection vers WhatsApp...');
   };
 
@@ -135,7 +205,7 @@ export default function CartPage() {
             </div>
             <h1 className="text-2xl font-black text-gray-900 mb-3">Votre panier est vide</h1>
             <p className="text-gray-500 mb-8 leading-relaxed">
-              Ajoutez un plat pour commencer. Parcourez notre catalogue de traiteurs martiniquais.
+              Ajoutez un plat pour préparer une commande. Parcourez notre catalogue de traiteurs martiniquais.
             </p>
             <Link
               to="/catalogue"
@@ -161,7 +231,7 @@ export default function CartPage() {
             </div>
             <h1 className="text-2xl font-black text-gray-900 mb-3">Demande préparée !</h1>
             <p className="text-gray-500 mb-8 leading-relaxed">
-              Votre demande a bien été préparée. Envoyez-la sur WhatsApp pour confirmation.
+              {preparedMessage}
             </p>
             <div className="flex flex-col gap-3">
               <a
@@ -171,7 +241,7 @@ export default function CartPage() {
                 className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-green-500 hover:bg-green-600 text-white font-bold rounded-2xl transition-all hover:scale-105"
               >
                 <MessageCircle className="w-5 h-5" fill="white" />
-                Ouvrir WhatsApp
+                Confirmer ma demande sur WhatsApp
               </a>
               <Link
                 to="/catalogue"
@@ -185,6 +255,8 @@ export default function CartPage() {
       </Layout>
     );
   }
+
+  const creneauText = getCreneauText();
 
   return (
     <Layout>
@@ -212,10 +284,10 @@ export default function CartPage() {
                 <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="font-bold text-green-800 text-sm">
-                    Votre demande a bien été préparée.
+                    Votre récapitulatif est prêt.
                   </p>
                   <p className="text-green-700 text-sm">
-                    Envoyez-la sur WhatsApp pour confirmation.
+                    Cliquez sur WhatsApp pour envoyer votre demande à DeliKreol. La commande sera confirmée après vérification des disponibilités, du retrait/livraison et du total final.
                   </p>
                 </div>
               </div>
@@ -230,10 +302,7 @@ export default function CartPage() {
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-lg font-bold text-gray-900">Articles</h2>
                 <button
-                  onClick={() => {
-                    clearCart();
-                    showSuccess('Panier vidé');
-                  }}
+                  onClick={handleClearCart}
                   className="text-sm text-red-500 hover:text-red-600 font-medium flex items-center gap-1"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -315,7 +384,7 @@ export default function CartPage() {
 
             {/* Order summary / WhatsApp form */}
             <div className="space-y-4">
-              {/* Subtotal */}
+              {/* Subtotal + Delivery */}
               <div className="bg-white rounded-2xl border border-orange-100 p-6">
                 <h2 className="text-lg font-bold text-gray-900 mb-4">Résumé</h2>
                 <div className="space-y-3 mb-4">
@@ -324,9 +393,20 @@ export default function CartPage() {
                     <span className="font-bold text-gray-900">{total.toFixed(2)} €</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Livraison</span>
-                    <span className="text-gray-400 text-xs">À confirmer</span>
+                    <span className="text-gray-500">
+                      {mode === 'livraison' ? 'Frais de livraison' : 'Retrait'}
+                    </span>
+                    <span className="text-gray-400 text-xs">
+                      {mode === 'livraison'
+                        ? 'À confirmer sur WhatsApp selon commune et disponibilité'
+                        : 'Frais de livraison non appliqués'}
+                    </span>
                   </div>
+                  {mode === 'livraison' && total < 40 && (
+                    <div className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2">
+                      Livraison éloignée possible à partir de 40 € de commande, selon validation du prestataire et disponibilité DeliKreol.
+                    </div>
+                  )}
                   <hr className="border-orange-100" />
                   <div className="flex justify-between">
                     <span className="font-bold text-gray-900">Total estimé</span>
@@ -334,12 +414,59 @@ export default function CartPage() {
                       {total.toFixed(2)} €
                     </span>
                   </div>
+                  <p className="text-xs text-gray-400">
+                    Total final confirmé après vérification par WhatsApp.
+                  </p>
                 </div>
+              </div>
+
+              {/* Paiement info card */}
+              <div className="bg-white rounded-2xl border border-orange-100 p-6">
+                <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
+                  <CreditCard className="w-4 h-4" />
+                  Paiement
+                </h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-semibold">
+                    WhatsApp-first
+                  </span>
+                  <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full font-semibold">
+                    Paiement en ligne bientôt disponible
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  Le paiement en ligne n'est pas encore activé sur cette version test. Votre commande est d'abord confirmée par WhatsApp avec le total final.
+                </p>
               </div>
 
               {/* Delivery info */}
               <div className="bg-white rounded-2xl border border-orange-100 p-6 space-y-4">
                 <h2 className="text-lg font-bold text-gray-900">Informations de commande</h2>
+
+                {/* Téléphone */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                    <MessageCircle className="w-4 h-4 inline mr-1" />
+                    Téléphone WhatsApp
+                  </label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => {
+                      setPhone(e.target.value);
+                      setPhoneError('');
+                    }}
+                    placeholder="0696 XX XX XX"
+                    className={`w-full px-3 py-2.5 rounded-xl border text-sm outline-none ${
+                      phoneError
+                        ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                        : 'border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100'
+                    }`}
+                  />
+                  {phoneError && (
+                    <p className="text-xs text-red-500 mt-1">{phoneError}</p>
+                  )}
+                </div>
 
                 {/* Commune */}
                 <div className="relative">
@@ -402,19 +529,40 @@ export default function CartPage() {
                   </div>
                 </div>
 
-                {/* Créneau */}
+                {/* Créneaux - checkboxes */}
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-1.5">
                     <Clock className="w-4 h-4 inline mr-1" />
-                    Créneau souhaité
+                    Créneau(x) souhaité(s)
                   </label>
-                  <input
-                    type="text"
-                    value={creneau}
-                    onChange={(e) => setCreneau(e.target.value)}
-                    placeholder="ex: Demain midi, Vendredi 12h..."
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 text-sm outline-none"
-                  />
+                  <p className="text-xs text-gray-400 mb-2">
+                    Choisissez un ou plusieurs créneaux possibles :
+                  </p>
+                  <div className="space-y-2">
+                    {CRENEAUX_OPTIONS.map((option) => (
+                      <label
+                        key={option.id}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-gray-200 hover:border-orange-300 cursor-pointer transition-all text-sm"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedCreneaux.includes(option.id)}
+                          onChange={() => toggleCreneau(option.id)}
+                          className="w-4 h-4 accent-orange-500"
+                        />
+                        {option.label}
+                      </label>
+                    ))}
+                    {selectedCreneaux.includes('autre') && (
+                      <input
+                        type="text"
+                        value={autreCreneau}
+                        onChange={(e) => setAutreCreneau(e.target.value)}
+                        placeholder="Précisez votre créneau..."
+                        className="w-full px-3 py-2 rounded-xl border border-orange-200 focus:border-orange-400 text-sm outline-none mt-1"
+                      />
+                    )}
+                  </div>
                 </div>
 
                 {/* Notes */}
@@ -433,38 +581,16 @@ export default function CartPage() {
                 </div>
               </div>
 
-              {/* Info boxes */}
-              <div className="space-y-3">
-                {mode === 'livraison' && (
-                  <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
-                    <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                    <div className="text-sm">
-                      <p className="font-bold text-amber-800">Livraison éloignée</p>
-                      <p className="text-amber-700">
-                        Livraison éloignée possible à partir de 40€ de commande.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-xl p-4">
-                  <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-blue-700">
-                    Pour une livraison midi, idéalement avant 10h.
-                  </p>
-                </div>
-              </div>
-
               {/* WhatsApp CTA */}
               <button
                 onClick={handleWhatsAppClick}
                 className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-green-500 hover:bg-green-600 text-white font-bold rounded-2xl transition-all hover:scale-[1.02] shadow-lg shadow-green-200 text-lg"
               >
                 <MessageCircle className="w-6 h-6" fill="white" />
-                Envoyer sur WhatsApp
+                Confirmer ma demande sur WhatsApp
               </button>
               <p className="text-xs text-center text-gray-400">
-                Votre commande sera vérifiée par DeliKreol puis confirmée par le prestataire.
+                Vous ne payez pas encore en ligne. La commande est envoyée à DeliKreol pour confirmation du plat, du retrait/livraison et du total final.
               </p>
             </div>
           </div>
