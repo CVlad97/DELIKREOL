@@ -1,5 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { validateMartiniquePhone, PHONE_ERROR_MESSAGE } from '../../utils/phone';
+import { DELIVERY_NOTICE, DELIVERY_PENDING_TEXT, PICKUP_TEXT } from '../../services/pricing';
 import {
   ShoppingCart,
   Plus,
@@ -134,6 +136,8 @@ export default function CartPage() {
     return Array.from(vendorSet);
   }, [items]);
 
+  const hasMultipleVendors = traiteurs.length > 1;
+
   // Build WhatsApp message
   const whatsappMessage = useMemo(() => {
     if (items.length === 0) return '';
@@ -176,8 +180,14 @@ export default function CartPage() {
 
   const handleWhatsAppClick = () => {
     // Validate phone
-    if (phone && !validatePhone(phone)) {
-      setPhoneError(formatPhoneError());
+    if (phone && !validateMartiniquePhone(phone)) {
+      setPhoneError(PHONE_ERROR_MESSAGE);
+      return;
+    }
+
+    // Block multi-traiteur
+    if (hasMultipleVendors) {
+      showError('Pour cette version test, merci de passer une commande par partenaire. Le panier multi-traiteur arrive bientôt.');
       return;
     }
     setPhoneError('');
@@ -398,13 +408,13 @@ export default function CartPage() {
                     </span>
                     <span className="text-gray-400 text-xs">
                       {mode === 'livraison'
-                        ? 'À confirmer sur WhatsApp selon commune et disponibilité'
-                        : 'Frais de livraison non appliqués'}
+                        ? DELIVERY_PENDING_TEXT
+                        : PICKUP_TEXT}
                     </span>
                   </div>
                   {mode === 'livraison' && total < 40 && (
                     <div className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2">
-                      Livraison éloignée possible à partir de 40 € de commande, selon validation du prestataire et disponibilité DeliKreol.
+                      {DELIVERY_NOTICE}
                     </div>
                   )}
                   <hr className="border-orange-100" />
@@ -442,6 +452,19 @@ export default function CartPage() {
               {/* Delivery info */}
               <div className="bg-white rounded-2xl border border-orange-100 p-6 space-y-4">
                 <h2 className="text-lg font-bold text-gray-900">Informations de commande</h2>
+
+                {/* Multi-traiteur warning */}
+                {hasMultipleVendors && (
+                  <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
+                    <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-bold text-amber-800">Panier multi-partenaires</p>
+                      <p className="text-amber-700">
+                        Pour cette version test, merci de valider une commande par partenaire. Le panier multi-traiteur arrive bientôt.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Téléphone */}
                 <div>

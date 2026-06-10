@@ -65,11 +65,11 @@ export const integrations: IntegrationsConfig = {
     status: (import.meta.env.VITE_SHEETS_PUBLIC_URL || import.meta.env.VITE_SHEETS_ORDERS_URL || import.meta.env.VITE_SHEETS_API_URL) ? 'configured' : 'pending',
   },
   openai: {
-    enabled: !!import.meta.env.VITE_OPENAI_API_KEY,
-    label: 'OpenAI',
-    description: 'Intelligence artificielle et copilot admin',
-    apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-    status: import.meta.env.VITE_OPENAI_API_KEY ? 'configured' : 'pending',
+    enabled: false,
+    label: 'OpenAI (proxy uniquement)',
+    description: 'IA serveur/proxy uniquement. Aucune clé exposée côté frontend.',
+    apiKey: undefined,
+    status: 'pending',
   },
   crypto: {
     enabled: false,
