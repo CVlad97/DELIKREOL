@@ -160,7 +160,7 @@ export default function CartPage() {
       '',
       `Total : ${total.toFixed(2)} €`,
       `Commune : ${commune || 'Non précisée'}`,
-      {`Type : ${mode === 'retrait' ? 'Retrait' : mode === 'relais' ? 'Point relais' : 'Livraison'}`},
+      `Type : ${mode === 'retrait' ? 'Retrait' : mode === 'relais' ? 'Point relais' : 'Livraison'}`,
       `Créneau(x) souhaité(s) : ${creneauText || 'Non précisé'}`,
       `Traiteur : ${traiteurText}`,
       phone ? `Téléphone : ${phone}` : '',
