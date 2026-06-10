@@ -22,12 +22,11 @@ export interface IntegrationsConfig {
 
 export const integrations: IntegrationsConfig = {
   stripe: {
-    // Stripe is no longer the primary payment path for the public pilot.
-    // We keep the entry for compatibility with existing admin screens, but default it off.
+    // Stripe test mode — prêt pour validation, pas activé sur le site public
     enabled: false,
-    label: 'Stripe (désactivé)',
-    description: 'Paiement désactivé (pivot vers lien bancaire / virement)',
-    publicKey: undefined,
+    label: 'Stripe (test — désactivé)',
+    description: 'Mode test prêt. Activer après validation humaine.',
+    publicKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
     status: 'pending',
   },
   qonto: {
