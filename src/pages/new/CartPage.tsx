@@ -360,10 +360,10 @@ export default function CartPage() {
                 <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="font-bold text-green-800 text-sm">
-                    Votre récapitulatif est prêt.
+                    Commande enregistrée.
                   </p>
                   <p className="text-green-700 text-sm">
-                    Cliquez sur WhatsApp pour envoyer votre demande à DeliKreol. La commande sera confirmée après vérification des disponibilités, du retrait/livraison et du total final.
+                    Votre commande est enregistrée. Le support WhatsApp est disponible si besoin.
                   </p>
                 </div>
               </div>
@@ -466,7 +466,7 @@ export default function CartPage() {
                 <div className="space-y-3 mb-4">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Sous-total ({itemCount} articles)</span>
-                    <span className="font-bold text-gray-900">{total.toFixed(2)} €</span>
+                    <span className="font-bold text-gray-900">{total.toFixed(2).replace('.', ',')} €</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">
@@ -501,15 +501,15 @@ export default function CartPage() {
                   Paiement
                 </h3>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-semibold">
-                    WhatsApp-first
+                  <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-semibold">
+                    Confirmation sur le site
                   </span>
                   <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full font-semibold">
                     Paiement en ligne bientôt disponible
                   </span>
                 </div>
                 <p className="text-xs text-gray-500 leading-relaxed">
-                  Le paiement en ligne n'est pas encore activé sur cette version test. Votre commande est d'abord confirmée par WhatsApp avec le total final.
+                  Le paiement en ligne n'est pas encore activé sur cette version test. Votre commande est confirmée sur le site et le support WhatsApp est disponible si besoin.
                 </p>
               </div>
 
@@ -694,7 +694,7 @@ export default function CartPage() {
                 </button>
               )}
               <p className="text-xs text-center text-gray-400">
-                Vous ne payez pas encore en ligne. La commande est envoyée à DeliKreol pour confirmation du plat, du retrait/livraison et du total final.
+                Vous ne payez pas encore en ligne. La commande est créée sur le site et confirmée par nos équipes. Besoin d'aide ? Contactez le support WhatsApp.
               </p>
             </div>
           </div>
