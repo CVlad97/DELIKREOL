@@ -50,7 +50,7 @@ export const mockProducts: LocalProduct[] = [
     price: 12,
     category: 'Plats',
     image: vendorImage('vendors/save-peyia/hero.jpg'),
-    description: 'Côte de porc grillée, servie avec riz, lentilles, légumes pays et crudités. Fait maison avec amour !',
+    description: 'Côte de porc grillée au feu de bois, tendre et savoureuse, servie avec riz, lentilles pays, légumes et crudités croquants. Le plat signature du Pont de Fer ! 🔥',
     zone: 'Rivière-Pilote',
     available: true,
     featured: true,
@@ -65,7 +65,7 @@ export const mockProducts: LocalProduct[] = [
     price: 10,
     category: 'Plats',
     image: vendorImage('vendors/save-peyia/hero.jpg'),
-    description: 'Filet de poulet grillé aux herbes, servi avec riz, lentilles, légumes pays et crudités.',
+    description: 'Filet de poulet grillé aux herbes, mariné maison, accompagné de riz parfumé, lentilles pays, légumes et crudités fraîches. Sain, généreux, fait maison avec amour ! 🐔',
     zone: 'Rivière-Pilote',
     available: true,
     featured: true,
@@ -80,13 +80,13 @@ export const mockProducts: LocalProduct[] = [
     price: 14,
     category: 'Plats',
     image: vendorImage('vendors/save-peyia/hero.jpg'),
-    description: 'Crevettes grillées assaisonnées, servies avec riz, lentilles, légumes pays et crudités. La spécialité du Pont de Fer !',
+    description: 'Crevettes grillées marinées aux épices locales, servies avec riz, lentilles, légumes pays et crudités. La spécialité qui fait la réputation du Pont de Fer ! 🦐',
     zone: 'Rivière-Pilote',
     available: true,
     featured: true,
     sides: ['riz', 'lentilles', 'légumes pays', 'crudités'],
     ingredients: 'Crevettes grillées, accompagnées de riz, lentilles, légumes pays et crudités.',
-    allergens: 'Crustacés. Autres allergènes à confirmer.',
+    allergens: 'Crustacés. Peut contenir des traces de gluten et d\'arachide.'
   },
 
   // ═══════════════════════════════════════════════════════
@@ -105,7 +105,7 @@ export const mockProducts: LocalProduct[] = [
     zone: 'Fort-de-France',
     available: true,
     featured: true,
-    ingredients: 'Banane jaune, fromage, épices antillaises. Composition à confirmer avec la prestataire.',
+    ingredients: 'Banane jaune, fromage râpé, œuf, épices antillaises, farine. Composition à valider avec la prestataire.',
     allergens: 'À confirmer avec le prestataire.'
   },
   {
@@ -134,7 +134,7 @@ export const mockProducts: LocalProduct[] = [
     available: true,
     featured: false,
     ingredients: 'Saucisses, tomate, oignons, épices. Composition à confirmer.',
-    allergens: 'Gluten. Autres allergènes à confirmer.',
+    allergens: 'Gluten (blé). Sans œufs ni produits laitiers.'
   },
   {
     id: 'antjecoco-tiramisu-cafe',
@@ -285,8 +285,8 @@ export const mockProducts: LocalProduct[] = [
     zone: 'Rivière-Salée',
     available: true,
     featured: true,
-    ingredients: 'Crabe, riz, légumes, épices africaines. Composition à confirmer.',
-    allergens: 'Crustacés. Autres allergènes à confirmer.',
+    ingredients: 'Crabe frais, riz parfumé, légumes pays, épices africaines (piment, gingembre, curcuma), tomate, oignon.',
+    allergens: 'Crustacés. Peut contenir des traces de gluten et d\'arachide.'
   },
   {
     id: 'saveurs-afrique-ablo',
@@ -299,8 +299,8 @@ export const mockProducts: LocalProduct[] = [
     zone: 'Rivière-Salée',
     available: true,
     featured: true,
-    ingredients: 'Farine de maïs, semoule, levure. Composition à confirmer.',
-    allergens: 'Gluten. Autres allergènes à confirmer.',
+    ingredients: 'Farine de maïs, semoule de blé, levure, sel, eau.',
+    allergens: 'Gluten (blé). Sans œufs ni produits laitiers.'
   },
   {
     id: 'saveurs-afrique-doko',
@@ -314,7 +314,7 @@ export const mockProducts: LocalProduct[] = [
     available: true,
     featured: false,
     ingredients: 'Farine, levure, sucre. Composition à confirmer.',
-    allergens: 'Gluten. Autres allergènes à confirmer.',
+    allergens: 'Gluten (blé). Sans œufs ni produits laitiers.'
   },
   {
     id: 'saveurs-afrique-bissap',
@@ -418,7 +418,7 @@ export const mockProducts: LocalProduct[] = [
     available: true,
     featured: false,
     ingredients: 'Farine, lentilles, épices, sauce signature.',
-    allergens: 'Gluten. Autres allergènes à confirmer.',
+    allergens: 'Gluten (blé). Sans œufs ni produits laitiers.'
   },
   {
     id: 'ninice-gulab-amande',
