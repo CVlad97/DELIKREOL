@@ -138,7 +138,7 @@ export default function HomePage() {
               Le réflexe local qui donne envie de commander.
             </p>
             <p className="text-base text-gray-500 mb-8 max-w-2xl mx-auto">
-              Choisissez un plat ou un traiteur près de chez vous en Martinique. Commandez en un clic, confirmez par WhatsApp.
+              Choisissez un plat ou un traiteur près de chez vous en Martinique. Commandez sur le site, choisissez retrait, point relais ou livraison, et contactez le support seulement si besoin.
             </p>
 
             {/* Search Bar */}

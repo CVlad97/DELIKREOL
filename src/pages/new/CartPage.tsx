@@ -144,6 +144,7 @@ export default function CartPage() {
   // Build WhatsApp message
   const whatsappMessage = useMemo(() => {
     if (items.length === 0) return '';
+    const modeFee = DELIVERY_FEES[mode]?.fee || 0;
 
     const productList = items
       .map(
@@ -161,7 +162,7 @@ export default function CartPage() {
       `Produits :`,
       productList,
       '',
-      `Total : ${total.toFixed(2)} €`,
+      `Total : ${(total + modeFee).toFixed(2).replace('.', ',')} € (dont ${modeFee.toFixed(2).replace('.', ',')} € de ${mode === 'retrait' ? 'retrait' : mode === 'relais' ? 'point relais' : 'livraison'})`,
       `Commune : ${commune || 'Non précisée'}`,
       `Type : ${mode === 'retrait' ? 'Retrait' : mode === 'relais' ? 'Point relais' : 'Livraison'}`,
       `Créneau(x) souhaité(s) : ${creneauText || 'Non précisé'}`,
@@ -468,10 +469,10 @@ export default function CartPage() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">
-                      {mode === 'retrait' ? 'Retrait' : mode === 'relais' ? 'Point relais' : 'Livraison'}
+                      {mode === 'retrait' ? 'Frais retrait' : mode === 'relais' ? 'Frais point relais' : 'Frais livraison'}
                     </span>
                     <span className="text-gray-400 text-xs">
-                      {mode === 'retrait' ? 'Gratuit' : `+ ${DELIVERY_FEES[mode].fee.toFixed(2).replace('.', ',')} €`}
+                      {mode === 'retrait' ? 'Gratuit' : `${(DELIVERY_FEES[mode]?.fee || 0).toFixed(2).replace('.', ',')} €`}
                     </span>
                   </div>
                   {mode === 'livraison' && total < 40 && (
@@ -483,7 +484,7 @@ export default function CartPage() {
                   <div className="flex justify-between">
                     <span className="font-bold text-gray-900">Total estimé</span>
                     <span className="text-2xl font-black text-orange-600">
-                      {total.toFixed(2)} €
+                      {(total + (DELIVERY_FEES[mode]?.fee || 0)).toFixed(2).replace('.', ',')} €
                     </span>
                   </div>
                   <p className="text-xs text-gray-400">
