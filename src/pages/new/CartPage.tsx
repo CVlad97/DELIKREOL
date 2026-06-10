@@ -526,28 +526,39 @@ export default function CartPage() {
                 {/* Mode */}
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-1.5">Mode</label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <button
                       onClick={() => setMode('retrait')}
-                      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                      className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
                         mode === 'retrait'
                           ? 'bg-orange-500 text-white shadow-md'
                           : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-orange-300'
                       }`}
                     >
                       <Store className="w-4 h-4" />
-                      Retrait
+                      Retrait {total > 0 ? `${total.toFixed(2).replace('.', ',')} €` : ''}
+                    </button>
+                    <button
+                      onClick={() => setMode('relais')}
+                      className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
+                        mode === 'relais'
+                          ? 'bg-orange-500 text-white shadow-md'
+                          : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-orange-300'
+                      }`}
+                    >
+                      <Store className="w-4 h-4" />
+                      Relais +2,50€
                     </button>
                     <button
                       onClick={() => setMode('livraison')}
-                      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                      className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
                         mode === 'livraison'
                           ? 'bg-orange-500 text-white shadow-md'
                           : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-orange-300'
                       }`}
                     >
                       <Truck className="w-4 h-4" />
-                      Livraison
+                      Livraison +4€
                     </button>
                   </div>
                 </div>

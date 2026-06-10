@@ -47,8 +47,8 @@ const HOW_IT_WORKS_STEPS = [
   },
   {
     icon: MessageCircle,
-    title: 'Commandez via WhatsApp',
-    description: 'Votre commande est envoyée directement sur WhatsApp pour confirmation rapide.',
+    title: 'Confirmez sur le site',
+    description: 'Votre commande est préparée et confirmée directement sur DELIKREOL. Suivi et support inclus.',
     color: 'bg-green-100 text-green-600',
   },
   {
@@ -186,15 +186,15 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* WhatsApp CTA */}
+            {/* WhatsApp Support CTA */}
             <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Bonjour DeliKreol, je souhaite passer une commande !')}`}
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Bonjour, j\'ai besoin d\'aide sur DELIKREOL.')}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 px-8 py-4 bg-green-500 hover:bg-green-600 text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-green-200 text-lg"
             >
               <MessageCircle className="w-6 h-6" fill="white" />
-              Commander sur WhatsApp
+              Besoin d'aide ? Support WhatsApp
             </a>
           </div>
         </div>
@@ -469,13 +469,13 @@ export default function HomePage() {
               Voir le catalogue
             </Link>
             <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Bonjour DeliKreol, je souhaite commander !')}`}
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Bonjour, j\'ai besoin d\'aide sur DELIKREOL.')}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-8 py-4 bg-green-500 hover:bg-green-600 text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-green-200 text-lg"
             >
               <MessageCircle className="w-5 h-5" fill="white" />
-              WhatsApp
+              Support WhatsApp
             </a>
           </div>
         </div>
