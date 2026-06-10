@@ -42,14 +42,16 @@ export function Header() {
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
+          {/* Logo DELIKREOL */}
           <Link
             to="/"
             className="flex items-center gap-2 group"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-orange-600 flex items-center justify-center shadow-glow group-hover:scale-105 transition-transform">
-              <span className="text-white font-bold text-sm">DK</span>
-            </div>
+            <img
+              src="/branding/logo-mark.svg"
+              alt="DeliKreol"
+              className="h-9 w-auto group-hover:scale-105 transition-transform"
+            />
             <div className="hidden sm:block">
               <span className="text-lg font-bold tracking-tight text-foreground">
                 Deli<span className="text-primary">Kreol</span>
