@@ -89,23 +89,27 @@ export default function CartPage() {
 
     const traiteurText = traiteurs.length > 0 ? traiteurs.join(', ') : 'Non précisé';
 
-    return [
-      'Bonjour DeliKreol, je souhaite vérifier cette commande :',
+    const lines = [
+      'Bonjour 👋 Nouvelle commande DeliKreol.',
       '',
       `Produits :`,
       productList,
       '',
-      `Montant : ${total.toFixed(2)}€`,
+      `Total : ${total.toFixed(2)} €`,
       `Commune : ${commune || 'Non précisée'}`,
-      `Mode : ${mode === 'retrait' ? 'Retrait' : 'Livraison'}`,
+      `Type : ${mode === 'retrait' ? 'Retrait' : 'Livraison'}`,
       `Créneau souhaité : ${creneau || 'Non précisé'}`,
       `Traiteur : ${traiteurText}`,
       '',
-      `Note : livraison à confirmer avec le prestataire.`,
-      notes ? `\nMessage du client : ${notes}` : '',
+      mode === 'livraison' ? `Livraison éloignée possible à partir de 40 € de commande, selon validation du prestataire et disponibilité DeliKreol.` : '',
+      notes ? `\\nMessage : ${notes}` : '',
+      '',
+      'Merci de confirmer la disponibilité avec le prestataire.',
     ]
       .filter(Boolean)
-      .join('\n');
+            .join('\n');
+
+          return lines;
   }, [items, total, commune, mode, creneau, notes, traiteurs]);
 
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMessage)}`;
