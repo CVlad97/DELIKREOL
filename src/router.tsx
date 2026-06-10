@@ -39,6 +39,8 @@ const AdminMemoire = lazy(() => import('./pages/admin/AdminMemoire'));
 const AdminParametres = lazy(() => import('./pages/admin/AdminParametres'));
 const AdminOrchestrateur = lazy(() => import('./pages/admin/AdminOrchestrateur'));
 const AdminOffres = lazy(() => import('./pages/admin/AdminOffres'));
+const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
+const PrivacyPolicy = lazy(() => import('./pages/legal/PrivacyPolicy'));
 
 const basePath = import.meta.env.VITE_BASE_PATH || import.meta.env.BASE_URL || '/';
 
@@ -95,6 +97,11 @@ export function AppRouter() {
                   <Route path="livraison" element={<LivraisonPage />} />
                   <Route path="pro" element={<ProSpacePage />} />
                   <Route path="statut-commande" element={<OrderStatusPage />} />
+                  {/* Pages légales */}
+                  <Route path="cgv" element={<TermsOfService />} />
+                  <Route path="cgu" element={<TermsOfService />} />
+                  <Route path="confidentialite" element={<PrivacyPolicy />} />
+                  <Route path="mentions-legales" element={<PrivacyPolicy />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Route>
 

@@ -17,6 +17,7 @@ const quickLinks = [
 ];
 
 const legalLinks = [
+  { label: 'CGV', to: '/cgv' },
   { label: 'CGU', to: '/cgu' },
   { label: 'Politique de confidentialité', to: '/confidentialite' },
   { label: 'Mentions légales', to: '/mentions-legales' },
