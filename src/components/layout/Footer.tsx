@@ -155,7 +155,7 @@ export function Footer() {
           {/* Bottom bar */}
           <div className="mt-12 pt-6 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-muted-foreground">
-              © 2024-2026 DeliKreol — Martinique. Tous droits réservés.
+              © 2026 DeliKreol — Martinique. Tous droits réservés. Propriété exclusive.
             </p>
             <p className="text-xs text-muted-foreground/60">
               Fait avec 🧡 en Martinique

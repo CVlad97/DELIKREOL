@@ -1,0 +1,26 @@
+# DELIKREOL — Tous droits réservés
+
+Copyright © 2026 Vladimir Claveau (CVlad97).
+
+Tous droits réservés. Ce logiciel et son code source sont la propriété exclusive de Vladimir Claveau. Aucune reproduction, modification, distribution ou utilisation commerciale n'est autorisée sans autorisation écrite préalable.
+
+This software and its source code are the exclusive property of Vladimir Claveau. No reproduction, modification, distribution or commercial use is permitted without prior written permission.
+
+## Ce qui est protégé
+- Le code source complet (frontend, backend, Edge Functions)
+- Les designs, interfaces utilisateur et maquettes
+- Les textes, descriptions produits et contenus rédactionnels
+- Les photos, logos et éléments graphiques
+- La base de données et schémas Supabase
+- La documentation technique et fonctionnelle
+- Le modèle économique et la tarification
+- Les noms "DeliKreol", "DELIKREOL", "Le réflexe local" et slogans associés
+
+## Dépôt privé recommandé
+Ce dépôt est public pour le déploiement GitHub Pages. Pour protéger le code source complet :
+1. Passer le dépôt en **privé** sur GitHub
+2. Utiliser un déploiement séparé (GitHub Actions déploie le build, pas le code source)
+3. Garder les clés API et tokens dans GitHub Secrets
+
+## Contact
+Vladimir Claveau — vladimirclavo@gmail.com
