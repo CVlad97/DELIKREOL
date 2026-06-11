@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import { MobileCartBar } from './MobileCartBar';
+import { CookieConsent } from '../CookieConsent';
 
 interface LayoutProps {
   children: ReactNode;
@@ -26,6 +27,9 @@ export function Layout({ children, title }: LayoutProps) {
 
       {/* Floating mobile cart bar — sticks to bottom on small screens */}
       <MobileCartBar />
+
+      {/* Cookie consent banner */}
+      <CookieConsent />
     </div>
   );
 }
