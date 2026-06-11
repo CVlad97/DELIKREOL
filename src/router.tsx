@@ -40,6 +40,8 @@ const AdminParametres = lazy(() => import('./pages/admin/AdminParametres'));
 const AdminOrchestrateur = lazy(() => import('./pages/admin/AdminOrchestrateur'));
 const AdminOffres = lazy(() => import('./pages/admin/AdminOffres'));
 const AdminSimulation = lazy(() => import('./pages/admin/AdminSimulation'));
+const PartnerAccessPage = lazy(() => import('./pages/new/PartnerAccessPage'));
+const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'));
 const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/legal/PrivacyPolicy'));
 
@@ -98,6 +100,8 @@ export function AppRouter() {
                   <Route path="livraison" element={<LivraisonPage />} />
                   <Route path="pro" element={<ProSpacePage />} />
                   <Route path="statut-commande" element={<OrderStatusPage />} />
+                  {/* Partenaire */}
+                  <Route path="partenaire" element={<PartnerAccessPage />} />
                   {/* Pages légales */}
                   <Route path="cgv" element={<TermsOfService />} />
                   <Route path="cgu" element={<TermsOfService />} />
@@ -121,6 +125,7 @@ export function AppRouter() {
                   <Route path="orchestrateur" element={<AdminOrchestrateur />} />
                   <Route path="offres" element={<AdminOffres />} />
                   <Route path="simulation" element={<AdminSimulation />} />
+                  <Route path="dashboard" element={<AdminDashboardPage />} />
                 </Route>
               </Routes>
             </ToastProvider>
