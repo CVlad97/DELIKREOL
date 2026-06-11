@@ -57,8 +57,7 @@ export const mockProducts: LocalProduct[] = [
     zone: 'Rivière-Pilote',
     available: true,
     featured: true,
-    sides: ['riz', 'lentilles', 'légumes pays', 'crudités'],
-    ingredients: 'Côte de porc grillée, accompagnée de riz, lentilles, légumes pays et crudités.',
+        ingredients: 'Côte de porc grillée, accompagnée de riz, lentilles, légumes pays et crudités.',
     allergens: 'À confirmer avec le prestataire.'
   },
   {
@@ -72,8 +71,7 @@ export const mockProducts: LocalProduct[] = [
     zone: 'Rivière-Pilote',
     available: true,
     featured: true,
-    sides: ['riz', 'lentilles', 'légumes pays', 'crudités'],
-    ingredients: 'Filet de poulet grillé, accompagné de riz, lentilles, légumes pays et crudités.',
+        ingredients: 'Filet de poulet grillé, accompagné de riz, lentilles, légumes pays et crudités.',
     allergens: 'À confirmer avec le prestataire.'
   },
   {
@@ -87,8 +85,7 @@ export const mockProducts: LocalProduct[] = [
     zone: 'Rivière-Pilote',
     available: true,
     featured: true,
-    sides: ['riz', 'lentilles', 'légumes pays', 'crudités'],
-    ingredients: 'Crevettes grillées, accompagnées de riz, lentilles, légumes pays et crudités.',
+        ingredients: 'Crevettes grillées, accompagnées de riz, lentilles, légumes pays et crudités.',
     allergens: 'Crustacés. Peut contenir des traces de gluten et d\'arachide.'
   },
 
