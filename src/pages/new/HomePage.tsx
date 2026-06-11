@@ -136,7 +136,7 @@ export default function HomePage() {
               🧪 Phase pilote — service en amélioration continue
             </div>
             <h1 className="text-4xl md:text-6xl font-black text-gray-900 leading-tight mb-4">
-              DeliKreol
+              Deli<span className="text-primary">Kreol</span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 mb-6 font-semibold">
               Le réflexe local qui donne envie de commander.
