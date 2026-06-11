@@ -73,6 +73,7 @@ export default function CataloguePage() {
   const [selectedMode, setSelectedMode] = useState<'tous' | 'retrait' | 'livraison'>('tous');
   const [showAvailableOnly, setShowAvailableOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [sortMode, setSortMode] = useState<'default' | 'commune' | 'prix-croissant' | 'prix-decroissant' | 'disponible'>('default');
 
   // Build extended product list with traiteur menu items
   const allProducts: LocalProduct[] = useMemo(() => {
@@ -161,8 +162,23 @@ export default function CataloguePage() {
       results = results.filter((p) => p.available !== false);
     }
 
+    // Sort
+    if (sortMode === 'prix-croissant') {
+      results.sort((a, b) => a.price - b.price);
+    } else if (sortMode === 'prix-decroissant') {
+      results.sort((a, b) => b.price - a.price);
+    } else if (sortMode === 'commune' && selectedCommune) {
+      results.sort((a, b) => {
+        const aMatch = a.zone?.toLowerCase().includes(selectedCommune.toLowerCase()) ? 0 : 1;
+        const bMatch = b.zone?.toLowerCase().includes(selectedCommune.toLowerCase()) ? 0 : 1;
+        return aMatch - bMatch;
+      });
+    } else if (sortMode === 'disponible') {
+      results.sort((a, b) => (a.available === b.available ? 0 : a.available ? -1 : 1));
+    }
+
     return results;
-  }, [allProducts, searchQuery, selectedCategory, selectedCommune, selectedBudgetIndex, showAvailableOnly, selectedMode]);
+  }, [allProducts, searchQuery, selectedCategory, selectedCommune, selectedBudgetIndex, showAvailableOnly, selectedMode, sortMode]);
 
   const handleAddToCart = (product: LocalProduct) => {
     addItem(localProductToCartProduct(product));
@@ -276,6 +292,24 @@ export default function CataloguePage() {
           {showFilters && (
             <div className="bg-white rounded-2xl border border-orange-100 p-6 mb-6 shadow-sm">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Tri par commune */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    <MapPin className="w-4 h-4 inline mr-1" />
+                    Trier par
+                  </label>
+                  <select
+                    value={sortMode}
+                    onChange={(e) => setSortMode(e.target.value as any)}
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 text-sm bg-white outline-none"
+                  >
+                    <option value="default">Pertinence</option>
+                    <option value="commune">Ma commune</option>
+                    <option value="prix-croissant">Prix croissant</option>
+                    <option value="prix-decroissant">Prix décroissant</option>
+                    <option value="disponible">Disponible maintenant</option>
+                  </select>
+                </div>
                 {/* Commune */}
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">
