@@ -14,11 +14,14 @@ export interface LocalProduct {
   image?: string;
   description?: string;
   zone?: string;
-  available?: boolean;
+  available: boolean;
   featured?: boolean;
-  allergens?: string;
   ingredients?: string;
-  sides?: string[];
+  allergens?: string;
+  /** Statut qualité photo : validée | floue | non bankable | à valider */
+  photoQuality?: 'validée' | 'floue' | 'non bankable' | 'à valider';
+  /** Statut qualité description : validée | à corriger | composition manquante | à valider */
+  descQuality?: 'validée' | 'à corriger' | 'composition manquante' | 'à valider';
 }
 
 export type Category = {

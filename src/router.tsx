@@ -39,6 +39,7 @@ const AdminMemoire = lazy(() => import('./pages/admin/AdminMemoire'));
 const AdminParametres = lazy(() => import('./pages/admin/AdminParametres'));
 const AdminOrchestrateur = lazy(() => import('./pages/admin/AdminOrchestrateur'));
 const AdminOffres = lazy(() => import('./pages/admin/AdminOffres'));
+const AdminSimulation = lazy(() => import('./pages/admin/AdminSimulation'));
 const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/legal/PrivacyPolicy'));
 
@@ -119,6 +120,7 @@ export function AppRouter() {
                   <Route path="parametres" element={<AdminParametres />} />
                   <Route path="orchestrateur" element={<AdminOrchestrateur />} />
                   <Route path="offres" element={<AdminOffres />} />
+                  <Route path="simulation" element={<AdminSimulation />} />
                 </Route>
               </Routes>
             </ToastProvider>
