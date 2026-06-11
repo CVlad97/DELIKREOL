@@ -216,17 +216,17 @@ export default function DevenirPartenairePage() {
         {/* Forfaits partenaires */}
         <div className="mb-10">
           <h2 className="text-xl font-display font-bold mb-2">Forfaits DELIKREOL</h2>
-          <p className="text-sm text-muted-foreground mb-6">Aucun frais d'accès pendant la phase pilote. Le partenaire peut modifier gratuitement sa fiche. L'aide DELIKREOL est une prestation optionnelle payante.</p>
+          <p className="text-sm text-muted-foreground mb-6">Pendant la phase pilote, envoyez vos corrections à DELIKREOL par WhatsApp. Nous les appliquons gratuitement avant publication. L'accès modification directe arrivera prochainement.</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-5 relative">
               <div className="absolute -top-2.5 left-4 px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full uppercase">Phase pilote</div>
               <h3 className="font-bold text-lg mt-1">Accès autonome</h3>
               <p className="text-3xl font-black text-emerald-600 my-2">0 €</p>
-              <p className="text-xs text-muted-foreground mb-3">Le partenaire modifie lui-même sa fiche gratuitement</p>
+              <p className="text-xs text-muted-foreground mb-3">Envoyez vos corrections à DELIKREOL. Nous les appliquons gratuitement.</p>
               <ul className="text-xs space-y-1 text-emerald-700">
-                <li>✅ Modification libre de la fiche</li>
+                <li>✅ Corrections gratuites par WhatsApp</li>
                 <li>✅ Photos, prix, description, bio</li>
-                <li>✅ Accès espace partenaire</li>
+                <li>✅ Accès espace partenaire (prochainement)</li>
                 <li>✅ Support par email</li>
               </ul>
             </div>

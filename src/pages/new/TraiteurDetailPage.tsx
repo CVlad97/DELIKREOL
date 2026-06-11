@@ -142,8 +142,27 @@ export function TraiteurDetailPage() {
 
         <p className="text-xs text-amber-600 flex items-center gap-1 mb-6">
           <AlertTriangle className="w-3 h-3" />
-          Horaires, retrait et livraison à confirmer avec le prestataire.
+          Fiche en cours de validation avec la partenaire. Photos et descriptions à confirmer.
         </p>
+
+        {/* Bouton Envoyer mes corrections */}
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+          <p className="text-sm text-amber-800 font-semibold mb-1">Vous êtes ce partenaire ?</p>
+          <p className="text-xs text-amber-700 mb-3">
+            Envoyez vos corrections à DELIKREOL, nous les appliquons gratuitement avant publication.
+          </p>
+          <a
+            href={`https://wa.me/596696653589?text=${encodeURIComponent(
+              `Bonjour Vladimir, je souhaite corriger ma fiche DELIKREOL.\nPartenaire : ${traiteur.name}\nCorrections à apporter :\n- Description :\n- Plats :\n- Prix :\n- Photos :\n- Compositions :\n- Allergènes :\n- Horaires :\n- Disponibilités :\n- Modes : retrait / relais / livraison`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all text-sm"
+          >
+            <MessageCircle className="w-4 h-4" fill="white" />
+            Envoyer mes corrections
+          </a>
+        </div>
 
         {/* CTA buttons */}
         <div className="flex flex-wrap gap-3">
