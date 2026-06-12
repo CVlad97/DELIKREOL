@@ -48,7 +48,7 @@ export function Header() {
             className="flex items-center gap-2 group"
           >
             <img
-              src="/branding/logo-mark.svg"
+              src={`${import.meta.env.BASE_URL || '/'}branding/logo-mark.svg`}
               alt="DeliKreol"
               className="h-9 w-auto group-hover:scale-105 transition-transform"
             />
