@@ -152,10 +152,122 @@ export const mockProducts: LocalProduct[] = [
   },
 
   // ═══════════════════════════════════════════════════════
-  // COCO'S FOOD — Rivière-Pilote (Marché)
-  // Cuisine de marché créole et caribéenne — photos WhatsApp mai 2026
-  // 8 produits identifiés sur photos — prix estimés à confirmer
-  // ═══════════════════════════════════════════════════════
+    // COCO'S FOOD — Rivi\xe8re-Pilote
+  // 8 produits avec photos sp\xe9cifiques (card + showcase)
+  // Source : WhatsApp import mai 2026 + analyse photo
+  {
+    id: 'cocos-food-paella-noire',
+    name: 'Paella noire aux fruits de mer',
+    vendor: "Coco's Food",
+    price: 15,
+    category: 'Plats',
+    image: vendorImage('vendors/coco/coco-paella-noire-card.jpg'),
+    description: 'Riz noir \xe0 l\'encre de seiche, garni g\xe9n\xe9reusement de crevettes, moules et poissons, relev\xe9 de poivrons et petits pois. La sp\xe9cialit\xe9 du march\xe9 sign\xe9e Coco\'s Food \u2014 un plat marin riche en saveurs et en couleurs.',
+    zone: 'Rivi\xe8re-Pilote',
+    available: true,
+    featured: true,
+    ingredients: 'Riz, encre de seiche, crevettes, moules, poisson, poivrons, oignons, petits pois, \xe9pices.',
+    allergens: 'Crustac\xe9s, mollusques, poisson.'
+  },
+  {
+    id: 'cocos-food-box-poisson-avocat',
+    name: 'Box poisson avocat',
+    vendor: "Coco's Food",
+    price: 14,
+    category: 'Plats',
+    image: vendorImage('vendors/coco/coco-box-poisson-avocat-card.jpg'),
+    description: 'Poulet r\xf4ti tendre et juteux, accompagn\xe9 de riz parfum\xe9 aux herbes, chou rouge croquant, carottes r\xe2p\xe9es et ma\xefs doux. Un bowl complet et color\xe9, relev\xe9 d\'une sauce \xe9pic\xe9e aux oignons et piment frais.',
+    zone: 'Rivi\xe8re-Pilote',
+    available: true,
+    featured: true,
+    ingredients: 'Poulet r\xf4ti, riz aux herbes, chou rouge, carottes, ma\xefs, oignon, piment, \xe9pices.',
+    allergens: '\xc0 confirmer avec la partenaire.'
+  },
+  {
+    id: 'cocos-food-brochettes-panees',
+    name: 'Brochettes pan\xe9es',
+    vendor: "Coco's Food",
+    price: 12,
+    category: 'Plats',
+    image: vendorImage('vendors/coco/coco-brochettes-panees-card.jpg'),
+    description: 'Brochettes de poulet pan\xe9es, dor\xe9es et croustillantes, servies avec une sauce saveur maison. Accompagn\xe9es de riz blanc et de crudit\xe9s fra\xeeches.',
+    zone: 'Rivi\xe8re-Pilote',
+    available: true,
+    featured: true,
+    ingredients: 'Poulet, chapelure, \u0153uf, riz, salade, tomate, sauce.',
+    allergens: 'Gluten, \u0153ufs.'
+  },
+  {
+    id: 'cocos-food-poulet-roti',
+    name: 'Poulet r\xf4ti',
+    vendor: "Coco's Food",
+    price: 13,
+    category: 'Plats',
+    image: vendorImage('vendors/coco/coco-poulet-roti-card.jpg'),
+    description: 'Poulet r\xf4ti \xe0 la perfection, peau croustillante et chair fondante, accompagn\xe9 de riz pilaf, de banane plantain frite et de crudit\xe9s. Un grand classique de la cuisine cr\xe9ole.',
+    zone: 'Rivi\xe8re-Pilote',
+    available: true,
+    featured: true,
+    ingredients: 'Poulet, riz, banane plantain, salade, tomate, \xe9pices.',
+    allergens: '\xc0 confirmer avec la partenaire.'
+  },
+  {
+    id: 'cocos-food-plat-jour-complet',
+    name: 'Plat du jour complet',
+    vendor: "Coco's Food",
+    price: 14,
+    category: 'Plats',
+    image: vendorImage('vendors/coco/coco-plat-jour-complet-card.jpg'),
+    description: 'Assiette compl\xe8te et g\xe9n\xe9reuse : viande mijot\xe9e tendre, riz parfum\xe9, gratin de l\xe9gumes pays et crudit\xe9s fra\xeeches. Un repas \xe9quilibr\xe9 qui change chaque jour.',
+    zone: 'Rivi\xe8re-Pilote',
+    available: true,
+    featured: true,
+    ingredients: 'Viande mijot\xe9e, riz, l\xe9gumes pays, gratin, salade.',
+    allergens: '\xc0 confirmer avec la partenaire.'
+  },
+  {
+    id: 'cocos-food-box-grille',
+    name: 'Box grill\xe9',
+    vendor: "Coco's Food",
+    price: 14,
+    category: 'Plats',
+    image: vendorImage('vendors/coco/coco-box-grille-card.jpg'),
+    description: 'Viande grill\xe9e marin\xe9e aux \xe9pices, cuite au barbecue, servie avec riz blanc, banane plantain frite et salade de crudit\xe9s maison. Les saveurs fum\xe9es du grill.',
+    zone: 'Rivi\xe8re-Pilote',
+    available: true,
+    featured: false,
+    ingredients: 'Viande grill\xe9e, riz, banane plantain, salade, tomate, oignon.',
+    allergens: '\xc0 confirmer avec la partenaire.'
+  },
+  {
+    id: 'cocos-food-friture-caramel',
+    name: 'Friture caramel',
+    vendor: "Coco's Food",
+    price: 6,
+    category: 'Desserts',
+    image: vendorImage('vendors/coco/coco-friture-caramel-card.jpg'),
+    description: 'Beignets croustillants enrob\xe9s d\'un caramel fondant. Une douceur traditionnelle martiniquaise, parfaite pour terminer le repas sur une note sucr\xe9e.',
+    zone: 'Rivi\xe8re-Pilote',
+    available: true,
+    featured: false,
+    ingredients: 'Farine, beurre, sucre, \u0153uf, caramel, vanille.',
+    allergens: 'Gluten, lait, \u0153ufs.'
+  },
+  {
+    id: 'cocos-food-salade-viande',
+    name: 'Salade viande',
+    vendor: "Coco's Food",
+    price: 11,
+    category: 'Plats',
+    image: vendorImage('vendors/coco/coco-salade-viande-card.jpg'),
+    description: 'Salade fra\xeeche et compl\xe8te : viande froide \xe9minc\xe9e, mesclun de salade verte, tomates cerises, ma\xefs, carottes r\xe2p\xe9es et \u0153uf dur. Une option l\xe9g\xe8re et \xe9quilibr\xee.',
+    zone: 'Rivi\xe8re-Pilote',
+    available: true,
+    featured: false,
+    ingredients: 'Viande, salade verte, tomate, ma\xefs, carotte, \u0153uf.',
+    allergens: '\u0152ufs.'
+  },
+// ═══════════════════════════════════════════════════════
   {
     id: 'cocos-food-paella-noire',
     name: 'Paella noire aux fruits de mer',
