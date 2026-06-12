@@ -193,8 +193,10 @@ export default function HomePage() {
                 Besoin d'aide ? Support WhatsApp
               </a>
             </div>
+            </div>
           </div>
-            </section>
+        </div>
+      </section>
 
       {/* Comment ça marche */}
       <section className="py-16 md:py-20 bg-white">
