@@ -98,33 +98,26 @@ export default function HomePage() {
           <div className="absolute bottom-10 right-20 w-96 h-96 bg-amber-300 rounded-full blur-3xl" />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            {/* Logo cloche */}
-            <div className="hidden md:flex justify-center">
-              <img
-                src={`${import.meta.env.BASE_URL}assets/hero-illustration.svg`}
-                alt="DELIKREOL"
-                className="w-full max-w-md h-auto drop-shadow-2xl"
-              />
-            </div>
-            {/* Text */}
-            <div className="text-center md:text-left">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            {/* Left: Text */}
+            <div className="text-center md:text-left order-2 md:order-1">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-100 text-orange-700 text-sm font-semibold mb-4 uppercase tracking-widest">
                 <Sparkles className="w-4 h-4" />
-                LOCAL PREMIUM
+                MARTINIQUE
               </div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold mb-4 ml-2">
                 🧪 Phase pilote
               </div>
-              <h1 className="text-4xl md:text-5xl font-black text-gray-900 leading-tight mb-4">
-                <span className="text-orange-500">Choisis</span> ton plat.
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 leading-tight mb-4">
+                Les meilleurs plats<br />
+                <span className="text-orange-500">maison de Martinique</span>
                 <br />
-                <span className="text-amber-500">Confirme</span> ta commande.
-                <br />
-                <span className="text-emerald-500">Récupère</span> ou reçois.
+                livrés, retirés ou déposés.
               </h1>
-              <p className="text-base text-gray-500 mb-6 max-w-lg mx-auto md:mx-0">
-                Commandez local en Martinique. Retrait, point relais ou livraison programmée.
+              <p className="text-base text-gray-500 mb-6 max-w-lg mx-auto md:mx-0 leading-relaxed">
+                Commandez les plats de vos traiteurs locaux. Retrait chez le partenaire, 
+                point relais ou livraison programmée selon votre commune. Une plateforme 
+                martiniquaise pensée pour bien manger sans complication.
               </p>
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start mb-8">
@@ -167,6 +160,15 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* Right: Food image */}
+            <div className="hidden md:flex justify-center order-1 md:order-2">
+              <img
+                src={`${import.meta.env.BASE_URL}assets/hero-food.svg`}
+                alt="Plats maison Martinique — DELIKREOL"
+                className="w-full max-w-sm h-auto drop-shadow-2xl"
+              />
+            </div>
+          </div>
             {/* Support WhatsApp */}
             <div className="flex justify-center pb-8">
               <a
@@ -179,7 +181,6 @@ export default function HomePage() {
                 Besoin d'aide ? Support WhatsApp
               </a>
             </div>
-          </div>
         </div>
       </section>
 

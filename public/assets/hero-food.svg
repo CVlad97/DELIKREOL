@@ -1,0 +1,47 @@
+<svg width="600" height="500" viewBox="0 0 600 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="600" height="500" rx="24" fill="#FFFAF3"/>
+  <!-- Plate -->
+  <ellipse cx="300" cy="300" rx="180" ry="120" fill="#F5F0EB" stroke="#E8DED0" stroke-width="2"/>
+  <ellipse cx="300" cy="300" rx="150" ry="95" fill="#FFF"/>
+  <!-- Rice -->
+  <ellipse cx="260" cy="290" rx="70" ry="40" fill="#FFF8DC"/>
+  <ellipse cx="260" cy="290" rx="60" ry="32" fill="#FFF3C4"/>
+  <!-- Chicken colombo -->
+  <ellipse cx="330" cy="280" rx="45" ry="30" fill="#D4883C"/>
+  <ellipse cx="330" cy="275" rx="40" ry="25" fill="#E8994A"/>
+  <!-- Sauce / gravy -->
+  <ellipse cx="290" cy="305" rx="50" ry="15" fill="#C4722A" opacity="0.6"/>
+  <!-- Accras / beignets -->
+  <circle cx="400" cy="270" r="12" fill="#D4A050"/>
+  <circle cx="415" cy="265" r="10" fill="#E0B060"/>
+  <circle cx="390" cy="260" r="11" fill="#C89040"/>
+  <!-- Legumes -->
+  <circle cx="220" cy="310" r="8" fill="#6B8E23"/>
+  <circle cx="235" cy="320" r="7" fill="#7BA428"/>
+  <circle cx="245" cy="308" r="6" fill="#5C7A1E"/>
+  <!-- Carrots -->
+  <ellipse cx="350" cy="320" rx="15" ry="6" fill="#E8732A"/>
+  <ellipse cx="370" cy="325" rx="12" ry="5" fill="#D4621A"/>
+  <!-- Plantain -->
+  <ellipse cx="210" cy="280" rx="20" ry="10" fill="#F0C858" transform="rotate(-15 210 280)"/>
+  <line x1="195" y1="285" x2="225" y2="275" stroke="#D4A030" stroke-width="1.5"/>
+  <!-- Lemon slice -->
+  <circle cx="420" cy="310" r="10" fill="#FFF44F"/>
+  <circle cx="420" cy="310" r="8" fill="#FFFDE0"/>
+  <line x1="420" y1="302" x2="420" y2="318" stroke="#E8D020" stroke-width="1"/>
+  <line x1="412" y1="310" x2="428" y2="310" stroke="#E8D020" stroke-width="1"/>
+  <!-- Steam -->
+  <path d="M270 235 Q275 215 270 195" stroke="#CCC" stroke-width="1.5" fill="none" opacity="0.4"/>
+  <path d="M310 228 Q315 208 310 188" stroke="#CCC" stroke-width="1.5" fill="none" opacity="0.3"/>
+  <path d="M350 235 Q355 215 350 195" stroke="#CCC" stroke-width="1.5" fill="none" opacity="0.35"/>
+  <!-- Badge "Cuisine Maison" -->
+  <rect x="440" y="130" width="120" height="28" rx="14" fill="#FF6B00"/>
+  <text x="500" y="149" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial">CUISINE MAISON</text>
+  <!-- Decorative leaves -->
+  <path d="M180 360 Q170 340 185 330" stroke="#4A7A2E" stroke-width="2" fill="#5A8A3E" opacity="0.5"/>
+  <path d="M410 350 Q420 330 405 320" stroke="#4A7A2E" stroke-width="2" fill="#5A8A3E" opacity="0.5"/>
+  <!-- Small chili -->
+  <path d="M430 240 Q435 235 432 230 Q438 232 435 240" fill="#DC3545"/>
+  <line x1="435" y1="230" x2="437" y2="228" stroke="#2A5A2A" stroke-width="1.5"/>
+</svg>
