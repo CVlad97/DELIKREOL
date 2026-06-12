@@ -159,7 +159,13 @@ export default function HomePage() {
                   to="/devenir-partenaire"
                   className="flex items-center justify-center gap-2 px-8 py-3.5 bg-white hover:bg-orange-50 text-orange-600 font-bold rounded-2xl border-2 border-orange-200 transition-all hover:scale-105 text-base"
                 >
-                  Devenir partenaire
+                  Je suis traiteur
+                </Link>
+                <Link
+                  to="/statut-commande"
+                  className="flex items-center justify-center gap-2 px-6 py-3.5 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold rounded-2xl border-2 border-amber-200 transition-all hover:scale-105 text-sm"
+                >
+                  Suivre ma commande
                 </Link>
               </div>
               {/* Steps */}
