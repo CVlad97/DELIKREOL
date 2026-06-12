@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { MapPin, Locate, ChevronDown, Navigation } from 'lucide-react';
-import { calculateDistanceKm, getGoogleMapsLink, getWazeLink } from '../../services/geolocation';
-import { martiniqueCommunes } from '../../data/martiniqueCommunes';
+import { calculateDistanceKm, getGoogleMapsLink, getWazeLink } from '../services/geolocation';
+import { martiniqueCommunes } from '../data/martiniqueCommunes';
 
 interface MapPoint {
   name: string;
