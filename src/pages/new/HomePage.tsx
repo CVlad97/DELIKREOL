@@ -193,7 +193,6 @@ export default function HomePage() {
                 Besoin d'aide ? Support WhatsApp
               </a>
             </div>
-            </div>
           </div>
         </div>
       </section>
