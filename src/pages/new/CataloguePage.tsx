@@ -11,6 +11,7 @@ import {
   Eye,
   Tag,
   Clock,
+  Map,
 } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
 import { mockProducts, type LocalProduct } from '../../data/mockCatalog';
@@ -22,6 +23,7 @@ import {
 } from '../../data/martiniqueCommunes';
 import { useCart } from '../../contexts/CartContext';
 import { useToast } from '../../contexts/ToastContext';
+import { InteractiveMap } from '../../components/InteractiveMap';
 import type { Product } from '../../lib/supabase';
 
 const ALL_CATEGORIES = [
@@ -74,6 +76,7 @@ export default function CataloguePage() {
   const [showAvailableOnly, setShowAvailableOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [sortMode, setSortMode] = useState<'default' | 'commune' | 'prix-croissant' | 'prix-decroissant' | 'disponible'>('default');
+  const [showMap, setShowMap] = useState(false);
 
   // Build extended product list with traiteur menu items
   const allProducts: LocalProduct[] = useMemo(() => {
@@ -262,6 +265,17 @@ export default function CataloguePage() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <button
+                onClick={() => setShowMap(!showMap)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                  showMap
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-white text-gray-600 border border-orange-100 hover:border-orange-300'
+                }`}
+              >
+                <Map className="w-4 h-4" />
+                Carte
+              </button>
+              <button
                 onClick={() => setShowFilters(!showFilters)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
                   showFilters
@@ -393,8 +407,22 @@ export default function CataloguePage() {
             </div>
           )}
 
-          {/* Product grid */}
-          {filteredProducts.length > 0 ? (
+          {/* Product grid or Map */}
+                    {showMap ? (
+                      <div className="mb-8">
+                        <InteractiveMap
+                          points={traiteurSpaces.filter(t => t.status === 'public confirmé').map(t => ({
+                            name: t.name,
+                            type: 'partner' as const,
+                            latitude: 14.6 + Math.random() * 0.2,
+                            longitude: -61.0 + Math.random() * 0.2,
+                            address: t.zone,
+                            status: 'Disponible',
+                          }))}
+                          compact
+                        />
+                      </div>
+                    ) : filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredProducts.map((product) => (
                 <div
