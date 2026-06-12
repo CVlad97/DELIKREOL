@@ -406,7 +406,7 @@ description: 'Spaghetti cuits al dente, enrobés d\'une sauce tomate maison aux 
     price: 12,
     category: 'Plats',
     image: vendorImage('vendors/saveurs-afrique/gallery-05.jpg'),
-    description: 'Semoule de maïs teintée à la tomate et au palmiste, servie avec une sauce viande ou poisson. L'amiwô béninois, coloré et parfumé, est un plat de fête du quotidien.',
+    description: 'Semoule de maïs teintée à la tomate et au palmiste, servie avec une sauce viande ou poisson. L\'amiwô béninois, coloré et parfumé, est un plat de fête du quotidien.',
     zone: 'Cluny',
     available: true,
     featured: false,
