@@ -272,20 +272,19 @@ export const mockProducts: LocalProduct[] = [
   // ═══════════════════════════════════════════════════════
   // SAVEURS D'AFRIQUE / LODIKA — Rivière-Salée
   // Cuisine africaine maison — photos WhatsApp 2026
-  // Source : conversation WhatsApp — prix à confirmer
-  // ═══════════════════════════════════════════════════════
+  // Source : menu photos WhatsApp juin 2026
   {
     id: 'saveurs-afrique-foutou',
     name: 'Foutou banane',
     vendor: "Saveurs d'Afrique",
     price: 15,
     category: 'Plats',
-    image: vendorImage('vendors/saveurs-afrique/gallery-01.jpg'),
-    description: 'Foutou banane — plat traditionnel ivoirien à base de banane plantain pilée, servi avec une sauce épicée. Cuisine 100% maison.',
+    image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-foutou-banane.jpg'),
+    description: 'Banane plantain pilée à la perfection, servie en boules généreuses nappées d'une sauce tomate-épices relevée aux oignons fondants et à la viande mijotée. Une signature ivoirienne qui marie la douceur du plantain à la puissance des épices africaines.',
     zone: 'Cluny',
     available: true,
     featured: true,
-    ingredients: 'Banane plantain, manioc, huile de palme, épices.',
+    ingredients: 'Banane plantain, manioc, huile de palme rouge, tomate, oignon, viande mijotée, piment, épices africaines.',
     allergens: 'Sans gluten.'
   },
   {
@@ -294,12 +293,12 @@ export const mockProducts: LocalProduct[] = [
     vendor: "Saveurs d'Afrique",
     price: 15,
     category: 'Plats',
-    image: vendorImage('vendors/saveurs-afrique/gallery-02.jpg'),
-    description: 'Galettes de riz fermenté (ablo), servies avec une sauce tomate épicée et du poisson. Spécialité ivoirienne maison.',
+    image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-ablo.jpg'),
+    description: 'Galettes de riz fermenté d'un jaune soleil, cuites à la vapeur, servies avec une sauce tomate épicée au poisson fumé. L'ablo traditionnel ivoirien, doux et légèrement acidulé, idéal pour absorber les saveurs de la sauce.',
     zone: 'Cluny',
     available: true,
     featured: true,
-    ingredients: 'Riz fermenté, tomate, poisson, épices, piment.',
+    ingredients: 'Riz fermenté, tomate, poisson fumé, oignon, piment, huile de palme, épices.',
     allergens: 'Poisson.'
   },
   {
@@ -309,7 +308,7 @@ export const mockProducts: LocalProduct[] = [
     price: 12,
     category: 'Plats',
     image: vendorImage('vendors/saveurs-afrique/gallery-05.jpg'),
-    description: 'Riz aux haricots rouges, plat complet et nourrissant, parfumé aux épices africaines. Accompagné de légumes.',
+    description: 'Riz blanc parfumé généreusement mélangé à des haricots rouges mijotés, relevé d'une sauce tomate-oignon épicée. Plat complet et nourrissant, véritable comfort food africaine.',
     zone: 'Cluny',
     available: true,
     featured: true,
@@ -322,12 +321,12 @@ export const mockProducts: LocalProduct[] = [
     vendor: "Saveurs d'Afrique",
     price: 13,
     category: 'Plats',
-    image: vendorImage('vendors/saveurs-afrique/gallery-06.jpg'),
-    description: 'Pâte (semoule ou farine) servie avec une sauce légume africaine aux épinards, gombo et viande.',
+    image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-pate-legume.jpg'),
+    description: 'Pâte de semoule ou farine, ferme et dense, accompagnée d'une sauce légume généreuse aux épinards frais, gombo et morceaux de viande tendre. Un plat rustique et profondément savoureux.',
     zone: 'Cluny',
     available: true,
     featured: false,
-    ingredients: 'Semoule de blé, épinards, gombo, viande, épices.',
+    ingredients: 'Semoule de blé, épinards, gombo, viande, tomate, oignon, huile de palme, épices.',
     allergens: 'Gluten.'
   },
   {
@@ -336,22 +335,22 @@ export const mockProducts: LocalProduct[] = [
     vendor: "Saveurs d'Afrique",
     price: 13,
     category: 'Plats',
-    image: vendorImage('vendors/saveurs-afrique/gallery-07.jpg'),
-    description: 'Pâte accompagnée d\'une sauce gombo onctueuse aux crevettes et épices. Un classique de l\'Afrique de l\'Ouest.',
+    image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-pate.jpg'),
+    description: 'Pâte traditionnelle servie avec une sauce gombo onctueuse aux crevettes séchées et au poisson fumé. La texture filante du gombo et la richesse des fruits de mer en font un plat emblématique de l'Afrique de l'Ouest.',
     zone: 'Cluny',
     available: true,
     featured: false,
-    ingredients: 'Semoule, gombo, crevettes, huile de palme, épices.',
-    allergens: 'Crustacés, gluten.'
+    ingredients: 'Semoule, gombo, crevettes séchées, poisson fumé, huile de palme, épices.',
+    allergens: 'Crustacés, gluten, poisson.'
   },
   {
     id: 'saveurs-afrique-igname',
-    name: 'Igname jus d\'œuf',
+    name: 'Igname jus d'œuf',
     vendor: "Saveurs d'Afrique",
     price: 12,
     category: 'Plats',
     image: vendorImage('vendors/saveurs-afrique/gallery-08.jpg'),
-    description: 'Igname pilée servie avec une sauce aux œufs et tomates. Plat réconfortant et savoureux.',
+    description: 'Igname pilée, lisse et élastique, accompagnée d'une sauce tomate aux œufs durs. Un plat réconfortant où la douceur de l'igname rencontre l'acidité de la sauce.',
     zone: 'Cluny',
     available: true,
     featured: false,
@@ -364,12 +363,12 @@ export const mockProducts: LocalProduct[] = [
     vendor: "Saveurs d'Afrique",
     price: 12,
     category: 'Plats',
-    image: vendorImage('vendors/saveurs-afrique/gallery-09.jpg'),
-    description: 'Mônyo — plat traditionnel à base de viande ou poisson mariné et mijoté dans une sauce parfumée.',
+    image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-monyo.jpg'),
+    description: 'Viande marinée longuement mijotée dans une sauce tomate-oignon parfumée au piment et aux épices africaines. Plat mijoté traditionnel, riche en saveurs, servi avec du riz ou de la pâte.',
     zone: 'Cluny',
     available: true,
     featured: false,
-    ingredients: 'Viande ou poisson, tomate, oignon, piment, épices.',
+    ingredients: 'Viande, tomate, oignon, piment, épices africaines, huile.',
     allergens: 'À confirmer avec la partenaire.'
   },
   {
@@ -379,7 +378,7 @@ export const mockProducts: LocalProduct[] = [
     price: 10,
     category: 'Plats',
     image: vendorImage('vendors/saveurs-afrique/gallery-10.jpg'),
-    description: 'Spaghetti à l\'africaine, sauce tomate maison, légumes et épices.',
+    description: 'Spaghetti cuits al dente, enrobés d'une sauce tomate maison aux légumes frais et épices. Une version africaine des pâtes, simple et savoureuse.',
     zone: 'Cluny',
     available: true,
     featured: false,
@@ -392,12 +391,12 @@ export const mockProducts: LocalProduct[] = [
     vendor: "Saveurs d'Afrique",
     price: 10,
     category: 'Plats',
-    image: vendorImage('vendors/saveurs-afrique/gallery-04.jpg'),
-    description: 'Salade fraîche aux légumes, thon, œufs durs et avocat. Une entrée complète et équilibrée.',
+    image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-salade-beninoise.jpg'),
+    description: 'Salade composée fraîche et colorée : laitue croquante, tomates juteuses, thon émietté, œufs durs, avocat fondant et oignons. Une entrée complète, idéale pour un déjeuner léger.',
     zone: 'Cluny',
     available: true,
     featured: false,
-    ingredients: 'Laitue, tomate, thon, œuf, avocat, oignon.',
+    ingredients: 'Laitue, tomate, thon, œuf, avocat, oignon, vinaigrette.',
     allergens: 'Poisson, œufs.'
   },
   {
@@ -407,7 +406,7 @@ export const mockProducts: LocalProduct[] = [
     price: 12,
     category: 'Plats',
     image: vendorImage('vendors/saveurs-afrique/gallery-05.jpg'),
-    description: 'Pâte rouge (amiwô) — semoule de maïs teintée à la tomate et aux épices, servie avec une sauce viande ou poisson.',
+    description: 'Semoule de maïs teintée à la tomate et au palmiste, servie avec une sauce viande ou poisson. L'amiwô béninois, coloré et parfumé, est un plat de fête du quotidien.',
     zone: 'Cluny',
     available: true,
     featured: false,
@@ -420,12 +419,12 @@ export const mockProducts: LocalProduct[] = [
     vendor: "Saveurs d'Afrique",
     price: 5,
     category: 'Boissons',
-    image: vendorImage('vendors/saveurs-afrique/gallery-03.jpg'),
-    description: 'Bissap — boisson rafraîchissante à base de fleurs d\'hibiscus, faite maison. Naturelle, désaltérante et riche en vitamine C.',
+    image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-bissap.jpg'),
+    description: 'Boisson rouge rubis à base de fleurs d'hibiscus, infusée à froid et légèrement sucrée. Naturellement désaltérante, riche en vitamine C, parfumée à la menthe fraîche.',
     zone: 'Cluny',
     available: true,
     featured: true,
-    ingredients: 'Fleurs d\'hibiscus, sucre, eau, menthe.',
+    ingredients: 'Fleurs d'hibiscus, sucre de canne, eau, menthe fraîche.',
     allergens: 'Aucun.'
   },
   {
@@ -434,12 +433,12 @@ export const mockProducts: LocalProduct[] = [
     vendor: "Saveurs d'Afrique",
     price: 12,
     category: 'Desserts',
-    image: vendorImage('vendors/saveurs-afrique/gallery-06.jpg'),
-    description: 'Yaourt maison nature, crémeux et onctueux. Vendu en pot d\'un litre.',
+    image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-yaourt.jpg'),
+    description: 'Yaourt brassé maison, épais et onctueux, au goût lacté pur. Vendu en pot d'un litre — idéal pour toute la famille, nature ou accompagné de fruits.',
     zone: 'Cluny',
     available: true,
     featured: false,
-    ingredients: 'Lait, ferments lactiques.',
+    ingredients: 'Lait entier, ferments lactiques.',
     allergens: 'Lait.'
   },
   {
@@ -448,8 +447,8 @@ export const mockProducts: LocalProduct[] = [
     vendor: "Saveurs d'Afrique",
     price: 15,
     category: 'Desserts',
-    image: vendorImage('vendors/saveurs-afrique/gallery-07.jpg'),
-    description: 'Yaourt maison au couscous, spécialité onctueuse et légèrement sucrée. Vendu en pot d\'un litre.',
+    image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-yaourt.jpg'),
+    description: 'Yaourt onctueux au couscous fin, légèrement sucré, à la texture unique entre le flan et le yaourt. Spécialité maison vendue en pot d'un litre.',
     zone: 'Cluny',
     available: true,
     featured: false,
@@ -462,13 +461,13 @@ export const mockProducts: LocalProduct[] = [
     vendor: "Saveurs d'Afrique",
     price: 10,
     category: 'Snacking',
-    image: vendorImage('vendors/saveurs-afrique/gallery-08.jpg'),
-    description: 'Petits cailloux (chin chin) — beignets frits croustillants, légèrement sucrés. Parfaits pour la collation.',
+    image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-petits-cailloux.jpg'),
+    description: 'Chin chin — petits beignets frits croustillants, légèrement sucrés à la vanille. Une collation addictive, parfaite pour accompagner le thé ou le café.',
     zone: 'Cluny',
     available: true,
     featured: false,
-    ingredients: 'Farine, sucre, beurre, vanille.',
-    allergens: 'Gluten, lait.'
+    ingredients: 'Farine, sucre, beurre, vanille, œuf.',
+    allergens: 'Gluten, lait, œufs.'
   },
   {
     id: 'saveurs-afrique-doko',
@@ -476,17 +475,14 @@ export const mockProducts: LocalProduct[] = [
     vendor: "Saveurs d'Afrique",
     price: 5,
     category: 'Snacking',
-    image: vendorImage('vendors/saveurs-afrique/gallery-09.jpg'),
-    description: 'Dokô — beignets africains moelleux et légèrement sucrés. Parfaits pour le petit-déjeuner ou la collation.',
+    image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-doko.jpg'),
+    description: 'Dokô — beignets moelleux et dorés, légèrement sucrés, à la mie aérienne. Parfaits pour le petit-déjeuner ou la pause gourmande.',
     zone: 'Cluny',
     available: true,
     featured: false,
-    ingredients: 'Farine, levure, sucre.',
+    ingredients: 'Farine, levure, sucre, vanille.',
     allergens: 'Gluten.'
-  },
-
-  // ═══════════════════════════════════════════════════════
-  // LES DELICES DE NINICE — Fort-de-France (Dillon)
+  },// LES DELICES DE NINICE — Fort-de-France (Dillon)
   // 11 produits avec photos professionnelles retouchées
   // Source : WhatsApp import mai 2026
   // ═══════════════════════════════════════════════════════
