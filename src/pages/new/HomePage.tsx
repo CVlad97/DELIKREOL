@@ -117,92 +117,83 @@ export default function HomePage() {
           <div className="absolute top-20 left-10 w-64 h-64 bg-orange-400 rounded-full blur-3xl" />
           <div className="absolute bottom-10 right-20 w-96 h-96 bg-amber-300 rounded-full blur-3xl" />
         </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-          <div className="text-center max-w-3xl mx-auto">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
             {/* Logo cloche */}
-            <div className="flex justify-center mb-8">
+            <div className="hidden md:flex justify-center">
               <img
-                src={`${import.meta.env.BASE_URL}branding/logo-mark.svg`}
-                alt="DeliKreol"
-                className="h-28 md:h-36 w-auto drop-shadow-xl animate-pulse"
+                src={`${import.meta.env.BASE_URL}assets/hero-illustration.svg`}
+                alt="DELIKREOL"
+                className="w-full max-w-md h-auto drop-shadow-2xl"
               />
             </div>
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-100 text-orange-700 text-sm font-semibold mb-4 uppercase tracking-widest">
-              <Sparkles className="w-4 h-4" />
-              LOCAL PREMIUM
-            </div>
-            {/* Badge phase pilote */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold mb-4">
-              🧪 Phase pilote — service en amélioration continue
-            </div>
-            <h1 className="text-4xl md:text-6xl font-black text-gray-900 leading-tight mb-4">
-              Deli<span className="text-primary">Kreol</span>
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-600 mb-6 font-semibold">
-              Le réflexe local qui donne envie de commander.
-            </p>
-            <p className="text-base text-gray-500 mb-8 max-w-2xl mx-auto">
-              Choisissez un plat ou un traiteur près de chez vous en Martinique. Commandez sur le site, choisissez retrait, point relais ou livraison, et contactez le support seulement si besoin.
-            </p>
-
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="max-w-xl mx-auto mb-8">
-              <div className="relative flex items-center">
-                <Search className="absolute left-4 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Rechercher un plat, un traiteur, une commune..."
-                  className="w-full pl-12 pr-32 py-4 rounded-2xl border-2 border-orange-200 focus:border-orange-400 focus:ring-4 focus:ring-orange-100 bg-white text-gray-800 placeholder-gray-400 text-base outline-none transition-all shadow-sm"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-2 px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all hover:scale-105 text-sm"
-                >
-                  Chercher
-                </button>
+            {/* Text */}
+            <div className="text-center md:text-left">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-100 text-orange-700 text-sm font-semibold mb-4 uppercase tracking-widest">
+                <Sparkles className="w-4 h-4" />
+                LOCAL PREMIUM
               </div>
-            </form>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
-              <Link
-                to="/catalogue"
-                className="flex items-center gap-2 px-8 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-orange-200 text-base"
-              >
-                <ShoppingBag className="w-5 h-5" />
-                Commander
-              </Link>
-              <Link
-                to="/devenir-partenaire"
-                className="flex items-center gap-2 px-8 py-3.5 bg-white hover:bg-orange-50 text-orange-600 font-bold rounded-2xl border-2 border-orange-200 transition-all hover:scale-105 text-base"
-              >
-                <Handshake className="w-5 h-5" />
-                Devenir partenaire
-              </Link>
-              <Link
-                to="/devis"
-                className="flex items-center gap-2 px-8 py-3.5 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold rounded-2xl border-2 border-amber-200 transition-all hover:scale-105 text-base"
-              >
-                <FileText className="w-5 h-5" />
-                Devis traiteur
-              </Link>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold mb-4 ml-2">
+                🧪 Phase pilote
+              </div>
+              <h1 className="text-4xl md:text-5xl font-black text-gray-900 leading-tight mb-4">
+                <span className="text-orange-500">Choisis</span> ton plat.
+                <br />
+                <span className="text-amber-500">Confirme</span> ta commande.
+                <br />
+                <span className="text-emerald-500">Récupère</span> ou reçois.
+              </h1>
+              <p className="text-base text-gray-500 mb-6 max-w-lg mx-auto md:mx-0">
+                Commandez local en Martinique. Retrait, point relais ou livraison programmée.
+              </p>
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start mb-8">
+                <Link
+                  to="/catalogue"
+                  className="flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-orange-200 text-base"
+                >
+                  <ShoppingBag className="w-5 h-5" />
+                  Commander maintenant
+                </Link>
+                <Link
+                  to="/devenir-partenaire"
+                  className="flex items-center justify-center gap-2 px-8 py-3.5 bg-white hover:bg-orange-50 text-orange-600 font-bold rounded-2xl border-2 border-orange-200 transition-all hover:scale-105 text-base"
+                >
+                  Devenir partenaire
+                </Link>
+              </div>
+              {/* Steps */}
+              <div className="flex items-center justify-center md:justify-start gap-4 pt-4 border-t border-orange-100">
+                <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                  <span className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-[10px] font-bold">1</span>
+                  Choisis
+                </div>
+                <span className="text-gray-300 text-xs">→</span>
+                <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                  <span className="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-[10px] font-bold">2</span>
+                  Confirme
+                </div>
+                <span className="text-gray-300 text-xs">→</span>
+                <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                  <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold">3</span>
+                  Récupère
+                </div>
+              </div>
             </div>
 
-            {/* WhatsApp Support CTA */}
-            <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Bonjour, j\'ai besoin d\'aide sur DELIKREOL.')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-green-500 hover:bg-green-600 text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-green-200 text-lg"
-            >
-              <MessageCircle className="w-6 h-6" fill="white" />
-              Besoin d'aide ? Support WhatsApp
-            </a>
-          </div>
-        </div>
-      </section>
+            {/* Support WhatsApp */}
+            <div className="flex justify-center pb-8">
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Bonjour, j\'ai besoin d\'aide sur DELIKREOL.')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-2xl transition-all text-sm"
+              >
+                <MessageCircle className="w-4 h-4" fill="white" />
+                Besoin d'aide ? Support WhatsApp
+              </a>
+            </div>
+            </section>
 
       {/* Comment ça marche */}
       <section className="py-16 md:py-20 bg-white">
