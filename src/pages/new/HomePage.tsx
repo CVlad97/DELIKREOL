@@ -23,6 +23,7 @@ import { traiteurSpaces, formatEuro } from '../../data/traiteurs';
 import { useCart } from '../../contexts/CartContext';
 import { useToast } from '../../contexts/ToastContext';
 import type { Product } from '../../lib/supabase';
+import { HowItWorksCompact } from '../../components/HowItWorksCompact';
 
 const WHATSAPP_NUMBER = '596696653589';
 
@@ -36,27 +37,6 @@ const ALL_CATEGORIES = [
   { id: 'pates', name: 'Pâtes' },
   { id: 'traiteur-evenementiel', name: 'Traiteur événementiel' },
   { id: 'commandes-entreprise', name: 'Commandes entreprise' },
-];
-
-const HOW_IT_WORKS_STEPS = [
-  {
-    icon: Utensils,
-    title: 'Choisissez',
-    description: 'Parcourez le catalogue, trouvez un plat ou un traiteur près de chez vous.',
-    color: 'bg-orange-100 text-orange-600',
-  },
-  {
-    icon: MessageCircle,
-    title: 'Confirmez sur le site',
-    description: 'Votre commande est préparée et confirmée directement sur DELIKREOL. Suivi et support inclus.',
-    color: 'bg-green-100 text-green-600',
-  },
-  {
-    icon: Truck,
-    title: 'Récupérez ou recevez',
-    description: 'Retrait sur place ou livraison selon la disponibilité du prestataire.',
-    color: 'bg-amber-100 text-amber-600',
-  },
 ];
 
 function localProductToCartProduct(p: LocalProduct): Product {
@@ -203,37 +183,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Comment ça marche */}
-      <section className="py-16 md:py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-3">
-              Comment ça marche ?
-            </h2>
-            <p className="text-gray-500 text-lg">3 étapes simples pour commander</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {HOW_IT_WORKS_STEPS.map((step, index) => {
-              const Icon = step.icon;
-              return (
-                <div
-                  key={index}
-                  className="relative text-center p-8 rounded-3xl bg-gradient-to-b from-white to-orange-50/30 border border-orange-100 hover:border-orange-200 hover:shadow-lg transition-all group"
-                >
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-black">
-                    {index + 1}
-                  </div>
-                  <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${step.color} mb-5 group-hover:scale-110 transition-transform`}>
-                    <Icon className="w-8 h-8" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{step.title}</h3>
-                  <p className="text-gray-500 leading-relaxed">{step.description}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      {/* Comment ça marche — version compacte */}
+      <HowItWorksCompact />
 
       {/* Featured Traiteurs */}
       {featuredTraiteurs.length > 0 && (

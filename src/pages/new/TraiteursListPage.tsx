@@ -1,12 +1,44 @@
 import { Link } from 'react-router-dom';
-import { ChefHat, MapPin, Star, ArrowRight, AlertCircle } from 'lucide-react';
+import { ChefHat, MapPin, Star, ArrowRight, AlertCircle, Locate } from 'lucide-react';
 import { traiteurSpaces } from '../../data/traiteurs';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { calculateDistanceKm } from '../../services/geolocation';
+import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 
 export function TraiteursListPage() {
+  const [userPosition, setUserPosition] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [selectedCommune, setSelectedCommune] = useState('');
+  const [requested, setRequested] = useState(false);
+
   useEffect(() => {
     document.title = 'Nos traiteurs partenaires — DeliKreol';
   }, []);
+
+  const requestPosition = () => {
+    if (!navigator.geolocation) return;
+    setRequested(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setUserPosition({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+      () => setRequested(false),
+      { enableHighAccuracy: false, timeout: 10000 }
+    );
+  };
+
+  const distTo = (lat?: number, lng?: number) => {
+    if (!userPosition || !lat || !lng) return null;
+    return calculateDistanceKm(userPosition, { latitude: lat, longitude: lng });
+  };
+
+  const filtered = traiteurSpaces
+    .filter(t => !selectedCommune || t.zone?.toLowerCase().includes(selectedCommune.toLowerCase()))
+    .sort((a, b) => {
+      if (userPosition) {
+        const dA = distTo(a.latitude, a.longitude) ?? 999;
+        const dB = distTo(b.latitude, b.longitude) ?? 999;
+        return dA - dB;
+      }
+      return 0;
+    });
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -14,13 +46,40 @@ export function TraiteursListPage() {
         <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-3">
           Nos traiteurs partenaires
         </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-6">
           Découvrez les traiteurs, snacks et restaurateurs locaux de Martinique référencés sur DeliKreol.
         </p>
+
+        {/* Commune filter + geoloc */}
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
+          <select
+            value={selectedCommune}
+            onChange={e => setSelectedCommune(e.target.value)}
+            className="px-4 py-2 rounded-xl border border-orange-200 text-sm bg-white outline-none focus:border-orange-400"
+          >
+            <option value="">Toutes les communes</option>
+            {martiniqueCommunes.slice(0, 34).map(c => (
+              <option key={c.name} value={c.name}>{c.name}</option>
+            ))}
+          </select>
+          {!userPosition && (
+            <button onClick={requestPosition} className="flex items-center gap-2 px-4 py-2 bg-orange-100 text-orange-700 rounded-xl text-sm font-bold hover:bg-orange-200">
+              <Locate className="w-4 h-4" /> Autour de moi
+            </button>
+          )}
+          {userPosition && (
+            <span className="text-xs text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full font-semibold">
+              📍 Tri par proximité actif
+            </span>
+          )}
+          {requested && !userPosition && (
+            <span className="text-xs text-gray-400">Demande de position...</span>
+          )}
+        </div>
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {traiteurSpaces.map((traiteur) => {
+        {filtered.map((traiteur) => {
           const isVerified = traiteur.status === 'public confirmé';
           const menuCount = traiteur.menuItems?.length || 0;
 
@@ -68,6 +127,14 @@ export function TraiteursListPage() {
                     <MapPin className="w-3.5 h-3.5" />
                     {traiteur.commune || traiteur.zone || 'Martinique'}
                   </span>
+                  {(() => {
+                    const dist = distTo(traiteur.latitude, traiteur.longitude);
+                    return dist !== null ? (
+                      <span className="text-[10px] px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full font-semibold">
+                        {dist.toFixed(1)} km
+                      </span>
+                    ) : null;
+                  })()}
                   {traiteur.specialty && (
                     <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full">
                       {traiteur.specialty}
