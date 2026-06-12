@@ -5,14 +5,14 @@ import { saveClientLocation } from '../services/geolocation';
 import { hasConsented } from '../services/privacy';
 
 interface LocationSelectorProps {
-  onSelect: (location: { commune: string; coords?: { lat: number; lng: number } }) => void;
+  onSelect: (location: { commune: string; coords?: { latitude: number; longitude: number } }) => void;
   compact?: boolean;
 }
 
 export function LocationSelector({ onSelect, compact }: LocationSelectorProps) {
   const [selectedCommune, setSelectedCommune] = useState('');
   const [showList, setShowList] = useState(false);
-  const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
+  const [position, setPosition] = useState<{ latitude: number; longitude: number } | null>(null);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export function LocationSelector({ onSelect, compact }: LocationSelectorProps) {
     if (!navigator.geolocation || !hasConsented('geolocation')) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        const coords = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
         setPosition(coords);
         saveClientLocation({ commune: selectedCommune, coords, consentGiven: true, source: 'gps', address: '' });
         onSelect({ commune: selectedCommune, coords });
