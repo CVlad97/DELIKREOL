@@ -383,78 +383,91 @@ export const mockProducts: LocalProduct[] = [
 
   // ═══════════════════════════════════════════════════════
   // ═══════════════════════════════════════════════════════
-  // SAVEURS D'AFRIQUE — Cluny
-  // Cuisine africaine et ivoirienne maison — menu réel juin 2026
-  // 15 produits avec photos spécifiques
+    // SAVEURS D'AFRIQUE — Cluny
+  // Menu réel WhatsApp juin 2026 — 17 produits
+  {
+    id: 'saveurs-afrique-attieke',
+    name: 'Atti\xe9k\xe9',
+    vendor: "Saveurs d'Afrique",
+    price: 14,
+    category: 'Plats',
+    image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-foutou-banane.jpg'),
+    description: 'Poisson grill\xe9 dor\xe9 \xe0 la perfection, servi avec un lit d\'atti\xe9k\xe9 (semoule de manioc), banane plantain frite (alloco), crudit\xe9s mayonnaise et deux sauces maison : piment rouge et oignons fondants. Un plat complet et parfum\xe9, signature de la cuisine ivoirienne.',
+    zone: 'Cluny',
+    available: true,
+    featured: true,
+    ingredients: 'Poisson grill\xe9, atti\xe9k\xe9 (manioc), banane plantain, chou, carotte, concombre, mayonnaise, piment, oignon.',
+    allergens: 'Poisson, œuf (mayonnaise).'
+  },
   {
     id: 'saveurs-afrique-foutou',
-    name: 'Foutou banane',
+    name: 'Foutou banane sauce arachide',
     vendor: "Saveurs d'Afrique",
     price: 15,
     category: 'Plats',
     image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-foutou-banane.jpg'),
-    description: 'Banane plantain pil\xe9e \xe0 la perfection, servie en boules g\xe9n\xe9reuses napp\xe9es d\'une sauce tomate-\xe9pices relev\xe9e aux oignons fondants et \xe0 la viande mijot\xe9e. Une signature ivoirienne qui marie la douceur du plantain \xe0 la puissance des \xe9pices africaines.',
+    description: 'Foutou banane plantain pil\xe9, servi dans une sauce arachide onctueuse et parfum\xe9e, accompagn\xe9 de viande de mouton ou dinde. Un grand classique ivoirien, riche et r\xe9confortant.',
     zone: 'Cluny',
     available: true,
     featured: true,
-    ingredients: 'Banane plantain, manioc, huile de palme rouge, tomate, oignon, viande mijot\xe9e, piment, \xe9pices africaines.',
-    allergens: 'Sans gluten.'
+    ingredients: 'Banane plantain, p\xe2te d\'arachide, viande de mouton ou dinde, \xe9pices.',
+    allergens: 'Arachide.'
   },
   {
     id: 'saveurs-afrique-ablo',
-    name: 'Galettes de riz (Ablo)',
+    name: 'Ablo (G\xe2teau de riz)',
     vendor: "Saveurs d'Afrique",
     price: 15,
     category: 'Plats',
     image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-ablo.jpg'),
-    description: 'Galettes de riz ferment\xe9 d\'un jaune soleil, cuites \xe0 la vapeur, servies avec une sauce tomate \xe9pic\xe9e au poisson fum\xe9. L\'ablo traditionnel ivoirien, doux et l\xe9g\xe8rement acidul\xe9, id\xe9al pour absorber les saveurs de la sauce.',
+    description: 'Galettes de riz ferment\xe9 cuites \xe0 la vapeur, servies avec du poisson grill\xe9 et une sauce tomate \xe9pic\xe9e. L\'ablo traditionnel ivoirien, doux et l\xe9g\xe8rement acidul\xe9.',
     zone: 'Cluny',
     available: true,
     featured: true,
-    ingredients: 'Riz ferment\xe9, tomate, poisson fum\xe9, oignon, piment, huile de palme, \xe9pices.',
+    ingredients: 'Riz, ma\xefs, poisson, tomate, \xe9pices.',
     allergens: 'Poisson.'
   },
   {
     id: 'saveurs-afrique-atassi',
-    name: 'Riz aux haricots (Atassi)',
+    name: 'Atassi (riz aux haricots)',
     vendor: "Saveurs d'Afrique",
     price: 12,
     category: 'Plats',
     image: vendorImage('vendors/saveurs-afrique/gallery-05.jpg'),
-    description: 'Riz blanc parfum\xe9 g\xe9n\xe9reusement m\xe9lang\xe9 \xe0 des haricots rouges mijot\xe9s, relev\xe9 d\'une sauce tomate-oignon \xe9pic\xe9e. Plat complet et nourrissant, v\xe9ritable comfort food africaine.',
+    description: 'Riz aux haricots rouges, plat complet et nourrissant. Accompagn\xe9 de poisson et d\'\u0153uf dur, relev\xe9 d\'une sauce \xe9pic\xe9e.',
     zone: 'Cluny',
     available: true,
     featured: true,
-    ingredients: 'Riz, haricots rouges, tomate, oignon, huile de palme, \xe9pices.',
-    allergens: 'Sans gluten.'
+    ingredients: 'Riz, haricot, poudre de crevette (facultatif), poisson, \u0153uf, \xe9pices.',
+    allergens: 'Crustac\xe9s (poudre de crevette), \u0153uf, poisson.'
   },
   {
-    id: 'saveurs-afrique-pate-legume',
-    name: 'P\xe2te, sauce l\xe9gume',
+    id: 'saveurs-afrique-sauce-legume',
+    name: 'Sauce l\xe9gume',
     vendor: "Saveurs d'Afrique",
     price: 13,
     category: 'Plats',
     image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-pate-legume.jpg'),
-    description: 'P\xe2te de semoule ou farine, ferme et dense, accompagn\xe9e d\'une sauce l\xe9gume g\xe9n\xe9reuse aux \xe9pinards frais, gombo et morceaux de viande tendre. Un plat rustique et profond\xe9ment savoureux.',
+    description: 'Sauce l\xe9gume verte aux \xe9pinards, poudre de crevette et poisson, servie avec une p\xe2te de semoule ferme et dense. Un plat rustique et profond\xe9ment savoureux de l\'Afrique de l\'Ouest.',
     zone: 'Cluny',
     available: true,
     featured: false,
-    ingredients: 'Semoule de bl\xe9, \xe9pinards, gombo, viande, tomate, oignon, huile de palme, \xe9pices.',
-    allergens: 'Gluten.'
+    ingredients: '\xc9pinard, poudre de crevette, poisson, semoule, \xe9pices.',
+    allergens: 'Crustac\xe9s, poisson, gluten.'
   },
   {
-    id: 'saveurs-afrique-pate-gombo',
-    name: 'P\xe2te, sauce gombo',
+    id: 'saveurs-afrique-sauce-gombo',
+    name: 'Sauce gombo',
     vendor: "Saveurs d'Afrique",
     price: 13,
     category: 'Plats',
     image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-pate.jpg'),
-    description: 'P\xe2te traditionnelle servie avec une sauce gombo onctueuse aux crevettes s\xe9ch\xe9es et au poisson fum\xe9. La texture filante du gombo et la richesse des fruits de mer en font un plat embl\xe9matique de l\'Afrique de l\'Ouest.',
+    description: 'Sauce gombo onctueuse aux morceaux de poisson, servie avec une p\xe2te de ma\xefs traditionnelle. La texture filante du gombo et la richesse du poisson fum\xe9 en font un plat embl\xe9matique.',
     zone: 'Cluny',
     available: true,
     featured: false,
-    ingredients: 'Semoule, gombo, crevettes s\xe9ch\xe9es, poisson fum\xe9, huile de palme, \xe9pices.',
-    allergens: 'Crustac\xe9s, gluten, poisson.'
+    ingredients: 'Gombo, p\xe2te de ma\xefs, poisson, \xe9pices.',
+    allergens: 'Poisson.'
   },
   {
     id: 'saveurs-afrique-igname',
@@ -463,11 +476,11 @@ export const mockProducts: LocalProduct[] = [
     price: 12,
     category: 'Plats',
     image: vendorImage('vendors/saveurs-afrique/gallery-08.jpg'),
-    description: 'Igname pil\xe9e, lisse et \xe9lastique, accompagn\xe9e d\'une sauce tomate aux \u0153ufs durs. Un plat r\xe9confortant o\xf9 la douceur de l\'igname rencontre l\'acidit\xe9 de la sauce.',
+    description: 'Igname pil\xe9e, lisse et \xe9lastique, accompagn\xe9e d\'une sauce tomate aux \u0153ufs durs. Un plat r\xe9confortant.',
     zone: 'Cluny',
     available: true,
     featured: false,
-    ingredients: 'Igname, \u0153ufs, tomate, oignon, huile, \xe9pices.',
+    ingredients: 'Igname, \u0153ufs, tomate, oignon, \xe9pices.',
     allergens: '\u0152ufs.'
   },
   {
@@ -477,11 +490,11 @@ export const mockProducts: LocalProduct[] = [
     price: 12,
     category: 'Plats',
     image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-monyo.jpg'),
-    description: 'Viande marin\xe9e longuement mijot\xe9e dans une sauce tomate-oignon parfum\xe9e au piment et aux \xe9pices africaines. Plat mijot\xe9 traditionnel, riche en saveurs.',
+    description: 'Viande marin\xe9e longuement mijot\xe9e dans une sauce tomate-oignon parfum\xe9e. Plat mijot\xe9 traditionnel africain.',
     zone: 'Cluny',
     available: true,
     featured: false,
-    ingredients: 'Viande, tomate, oignon, piment, \xe9pices africaines, huile.',
+    ingredients: 'Viande, tomate, oignon, piment, \xe9pices.',
     allergens: '\xc0 confirmer avec la partenaire.'
   },
   {
@@ -491,7 +504,7 @@ export const mockProducts: LocalProduct[] = [
     price: 10,
     category: 'Plats',
     image: vendorImage('vendors/saveurs-afrique/gallery-10.jpg'),
-    description: 'Spaghetti cuits al dente, enrob\xe9s d\'une sauce tomate maison aux l\xe9gumes frais et \xe9pices. Une version africaine des p\xe2tes, simple et savoureuse.',
+    description: 'Spaghetti sauce tomate maison aux l\xe9gumes frais et \xe9pices. Version africaine des p\xe2tes.',
     zone: 'Cluny',
     available: true,
     featured: false,
@@ -505,26 +518,12 @@ export const mockProducts: LocalProduct[] = [
     price: 10,
     category: 'Plats',
     image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-salade-beninoise.jpg'),
-    description: 'Salade compos\xe9e fra\xeechen et color\xe9e : laitue croquante, tomates juteuses, thon \xe9miett\xe9, \u0153ufs durs, avocat fondant et oignons.',
+    description: 'Salade fra\xeechen : laitue, tomate, thon, \u0153uf dur, avocat. Id\xe9ale pour un d\xe9jeuner l\xe9ger.',
     zone: 'Cluny',
     available: true,
     featured: false,
-    ingredients: 'Laitue, tomate, thon, \u0153uf, avocat, oignon, vinaigrette.',
+    ingredients: 'Laitue, tomate, thon, \u0153uf, avocat, oignon.',
     allergens: 'Poisson, \u0153ufs.'
-  },
-  {
-    id: 'saveurs-afrique-pate-rouge',
-    name: 'P\xe2te rouge (Amiw\xf4)',
-    vendor: "Saveurs d'Afrique",
-    price: 12,
-    category: 'Plats',
-    image: vendorImage('vendors/saveurs-afrique/gallery-05.jpg'),
-    description: 'Semoule de ma\xefs teint\xe9e \xe0 la tomate et au palmiste, servie avec une sauce viande ou poisson. L\'amiw\xf4 b\xe9ninois, color\xe9 et parfum\xe9.',
-    zone: 'Cluny',
-    available: true,
-    featured: false,
-    ingredients: 'Farine de ma\xefs, tomate, huile de palme, viande, \xe9pices.',
-    allergens: 'Sans gluten.'
   },
   {
     id: 'saveurs-afrique-bissap',
@@ -533,21 +532,21 @@ export const mockProducts: LocalProduct[] = [
     price: 5,
     category: 'Boissons',
     image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-bissap.jpg'),
-    description: 'Boisson rouge rubis \xe0 base de fleurs d\'hibiscus, infus\xe9e \xe0 froid et l\xe9g\xe8rement sucr\xe9e. Naturellement d\xe9salt\xe9rante, riche en vitamine C.',
+    description: 'Boisson rouge rubis \xe0 base de fleurs d\'hibiscus, infus\xe9e et l\xe9g\xe8rement sucr\xe9e. Rafra\xeechenchissante, riche en vitamine C.',
     zone: 'Cluny',
     available: true,
     featured: true,
-    ingredients: 'Fleurs d\'hibiscus, sucre de canne, eau, menthe fra\xeechen.',
+    ingredients: 'Fleurs d\'hibiscus, sucre de canne, eau, menthe.',
     allergens: 'Aucun.'
   },
   {
     id: 'saveurs-afrique-yaourt',
-    name: 'Yaourt 1L',
+    name: 'Yaourt simple 1L',
     vendor: "Saveurs d'Afrique",
     price: 12,
     category: 'Desserts',
     image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-yaourt.jpg'),
-    description: 'Yaourt brass\xe9 maison, \xe9pais et onctueux, au go\xfbt lact\xe9 pur. Vendu en pot d\'un litre.',
+    description: 'Yaourt brass\xe9 maison, \xe9pais et onctueux. Vendu en pot d\'un litre.',
     zone: 'Cluny',
     available: true,
     featured: false,
@@ -555,49 +554,48 @@ export const mockProducts: LocalProduct[] = [
     allergens: 'Lait.'
   },
   {
-    id: 'saveurs-afrique-yaourt-couscous',
-    name: 'Yaourt couscous 1L',
+    id: 'saveurs-afrique-degue',
+    name: 'D\xe8gu\xe8 1L',
     vendor: "Saveurs d'Afrique",
     price: 15,
     category: 'Desserts',
     image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-yaourt.jpg'),
-    description: 'Yaourt onctueux au couscous fin, l\xe9g\xe8rement sucr\xe9, \xe0 la texture unique entre le flan et le yaourt.',
+    description: 'Yaourt maison au couscous fin, l\xe9g\xe8rement sucr\xe9. Sp\xe9cialit\xe9 onctueuse vendue en pot d\'un litre.',
     zone: 'Cluny',
     available: true,
     featured: false,
-    ingredients: 'Lait, couscous, ferments lactiques, sucre.',
+    ingredients: 'Yaourt maison, couscous, sucre.',
     allergens: 'Lait, gluten.'
   },
   {
-    id: 'saveurs-afrique-petits-cailloux',
-    name: 'Petits cailloux',
+    id: 'saveurs-afrique-atchonmon',
+    name: 'Atchonmon (Petits cailloux)',
     vendor: "Saveurs d'Afrique",
     price: 10,
     category: 'Snacking',
     image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-petits-cailloux.jpg'),
-    description: 'Chin chin \u2014 petits beignets frits croustillants, l\xe9g\xe8rement sucr\xe9s \xe0 la vanille. Une collation addictive.',
+    description: 'Atchonmon \u2014 petits beignets frits croustillants, l\xe9g\xe8rement sucr\xe9s. Une collation traditionnelle irr\xe9sistible.',
     zone: 'Cluny',
     available: true,
     featured: false,
-    ingredients: 'Farine, sucre, beurre, vanille, \u0153uf.',
-    allergens: 'Gluten, lait, \u0153ufs.'
+    ingredients: 'Farine de bl\xe9, \u0153uf, sucre, lait (facultatif).',
+    allergens: 'Gluten, \u0153ufs, lait.'
   },
   {
-    id: 'saveurs-afrique-doko',
-    name: 'Beignet sucr\xe9 (Dok\xf4)',
+    id: 'saveurs-afrique-dokor',
+    name: 'Dok\xf4r (beignets sucr\xe9s) 8u',
     vendor: "Saveurs d'Afrique",
     price: 5,
     category: 'Snacking',
     image: vendorImage('vendors/saveurs-afrique/saveurs-afrique-doko.jpg'),
-    description: 'Dok\xf4 \u2014 beignets moelleux et dor\xe9s, l\xe9g\xe8rement sucr\xe9s, \xe0 la mie a\xe9rienne. Parfaits pour le petit-d\xe9jeuner ou la pause gourmande.',
+    description: 'Dok\xf4r \u2014 beignets moelleux et dor\xe9s, l\xe9g\xe8rement sucr\xe9s. Parfaits pour le petit-d\xe9jeuner ou la pause gourmande. 8 unit\xe9s.',
     zone: 'Cluny',
     available: true,
     featured: false,
-    ingredients: 'Farine, levure, sucre, vanille.',
+    ingredients: 'Farine de bl\xe9, sucre.',
     allergens: 'Gluten.'
   },
-
-  // LES DELICES DE NINICE — Fort-de-France (Dillon)
+// LES DELICES DE NINICE — Fort-de-France (Dillon)
   // 11 produits avec photos professionnelles retouchées
   // Source : WhatsApp import mai 2026
   // ═══════════════════════════════════════════════════════
