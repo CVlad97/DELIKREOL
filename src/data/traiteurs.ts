@@ -27,6 +27,8 @@ export type TraiteurSpace = {
   specialty: string;
   heroImage?: string | null;
   portraitImage?: string | null;
+  latitude?: number;
+  longitude?: number;
   gradient: string;
   accent: string;
   highlights: string[];
