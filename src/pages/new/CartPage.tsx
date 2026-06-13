@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { validateMartiniquePhone, PHONE_ERROR_MESSAGE } from '../../utils/phone';
 import { DELIVERY_FEES } from '../../services/pricing';
 import { generateOrderId } from '../../utils/orderId';
@@ -56,6 +56,7 @@ function formatPhoneError(): string {
 export default function CartPage() {
   const { items, updateQuantity, removeItem, clearCart, total, itemCount } = useCart();
   const { showSuccess, showError } = useToast();
+  const navigate = useNavigate();
 
   const [commune, setCommune] = useState('');
   const [communeSuggestions, setCommuneSuggestions] = useState<string[]>([]);
@@ -183,9 +184,9 @@ export default function CartPage() {
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMessage)}`;
 
   const handleWhatsAppClick = () => {
-    // Validate phone
-    if (phone && !validateMartiniquePhone(phone)) {
-      setPhoneError(PHONE_ERROR_MESSAGE);
+    // Validate phone — obligatoire
+    if (!phone || !validateMartiniquePhone(phone)) {
+      setPhoneError(PHONE_ERROR_MESSAGE || "Merci d'indiquer un num\u00e9ro WhatsApp valide, ex : 0696 XX XX XX");
       return;
     }
 
@@ -254,10 +255,12 @@ export default function CartPage() {
 
     setCheckoutStatus('success');
     setMessageSent(true);
+    clearCart();
     setPreparedMessage(
       `Votre commande ${orderId} a été créée. Un récapitulatif vous est envoyé pour confirmation.`
     );
     showSuccess(`Commande ${orderId} créée !`);
+    setTimeout(() => navigate(`/statut-commande?order=${orderId}`), 1500);
   };
 
   useEffect(() => {
