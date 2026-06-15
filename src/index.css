@@ -302,3 +302,70 @@
 .leaflet-bottom {
   z-index: 1000;
 }
+
+/* Classes pour page admin Qonto */
+.pageSection {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.card {
+  background: hsl(var(--card));
+  border-radius: 1rem;
+  border: 1px solid hsl(var(--border) / 0.5);
+  box-shadow: var(--shadow-soft);
+}
+
+.cardGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1.125rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  display: inline-block;
+}
+
+.badge-success {
+  background: #d1fae5;
+  color: #064e3b;
+}
+
+.badge-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.btnPrimary {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.btnPrimary:hover {
+  background: hsl(var(--primary) / 0.9);
+}
