@@ -5,9 +5,6 @@ on:
     branches: [main]
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-
 permissions:
   contents: read
   pages: write
@@ -19,71 +16,31 @@ concurrency:
 
 jobs:
   build:
-    name: Build static site
+    name: Lint, typecheck and build
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    env:
-      APP_BASE_PATH: /DELIKREOL/
-      APP_FALLBACK_DEMO: "true"
-      CFG_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-      CFG_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
-      CFG_SUPABASE_URL_SECRET: ${{ secrets.VITE_SUPABASE_URL }}
-      CFG_SUPABASE_ANON_KEY_SECRET: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-      CFG_SHEETS_PUBLIC_URL: ${{ vars.VITE_SHEETS_PUBLIC_URL }}
-      CFG_SHEETS_API_URL: ${{ vars.VITE_SHEETS_API_URL }}
-      CFG_METRICS_WEBHOOK_URL: ${{ vars.VITE_METRICS_WEBHOOK_URL }}
-      CFG_WHATSAPP_NUMBER: ${{ vars.VITE_WHATSAPP_NUMBER }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: npm
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit --fund=false
-
-      - name: Prepare frontend env file
-        run: |
-          SUPABASE_URL="${CFG_SUPABASE_URL:-$CFG_SUPABASE_URL_SECRET}"
-          SUPABASE_ANON_KEY="${CFG_SUPABASE_ANON_KEY:-$CFG_SUPABASE_ANON_KEY_SECRET}"
-          WHATSAPP_NUMBER="${CFG_WHATSAPP_NUMBER:-596696653589}"
-
-          {
-            echo "VITE_BASE_PATH=${APP_BASE_PATH}"
-            echo "VITE_ERP_FALLBACK_DEMO=${APP_FALLBACK_DEMO}"
-            echo "VITE_FREE_MODE=true"
-            echo "VITE_ORDER_MODE=whatsapp_first"
-            echo "VITE_SUPABASE_URL=${SUPABASE_URL}"
-            echo "VITE_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}"
-            echo "VITE_SHEETS_PUBLIC_URL=${CFG_SHEETS_PUBLIC_URL}"
-            echo "VITE_SHEETS_API_URL=${CFG_SHEETS_API_URL}"
-            echo "VITE_METRICS_WEBHOOK_URL=${CFG_METRICS_WEBHOOK_URL}"
-            echo "VITE_WHATSAPP_NUMBER=${WHATSAPP_NUMBER}"
-            echo "VITE_CONTACT_EMAIL=contact@delikreol.mq"
-            echo "VITE_OPERATIONS_EMAIL=contact@delikreol.mq"
-          } > .env.production
-
-          if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_ANON_KEY" ]; then
-            echo "Supabase env ready for production build."
-          else
-            echo "Supabase env missing: static build will run in free/offline mode with WhatsApp support."
-          fi
+        run: npm ci --legacy-peer-deps
 
       - name: Typecheck
-        run: npm run typecheck --if-present
-        continue-on-error: true
+        run: npm run typecheck
 
       - name: Lint
-        run: npm run lint --if-present
-        continue-on-error: true
+        run: npm run lint
 
       - name: Build
+        env:
+          VITE_BASE_PATH: /DELIKREOL/
         run: npm run build
 
       - name: Add SPA fallback and nojekyll marker
@@ -91,10 +48,7 @@ jobs:
           cp dist/index.html dist/404.html
           touch dist/.nojekyll
 
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload Pages artifact
+      - name: Upload dist artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
@@ -103,11 +57,15 @@ jobs:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
     needs: build
+    if: github.ref == 'refs/heads/main'
     timeout-minutes: 10
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy artifact
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
