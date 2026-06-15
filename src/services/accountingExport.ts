@@ -246,8 +246,8 @@ export function generateVATSummary(year: number): VATSummary {
 
     let baseHt = 0;
     let vat20 = 0;
-    let vat10 = 0;
-    let vat55 = 0;
+    const vat10 = 0;
+    const vat55 = 0;
 
     for (const tx of monthlyTransactions) {
       const ht = round2(tx.clientAmount / 1.2);
