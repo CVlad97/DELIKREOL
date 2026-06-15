@@ -88,7 +88,7 @@ async function getQontoService() {
   try {
     // Dynamic import — le service Qonto est côté backend uniquement
     // Le fichier n'existe que côté serveur, jamais exposé dans le bundle frontend
-    const mod = await import(/* @vite-ignore */ '../../services/qonto');
+    const mod = await import(/* @vite-ignore */ '../../services/qontoApi');
     return mod;
   } catch {
     return null;
