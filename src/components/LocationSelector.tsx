@@ -20,7 +20,7 @@ export function LocationSelector({ onSelect, compact }: LocationSelectorProps) {
     try {
       const saved = JSON.parse(localStorage.getItem('delikreol_client_location') || '{}');
       if (saved.commune) setSelectedCommune(saved.commune);
-    } catch {}
+    } catch { /* empty */ }
   }, []);
 
   const requestGeolocation = useCallback(() => {
@@ -47,7 +47,7 @@ export function LocationSelector({ onSelect, compact }: LocationSelectorProps) {
     setSearch('');
     try {
       localStorage.setItem('delikreol_client_location', JSON.stringify({ commune: name }));
-    } catch {}
+    } catch { /* empty */ }
     onSelect({ commune: name, coords: position || undefined });
   };
 

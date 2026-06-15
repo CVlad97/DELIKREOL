@@ -83,7 +83,7 @@ export function qualityCheckLocation(coord: Coords): boolean {
 const LOCATION_STORAGE_KEY = 'delikreol_client_location';
 
 export function saveClientLocation(loc: ClientLocation): void {
-  try { localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(loc)); } catch {}
+  try { localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(loc)); } catch { /* empty */ }
 }
 
 export function loadClientLocation(): ClientLocation | null {
@@ -94,5 +94,5 @@ export function loadClientLocation(): ClientLocation | null {
 }
 
 export function clearClientLocation(): void {
-  try { localStorage.removeItem(LOCATION_STORAGE_KEY); } catch {}
+  try { localStorage.removeItem(LOCATION_STORAGE_KEY); } catch { /* empty */ }
 }

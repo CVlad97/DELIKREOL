@@ -30,7 +30,7 @@ export default function PartnerAccessPage() {
       const events = JSON.parse(localStorage.getItem('delikreol_site_events') || '[]');
       events.push({ type: 'partner_access_opened', code, time: new Date().toISOString() });
       localStorage.setItem('delikreol_site_events', JSON.stringify(events));
-    } catch {}
+    } catch { /* empty */ }
   }, [code, partnerName]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -39,7 +39,7 @@ export default function PartnerAccessPage() {
       const subs = JSON.parse(localStorage.getItem('delikreol_partner_submissions') || '[]');
       subs.push({ ...form, code, partnerName, status: 'pending', created_at: new Date().toISOString() });
       localStorage.setItem('delikreol_partner_submissions', JSON.stringify(subs));
-    } catch {}
+    } catch { /* empty */ }
     setSubmitted(true);
   };
 

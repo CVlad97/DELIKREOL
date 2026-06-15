@@ -60,7 +60,7 @@ export default function AdminSimulation() {
       const filtered = existing.filter((o: any) => !o.demo);
       localStorage.setItem('delikreol_local_orders_v1', JSON.stringify(filtered));
       addLog('🔄 Données demo réinitialisées');
-    } catch {}
+    } catch { /* empty */ }
   };
 
   return (

@@ -23,7 +23,7 @@ export default function AdminDashboardPage() {
       setSubmissions(JSON.parse(localStorage.getItem('delikreol_partner_submissions') || '[]'));
       setEvents(JSON.parse(localStorage.getItem('delikreol_site_events') || '[]'));
       setMessages(JSON.parse(localStorage.getItem('delikreol_contact_messages') || '[]'));
-    } catch {}
+    } catch { /* empty */ }
     // Auto refresh
     const interval = setInterval(() => setRefresh(r => r + 1), 15000);
     return () => clearInterval(interval);

@@ -14,7 +14,7 @@ export default function OrderStatusPage() {
       const saved = JSON.parse(localStorage.getItem('delikreol_local_orders_v1') || '[]');
       const found = saved.find((o: any) => o.id === orderId);
       if (found) setOrder(found);
-    } catch {}
+    } catch { /* empty */ }
   }, [orderId]);
 
   return (

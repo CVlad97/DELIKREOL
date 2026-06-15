@@ -18,12 +18,12 @@ export function loadCookiePrefs(): CookiePreferences {
   try {
     const raw = localStorage.getItem(COOKIE_KEY);
     if (raw) return { ...DEFAULT_PREFS, ...JSON.parse(raw) };
-  } catch {}
+  } catch { /* empty */ }
   return DEFAULT_PREFS;
 }
 
 export function saveCookiePrefs(prefs: CookiePreferences): void {
-  try { localStorage.setItem(COOKIE_KEY, JSON.stringify(prefs)); } catch {}
+  try { localStorage.setItem(COOKIE_KEY, JSON.stringify(prefs)); } catch { /* empty */ }
 }
 
 export function hasConsented(loc: keyof CookiePreferences): boolean {

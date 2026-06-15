@@ -15,7 +15,7 @@ export function AdminParametres() {
     document.title = 'Paramètres — Admin DeliKreol';
     const saved = localStorage.getItem('delikreol_settings');
     if (saved) {
-      try { setSettings(s => ({ ...s, ...JSON.parse(saved) })); } catch {}
+      try { setSettings(s => ({ ...s, ...JSON.parse(saved) })); } catch { /* empty */ }
     }
   }, []);
 
