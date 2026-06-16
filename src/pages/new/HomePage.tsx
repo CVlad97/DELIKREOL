@@ -78,7 +78,37 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    document.title = 'DeliKreol — Le goût local, simple à commander | Martinique';
+    document.title = 'DeliKreol — Commandez créole local en Martinique | Livraison & Traiteur';
+  }, []);
+
+  useEffect(() => {
+    const setMeta = (property: string, content: string, name?: string) => {
+      const attr = name ? 'name' : 'property';
+      const key = name || property;
+      let el = document.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement | null;
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute(attr, key);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', content);
+    };
+
+    // OG tags
+    setMeta('og:title', 'DeliKreol — Commandez créole local en Martinique | Livraison & Traiteur');
+    setMeta('og:description', 'Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait. Commandez en ligne vos plats maison.');
+    setMeta('og:image', 'https://cvlad97.github.io/DELIKREOL/branding/favicon.svg');
+    setMeta('og:url', 'https://cvlad97.github.io/DELIKREOL/');
+    setMeta('og:type', 'website');
+
+    // Twitter card
+    setMeta('twitter:card', 'summary_large_image', 'twitter:card');
+    setMeta('twitter:title', 'DeliKreol — Commandez créole local en Martinique | Livraison & Traiteur', 'twitter:title');
+    setMeta('twitter:description', 'Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait. Commandez en ligne vos plats maison.', 'twitter:description');
+    setMeta('twitter:image', 'https://cvlad97.github.io/DELIKREOL/branding/favicon.svg', 'twitter:image');
+
+    // Meta description
+    setMeta('description', 'Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait. Commandez en ligne vos plats maison.', 'description');
   }, []);
 
   return (
