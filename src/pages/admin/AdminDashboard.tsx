@@ -61,7 +61,7 @@ export function AdminDashboard() {
     { label: 'Commandes aujourd\'hui', value: DEMO_STATS.ordersToday, icon: CalendarDays, color: 'text-blue-600 bg-blue-50' },
     { label: 'Revenus du mois', value: `${DEMO_STATS.revenueMonth.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €`, icon: DollarSign, color: 'text-emerald-600 bg-emerald-50' },
     { label: 'Partenaires actifs', value: DEMO_STATS.activePartners, icon: Users, color: 'text-orange-600 bg-orange-50' },
-    { label: 'Livraisons en cours', value: DEMO_STATS.ongoingDeliveries, icon: Motorcycle, color: 'text-purple-600 bg-purple-50' },
+    { label: 'Livraisons en cours', value: DEMO_STATS.ongoingDeliveries, icon: Bike, color: 'text-purple-600 bg-purple-50' },
   ];
 
   return (
@@ -105,8 +105,8 @@ export function AdminDashboard() {
         {/* Produits */}
         <div className="bg-white rounded-xl border p-5">
           <h2 className="font-semibold flex items-center gap-2 mb-3">
-            <Bike className="w-8 h-8 text-orange-500" />
-            Produits au catalogue
+            <Package className="w-5 h-5 text-orange-600" />
+                         Produits au catalogue
           </h2>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between"><span>Total produits</span><span className="font-bold">{totalProduits}</span></div>
