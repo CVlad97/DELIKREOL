@@ -1,16 +1,17 @@
 import { useMemo, useState } from 'react';
-import { Banknote, Landmark, MessageCircle, X, MapPin, Store, Package } from 'lucide-react';
+import { Landmark, MessageCircle, X, MapPin, Store, Package, CreditCard } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { ordersService } from '../services/ordersService';
 import { shouldFallbackToDemo } from '../utils/supabaseFallback';
+import { createConnectPaymentIntent } from '../utils/stripe';
 
 interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type PaymentMode = 'bank_transfer' | 'whatsapp';
+type PaymentMode = 'bank_transfer' | 'whatsapp' | 'stripe';
 
 export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const { items, total, clearCart } = useCart();
@@ -22,18 +23,29 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Stripe Connect : détection si le traiteur a un compte Connect
+  const vendor = items[0]?.vendor;
+  const hasStripeConnect = !!vendor?.stripe_connect_account_id;
+  const vendorStripeAccountId = vendor?.stripe_connect_account_id ?? undefined;
+
   const deliveryFee = deliveryType === 'home_delivery' ? 5.0 : 0;
   const finalTotal = total + deliveryFee;
+  const commissionDelikreol = total * 0.2;
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
   const bankPaymentUrl = (import.meta.env.VITE_BANK_PAYMENT_URL as string | undefined) || '';
   const bankPaymentIban = (import.meta.env.VITE_BANK_IBAN as string | undefined) || '';
   const bankPaymentBic = (import.meta.env.VITE_BANK_BIC as string | undefined) || '';
   const bankPaymentLabel = (import.meta.env.VITE_BANK_PAYMENT_LABEL as string | undefined) || 'Virement / lien bancaire';
 
-  const paymentOptions = useMemo(
-    () => [
+  const paymentOptions = useMemo(() => {
+    const options: Array<{
+      id: PaymentMode;
+      title: string;
+      subtitle: string;
+      icon: React.ComponentType<{ size?: number }>;
+    }> = [
       {
-        id: 'bank_transfer' as const,
+        id: 'bank_transfer',
         title: bankPaymentLabel,
         subtitle: bankPaymentUrl
           ? 'Ouvrir le lien bancaire (si disponible)'
@@ -41,14 +53,25 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         icon: Landmark,
       },
       {
-        id: 'whatsapp' as const,
+        id: 'whatsapp',
         title: 'Assistance WhatsApp',
         subtitle: 'Confirmation humaine et accompagnement client',
         icon: MessageCircle,
       },
-    ],
-    [bankPaymentLabel, bankPaymentUrl],
-  );
+    ];
+
+    // Ajouter Stripe si le traiteur a un compte Connect
+    if (hasStripeConnect) {
+      options.unshift({
+        id: 'stripe',
+        title: 'Carte bancaire (Stripe)',
+        subtitle: 'Paiement sécurisé par Stripe — votre plat, votre traiteur, votre livraison',
+        icon: CreditCard,
+      });
+    }
+
+    return options;
+  }, [bankPaymentLabel, bankPaymentUrl, hasStripeConnect]);
 
   if (!isOpen) return null;
 
@@ -68,14 +91,33 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
     try {
       const orderNumber = `DK${Date.now().toString().slice(-8)}`;
+
+      // Traitement Stripe Connect
+      let stripePaymentInfo = '';
+      if (paymentMode === 'stripe' && hasStripeConnect && vendorStripeAccountId) {
+        const clientSecret = await createConnectPaymentIntent(
+          finalTotal,
+          orderNumber,
+          vendorStripeAccountId,
+        );
+        if (clientSecret) {
+          stripePaymentInfo = `Paiement Stripe initie (clientSecret: ${clientSecret.slice(0, 8)}...)`;
+        } else {
+          stripePaymentInfo = 'Paiement Stripe : echec de l initialisation, contactez le service client.';
+        }
+      }
+
       const paymentNotes = [
         `Mode de paiement souhaite: ${paymentLabel}`,
+        stripePaymentInfo,
         `Assistance WhatsApp: https://wa.me/${whatsappNumber}`,
         bankPaymentUrl ? `Lien bancaire: ${bankPaymentUrl}` : '',
         bankPaymentIban ? `IBAN: ${bankPaymentIban}` : '',
         bankPaymentBic ? `BIC: ${bankPaymentBic}` : '',
         'Paiement final confirme avant preparation.',
-      ].join('\n');
+      ]
+        .filter(Boolean)
+        .join('\n');
 
       const orderItems = items.map((item) => ({
         product_id: item.id,
@@ -85,6 +127,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         subtotal: item.price * item.quantity,
         vendor_commission: item.price * item.quantity * 0.2,
       }));
+
       await ordersService.create({
         customer_id: user.id,
         order_number: orderNumber,
@@ -208,6 +251,12 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
               La commande est enregistrée avec le mode choisi et peut être confirmée sur WhatsApp si besoin.
             </div>
+            {hasStripeConnect && paymentMode === 'stripe' && (
+              <div className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800 flex items-center gap-2">
+                <CreditCard size={14} />
+                Paiement sécurisé par Stripe — votre plat, votre traiteur, votre livraison
+              </div>
+            )}
           </div>
 
           {deliveryType === 'home_delivery' && (
@@ -245,8 +294,12 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
               Récapitulatif
             </h3>
             <div className="flex justify-between text-gray-600">
-              <span>Articles ({items.length})</span>
+              <span>Sous-total ({items.length} article{items.length > 1 ? 's' : ''})</span>
               <span>{total.toFixed(2)} €</span>
+            </div>
+            <div className="flex justify-between text-gray-500 text-sm">
+              <span>Commission Delikreol (incluse)</span>
+              <span>{commissionDelikreol.toFixed(2)} €</span>
             </div>
             <div className="flex justify-between text-gray-600">
               <span>Frais de livraison</span>

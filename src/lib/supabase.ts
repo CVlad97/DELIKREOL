@@ -113,6 +113,7 @@ export interface Vendor {
   is_active: boolean;
   opening_hours: Record<string, any> | null;
   delivery_radius_km: number;
+  stripe_connect_account_id?: string | null;
   created_at: string;
 }
 
