@@ -23,6 +23,7 @@ const PointsRelaisPage = lazy(() => import('./pages/new/PointsRelaisPage'));
 const AidePage = lazy(() => import('./pages/new/AidePage'));
 const LivraisonPage = lazy(() => import('./pages/new/LivraisonPage'));
 const NotFoundPage = lazy(() => import('./pages/new/NotFoundPage'));
+const ContactPage = lazy(() => import('./pages/new/ContactPage'));
 
 // Admin pages — fully lazy loaded
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
@@ -43,6 +44,7 @@ const PartnerAccessPage = lazy(() => import('./pages/new/PartnerAccessPage'));
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'));
 const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/legal/PrivacyPolicy'));
+const CGVPage = lazy(() => import('./pages/legal/CGVPage'));
 
 const basePath = import.meta.env.VITE_BASE_PATH || import.meta.env.BASE_URL || '/';
 
@@ -95,13 +97,14 @@ export function AppRouter() {
                   <Route path="points-relais" element={<PointsRelaisPage />} />
                   <Route path="aide" element={<AidePage />} />
                   <Route path="livraison" element={<LivraisonPage />} />
+                  <Route path="contact" element={<ContactPage />} />
                   <Route path="pro" element={<ProSpacePage />} />
                   <Route path="statut-commande" element={<OrderStatusPage />} />
                   {/* Partenaire */}
                   <Route path="partenaire" element={<PartnerAccessPage />} />
                   {/* Pages légales */}
-                  <Route path="cgv" element={<TermsOfService />} />
                   <Route path="cgu" element={<TermsOfService />} />
+                  <Route path="cgv" element={<CGVPage />} />
                   <Route path="confidentialite" element={<PrivacyPolicy />} />
                   <Route path="mentions-legales" element={<PrivacyPolicy />} />
                   <Route path="*" element={<NotFoundPage />} />

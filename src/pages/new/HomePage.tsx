@@ -61,7 +61,7 @@ export default function HomePage() {
   const { showSuccess } = useToast();
 
   const featuredProducts = mockProducts.filter((p) => p.featured);
-  const featuredTraiteurs = traiteurSpaces.slice(0, 4);
+  const featuredTraiteurs = traiteurSpaces.slice(0, 5);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,15 +109,11 @@ export default function HomePage() {
                 🧪 Phase pilote
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 leading-tight mb-4">
-                Les meilleurs plats<br />
-                <span className="text-orange-500">maison de Martinique</span>
-                <br />
-                livrés, retirés ou déposés.
+                Commandez créole<br />
+                <span className="text-orange-500">local en Martinique</span>
               </h1>
               <p className="text-base text-gray-500 mb-6 max-w-lg mx-auto md:mx-0 leading-relaxed">
-                Commandez les plats de vos traiteurs locaux. Retrait chez le partenaire, 
-                point relais ou livraison programmée selon votre commune. Une plateforme 
-                martiniquaise pensée pour bien manger sans complication.
+                Plats maison, traiteurs locaux, livraison ou retrait — commandez en 3 clics.
               </p>
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start mb-8">
@@ -132,13 +128,13 @@ export default function HomePage() {
                   to="/devenir-partenaire"
                   className="flex items-center justify-center gap-2 px-8 py-3.5 bg-white hover:bg-orange-50 text-orange-600 font-bold rounded-2xl border-2 border-orange-200 transition-all hover:scale-105 text-base"
                 >
-                  Je suis traiteur
+                  Devenir traiteur bêta
                 </Link>
                 <Link
-                  to="/statut-commande"
-                  className="flex items-center justify-center gap-2 px-6 py-3.5 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold rounded-2xl border-2 border-amber-200 transition-all hover:scale-105 text-sm"
+                  to="/devenir-livreur"
+                  className="flex items-center justify-center gap-2 px-6 py-3.5 bg-white hover:bg-orange-50 text-orange-600 font-bold rounded-2xl border-2 border-orange-200 transition-all hover:scale-105 text-sm"
                 >
-                  Suivre ma commande
+                  Devenir livreur
                 </Link>
               </div>
               {/* Steps */}
@@ -402,6 +398,50 @@ export default function HomePage() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* Pourquoi Delikreol */}
+      <section className="py-16 md:py-20 bg-[#FFFBF0]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-3">
+              Pourquoi Delikreol
+            </h2>
+            <p className="text-gray-500 text-lg">La plateforme martiniquaise qui valorise nos producteurs</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-white rounded-3xl p-8 border border-orange-100 shadow-sm hover:shadow-lg transition-all text-center">
+              <div className="w-14 h-14 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center mx-auto mb-5">
+                <ChefHat className="w-7 h-7" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Produits locaux</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">
+                Des plats préparés par des traiteurs martiniquais avec des ingrédients frais et locaux. 
+                Manger créole, c'est soutenir l'économie de l'île.
+              </p>
+            </div>
+            <div className="bg-white rounded-3xl p-8 border border-orange-100 shadow-sm hover:shadow-lg transition-all text-center">
+              <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-5">
+                <Clock className="w-7 h-7" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Livraison programmée</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">
+                Choisissez votre créneau. Retrait chez le traiteur, point relais ou livraison 
+                selon votre commune. Vous décidez.
+              </p>
+            </div>
+            <div className="bg-white rounded-3xl p-8 border border-orange-100 shadow-sm hover:shadow-lg transition-all text-center">
+              <div className="w-14 h-14 rounded-2xl bg-green-100 text-green-600 flex items-center justify-center mx-auto mb-5">
+                <MessageCircle className="w-7 h-7" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Support WhatsApp</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">
+                Une question ? Un souci avec votre commande ? Contactez-nous directement 
+                sur WhatsApp. Réponse rapide, service humain.
+              </p>
+            </div>
           </div>
         </div>
       </section>
