@@ -53,8 +53,8 @@ export default function OrderStatusPage() {
           </div>
 
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6">
-            <p className="text-sm font-semibold text-amber-800 mb-1">Votre demande n'est pas encore confirmée</p>
-            <p className="text-xs text-amber-700">Elle sera validée par WhatsApp. Nous vous contacterons sur ce numéro.</p>
+            <p className="text-sm font-semibold text-amber-800 mb-1">En attente de confirmation</p>
+            <p className="text-xs text-amber-700">Nous vous contacterons par WhatsApp pour valider votre commande.</p>
           </div>
 
           <a

@@ -4,7 +4,6 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { ToastProvider } from './contexts/ToastContext';
-import { Layout } from './components/layout/Layout';
 
 // Existing pages (eager)
 import { ProSpacePage } from './pages/ProSpacePage';
@@ -60,11 +59,9 @@ function PageLoader() {
 
 function LayoutWrapper() {
   return (
-    <Layout>
-      <Suspense fallback={<PageLoader />}>
-        <Outlet />
-      </Suspense>
-    </Layout>
+    <Suspense fallback={<PageLoader />}>
+      <Outlet />
+    </Suspense>
   );
 }
 

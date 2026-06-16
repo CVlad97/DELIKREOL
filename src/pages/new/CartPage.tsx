@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { validateMartiniquePhone, PHONE_ERROR_MESSAGE } from '../../utils/phone';
 import { DELIVERY_FEES } from '../../services/pricing';
@@ -71,6 +71,19 @@ export default function CartPage() {
   const [preparedMessage, setPreparedMessage] = useState('');
   const [orderNumber, setOrderNumber] = useState('');
   const [checkoutStatus, setCheckoutStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
+  const [savedField, setSavedField] = useState<string | null>(null);
+  const panierRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (panierRef.current) {
+      panierRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, []);
+
+  const flashSaved = (field: string) => {
+    setSavedField(field);
+    setTimeout(() => setSavedField(null), 1500);
+  };
 
   const handleClearCart = () => {
     clearCart();
@@ -257,9 +270,9 @@ export default function CartPage() {
     setMessageSent(true);
     clearCart();
     setPreparedMessage(
-      `Votre commande ${orderId} a été créée. Un récapitulatif vous est envoyé pour confirmation.`
+      `Commande enregistrée ! Un récapitulatif vous sera envoyé par WhatsApp.`
     );
-    showSuccess(`Commande ${orderId} créée !`);
+    showSuccess(`Commande enregistrée !`);
     setTimeout(() => navigate(`/statut-commande?order=${orderId}`), 1500);
   };
 
@@ -302,7 +315,7 @@ export default function CartPage() {
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-green-100 mb-6">
               <CheckCircle2 className="w-10 h-10 text-green-500" />
             </div>
-            <h1 className="text-2xl font-black text-gray-900 mb-3">Commande créée !</h1>
+            <h1 className="text-2xl font-black text-gray-900 mb-3">Commande enregistrée ! 🎉</h1>
             {orderNumber && (
               <p className="text-3xl font-black text-orange-600 mb-2 font-mono">{orderNumber}</p>
             )}
@@ -366,7 +379,7 @@ export default function CartPage() {
                     Commande enregistrée.
                   </p>
                   <p className="text-green-700 text-sm">
-                    Votre commande est enregistrée. Le support WhatsApp est disponible si besoin.
+                    Commande enregistrée, félicitations ! Le support WhatsApp est disponible si besoin.
                   </p>
                 </div>
               </div>
@@ -377,7 +390,7 @@ export default function CartPage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Cart items */}
-            <div className="lg:col-span-2 space-y-4">
+            <div className="lg:col-span-2 space-y-4" ref={panierRef}>
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-lg font-bold text-gray-900">Articles</h2>
                 <button
@@ -546,6 +559,7 @@ export default function CartPage() {
                       setPhone(e.target.value);
                       setPhoneError('');
                     }}
+                    onBlur={() => phone.trim() && flashSaved('phone')}
                     placeholder="0696 XX XX XX"
                     className={`w-full px-3 py-2.5 rounded-xl border text-sm outline-none ${
                       phoneError
@@ -553,6 +567,11 @@ export default function CartPage() {
                         : 'border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100'
                     }`}
                   />
+                  {savedField === 'phone' && (
+                    <span className="inline-flex items-center gap-1 text-xs text-emerald-600 font-semibold mt-1 animate-pulse">
+                      ✓ Enregistré
+                    </span>
+                  )}
                   {phoneError && (
                     <p className="text-xs text-red-500 mt-1">{phoneError}</p>
                   )}
@@ -569,10 +588,18 @@ export default function CartPage() {
                     value={commune}
                     onChange={(e) => handleCommuneInput(e.target.value)}
                     onFocus={() => communeSuggestions.length > 0 && setShowSuggestions(true)}
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    onBlur={() => {
+                      setTimeout(() => setShowSuggestions(false), 200);
+                      if (commune.trim()) flashSaved('commune');
+                    }}
                     placeholder="Fort-de-France, Lamentin..."
                     className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 text-sm outline-none"
                   />
+                  {savedField === 'commune' && (
+                    <span className="inline-flex items-center gap-1 text-xs text-emerald-600 font-semibold mt-1 animate-pulse">
+                      ✓ Enregistré
+                    </span>
+                  )}
                   {showSuggestions && communeSuggestions.length > 0 && (
                     <div className="absolute z-10 w-full mt-1 bg-white border border-orange-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
                       {communeSuggestions.map((name) => (
@@ -675,17 +702,23 @@ export default function CartPage() {
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
+                    onBlur={() => notes.trim() && flashSaved('notes')}
                     placeholder="Allergies, préférences, instructions spéciales..."
                     rows={3}
                     className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 text-sm outline-none resize-none"
                   />
+                  {savedField === 'notes' && (
+                    <span className="inline-flex items-center gap-1 text-xs text-emerald-600 font-semibold mt-1 animate-pulse">
+                      ✓ Enregistré
+                    </span>
+                  )}
                 </div>
               </div>
 
               {/* Bouton principal — Supabase-first */}
               {checkoutStatus === 'processing' ? (
                 <div className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-orange-400 text-white font-bold rounded-2xl text-lg">
-                  Création de votre commande...
+                  Enregistrement en cours...
                 </div>
               ) : (
                 <button
@@ -697,7 +730,7 @@ export default function CartPage() {
                 </button>
               )}
               <p className="text-xs text-center text-gray-400">
-                Vous ne payez pas encore en ligne. La commande est créée sur le site et confirmée par nos équipes. Besoin d'aide ? Contactez le support WhatsApp.
+                Pas de règlement en ligne pour le moment. La commande est créée et sera confirmée par nos équipes. Besoin d'aide ? Contactez-nous sur WhatsApp.
               </p>
             </div>
           </div>

@@ -1,12 +1,14 @@
 import { Building2, ChevronRight, ShieldCheck, Store, Truck } from 'lucide-react';
+import { Layout } from '../components/layout/Layout';
 
 export function ProSpacePage() {
   const baseUrl = import.meta.env.BASE_URL || '/';
   const partnerLaunchLink = `${baseUrl}?view=launch-network`;
 
   return (
-    <div className="min-h-screen bg-[#fbf4ea] text-[#2a190f]">
-      <main className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
+    <Layout>
+      <div className="min-h-screen bg-[#fbf4ea] text-[#2a190f]">
+        <main className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
         <div className="rounded-[2rem] border border-orange-100 bg-white p-6 shadow-soft sm:p-8">
           <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">DELIKREOL</p>
           <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Espace Pro</h1>
@@ -74,5 +76,6 @@ export function ProSpacePage() {
         </div>
       </main>
     </div>
+    </Layout>
   );
 }

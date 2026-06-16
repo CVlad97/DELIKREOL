@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { MapPin, Locate, ChevronDown, Navigation } from 'lucide-react';
-import { martiniqueCommunes } from '../data/martiniqueCommunes';
+import { MapPin, Locate, ChevronDown } from 'lucide-react';
+import { martiniqueCommunes, normalizeCommuneQuery } from '../data/martiniqueCommunes';
 import { saveClientLocation } from '../services/geolocation';
 import { hasConsented } from '../services/privacy';
 
@@ -38,7 +38,11 @@ export function LocationSelector({ onSelect, compact }: LocationSelectorProps) {
   }, [selectedCommune, onSelect]);
 
   const filtered = search
-    ? martiniqueCommunes.filter(c => c.name.toLowerCase().includes(search.toLowerCase()))
+    ? martiniqueCommunes.filter(c => {
+        const names = [c.name, ...c.aliases].map(normalizeCommuneQuery);
+        const q = normalizeCommuneQuery(search);
+        return names.some(n => n.includes(q));
+      })
     : martiniqueCommunes;
 
   const handleSelect = (name: string) => {

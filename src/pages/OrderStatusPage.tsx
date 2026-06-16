@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { erpRequest, isErpConfigured } from '../lib/erpClient';
 import { readDemoOrders, seedDemoData } from '../data/demoDb';
+import { Layout } from '../components/layout/Layout';
 
 const allowDemoFallback = import.meta.env.VITE_ERP_FALLBACK_DEMO !== 'false';
 const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
@@ -8,31 +9,31 @@ const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 const statusCopy: Record<string, { label: string; message: string }> = {
   pending: {
     label: 'En attente',
-    message: 'Commande recue. Confirmation manuelle en cours.'
+    message: 'Commande reçue. Confirmation en cours.'
   },
   confirmed: {
-    label: 'Confirmee',
-    message: 'Commande confirmee. Preparation en cours.'
+    label: 'Confirmée',
+    message: 'Commande confirmée. Préparation en cours.'
   },
   preparing: {
-    label: 'En preparation',
-    message: 'Le partenaire prepare votre commande.'
+    label: 'En préparation',
+    message: 'Le partenaire prépare votre commande.'
   },
   ready: {
-    label: 'Prete',
-    message: 'Commande prete. Livraison ou retrait a confirmer.'
+    label: 'Prête',
+    message: 'Commande prête. Livraison ou retrait à confirmer.'
   },
   in_delivery: {
     label: 'En livraison',
-    message: 'Livraison en cours (mise a jour manuelle).'
+    message: 'Livraison en cours.'
   },
   delivered: {
-    label: 'Livree',
-    message: 'Commande livree. Merci !'
+    label: 'Livrée',
+    message: 'Commande livrée. Merci ! 😊'
   },
   cancelled: {
-    label: 'Annulee',
-    message: 'Commande annulee. Contactez-nous si besoin.'
+    label: 'Annulée',
+    message: 'Commande annulée. Contactez-nous si besoin.'
   }
 };
 
@@ -64,7 +65,7 @@ export function OrderStatusPage() {
   const handleLookup = async () => {
     const trimmed = query.trim();
     if (!trimmed) {
-      setError('Entre un identifiant ou numero de commande.');
+      setError('Entre ton numéro de commande.');
       return;
     }
     setLoading(true);
@@ -108,7 +109,7 @@ export function OrderStatusPage() {
     } catch (err: any) {
       setError(
         err?.message === 'NOT_FOUND'
-          ? 'Commande introuvable. Verifie ton numero.'
+          ? 'Commande introuvable. Vérifie ton numéro.'
           : 'Erreur lors de la recherche.'
       );
     } finally {
@@ -130,15 +131,16 @@ export function OrderStatusPage() {
   const baseUrl = import.meta.env.BASE_URL || '/';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 text-slate-900">
+    <Layout>
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 text-slate-900">
       <div className="max-w-3xl mx-auto px-6 py-12">
         <div className="bg-white/90 border border-orange-100 rounded-3xl p-6 shadow-lg">
           <h1 className="text-3xl font-black text-orange-700 mb-2">Suivre ma commande</h1>
           <p className="text-sm text-slate-600 mb-6">
-            Entre ton identifiant ou numero de commande pour voir un suivi indicatif.
+            Entre ton numéro de commande pour suivre son statut.
           </p>
           <div className="text-xs text-slate-500 mb-4">
-            Mise a jour manuelle. Pour une question urgente, contacte le support WhatsApp.
+            Suivi mis à jour manuellement. Pour une question urgente, contacte-nous sur WhatsApp.
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
@@ -152,11 +154,11 @@ export function OrderStatusPage() {
               onClick={handleLookup}
               className="px-6 py-3 rounded-xl bg-orange-600 text-white font-bold"
             >
-              Verifier
+              Vérifier
             </button>
           </div>
 
-          {loading && <div className="mt-4 text-sm text-slate-500">Recherche en cours...</div>}
+          {loading && <div className="mt-4 text-sm text-slate-500">Recherche...</div>}
           {error && <div className="mt-4 text-sm text-red-600">{error}</div>}
 
           {result && (
@@ -222,5 +224,6 @@ export function OrderStatusPage() {
         </div>
       </div>
     </div>
+    </Layout>
   );
 }

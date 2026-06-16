@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
+import { Layout } from '../../components/layout/Layout';
 import { PUBLIC_CONTACT_EMAIL } from '../../config/publicRuntime';
 
 export default function TermsOfService() {
   return (
-    <div className="min-h-screen bg-white">
+    <Layout>
+      <div className="min-h-screen bg-white">
       <section className="relative bg-gradient-to-br from-emerald-50 to-teal-50 py-12 px-4">
         <div className="max-w-4xl mx-auto">
           <Link to="/" className="text-emerald-600 hover:text-emerald-700 mb-4 inline-block">
@@ -174,5 +176,6 @@ export default function TermsOfService() {
         </div>
       </section>
     </div>
+    </Layout>
   );
 }
