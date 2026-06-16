@@ -24,6 +24,7 @@ const AidePage = lazy(() => import('./pages/new/AidePage'));
 const LivraisonPage = lazy(() => import('./pages/new/LivraisonPage'));
 const NotFoundPage = lazy(() => import('./pages/new/NotFoundPage'));
 const ContactPage = lazy(() => import('./pages/new/ContactPage'));
+const FeedbackPage = lazy(() => import('./pages/new/FeedbackPage'));
 
 // Admin pages — fully lazy loaded
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
@@ -43,6 +44,7 @@ const AdminSimulation = lazy(() => import('./pages/admin/AdminSimulation'));
 const PartnerAccessPage = lazy(() => import('./pages/new/PartnerAccessPage'));
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'));
 const AdminFinance = lazy(() => import('./pages/admin/AdminFinance'));
+const AdminFeedback = lazy(() => import('./pages/admin/AdminFeedback'));
 const AdminPartnersApplications = lazy(() => import('./pages/admin/AdminPartnersApplications'));
 const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/legal/PrivacyPolicy'));
@@ -103,6 +105,7 @@ export function AppRouter() {
                   <Route path="aide" element={<AidePage />} />
                   <Route path="livraison" element={<LivraisonPage />} />
                   <Route path="contact" element={<ContactPage />} />
+                  <Route path="feedback" element={<FeedbackPage />} />
                   <Route path="pro" element={<ProSpacePage />} />
                   <Route path="statut-commande" element={<OrderStatusPage />} />
                   {/* Partenaire */}
@@ -135,6 +138,7 @@ export function AppRouter() {
                   <Route path="simulation" element={<AdminSimulation />} />
                   <Route path="dashboard" element={<AdminDashboardPage />} />
                   <Route path="finance" element={<AdminFinance />} />
+                  <Route path="feedback" element={<AdminFeedback />} />
                   <Route path="applications" element={<AdminPartnersApplications />} />
                 </Route>
               </Routes>

@@ -16,14 +16,19 @@ import {
   Sparkles,
   Users,
   Heart,
+  Locate,
+  Crosshair,
+  Navigation,
 } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
 import { mockProducts, type LocalProduct } from '../../data/mockCatalog';
-import { traiteurSpaces, formatEuro } from '../../data/traiteurs';
+import { traiteurSpaces, formatEuro, type TraiteurSpace } from '../../data/traiteurs';
 import { useCart } from '../../contexts/CartContext';
 import { useToast } from '../../contexts/ToastContext';
 import type { Product } from '../../lib/supabase';
 import { HowItWorksCompact } from '../../components/HowItWorksCompact';
+import { calculateDistanceKm, type Coords } from '../../services/geolocation';
+import { LocationSelector } from '../../components/LocationSelector';
 
 const WHATSAPP_NUMBER = '596696653589';
 
@@ -60,6 +65,11 @@ export default function HomePage() {
   const { addItem } = useCart();
   const { showSuccess } = useToast();
 
+  const [geoStatus, setGeoStatus] = useState<'idle' | 'loading' | 'success' | 'denied'>('idle');
+  const [geoPosition, setGeoPosition] = useState<Coords | null>(null);
+  const [nearbyTraiteurs, setNearbyTraiteurs] = useState<Array<{ traiteur: TraiteurSpace; distance: number }>>([]);
+  const [showLocationSelector, setShowLocationSelector] = useState(false);
+
   const featuredProducts = mockProducts.filter((p) => p.featured);
   const featuredTraiteurs = traiteurSpaces.slice(0, 5);
 
@@ -75,6 +85,63 @@ export default function HomePage() {
   const handleAddToCart = (product: LocalProduct) => {
     addItem(localProductToCartProduct(product));
     showSuccess(`${product.name} ajouté au panier`);
+  };
+
+  const handleFindNearby = () => {
+    setGeoStatus('loading');
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords: Coords = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        };
+        setGeoPosition(coords);
+        setGeoStatus('success');
+
+        // Calculer distances pour tous les traiteurs avec lat/lng
+        const withDistance = traiteurSpaces
+          .filter((t) => t.latitude != null && t.longitude != null)
+          .map((t) => ({
+            traiteur: t,
+            distance: calculateDistanceKm(coords, {
+              latitude: t.latitude!,
+              longitude: t.longitude!,
+            }),
+          }))
+          .sort((a, b) => a.distance - b.distance)
+          .slice(0, 3);
+
+        setNearbyTraiteurs(withDistance);
+      },
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          setGeoStatus('denied');
+        } else {
+          setGeoStatus('denied');
+        }
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+    );
+  };
+
+  const handleCommuneSelect = (location: { commune: string; coords?: { latitude: number; longitude: number } }) => {
+    setShowLocationSelector(false);
+    if (location.coords) {
+      setGeoPosition(location.coords);
+      setGeoStatus('success');
+      const withDistance = traiteurSpaces
+        .filter((t) => t.latitude != null && t.longitude != null)
+        .map((t) => ({
+          traiteur: t,
+          distance: calculateDistanceKm(location.coords!, {
+            latitude: t.latitude!,
+            longitude: t.longitude!,
+          }),
+        }))
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, 3);
+      setNearbyTraiteurs(withDistance);
+    }
   };
 
   useEffect(() => {
@@ -207,6 +274,165 @@ export default function HomePage() {
                 Besoin d'aide ? Support WhatsApp
               </a>
             </div>
+        </div>
+      </section>
+
+      {/* 📍 Traiteurs près de chez moi — Géolocalisation */}
+      <section className="py-12 md:py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-2">
+              Traiteurs près de chez toi
+            </h2>
+            <p className="text-gray-500 text-base">
+              Trouve les traiteurs DeliKreol les plus proches de ta position
+            </p>
+          </div>
+
+          {geoStatus === 'idle' && !showLocationSelector && (
+            <div className="text-center">
+              <button
+                onClick={handleFindNearby}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-orange-200 text-base"
+              >
+                <Locate className="w-5 h-5" />
+                📍 Trouver les traiteurs près de chez moi
+              </button>
+            </div>
+          )}
+
+          {geoStatus === 'loading' && (
+            <div className="text-center py-8">
+              <div className="inline-flex items-center gap-3 px-6 py-4 bg-orange-50 rounded-2xl">
+                <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                <span className="text-orange-700 font-semibold">
+                  Recherche de ta position…
+                </span>
+              </div>
+            </div>
+          )}
+
+          {geoStatus === 'denied' && !showLocationSelector && (
+            <div className="text-center py-8">
+              <div className="inline-flex flex-col items-center gap-4 px-8 py-6 bg-amber-50 rounded-2xl border border-amber-200 max-w-lg mx-auto">
+                <MapPin className="w-8 h-8 text-amber-600" />
+                <p className="text-amber-800 font-semibold">
+                  Active ta position pour voir les traiteurs près de chez toi
+                </p>
+                <p className="text-sm text-amber-600">
+                  Nous utilisons ta position uniquement pour estimer les distances.
+                </p>
+                <button
+                  onClick={() => setShowLocationSelector(true)}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all text-sm"
+                >
+                  <MapPin className="w-4 h-4" />
+                  Sélectionner une commune
+                </button>
+              </div>
+            </div>
+          )}
+
+          {showLocationSelector && (
+            <div className="max-w-md mx-auto">
+              <LocationSelector onSelect={handleCommuneSelect} compact />
+              <div className="text-center mt-4">
+                <button
+                  onClick={() => setShowLocationSelector(false)}
+                  className="text-sm text-gray-500 hover:text-gray-700 underline"
+                >
+                  Annuler
+                </button>
+              </div>
+            </div>
+          )}
+
+          {geoStatus === 'success' && (
+            <div>
+              {nearbyTraiteurs.length > 0 ? (
+                <>
+                  <div className="grid md:grid-cols-3 gap-5 mb-8">
+                    {nearbyTraiteurs.map(({ traiteur, distance }) => (
+                      <Link
+                        key={traiteur.slug}
+                        to={`/traiteur/${traiteur.slug}`}
+                        className="card group bg-white rounded-3xl border border-orange-100 hover:border-orange-300 overflow-hidden shadow-sm hover:shadow-xl transition-all"
+                      >
+                        <div className={`h-32 bg-gradient-to-br ${traiteur.gradient} relative overflow-hidden`}>
+                          {traiteur.heroImage && (
+                            <img
+                              src={traiteur.heroImage}
+                              alt={traiteur.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 mix-blend-overlay opacity-60"
+                            />
+                          )}
+                          <div className="absolute inset-0 flex items-end p-4">
+                            <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                              <Navigation className="w-3.5 h-3.5 text-orange-500" />
+                              {distance < 1
+                                ? `À ${Math.round(distance * 1000)} m`
+                                : `À ${distance.toFixed(1)} km`}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-base font-bold text-gray-900 mb-0.5 group-hover:text-orange-600 transition-colors">
+                            {traiteur.name}
+                          </h3>
+                          <p className="text-xs text-gray-500 mb-1">
+                            {traiteur.offer}
+                          </p>
+                          <div className="flex items-center gap-1 text-xs text-gray-400">
+                            <MapPin className="w-3 h-3" />
+                            {traiteur.commune || traiteur.zone}
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  <div className="text-center">
+                    <Link
+                      to="/traiteurs"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all hover:scale-105 shadow-md text-sm"
+                    >
+                      Voir tous les traiteurs
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="inline-flex flex-col items-center gap-3 px-8 py-6 bg-orange-50 rounded-2xl max-w-lg mx-auto">
+                    <Crosshair className="w-8 h-8 text-orange-500" />
+                    <p className="text-gray-700 font-semibold text-lg">
+                      📍 Traiteurs disponibles
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-3 mt-2">
+                      {traiteurSpaces.slice(0, 5).map((t) => (
+                        <Link
+                          key={t.slug}
+                          to={`/traiteur/${t.slug}`}
+                          className="px-4 py-2 bg-white rounded-xl border border-orange-100 text-sm font-medium text-gray-700 hover:text-orange-600 hover:border-orange-300 transition-all"
+                        >
+                          {t.name}
+                          <span className="text-gray-400 ml-1">— {t.commune || t.zone}</span>
+                        </Link>
+                      ))}
+                    </div>
+                    <div className="mt-4">
+                      <Link
+                        to="/traiteurs"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all hover:scale-105 shadow-md text-sm"
+                      >
+                        Voir tous les traiteurs
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
