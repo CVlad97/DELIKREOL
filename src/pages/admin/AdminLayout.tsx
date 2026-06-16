@@ -19,6 +19,7 @@ const adminNav = [
   { label: 'Paramètres', icon: Settings, path: '/admin/parametres' },
   { label: 'Orchestrateur', icon: Briefcase, path: '/admin/orchestrateur' },
   { label: 'Offres cash', icon: DollarSign, path: '/admin/offres' },
+  { label: 'Finance', icon: DollarSign, path: '/admin/finance' },
 ];
 
 export function AdminLayout() {

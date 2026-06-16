@@ -42,9 +42,13 @@ const AdminOffres = lazy(() => import('./pages/admin/AdminOffres'));
 const AdminSimulation = lazy(() => import('./pages/admin/AdminSimulation'));
 const PartnerAccessPage = lazy(() => import('./pages/new/PartnerAccessPage'));
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'));
+const AdminFinance = lazy(() => import('./pages/admin/AdminFinance'));
 const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/legal/PrivacyPolicy'));
 const CGVPage = lazy(() => import('./pages/legal/CGVPage'));
+const CookiesPage = lazy(() => import('./pages/legal/CookiesPage'));
+const RemoursementPage = lazy(() => import('./pages/legal/RemoursementPage'));
+const PartnerTermsPage = lazy(() => import('./pages/legal/PartnerTermsPage'));
 
 const basePath = import.meta.env.VITE_BASE_PATH || import.meta.env.BASE_URL || '/';
 
@@ -107,6 +111,9 @@ export function AppRouter() {
                   <Route path="cgv" element={<CGVPage />} />
                   <Route path="confidentialite" element={<PrivacyPolicy />} />
                   <Route path="mentions-legales" element={<PrivacyPolicy />} />
+                  <Route path="cookies" element={<CookiesPage />} />
+                  <Route path="remboursement" element={<RemoursementPage />} />
+                  <Route path="conditions-partenaires" element={<PartnerTermsPage />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Route>
 
@@ -126,6 +133,7 @@ export function AppRouter() {
                   <Route path="offres" element={<AdminOffres />} />
                   <Route path="simulation" element={<AdminSimulation />} />
                   <Route path="dashboard" element={<AdminDashboardPage />} />
+                  <Route path="finance" element={<AdminFinance />} />
                 </Route>
               </Routes>
             </ToastProvider>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   ShoppingCart, ChefHat, Truck, MapPin, FileText,
   Target, AlertTriangle, ImageOff, Package, CheckCircle2,
+  DollarSign, CalendarDays, Users, Bike,
 } from 'lucide-react';
 import { mockProducts } from '../../data/mockCatalog';
 import { traiteurSpaces } from '../../data/traiteurs';
@@ -12,6 +13,14 @@ function loadFromStorage(key: string): any[] {
   try { return JSON.parse(localStorage.getItem(key) || '[]'); }
   catch { return []; }
 }
+
+/* ─── Données démo réalistes ─── */
+const DEMO_STATS = {
+  ordersToday: 14,
+  revenueMonth: 4_280.50,
+  activePartners: 8,
+  ongoingDeliveries: 6,
+};
 
 export function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -47,11 +56,36 @@ export function AdminDashboard() {
     { label: 'Leads', value: stats.leads, icon: Target, color: 'text-indigo-600 bg-indigo-50', link: '/admin/leads' },
   ];
 
+  /* Cartes stats "live" (démo réalistes) */
+  const quickCards = [
+    { label: 'Commandes aujourd\'hui', value: DEMO_STATS.ordersToday, icon: CalendarDays, color: 'text-blue-600 bg-blue-50' },
+    { label: 'Revenus du mois', value: `${DEMO_STATS.revenueMonth.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €`, icon: DollarSign, color: 'text-emerald-600 bg-emerald-50' },
+    { label: 'Partenaires actifs', value: DEMO_STATS.activePartners, icon: Users, color: 'text-orange-600 bg-orange-50' },
+    { label: 'Livraisons en cours', value: DEMO_STATS.ongoingDeliveries, icon: Motorcycle, color: 'text-purple-600 bg-purple-50' },
+  ];
+
   return (
     <div>
       <h1 className="text-2xl font-display font-bold mb-6">Vue d'ensemble</h1>
 
+      {/* Quick stats — 4 cartes clés */}
+      <h2 className="sectionTitle text-lg font-display font-bold mb-3 text-foreground">Aperçu du jour</h2>
+      <div className="cardGrid grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {quickCards.map(card => (
+          <div key={card.label} className="card bg-card rounded-2xl border border-border/50 p-5">
+            <div className="flex items-center gap-3 mb-2">
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${card.color}`}>
+                <card.icon className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{card.label}</span>
+            </div>
+            <p className="text-2xl font-black text-foreground">{card.value}</p>
+          </div>
+        ))}
+      </div>
+
       {/* Stats cards */}
+      <h2 className="sectionTitle text-lg font-display font-bold mb-3 text-foreground">Toutes les données</h2>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {cards.map(card => (
           <Link key={card.label} to={card.link} className="bg-card rounded-xl border p-5 hover:shadow-elegant transition-shadow group">
@@ -71,7 +105,7 @@ export function AdminDashboard() {
         {/* Produits */}
         <div className="bg-white rounded-xl border p-5">
           <h2 className="font-semibold flex items-center gap-2 mb-3">
-            <Package className="w-5 h-5 text-orange-600" />
+            <Bike className="w-8 h-8 text-orange-500" />
             Produits au catalogue
           </h2>
           <div className="space-y-2 text-sm">
