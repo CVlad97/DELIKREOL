@@ -97,6 +97,36 @@ serve(async (req) => {
     const amountInCents = Math.round(amount * 100)
     console.log(`[stripe] Création transfert — ${amount} EUR vers ${driverStripeAccountId} (commande: ${orderId})`)
 
+    // --- Vérification que la commande existe et est payée ---
+    const { data: order, error: orderCheckError } = await supabase
+      .from('orders')
+      .select('id, status, payment_status')
+      .eq('id', orderId)
+      .single()
+
+    if (orderCheckError || !order) {
+      throw new Error(`Commande ${orderId} introuvable`)
+    }
+    if (order.payment_status !== 'paid' && order.status !== 'payée') {
+      throw new Error(`Commande ${orderId} non payée (status: ${order.payment_status || order.status}) — payout impossible`)
+    }
+
+    // --- Vérification que le livreur a les droits Stripe ---
+    const { data: driver } = await supabase
+      .from('drivers')
+      .select('stripe_payouts_enabled, stripe_status')
+      .eq('stripe_connect_account_id', driverStripeAccountId)
+      .single()
+
+    if (!driver) {
+      console.warn('[stripe] Livreur non trouvé dans drivers, transfert quand même...')
+    } else if (!driver.stripe_payouts_enabled) {
+      throw new Error(`Le livreur n'a pas les paiements activés (stripe_payouts_enabled=${driver.stripe_payouts_enabled})`)
+    }
+
+    // Génération d'une clé d'idempotence pour éviter les doublons Stripe
+    const idempotencyKey = `payout_${orderId}_${Date.now()}`
+
     // --- Création du transfert Stripe ---
     const transfer = await stripe.transfers.create({
       amount: amountInCents,
@@ -106,6 +136,8 @@ serve(async (req) => {
       metadata: {
         orderId,
       },
+    }, {
+      idempotencyKey,
     })
 
     console.log(`[stripe] Transfert créé : ${transfer.id}`)

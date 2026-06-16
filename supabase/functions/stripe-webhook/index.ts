@@ -237,14 +237,41 @@ serve(async (req) => {
 
     console.log(`[stripe] Webhook reçu : ${event.type} (id: ${event.id})`)
 
-    // --- Idempotence : éviter de traiter 2x le même événement ---
+    // --- Idempotence : mémoire + base de données ---
     if (processedEvents.has(event.id)) {
-      console.log(`[stripe] Événement ${event.id} déjà traité — ignoré (idempotence)`)
+      console.log(`[stripe] Événement ${event.id} déjà traité en mémoire — ignoré`)
       return new Response(JSON.stringify({ received: true, idempotent: true }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       })
     }
+
+    processedEvents.add(event.id)
+
+    // --- Initialisation Supabase (service role) ---
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+
+    // --- Vérifier aussi en base (si le serveur a redémarré) ---
+    const { data: existingEvent } = await supabase
+      .from('stripe_webhook_events')
+      .select('id')
+      .eq('id', event.id)
+      .maybeSingle()
+
+    if (existingEvent) {
+      console.log(`[stripe] Événement ${event.id} déjà en base — ignoré (idempotence DB)`)
+      return new Response(JSON.stringify({ received: true, idempotent: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    }
+
+    // Enregistrer l'événement en base (idempotence)
+    await supabase.from('stripe_webhook_events').insert({
+      id: event.id,
+      type: event.type,
+    }).catch((e: unknown) => console.warn('[stripe] Échec enregistrement événement webhook:', (e as Error).message))
+
     processedEvents.add(event.id)
 
     // --- Initialisation Supabase (service role) ---
@@ -282,6 +309,51 @@ serve(async (req) => {
       case 'transfer.created': {
         const transfer = event.data.object as Stripe.Transfer
         await handleTransferCreated(supabase, transfer)
+        break
+      }
+
+      case 'charge.refunded': {
+        const charge = event.data.object as Stripe.Charge
+        const refundedOrderId = charge.metadata?.orderId || (charge.payment_intent ? null : null)
+        const piId = charge.payment_intent as string || ''
+
+        console.log(`[stripe] charge.refunded — charge: ${charge.id}, PI: ${piId}, orderId: ${refundedOrderId}`)
+
+        // Récupérer le PaymentIntent pour trouver l'orderId dans les metadata
+        let orderId = refundedOrderId
+        if (!orderId && piId) {
+          try {
+            const pi = await stripe.paymentIntents.retrieve(piId)
+            orderId = pi.metadata?.orderId
+            console.log(`[stripe] charge.refunded — orderId trouvé via PI metadata: ${orderId}`)
+          } catch (e) {
+            console.warn('[stripe] Impossible de retrouver le PI pour charge.refunded:', e)
+          }
+        }
+
+        if (orderId) {
+          const { error: refundError } = await supabase
+            .from('orders')
+            .update({
+              status: 'refunded',
+              refunded_at: new Date().toISOString(),
+              payment_intent_id: piId || null,
+            })
+            .eq('id', orderId)
+
+          if (refundError) {
+            console.error('[stripe] Erreur mise à jour commande refund:', refundError.message)
+          } else {
+            console.log(`[stripe] Commande ${orderId} marquée comme remboursée`)
+          }
+
+          // Créer un order_event
+          await supabase.from('order_events').insert({
+            order_id: orderId,
+            event_type: 'payment_refunded',
+            payload: { charge_id: charge.id, amount: charge.amount / 100 },
+          }).catch((e: unknown) => console.warn('[stripe] Erreur order_event refund:', (e as Error).message))
+        }
         break
       }
 

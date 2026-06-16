@@ -88,7 +88,11 @@ serve(async (req) => {
       // On met à jour par email (le partenaire a déjà été créé dans la BDD)
       const { error: updateError } = await supabase
         .from('partners')
-        .update({ stripe_account_id: stripeAccountId, updated_at: new Date().toISOString() })
+        .update({
+          stripe_account_id: stripeAccountId,
+          stripe_connect_account_id: stripeAccountId,
+          updated_at: new Date().toISOString(),
+        })
         .eq('email', email)
 
       if (updateError) {
@@ -96,7 +100,7 @@ serve(async (req) => {
         // Tentative d'insertion si l'enregistrement n'existe pas encore
         const { error: insertError } = await supabase
           .from('partners')
-          .insert({ email, name, stripe_account_id: stripeAccountId, status: 'onboarding' })
+          .insert({ email, name, stripe_account_id: stripeAccountId, stripe_connect_account_id: stripeAccountId, status: 'onboarding' })
 
         if (insertError) {
           console.warn('[stripe] Impossible d\'insérer dans partners :', insertError.message)

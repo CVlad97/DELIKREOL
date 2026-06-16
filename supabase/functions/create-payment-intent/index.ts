@@ -32,6 +32,43 @@ serve(async (req) => {
     const body = await req.json()
     const { amount, currency = 'eur', orderId, vendorStripeAccountId, vendorId, customerId, deliveryId } = body
 
+    // --- Initialisation Supabase ---
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    // --- Recalcul serveur du montant depuis la commande (sécurité) ---
+    let serverAmountInCents = Math.round(amount * 100)
+
+    if (orderId) {
+      console.log(`[stripe] Vérification commande ${orderId} en base...`)
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .select('total, delivery_fee, sub_total')
+        .eq('id', orderId)
+        .single()
+
+      if (orderError) {
+        console.warn('[stripe] Commande non trouvée en base, utilisation du montant frontend')
+      } else {
+        // Recalcul : (sub_total ou total) + delivery_fee = total_attend
+        const subTotal = order.sub_total || 0
+        const deliveryFee = order.delivery_fee || 0
+        const calculatedTotal = subTotal + deliveryFee
+
+        if (calculatedTotal > 0) {
+          serverAmountInCents = Math.round(calculatedTotal * 100)
+          console.log(`[stripe] Montant recalculé depuis la base : ${subTotal} + ${deliveryFee} = ${calculatedTotal}€ (${serverAmountInCents} centimes)`)
+        }
+
+        // Alerte si le frontend a envoyé un montant différent
+        const frontendAmountCents = Math.round(amount * 100)
+        if (Math.abs(serverAmountInCents - frontendAmountCents) > 1) {
+          console.warn(`[stripe] ⚠️ Différence de montant : frontend=${frontendAmountCents}, serveur=${serverAmountInCents} — utilisation valeur serveur`)
+        }
+      }
+    }
+
     // --- Validation du montant ---
     if (!amount || amount <= 0) {
       throw new Error('Montant invalide')
@@ -40,7 +77,7 @@ serve(async (req) => {
       throw new Error('ID de compte Stripe Connect invalide')
     }
 
-    const amountInCents = Math.round(amount * 100)
+    const amountInCents = serverAmountInCents
 
     if (vendorStripeAccountId) {
       // -------------------------------------------------------
