@@ -30,11 +30,14 @@ serve(async (req) => {
 
   try {
     const body = await req.json()
-    const { amount, currency = 'eur', orderId, vendorStripeAccountId } = body
+    const { amount, currency = 'eur', orderId, vendorStripeAccountId, vendorId, customerId, deliveryId } = body
 
     // --- Validation du montant ---
     if (!amount || amount <= 0) {
       throw new Error('Montant invalide')
+    }
+    if (vendorStripeAccountId && !vendorStripeAccountId.startsWith('acct_')) {
+      throw new Error('ID de compte Stripe Connect invalide')
     }
 
     const amountInCents = Math.round(amount * 100)
@@ -51,7 +54,13 @@ serve(async (req) => {
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amountInCents,
         currency,
-        metadata: { orderId },
+        metadata: {
+          orderId,
+          ...(vendorId && { vendorId }),
+          ...(customerId && { customerId }),
+          ...(deliveryId && { deliveryId }),
+          mode: 'marketplace',
+        },
         automatic_payment_methods: { enabled: true },
         // Transfert automatique des fonds vers le compte Stripe Connect du traiteur
         transfer_data: {

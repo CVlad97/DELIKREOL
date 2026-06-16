@@ -22,7 +22,6 @@ export async function createPaymentIntent(
         amount: Math.round(total * 100),
         currency: 'eur',
         orderId,
-        vendorAccountId,
       },
     });
 
@@ -59,7 +58,7 @@ export async function createConnectPaymentIntent(
         amount: Math.round(amount * 100),
         currency: 'eur',
         orderId,
-        vendorAccountId: vendorStripeAccountId,
+        vendorStripeAccountId,
         connect: true,
       },
     });
@@ -104,7 +103,7 @@ export async function getStripeConnectOnboardingLink(
       return null;
     }
 
-    return data.url;
+    return data.accountLink;
   } catch (error) {
     console.error('Error calling Connect onboarding function:', error);
     return null;

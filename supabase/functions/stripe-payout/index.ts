@@ -50,8 +50,8 @@ async function verifyAdminAuth(
 
     return profile?.role === 'admin'
   } catch {
-    // Si le token est un service_role key directement
-    return token === SUPABASE_SERVICE_KEY
+    console.warn('[stripe] Auth admin échouée — token JWT invalide')
+    return false
   }
 }
 

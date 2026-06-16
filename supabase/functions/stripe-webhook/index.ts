@@ -10,6 +10,9 @@ const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16', httpClient: Str
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || ''
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 
+// Set pour idempotence (évite de traiter 2x le même événement)
+const processedEvents = new Set<string>()
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -109,8 +112,10 @@ async function handleAccountUpdated(
 
   // Déterminer le statut basé sur l'état du compte Stripe
   let status: string
+  let onboardingCompleted = false
   if (account.charges_enabled && account.payouts_enabled) {
     status = 'actif'
+    onboardingCompleted = true
   } else if (account.charges_enabled) {
     status = 'payments_ready'
   } else if (account.details_submitted) {
@@ -126,6 +131,7 @@ async function handleAccountUpdated(
         stripe_status: status,
         charges_enabled: account.charges_enabled,
         payouts_enabled: account.payouts_enabled,
+        onboarding_completed: onboardingCompleted,
         updated_at: new Date().toISOString(),
       })
       .eq('stripe_account_id', accountId)
@@ -133,7 +139,7 @@ async function handleAccountUpdated(
     if (error) {
       console.warn('[stripe] Erreur mise à jour partners :', error.message)
     } else {
-      console.log(`[stripe] Compte partenaire ${onboardName || accountId} → ${status}`)
+      console.log(`[stripe] Compte partenaire ${onboardName || accountId} → ${status} (onboarding: ${onboardingCompleted})`)
     }
   } else if (onboardType === 'driver') {
     const { error } = await supabase
@@ -142,6 +148,7 @@ async function handleAccountUpdated(
         stripe_status: status,
         charges_enabled: account.charges_enabled,
         payouts_enabled: account.payouts_enabled,
+        onboarding_completed: onboardingCompleted,
         updated_at: new Date().toISOString(),
       })
       .eq('stripe_account_id', accountId)
@@ -230,6 +237,16 @@ serve(async (req) => {
 
     console.log(`[stripe] Webhook reçu : ${event.type} (id: ${event.id})`)
 
+    // --- Idempotence : éviter de traiter 2x le même événement ---
+    if (processedEvents.has(event.id)) {
+      console.log(`[stripe] Événement ${event.id} déjà traité — ignoré (idempotence)`)
+      return new Response(JSON.stringify({ received: true, idempotent: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    }
+    processedEvents.add(event.id)
+
     // --- Initialisation Supabase (service role) ---
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
@@ -238,6 +255,21 @@ serve(async (req) => {
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent
         await handlePaymentIntentSucceeded(supabase, paymentIntent)
+        break
+      }
+
+      case 'payment_intent.payment_failed': {
+        const failedPI = event.data.object as Stripe.PaymentIntent
+        const failedOrderId = failedPI.metadata?.orderId
+        console.log(`[stripe] payment_intent.payment_failed — PI: ${failedPI.id}, orderId: ${failedOrderId}, error: ${failedPI.last_payment_error?.message || 'inconnu'}`)
+
+        if (failedOrderId) {
+          const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+          await supabase
+            .from('orders')
+            .update({ status: 'payment_failed', payment_error: failedPI.last_payment_error?.message || 'Erreur de paiement' })
+            .eq('id', failedOrderId)
+        }
         break
       }
 
