@@ -14,6 +14,7 @@ import {
 import { Layout } from '../../components/layout/Layout';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 import { useToast } from '../../contexts/ToastContext';
+import { supabase } from '../../lib/supabase';
 
 const WHATSAPP_NUMBER = '596696653589';
 
@@ -120,7 +121,7 @@ export default function DevenirPartenairePage() {
     return lines.filter(Boolean).join('\n');
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     const existing = JSON.parse(localStorage.getItem('delikreol_partner_applications') || '[]');
@@ -132,6 +133,27 @@ export default function DevenirPartenairePage() {
     };
     existing.push(entry);
     localStorage.setItem('delikreol_partner_applications', JSON.stringify(existing));
+
+    // Tentative de sauvegarde dans Supabase (fallback silencieux si indisponible)
+    try {
+      const { error } = await supabase
+        .from('partner_applications')
+        .insert({
+          name: form.nomResponsable,
+          business_name: form.nomActivite,
+          email: form.email || null,
+          phone: form.telephone,
+          commune: form.commune,
+          activity_type: form.typeActivite,
+          description: form.message || null,
+        });
+
+      if (error) {
+        console.warn('[DevenirPartenaire] Supabase insert failed, keeping localStorage only:', error.message);
+      }
+    } catch (err) {
+      console.warn('[DevenirPartenaire] Supabase unavailable, keeping localStorage only:', err);
+    }
 
     setSubmitted(true);
     showSuccess('Votre demande a bien été reçue. Nous revenons vers vous rapidement par WhatsApp.');
@@ -156,14 +178,19 @@ export default function DevenirPartenairePage() {
           <p className="text-xs text-muted-foreground">
             Statut : <span className="font-bold text-primary">nouveau / à vérifier</span>
           </p>
+          <p className="text-sm text-muted-foreground">
+            Vous serez contacté rapidement. Contact support si besoin.
+          </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
-            <button
-              onClick={openWhatsApp}
+            <a
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Bonjour DeliKreol, j\'ai postulé pour devenir partenaire et souhaitais un suivi.')}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold transition-colors"
             >
               <MessageCircle size={18} fill="white" />
-              Envoyer aussi par WhatsApp
-            </button>
+              Suivi par WhatsApp
+            </a>
             <Link
               to="/"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold transition-colors"

@@ -43,6 +43,7 @@ const AdminSimulation = lazy(() => import('./pages/admin/AdminSimulation'));
 const PartnerAccessPage = lazy(() => import('./pages/new/PartnerAccessPage'));
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'));
 const AdminFinance = lazy(() => import('./pages/admin/AdminFinance'));
+const AdminPartnersApplications = lazy(() => import('./pages/admin/AdminPartnersApplications'));
 const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/legal/PrivacyPolicy'));
 const CGVPage = lazy(() => import('./pages/legal/CGVPage'));
@@ -134,6 +135,7 @@ export function AppRouter() {
                   <Route path="simulation" element={<AdminSimulation />} />
                   <Route path="dashboard" element={<AdminDashboardPage />} />
                   <Route path="finance" element={<AdminFinance />} />
+                  <Route path="applications" element={<AdminPartnersApplications />} />
                 </Route>
               </Routes>
             </ToastProvider>
