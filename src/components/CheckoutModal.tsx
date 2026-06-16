@@ -42,7 +42,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       id: PaymentMode;
       title: string;
       subtitle: string;
-      icon: React.ComponentType<{ size?: number; className?: string }>;
+      icon: React.ElementType;
     }> = [
       {
         id: 'bank_transfer',
