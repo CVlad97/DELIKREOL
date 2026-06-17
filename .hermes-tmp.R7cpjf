@@ -1,0 +1,2 @@
+#!/bin/bash
+cd /workspace/DELIKREOL && npx vite build 2>&1

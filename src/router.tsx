@@ -25,6 +25,7 @@ const LivraisonPage = lazy(() => import('./pages/new/LivraisonPage'));
 const NotFoundPage = lazy(() => import('./pages/new/NotFoundPage'));
 const ContactPage = lazy(() => import('./pages/new/ContactPage'));
 const FeedbackPage = lazy(() => import('./pages/new/FeedbackPage'));
+const CatererSignupPage = lazy(() => import('./pages/new/CatererSignupPage'));
 
 // Admin pages — fully lazy loaded
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
@@ -106,6 +107,7 @@ export function AppRouter() {
                   <Route path="livraison" element={<LivraisonPage />} />
                   <Route path="contact" element={<ContactPage />} />
                   <Route path="feedback" element={<FeedbackPage />} />
+                  <Route path="inscription-traiteur" element={<CatererSignupPage />} />
                   <Route path="pro" element={<ProSpacePage />} />
                   <Route path="statut-commande" element={<OrderStatusPage />} />
                   {/* Partenaire */}

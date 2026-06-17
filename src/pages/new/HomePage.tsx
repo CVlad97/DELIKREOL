@@ -223,10 +223,10 @@ export default function HomePage() {
                   Commander maintenant
                 </Link>
                 <Link
-                  to="/devenir-partenaire"
+                  to="/inscription-traiteur"
                   className="flex items-center justify-center gap-2 px-8 py-3.5 bg-white hover:bg-orange-50 text-orange-600 font-bold rounded-2xl border-2 border-orange-200 transition-all hover:scale-105 text-base"
                 >
-                  Devenir traiteur bêta
+                  Rejoindre Delikreol comme traiteur
                 </Link>
                 <Link
                   to="/devenir-livreur"
