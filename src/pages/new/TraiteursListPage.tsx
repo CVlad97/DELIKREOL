@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
-import { ChefHat, MapPin, Star, ArrowRight, AlertCircle, Locate } from 'lucide-react';
-import { traiteurSpaces } from '../../data/traiteurs';
+import { ChefHat, MapPin, Star, ArrowRight, AlertCircle, Locate, Euro } from 'lucide-react';
+import { traiteurSpaces, formatEuro } from '../../data/traiteurs';
 import { useEffect, useState } from 'react';
 import { calculateDistanceKm } from '../../services/geolocation';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
+import { mockProducts } from '../../data/mockCatalog';
 
 export function TraiteursListPage() {
   const [userPosition, setUserPosition] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -27,6 +28,30 @@ export function TraiteursListPage() {
   const distTo = (lat?: number, lng?: number) => {
     if (!userPosition || !lat || !lng) return null;
     return calculateDistanceKm(userPosition, { latitude: lat, longitude: lng });
+  };
+
+  const getStartingPrice = (traiteur: any): string => {
+    // 1) Vérifier priceRange ou price_level (champ futur-compatible)
+    if (traiteur.priceRange) return `À partir de ${traiteur.priceRange}`;
+    if (traiteur.price_level) return `À partir de ${traiteur.price_level}`;
+
+    // 2) Utiliser startingAt déjà calculé depuis les menuItems
+    if (traiteur.startingAt && traiteur.startingAt > 0) {
+      return `À partir de ${formatEuro(traiteur.startingAt)}`;
+    }
+
+    // 3) Fallback : chercher dans mockCatalog les produits de ce traiteur
+    const traiteurName = (traiteur.name || '').toLowerCase().trim();
+    const products = mockProducts.filter(
+      (p) => p.vendor?.toLowerCase().trim() === traiteurName
+    );
+    if (products.length > 0) {
+      const minPrice = Math.min(...products.map((p) => p.price));
+      return `À partir de ${formatEuro(minPrice)}`;
+    }
+
+    // 4) Rien trouvé
+    return 'Prix à confirmer';
   };
 
   const filtered = traiteurSpaces
@@ -87,7 +112,7 @@ export function TraiteursListPage() {
             <Link
               key={traiteur.slug}
               to={`/traiteur/${traiteur.slug}`}
-              className="group block bg-card rounded-2xl overflow-hidden shadow-elegant hover:shadow-warm transition-all duration-300 hover:-translate-y-1 border border-border"
+              className="card group block bg-card rounded-2xl overflow-hidden shadow-elegant hover:shadow-warm transition-all duration-300 hover:-translate-y-1 border border-border"
             >
               {/* Cover image */}
               <div className="aspect-video bg-muted relative overflow-hidden">
@@ -115,6 +140,11 @@ export function TraiteursListPage() {
                     📸 {traiteur.photoStatus === 'externe à vérifier' ? 'Externe' : 'À confirmer'}
                   </div>
                 )}
+                {/* Prix indicatif */}
+                <div className="badge absolute bottom-3 right-3 bg-white/90 text-foreground text-[11px] px-2.5 py-1 rounded-full font-semibold shadow-sm flex items-center gap-1">
+                  <Euro className="w-3 h-3 text-orange-600" />
+                  {getStartingPrice(traiteur)}
+                </div>
               </div>
 
               {/* Content */}

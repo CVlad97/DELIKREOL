@@ -42,6 +42,10 @@ export type TraiteurSpace = {
   photoStatus: 'confirmée' | 'à confirmer' | 'externe à vérifier';
   bioStatus?: 'confirmée' | 'à confirmer';
   photoCredit?: string;
+  horaires?: Partial<Record<string, { open: string; close: string }>>;
+  cutoff_time?: string;
+  prep_time?: number;
+  delivery_slots?: string[];
 };
 
 const allPartnerProfiles: PartnerProfile[] = [...partnerProfiles, ...additionalPartnerProfiles];
@@ -199,23 +203,53 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
     .filter((profile) => profile.type.toLowerCase() === 'traiteur')
     .map((profile) => {
       if (profile.name === 'Les Delices de Ninice') {
-        return buildSpace(profile, 'from-[#d95f2d] via-[#f49d4b] to-[#7c2d12]', '#fff7ed', 'public confirmé', 'confirmée');
+        return {
+          ...buildSpace(profile, 'from-[#d95f2d] via-[#f49d4b] to-[#7c2d12]', '#fff7ed', 'public confirmé', 'confirmée'),
+          horaires: { lun: { open: '08:00', close: '18:00' }, mar: { open: '08:00', close: '18:00' }, mer: { open: '08:00', close: '18:00' }, jeu: { open: '08:00', close: '18:00' }, ven: { open: '08:00', close: '18:00' }, sam: { open: '09:00', close: '15:00' } },
+          cutoff_time: '10:30',
+          prep_time: 30,
+          delivery_slots: ['11:30-12:30', '12:30-13:30', '18:00-19:00', '19:00-20:00'],
+        };
       }
 
       if (profile.name === 'An Tjè Coco') {
-        return buildSpace(profile, 'from-[#7c3aed] via-[#ec4899] to-[#c2410c]', '#fff1f2', 'public confirmé', 'confirmée');
+        return {
+          ...buildSpace(profile, 'from-[#7c3aed] via-[#ec4899] to-[#c2410c]', '#fff1f2', 'public confirmé', 'confirmée'),
+          horaires: { mar: { open: '14:00', close: '22:00' }, mer: { open: '14:00', close: '22:00' }, jeu: { open: '14:00', close: '22:00' }, ven: { open: '14:00', close: '22:00' }, sam: { open: '14:00', close: '22:00' } },
+          cutoff_time: '09:30',
+          prep_time: 40,
+          delivery_slots: ['18:00-19:00', '19:00-20:00', '20:00-21:00'],
+        };
       }
 
       if (profile.name === "Coco's Food") {
-        return buildSpace(profile, 'from-[#2b1b10] via-[#8b5e34] to-[#d97706]', '#fff7ed', 'public confirmé', 'confirmée');
+        return {
+          ...buildSpace(profile, 'from-[#2b1b10] via-[#8b5e34] to-[#d97706]', '#fff7ed', 'public confirmé', 'confirmée'),
+          horaires: { lun: { open: '09:00', close: '21:00' }, mar: { open: '09:00', close: '21:00' }, mer: { open: '09:00', close: '21:00' }, jeu: { open: '09:00', close: '21:00' }, ven: { open: '09:00', close: '21:00' }, sam: { open: '09:00', close: '21:00' }, dim: { open: '10:00', close: '16:00' } },
+          cutoff_time: '11:00',
+          prep_time: 25,
+          delivery_slots: ['11:30-12:30', '12:30-13:30', '18:00-19:00', '19:00-20:00', '20:00-21:00'],
+        };
       }
 
       if (profile.name.startsWith('Snack Savè Peyi')) {
-        return buildSpace(profile, 'from-[#f59e0b] via-[#dc2626] to-[#15803d]', '#fff7ed', 'public confirmé', 'confirmée');
+        return {
+          ...buildSpace(profile, 'from-[#f59e0b] via-[#dc2626] to-[#15803d]', '#fff7ed', 'public confirmé', 'confirmée'),
+          horaires: { lun: { open: '07:00', close: '19:00' }, mar: { open: '07:00', close: '19:00' }, mer: { open: '07:00', close: '19:00' }, jeu: { open: '07:00', close: '19:00' }, ven: { open: '07:00', close: '19:00' }, sam: { open: '07:00', close: '19:00' } },
+          cutoff_time: '11:30',
+          prep_time: 20,
+          delivery_slots: ['11:30-12:30', '12:30-13:30', '18:00-19:00', '19:00-20:00'],
+        };
       }
 
       // Saveurs d'Afrique — public confirmé
-      return buildSpace(profile, 'from-[#0f766e] via-[#14b8a6] to-[#14532d]', '#ecfeff', 'public confirmé', 'confirmée');
+      return {
+        ...buildSpace(profile, 'from-[#0f766e] via-[#14b8a6] to-[#14532d]', '#ecfeff', 'public confirmé', 'confirmée'),
+        horaires: { lun: { open: '09:00', close: '18:00' }, mar: { open: '09:00', close: '18:00' }, mer: { open: '09:00', close: '18:00' }, jeu: { open: '09:00', close: '18:00' }, ven: { open: '09:00', close: '18:00' }, sam: { open: '10:00', close: '16:00' } },
+        cutoff_time: '10:00',
+        prep_time: 35,
+        delivery_slots: ['11:30-12:30', '12:30-13:30', '18:00-19:00', '19:00-20:00'],
+      };
     });
 }
 

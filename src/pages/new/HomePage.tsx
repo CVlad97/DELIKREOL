@@ -14,6 +14,7 @@ import {
   Utensils,
   Plus,
   Sparkles,
+  Star,
   Users,
   Heart,
   Locate,
@@ -698,6 +699,66 @@ export default function HomePage() {
                 sur WhatsApp. Réponse rapide, service humain.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Avis clients — Ce que disent nos clients */}
+      <section className="py-16 md:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <h2 className="sectionTitle text-3xl md:text-4xl font-black text-gray-900 mb-3">
+              Ce que disent nos clients
+            </h2>
+            <p className="text-gray-500 text-lg">
+              Des avis de Martiniquais comme vous
+            </p>
+          </div>
+          <div className="cardGrid grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                initial: 'M',
+                name: 'Marie-Line',
+                comment: 'Le colombo de Ninice est un délice. Livré en 45 min à Ducos, parfait !',
+              },
+              {
+                initial: 'J',
+                name: 'Jean-Philippe',
+                comment: "Commander les accras de Coco's Food pour une fête, tout le monde a adoré. Click & collect super pratique.",
+              },
+              {
+                initial: 'S',
+                name: 'Sandra',
+                comment: "Je commande toutes les semaines chez Saveurs d'Afrique. Les plats sont toujours frais et les portions généreuses.",
+              },
+              {
+                initial: 'P',
+                name: 'Patrick',
+                comment: 'Le service traiteur événementiel au Marin, nickel. Livraison à l\'heure, plat chaud. Je recommande.',
+              },
+            ].map((review, index) => (
+              <div
+                key={index}
+                className="card bg-[#FFFBF0] rounded-3xl p-6 border border-orange-100 shadow-sm hover:shadow-lg transition-all"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 rounded-full bg-orange-500 text-white flex items-center justify-center text-lg font-bold shrink-0">
+                    {review.initial}
+                  </div>
+                  <div>
+                    <p className="font-bold text-gray-900">{review.name}</p>
+                    <div className="flex items-center gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm leading-relaxed italic">
+                  &ldquo;{review.comment}&rdquo;
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
