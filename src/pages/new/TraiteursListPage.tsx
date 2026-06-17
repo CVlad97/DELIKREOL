@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { calculateDistanceKm } from '../../services/geolocation';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 import { mockProducts } from '../../data/mockCatalog';
+import { setPageMeta } from '../../services/seo';
 
 export function TraiteursListPage() {
   const [userPosition, setUserPosition] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -14,6 +15,16 @@ export function TraiteursListPage() {
   useEffect(() => {
     document.title = 'Nos traiteurs partenaires — DeliKreol';
   }, []);
+
+  useEffect(() => {
+    const communeFilter = selectedCommune
+      ? ` à ${selectedCommune}`
+      : '';
+    setPageMeta(
+      `Nos traiteurs partenaires${communeFilter} — DeliKreol`,
+      `Les meilleurs traiteurs de Martinique par commune${communeFilter} — livraison repas, plats créoles et cuisine locale.`
+    );
+  }, [selectedCommune]);
 
   const requestPosition = () => {
     if (!navigator.geolocation) return;

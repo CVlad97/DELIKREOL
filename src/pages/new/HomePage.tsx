@@ -30,6 +30,7 @@ import type { Product } from '../../lib/supabase';
 import { HowItWorksCompact } from '../../components/HowItWorksCompact';
 import { calculateDistanceKm, type Coords } from '../../services/geolocation';
 import { LocationSelector } from '../../components/LocationSelector';
+import { setPageMeta } from '../../services/seo';
 
 const WHATSAPP_NUMBER = '596696653589';
 
@@ -147,13 +148,17 @@ export default function HomePage() {
 
   useEffect(() => {
     document.title = 'DeliKreol — Commandez créole local en Martinique | Livraison & Traiteur';
+    setPageMeta(
+      'DeliKreol — Commandez créole local en Martinique | Livraison & Traiteur',
+      'Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait. Commandez en ligne vos plats maison.',
+      'livraison repas Martinique, traiteur Martinique, plats créoles, Delikreol, click and collect Martinique'
+    );
   }, []);
 
   useEffect(() => {
-    const setMeta = (property: string, content: string, name?: string) => {
-      const attr = name ? 'name' : 'property';
-      const key = name || property;
-      let el = document.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement | null;
+    const upsertMeta = (attr: 'name' | 'property', key: string, content: string) => {
+      const selector = `meta[${attr}="${key}"]`;
+      let el = document.querySelector(selector) as HTMLMetaElement | null;
       if (!el) {
         el = document.createElement('meta');
         el.setAttribute(attr, key);
@@ -162,21 +167,9 @@ export default function HomePage() {
       el.setAttribute('content', content);
     };
 
-    // OG tags
-    setMeta('og:title', 'DeliKreol — Commandez créole local en Martinique | Livraison & Traiteur');
-    setMeta('og:description', 'Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait. Commandez en ligne vos plats maison.');
-    setMeta('og:image', 'https://cvlad97.github.io/DELIKREOL/branding/favicon.svg');
-    setMeta('og:url', 'https://cvlad97.github.io/DELIKREOL/');
-    setMeta('og:type', 'website');
-
-    // Twitter card
-    setMeta('twitter:card', 'summary_large_image', 'twitter:card');
-    setMeta('twitter:title', 'DeliKreol — Commandez créole local en Martinique | Livraison & Traiteur', 'twitter:title');
-    setMeta('twitter:description', 'Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait. Commandez en ligne vos plats maison.', 'twitter:description');
-    setMeta('twitter:image', 'https://cvlad97.github.io/DELIKREOL/branding/favicon.svg', 'twitter:image');
-
-    // Meta description
-    setMeta('description', 'Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait. Commandez en ligne vos plats maison.', 'description');
+    // Geotags Martinique
+    upsertMeta('name', 'geo.position', '14.616065;-61.058906');
+    upsertMeta('name', 'ICBM', '14.616065, -61.058906');
   }, []);
 
   return (

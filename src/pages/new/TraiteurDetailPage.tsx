@@ -4,6 +4,7 @@ import { traiteurSpaces, formatEuro } from '../../data/traiteurs';
 import { useCart } from '../../contexts/CartContext';
 import { useToast } from '../../contexts/ToastContext';
 import { useEffect, useMemo } from 'react';
+import { setPageMeta } from '../../services/seo';
 import type { Product } from '../../types';
 
 const WHATSAPP_NUMBER = '596696653589';
@@ -36,6 +37,17 @@ export function TraiteurDetailPage() {
     document.title = traiteur
       ? `${traiteur.name} — DeliKreol`
       : 'Traiteur introuvable — DeliKreol';
+  }, [traiteur]);
+
+  useEffect(() => {
+    if (traiteur) {
+      const commune = traiteur.commune || traiteur.zone || 'Martinique';
+      setPageMeta(
+        `${traiteur.name} - ${commune} - Plats créoles Martinique`,
+        `${traiteur.name} - ${commune} - Plats créoles Martinique. ${traiteur.description || traiteur.offer || 'Découvrez les spécialités de ce prestataire.'}`,
+        `${traiteur.name}, ${commune}, livraison repas Martinique, plats créoles`
+      );
+    }
   }, [traiteur]);
 
   if (!traiteur) {
