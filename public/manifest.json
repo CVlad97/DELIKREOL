@@ -1,0 +1,19 @@
+{
+  "name": "DeliKreol — Plats créoles Martinique",
+  "short_name": "DeliKreol",
+  "description": "Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait.",
+  "start_url": "/DELIKREOL/",
+  "scope": "/DELIKREOL/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/DELIKREOL/branding/logo-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
