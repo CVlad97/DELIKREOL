@@ -696,6 +696,47 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Ils nous ont rejoints */}
+      <section className="py-16 md:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-3">
+              Ils nous ont rejoints
+            </h2>
+            <p className="text-gray-500 text-lg">
+              Des traiteurs martiniquais déjà partenaires DeliKreol
+            </p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+            {([
+              { name: 'Ninice', slug: 'ninice', image: `${import.meta.env.BASE_URL}vendors/ninice/portrait.jpg` },
+              { name: "Coco's Food", slug: 'coco', image: `${import.meta.env.BASE_URL}vendors/coco/hero.jpg` },
+              { name: "Saveurs d'Afrique", slug: 'saveurs-afrique', image: `${import.meta.env.BASE_URL}vendors/saveurs-afrique/hero.jpg` },
+              { name: 'An Tjè Coco', slug: 'an-tje-coco', image: `${import.meta.env.BASE_URL}vendors/an-tje-coco/hero.jpg` },
+              { name: 'Snack Save Peyi\'A', slug: 'save-peyia', image: `${import.meta.env.BASE_URL}vendors/save-peyia/hero.jpg` },
+            ] as const).map((caterer) => (
+              <Link
+                key={caterer.slug}
+                to={`/traiteur/${caterer.slug}`}
+                className="group flex flex-col items-center gap-3 p-5 rounded-2xl bg-[#FFFBF0] border border-orange-100 hover:border-orange-300 hover:shadow-lg transition-all text-center"
+              >
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-orange-200 group-hover:border-orange-400 transition-colors bg-white shadow-sm">
+                  <img
+                    src={caterer.image}
+                    alt={caterer.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                </div>
+                <span className="text-sm font-bold text-gray-700 group-hover:text-orange-600 transition-colors">
+                  {caterer.name}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Avis clients — Ce que disent nos clients */}
       <section className="py-16 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

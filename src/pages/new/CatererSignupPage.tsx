@@ -144,6 +144,14 @@ export default function CatererSignupPage() {
   const logoInputRef = useRef<HTMLInputElement>(null);
   const { showSuccess, showError } = useToast();
 
+  const [catererCount] = useState(() => {
+    try {
+      return parseInt(localStorage.getItem('delikreol_caterer_count') || '0', 10);
+    } catch {
+      return 0;
+    }
+  });
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -387,6 +395,10 @@ export default function CatererSignupPage() {
 
     setSubmitted(true);
 
+    // Incrémenter le compteur de traiteurs
+    const currentCount = parseInt(localStorage.getItem('delikreol_caterer_count') || '0', 10);
+    localStorage.setItem('delikreol_caterer_count', String(currentCount + 1));
+
     if (storageUsed) {
       showSuccess('Photos sauvegardées ! Votre inscription traiteur bêta a bien été reçue !');
     } else if (photos.length > 0 && !storageUsed) {
@@ -509,6 +521,13 @@ export default function CatererSignupPage() {
               fiche avec vous.
             </p>
           </div>
+        </div>
+
+        {/* 👥 Compteur traiteurs */}
+        <div className="mb-6 text-center bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-2xl p-4">
+          <p className="text-sm font-bold text-orange-700">
+            👥 {catererCount} traiteur{catererCount !== 1 ? 's' : ''} {catererCount > 1 ? 'ont déjà rejoint' : 'a déjà rejoint'} Delikreol
+          </p>
         </div>
 
         {/* Benefits */}

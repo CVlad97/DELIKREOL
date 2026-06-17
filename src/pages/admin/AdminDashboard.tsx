@@ -14,6 +14,47 @@ function loadFromStorage(key: string): any[] {
   catch { return []; }
 }
 
+/* ─── Composant candidatures récentes ─── */
+function LatestApplications() {
+  const [apps, setApps] = useState<any[]>([]);
+
+  useEffect(() => {
+    const raw = loadFromStorage('delikreol_partner_applications');
+    const sorted = raw
+      .sort((a, b) => new Date(b.createdAt || b.created_at || 0).getTime() - new Date(a.createdAt || a.created_at || 0).getTime())
+      .slice(0, 5);
+    setApps(sorted);
+  }, []);
+
+  if (apps.length === 0) {
+    return <p className="text-sm text-gray-400 italic">Aucune candidature pour le moment</p>;
+  }
+
+  return (
+    <div className="space-y-3">
+      {apps.map((app, i) => (
+        <div key={i} className="text-sm p-3 bg-gray-50 rounded-xl flex items-center justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-gray-800 truncate">{app.business_name || app.nomActivite || '—'}</p>
+            <p className="text-xs text-gray-500 truncate">
+              {app.name || app.nomResponsable || ''}{app.name || app.nomResponsable ? ' • ' : ''}{app.commune || ''}{app.phone ? ` • ${app.phone}` : ''}
+            </p>
+          </div>
+          <span className="text-[10px] text-gray-400 whitespace-nowrap shrink-0">
+            {new Date(app.createdAt || app.created_at || 0).toLocaleDateString('fr-FR')}
+          </span>
+        </div>
+      ))}
+      <Link
+        to="/admin/applications"
+        className="mt-3 inline-block text-xs text-orange-600 font-semibold hover:underline"
+      >
+        Voir toutes les candidatures →
+      </Link>
+    </div>
+  );
+}
+
 /* ─── Données démo réalistes ─── */
 const DEMO_STATS = {
   ordersToday: 14,
@@ -131,6 +172,15 @@ export function AdminDashboard() {
           </div>
           <Link to="/admin/partenaires" className="mt-3 inline-block text-xs text-orange-600 font-semibold hover:underline">Voir les partenaires →</Link>
         </div>
+      </div>
+
+      {/* Dernières candidatures partenaires */}
+      <div className="bg-white rounded-xl border p-5 mb-8">
+        <h2 className="font-semibold flex items-center gap-2 mb-3">
+          <FileText className="w-5 h-5 text-orange-600" />
+          Dernières candidatures
+        </h2>
+        <LatestApplications />
       </div>
 
       {/* Alerts */}
