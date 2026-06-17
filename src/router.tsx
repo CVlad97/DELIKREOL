@@ -42,6 +42,7 @@ const AdminParametres = lazy(() => import('./pages/admin/AdminParametres'));
 const AdminOrchestrateur = lazy(() => import('./pages/admin/AdminOrchestrateur'));
 const AdminOffres = lazy(() => import('./pages/admin/AdminOffres'));
 const AdminSimulation = lazy(() => import('./pages/admin/AdminSimulation'));
+const AdminCatererValidation = lazy(() => import('./pages/admin/AdminCatererValidation'));
 const PartnerAccessPage = lazy(() => import('./pages/new/PartnerAccessPage'));
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'));
 const AdminFinance = lazy(() => import('./pages/admin/AdminFinance'));
@@ -142,6 +143,7 @@ export function AppRouter() {
                   <Route path="finance" element={<AdminFinance />} />
                   <Route path="feedback" element={<AdminFeedback />} />
                   <Route path="applications" element={<AdminPartnersApplications />} />
+                  <Route path="caterer-validation" element={<AdminCatererValidation />} />
                 </Route>
               </Routes>
             </ToastProvider>

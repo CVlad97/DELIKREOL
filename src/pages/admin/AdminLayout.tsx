@@ -22,6 +22,7 @@ const adminNav = [
   { label: 'Finance', icon: DollarSign, path: '/admin/finance' },
   { label: 'Feedback', icon: MessageCircle, path: '/admin/feedback' },
   { label: 'Candidatures', icon: ClipboardList, path: '/admin/applications' },
+  { label: 'Validation traiteurs', icon: ChefHat, path: '/admin/caterer-validation' },
 ];
 
 export function AdminLayout() {

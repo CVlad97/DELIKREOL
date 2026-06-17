@@ -231,12 +231,94 @@ export default function CatererSignupPage() {
     return `Bonjour Vladimir, je souhaite rejoindre DELIKREOL comme traiteur bêta testeur gratuit. Voici mes informations : ${data.nomActivite}, ${data.commune}, ${specialties}, ${data.prixDepart ? data.prixDepart + ' €' : 'Non précisé'}, ${contact}. Je vais aussi envoyer mes photos, ma bio et mes descriptions pour l intégration.`;
   };
 
+  const uploadPhotosToStorage = async (
+    photosList: PhotoItem[],
+    logoFile: File | null | undefined,
+    catererName: string
+  ): Promise<{ photoUrls: string[]; photoDescriptions: string[]; logoUrl: string | null }> => {
+    const timestamp = Date.now();
+    const safeName = catererName
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '_')
+      .slice(0, 30);
+    const folder = `caterer-photos/${safeName}_${timestamp}`;
+    const photoUrls: string[] = [];
+    const photoDescriptions: string[] = [];
+    let logoUrl: string | null = null;
+
+    for (const photo of photosList) {
+      try {
+        const fileName = `${photo.id}_${photo.file.name}`;
+        const { data, error } = await supabase.storage
+          .from('caterer-photos')
+          .upload(`${safeName}_${timestamp}/${fileName}`, photo.file, {
+            cacheControl: '3600',
+            upsert: false,
+          });
+
+        if (error) throw error;
+
+        const { data: urlData } = supabase.storage
+          .from('caterer-photos')
+          .getPublicUrl(data.path);
+
+        photoUrls.push(urlData.publicUrl);
+        photoDescriptions.push(photo.description);
+      } catch (err) {
+        console.warn('[CatererSignup] Photo upload failed:', err);
+        throw err;
+      }
+    }
+
+    if (logoFile) {
+      try {
+        const ext = logoFile.name.split('.').pop() || 'jpg';
+        const fileName = `logo_${timestamp}.${ext}`;
+        const { data, error } = await supabase.storage
+          .from('caterer-photos')
+          .upload(`${safeName}_${timestamp}/${fileName}`, logoFile, {
+            cacheControl: '3600',
+            upsert: false,
+          });
+
+        if (!error && data) {
+          const { data: urlData } = supabase.storage
+            .from('caterer-photos')
+            .getPublicUrl(data.path);
+          logoUrl = urlData.publicUrl;
+        }
+      } catch (err) {
+        console.warn('[CatererSignup] Logo upload failed:', err);
+      }
+    }
+
+    return { photoUrls, photoDescriptions, logoUrl };
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     if (!validateMartiniquePhone(form.telephone)) {
       showError('Le numéro de téléphone doit être un numéro martiniquais valide (0696 XX XX XX).');
       return;
+    }
+
+    let storageUsed = false;
+    let photoUrls: string[] = [];
+    let photoDescriptions: string[] = [];
+    let logoUrl: string | null = null;
+
+    // Tentative d'upload des photos vers Supabase Storage
+    if (photos.length > 0 || form.logo) {
+      try {
+        const result = await uploadPhotosToStorage(photos, form.logo, form.nomActivite);
+        photoUrls = result.photoUrls;
+        photoDescriptions = result.photoDescriptions;
+        logoUrl = result.logoUrl;
+        storageUsed = photoUrls.length > 0 || logoUrl !== null;
+      } catch (err) {
+        console.warn('[CatererSignup] Storage upload failed, falling back to localStorage:', err);
+      }
     }
 
     const entry = {
@@ -249,20 +331,22 @@ export default function CatererSignupPage() {
         type: p.file.type,
         description: p.description,
       })),
+      photoUrls: storageUsed ? photoUrls : undefined,
+      logoUrl: storageUsed ? logoUrl : undefined,
       id: `caterer_${Date.now()}`,
       createdAt: new Date().toISOString(),
       status: 'nouveau',
       source: 'inscription_traiteur_beta',
     };
 
-    // Sauvegarde dans localStorage
+    // Sauvegarde dans localStorage (toujours faite)
     const existing = JSON.parse(
       localStorage.getItem('delikreol_caterer_applications') || '[]'
     );
     existing.push(entry);
     localStorage.setItem('delikreol_caterer_applications', JSON.stringify(existing));
 
-    // Tentative Supabase table partner_applications (fallback silencieux)
+    // Tentative Supabase table partner_applications
     try {
       const { error } = await supabase
         .from('partner_applications')
@@ -274,6 +358,18 @@ export default function CatererSignupPage() {
           commune: form.commune,
           activity_type: 'traiteur',
           description: form.description || null,
+          bio: form.bio || null,
+          specialties: form.specialties.length > 0 ? JSON.parse(JSON.stringify(form.specialties)) : null,
+          prix_depart: form.prixDepart || null,
+          temps_preparation: form.tempsPreparation || null,
+          heure_limite: form.heureLimite || null,
+          creneaux: form.creneaux.length > 0 ? JSON.parse(JSON.stringify(form.creneaux)) : null,
+          instagram: form.instagram || null,
+          facebook: form.facebook || null,
+          site_web: form.siteWeb || null,
+          logo_url: logoUrl,
+          photo_urls: photoUrls.length > 0 ? JSON.parse(JSON.stringify(photoUrls)) : null,
+          photo_descriptions: photoDescriptions.length > 0 ? JSON.parse(JSON.stringify(photoDescriptions)) : null,
           source: 'inscription_traiteur_beta',
         });
 
@@ -290,7 +386,14 @@ export default function CatererSignupPage() {
     setSubmissionLogoPreview(logoPreview);
 
     setSubmitted(true);
-    showSuccess('Votre inscription traiteur bêta a bien été reçue !');
+
+    if (storageUsed) {
+      showSuccess('Photos sauvegardées ! Votre inscription traiteur bêta a bien été reçue !');
+    } else if (photos.length > 0 && !storageUsed) {
+      showSuccess('Photos enregistrées localement (en attente de configuration Storage). Votre inscription traiteur bêta a bien été reçue !');
+    } else {
+      showSuccess('Votre inscription traiteur bêta a bien été reçue !');
+    }
   };
 
   const openWhatsApp = () => {
@@ -712,7 +815,6 @@ export default function CatererSignupPage() {
               </p>
             </div>
 
-            {/* TODO: Supabase Storage — upload des photos vers Supabase Storage bucket 'caterer-photos' */}
             {photos.length > 0 && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {photos.map((photo) => (
