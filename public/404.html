@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DELIKREOL</title>
     <script>
-      // GitHub Pages SPA fallback → HashRouter compatible
-      var path = window.location.pathname.replace('/DELIKREOL/', '').replace(/^\/+/, '');
+      // GitHub Pages SPA fallback — HashRouter compatible (#/catalogue)
+      var path = window.location.pathname.replace(/^\/DELIKREOL\//, '').replace(/^\/+/, '');
       if (path && path !== '') {
         window.location.replace('/DELIKREOL/#' + path);
       } else {
@@ -15,6 +15,6 @@
     </script>
   </head>
   <body>
-    <p>Redirection…</p>
+    <p>Redirection vers Delikreol…</p>
   </body>
 </html>
