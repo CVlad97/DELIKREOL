@@ -126,9 +126,16 @@ export function InteractiveMap({ points, clientCoords, onSelectPoint, compact }:
                   {p.status && <p className="text-emerald-600 font-semibold">{p.status}</p>}
                 </div>
                 {dist !== null && (
-                  <button onClick={(e) => { e.stopPropagation(); window.open(getGoogleMapsLink({ latitude: p.latitude, longitude: p.longitude }), '_blank'); }} className="p-1.5 text-orange-500 hover:bg-orange-100 rounded-lg">
-                    <Navigation className="w-4 h-4" />
-                  </button>
+                  <div className="flex gap-1">
+                    <button onClick={(e) => { e.stopPropagation(); window.open(getWazeLink({ latitude: p.latitude, longitude: p.longitude }), '_blank'); }} className="p-1.5 text-black hover:bg-gray-100 rounded-lg" title="Ouvrir dans Waze">
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                        <path d="M20.87 10.49C20.87 5.29 16.7 1 11.5 1S2.13 5.29 2.13 10.49c0 3.37 2.34 6.64 5.47 8.14.32.15.48.47.38.8-.11.43-.26 1.22-.36 1.5-.1.28.24.54.52.38l1.87-1.11c.35-.2.75-.3 1.15-.3.38 0 .76.11 1.09.31 1.73 1.02 4.06 1.42 6.49 1.42 1.72 0 3.41-.28 4.93-.83.33-.12.53-.46.43-.8-.07-.28-.24-.88-.38-1.32-.08-.28.1-.57.38-.68 3.12-1.1 5.44-4.3 5.44-7.67z"/>
+                      </svg>
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); window.open(getGoogleMapsLink({ latitude: p.latitude, longitude: p.longitude }), '_blank'); }} className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg" title="Ouvrir dans Google Maps">
+                      <Navigation className="w-4 h-4" />
+                    </button>
+                  </div>
                 )}
               </div>
             );

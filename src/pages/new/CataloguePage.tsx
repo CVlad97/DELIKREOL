@@ -24,6 +24,7 @@ import {
 import { useCart } from '../../contexts/CartContext';
 import { useToast } from '../../contexts/ToastContext';
 import { InteractiveMap } from '../../components/InteractiveMap';
+import { HEALTH_TAGS, type HealthTag } from '../../data/mockCatalog';
 import type { Product } from '../../lib/supabase';
 
 const ALL_CATEGORIES = [
@@ -77,23 +78,38 @@ export default function CataloguePage() {
   const [showFilters, setShowFilters] = useState(false);
   const [sortMode, setSortMode] = useState<'default' | 'commune' | 'prix-croissant' | 'prix-decroissant' | 'disponible'>('default');
   const [showMap, setShowMap] = useState(false);
+  const [selectedHealthTag, setSelectedHealthTag] = useState<HealthTag | ''>('');
+  const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<string>('');
+
+  // Build vendor → healthTags & deliveryOptions lookup
+  const vendorHealthMap = useMemo(() => {
+    const map = new Map<string, { healthTags?: HealthTag[]; deliveryOptions?: string[] }>();
+    for (const space of traiteurSpaces) {
+      map.set(space.name, {
+        healthTags: space.healthTags,
+        deliveryOptions: space.deliveryOptions,
+      });
+    }
+    return map;
+  }, []);
 
   // Build extended product list with traiteur menu items
   const allProducts: LocalProduct[] = useMemo(() => {
-    const traiteurProducts: LocalProduct[] = traiteurSpaces.flatMap((space) =>
-      space.menuItems.map((item) => ({
-        id: `${space.slug}-${item.name.toLowerCase().replace(/\s+/g, '-')}`,
-        name: item.name,
-        vendor: space.name,
-        price: item.price,
-        category: item.category,
-        image: item.image ?? undefined,
-        description: item.description,
-        zone: space.zone,
-        available: true,
-        featured: item.featured,
-      }))
-    );
+      const traiteurProducts: LocalProduct[] = traiteurSpaces.flatMap((space) =>
+        space.menuItems.map((item) => ({
+          id: `${space.slug}-${item.name.toLowerCase().replace(/\\s+/g, '-')}`,
+          name: item.name,
+          vendor: space.name,
+          price: item.price,
+          category: item.category,
+          image: item.image ?? undefined,
+          description: item.description,
+          zone: space.zone,
+          available: true,
+          featured: item.featured,
+          healthTags: space.healthTags,
+        }))
+      );
 
     // Combine mockProducts and traiteur menu items (avoid duplicates by id)
     const ids = new Set(mockProducts.map((p) => p.id));
@@ -165,6 +181,23 @@ export default function CataloguePage() {
       results = results.filter((p) => p.available !== false);
     }
 
+    // Health tag filter
+    if (selectedHealthTag) {
+      results = results.filter((p) => {
+        // Check product's own healthTags, or look up from vendor map
+        const tags = p.healthTags || vendorHealthMap.get(p.vendor)?.healthTags;
+        return tags?.includes(selectedHealthTag) ?? false;
+      });
+    }
+
+    // Delivery option filter (retraite, bateau, infirmiere)
+    if (selectedDeliveryOption) {
+      results = results.filter((p) => {
+        const opts = vendorHealthMap.get(p.vendor)?.deliveryOptions;
+        return opts?.includes(selectedDeliveryOption) ?? false;
+      });
+    }
+
     // Sort
     if (sortMode === 'prix-croissant') {
       results.sort((a, b) => a.price - b.price);
@@ -181,7 +214,7 @@ export default function CataloguePage() {
     }
 
     return results;
-  }, [allProducts, searchQuery, selectedCategory, selectedCommune, selectedBudgetIndex, showAvailableOnly, selectedMode, sortMode]);
+  }, [allProducts, searchQuery, selectedCategory, selectedCommune, selectedBudgetIndex, showAvailableOnly, selectedMode, sortMode, selectedHealthTag, selectedDeliveryOption, vendorHealthMap]);
 
   const handleAddToCart = (product: LocalProduct) => {
     addItem(localProductToCartProduct(product));
@@ -195,6 +228,8 @@ export default function CataloguePage() {
     setSelectedBudgetIndex(0);
     setSelectedMode('tous');
     setShowAvailableOnly(false);
+    setSelectedHealthTag('');
+    setSelectedDeliveryOption('');
     setSearchParams({});
   };
 
@@ -204,7 +239,9 @@ export default function CataloguePage() {
     selectedCommune !== '' ||
     selectedBudgetIndex !== 0 ||
     selectedMode !== 'tous' ||
-    showAvailableOnly;
+    showAvailableOnly ||
+    selectedHealthTag !== '' ||
+    selectedDeliveryOption !== '';
 
   useEffect(() => {
     document.title = 'Catalogue — DeliKreol | Plats & traiteurs en Martinique';
@@ -259,6 +296,55 @@ export default function CataloguePage() {
                 {cat.name}
               </button>
             ))}
+          </div>
+
+          {/* Health tag pills */}
+          <div className="flex flex-wrap gap-2 mb-6 overflow-x-auto pb-2">
+            {HEALTH_TAGS.map((tag) => (
+              <button
+                key={tag.id}
+                onClick={() => setSelectedHealthTag(selectedHealthTag === tag.id ? '' : tag.id)}
+                className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
+                  selectedHealthTag === tag.id
+                    ? 'bg-emerald-500 text-white shadow-md'
+                    : 'bg-white text-gray-600 border border-emerald-200 hover:border-emerald-400 hover:text-emerald-600'
+                }`}
+                title={tag.description}
+              >
+                {tag.icon} {tag.name}
+              </button>
+            ))}
+            {/* Delivery option pills */}
+            <button
+              onClick={() => setSelectedDeliveryOption(selectedDeliveryOption === 'retraite' ? '' : 'retraite')}
+              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
+                selectedDeliveryOption === 'retraite'
+                  ? 'bg-blue-500 text-white shadow-md'
+                  : 'bg-white text-gray-600 border border-blue-200 hover:border-blue-400 hover:text-blue-600'
+              }`}
+            >
+              🏠 Livraison retraite
+            </button>
+            <button
+              onClick={() => setSelectedDeliveryOption(selectedDeliveryOption === 'bateau' ? '' : 'bateau')}
+              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
+                selectedDeliveryOption === 'bateau'
+                  ? 'bg-blue-500 text-white shadow-md'
+                  : 'bg-white text-gray-600 border border-blue-200 hover:border-blue-400 hover:text-blue-600'
+              }`}
+            >
+              🚤 Livraison bateau
+            </button>
+            <button
+              onClick={() => setSelectedDeliveryOption(selectedDeliveryOption === 'infirmiere' ? '' : 'infirmiere')}
+              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
+                selectedDeliveryOption === 'infirmiere'
+                  ? 'bg-blue-500 text-white shadow-md'
+                  : 'bg-white text-gray-600 border border-blue-200 hover:border-blue-400 hover:text-blue-600'
+              }`}
+            >
+              🩺 Partenariat infirmier
+            </button>
           </div>
 
           {/* Filters toggle + active count */}
@@ -466,6 +552,19 @@ export default function CataloguePage() {
                       {product.name}
                     </h3>
                     <p className="text-sm text-gray-500 mb-0.5">{product.vendor}</p>
+                    {/* Health tag badges */}
+                    {(product.healthTags || vendorHealthMap.get(product.vendor)?.healthTags) && (
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {(product.healthTags || vendorHealthMap.get(product.vendor)?.healthTags || []).slice(0, 3).map((tag) => {
+                          const tagInfo = HEALTH_TAGS.find(t => t.id === tag);
+                          return tagInfo ? (
+                            <span key={tag} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded-md text-[10px] font-semibold" title={tagInfo.description}>
+                              {tagInfo.icon} {tagInfo.name}
+                            </span>
+                          ) : null;
+                        })}
+                      </div>
+                    )}
                     {product.zone && (
                       <p className="text-xs text-gray-400 flex items-center gap-1 mb-3">
                         <MapPin className="w-3 h-3" />

@@ -25,11 +25,11 @@ export const cocoFoodAssets = {
     assetFromPublic('vendors/coco/gallery-04.jpg'),  // Grande préparation
     assetFromPublic('vendors/coco/gallery-05.jpg'),  // Plat en portion
     assetFromPublic('vendors/coco/gallery-06.jpg'),  // Plateau complet
-    assetFromPublic('vendors/coco/gallery-07.jpg'),  // Box poisson & avocat + jus
-    assetFromPublic('vendors/coco/gallery-08.jpg'),  // Brochettes panées, lentilles, brocoli
-    assetFromPublic('vendors/coco/gallery-09.jpg'),  // Paella noire aux fruits de mer
-    assetFromPublic('vendors/coco/gallery-10.jpg'),  // Plat du jour complet
-    assetFromPublic('vendors/coco/gallery-11.jpg'),  // Salade viande marinée
+    assetFromPublic('vendors/coco/gallery-07.jpg'),  // Poulet rôti, riz & crudités
+    assetFromPublic('vendors/coco/gallery-08.jpg'),  // Friture caramélisée (plantains + viande)
+    assetFromPublic('vendors/coco/gallery-09.jpg'),  // Box viande grillée & riz aux pois
+    assetFromPublic('vendors/coco/gallery-10.jpg'),  // Salade de viande marinée
+    assetFromPublic('vendors/coco/gallery-11.jpg'),  // Box poisson & avocat
     assetFromPublic('vendors/coco/gallery-12.jpg'),  // Box viande grillée
     assetFromPublic('vendors/coco/gallery-13.jpg'),  // Friture caramélisée
     assetFromPublic('vendors/coco/gallery-14.jpg'),  // Poulet rôti, riz aux pois

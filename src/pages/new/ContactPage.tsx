@@ -306,7 +306,7 @@ export function ContactPage() {
 
             {/* Nos bureaux */}
             <div className="p-5 bg-card rounded-2xl border border-border space-y-4">
-              <h2 className="text-lg font-bold text-foreground">Nos bureaux</h2>
+              <h2 className="text-lg font-bold text-foreground">Nous trouver</h2>
 
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
@@ -332,6 +332,40 @@ export function ContactPage() {
                     <li className="text-red-500">Dim : Fermé</li>
                   </ul>
                 </div>
+              </div>
+
+              {/* Boutons Waze & Google Maps */}
+              <div className="pt-2 space-y-2.5">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  S'y rendre
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <a
+                    href="https://waze.com/ul?ll=14.641,-61.014&navigate=yes"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 px-3 py-2.5 bg-black hover:bg-black/80 text-white rounded-xl text-xs font-bold transition-colors"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                      <path d="M20.87 10.49C20.87 5.29 16.7 1 11.5 1S2.13 5.29 2.13 10.49c0 3.37 2.34 6.64 5.47 8.14.32.15.48.47.38.8-.11.43-.26 1.22-.36 1.5-.1.28.24.54.52.38l1.87-1.11c.35-.2.75-.3 1.15-.3.38 0 .76.11 1.09.31 1.73 1.02 4.06 1.42 6.49 1.42 1.72 0 3.41-.28 4.93-.83.33-.12.53-.46.43-.8-.07-.28-.24-.88-.38-1.32-.08-.28.1-.57.38-.68 3.12-1.1 5.44-4.3 5.44-7.67z"/>
+                    </svg>
+                    Waze
+                  </a>
+                  <a
+                    href="https://maps.google.com/maps?q=14.641,-61.014"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 px-3 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-bold transition-colors"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                      <path d="M12 2C7.58 2 4 5.58 4 10c0 2.33 1.59 4.97 3.99 7.24 1.55 1.47 3.33 2.8 4.01 3.29.68-.49 2.46-1.82 4.01-3.29C18.41 14.97 20 12.33 20 10c0-4.42-3.58-8-8-8zm0 10c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                    </svg>
+                    Google Maps
+                  </a>
+                </div>
+                <p className="text-[10px] text-muted-foreground text-center">
+                  Cliquez pour naviguer depuis votre position
+                </p>
               </div>
             </div>
           </div>

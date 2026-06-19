@@ -797,6 +797,100 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ═══════════════════════════════════════════
+          LIVRAISON SPÉCIALE & SERVICES SANTÉ
+          ═══════════════════════════════════════════ */}
+      <section className="py-12 md:py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+              <span>💚</span>
+              Services spéciaux
+            </div>
+            <h2 className="text-2xl md:text-4xl font-black text-gray-900 tracking-tight mb-3">
+              Livraison adaptée à vos besoins
+            </h2>
+            <p className="text-gray-500 max-w-2xl mx-auto leading-relaxed">
+              Des solutions de livraison sur mesure pour les établissements de santé, les seniors et les zones insulaires
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Carte 1 — Livraison retraite */}
+            <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-3xl border border-blue-100 hover:shadow-lg transition-all">
+              <div className="w-14 h-14 rounded-2xl bg-blue-500 text-white flex items-center justify-center text-2xl mb-4 shadow-md">
+                🏠
+              </div>
+              <h3 className="text-xl font-black text-gray-900 mb-2">Livraison retraite</h3>
+              <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                Livraison adaptée aux <strong>maisons de retraite</strong> et <strong>EHPAD</strong>.
+                Repas en portions adaptées, commandes groupées, livraison en matinée.
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {traiteurSpaces.filter(t => t.deliveryOptions?.includes('retraite')).slice(0, 3).map(t => (
+                  <Link key={t.slug} to={`/?view=traiteurs&vendor=${t.slug}`}
+                    className="text-xs px-2 py-1 bg-white rounded-lg font-semibold text-blue-600 hover:bg-blue-500 hover:text-white transition-all">
+                    {t.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Carte 2 — Partenariat infirmier */}
+            <div className="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-3xl border border-emerald-100 hover:shadow-lg transition-all">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-2xl mb-4 shadow-md">
+                🩺
+              </div>
+              <h3 className="text-xl font-black text-gray-900 mb-2">Partenariat infirmier</h3>
+              <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                En lien avec les <strong>infirmiers libéraux</strong> et professions médicales.
+                Repas adaptés, livraison programmée, suivi personnalisé.
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {traiteurSpaces.filter(t => t.deliveryOptions?.includes('infirmiere')).slice(0, 3).map(t => (
+                  <Link key={t.slug} to={`/?view=traiteurs&vendor=${t.slug}`}
+                    className="text-xs px-2 py-1 bg-white rounded-lg font-semibold text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all">
+                    {t.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Carte 3 — Livraison bateau */}
+            <div className="p-6 bg-gradient-to-br from-cyan-50 to-cyan-100/50 rounded-3xl border border-cyan-100 hover:shadow-lg transition-all">
+              <div className="w-14 h-14 rounded-2xl bg-cyan-500 text-white flex items-center justify-center text-2xl mb-4 shadow-md">
+                🚤
+              </div>
+              <h3 className="text-xl font-black text-gray-900 mb-2">Livraison bateau</h3>
+              <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                Livraison vers les <strong>zones insulaires</strong> et îles environnantes.
+                Transport maritime organisé pour les commandes groupes.
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {traiteurSpaces.filter(t => t.deliveryOptions?.includes('bateau')).slice(0, 3).map(t => (
+                  <Link key={t.slug} to={`/?view=traiteurs&vendor=${t.slug}`}
+                    className="text-xs px-2 py-1 bg-white rounded-lg font-semibold text-cyan-600 hover:bg-cyan-500 hover:text-white transition-all">
+                    {t.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="mt-8 text-center">
+            <Link
+              to="/catalogue"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition-all"
+            >
+              <span>💚</span>
+              Voir tous les filtres santé
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Final */}
       <section className="py-16 md:py-20 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

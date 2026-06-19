@@ -1,4 +1,5 @@
 import { mockProducts } from './mockCatalog';
+import type { HealthTag } from './mockCatalog';
 import { anTjeCocoAssets, cocoFoodAssets } from './partnerAssets';
 import { partnerProfiles, type PartnerProfile } from './partnerProfiles';
 import { additionalPartnerProfiles } from './additionalPartnerProfiles';
@@ -46,6 +47,10 @@ export type TraiteurSpace = {
   cutoff_time?: string;
   prep_time?: number;
   delivery_slots?: string[];
+  /** Tags santé associés à ce traiteur */
+  healthTags?: HealthTag[];
+  /** Options de livraison spéciale : retraite, bateau */
+  deliveryOptions?: ('retraite' | 'bateau' | 'infirmiere')[];
 };
 
 const allPartnerProfiles: PartnerProfile[] = [...partnerProfiles, ...additionalPartnerProfiles];
@@ -65,6 +70,9 @@ function resolveHeroImage(name: string) {
   }
   if (name === 'Les Delices de Ninice') {
     return assetFromPublic('vendors/ninice/hero.jpg');
+  }
+  if (name === 'Sweet Family Traiteur Orianne') {
+    return assetFromPublic('vendors/sweet-family/bao-buns.jpg');
   }
   return mockProducts.find((product) => product.vendor === name && product.image)?.image ?? null;
 }
@@ -105,8 +113,15 @@ function resolveGalleryImages(name: string) {
       assetFromPublic('vendors/ninice/gallery-10.jpg'),  // Condiment mariné fait maison
     ];
   }
-  if (name === 'Snack Savè Peyi\u2019A') {
+    if (name === 'Snack Savè Peyi\u2019A') {
     return [];
+  }
+  if (name === 'Sweet Family Traiteur Orianne') {
+    return [
+      assetFromPublic('vendors/sweet-family/bao-buns.jpg'),
+      assetFromPublic('vendors/sweet-family/cocktails-mignardises.jpg'),
+      assetFromPublic('vendors/sweet-family/conditions.jpg'),
+    ];
   }
   return [];
 }
@@ -195,6 +210,8 @@ function buildSpace(profile: PartnerProfile, gradient: string, accent: string, s
     photoStatus,
     bioStatus: 'confirmée',
     photoCredit: undefined,
+    healthTags: profile.healthTags,
+    deliveryOptions: profile.deliveryOptions,
   };
 }
 
@@ -238,6 +255,28 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
           horaires: { lun: { open: '07:00', close: '19:00' }, mar: { open: '07:00', close: '19:00' }, mer: { open: '07:00', close: '19:00' }, jeu: { open: '07:00', close: '19:00' }, ven: { open: '07:00', close: '19:00' }, sam: { open: '07:00', close: '19:00' } },
           cutoff_time: '11:30',
           prep_time: 20,
+          delivery_slots: ['11:30-12:30', '12:30-13:30', '18:00-19:00', '19:00-20:00'],
+        };
+      }
+
+      // Virtuel Gouté Mwen — sirops artisanaux, public confirmé
+      if (profile.name === 'Virtuel Gouté Mwen') {
+        return {
+          ...buildSpace(profile, 'from-[#eab308] via-[#f97316] to-[#dc2626]', '#fff7ed', 'public confirmé', 'à confirmer'),
+          horaires: { lun: { open: '08:00', close: '18:00' }, mar: { open: '08:00', close: '18:00' }, mer: { open: '08:00', close: '18:00' }, jeu: { open: '08:00', close: '18:00' }, ven: { open: '08:00', close: '18:00' }, sam: { open: '09:00', close: '13:00' } },
+          cutoff_time: '10:00',
+          prep_time: 15,
+          delivery_slots: ['11:30-12:30', '12:30-13:30', '18:00-19:00'],
+        };
+      }
+
+      // Sweet Family Traiteur Orianne — cocktails & mignardises, public confirmé
+      if (profile.name === 'Sweet Family Traiteur Orianne') {
+        return {
+          ...buildSpace(profile, 'from-[#dc2626] via-[#f97316] to-[#eab308]', '#fff7ed', 'public confirmé', 'à confirmer'),
+          horaires: { lun: { open: '08:00', close: '20:00' }, mar: { open: '08:00', close: '20:00' }, mer: { open: '08:00', close: '20:00' }, jeu: { open: '08:00', close: '20:00' }, ven: { open: '08:00', close: '20:00' }, sam: { open: '09:00', close: '18:00' } },
+          cutoff_time: '48:00',
+          prep_time: 60,
           delivery_slots: ['11:30-12:30', '12:30-13:30', '18:00-19:00', '19:00-20:00'],
         };
       }

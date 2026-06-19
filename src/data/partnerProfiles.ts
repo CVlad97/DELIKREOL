@@ -32,6 +32,10 @@ export type PartnerProfile = {
   }>;
   planifiable: boolean;
   enterprise: boolean;
+  /** Tags santé associés */
+  healthTags?: import('./mockCatalog').HealthTag[];
+  /** Options livraison spéciale : retraite, bateau, infirmiere */
+  deliveryOptions?: ('retraite' | 'bateau' | 'infirmiere')[];
 };
 
 export const partnerProfiles: PartnerProfile[] = [
@@ -70,6 +74,7 @@ export const partnerProfiles: PartnerProfile[] = [
     ],
     planifiable: true,
     enterprise: true,
+    healthTags: ['fait-maison', 'equilibre'],
   },
   {
     name: "Coco's Food",
@@ -98,6 +103,7 @@ export const partnerProfiles: PartnerProfile[] = [
     },
     planifiable: true,
     enterprise: true,
+    healthTags: ['fait-maison', 'equilibre'],
   },
   {
     name: "Saveurs d'Afrique",
@@ -123,6 +129,7 @@ export const partnerProfiles: PartnerProfile[] = [
     },
     planifiable: true,
     enterprise: true,
+    healthTags: ['fait-maison', 'equilibre'],
   },
   {
     name: 'Les Delices de Ninice',
@@ -169,5 +176,7 @@ export const partnerProfiles: PartnerProfile[] = [
     ],
     planifiable: true,
     enterprise: true,
+    healthTags: ['fait-maison', 'traiteur-evenementiel'],
+    deliveryOptions: ['retraite', 'infirmiere'],
   },
 ];
