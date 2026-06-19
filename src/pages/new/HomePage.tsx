@@ -475,8 +475,16 @@ export default function HomePage() {
                         {traiteur.zone}
                       </div>
                     </div>
+                    {/* Portrait */}
+                    {traiteur.portraitImage && (
+                      <div className="absolute -bottom-8 right-4">
+                        <div className="w-16 h-16 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
+                          <img src={traiteur.portraitImage} alt={traiteur.name} className="w-full h-full object-cover" />
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="p-5">
+                  <div className="p-5 pt-10">
                     <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-orange-600 transition-colors">
                       {traiteur.name}
                     </h3>

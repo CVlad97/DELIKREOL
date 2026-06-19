@@ -164,6 +164,21 @@ function resolvePortraitImage(name: string) {
   if (name === 'Les Delices de Ninice') {
     return assetFromPublic('vendors/ninice/portrait.jpg');
   }
+  if (name === 'An Tjè Coco') {
+    return assetFromPublic('vendors/an-tje-coco/portrait.jpg');
+  }
+  if (name === "Coco's Food") {
+    return assetFromPublic('vendors/coco/portrait.jpg');
+  }
+  if (name === "Saveurs d'Afrique") {
+    return assetFromPublic('vendors/saveurs-afrique/portrait.jpg');
+  }
+  if (name === 'Snack Savè Peyi\u2019A') {
+    return assetFromPublic('vendors/save-peyia/portrait.jpg');
+  }
+  if (name === 'Sweet Family Traiteur Orianne') {
+    return assetFromPublic('vendors/sweet-family/portrait.jpg');
+  }
   return null;
 }
 

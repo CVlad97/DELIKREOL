@@ -134,6 +134,14 @@ export function TraiteursListPage() {
                     <ChefHat className="w-12 h-12 text-primary/30" />
                   </div>
                 )}
+                {/* Portrait overlay */}
+                {traiteur.portraitImage && (
+                  <div className="absolute bottom-0 left-4 translate-y-1/3">
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
+                      <img src={traiteur.portraitImage} alt={traiteur.name} className="w-full h-full object-cover" />
+                    </div>
+                  </div>
+                )}
                 {!isVerified && (
                   <div className="absolute top-3 right-3 bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
                     <AlertCircle className="w-3 h-3" />
@@ -159,7 +167,7 @@ export function TraiteursListPage() {
               </div>
 
               {/* Content */}
-              <div className="p-5">
+              <div className="p-5 pt-8">
                 <h3 className="text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
                   {traiteur.name}
                 </h3>
