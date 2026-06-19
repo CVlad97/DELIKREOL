@@ -83,12 +83,12 @@ export default function CataloguePage() {
 
   // Build vendor → healthTags & deliveryOptions lookup
   const vendorHealthMap = useMemo(() => {
-    const map = new Map<string, { healthTags?: HealthTag[]; deliveryOptions?: string[] }>();
+    const map: Record<string, { healthTags?: HealthTag[]; deliveryOptions?: string[] }> = {};
     for (const space of traiteurSpaces) {
-      map.set(space.name, {
+      map[space.name] = {
         healthTags: space.healthTags,
         deliveryOptions: space.deliveryOptions,
-      });
+      };
     }
     return map;
   }, []);
@@ -185,7 +185,7 @@ export default function CataloguePage() {
     if (selectedHealthTag) {
       results = results.filter((p) => {
         // Check product's own healthTags, or look up from vendor map
-        const tags = p.healthTags || vendorHealthMap.get(p.vendor)?.healthTags;
+        const tags = p.healthTags || vendorHealthMap[p.vendor]?.healthTags;
         return tags?.includes(selectedHealthTag) ?? false;
       });
     }
@@ -193,7 +193,7 @@ export default function CataloguePage() {
     // Delivery option filter (retraite, bateau, infirmiere)
     if (selectedDeliveryOption) {
       results = results.filter((p) => {
-        const opts = vendorHealthMap.get(p.vendor)?.deliveryOptions;
+        const opts = vendorHealthMap[p.vendor]?.deliveryOptions;
         return opts?.includes(selectedDeliveryOption) ?? false;
       });
     }
@@ -553,9 +553,9 @@ export default function CataloguePage() {
                     </h3>
                     <p className="text-sm text-gray-500 mb-0.5">{product.vendor}</p>
                     {/* Health tag badges */}
-                    {(product.healthTags || vendorHealthMap.get(product.vendor)?.healthTags) && (
+                    {(product.healthTags || vendorHealthMap[product.vendor]?.healthTags) && (
                       <div className="flex flex-wrap gap-1 mb-2">
-                        {(product.healthTags || vendorHealthMap.get(product.vendor)?.healthTags || []).slice(0, 3).map((tag) => {
+                        {(product.healthTags || vendorHealthMap[product.vendor]?.healthTags || []).slice(0, 3).map((tag: string) => {
                           const tagInfo = HEALTH_TAGS.find(t => t.id === tag);
                           return tagInfo ? (
                             <span key={tag} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded-md text-[10px] font-semibold" title={tagInfo.description}>
