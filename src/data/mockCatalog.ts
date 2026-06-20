@@ -745,6 +745,7 @@ export const mockProducts: LocalProduct[] = [
     vendor: 'Virtuel Gouté Mwen',
     price: 2,
     category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/maracuja.jpg'),
     description: 'Glace artisanale au maracuja (fruit de la passion). Exotique et fruité.',
     zone: 'Martinique',
     available: true,
