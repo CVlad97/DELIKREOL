@@ -28,6 +28,20 @@
       })();
     </script>
 
+    <!-- Google Analytics (via VITE_GA_ID) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_ID%"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      (function() {
+        var id = '%VITE_GA_ID%';
+        if (window.location.hostname !== 'localhost' && id && id.indexOf('VITE_') !== 0) {
+          gtag('js', new Date());
+          gtag('config', id, { anonymize_ip: true });
+        }
+      })();
+    </script>
+
     <title>DeliKreol — Commandez créole local en Martinique | Livraison & Traiteur</title>
     <meta name="description" content="Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait. Commandez en ligne vos plats maison." />
     <meta name="keywords" content="livraison repas Martinique, traiteur Martinique, plats créoles, Delikreol, click and collect Martinique" />

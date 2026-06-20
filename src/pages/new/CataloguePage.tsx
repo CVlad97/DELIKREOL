@@ -554,7 +554,7 @@ export default function CataloguePage() {
                   {/* Image */}
                   <div className="relative aspect-[4/3] overflow-hidden bg-orange-50">
                     {product.image ? (
-                      <img
+                      <img loading="lazy"
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

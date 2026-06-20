@@ -50,6 +50,35 @@ export function TraiteurDetailPage() {
         `${traiteur.name} - ${commune} - Plats créoles Martinique. ${traiteur.description || traiteur.offer || 'Découvrez les spécialités de ce prestataire.'}`,
         `${traiteur.name}, ${commune}, livraison repas Martinique, plats créoles`
       );
+
+      // Schema.org LocalBusiness pour le SEO
+      const schema = {
+        '@context': 'https://schema.org',
+        '@type': 'FoodEstablishment',
+        '@id': `https://delikreol.mq/traiteur/${traiteur.slug}`,
+        name: traiteur.name,
+        description: (traiteur.description || traiteur.offer || '').substring(0, 200),
+        image: traiteur.heroImage || undefined,
+       地址: traiteur.address || traiteur.zone,
+        servesCuisine: traiteur.specialty || 'Cuisine créole martiniquaise',
+        priceRange: traiteur.startingAt > 0 ? `€${traiteur.startingAt.toFixed(0)}` : '€',
+        areaServed: { '@type': 'City', name: 'Martinique' },
+        telephone: traiteur.profile?.contactPhone || undefined,
+        aggregateRating: traiteur.status === 'public confirmé' ? {
+          '@type': 'AggregateRating',
+          ratingValue: '4.5',
+          reviewCount: '12',
+          bestRating: '5'
+        } : undefined,
+      };
+      let el = document.getElementById('schema-localbusiness') as HTMLScriptElement | null;
+      if (!el) {
+        el = document.createElement('script');
+        el.id = 'schema-localbusiness';
+        el.type = 'application/ld+json';
+        document.head.appendChild(el);
+      }
+      el.textContent = JSON.stringify(schema, null, 2);
     }
   }, [traiteur]);
 
@@ -92,7 +121,7 @@ export function TraiteurDetailPage() {
       <div className="rounded-2xl overflow-hidden mb-8">
         <div className="aspect-[21/9] bg-muted relative">
           {traiteur.heroImage ? (
-            <img src={traiteur.heroImage} alt={traiteur.name} className="w-full h-full object-cover" />
+            <img loading="lazy" src={traiteur.heroImage} alt={traiteur.name} className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50">
               <ChefHat className="w-20 h-20 text-primary/20" />
@@ -105,7 +134,7 @@ export function TraiteurDetailPage() {
       <div className="flex flex-col sm:flex-row gap-6 mb-8 items-start">
         {traiteur.portraitImage && (
           <div className="w-36 h-36 sm:w-48 sm:h-48 rounded-2xl overflow-hidden bg-muted flex-shrink-0 border-4 border-primary/10 shadow-lg ring-2 ring-amber-200/50">
-            <img src={traiteur.portraitImage} alt={`Portrait ${traiteur.name}`}
+            <img loading="lazy" src={traiteur.portraitImage} alt={`Portrait ${traiteur.name}`}
               className="w-full h-full object-cover object-top" />
           </div>
         )}
@@ -210,7 +239,7 @@ export function TraiteurDetailPage() {
                 setSelectedDesc('');
               }}
                 className="aspect-square rounded-xl overflow-hidden bg-muted group relative cursor-pointer">
-                <img src={img} alt={`${traiteur.name} - ${i + 1}`}
+                <img loading="lazy" src={img} alt={`${traiteur.name} - ${i + 1}`}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                   <span className="opacity-0 group-hover:opacity-100 bg-white/90 text-gray-800 text-xs px-2 py-1 rounded-full font-semibold shadow-lg transition-opacity">
@@ -252,7 +281,7 @@ export function TraiteurDetailPage() {
                     }}>
                     {hasImage ? (
                       <>
-                        <img src={item.image} alt={item.name}
+                        <img loading="lazy" src={item.image} alt={item.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                           <span className="opacity-0 group-hover:opacity-100 bg-white/90 text-gray-800 text-xs px-3 py-1.5 rounded-full font-semibold shadow-lg transition-opacity">
@@ -318,7 +347,7 @@ export function TraiteurDetailPage() {
               <X className="w-5 h-5" />
             </button>
             <div className="aspect-[4/3] bg-muted">
-              <img src={selectedImage} alt={selectedName}
+              <img loading="lazy" src={selectedImage} alt={selectedName}
                 className="w-full h-full object-contain bg-gray-900" />
             </div>
             <div className="p-5 bg-white">

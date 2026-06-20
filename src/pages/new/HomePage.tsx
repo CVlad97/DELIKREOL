@@ -262,7 +262,7 @@ export default function HomePage() {
 
             {/* Right: Madras delivery illustration */}
             <div className="hidden md:flex justify-center order-1 md:order-2">
-              <img
+              <img loading="lazy"
                 src={`${import.meta.env.BASE_URL}branding/delivery-madras.svg`}
                 alt="Livraison DeliKreol en Martinique — style madras"
                 className="w-full max-w-sm h-auto drop-shadow-2xl"
@@ -367,7 +367,7 @@ export default function HomePage() {
                       >
                         <div className={`h-32 bg-gradient-to-br ${traiteur.gradient} relative overflow-hidden`}>
                           {traiteur.heroImage && (
-                            <img
+                            <img loading="lazy"
                               src={traiteur.heroImage}
                               alt={traiteur.name}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 mix-blend-overlay opacity-60"
@@ -476,7 +476,7 @@ export default function HomePage() {
                 >
                   <div className={`h-36 bg-gradient-to-br ${traiteur.gradient} relative overflow-hidden`}>
                     {traiteur.heroImage && (
-                      <img
+                      <img loading="lazy"
                         src={traiteur.heroImage}
                         alt={traiteur.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 mix-blend-overlay opacity-60"
@@ -492,7 +492,7 @@ export default function HomePage() {
                     {traiteur.portraitImage && (
                       <div className="absolute -bottom-8 right-4">
                         <div className="w-16 h-16 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
-                          <img src={traiteur.portraitImage} alt={traiteur.name} className="w-full h-full object-cover" />
+                          <img loading="lazy" src={traiteur.portraitImage} alt={traiteur.name} className="w-full h-full object-cover" />
                         </div>
                       </div>
                     )}
@@ -559,7 +559,7 @@ export default function HomePage() {
                 >
                   <div className="relative aspect-[4/3] overflow-hidden bg-orange-50">
                     {product.image ? (
-                      <img
+                      <img loading="lazy"
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -742,12 +742,11 @@ export default function HomePage() {
                 className="group flex flex-col items-center gap-3 p-5 rounded-2xl bg-[#FFFBF0] border border-orange-100 hover:border-orange-300 hover:shadow-lg transition-all text-center"
               >
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-orange-200 group-hover:border-orange-400 transition-colors bg-white shadow-sm">
-                  <img
-                    src={caterer.image}
-                    alt={caterer.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    loading="lazy"
-                  />
+                                  <img loading="lazy"
+                                     src={caterer.image}
+                                     alt={caterer.name}
+                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                   />
                 </div>
                 <span className="text-sm font-bold text-gray-700 group-hover:text-orange-600 transition-colors">
                   {caterer.name}

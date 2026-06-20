@@ -128,7 +128,7 @@ export function TraiteursListPage() {
               {/* Cover image */}
               <div className="aspect-video bg-muted relative overflow-hidden">
                 {traiteur.heroImage ? (
-                  <img src={traiteur.heroImage} alt={traiteur.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img loading="lazy" src={traiteur.heroImage} alt={traiteur.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50">
                     <ChefHat className="w-12 h-12 text-primary/30" />
@@ -138,7 +138,7 @@ export function TraiteursListPage() {
                 {traiteur.portraitImage && (
                   <div className="absolute bottom-0 left-4 translate-y-1/3">
                     <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
-                      <img src={traiteur.portraitImage} alt={traiteur.name} className="w-full h-full object-cover" />
+                      <img loading="lazy" src={traiteur.portraitImage} alt={traiteur.name} className="w-full h-full object-cover" />
                     </div>
                   </div>
                 )}

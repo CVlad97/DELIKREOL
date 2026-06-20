@@ -96,7 +96,7 @@ export function ProductDetailPage() {
         {/* Image */}
         <div className="aspect-square rounded-2xl overflow-hidden bg-muted">
           {hasRealImage && product.image ? (
-            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+            <img loading="lazy" src={product.image} alt={product.name} className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50 text-amber-600">
               <ChefHat className="w-16 h-16 mb-3 opacity-40" />

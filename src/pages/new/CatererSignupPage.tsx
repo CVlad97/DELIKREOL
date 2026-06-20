@@ -841,7 +841,7 @@ export default function CatererSignupPage() {
                     key={photo.id}
                     className="relative group bg-card rounded-xl border border-border overflow-hidden"
                   >
-                    <img
+                    <img loading="lazy"
                       src={photo.preview}
                       alt="Aperçu"
                       className="w-full h-28 object-cover"
@@ -889,7 +889,7 @@ export default function CatererSignupPage() {
 
             {logoPreview && (
               <div className="relative inline-block">
-                <img
+                <img loading="lazy"
                   src={logoPreview}
                   alt="Logo preview"
                   className="w-24 h-24 object-cover rounded-xl border border-border"
