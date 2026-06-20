@@ -787,6 +787,7 @@ export const mockProducts: LocalProduct[] = [
     vendor: 'Virtuel Gouté Mwen',
     price: 2,
     category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/corossol.jpg'),
     description: 'Glace artisanale au corossol. Fruit crémeux aux vertues naturelles.',
     zone: 'Martinique',
     available: true,
