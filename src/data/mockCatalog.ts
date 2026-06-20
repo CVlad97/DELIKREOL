@@ -605,6 +605,7 @@ export const mockProducts: LocalProduct[] = [
     vendor: 'Virtuel Gouté Mwen',
     price: 2,
     category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/api.jpg'),
     description: 'Glace artisanale à l\'ananas, piment végétarien. ‼️ Attention ça pique !',
     zone: 'Martinique',
     available: true,
