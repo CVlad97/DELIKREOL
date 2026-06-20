@@ -1,9 +1,9 @@
 import { useParams, Link } from 'react-router-dom';
-import { ChefHat, MapPin, ShoppingCart, MessageCircle, ArrowLeft, Clock, AlertTriangle, Star } from 'lucide-react';
+import { ChefHat, MapPin, ShoppingCart, MessageCircle, ArrowLeft, Clock, AlertTriangle, Star, X } from 'lucide-react';
 import { traiteurSpaces, formatEuro } from '../../data/traiteurs';
 import { useCart } from '../../contexts/CartContext';
 import { useToast } from '../../contexts/ToastContext';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { setPageMeta } from '../../services/seo';
 import type { Product } from '../../types';
 
@@ -65,6 +65,9 @@ export function TraiteurDetailPage() {
 
   const isVerified = traiteur.status === 'public confirmé';
   const menuItems = traiteur.menuItems || [];
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedName, setSelectedName] = useState<string>('');
+  const [selectedDesc, setSelectedDesc] = useState<string>('');
 
   const handleAddToCart = (item: any) => {
     addItem(menuItemToProduct(item, traiteur.name));
@@ -195,17 +198,26 @@ export function TraiteurDetailPage() {
       </div>
       </div>
 
-      {/* Galerie photos */}
+      {/* Photos du traiteur */}
       {traiteur.galleryImages && traiteur.galleryImages.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-2xl font-display font-bold mb-4">Galerie</h2>
+          <h2 className="text-2xl font-display font-bold mb-4">Photos du traiteur</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {traiteur.galleryImages.map((img, i) => (
-              <a key={i} href={img} target="_blank" rel="noopener noreferrer"
-                className="aspect-square rounded-xl overflow-hidden bg-muted group relative">
+              <div key={i} onClick={() => {
+                setSelectedImage(img);
+                setSelectedName(`${traiteur.name} — Photo ${i + 1}`);
+                setSelectedDesc('');
+              }}
+                className="aspect-square rounded-xl overflow-hidden bg-muted group relative cursor-pointer">
                 <img src={img} alt={`${traiteur.name} - ${i + 1}`}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-              </a>
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                  <span className="opacity-0 group-hover:opacity-100 bg-white/90 text-gray-800 text-xs px-2 py-1 rounded-full font-semibold shadow-lg transition-opacity">
+                    🔍 Agrandir
+                  </span>
+                </div>
+              </div>
             ))}
           </div>
           {traiteur.photoStatus && traiteur.photoStatus !== 'confirmée' && (
@@ -224,34 +236,53 @@ export function TraiteurDetailPage() {
         </h2>
 
         {menuItems.length > 0 ? (
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {menuItems.map((item: any) => {
               const hasImage = item.image && !item.image.includes('photo-a-confirmer');
               return (
-                <div key={item.id || item.name} className="bg-card rounded-xl border border-border p-4 flex gap-4">
-                  <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                <div key={item.id || item.name} className="bg-card rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all group">
+                  {/* Large clickable image */}
+                  <div className="aspect-[4/3] overflow-hidden bg-muted relative cursor-pointer"
+                    onClick={() => {
+                      if (hasImage) {
+                        setSelectedImage(item.image);
+                        setSelectedName(item.name);
+                        setSelectedDesc(item.description || '');
+                      }
+                    }}>
                     {hasImage ? (
-                      <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                      <>
+                        <img src={item.image} alt={item.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                          <span className="opacity-0 group-hover:opacity-100 bg-white/90 text-gray-800 text-xs px-3 py-1.5 rounded-full font-semibold shadow-lg transition-opacity">
+                            🔍 Agrandir
+                          </span>
+                        </div>
+                      </>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-amber-50">
-                        <ChefHat className="w-6 h-6 text-amber-400" />
+                        <ChefHat className="w-10 h-10 text-amber-300" />
                       </div>
                     )}
+                    {/* Price badge */}
+                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-full text-sm font-bold text-primary shadow-sm">
+                      {item.price > 0 ? `${item.price} €` : 'Sur devis'}
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground">{item.name}</h3>
-                    <p className="text-sm text-muted-foreground line-clamp-1 mb-1">
+                  {/* Content */}
+                  <div className="p-4">
+                    <h3 className="font-bold text-foreground text-base mb-1">{item.name}</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-2 mb-3 min-h-[2.5rem]">
                       {item.description || 'Description à compléter avec le prestataire.'}
                     </p>
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-primary">{item.price > 0 ? `${item.price} €` : 'Prix à confirmer'}</span>
-                      <button
-                        onClick={() => handleAddToCart(item)}
-                        className="text-xs px-3 py-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors font-medium"
-                      >
-                        + Ajouter
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleAddToCart(item)}
+                      className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-primary/10 hover:bg-primary/20 text-primary font-bold rounded-xl text-sm transition-all hover:scale-[1.02]"
+                    >
+                      <ShoppingCart className="w-4 h-4" />
+                      Ajouter au panier
+                    </button>
                   </div>
                 </div>
               );
@@ -275,6 +306,30 @@ export function TraiteurDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Lightbox modal */}
+      {selectedImage && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm"
+          onClick={() => setSelectedImage(null)}>
+          <div className="relative max-w-3xl w-full max-h-[90vh] bg-white rounded-2xl overflow-hidden shadow-2xl"
+            onClick={e => e.stopPropagation()}>
+            <button onClick={() => setSelectedImage(null)}
+              className="absolute top-3 right-3 z-10 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+            <div className="aspect-[4/3] bg-muted">
+              <img src={selectedImage} alt={selectedName}
+                className="w-full h-full object-contain bg-gray-900" />
+            </div>
+            <div className="p-5 bg-white">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">{selectedName}</h3>
+              {selectedDesc && (
+                <p className="text-gray-600 text-sm leading-relaxed">{selectedDesc}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
