@@ -74,9 +74,6 @@ function resolveHeroImage(name: string) {
   if (name === 'Sweet Family Traiteur Orianne') {
     return assetFromPublic('vendors/sweet-family/bao-buns.jpg');
   }
-  if (name === 'Virtuel Gouté Mwen') {
-    return assetFromPublic('vendors/sweet-family/bao-buns.jpg');
-  }
   return mockProducts.find((product) => product.vendor === name && product.image)?.image ?? null;
 }
 
@@ -182,6 +179,7 @@ function resolvePortraitImage(name: string) {
   if (name === 'Sweet Family Traiteur Orianne') {
     return assetFromPublic('vendors/sweet-family/portrait.jpg');
   }
+  // Gouté Mwen: pas de portrait disponible — en attente photo humaine
   return null;
 }
 

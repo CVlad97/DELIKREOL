@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <!-- Madras pattern background -->
+  <defs>
+    <pattern id="madras" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <rect width="40" height="40" fill="#FF6B35"/>
+      <rect x="0" y="0" width="20" height="20" fill="#FFD700" opacity="0.3"/>
+      <rect x="20" y="20" width="20" height="20" fill="#FFD700" opacity="0.3"/>
+      <line x1="0" y1="0" x2="40" y2="40" stroke="#E85D26" stroke-width="1" opacity="0.4"/>
+      <line x1="40" y1="0" x2="0" y2="40" stroke="#E85D26" stroke-width="1" opacity="0.4"/>
+      <rect x="0" y="20" width="8" height="8" fill="#2ECC71" opacity="0.25" rx="2"/>
+      <rect x="32" y="0" width="8" height="8" fill="#2ECC71" opacity="0.25" rx="2"/>
+      <rect x="16" y="10" width="4" height="4" fill="#FFF" opacity="0.15" rx="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Sky -->
+  <rect width="400" height="300" fill="#FFF8F0"/>
+
+  <!-- Ground -->
+  <rect x="0" y="220" width="400" height="80" fill="#F0E6D3"/>
+
+  <!-- Sun -->
+  <circle cx="340" cy="50" r="35" fill="#FFD700" opacity="0.8"/>
+  <circle cx="340" cy="50" r="25" fill="#FFEB3B"/>
+
+  <!-- Madras scooter -->
+  <g transform="translate(130, 140)">
+    <!-- Wheels -->
+    <circle cx="30" cy="75" r="20" fill="#333" stroke="#222" stroke-width="3"/>
+    <circle cx="30" cy="75" r="8" fill="#666"/>
+    <circle cx="100" cy="75" r="20" fill="#333" stroke="#222" stroke-width="3"/>
+    <circle cx="100" cy="75" r="8" fill="#666"/>
+
+    <!-- Body -->
+    <rect x="20" y="20" width="90" height="35" rx="8" fill="url(#madras)" stroke="#E85D26" stroke-width="2"/>
+    <rect x="10" y="35" width="20" height="20" rx="4" fill="#FF6B35" stroke="#E85D26" stroke-width="1.5"/>
+
+    <!-- Handlebar -->
+    <line x1="10" y1="35" x2="-5" y2="10" stroke="#555" stroke-width="4" stroke-linecap="round"/>
+    <line x1="-5" y1="10" x2="-15" y2="8" stroke="#555" stroke-width="4" stroke-linecap="round"/>
+    <line x1="-5" y1="10" x2="5" y2="5" stroke="#555" stroke-width="4" stroke-linecap="round"/>
+
+    <!-- Seat -->
+    <rect x="35" y="12" width="35" height="12" rx="4" fill="#444" stroke="#333" stroke-width="1"/>
+
+    <!-- Delivery box (madras) -->
+    <rect x="70" y="-15" width="35" height="30" rx="3" fill="url(#madras)" stroke="#E85D26" stroke-width="1.5"/>
+    <text x="87" y="-2" text-anchor="middle" font-size="7" fill="#FFF" font-weight="bold">DK</text>
+  </g>
+
+  <!-- Delivery person (madras shirt) -->
+  <g transform="translate(155, 85)">
+    <!-- Head -->
+    <circle cx="0" cy="-15" r="14" fill="#8B5E3C" stroke="#6D4222" stroke-width="1"/>
+    <!-- Hair -->
+    <path d="M-12,-18 Q0,-32 12,-18" fill="#3A2010"/>
+    <!-- Eyes -->
+    <circle cx="-5" cy="-16" r="2" fill="#333"/>
+    <circle cx="5" cy="-16" r="2" fill="#333"/>
+    <!-- Smile -->
+    <path d="M-4,-11 Q0,-8 4,-11" stroke="#6D4222" stroke-width="1.5" fill="none"/>
+    <!-- Madras shirt -->
+    <path d="M-10,-2 L-12,25 Q0,30 12,25 L10,-2 Z" fill="url(#madras)" stroke="#E85D26" stroke-width="1.5"/>
+    <!-- Helmet -->
+    <path d="M-14,-18 Q0,-30 14,-18" fill="#FF6B35" stroke="#E85D26" stroke-width="1.5"/>
+    <rect x="-14" y="-20" width="28" height="4" rx="2" fill="#E85D26"/>
+    <!-- Arms driving -->
+    <line x1="-10" y1="5" x2="-30" y2="15" stroke="#8B5E3C" stroke-width="4" stroke-linecap="round"/>
+    <line x1="10" y1="5" x2="25" y2="15" stroke="#8B5E3C" stroke-width="4" stroke-linecap="round"/>
+    <!-- Legs -->
+    <line x1="-5" y1="25" x2="-8" y2="50" stroke="#8B5E3C" stroke-width="5" stroke-linecap="round"/>
+    <line x1="5" y1="25" x2="8" y2="50" stroke="#8B5E3C" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Madras pattern decorative bars -->
+  <rect x="20" y="240" width="80" height="4" rx="2" fill="url(#madras)" opacity="0.6"/>
+  <rect x="300" y="240" width="80" height="4" rx="2" fill="url(#madras)" opacity="0.6"/>
+  <rect x="50" y="255" width="60" height="3" rx="1.5" fill="url(#madras)" opacity="0.4"/>
+  <rect x="290" y="255" width="60" height="3" rx="1.5" fill="url(#madras)" opacity="0.4"/>
+
+  <!-- Coconut trees -->
+  <!-- Tree 1 -->
+  <line x1="30" y1="220" x2="25" y2="120" stroke="#6D4C2A" stroke-width="5"/>
+  <path d="M10,130 Q25,100 40,130" fill="#2ECC71"/>
+  <path d="M0,145 Q25,115 50,145" fill="#27AE60"/>
+  <circle cx="25" cy="118" r="5" fill="#8B5E3C"/>
+
+  <!-- Tree 2 -->
+  <line x1="370" y1="220" x2="375" y2="130" stroke="#6D4C2A" stroke-width="4"/>
+  <path d="M360,140 Q375,115 390,140" fill="#2ECC71"/>
+  <path d="M355,155 Q375,130 395,155" fill="#27AE60"/>
+
+  <!-- Small plants -->
+  <ellipse cx="60" cy="225" rx="15" ry="8" fill="#2ECC71" opacity="0.5"/>
+  <ellipse cx="340" cy="225" rx="12" ry="6" fill="#2ECC71" opacity="0.5"/>
+
+  <!-- Clouds -->
+  <ellipse cx="80" cy="40" rx="30" ry="12" fill="#FFF" opacity="0.8"/>
+  <ellipse cx="100" cy="35" rx="20" ry="10" fill="#FFF" opacity="0.8"/>
+  <ellipse cx="250" cy="60" rx="25" ry="10" fill="#FFF" opacity="0.7"/>
+  <ellipse cx="270" cy="55" rx="18" ry="8" fill="#FFF" opacity="0.7"/>
+</svg>

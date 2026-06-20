@@ -260,11 +260,11 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right: Food image */}
+            {/* Right: Madras delivery illustration */}
             <div className="hidden md:flex justify-center order-1 md:order-2">
               <img
-                src={`${import.meta.env.BASE_URL}assets/hero-food.svg`}
-                alt="Plats maison Martinique — DELIKREOL"
+                src={`${import.meta.env.BASE_URL}branding/delivery-madras.svg`}
+                alt="Livraison DeliKreol en Martinique — style madras"
                 className="w-full max-w-sm h-auto drop-shadow-2xl"
               />
             </div>
