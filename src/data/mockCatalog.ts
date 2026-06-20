@@ -591,6 +591,7 @@ export const mockProducts: LocalProduct[] = [
     vendor: 'Virtuel Gouté Mwen',
     price: 2,
     category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/super-coco.jpg'),
     description: "Glace artisanale à la noix de coco. Sans sucre ajouté. Ingrédients : nan-nan coco et eau de coco.",
     zone: 'Martinique',
     available: true,
