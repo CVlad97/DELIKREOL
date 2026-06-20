@@ -619,6 +619,7 @@ export const mockProducts: LocalProduct[] = [
     vendor: 'Virtuel Gouté Mwen',
     price: 2,
     category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/mangue.jpg'),
     description: 'Glace artisanale à la mangue. Plein de saveurs des Antilles.',
     zone: 'Martinique',
     available: true,
