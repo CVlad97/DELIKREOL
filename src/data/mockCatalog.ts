@@ -773,6 +773,7 @@ export const mockProducts: LocalProduct[] = [
     vendor: 'Virtuel Gouté Mwen',
     price: 2,
     category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/avocat-basi.jpg'),
     description: 'Glace artisanale avocat et sirop de basilic. Original et surprenant !',
     zone: 'Martinique',
     available: true,
