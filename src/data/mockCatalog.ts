@@ -661,6 +661,7 @@ export const mockProducts: LocalProduct[] = [
     vendor: 'Virtuel Gouté Mwen',
     price: 2,
     category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/pomme-liane.jpg'),
     description: "Glace artisanale à la pomme liane, fruit exotique au goût unique.",
     zone: 'Martinique',
     available: true,
