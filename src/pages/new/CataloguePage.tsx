@@ -25,6 +25,7 @@ import { useCart } from '../../contexts/CartContext';
 import { useToast } from '../../contexts/ToastContext';
 import { InteractiveMap } from '../../components/InteractiveMap';
 import { HEALTH_TAGS, type HealthTag } from '../../data/mockCatalog';
+import { calculateDistanceKm } from '../../services/geolocation';
 import type { Product } from '../../lib/supabase';
 
 const ALL_CATEGORIES = [
@@ -76,10 +77,26 @@ export default function CataloguePage() {
   const [selectedMode, setSelectedMode] = useState<'tous' | 'retrait' | 'livraison'>('tous');
   const [showAvailableOnly, setShowAvailableOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [sortMode, setSortMode] = useState<'default' | 'commune' | 'prix-croissant' | 'prix-decroissant' | 'disponible'>('default');
+  const [sortMode, setSortMode] = useState<'default' | 'commune' | 'prix-croissant' | 'prix-decroissant' | 'disponible' | 'distance'>('default');
   const [showMap, setShowMap] = useState(false);
   const [selectedHealthTag, setSelectedHealthTag] = useState<HealthTag | ''>('');
   const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<string>('');
+  const [userPosition, setUserPosition] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [geoRequested, setGeoRequested] = useState(false);
+
+  const requestGeo = () => {
+    if (!navigator.geolocation) return;
+    setGeoRequested(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserPosition({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+        setSortMode('distance');
+        setGeoRequested(false);
+      },
+      () => setGeoRequested(false),
+      { enableHighAccuracy: false, timeout: 10000 }
+    );
+  };
 
   // Build vendor → healthTags & deliveryOptions lookup
   const vendorHealthMap = useMemo(() => {
@@ -211,10 +228,28 @@ export default function CataloguePage() {
       });
     } else if (sortMode === 'disponible') {
       results.sort((a, b) => (a.available === b.available ? 0 : a.available ? -1 : 1));
+    } else if (sortMode === 'distance' && userPosition) {
+      // Map vendor name to coordinates from traiteurSpaces
+      const vendorCoords: Record<string, { lat: number; lng: number }> = {};
+      for (const space of traiteurSpaces) {
+        if (space.latitude && space.longitude) {
+          vendorCoords[space.name] = { lat: space.latitude, lng: space.longitude };
+        }
+      }
+      results.sort((a, b) => {
+        const ca = vendorCoords[a.vendor];
+        const cb = vendorCoords[b.vendor];
+        if (!ca && !cb) return 0;
+        if (!ca) return 1;
+        if (!cb) return -1;
+        const dA = calculateDistanceKm(userPosition, { latitude: ca.lat, longitude: ca.lng });
+        const dB = calculateDistanceKm(userPosition, { latitude: cb.lat, longitude: cb.lng });
+        return dA - dB;
+      });
     }
 
     return results;
-  }, [allProducts, searchQuery, selectedCategory, selectedCommune, selectedBudgetIndex, showAvailableOnly, selectedMode, sortMode, selectedHealthTag, selectedDeliveryOption, vendorHealthMap]);
+  }, [allProducts, searchQuery, selectedCategory, selectedCommune, selectedBudgetIndex, showAvailableOnly, selectedMode, sortMode, selectedHealthTag, selectedDeliveryOption, vendorHealthMap, userPosition]);
 
   const handleAddToCart = (product: LocalProduct) => {
     addItem(localProductToCartProduct(product));
@@ -404,6 +439,7 @@ export default function CataloguePage() {
                     className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 text-sm bg-white outline-none"
                   >
                     <option value="default">Pertinence</option>
+                    <option value="distance">📍 À proximité</option>
                     <option value="commune">Ma commune</option>
                     <option value="prix-croissant">Prix croissant</option>
                     <option value="prix-decroissant">Prix décroissant</option>
@@ -569,6 +605,15 @@ export default function CataloguePage() {
                       <p className="text-xs text-gray-400 flex items-center gap-1 mb-3">
                         <MapPin className="w-3 h-3" />
                         {product.zone}
+                        {userPosition && (() => {
+                          // Try to find vendor coordinates
+                          const space = traiteurSpaces.find(s => s.name === product.vendor);
+                          if (space?.latitude && space?.longitude) {
+                            const dist = calculateDistanceKm(userPosition, { latitude: space.latitude, longitude: space.longitude });
+                            return <span className="ml-1 text-[10px] px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded-full font-semibold">{dist.toFixed(1)} km</span>;
+                          }
+                          return null;
+                        })()}
                       </p>
                     )}
                     {product.description && (
