@@ -815,6 +815,7 @@ export const mockProducts: LocalProduct[] = [
     vendor: 'Virtuel Gouté Mwen',
     price: 2,
     category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/cocktail.jpg'),
     description: 'Glace artisanale cocktail — abricot pays, goyave et maracuja. Le mix parfait des Antilles !',
     zone: 'Martinique',
     available: true,
