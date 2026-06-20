@@ -675,6 +675,7 @@ export const mockProducts: LocalProduct[] = [
     vendor: 'Virtuel Gouté Mwen',
     price: 2,
     category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/citronnade.jpg'),
     description: "Citronnade artisanale faite avec le zeste du citron. Rafraîchissante et acidulée ! 🚨 Fait réellement avec le zeste.",
     zone: 'Martinique',
     available: true,
