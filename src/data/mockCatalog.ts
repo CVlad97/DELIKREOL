@@ -717,6 +717,7 @@ export const mockProducts: LocalProduct[] = [
     vendor: 'Virtuel Gouté Mwen',
     price: 2,
     category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/snow-boll.jpg'),
     description: 'Glace artisanale groseille et menthe. Très apprécié de tous, enfants compris. Rafraîchissant ! ❄️',
     zone: 'Martinique',
     available: true,
