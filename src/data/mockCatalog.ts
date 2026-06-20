@@ -759,6 +759,7 @@ export const mockProducts: LocalProduct[] = [
     vendor: 'Virtuel Gouté Mwen',
     price: 2,
     category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/prune-maracuja.jpg'),
     description: 'Glace artisanale prune de cythere et maracuja. Le mélange parfait !',
     zone: 'Martinique',
     available: true,
