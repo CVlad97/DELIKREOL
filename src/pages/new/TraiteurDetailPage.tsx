@@ -28,6 +28,9 @@ export function TraiteurDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { addItem } = useCart();
   const { showSuccess } = useToast();
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedName, setSelectedName] = useState<string>('');
+  const [selectedDesc, setSelectedDesc] = useState<string>('');
 
   const traiteur = useMemo(() => {
     return traiteurSpaces.find(t => t.slug === slug) || null;
@@ -65,9 +68,6 @@ export function TraiteurDetailPage() {
 
   const isVerified = traiteur.status === 'public confirmé';
   const menuItems = traiteur.menuItems || [];
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [selectedName, setSelectedName] = useState<string>('');
-  const [selectedDesc, setSelectedDesc] = useState<string>('');
 
   const handleAddToCart = (item: any) => {
     addItem(menuItemToProduct(item, traiteur.name));
