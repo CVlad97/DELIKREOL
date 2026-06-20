@@ -72,7 +72,10 @@ function resolveHeroImage(name: string) {
     return assetFromPublic('vendors/ninice/hero.jpg');
   }
   if (name === 'Sweet Family Traiteur Orianne') {
-    return assetFromPublic('vendors/sweet-family/bao-buns.jpg');
+    return assetFromPublic('vendors/sweet-family/hero.jpg');
+  }
+  if (name === 'Virtuel Gouté Mwen') {
+    return assetFromPublic('vendors/goute-mwen/hero.jpg');
   }
   return mockProducts.find((product) => product.vendor === name && product.image)?.image ?? null;
 }
@@ -121,6 +124,11 @@ function resolveGalleryImages(name: string) {
       assetFromPublic('vendors/sweet-family/bao-buns.jpg'),
       assetFromPublic('vendors/sweet-family/cocktails-mignardises.jpg'),
       assetFromPublic('vendors/sweet-family/conditions.jpg'),
+    ];
+  }
+  if (name === 'Virtuel Gouté Mwen') {
+    return [
+      assetFromPublic('vendors/goute-mwen/hero.jpg'),
     ];
   }
   return [];
@@ -179,7 +187,10 @@ function resolvePortraitImage(name: string) {
   if (name === 'Sweet Family Traiteur Orianne') {
     return assetFromPublic('vendors/sweet-family/portrait.jpg');
   }
-  // Gouté Mwen: pas de portrait disponible — en attente photo humaine
+// Gouté Mwen: photo Stacy Vilocy
+  if (name === 'Virtuel Gouté Mwen') {
+    return assetFromPublic('vendors/goute-mwen/portrait.jpg');
+  }
   return null;
 }
 
