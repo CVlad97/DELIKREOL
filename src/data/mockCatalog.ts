@@ -577,6 +577,7 @@ export const mockProducts: LocalProduct[] = [
     vendor: 'Virtuel Gouté Mwen',
     price: 2,
     category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/abricot-pays.jpg'),
     description: "Glace artisanale à l'abricot pays. Douce et fruitée.",
     zone: 'Martinique',
     available: true,
