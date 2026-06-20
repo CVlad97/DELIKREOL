@@ -73,7 +73,20 @@ export default function HomePage() {
   const [showLocationSelector, setShowLocationSelector] = useState(false);
 
   const featuredProducts = mockProducts.filter((p) => p.featured);
-  const featuredTraiteurs = traiteurSpaces.slice(0, 5);
+  // Ajouter les produits phares des traiteurs (featured menu items)
+  const featuredTraiteurItems = traiteurSpaces.flatMap(space =>
+    space.menuItems.filter(item => item.featured).map(item => ({
+      ...item,
+      vendor: space.name,
+      zone: space.zone,
+      image: item.image ?? space.heroImage ?? undefined,
+      available: true,
+      id: `${space.slug}-${item.name.toLowerCase().replace(/\\s+/g, '-')}`,
+    }))
+  );
+  const allFeatured = [...featuredProducts, ...featuredTraiteurItems.filter(p => !featuredProducts.find(fp => fp.id === p.id))];
+  // Tous les traiteurs confirmés sur l'accueil
+  const featuredTraiteurs = traiteurSpaces.filter(t => t.status === 'public confirmé');
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -518,16 +531,16 @@ export default function HomePage() {
       )}
 
       {/* Featured Products — Carrousel */}
-      {featuredProducts.length > 0 && (
+      {allFeatured.length > 0 && (
         <section className="py-16 md:py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-10">
               <div>
                 <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">
-                  Plats à découvrir
+                  Meilleures ventes
                 </h2>
                 <p className="text-gray-500 text-lg">
-                  Sélection de nos partenaires
+                  Les produits phares de nos traiteurs
                 </p>
               </div>
               <Link
@@ -539,7 +552,7 @@ export default function HomePage() {
               </Link>
             </div>
             <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
-              {featuredProducts.map((product) => (
+              {allFeatured.map((product: any) => (
                 <div
                   key={product.id}
                   className="snap-start flex-shrink-0 w-[280px] sm:w-[300px] group bg-white rounded-3xl border border-orange-100 hover:border-orange-300 overflow-hidden shadow-sm hover:shadow-lg transition-all"
