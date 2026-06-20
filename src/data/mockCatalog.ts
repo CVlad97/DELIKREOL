@@ -703,6 +703,7 @@ export const mockProducts: LocalProduct[] = [
     vendor: 'Virtuel Gouté Mwen',
     price: 2,
     category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/prune-cythere.jpg'),
     description: 'Glace artisanale à la prune de cythere (pomme cythere). Saveur tropicale authentique.',
     zone: 'Martinique',
     available: true,
