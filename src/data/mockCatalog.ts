@@ -689,6 +689,7 @@ export const mockProducts: LocalProduct[] = [
     vendor: 'Virtuel Gouté Mwen',
     price: 2,
     category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/ananas.jpg'),
     description: 'Glace artisanale à l\'ananas avec des morceaux d\'ananas. Sans sucre ajouté.',
     zone: 'Martinique',
     available: true,
