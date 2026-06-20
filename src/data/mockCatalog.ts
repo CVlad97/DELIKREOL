@@ -731,6 +731,7 @@ export const mockProducts: LocalProduct[] = [
     vendor: 'Virtuel Gouté Mwen',
     price: 2,
     category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/kumquat.jpg'),
     description: 'Glace artisanale au kumquat. Agrumes antillais au goût subtil.',
     zone: 'Martinique',
     available: true,
