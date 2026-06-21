@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { HashRouter, Routes, Route, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
@@ -87,7 +87,7 @@ function AdminWrapper() {
 export function AppRouter() {
   return (
     <ErrorBoundary>
-      <HashRouter>
+      <BrowserRouter basename="/DELIKREOL">
         <AuthProvider>
           <CartProvider>
             <ToastProvider>
@@ -149,7 +149,7 @@ export function AppRouter() {
             </ToastProvider>
           </CartProvider>
         </AuthProvider>
-      </HashRouter>
+      </BrowserRouter>
     </ErrorBoundary>
   );
 }

@@ -51,7 +51,7 @@ export function TraiteurDetailPage() {
         `${traiteur.name}, ${commune}, livraison repas Martinique, plats créoles`
       );
 
-      // Schema.org LocalBusiness pour le SEO
+      // Schema.org LocalBusiness pour le SEO — sans aggregateRating non prouvé
       const schema = {
         '@context': 'https://schema.org',
         '@type': 'FoodEstablishment',
@@ -64,12 +64,7 @@ export function TraiteurDetailPage() {
         priceRange: traiteur.startingAt > 0 ? `€${traiteur.startingAt.toFixed(0)}` : '€',
         areaServed: { '@type': 'City', name: 'Martinique' },
         telephone: traiteur.profile?.contactPhone || undefined,
-        aggregateRating: traiteur.status === 'public confirmé' ? {
-          '@type': 'AggregateRating',
-          ratingValue: '4.5',
-          reviewCount: '12',
-          bestRating: '5'
-        } : undefined,
+        // Pas d'aggregateRating — pas encore d'avis réels collectés
       };
       let el = document.getElementById('schema-localbusiness') as HTMLScriptElement | null;
       if (!el) {

@@ -11,19 +11,8 @@ const corsHeaders = {
 }
 
 /**
- * Crée un PaymentIntent Stripe.
- *
- * Comportement marketplace Stripe Connect :
- * - Si `vendorStripeAccountId` est fourni, le PaymentIntent est créé avec
- *   un transfert automatique vers le compte du traiteur (transfer_data)
- *   et une commission Delikreol de 15 % (application_fee_amount).
- * - Sinon, le comportement existant est conservé (paiement simple direct).
- *
- * @param {number} amount - Montant en EUR (ex: 25.50)
- * @param {string} [currency='eur'] - Devise
- * @param {string} [orderId] - Identifiant de la commande (metadata)
- * @param {string} [vendorStripeAccountId] - Stripe Connect account ID du traiteur (optionnel)
- * @returns {Promise<{ clientSecret: string }>} Le client_secret à utiliser côté frontend
+ * Crée un PaymentIntent Stripe avec idempotency key.
+ * Mode marketplace (Stripe Connect) ou mode simple.
  */
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -51,7 +40,6 @@ serve(async (req) => {
       if (orderError) {
         console.warn('[stripe] Commande non trouvée en base, utilisation du montant frontend')
       } else {
-        // Recalcul : (sub_total ou total) + delivery_fee = total_attend
         const subTotal = order.sub_total || 0
         const deliveryFee = order.delivery_fee || 0
         const calculatedTotal = subTotal + deliveryFee
@@ -61,7 +49,6 @@ serve(async (req) => {
           console.log(`[stripe] Montant recalculé depuis la base : ${subTotal} + ${deliveryFee} = ${calculatedTotal}€ (${serverAmountInCents} centimes)`)
         }
 
-        // Alerte si le frontend a envoyé un montant différent
         const frontendAmountCents = Math.round(amount * 100)
         if (Math.abs(serverAmountInCents - frontendAmountCents) > 1) {
           console.warn(`[stripe] ⚠️ Différence de montant : frontend=${frontendAmountCents}, serveur=${serverAmountInCents} — utilisation valeur serveur`)
@@ -78,14 +65,14 @@ serve(async (req) => {
     }
 
     const amountInCents = serverAmountInCents
+    // Générer une idempotency key pour éviter les doublons de paiement
+    const idempotencyKey = `pi_${orderId || 'direct'}_${Date.now()}`
 
     if (vendorStripeAccountId) {
-      // -------------------------------------------------------
-      // MODE MARKETPLACE — Paiement avec transfert vers le traiteur
-      // -------------------------------------------------------
-      console.log('[stripe] Mode marketplace — création PaymentIntent avec transfer vers', vendorStripeAccountId)
+      // MODE MARKETPLACE
+      console.log('[stripe] Mode marketplace — création PaymentIntent idempotencyKey:', idempotencyKey)
 
-      const commissionRate = 0.15 // 15 % de commission Delikreol
+      const commissionRate = 0.15
       const applicationFee = Math.round(amountInCents * commissionRate)
 
       const paymentIntent = await stripe.paymentIntents.create({
@@ -99,13 +86,11 @@ serve(async (req) => {
           mode: 'marketplace',
         },
         automatic_payment_methods: { enabled: true },
-        // Transfert automatique des fonds vers le compte Stripe Connect du traiteur
         transfer_data: {
           destination: vendorStripeAccountId,
         },
-        // Commission Delikreol prélevée sur le transfert
         application_fee_amount: applicationFee,
-      })
+      }, { idempotencyKey })
 
       console.log('[stripe] PaymentIntent créé (marketplace) :', paymentIntent.id)
 
@@ -117,17 +102,15 @@ serve(async (req) => {
       })
     }
 
-    // -------------------------------------------------------
-    // MODE SIMPLE — Paiement direct (comportement existant)
-    // -------------------------------------------------------
-    console.log('[stripe] Mode simple — création PaymentIntent sans transfer')
+    // MODE SIMPLE
+    console.log('[stripe] Mode simple — création PaymentIntent idempotencyKey:', idempotencyKey)
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency,
       metadata: { orderId },
       automatic_payment_methods: { enabled: true },
-    })
+    }, { idempotencyKey })
 
     console.log('[stripe] PaymentIntent créé (simple) :', paymentIntent.id)
 
