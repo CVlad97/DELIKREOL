@@ -4,17 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DELIKREOL</title>
-    <script>
-      // GitHub Pages SPA fallback — HashRouter compatible (#/catalogue)
-      var path = window.location.pathname.replace(/^\/DELIKREOL\//, '').replace(/^\/+/, '');
-      if (path && path !== '') {
-        window.location.replace('/DELIKREOL/#' + path);
-      } else {
-        window.location.replace('/DELIKREOL/');
-      }
-    </script>
+    <!--
+      GitHub Pages SPA fallback — BrowserRouter compatible.
+      Ce fichier est ÉCRASÉ à chaque build par le workflow CI
+      qui copie dist/index.html → dist/404.html.
+      Ainsi, toute route inconnue (/) sert l'application React
+      et BrowserRouter gère le routing côté client.
+      Voir .github/workflows/deploy.yml étape "Add SPA fallback".
+    -->
   </head>
   <body>
-    <p>Redirection vers Delikreol…</p>
+    <p>Chargement de DeliKreol…</p>
   </body>
 </html>

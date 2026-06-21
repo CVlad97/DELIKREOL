@@ -11,8 +11,8 @@ const corsHeaders = {
 }
 
 /**
- * Crée un PaymentIntent Stripe avec idempotency key.
- * Mode marketplace (Stripe Connect) ou mode simple.
+ * Crée un PaymentIntent Stripe avec idempotency key stable.
+ * orderId est obligatoire — chaque PaymentIntent est lié à une commande.
  */
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -21,42 +21,10 @@ serve(async (req) => {
     const body = await req.json()
     const { amount, currency = 'eur', orderId, vendorStripeAccountId, vendorId, customerId, deliveryId } = body
 
-    // --- Initialisation Supabase ---
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    const supabase = createClient(supabaseUrl, supabaseKey)
-
-    // --- Recalcul serveur du montant depuis la commande (sécurité) ---
-    let serverAmountInCents = Math.round(amount * 100)
-
-    if (orderId) {
-      console.log(`[stripe] Vérification commande ${orderId} en base...`)
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .select('total, delivery_fee, sub_total')
-        .eq('id', orderId)
-        .single()
-
-      if (orderError) {
-        console.warn('[stripe] Commande non trouvée en base, utilisation du montant frontend')
-      } else {
-        const subTotal = order.sub_total || 0
-        const deliveryFee = order.delivery_fee || 0
-        const calculatedTotal = subTotal + deliveryFee
-
-        if (calculatedTotal > 0) {
-          serverAmountInCents = Math.round(calculatedTotal * 100)
-          console.log(`[stripe] Montant recalculé depuis la base : ${subTotal} + ${deliveryFee} = ${calculatedTotal}€ (${serverAmountInCents} centimes)`)
-        }
-
-        const frontendAmountCents = Math.round(amount * 100)
-        if (Math.abs(serverAmountInCents - frontendAmountCents) > 1) {
-          console.warn(`[stripe] ⚠️ Différence de montant : frontend=${frontendAmountCents}, serveur=${serverAmountInCents} — utilisation valeur serveur`)
-        }
-      }
+    // --- Validation — orderId obligatoire ---
+    if (!orderId) {
+      throw new Error('orderId requis — chaque PaymentIntent doit être lié à une commande')
     }
-
-    // --- Validation du montant ---
     if (!amount || amount <= 0) {
       throw new Error('Montant invalide')
     }
@@ -64,14 +32,54 @@ serve(async (req) => {
       throw new Error('ID de compte Stripe Connect invalide')
     }
 
+    // --- Initialisation Supabase ---
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    // --- Recalcul serveur du montant depuis la commande (sécurité) ---
+    let serverAmountInCents = Math.round(amount * 100)
+    // Idempotency key STABLE basée sur orderId (évite les doublons Stripe)
+    const idempotencyKey = `delikreol_pi_${orderId}`
+
+    console.log(`[stripe] Vérification commande ${orderId} en base...`)
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .select('total, delivery_fee, sub_total, payment_intent_id')
+      .eq('id', orderId)
+      .single()
+
+    // Vérifier si un PaymentIntent existe déjà pour cette commande
+    if (!orderError && order?.payment_intent_id) {
+      console.log(`[stripe] PaymentIntent déjà existant pour ${orderId} : ${order.payment_intent_id}`)
+      return new Response(JSON.stringify({ clientSecret: 'already_exists' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    }
+
+    if (orderError) {
+      console.warn('[stripe] Commande non trouvée en base, utilisation du montant frontend')
+    } else {
+      const subTotal = order.sub_total || 0
+      const deliveryFee = order.delivery_fee || 0
+      const calculatedTotal = subTotal + deliveryFee
+
+      if (calculatedTotal > 0) {
+        serverAmountInCents = Math.round(calculatedTotal * 100)
+        console.log(`[stripe] Montant recalculé depuis la base : ${subTotal} + ${deliveryFee} = ${calculatedTotal}€ (${serverAmountInCents} centimes)`)
+      }
+
+      const frontendAmountCents = Math.round(amount * 100)
+      if (Math.abs(serverAmountInCents - frontendAmountCents) > 1) {
+        console.warn(`[stripe] ⚠️ Différence de montant : frontend=${frontendAmountCents}, serveur=${serverAmountInCents} — utilisation valeur serveur`)
+      }
+    }
+
     const amountInCents = serverAmountInCents
-    // Générer une idempotency key pour éviter les doublons de paiement
-    const idempotencyKey = `pi_${orderId || 'direct'}_${Date.now()}`
 
     if (vendorStripeAccountId) {
       // MODE MARKETPLACE
-      console.log('[stripe] Mode marketplace — création PaymentIntent idempotencyKey:', idempotencyKey)
-
       const commissionRate = 0.15
       const applicationFee = Math.round(amountInCents * commissionRate)
 
@@ -92,18 +100,17 @@ serve(async (req) => {
         application_fee_amount: applicationFee,
       }, { idempotencyKey })
 
-      console.log('[stripe] PaymentIntent créé (marketplace) :', paymentIntent.id)
+      // Stocker le payment_intent_id dans la commande pour traçabilité
+      await supabase.from('orders').update({ payment_intent_id: paymentIntent.id }).eq('id', orderId)
 
-      return new Response(JSON.stringify({
-        clientSecret: paymentIntent.client_secret,
-      }), {
+      return new Response(JSON.stringify({ clientSecret: paymentIntent.client_secret }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       })
     }
 
     // MODE SIMPLE
-    console.log('[stripe] Mode simple — création PaymentIntent idempotencyKey:', idempotencyKey)
+    console.log('[stripe] Mode simple — création PaymentIntent')
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
@@ -112,7 +119,8 @@ serve(async (req) => {
       automatic_payment_methods: { enabled: true },
     }, { idempotencyKey })
 
-    console.log('[stripe] PaymentIntent créé (simple) :', paymentIntent.id)
+    // Stocker le payment_intent_id dans la commande
+    await supabase.from('orders').update({ payment_intent_id: paymentIntent.id }).eq('id', orderId)
 
     return new Response(JSON.stringify({ clientSecret: paymentIntent.client_secret }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
