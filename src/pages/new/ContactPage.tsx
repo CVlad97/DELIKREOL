@@ -2,6 +2,7 @@ import { useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageCircle, Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
+import { BackBar } from '../../components/BackBar';
 
 const WHATSAPP_NUMBER = '596696653589';
 const CONTACT_EMAIL = 'contact@delikreol.mq';
@@ -79,6 +80,7 @@ export function ContactPage() {
   if (submitted) {
     return (
       <Layout>
+        <BackBar label='Retour' backTo='/' />
         <div className="max-w-lg mx-auto text-center px-4 py-16 space-y-6">
           <div className="inline-flex p-4 bg-green-100 text-green-600 rounded-full">
             <Send size={48} />
@@ -110,8 +112,10 @@ export function ContactPage() {
     );
   }
 
+
   return (
     <Layout>
+      <BackBar label='Retour' backTo='/' />
       <div className="max-w-5xl mx-auto px-4 py-8 md:py-12 space-y-10">
         {/* Header */}
         <div className="text-center space-y-4">

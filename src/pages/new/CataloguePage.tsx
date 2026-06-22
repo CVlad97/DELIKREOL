@@ -25,6 +25,7 @@ import { useCart } from '../../contexts/CartContext';
 import { useToast } from '../../contexts/ToastContext';
 import { InteractiveMap } from '../../components/InteractiveMap';
 import { HEALTH_TAGS, type HealthTag } from '../../data/mockCatalog';
+import { BackBar } from '../../components/BackBar';
 import { calculateDistanceKm } from '../../services/geolocation';
 import type { Product } from '../../lib/supabase';
 
@@ -284,6 +285,7 @@ export default function CataloguePage() {
 
   return (
     <Layout>
+      <BackBar label='Accueil' backTo='/' />
       <div className="bg-[#FFFBF0] min-h-screen">
         {/* Header */}
         <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white">

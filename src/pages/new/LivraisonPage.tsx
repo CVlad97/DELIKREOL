@@ -11,6 +11,7 @@ import {
   Store,
 } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
+import { BackBar } from '../../components/BackBar';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 
 const WHATSAPP_NUMBER = '596696653589';
@@ -58,6 +59,7 @@ export default function LivraisonPage() {
 
   return (
     <Layout title="Livraison & Retrait">
+      <BackBar label='Retour' backTo='/' />
       {/* Intro */}
       <div className="mb-8 space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase tracking-wider">

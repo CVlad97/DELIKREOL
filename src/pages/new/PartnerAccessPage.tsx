@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Layout } from '../../components/layout/Layout';
+import { BackBar } from '../../components/BackBar';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 
 const PARTNER_CODES: Record<string, string> = {
@@ -50,6 +51,7 @@ export default function PartnerAccessPage() {
   if (!code) {
     return (
       <Layout>
+        <BackBar label='Retour' backTo='/' />
         <div className="max-w-lg mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-black mb-4">Accès partenaire</h1>
           <p className="text-gray-500 mb-6">Utilisez le lien que Vladimir vous a envoyé pour accéder à votre espace.</p>
@@ -62,6 +64,7 @@ export default function PartnerAccessPage() {
   if (!partnerName) {
     return (
       <Layout>
+        <BackBar label='Retour' backTo='/' />
         <div className="max-w-lg mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-black mb-4">Code non reconnu</h1>
           <p className="text-gray-500">Le code <strong>{code}</strong> n'est pas valide. Vérifiez votre lien ou contactez DELIKREOL.</p>
@@ -73,6 +76,7 @@ export default function PartnerAccessPage() {
   if (submitted) {
     return (
       <Layout>
+        <BackBar label='Retour' backTo='/' />
         <div className="max-w-lg mx-auto px-4 py-16 text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">✅</div>
           <h1 className="text-2xl font-black mb-3">Merci, {partnerName} !</h1>
@@ -83,8 +87,10 @@ export default function PartnerAccessPage() {
     );
   }
 
+
   return (
     <Layout>
+      <BackBar label='Retour' backTo='/' />
       <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6">
           <p className="text-sm font-bold text-amber-800">🧪 Accès pilote gratuit</p>

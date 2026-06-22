@@ -11,6 +11,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
+import { BackBar } from '../../components/BackBar';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -118,6 +119,7 @@ export default function DevisPage() {
   if (submitted) {
     return (
       <Layout>
+        <BackBar label='Retour' backTo='/' />
         <div className="max-w-lg mx-auto text-center px-4 py-16 space-y-6">
           <div className="inline-flex p-4 bg-green-100 text-green-600 rounded-full">
             <CheckCircle2 size={48} />
@@ -146,8 +148,10 @@ export default function DevisPage() {
     );
   }
 
+
   return (
     <Layout>
+      <BackBar label='Retour' backTo='/' />
       <div className="max-w-3xl mx-auto px-4 py-8 md:py-12">
         {/* Page Header */}
         <div className="mb-8 space-y-3">

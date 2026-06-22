@@ -7,6 +7,7 @@ import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 import { mockProducts } from '../../data/mockCatalog';
 import { setPageMeta } from '../../services/seo';
 import { RatingBadge } from '../../components/ReviewSection';
+import { BackBar } from '../../components/BackBar';
 
 export function TraiteursListPage() {
   const [userPosition, setUserPosition] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -79,6 +80,7 @@ export function TraiteursListPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
+      <BackBar label='Accueil' backTo='/' />
       <div className="text-center mb-10">
         <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-3">
           Nos traiteurs partenaires
