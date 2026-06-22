@@ -30,6 +30,7 @@ import type { Product } from '../../lib/supabase';
 import { HowItWorksCompact } from '../../components/HowItWorksCompact';
 import { calculateDistanceKm, type Coords } from '../../services/geolocation';
 import { LocationSelector } from '../../components/LocationSelector';
+import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 import { setPageMeta } from '../../services/seo';
 
 const WHATSAPP_NUMBER = '596696653589';
@@ -71,6 +72,8 @@ export default function HomePage() {
   const [geoPosition, setGeoPosition] = useState<Coords | null>(null);
   const [nearbyTraiteurs, setNearbyTraiteurs] = useState<Array<{ traiteur: TraiteurSpace; distance: number }>>([]);
   const [showLocationSelector, setShowLocationSelector] = useState(false);
+  const [selectedCommune, setSelectedCommune] = useState('');
+  const [selectedMode, setSelectedMode] = useState('tous');
 
   const featuredProducts = mockProducts.filter((p) => p.featured);
   // Ajouter les produits phares des traiteurs (featured menu items)
@@ -187,102 +190,165 @@ export default function HomePage() {
 
   return (
     <Layout>
-      {/* Hero Section — Style original DeliKreol */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-amber-50 to-[#FFFBF0]">
-        {/* Madras pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: `url(${import.meta.env.BASE_URL}branding/logo-madras.svg)`,
-            backgroundSize: '120px',
-            backgroundRepeat: 'repeat',
-          }}
-        />
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-20 left-10 w-64 h-64 bg-orange-400 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-20 w-96 h-96 bg-amber-300 rounded-full blur-3xl" />
-        </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            {/* Left: Text */}
-            <div className="text-center md:text-left order-2 md:order-1">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-100 text-orange-700 text-sm font-semibold mb-4 uppercase tracking-widest">
-                <Sparkles className="w-4 h-4" />
-                MARTINIQUE
-              </div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold mb-4 ml-2">
-                🧪 Phase pilote
-              </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 leading-tight mb-4">
-                Commandez créole<br />
-                <span className="text-orange-500">local en Martinique</span>
-              </h1>
-              <p className="text-base text-gray-500 mb-6 max-w-lg mx-auto md:mx-0 leading-relaxed">
-                Plats maison, traiteurs locaux, livraison ou retrait — commandez en 3 clics.
-              </p>
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start mb-8">
-                <Link
-                  to="/catalogue"
-                  className="flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-orange-200 text-base"
-                >
-                  <ShoppingBag className="w-5 h-5" />
-                  Commander maintenant
-                </Link>
-                <Link
-                  to="/inscription-traiteur"
-                  className="flex items-center justify-center gap-2 px-8 py-3.5 bg-white hover:bg-orange-50 text-orange-600 font-bold rounded-2xl border-2 border-orange-200 transition-all hover:scale-105 text-base"
-                >
-                  Rejoindre Delikreol comme traiteur
-                </Link>
-                <Link
-                  to="/devenir-livreur"
-                  className="flex items-center justify-center gap-2 px-6 py-3.5 bg-white hover:bg-orange-50 text-orange-600 font-bold rounded-2xl border-2 border-orange-200 transition-all hover:scale-105 text-sm"
-                >
-                  Devenir livreur
-                </Link>
-              </div>
-              {/* Steps */}
-              <div className="flex items-center justify-center md:justify-start gap-4 pt-4 border-t border-orange-100">
-                <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                  <span className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-[10px] font-bold">1</span>
-                  Choisis
-                </div>
-                <span className="text-gray-300 text-xs">→</span>
-                <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                  <span className="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-[10px] font-bold">2</span>
-                  Confirme
-                </div>
-                <span className="text-gray-300 text-xs">→</span>
-                <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                  <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold">3</span>
-                  Récupère
-                </div>
-              </div>
-            </div>
+      {/* Hero Section — Style DeliKreol */}
+            <section className="relative bg-white">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+                <div className="flex flex-col md:flex-row gap-8 items-center">
+                    {/* Left: Search & CTA */}
+                    <div className="flex-1 text-center md:text-left">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-semibold mb-4">
+                        <Sparkles className="w-3 h-3" />
+                        Livraison & retrait en Martinique
+                      </div>
+                      <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 leading-tight mb-3">
+                        Commandez créole<br />
+                        <span className="text-orange-500">local en Martinique</span>
+                      </h1>
+                      <p className="text-base text-gray-500 mb-6 max-w-lg mx-auto md:mx-0">
+                        Plats maison, traiteurs locaux — livraison ou retrait.
+                      </p>
 
-            {/* Right: Madras delivery illustration */}
-            <div className="hidden md:flex justify-center order-1 md:order-2">
-              <img loading="lazy"
-                src={`${import.meta.env.BASE_URL}branding/delivery-madras.svg`}
-                alt="Livraison DeliKreol en Martinique — style madras"
-                className="w-full max-w-sm h-auto drop-shadow-2xl"
-              />
-            </div>
-          </div>
-            {/* Support WhatsApp */}
-            <div className="flex justify-center pb-8">
-              <a
-                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Bonjour, j\'ai besoin d\'aide sur DELIKREOL.')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-2xl transition-all text-sm"
-              >
-                <MessageCircle className="w-4 h-4" fill="white" />
-                Besoin d'aide ? Support WhatsApp
-              </a>
-            </div>
-        </div>
-      </section>
+                      {/* Commune Search Bar */}
+                      <div className="max-w-lg mx-auto md:mx-0 mb-6">
+                        <div className="flex items-center gap-2 p-1.5 bg-orange-50 rounded-2xl border border-orange-200">
+                          <div className="flex-1 flex items-center gap-2 px-3">
+                            <MapPin className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                            <select
+                              value={selectedCommune}
+                              onChange={(e) => {
+                                setSelectedCommune(e.target.value);
+                                if (e.target.value) window.location.href = '/catalogue?commune=' + encodeURIComponent(e.target.value);
+                              }}
+                              className="w-full bg-transparent text-sm text-gray-700 font-medium outline-none py-2"
+                            >
+                              <option value="">Ma commune</option>
+                              {martiniqueCommunes.slice(0, 34).map((c) => (
+                                <option key={c.name} value={c.name}>{c.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="flex items-center gap-1 bg-white rounded-xl p-1">
+                            <button
+                              onClick={() => setSelectedMode('livraison')}
+                              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+                                selectedMode === 'livraison' ? 'bg-orange-500 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                              }`}
+                            >
+                              🚚 Livraison
+                            </button>
+                            <button
+                              onClick={() => setSelectedMode('retrait')}
+                              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+                                selectedMode === 'retrait' ? 'bg-orange-500 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                              }`}
+                            >
+                              📍 Retrait
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* CTA Buttons */}
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start mb-6">
+                        <Link
+                          to="/catalogue"
+                          className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-orange-200 text-sm"
+                        >
+                          <ShoppingBag className="w-4 h-4" />
+                          Commander
+                        </Link>
+                        <Link
+                          to="/inscription-traiteur"
+                          className="flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-orange-50 text-orange-600 font-bold rounded-2xl border-2 border-orange-200 transition-all hover:scale-105 text-sm"
+                        >
+                          Devenir partenaire
+                        </Link>
+                        <Link
+                          to="/devis"
+                          className="flex items-center justify-center gap-2 px-6 py-3 bg-gray-50 hover:bg-gray-100 text-gray-600 font-bold rounded-2xl border border-gray-200 transition-all hover:scale-105 text-sm"
+                        >
+                          Demande pro
+                        </Link>
+                      </div>
+
+                      {/* Quick steps */}
+                      <div className="flex items-center justify-center md:justify-start gap-4 text-xs text-gray-400">
+                        <span className="flex items-center gap-1">1. Choisis</span>
+                        <span>→</span>
+                        <span className="flex items-center gap-1">2. Commande</span>
+                        <span>→</span>
+                        <span className="flex items-center gap-1">3. Déguste</span>
+                      </div>
+                    </div>
+
+                    {/* Right: Grid des meilleurs plats */}
+                    <div className="hidden md:block flex-shrink-0 w-full max-w-md">
+                      <div className="relative">
+                        <div className="absolute -inset-4 bg-gradient-to-br from-orange-100/50 to-amber-100/30 rounded-3xl blur-xl" />
+                        <div className="relative grid grid-cols-2 gap-3">
+                          {featuredProducts.slice(0, 4).map((product: any, i: number) => (
+                            <Link key={i} to="/catalogue"
+                              className={`bg-white rounded-2xl overflow-hidden shadow-lg border border-orange-100 hover:shadow-xl transition-all hover:-translate-y-1 ${
+                                i === 0 ? 'row-span-2' : ''
+                              }`}>
+                              <div className={`${i === 0 ? 'aspect-[3/4]' : 'aspect-square'} bg-orange-50 overflow-hidden`}>
+                                {product.image ? (
+                                  <img loading="lazy" src={product.image} alt={product.name}
+                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-orange-200 text-4xl">🍽️</div>
+                                )}
+                              </div>
+                              <div className="p-2">
+                                <p className="text-[10px] font-bold text-gray-900 truncate">{product.name}</p>
+                                <p className="text-[10px] text-orange-600 font-semibold">{product.price.toFixed(2)} €</p>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* 🏆 Meilleurs plats carrousel */}
+              <section className="py-10 bg-white border-t border-gray-100">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h2 className="text-2xl font-black text-gray-900">Meilleurs plats</h2>
+                      <p className="text-sm text-gray-500 mt-1">Les plus populaires chez nos traiteurs</p>
+                    </div>
+                    <Link to="/catalogue" className="hidden sm:flex items-center gap-1 text-sm font-semibold text-orange-600 hover:text-orange-700">
+                      Voir tout <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  </div>
+                  <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
+                    {featuredProducts.slice(0, 10).map((product: any, i: number) => (
+                      <Link key={i} to="/catalogue"
+                        className="flex-shrink-0 w-44 snap-start bg-white rounded-2xl border border-gray-100 hover:border-orange-200 hover:shadow-lg transition-all group">
+                        <div className="aspect-square rounded-t-2xl overflow-hidden bg-orange-50">
+                          {product.image ? (
+                            <img loading="lazy" src={product.image} alt={product.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-orange-200 text-3xl">🍽️</div>
+                          )}
+                        </div>
+                        <div className="p-3">
+                          <p className="text-xs text-gray-400 truncate">{product.vendor}</p>
+                          <p className="text-sm font-bold text-gray-900 truncate mt-0.5">{product.name}</p>
+                          <div className="flex items-center justify-between mt-2">
+                            <span className="text-sm font-bold text-orange-600">{product.price.toFixed(2)} €</span>
+                            <span className="text-[10px] px-2 py-0.5 bg-orange-50 text-orange-600 rounded-full font-semibold">Ajouter</span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </section>
 
       {/* 📍 Traiteurs près de chez moi — Géolocalisation */}
       <section className="py-12 md:py-16 bg-white">
