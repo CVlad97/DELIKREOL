@@ -6,6 +6,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { useEffect, useMemo, useState } from 'react';
 import { setPageMeta } from '../../services/seo';
 import type { Product } from '../../types';
+import { ReviewSection, RatingBadge } from '../../components/ReviewSection';
 
 const WHATSAPP_NUMBER = '596696653589';
 
@@ -252,6 +253,8 @@ export function TraiteurDetailPage() {
           )}
         </div>
       )}
+
+      <ReviewSection traiteurSlug={traiteur.slug} traiteurName={traiteur.name} />
 
       {/* Menu */}
       <div className="border-t pt-8">

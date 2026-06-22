@@ -6,6 +6,7 @@ import { calculateDistanceKm } from '../../services/geolocation';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 import { mockProducts } from '../../data/mockCatalog';
 import { setPageMeta } from '../../services/seo';
+import { RatingBadge } from '../../components/ReviewSection';
 
 export function TraiteursListPage() {
   const [userPosition, setUserPosition] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -168,9 +169,10 @@ export function TraiteursListPage() {
 
               {/* Content */}
               <div className="p-5 pt-8">
-                <h3 className="text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
-                  {traiteur.name}
-                </h3>
+                <h3 className="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">
+                                      {traiteur.name}
+                                    </h3>
+                                    <RatingBadge traiteurSlug={traiteur.slug} />
                 <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3">
                   <span className="inline-flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5" />
