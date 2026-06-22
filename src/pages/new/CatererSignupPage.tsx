@@ -464,7 +464,7 @@ export default function CatererSignupPage() {
             fiche avec vous.
           </p>
           <p className="text-sm text-muted-foreground">
-            Contactez Vladimir sur WhatsApp pour accélérer votre intégration.
+            Vous pouvez aussi partager votre candidature par WhatsApp pour accélérer l'intégration.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
