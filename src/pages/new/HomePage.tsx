@@ -29,6 +29,7 @@ import { useToast } from '../../contexts/ToastContext';
 import type { Product } from '../../lib/supabase';
 import { HowItWorksCompact } from '../../components/HowItWorksCompact';
 import { AutoCarousel } from '../../components/AutoCarousel';
+import { ScrollCarousel } from '../../components/ScrollCarousel';
 import { calculateDistanceKm, type Coords } from '../../services/geolocation';
 import { LocationSelector } from '../../components/LocationSelector';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
@@ -452,7 +453,7 @@ export default function HomePage() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-            <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
+            <ScrollCarousel>
               {featuredTraiteurs.map((traiteur) => (
                 <Link
                   key={traiteur.slug}
@@ -501,7 +502,7 @@ export default function HomePage() {
                   </div>
                 </Link>
               ))}
-            </div>
+            </ScrollCarousel>
             <div className="text-center mt-8 md:hidden">
               <Link
                 to="/catalogue"
@@ -536,7 +537,7 @@ export default function HomePage() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-            <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
+            <ScrollCarousel>
               {allFeatured.map((product: any) => (
                 <div
                   key={product.id}
@@ -599,7 +600,7 @@ export default function HomePage() {
                   </div>
                 </div>
               ))}
-            </div>
+            </ScrollCarousel>
           </div>
         </section>
       )}
