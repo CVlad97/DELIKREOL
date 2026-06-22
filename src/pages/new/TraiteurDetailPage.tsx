@@ -113,25 +113,42 @@ export function TraiteurDetailPage() {
         Tous les traiteurs
       </Link>
 
-      {/* Hero */}
-      <div className="rounded-2xl overflow-hidden mb-8">
-        <div className="aspect-[21/9] bg-muted relative">
+      {/* Hero réduit */}
+      <div className="rounded-xl overflow-hidden mb-6 cursor-pointer"
+        onClick={() => {
+          if (traiteur.heroImage) {
+            setSelectedImage(traiteur.heroImage);
+            setSelectedName(traiteur.name);
+            setSelectedDesc('');
+          }
+        }}>
+        <div className="aspect-[3/1] bg-muted relative group">
           {traiteur.heroImage ? (
-            <img loading="lazy" src={traiteur.heroImage} alt={traiteur.name} className="w-full h-full object-cover" />
+            <img loading="lazy" src={traiteur.heroImage} alt={traiteur.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50">
-              <ChefHat className="w-20 h-20 text-primary/20" />
+              <ChefHat className="w-16 h-16 text-primary/20" />
             </div>
           )}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+            <span className="opacity-0 group-hover:opacity-100 bg-white/90 text-gray-800 text-xs px-3 py-1.5 rounded-full font-semibold shadow-lg transition-opacity">🔍 Agrandir</span>
+          </div>
         </div>
       </div>
 
-      {/* Portrait + Bio */}
-      <div className="flex flex-col sm:flex-row gap-6 mb-8 items-start">
+      {/* Portrait + Bio — BIO EN PREMIER */}
+      <div className="flex flex-col sm:flex-row gap-6 mb-6 items-start">
         {traiteur.portraitImage && (
-          <div className="w-36 h-36 sm:w-48 sm:h-48 rounded-2xl overflow-hidden bg-muted flex-shrink-0 border-4 border-primary/10 shadow-lg ring-2 ring-amber-200/50">
+          <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl overflow-hidden bg-muted flex-shrink-0 border-4 border-primary/10 shadow-lg ring-2 ring-amber-200/50 cursor-pointer group"
+            onClick={() => {
+              if (traiteur.portraitImage) {
+                setSelectedImage(traiteur.portraitImage);
+                setSelectedName(traiteur.name);
+                setSelectedDesc('');
+              }
+            }}>
             <img loading="lazy" src={traiteur.portraitImage} alt={`Portrait ${traiteur.name}`}
-              className="w-full h-full object-cover object-top" />
+              className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300" />
           </div>
         )}
         <div className="flex-1">
@@ -160,14 +177,14 @@ export function TraiteurDetailPage() {
           {traiteur.specialty && <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs">{traiteur.specialty}</span>}
         </div>
 
-        <p className="text-muted-foreground mb-4">
+        {/* BIO tout de suite */}
+        <p className="text-muted-foreground mb-4 text-base leading-relaxed">
           {traiteur.description || traiteur.offer || 'Découvrez les spécialités de ce prestataire.'}
         </p>
 
-        {/* Bio complète */}
         {traiteur.story && traiteur.story !== traiteur.description && (
-          <div className="mb-4 p-4 bg-muted/30 rounded-xl">
-            <p className="text-sm text-muted-foreground leading-relaxed">{traiteur.story}</p>
+          <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <p className="text-sm text-gray-700 leading-relaxed">{traiteur.story}</p>
           </div>
         )}
 
@@ -223,23 +240,23 @@ export function TraiteurDetailPage() {
       </div>
       </div>
 
-      {/* Photos du traiteur */}
+      {/* Photos — galerie réduite */}
       {traiteur.galleryImages && traiteur.galleryImages.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-2xl font-display font-bold mb-4">Photos du traiteur</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {traiteur.galleryImages.map((img, i) => (
+        <div className="mb-6">
+          <h2 className="text-xl font-display font-bold mb-3">Photos</h2>
+          <div className="grid grid-cols-3 gap-2">
+            {traiteur.galleryImages.slice(0, 3).map((img, i) => (
               <div key={i} onClick={() => {
                 setSelectedImage(img);
                 setSelectedName(`${traiteur.name} — Photo ${i + 1}`);
                 setSelectedDesc('');
               }}
-                className="aspect-square rounded-xl overflow-hidden bg-muted group relative cursor-pointer">
+                className="aspect-square rounded-lg overflow-hidden bg-muted group relative cursor-pointer">
                 <img loading="lazy" src={img} alt={`${traiteur.name} - ${i + 1}`}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                   <span className="opacity-0 group-hover:opacity-100 bg-white/90 text-gray-800 text-xs px-2 py-1 rounded-full font-semibold shadow-lg transition-opacity">
-                    🔍 Agrandir
+                    🔍
                   </span>
                 </div>
               </div>
