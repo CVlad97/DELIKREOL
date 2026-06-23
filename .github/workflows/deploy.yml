@@ -41,6 +41,9 @@ jobs:
       - name: Build
         env:
           VITE_BASE_PATH: /DELIKREOL/
+          VITE_SUPABASE_URL: https://boihlgodmclljtckhmgz.supabase.co
+          VITE_SUPABASE_ANON_KEY: sb_publishable_LE_NgMgaOlJEhkJlVF_zow_4NNOtTHX
+          VITE_DEMO_MODE: "false"
         run: npm run build
 
       - name: Add SPA fallback and nojekyll marker
