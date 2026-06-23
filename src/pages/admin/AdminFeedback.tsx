@@ -1,21 +1,27 @@
 import { useEffect, useState } from 'react';
-import { Bug, Lightbulb, MessageCircle, CheckCircle2, Archive, Inbox } from 'lucide-react';
+import { Bug, Lightbulb, MessageCircle, CheckCircle2, Archive, Inbox, AlertTriangle, ExternalLink, Phone } from 'lucide-react';
+import { supabase, isDemoMode, isSupabaseConfigured } from '../../lib/supabase';
 
 type FeedbackStatus = 'new' | 'read' | 'resolved';
-type FeedbackType = 'bug' | 'suggestion' | 'amelioration' | 'autre';
+type FeedbackType = 'bug' | 'commande' | 'connexion' | 'suggestion' | 'amelioration' | 'autre';
 
 interface FeedbackItem {
   id: string;
   type: FeedbackType;
   description: string;
-  email?: string;
+  email?: string | null;
+  phone?: string | null;
+  page_url?: string | null;
   attachment_url?: string | null;
+  attachment_name?: string | null;
   status: FeedbackStatus;
   created_at: string;
 }
 
 const TYPE_CONFIG: Record<FeedbackType, { label: string; icon: any; color: string }> = {
   bug: { label: 'Bug', icon: Bug, color: 'text-red-600 bg-red-50' },
+  commande: { label: 'Commande', icon: AlertTriangle, color: 'text-red-600 bg-red-50' },
+  connexion: { label: 'Connexion', icon: AlertTriangle, color: 'text-purple-600 bg-purple-50' },
   suggestion: { label: 'Suggestion', icon: Lightbulb, color: 'text-amber-600 bg-amber-50' },
   amelioration: { label: 'Amélioration', icon: Inbox, color: 'text-blue-600 bg-blue-50' },
   autre: { label: 'Autre', icon: MessageCircle, color: 'text-gray-600 bg-gray-50' },
@@ -27,7 +33,7 @@ const STATUS_CONFIG: Record<FeedbackStatus, { label: string; color: string }> = 
   resolved: { label: 'Résolu', color: 'bg-green-100 text-green-700' },
 };
 
-function loadFeedback(): FeedbackItem[] {
+function loadLocalFeedback(): FeedbackItem[] {
   try {
     const stored = localStorage.getItem('delikreol_feedback');
     if (stored) {
@@ -40,7 +46,7 @@ function loadFeedback(): FeedbackItem[] {
   return [];
 }
 
-function saveFeedback(items: FeedbackItem[]) {
+function saveLocalFeedback(items: FeedbackItem[]) {
   localStorage.setItem('delikreol_feedback', JSON.stringify(items));
 }
 
@@ -53,18 +59,60 @@ function getTypeIcon(type: FeedbackType) {
 export function AdminFeedback() {
   const [items, setItems] = useState<FeedbackItem[]>([]);
   const [filter, setFilter] = useState<FeedbackStatus | 'all'>('all');
+  const [loading, setLoading] = useState(true);
+  const [source, setSource] = useState<'supabase' | 'local'>('local');
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const loadFeedback = async () => {
+    setLoading(true);
+    setLoadError(null);
+
+    if (isSupabaseConfigured && !isDemoMode) {
+      try {
+        const { data, error } = await supabase
+          .from('feedback')
+          .select('id,type,description,email,phone,page_url,attachment_url,attachment_name,status,created_at')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setItems((data || []) as FeedbackItem[]);
+        setSource('supabase');
+        setLoading(false);
+        return;
+      } catch (err: any) {
+        console.warn('[AdminFeedback] Supabase load failed, fallback localStorage', err);
+        setLoadError(err?.message || 'Lecture Supabase impossible. Affichage local uniquement.');
+      }
+    }
+
+    setItems(loadLocalFeedback().sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+    setSource('local');
+    setLoading(false);
+  };
 
   useEffect(() => {
-    document.title = 'Feedback — Admin DeliKreol';
-    setItems(loadFeedback());
+    document.title = 'Signalements — Admin DeliKreol';
+    loadFeedback();
   }, []);
 
-  const updateStatus = (id: string, newStatus: FeedbackStatus) => {
+  const updateStatus = async (id: string, newStatus: FeedbackStatus) => {
     const updated = items.map((item) =>
       item.id === id ? { ...item, status: newStatus } : item
     );
     setItems(updated);
-    saveFeedback(updated);
+
+    if (source === 'supabase' && isSupabaseConfigured && !isDemoMode) {
+      const { error } = await supabase
+        .from('feedback')
+        .update({ status: newStatus })
+        .eq('id', id);
+      if (error) {
+        console.warn('[AdminFeedback] Update failed', error);
+        setLoadError(error.message);
+      }
+    } else {
+      saveLocalFeedback(updated);
+    }
   };
 
   const markAsRead = (id: string) => updateStatus(id, 'read');
@@ -78,17 +126,35 @@ export function AdminFeedback() {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-display font-bold">Feedback</h1>
-        <div className="text-xs text-muted-foreground">
-          {items.length} message{items.length !== 1 ? 's' : ''}
-          {' · '}
-          <span className="text-blue-600 font-semibold">{countByStatus('new')} nouveau</span>
-          {' · '}
-          <span className="text-green-600 font-semibold">{countByStatus('resolved')} résolu</span>
+        <div>
+          <h1 className="text-2xl font-display font-bold">Signalements & problèmes</h1>
+          <p className="text-xs text-muted-foreground mt-1">
+            Source : {source === 'supabase' ? 'Supabase' : 'localStorage'}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="text-xs text-muted-foreground">
+            {items.length} message{items.length !== 1 ? 's' : ''}
+            {' · '}
+            <span className="text-blue-600 font-semibold">{countByStatus('new')} nouveau</span>
+            {' · '}
+            <span className="text-green-600 font-semibold">{countByStatus('resolved')} résolu</span>
+          </div>
+          <button
+            onClick={loadFeedback}
+            className="rounded-lg bg-muted px-3 py-2 text-xs font-bold text-muted-foreground hover:text-foreground"
+          >
+            Actualiser
+          </button>
         </div>
       </div>
 
-      {/* Filtres */}
+      {loadError && (
+        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          {loadError}
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-2 mb-4">
         {(['all', 'new', 'read', 'resolved'] as const).map((f) => (
           <button
@@ -108,14 +174,18 @@ export function AdminFeedback() {
         ))}
       </div>
 
-      {/* Liste */}
-      {filteredItems.length === 0 ? (
+      {loading ? (
+        <div className="text-center py-12 bg-muted/20 rounded-xl">
+          <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+          <p className="text-muted-foreground">Chargement des signalements…</p>
+        </div>
+      ) : filteredItems.length === 0 ? (
         <div className="text-center py-12 bg-muted/20 rounded-xl">
           <Inbox size={40} className="mx-auto text-muted-foreground/40 mb-3" />
           <p className="text-muted-foreground">
             {filter === 'all'
-              ? 'Aucun feedback pour le moment.'
-              : `Aucun feedback avec le statut "${STATUS_CONFIG[filter]?.label || filter}".`}
+              ? 'Aucun signalement pour le moment.'
+              : `Aucun signalement avec le statut "${STATUS_CONFIG[filter]?.label || filter}".`}
           </p>
         </div>
       ) : (
@@ -134,13 +204,11 @@ export function AdminFeedback() {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3 min-w-0 flex-1">
-                    {/* Type icon */}
                     <div className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center ${typeConfig.color}`}>
                       <Icon size={16} />
                     </div>
 
-                    <div className="space-y-1 min-w-0">
-                      {/* Type + status badges */}
+                    <div className="space-y-2 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${typeConfig.color}`}>
                           {typeConfig.label}
@@ -159,22 +227,28 @@ export function AdminFeedback() {
                         </span>
                       </div>
 
-                      {/* Description */}
                       <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
                         {item.description}
                       </p>
 
-                      {/* Email */}
-                      {item.email && (
-                        <p className="text-xs text-muted-foreground">
-                          📧{' '}
+                      <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                        {item.email && (
                           <a href={`mailto:${item.email}`} className="text-primary hover:underline">
-                            {item.email}
+                            📧 {item.email}
                           </a>
-                        </p>
-                      )}
+                        )}
+                        {item.phone && (
+                          <a href={`https://wa.me/${item.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-green-600 hover:underline">
+                            <Phone size={13} /> {item.phone}
+                          </a>
+                        )}
+                        {item.page_url && (
+                          <a href={item.page_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
+                            <ExternalLink size={13} /> Page concernée
+                          </a>
+                        )}
+                      </div>
 
-                      {/* Attachment */}
                       {item.attachment_url && (
                         <p className="text-xs">
                           <a
@@ -183,14 +257,13 @@ export function AdminFeedback() {
                             rel="noopener noreferrer"
                             className="text-primary hover:underline"
                           >
-                            📎 Voir la pièce jointe
+                            📎 Voir la pièce jointe {item.attachment_name ? `(${item.attachment_name})` : ''}
                           </a>
                         </p>
                       )}
                     </div>
                   </div>
 
-                  {/* Actions */}
                   <div className="flex-shrink-0 flex items-center gap-1">
                     {item.status === 'new' && (
                       <button
