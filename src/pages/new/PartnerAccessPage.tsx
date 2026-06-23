@@ -3,13 +3,14 @@ import { useSearchParams } from 'react-router-dom';
 import { Layout } from '../../components/layout/Layout';
 import { BackBar } from '../../components/BackBar';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
+import { isDemoMode, supabase } from '../../lib/supabase';
 
-// Plus de codes hardcodés ! Le token dans l'URL est validé côté serveur.
+const WHATSAPP_NUMBER = '596696653589';
 
 function resolvePartnerName(code: string): string | null {
   if (!code || code.length < 4) return null;
   const upper = code.toUpperCase();
-  // Fallback demo : on détecte le préfixe
+  // Fallback pilote : ces codes ne sont PAS des mots de passe, uniquement des liens de test.
   if (upper.includes('SAVEURS')) return "Saveurs d'Afrique";
   if (upper.includes('COCO')) return "Coco's Food";
   if (upper.includes('NINICE')) return 'Les Délices de Ninice';
@@ -17,12 +18,13 @@ function resolvePartnerName(code: string): string | null {
   if (upper.includes('GOUTE')) return 'Virtuel Gouté Mwen';
   if (upper.includes('ANTJE')) return 'An Tjè Coco';
   if (upper.includes('SAVE') || upper.includes('PEYI')) return "Snack Savè Peyi'A";
-  // Token long (>10 chars) = token valide côté serveur (vérifié à la mise en prod)
   if (code.length > 10) return 'Partenaire DeliKreol';
   return null;
 }
 
 const MODES = ['retrait', 'point relais', 'livraison'] as const;
+
+type SubmitStatus = 'idle' | 'saving' | 'saved' | 'local_only' | 'error';
 
 export default function PartnerAccessPage() {
   const [searchParams] = useSearchParams();
@@ -30,6 +32,8 @@ export default function PartnerAccessPage() {
   const partnerName = resolvePartnerName(code);
 
   const [submitted, setSubmitted] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>('idle');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [form, setForm] = useState({
     responsable: '', telephone: '', email: '', commune: '',
     description: '', horaires: '', modes: [] as string[],
@@ -38,7 +42,6 @@ export default function PartnerAccessPage() {
 
   useEffect(() => {
     document.title = partnerName ? `Espace ${partnerName} — DELIKREOL` : 'Accès partenaire — DELIKREOL';
-    // Track ouverture
     try {
       const events = JSON.parse(localStorage.getItem('delikreol_site_events') || '[]');
       events.push({ type: 'partner_access_opened', code, time: new Date().toISOString() });
@@ -46,14 +49,78 @@ export default function PartnerAccessPage() {
     } catch { /* empty */ }
   }, [code, partnerName]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const saveLocalFallback = () => {
+    const subs = JSON.parse(localStorage.getItem('delikreol_partner_submissions') || '[]');
+    subs.push({ ...form, code, partnerName, status: 'pending', created_at: new Date().toISOString() });
+    localStorage.setItem('delikreol_partner_submissions', JSON.stringify(subs));
+  };
+
+  const buildWhatsAppMessage = () => {
+    return encodeURIComponent([
+      `Bonjour Vladimir, voici mes corrections DELIKREOL.`,
+      ``,
+      `Partenaire : ${partnerName}`,
+      `Code : ${code}`,
+      `Responsable : ${form.responsable || '-'}`,
+      `Téléphone : ${form.telephone || '-'}`,
+      `Email : ${form.email || '-'}`,
+      `Commune : ${form.commune || '-'}`,
+      `Modes : ${form.modes.join(', ') || '-'}`,
+      `Horaires : ${form.horaires || '-'}`,
+      `Description : ${form.description || '-'}`,
+      `Plats : ${form.plats || '-'}`,
+      `Prix : ${form.prix || '-'}`,
+      `Compositions : ${form.compositions || '-'}`,
+      `Allergènes : ${form.allergenes || '-'}`,
+      `Remarques : ${form.remarques || '-'}`,
+    ].join('\n'));
+  };
+
+  const getWhatsAppUrl = () => `https://wa.me/${WHATSAPP_NUMBER}?text=${buildWhatsAppMessage()}`;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitStatus('saving');
+    setErrorMessage(null);
+
     try {
-      const subs = JSON.parse(localStorage.getItem('delikreol_partner_submissions') || '[]');
-      subs.push({ ...form, code, partnerName, status: 'pending', created_at: new Date().toISOString() });
-      localStorage.setItem('delikreol_partner_submissions', JSON.stringify(subs));
-    } catch { /* empty */ }
-    setSubmitted(true);
+      if (isDemoMode) {
+        saveLocalFallback();
+        setSubmitStatus('local_only');
+        setSubmitted(true);
+        return;
+      }
+
+      const { error } = await supabase.from('partner_corrections').insert({
+        access_code: code,
+        partner_name: partnerName,
+        responsable: form.responsable || null,
+        telephone: form.telephone || null,
+        email: form.email || null,
+        commune: form.commune || null,
+        description: form.description || null,
+        horaires: form.horaires || null,
+        modes: form.modes,
+        plats: form.plats || null,
+        prix: form.prix || null,
+        compositions: form.compositions || null,
+        allergenes: form.allergenes || null,
+        remarques: form.remarques || null,
+        user_agent: navigator.userAgent,
+      });
+
+      if (error) throw error;
+
+      saveLocalFallback();
+      setSubmitStatus('saved');
+      setSubmitted(true);
+    } catch (err: any) {
+      console.error('Erreur sauvegarde corrections partenaire:', err);
+      try { saveLocalFallback(); } catch { /* empty */ }
+      setSubmitStatus('error');
+      setErrorMessage('La sauvegarde serveur a échoué. Envoyez vos corrections par WhatsApp pour sécuriser le retour.');
+      setSubmitted(true);
+    }
   };
 
   const toggleMode = (m: string) => {
@@ -86,19 +153,26 @@ export default function PartnerAccessPage() {
   }
 
   if (submitted) {
+    const savedText = submitStatus === 'saved'
+      ? 'Vos corrections ont été enregistrées dans DELIKREOL.'
+      : 'Vos corrections sont prêtes. Envoyez-les aussi par WhatsApp pour confirmer la réception.';
+
     return (
       <Layout>
         <BackBar label='Retour' backTo='/' />
         <div className="max-w-lg mx-auto px-4 py-16 text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">✅</div>
           <h1 className="text-2xl font-black mb-3">Merci, {partnerName} !</h1>
-          <p className="text-gray-600 mb-4">Vos corrections ont été envoyées à DELIKREOL.</p>
-          <p className="text-sm text-gray-500">Vladimir les vérifie et les applique gratuitement pendant le pilote. Vous recevrez une confirmation par WhatsApp.</p>
+          <p className="text-gray-600 mb-4">{savedText}</p>
+          {errorMessage && <p className="text-sm text-red-600 mb-4">{errorMessage}</p>}
+          <a href={getWhatsAppUrl()} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center px-6 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700">
+            Envoyer aussi sur WhatsApp
+          </a>
+          <p className="text-sm text-gray-500 mt-4">Vladimir vérifie et applique gratuitement les corrections pendant le pilote.</p>
         </div>
       </Layout>
     );
   }
-
 
   return (
     <Layout>
@@ -106,14 +180,14 @@ export default function PartnerAccessPage() {
       <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6">
           <p className="text-sm font-bold text-amber-800">🧪 Accès pilote gratuit</p>
-          <p className="text-xs text-amber-700">Code : <strong>{code}</strong> — Identifiant provisoire, pas un mot de passe sécurisé. Envoyez vos corrections, DELIKREOL les applique gratuitement.</p>
+          <p className="text-xs text-amber-700">Code : <strong>{code}</strong> — Lien provisoire de test, pas un mot de passe définitif. Envoyez vos corrections, DELIKREOL les applique gratuitement.</p>
         </div>
 
         <h1 className="text-2xl font-black mb-1">{partnerName}</h1>
         <p className="text-sm text-gray-500 mb-6">Espace de correction — validez ou modifiez votre fiche</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1">Responsable</label>
               <input value={form.responsable} onChange={e => setForm(f => ({ ...f, responsable: e.target.value }))} className="w-full px-3 py-2 rounded-xl border text-sm" placeholder="Votre nom" />
@@ -124,7 +198,7 @@ export default function PartnerAccessPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1">Email</label>
               <input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} className="w-full px-3 py-2 rounded-xl border text-sm" placeholder="exemple@email.mq" />
@@ -143,7 +217,7 @@ export default function PartnerAccessPage() {
             <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="w-full px-3 py-2 rounded-xl border text-sm" rows={3} placeholder="Décrivez votre activité..." />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1">Horaires</label>
               <input value={form.horaires} onChange={e => setForm(f => ({ ...f, horaires: e.target.value }))} className="w-full px-3 py-2 rounded-xl border text-sm" placeholder="Lun-Ven 08h-15h..." />
@@ -158,7 +232,7 @@ export default function PartnerAccessPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1">Plats proposés</label>
               <textarea value={form.plats} onChange={e => setForm(f => ({ ...f, plats: e.target.value }))} className="w-full px-3 py-2 rounded-xl border text-sm" rows={2} placeholder="Liste des plats..." />
@@ -169,7 +243,7 @@ export default function PartnerAccessPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1">Compositions</label>
               <textarea value={form.compositions} onChange={e => setForm(f => ({ ...f, compositions: e.target.value }))} className="w-full px-3 py-2 rounded-xl border text-sm" rows={2} placeholder="Ingrédients par plat..." />
@@ -185,7 +259,9 @@ export default function PartnerAccessPage() {
             <textarea value={form.remarques} onChange={e => setForm(f => ({ ...f, remarques: e.target.value }))} className="w-full px-3 py-2 rounded-xl border text-sm" rows={2} placeholder="Photos à changer, informations supplémentaires..." />
           </div>
 
-          <button type="submit" className="w-full py-3 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600">Envoyer mes corrections</button>
+          <button disabled={submitStatus === 'saving'} type="submit" className="w-full py-3 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 disabled:opacity-60">
+            {submitStatus === 'saving' ? 'Envoi en cours…' : 'Envoyer mes corrections'}
+          </button>
         </form>
       </div>
     </Layout>
