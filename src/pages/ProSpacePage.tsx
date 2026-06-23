@@ -1,10 +1,8 @@
 import { Building2, ChevronRight, ShieldCheck, Store, Truck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Layout } from '../components/layout/Layout';
 
 export function ProSpacePage() {
-  const baseUrl = import.meta.env.BASE_URL || '/';
-  const partnerLaunchLink = `${baseUrl}?view=launch-network`;
-
   return (
     <Layout>
       <div className="min-h-screen bg-[#fbf4ea] text-[#2a190f]">
@@ -17,8 +15,8 @@ export function ProSpacePage() {
           </p>
 
           <div className="mt-8 grid gap-4 md:grid-cols-2">
-            <a
-              href={partnerLaunchLink}
+            <Link
+              to="/devenir-partenaire"
               className="rounded-[1.4rem] border border-orange-200 bg-[#fff8ef] p-5 transition hover:-translate-y-0.5"
             >
               <div className="inline-flex rounded-xl bg-white p-2 text-[#d95f2d]">
@@ -29,38 +27,38 @@ export function ProSpacePage() {
               <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-[#7c2d12]">
                 Ouvrir le formulaire <ChevronRight className="h-4 w-4" />
               </span>
-            </a>
+            </Link>
 
-            <a
-              href={`${baseUrl}?view=partner-documents`}
+            <Link
+              to="/partenaire"
               className="rounded-[1.4rem] border border-orange-200 bg-white p-5 transition hover:-translate-y-0.5"
             >
               <div className="inline-flex rounded-xl bg-[#fff3e5] p-2 text-[#d95f2d]">
                 <Building2 className="h-5 w-5" />
               </div>
               <h2 className="mt-3 text-xl font-black">Accès partenaire</h2>
-              <p className="mt-2 text-sm text-stone-600">Déposer et suivre vos documents, conformité et statut.</p>
+              <p className="mt-2 text-sm text-stone-600">Tester le lien pilote reçu et corriger sa fiche partenaire.</p>
               <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-[#7c2d12]">
                 Ouvrir le portail <ChevronRight className="h-4 w-4" />
               </span>
-            </a>
+            </Link>
 
-            <a
-              href={`${baseUrl}?view=admin-documents`}
+            <Link
+              to="/admin"
               className="rounded-[1.4rem] border border-orange-200 bg-white p-5 transition hover:-translate-y-0.5"
             >
               <div className="inline-flex rounded-xl bg-[#fff3e5] p-2 text-[#d95f2d]">
                 <ShieldCheck className="h-5 w-5" />
               </div>
               <h2 className="mt-3 text-xl font-black">Accès admin</h2>
-              <p className="mt-2 text-sm text-stone-600">Validation documentaire et supervision opérationnelle.</p>
+              <p className="mt-2 text-sm text-stone-600">Commandes, partenaires, accès pilotes, retours clients et supervision.</p>
               <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-[#7c2d12]">
                 Ouvrir l’admin <ChevronRight className="h-4 w-4" />
               </span>
-            </a>
+            </Link>
 
-            <a
-              href={`${baseUrl}?view=customer`}
+            <Link
+              to="/"
               className="rounded-[1.4rem] border border-orange-200 bg-white p-5 transition hover:-translate-y-0.5"
             >
               <div className="inline-flex rounded-xl bg-[#fff3e5] p-2 text-[#d95f2d]">
@@ -71,7 +69,7 @@ export function ProSpacePage() {
               <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-[#7c2d12]">
                 Revenir au site <ChevronRight className="h-4 w-4" />
               </span>
-            </a>
+            </Link>
           </div>
         </div>
       </main>
