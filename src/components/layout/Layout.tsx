@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import { MobileCartBar } from './MobileCartBar';
+import { FloatingFeedbackButton } from './FloatingFeedbackButton';
 import { CookieConsent } from '../CookieConsent';
 
 interface LayoutProps {
@@ -24,6 +25,9 @@ export function Layout({ children, title }: LayoutProps) {
       </main>
 
       <Footer />
+
+      {/* Signalement rapide visible partout */}
+      <FloatingFeedbackButton />
 
       {/* Floating mobile cart bar — sticks to bottom on small screens */}
       <MobileCartBar />
