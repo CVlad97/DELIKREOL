@@ -1,16 +1,20 @@
 import { useState, FormEvent } from 'react';
 import {
   MessageCircle, Bug, Lightbulb, Send, Inbox, AlertTriangle,
-  FileUp, CheckCircle2
+  FileUp, CheckCircle2, ArrowLeft, ImagePlus
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Layout } from '../../components/layout/Layout';
 import { supabase, isDemoMode, isSupabaseConfigured } from '../../lib/supabase';
 
 const WHATSAPP_NUMBER = '596696653589';
-const CONTACT_EMAIL = 'contact@delikreol.mq';
+const MAX_FILE_SIZE_MB = 8;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 const FEEDBACK_TYPES = [
   { value: 'bug', label: '🐛 Bug / Dysfonctionnement', icon: Bug },
+  { value: 'commande', label: '🛒 Problème de commande', icon: AlertTriangle },
+  { value: 'connexion', label: '🔐 Problème de connexion', icon: AlertTriangle },
   { value: 'suggestion', label: '💡 Suggestion', icon: Lightbulb },
   { value: 'amelioration', label: '🚀 Amélioration', icon: Inbox },
   { value: 'autre', label: '📝 Autre', icon: AlertTriangle },
@@ -20,13 +24,17 @@ interface FeedbackFormData {
   type: string;
   description: string;
   email: string;
+  phone: string;
+  pageUrl: string;
   attachment: File | null;
 }
 
 const initialFormData: FeedbackFormData = {
-  type: '',
+  type: 'bug',
   description: '',
   email: '',
+  phone: '',
+  pageUrl: typeof window !== 'undefined' ? window.location.href : '',
   attachment: null,
 };
 
@@ -35,6 +43,7 @@ export function FeedbackPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [attachmentWarning, setAttachmentWarning] = useState<string | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -45,17 +54,32 @@ export function FeedbackPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
+    setAttachmentWarning(null);
+
+    if (file && file.size > MAX_FILE_SIZE_BYTES) {
+      setForm((prev) => ({ ...prev, attachment: null }));
+      setAttachmentWarning(`Fichier trop lourd. Merci d'envoyer une pièce jointe de ${MAX_FILE_SIZE_MB} Mo maximum.`);
+      e.target.value = '';
+      return;
+    }
+
     setForm((prev) => ({ ...prev, attachment: file }));
   };
 
   const buildWhatsAppMessage = (): string => {
     const typeLabel = FEEDBACK_TYPES.find((t) => t.value === form.type)?.label || form.type;
     const lines = [
-      `👋 *Nouveau feedback — DeliKreol*`,
+      `👋 *Signalement problème — DeliKreol*`,
       ``,
       `🏷️ Type : ${typeLabel}`,
       form.email ? `📧 Email : ${form.email}` : '',
-      `💬 Description : ${form.description}`,
+      form.phone ? `📱 Téléphone : ${form.phone}` : '',
+      form.pageUrl ? `🔗 Page : ${form.pageUrl}` : '',
+      ``,
+      `💬 Description :`,
+      form.description,
+      ``,
+      form.attachment ? `📎 Pièce jointe : ${form.attachment.name} — merci de l'envoyer dans ce WhatsApp si elle n'a pas été transmise automatiquement.` : '',
     ];
     return lines.filter(Boolean).join('\n');
   };
@@ -63,13 +87,16 @@ export function FeedbackPage() {
   const uploadAttachment = async (file: File): Promise<string | null> => {
     if (!isSupabaseConfigured || isDemoMode) return null;
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `feedback_${Date.now()}_${Math.random().toString(36).slice(2)}.${fileExt}`;
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-80);
+      const fileName = `feedback_${Date.now()}_${Math.random().toString(36).slice(2)}_${safeName}`;
       const filePath = `feedback/${fileName}`;
 
-      const { data, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('delikreol-files')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+        });
 
       if (uploadError) throw uploadError;
 
@@ -84,22 +111,12 @@ export function FeedbackPage() {
     }
   };
 
-  const saveToSupabase = async (data: {
-    type: string;
-    description: string;
-    email: string;
-    attachment_url: string | null;
-  }) => {
+  const saveToSupabase = async (data: Record<string, any>) => {
     const { error: dbError } = await supabase.from('feedback').insert(data);
     if (dbError) throw dbError;
   };
 
-  const saveToLocalStorage = (data: {
-    type: string;
-    description: string;
-    email: string;
-    attachment_url: string | null;
-  }) => {
+  const saveToLocalStorage = (data: Record<string, any>) => {
     const existing = JSON.parse(localStorage.getItem('delikreol_feedback') || '[]');
     existing.push({
       ...data,
@@ -113,6 +130,13 @@ export function FeedbackPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    setAttachmentWarning(null);
+
+    if (!form.description.trim()) {
+      setError('Merci de décrire le problème rencontré.');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -120,13 +144,21 @@ export function FeedbackPage() {
 
       if (form.attachment) {
         attachmentUrl = await uploadAttachment(form.attachment);
+        if (!attachmentUrl) {
+          setAttachmentWarning('La pièce jointe n’a pas pu être téléversée automatiquement. Vous pourrez l’envoyer par WhatsApp après validation.');
+        }
       }
 
       const data = {
         type: form.type,
-        description: form.description,
-        email: form.email,
+        description: form.description.trim(),
+        email: form.email.trim() || null,
+        phone: form.phone.trim() || null,
+        page_url: form.pageUrl || (typeof window !== 'undefined' ? window.location.href : null),
         attachment_url: attachmentUrl,
+        attachment_name: form.attachment?.name || null,
+        user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
+        status: 'new',
       };
 
       if (isSupabaseConfigured && !isDemoMode) {
@@ -142,7 +174,7 @@ export function FeedbackPage() {
 
       setSubmitted(true);
     } catch (err: any) {
-      setError(err?.message || 'Une erreur est survenue. Veuillez réessayer.');
+      setError(err?.message || 'Une erreur est survenue. Veuillez réessayer ou envoyer le signalement par WhatsApp.');
     } finally {
       setSubmitting(false);
     }
@@ -160,9 +192,9 @@ export function FeedbackPage() {
           <div className="inline-flex p-4 bg-green-100 text-green-600 rounded-full">
             <CheckCircle2 size={48} />
           </div>
-          <h2 className="text-2xl font-bold text-foreground">Message envoyé !</h2>
+          <h2 className="text-2xl font-bold text-foreground">Signalement envoyé !</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Merci pour votre retour ! Nous lisons chaque message pour améliorer DeliKreol.
+            Merci. Le problème est enregistré pour correction. Si c’est urgent ou si la pièce jointe n’a pas été envoyée, utilise aussi WhatsApp.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
             <button
@@ -175,11 +207,11 @@ export function FeedbackPage() {
             <button
               onClick={() => {
                 setSubmitted(false);
-                setForm(initialFormData);
+                setForm({ ...initialFormData, pageUrl: typeof window !== 'undefined' ? window.location.href : '' });
               }}
               className="btn btnPrimary"
             >
-              Envoyer un autre message
+              Signaler autre chose
             </button>
           </div>
         </div>
@@ -189,66 +221,60 @@ export function FeedbackPage() {
 
   return (
     <Layout>
-      <div className="max-w-3xl mx-auto px-4 py-8 md:py-12 space-y-10">
-        {/* Header */}
+      <div className="max-w-3xl mx-auto px-4 py-8 md:py-12 space-y-8">
+        <Link to="/" className="inline-flex items-center gap-2 text-sm font-bold text-orange-600 hover:underline">
+          <ArrowLeft size={16} /> Retour accueil
+        </Link>
+
         <div className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase tracking-wider">
-            <Inbox size={14} />
-            Feedback
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-100 text-red-600 rounded-full text-xs font-bold uppercase tracking-wider">
+            <AlertTriangle size={14} />
+            Signalement
           </div>
           <h1 className="text-2xl md:text-4xl font-black text-foreground tracking-tight">
-            Boîte à idées &amp; signalement
+            Signaler un problème
           </h1>
           <p className="text-muted-foreground leading-relaxed max-w-xl mx-auto">
-            Une suggestion ? Un bug ? Envoie-nous un message. On lit tout.
+            Décris le bug ou le blocage. Tu peux ajouter une capture d’écran ou un document.
           </p>
         </div>
 
-        {/* Formulaire */}
-        <div className="md:col-span-3">
-          <form onSubmit={handleSubmit} className="space-y-5 p-6 bg-card rounded-2xl border border-border">
-            <h2 className="text-lg font-bold text-foreground">Envoyez-nous votre retour</h2>
+        <form onSubmit={handleSubmit} className="space-y-5 p-6 bg-card rounded-2xl border border-border shadow-sm">
+          <div className="space-y-1.5">
+            <label htmlFor="type" className="block text-sm font-semibold text-foreground">
+              Type de problème <span className="text-red-500">*</span>
+            </label>
+            <select
+              id="type"
+              name="type"
+              required
+              value={form.type}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-border rounded-xl bg-background text-foreground text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition"
+            >
+              {FEEDBACK_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+          </div>
 
-            {/* Type */}
-            <div className="space-y-1.5">
-              <label htmlFor="type" className="block text-sm font-semibold text-foreground">
-                Type de retour <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="type"
-                name="type"
-                required
-                value={form.type}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-border rounded-xl bg-background text-foreground text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition"
-              >
-                <option value="">— Choisir un type —</option>
-                {FEEDBACK_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="space-y-1.5">
+            <label htmlFor="description" className="block text-sm font-semibold text-foreground">
+              Description du problème <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              required
+              rows={7}
+              value={form.description}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-border rounded-xl bg-background text-foreground text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition resize-y"
+              placeholder="Exemple : je clique sur Commander, mais rien ne se passe. Je suis sur Android / Chrome."
+            />
+          </div>
 
-            {/* Description */}
-            <div className="space-y-1.5">
-              <label htmlFor="description" className="block text-sm font-semibold text-foreground">
-                Description <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                required
-                rows={6}
-                value={form.description}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-border rounded-xl bg-background text-foreground text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition resize-y"
-                placeholder="Décrivez votre idée, le bug rencontré ou votre suggestion..."
-              />
-            </div>
-
-            {/* Email */}
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-1.5">
               <label htmlFor="email" className="block text-sm font-semibold text-foreground">
                 Email <span className="text-muted-foreground text-xs">(optionnel)</span>
@@ -259,45 +285,76 @@ export function FeedbackPage() {
                 type="email"
                 value={form.email}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-border rounded-xl bg-background text-foreground text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition"
-                placeholder="vous@exemple.mq (si vous souhaitez une réponse)"
+                className="w-full px-4 py-3 border border-border rounded-xl bg-background text-foreground text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition"
+                placeholder="vous@exemple.mq"
               />
             </div>
 
-            {/* Pièce jointe */}
             <div className="space-y-1.5">
-              <label htmlFor="attachment" className="block text-sm font-semibold text-foreground">
-                Pièce jointe <span className="text-muted-foreground text-xs">(optionnel, image ou capture d'écran)</span>
+              <label htmlFor="phone" className="block text-sm font-semibold text-foreground">
+                Téléphone / WhatsApp <span className="text-muted-foreground text-xs">(optionnel)</span>
               </label>
-              <div className="flex items-center gap-3">
-                <label className="flex items-center gap-2 px-4 py-2.5 border border-border rounded-xl bg-background text-foreground text-sm cursor-pointer hover:bg-muted/50 transition">
-                  <FileUp size={16} />
-                  <span>Choisir un fichier</span>
-                  <input
-                    id="attachment"
-                    name="attachment"
-                    type="file"
-                    accept="image/*,.pdf,.doc,.docx"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                </label>
-                {form.attachment && (
-                  <span className="text-xs text-muted-foreground truncate max-w-[200px]">
-                    {form.attachment.name}
-                  </span>
-                )}
-              </div>
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                value={form.phone}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-border rounded-xl bg-background text-foreground text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition"
+                placeholder="0696 XX XX XX"
+              />
             </div>
+          </div>
 
-            {/* Error */}
-            {error && (
-              <div className="p-3 bg-red-50 text-red-700 rounded-xl text-sm border border-red-200">
-                {error}
-              </div>
+          <div className="space-y-1.5">
+            <label htmlFor="pageUrl" className="block text-sm font-semibold text-foreground">
+              Page concernée <span className="text-muted-foreground text-xs">(auto)</span>
+            </label>
+            <input
+              id="pageUrl"
+              name="pageUrl"
+              type="url"
+              value={form.pageUrl}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-border rounded-xl bg-background text-foreground text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="attachment" className="block text-sm font-semibold text-foreground">
+              Pièce jointe <span className="text-muted-foreground text-xs">(optionnel, max {MAX_FILE_SIZE_MB} Mo)</span>
+            </label>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <label className="inline-flex items-center justify-center gap-2 px-4 py-3 border border-border rounded-xl bg-background text-foreground text-sm cursor-pointer hover:bg-muted/50 transition">
+                <ImagePlus size={17} />
+                <span>Ajouter une capture / PJ</span>
+                <input
+                  id="attachment"
+                  name="attachment"
+                  type="file"
+                  accept="image/*,.pdf,.doc,.docx"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </label>
+              {form.attachment && (
+                <span className="text-xs text-muted-foreground truncate max-w-full sm:max-w-[280px]">
+                  📎 {form.attachment.name}
+                </span>
+              )}
+            </div>
+            {attachmentWarning && (
+              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl p-3">{attachmentWarning}</p>
             )}
+          </div>
 
-            {/* Submit */}
+          {error && (
+            <div className="p-3 bg-red-50 text-red-700 rounded-xl text-sm border border-red-200">
+              {error}
+            </div>
+          )}
+
+          <div className="grid gap-3 sm:grid-cols-2">
             <button
               type="submit"
               disabled={submitting}
@@ -311,42 +368,20 @@ export function FeedbackPage() {
               ) : (
                 <>
                   <Send size={18} />
-                  Envoyer
+                  Envoyer le signalement
                 </>
               )}
             </button>
-          </form>
-        </div>
-
-        {/* WhatsApp urgent */}
-        <div className="p-5 bg-green-50 border border-green-200 rounded-2xl space-y-3">
-          <div className="flex items-center gap-2">
-            <MessageCircle size={18} className="text-green-600" />
-            <h3 className="text-sm font-bold text-green-800">Besoin urgent ?</h3>
+            <button
+              type="button"
+              onClick={openWhatsApp}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-500 px-5 py-3 font-bold text-white transition hover:bg-green-600"
+            >
+              <MessageCircle size={18} />
+              WhatsApp urgent
+            </button>
           </div>
-          <p className="text-xs text-green-700 leading-relaxed">
-            Si vous avez besoin d'une réponse immédiate, contactez-nous directement sur WhatsApp.
-          </p>
-          <a
-            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Bonjour DeliKreol, j'ai un retour à vous faire (urgent).")}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold text-sm transition-colors"
-          >
-            <MessageCircle size={16} fill="white" />
-            Nous écrire sur WhatsApp
-          </a>
-        </div>
-
-        {/* Contact email */}
-        <div className="text-center">
-          <p className="text-xs text-muted-foreground">
-            Vous pouvez aussi nous écrire à{' '}
-            <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary hover:underline">
-              {CONTACT_EMAIL}
-            </a>
-          </p>
-        </div>
+        </form>
       </div>
     </Layout>
   );
