@@ -48,12 +48,12 @@ export function Header() {
       {/* Madras accent strip */}
       <div className="madras-strip" />
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+      <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between gap-2">
           {/* Logo DELIKREOL */}
           <Link
             to="/"
-            className="flex items-center gap-2 group"
+            className="flex items-center gap-2 group shrink-0"
           >
             <img
               src={`${import.meta.env.BASE_URL || '/'}branding/logo-mark.svg`}
@@ -86,16 +86,16 @@ export function Header() {
           </nav>
 
           {/* Right actions */}
-          <div className="flex items-center gap-2">
-            {/* Account access - desktop */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Account access - visible on mobile and desktop */}
             <Link
               to={accountTarget}
-              className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold text-primary bg-primary/10 hover:bg-primary/15 transition-colors"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl text-xs sm:text-sm font-black text-white bg-orange-500 hover:bg-orange-600 shadow-sm transition-colors"
               aria-label={accountLabel}
               title={accountLabel}
             >
               {accountIcon}
-              <span className="hidden xl:inline">{accountLabel}</span>
+              <span>{accountLabel}</span>
             </Link>
 
             {/* WhatsApp button - desktop */}
@@ -113,7 +113,7 @@ export function Header() {
             {/* Cart button */}
             <Link
               to="/panier"
-              className="relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-foreground/70 hover:bg-muted hover:text-foreground transition-colors"
+              className="relative flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl text-sm font-medium text-foreground/70 hover:bg-muted hover:text-foreground transition-colors"
               aria-label={`Panier (${itemCount} articles)`}
             >
               <ShoppingCart className="w-5 h-5" />
@@ -149,7 +149,7 @@ export function Header() {
             <Link
               to={accountTarget}
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-primary bg-primary/10 hover:bg-primary/15 transition-colors"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-white bg-orange-500 hover:bg-orange-600 transition-colors"
             >
               {accountIcon}
               {accountLabel}
