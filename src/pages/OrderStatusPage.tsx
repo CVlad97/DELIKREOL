@@ -7,47 +7,43 @@ const allowDemoFallback = import.meta.env.VITE_ERP_FALLBACK_DEMO !== 'false';
 const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 
 const statusCopy: Record<string, { label: string; message: string }> = {
-  pending: {
-    label: 'En attente',
-    message: 'Commande reçue. Confirmation en cours.'
-  },
-  confirmed: {
-    label: 'Confirmée',
-    message: 'Commande confirmée. Préparation en cours.'
-  },
-  preparing: {
-    label: 'En préparation',
-    message: 'Le partenaire prépare votre commande.'
-  },
-  ready: {
-    label: 'Prête',
-    message: 'Commande prête. Livraison ou retrait à confirmer.'
-  },
-  in_delivery: {
-    label: 'En livraison',
-    message: 'Livraison en cours.'
-  },
-  delivered: {
-    label: 'Livrée',
-    message: 'Commande livrée. Merci ! 😊'
-  },
-  cancelled: {
-    label: 'Annulée',
-    message: 'Commande annulée. Contactez-nous si besoin.'
-  }
+  pending: { label: 'En attente', message: 'Commande reçue. Confirmation en cours.' },
+  confirmed: { label: 'Confirmée', message: 'Commande confirmée. Préparation en cours.' },
+  preparing: { label: 'En préparation', message: 'Le partenaire prépare votre commande.' },
+  ready: { label: 'Prête', message: 'Commande prête. Livraison ou retrait à confirmer.' },
+  in_delivery: { label: 'En livraison', message: 'Livraison en cours.' },
+  delivered: { label: 'Livrée', message: 'Commande livrée. Merci ! 😊' },
+  cancelled: { label: 'Annulée', message: 'Commande annulée. Contactez-nous si besoin.' }
 };
 
 function formatDate(value?: number | string | null) {
   if (!value) return '';
   const date = typeof value === 'number' ? new Date(value) : new Date(value);
   if (Number.isNaN(date.getTime())) return '';
-  return date.toLocaleString('fr-FR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  return date.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function readLocalOrders(): any[] {
+  try {
+    const raw = localStorage.getItem('delikreol_local_orders_v1');
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function normalizeLocalOrder(order: any) {
+  return {
+    id: order.id,
+    orderNumber: order.order_number || order.id,
+    status: order.status || 'pending',
+    totalAmount: order.total_amount || order.total || order.subtotal || 0,
+    createdAt: order.created_at,
+    items: order.items || [],
+    commune: order.commune,
+    mode: order.order_mode || order.mode,
+  };
 }
 
 export function OrderStatusPage() {
@@ -62,8 +58,8 @@ export function OrderStatusPage() {
     if (order) setQuery(order);
   }, []);
 
-  const handleLookup = async () => {
-    const trimmed = query.trim();
+  const handleLookup = async (forcedQuery?: string) => {
+    const trimmed = (forcedQuery ?? query).trim();
     if (!trimmed) {
       setError('Entre ton numéro de commande.');
       return;
@@ -73,19 +69,17 @@ export function OrderStatusPage() {
     setResult(null);
 
     try {
+      const localOrders = readLocalOrders();
+      const localOrder = localOrders.find((o) => o.id === trimmed || o.order_number === trimmed);
+      if (localOrder) {
+        setResult(normalizeLocalOrder(localOrder));
+        return;
+      }
+
       if (isErpConfigured) {
         const res = await erpRequest<any>(`/orders/lookup?q=${encodeURIComponent(trimmed)}`);
-        if (!res || res.error) {
-          throw new Error('NOT_FOUND');
-        }
-        setResult({
-          id: res.order.id,
-          orderNumber: res.order.orderNumber,
-          status: res.order.status,
-          totalAmount: res.order.totalAmount,
-          createdAt: res.order.createdAt,
-          items: res.items || []
-        });
+        if (!res || res.error) throw new Error('NOT_FOUND');
+        setResult({ id: res.order.id, orderNumber: res.order.orderNumber, status: res.order.status, totalAmount: res.order.totalAmount, createdAt: res.order.createdAt, items: res.items || [] });
         return;
       }
 
@@ -94,24 +88,13 @@ export function OrderStatusPage() {
         const orders = readDemoOrders();
         const order = orders.find((o) => o.id === trimmed || o.order_number === trimmed);
         if (!order) throw new Error('NOT_FOUND');
-        setResult({
-          id: order.id,
-          orderNumber: order.order_number,
-          status: order.status,
-          totalAmount: order.total_amount,
-          createdAt: order.created_at,
-          items: order.items || []
-        });
+        setResult({ id: order.id, orderNumber: order.order_number, status: order.status, totalAmount: order.total_amount, createdAt: order.created_at, items: order.items || [] });
         return;
       }
 
       throw new Error('NOT_FOUND');
     } catch (err: any) {
-      setError(
-        err?.message === 'NOT_FOUND'
-          ? 'Commande introuvable. Vérifie ton numéro.'
-          : 'Erreur lors de la recherche.'
-      );
+      setError(err?.message === 'NOT_FOUND' ? 'Commande introuvable. Vérifie ton numéro ou contacte le support WhatsApp.' : 'Erreur lors de la recherche.');
     } finally {
       setLoading(false);
     }
@@ -119,111 +102,50 @@ export function OrderStatusPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (!params.get('order')) return;
-    if (!query.trim()) return;
-    void handleLookup();
-  }, [query]);
+    const order = params.get('order');
+    if (order) void handleLookup(order);
+  }, []);
 
-  const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-    `Bonjour, je veux de l'aide pour la commande ${query.trim() || ''}.`
-  )}`;
-
+  const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Bonjour, je veux de l'aide pour la commande ${query.trim() || ''}.`)}`;
   const baseUrl = import.meta.env.BASE_URL || '/';
 
   return (
     <Layout>
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 text-slate-900">
-      <div className="max-w-3xl mx-auto px-6 py-12">
-        <div className="bg-white/90 border border-orange-100 rounded-3xl p-6 shadow-lg">
-          <h1 className="text-3xl font-black text-orange-700 mb-2">Suivre ma commande</h1>
-          <p className="text-sm text-slate-600 mb-6">
-            Entre ton numéro de commande pour suivre son statut.
-          </p>
-          <div className="text-xs text-slate-500 mb-4">
-            Suivi mis à jour manuellement. Pour une question urgente, contacte-nous sur WhatsApp.
-          </div>
+        <div className="max-w-3xl mx-auto px-6 py-12">
+          <div className="bg-white/90 border border-orange-100 rounded-3xl p-6 shadow-lg">
+            <h1 className="text-3xl font-black text-orange-700 mb-2">Suivre ma commande</h1>
+            <p className="text-sm text-slate-600 mb-6">Entre ton numéro de commande pour suivre son statut.</p>
+            <div className="text-xs text-slate-500 mb-4">Suivi mis à jour manuellement. Pour une question urgente, contacte-nous sur WhatsApp.</div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <input
-              className="flex-1 border border-orange-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-300"
-              placeholder="Ex: DK12345678 ou o1"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            <button
-              onClick={handleLookup}
-              className="px-6 py-3 rounded-xl bg-orange-600 text-white font-bold"
-            >
-              Vérifier
-            </button>
-          </div>
-
-          {loading && <div className="mt-4 text-sm text-slate-500">Recherche...</div>}
-          {error && <div className="mt-4 text-sm text-red-600">{error}</div>}
-
-          {result && (
-            <div className="mt-6 border border-orange-100 rounded-2xl p-5 bg-orange-50/40">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <div>
-                  <div className="text-sm text-slate-500">Commande</div>
-                  <div className="text-xl font-black text-orange-700">{result.orderNumber}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm text-slate-500">Total</div>
-                  <div className="text-lg font-bold">
-                    {Number(result.totalAmount || 0).toFixed(2)} €
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <div className="text-sm text-slate-500">Statut</div>
-                <div className="text-lg font-semibold">
-                  {statusCopy[result.status]?.label ?? result.status}
-                </div>
-                <div className="text-sm text-slate-600">
-                  {statusCopy[result.status]?.message ?? 'Suivi en cours.'}
-                </div>
-              </div>
-
-              <div className="mt-4 text-sm text-slate-500">
-                Date: {formatDate(result.createdAt)}
-              </div>
-
-              <div className="mt-4">
-                <div className="text-sm font-semibold mb-2">Articles</div>
-                <div className="space-y-2">
-                  {(result.items || []).map((item: any) => (
-                    <div
-                      key={item.id || `${item.productId || item.product_id}-${item.quantity}`}
-                      className="flex items-center justify-between text-sm"
-                    >
-                      <span>{item.productId || item.product_id}</span>
-                      <span>x{item.quantity}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                <a
-                  href={whatsappLink}
-                  className="px-5 py-3 rounded-xl bg-green-600 text-white font-bold text-center"
-                >
-                  WhatsApp support
-                </a>
-                <a
-                  href={baseUrl}
-                  className="px-5 py-3 rounded-xl border border-orange-300 text-orange-700 font-bold text-center"
-                >
-                  Retour accueil
-                </a>
-              </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input className="flex-1 border border-orange-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-300" placeholder="Ex: DK12345678" value={query} onChange={(e) => setQuery(e.target.value)} />
+              <button onClick={() => handleLookup()} className="px-6 py-3 rounded-xl bg-orange-600 text-white font-bold">Vérifier</button>
             </div>
-          )}
+
+            {loading && <div className="mt-4 text-sm text-slate-500">Recherche...</div>}
+            {error && <div className="mt-4 text-sm text-red-600">{error}</div>}
+
+            {result && (
+              <div className="mt-6 border border-orange-100 rounded-2xl p-5 bg-orange-50/40">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div><div className="text-sm text-slate-500">Commande</div><div className="text-xl font-black text-orange-700">{result.orderNumber}</div></div>
+                  <div className="text-right"><div className="text-sm text-slate-500">Total</div><div className="text-lg font-bold">{Number(result.totalAmount || 0).toFixed(2)} €</div></div>
+                </div>
+
+                <div className="mt-4"><div className="text-sm text-slate-500">Statut</div><div className="text-lg font-semibold">{statusCopy[result.status]?.label ?? result.status}</div><div className="text-sm text-slate-600">{statusCopy[result.status]?.message ?? 'Suivi en cours.'}</div></div>
+                <div className="mt-4 text-sm text-slate-500">Date: {formatDate(result.createdAt)}</div>
+
+                {(result.commune || result.mode) && <div className="mt-2 text-sm text-slate-600">{result.commune || ''} {result.mode ? `· ${result.mode}` : ''}</div>}
+
+                <div className="mt-4"><div className="text-sm font-semibold mb-2">Articles</div><div className="space-y-2">{(result.items || []).map((item: any, index: number) => (<div key={item.id || index} className="flex items-center justify-between text-sm"><span>{item.name || item.productId || item.product_id || 'Article'}</span><span>x{item.quantity || 1}</span></div>))}</div></div>
+
+                <div className="mt-6 flex flex-col sm:flex-row gap-3"><a href={whatsappLink} className="px-5 py-3 rounded-xl bg-green-600 text-white font-bold text-center">WhatsApp support</a><a href={baseUrl} className="px-5 py-3 rounded-xl border border-orange-300 text-orange-700 font-bold text-center">Retour accueil</a></div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
     </Layout>
   );
 }
