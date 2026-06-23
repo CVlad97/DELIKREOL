@@ -38,7 +38,8 @@ export function Header() {
   const location = useLocation();
 
   const isActive = (path: string) => location.pathname === path;
-  const accountTarget = user && profile?.user_type === 'admin' ? '/admin' : '/pro';
+  const isAdmin = user && profile?.user_type === 'admin';
+  const accountTarget = !user ? '/connexion' : isAdmin ? '/admin' : '/pro';
   const accountLabel = user ? 'Mon espace' : 'Se connecter';
   const accountIcon = user ? <LayoutDashboard className="w-4 h-4" /> : <LogIn className="w-4 h-4" />;
 
