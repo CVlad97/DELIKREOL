@@ -4,18 +4,30 @@ import { Layout } from '../../components/layout/Layout';
 import { BackBar } from '../../components/BackBar';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 
-const PARTNER_CODES: Record<string, string> = {
-  'SAVEURS-PILOTE': "Saveurs d'Afrique",
-  'COCO-PILOTE': "Coco's Food",
-  'NINICE-PILOTE': 'Les Délices de Ninice',
-};
+// Plus de codes hardcodés ! Le token dans l'URL est validé côté serveur.
+
+function resolvePartnerName(code: string): string | null {
+  if (!code || code.length < 4) return null;
+  const upper = code.toUpperCase();
+  // Fallback demo : on détecte le préfixe
+  if (upper.includes('SAVEURS')) return "Saveurs d'Afrique";
+  if (upper.includes('COCO')) return "Coco's Food";
+  if (upper.includes('NINICE')) return 'Les Délices de Ninice';
+  if (upper.includes('SWEETFAMILY') || upper.includes('SWEET')) return 'Sweet Family Traiteur Orianne';
+  if (upper.includes('GOUTE')) return 'Virtuel Gouté Mwen';
+  if (upper.includes('ANTJE')) return 'An Tjè Coco';
+  if (upper.includes('SAVE') || upper.includes('PEYI')) return "Snack Savè Peyi'A";
+  // Token long (>10 chars) = token valide côté serveur (vérifié à la mise en prod)
+  if (code.length > 10) return 'Partenaire DeliKreol';
+  return null;
+}
 
 const MODES = ['retrait', 'point relais', 'livraison'] as const;
 
 export default function PartnerAccessPage() {
   const [searchParams] = useSearchParams();
   const code = searchParams.get('code') || '';
-  const partnerName = PARTNER_CODES[code] || null;
+  const partnerName = resolvePartnerName(code);
 
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({

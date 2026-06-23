@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { ToastProvider } from './contexts/ToastContext';
@@ -78,9 +79,11 @@ function LayoutWrapper() {
 
 function AdminWrapper() {
   return (
-    <Suspense fallback={<PageLoader />}>
-      <AdminLayout />
-    </Suspense>
+    <ProtectedAdminRoute>
+      <Suspense fallback={<PageLoader />}>
+        <AdminLayout />
+      </Suspense>
+    </ProtectedAdminRoute>
   );
 }
 
