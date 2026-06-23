@@ -3,6 +3,8 @@ export interface CookiePreferences {
   geolocation: boolean; // consentement explicite
   analytics: boolean;   // tendances (opt-in)
   marketing: boolean;   // refus par défaut
+  hasMadeChoice: boolean;
+  consentUpdatedAt?: string;
 }
 
 const COOKIE_KEY = 'delikreol_cookie_prefs';
@@ -12,6 +14,7 @@ export const DEFAULT_PREFS: CookiePreferences = {
   geolocation: false,
   analytics: false,
   marketing: false,
+  hasMadeChoice: false,
 };
 
 export function loadCookiePrefs(): CookiePreferences {
@@ -23,7 +26,16 @@ export function loadCookiePrefs(): CookiePreferences {
 }
 
 export function saveCookiePrefs(prefs: CookiePreferences): void {
-  try { localStorage.setItem(COOKIE_KEY, JSON.stringify(prefs)); } catch { /* empty */ }
+  try {
+    localStorage.setItem(
+      COOKIE_KEY,
+      JSON.stringify({ ...DEFAULT_PREFS, ...prefs, necessary: true, hasMadeChoice: true, consentUpdatedAt: new Date().toISOString() })
+    );
+  } catch { /* empty */ }
+}
+
+export function resetCookiePrefs(): void {
+  try { localStorage.removeItem(COOKIE_KEY); } catch { /* empty */ }
 }
 
 export function hasConsented(loc: keyof CookiePreferences): boolean {
