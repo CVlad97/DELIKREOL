@@ -9,8 +9,11 @@ import {
   Store,
   FileText,
   Users,
+  LogIn,
+  LayoutDashboard,
 } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const WHATSAPP_NUMBER = '596696653589';
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
@@ -31,9 +34,13 @@ const navItems: NavItem[] = [
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { itemCount } = useCart();
+  const { user, profile } = useAuth();
   const location = useLocation();
 
   const isActive = (path: string) => location.pathname === path;
+  const accountTarget = user && profile?.user_type === 'admin' ? '/admin' : '/pro';
+  const accountLabel = user ? 'Mon espace' : 'Se connecter';
+  const accountIcon = user ? <LayoutDashboard className="w-4 h-4" /> : <LogIn className="w-4 h-4" />;
 
   return (
     <header className="sticky top-0 z-40 glass border-b border-border/60">
@@ -79,6 +86,17 @@ export function Header() {
 
           {/* Right actions */}
           <div className="flex items-center gap-2">
+            {/* Account access - desktop */}
+            <Link
+              to={accountTarget}
+              className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold text-primary bg-primary/10 hover:bg-primary/15 transition-colors"
+              aria-label={accountLabel}
+              title={accountLabel}
+            >
+              {accountIcon}
+              <span className="hidden xl:inline">{accountLabel}</span>
+            </Link>
+
             {/* WhatsApp button - desktop */}
             <a
               href={WHATSAPP_URL}
@@ -127,6 +145,15 @@ export function Header() {
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-border/40 bg-white/95 backdrop-blur-xl animate-slide-up">
           <nav className="mx-auto max-w-7xl px-4 py-4 space-y-1">
+            <Link
+              to={accountTarget}
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-primary bg-primary/10 hover:bg-primary/15 transition-colors"
+            >
+              {accountIcon}
+              {accountLabel}
+            </Link>
+
             {navItems.map((item) => (
               <Link
                 key={item.to}
