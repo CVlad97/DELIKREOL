@@ -12,6 +12,7 @@ import { OrderStatusPage } from './pages/OrderStatusPage';
 
 // New public pages — lazy loaded
 const HomePage = lazy(() => import('./pages/new/HomePage'));
+const LoginPage = lazy(() => import('./pages/new/LoginPage'));
 const CataloguePage = lazy(() => import('./pages/new/CataloguePage'));
 const ProductDetailPage = lazy(() => import('./pages/new/ProductDetailPage'));
 const TraiteursListPage = lazy(() => import('./pages/new/TraiteursListPage'));
@@ -57,8 +58,6 @@ const CookiesPage = lazy(() => import('./pages/legal/CookiesPage'));
 const RemoursementPage = lazy(() => import('./pages/legal/RemoursementPage'));
 const PartnerTermsPage = lazy(() => import('./pages/legal/PartnerTermsPage'));
 
-const basePath = import.meta.env.VITE_BASE_PATH || import.meta.env.BASE_URL || '/';
-
 function PageLoader() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
@@ -99,6 +98,7 @@ export function AppRouter() {
                 {/* Public routes */}
                 <Route element={<LayoutWrapper />}>
                   <Route index element={<HomePage />} />
+                  <Route path="connexion" element={<LoginPage />} />
                   <Route path="catalogue" element={<CataloguePage />} />
                   <Route path="produit/:slug" element={<ProductDetailPage />} />
                   <Route path="traiteurs" element={<TraiteursListPage />} />
