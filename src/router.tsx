@@ -13,6 +13,7 @@ import { OrderStatusPage } from './pages/OrderStatusPage';
 // New public pages — lazy loaded
 const HomePage = lazy(() => import('./pages/new/HomePage'));
 const LoginPage = lazy(() => import('./pages/new/LoginPage'));
+const ClientAccountPage = lazy(() => import('./pages/new/ClientAccountPage'));
 const CataloguePage = lazy(() => import('./pages/new/CataloguePage'));
 const ProductDetailPage = lazy(() => import('./pages/new/ProductDetailPage'));
 const TraiteursListPage = lazy(() => import('./pages/new/TraiteursListPage'));
@@ -99,6 +100,7 @@ export function AppRouter() {
                 <Route element={<LayoutWrapper />}>
                   <Route index element={<HomePage />} />
                   <Route path="connexion" element={<LoginPage />} />
+                  <Route path="compte" element={<ClientAccountPage />} />
                   <Route path="catalogue" element={<CataloguePage />} />
                   <Route path="produit/:slug" element={<ProductDetailPage />} />
                   <Route path="traiteurs" element={<TraiteursListPage />} />
