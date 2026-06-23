@@ -8,27 +8,26 @@ export function CookieConsent() {
 
   useEffect(() => {
     const saved = loadCookiePrefs();
-    if (!saved.analytics && !saved.marketing && !saved.geolocation) {
-      setVisible(true);
-    }
+    setVisible(!saved.hasMadeChoice);
     setPrefs(saved);
   }, []);
 
   const acceptAll = () => {
-    const all: CookiePreferences = { necessary: true, geolocation: true, analytics: true, marketing: true };
+    const all: CookiePreferences = { necessary: true, geolocation: true, analytics: true, marketing: true, hasMadeChoice: true };
     saveCookiePrefs(all);
     setPrefs(all);
     setVisible(false);
   };
 
   const acceptNecessary = () => {
-    saveCookiePrefs(DEFAULT_PREFS);
-    setPrefs(DEFAULT_PREFS);
+    const necessaryOnly: CookiePreferences = { ...DEFAULT_PREFS, hasMadeChoice: true };
+    saveCookiePrefs(necessaryOnly);
+    setPrefs(necessaryOnly);
     setVisible(false);
   };
 
   const saveCustom = () => {
-    saveCookiePrefs(prefs);
+    saveCookiePrefs({ ...prefs, necessary: true, hasMadeChoice: true });
     setVisible(false);
   };
 
@@ -48,6 +47,10 @@ export function CookieConsent() {
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={prefs.analytics} onChange={e => setPrefs(p => ({ ...p, analytics: e.target.checked }))} className="accent-orange-500" />
               Analytics (amélioration du service)
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={prefs.marketing} onChange={e => setPrefs(p => ({ ...p, marketing: e.target.checked }))} className="accent-orange-500" />
+              Marketing (offres personnalisées)
             </label>
           </div>
         )}
