@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Package, Users, Truck, MapPin, FileText,
+  LayoutDashboard, Package, Truck, MapPin, FileText,
   Target, Brain, Settings, Menu, X, Home, ShoppingCart,
-  Briefcase, DollarSign, ChefHat, ClipboardList, MessageCircle, KeyRound
+  Briefcase, DollarSign, ChefHat, ClipboardList, MessageCircle, KeyRound, Activity
 } from 'lucide-react';
 
 const adminNav = [
   { label: 'Vue d\'ensemble', icon: LayoutDashboard, path: '/admin' },
+  { label: 'Test système', icon: Activity, path: '/admin/test-systeme' },
   { label: 'Commandes', icon: ShoppingCart, path: '/admin/commandes' },
   { label: 'Produits', icon: Package, path: '/admin/catalogue' },
   { label: 'Partenaires', icon: ChefHat, path: '/admin/partenaires' },
