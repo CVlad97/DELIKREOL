@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { X, Check, Clock, Bike, Package, MapPin } from 'lucide-react';
-import { blink } from '../lib/blink';
+import { X, Check, Clock, Bike, Package, MapPin, AlertCircle } from 'lucide-react';
+import { ordersService } from '../services/ordersService';
 import { Order, Delivery } from '../types';
 
 interface OrderTrackingProps {
@@ -12,15 +12,16 @@ const statusSteps = [
   { key: 'pending', label: 'Commande reçue', icon: Clock },
   { key: 'confirmed', label: 'Confirmée', icon: Check },
   { key: 'preparing', label: 'En préparation', icon: Package },
+  { key: 'ready', label: 'Prête', icon: Package },
   { key: 'in_delivery', label: 'En livraison', icon: Bike },
   { key: 'delivered', label: 'Livrée', icon: MapPin },
 ];
 
 export function OrderTracking({ orderId, onClose }: OrderTrackingProps) {
-  const blinkDb = blink.db as any;
   const [order, setOrder] = useState<Order | null>(null);
   const [delivery, setDelivery] = useState<Delivery | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     loadOrderDetails();
@@ -28,16 +29,20 @@ export function OrderTracking({ orderId, onClose }: OrderTrackingProps) {
 
   const loadOrderDetails = async () => {
     setLoading(true);
+    setError('');
     try {
-      const orderData = await blinkDb.orders.get(orderId) as Order | null;
-      const deliveryData = (await blinkDb.deliveries.list({ where: { orderId } }))[0] as Delivery | null;
-
-      if (orderData) setOrder(orderData);
-      if (deliveryData) setDelivery(deliveryData);
-    } catch (e) {
+      const orderData = await ordersService.getById(orderId);
+      setOrder(orderData);
+      setDelivery(orderData?.delivery ?? null);
+      if (!orderData) {
+        setError('Commande introuvable ou non encore synchronisée.');
+      }
+    } catch (e: any) {
       console.error(e);
+      setError(e?.message || 'Impossible de charger le suivi commande.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   if (loading) {
@@ -49,9 +54,22 @@ export function OrderTracking({ orderId, onClose }: OrderTrackingProps) {
     );
   }
 
-  if (!order) return null;
+  if (!order) {
+    return (
+      <div className="bg-card w-full rounded-[2.5rem] border border-amber-100 p-8 text-center space-y-4">
+        <AlertCircle className="mx-auto h-10 w-10 text-amber-500" />
+        <div>
+          <h2 className="text-lg font-black uppercase tracking-tight text-foreground">Suivi indisponible</h2>
+          <p className="mt-2 text-sm font-medium text-muted-foreground">{error || 'Commande introuvable.'}</p>
+        </div>
+        <button onClick={loadOrderDetails} className="rounded-full bg-primary px-5 py-3 text-xs font-black uppercase tracking-widest text-primary-foreground">
+          Réessayer
+        </button>
+      </div>
+    );
+  }
 
-  const currentStepIndex = statusSteps.findIndex((s) => s.key === order.status);
+  const currentStepIndex = Math.max(0, statusSteps.findIndex((s) => s.key === order.status));
 
   return (
     <div className="bg-card w-full rounded-[2.5rem] flex flex-col animate-fadeIn">
@@ -64,6 +82,12 @@ export function OrderTracking({ orderId, onClose }: OrderTrackingProps) {
           <X size={20} className="text-muted-foreground" />
         </button>
       </div>
+
+      {error && (
+        <div className="mx-8 mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          {error}
+        </div>
+      )}
 
       <div className="p-10 space-y-10">
         <div className="relative space-y-8">
