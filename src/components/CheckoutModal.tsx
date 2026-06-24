@@ -1,19 +1,28 @@
 import { useMemo, useState } from 'react';
-import { Landmark, MessageCircle, X, MapPin, Store, Package, CreditCard } from 'lucide-react';
+import { Landmark, MessageCircle, X, MapPin, Store, Package, CreditCard, CheckCircle } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { ordersService } from '../services/ordersService';
 import { shouldFallbackToDemo } from '../utils/supabaseFallback';
 import { createConnectPaymentIntent } from '../utils/stripe';
+import { Order } from '../types';
 
 interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onOrderCreated?: (order: Order) => void;
 }
 
 type PaymentMode = 'bank_transfer' | 'whatsapp' | 'stripe';
 
-export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
+interface SuccessState {
+  orderNumber: string;
+  paymentLabel: string;
+  whatsappUrl: string;
+  bankPaymentUrl?: string;
+}
+
+export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModalProps) {
   const { items, total, clearCart } = useCart();
   const { user } = useAuth();
   const [deliveryType, setDeliveryType] = useState<'home_delivery' | 'pickup'>('home_delivery');
@@ -22,6 +31,8 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('whatsapp');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fallbackWhatsappUrl, setFallbackWhatsappUrl] = useState('');
+  const [success, setSuccess] = useState<SuccessState | null>(null);
 
   // Stripe Connect : détection si le traiteur a un compte Connect
   const vendor = items[0]?.vendor;
@@ -75,6 +86,32 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
   if (!isOpen) return null;
 
+  const handleClose = () => {
+    setSuccess(null);
+    setFallbackWhatsappUrl('');
+    setError('');
+    onClose();
+  };
+
+  const buildWhatsappUrl = (orderNumber: string, paymentLabel: string) => {
+    const waText = [
+      `Bonjour DELIKREOL, je souhaite confirmer la commande ${orderNumber} (${finalTotal.toFixed(2)} €).`,
+      '',
+      `Livraison: ${deliveryType === 'home_delivery' ? `domicile (${address || 'adresse à préciser'})` : 'retrait'}`,
+      '',
+      'Panier:',
+      ...items.map((i) => `- ${i.name} x${i.quantity} (${(i.price * i.quantity).toFixed(2)} €)`),
+      '',
+      notes.trim() ? `Note: ${notes.trim()}` : '',
+      '',
+      `Paiement souhaité: ${paymentLabel}`,
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waText)}`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -86,11 +123,13 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
     setLoading(true);
     setError('');
+    setFallbackWhatsappUrl('');
 
     const paymentLabel = paymentOptions.find((option) => option.id === paymentMode)?.title ?? 'WhatsApp';
 
     try {
       const orderNumber = `DK${Date.now().toString().slice(-8)}`;
+      const whatsappUrl = buildWhatsappUrl(orderNumber, paymentLabel);
 
       // Traitement Stripe Connect
       let stripePaymentInfo = '';
@@ -128,7 +167,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         vendor_commission: item.price * item.quantity * 0.2,
       }));
 
-      await ordersService.create({
+      const createdOrder = await ordersService.create({
         customer_id: user.id,
         order_number: orderNumber,
         status: 'pending',
@@ -141,30 +180,20 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       });
 
       clearCart();
-      alert(`Commande ${orderNumber} passée avec succès. Mode de paiement: ${paymentLabel}.`);
-      onClose();
+      onOrderCreated?.(createdOrder);
+      setSuccess({ orderNumber, paymentLabel, whatsappUrl, bankPaymentUrl: bankPaymentUrl || undefined });
+      if (paymentMode === 'whatsapp') {
+        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+      }
     } catch (err: any) {
       console.error('Error creating order:', err);
       // Si Supabase est en pause / indisponible, on ne bloque pas le client:
       // on garde le panier et on bascule vers une confirmation WhatsApp.
       if (shouldFallbackToDemo(err)) {
-        const waText = [
-          `Bonjour DELIKREOL, je souhaite confirmer une commande (${finalTotal.toFixed(2)} €).`,
-          '',
-          `Livraison: ${deliveryType === 'home_delivery' ? `domicile (${address || 'adresse à préciser'})` : 'retrait'}`,
-          '',
-          'Panier:',
-          ...items.map((i) => `- ${i.name} x${i.quantity} (${(i.price * i.quantity).toFixed(2)} €)`),
-          '',
-          notes.trim() ? `Note: ${notes.trim()}` : '',
-          '',
-          `Paiement souhaité: ${paymentLabel}`,
-        ]
-          .filter(Boolean)
-          .join('\n');
-        const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waText)}`;
-        setError("Backend indisponible: utilisez WhatsApp pour valider la commande (panier conservé).");
-        window.open(waUrl, '_blank', 'noopener,noreferrer');
+        const fallbackUrl = buildWhatsappUrl('non enregistrée', paymentLabel);
+        setFallbackWhatsappUrl(fallbackUrl);
+        setError('Backend indisponible: utilisez WhatsApp pour valider la commande (panier conservé).');
+        window.open(fallbackUrl, '_blank', 'noopener,noreferrer');
         return;
       }
       setError('Erreur lors de la création de la commande');
@@ -173,12 +202,69 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     }
   };
 
+  if (success) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-xl">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-2xl bg-emerald-50 p-3 text-emerald-700">
+                <CheckCircle size={28} />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">Commande enregistrée</p>
+                <h2 className="text-2xl font-bold text-gray-900">#{success.orderNumber}</h2>
+              </div>
+            </div>
+            <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
+              <X size={24} />
+            </button>
+          </div>
+
+          <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-900">
+            Le panier a été vidé uniquement après création de la commande. Mode choisi : <strong>{success.paymentLabel}</strong>.
+          </div>
+
+          <div className="grid gap-3">
+            <a
+              href={success.whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 font-semibold text-white hover:bg-green-700"
+            >
+              <MessageCircle size={18} />
+              Confirmer sur WhatsApp
+            </a>
+            {success.bankPaymentUrl && (
+              <a
+                href={success.bankPaymentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-3 font-semibold text-gray-800 hover:bg-gray-50"
+              >
+                <Landmark size={18} />
+                Ouvrir le lien bancaire
+              </a>
+            )}
+            <button
+              type="button"
+              onClick={handleClose}
+              className="rounded-xl border border-gray-200 px-4 py-3 font-semibold text-gray-800 hover:bg-gray-50"
+            >
+              Voir mes commandes
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white p-6 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">Finaliser la commande</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
             <X size={24} />
           </button>
         </div>
@@ -312,14 +398,25 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
           </div>
 
           {error && (
-            <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm">
-              {error}
+            <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm space-y-2">
+              <p>{error}</p>
+              {fallbackWhatsappUrl && (
+                <a
+                  href={fallbackWhatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 font-semibold text-red-700 underline"
+                >
+                  <MessageCircle size={16} />
+                  Ouvrir WhatsApp
+                </a>
+              )}
             </div>
           )}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || items.length === 0}
             className="w-full bg-emerald-600 text-white py-4 rounded-lg font-medium text-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
           >
             {loading ? 'Traitement...' : `Enregistrer la commande ${finalTotal.toFixed(2)} €`}
