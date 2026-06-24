@@ -453,6 +453,11 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
     </div>
   );
 
+  const handleOrderCreated = (order: Order) => {
+    setOrders((prev) => [order, ...prev.filter((item) => item.id !== order.id)]);
+    setCurrentView('orders');
+  };
+
   const renderProfile = () => <UserProfile isOpen={true} onClose={() => setCurrentView('home')} />;
 
   const renderRequests = () => (
@@ -507,7 +512,11 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
           }}
         />
       )}
-      <CheckoutModal isOpen={checkoutOpen} onClose={() => setCheckoutOpen(false)} />
+      <CheckoutModal
+        isOpen={checkoutOpen}
+        onClose={() => setCheckoutOpen(false)}
+        onOrderCreated={handleOrderCreated}
+      />
     </div>
   );
 }
