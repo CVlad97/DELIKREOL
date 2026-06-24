@@ -3,7 +3,6 @@ import { Header } from './Header';
 import { BrandRibbon } from './BrandRibbon';
 import { Footer } from './Footer';
 import { MobileCartBar } from './MobileCartBar';
-import { FloatingFeedbackButton } from './FloatingFeedbackButton';
 import { CookieConsent } from '../CookieConsent';
 
 interface LayoutProps {
@@ -27,9 +26,6 @@ export function Layout({ children, title }: LayoutProps) {
       </main>
 
       <Footer />
-
-      {/* Signalement rapide visible partout */}
-      <FloatingFeedbackButton />
 
       {/* Floating mobile cart bar — sticks to bottom on small screens */}
       <MobileCartBar />
