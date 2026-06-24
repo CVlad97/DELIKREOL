@@ -24,6 +24,17 @@ export interface OrdersService {
   updateStatus(id: string, status: string): Promise<Order | null>;
 }
 
+function normalizeOrder(row: any): Order {
+  const delivery = Array.isArray(row?.delivery) ? row.delivery[0] : row?.delivery;
+  const items = row?.items ?? row?.order_items;
+
+  return {
+    ...row,
+    items: items ?? undefined,
+    delivery: delivery ?? undefined,
+  } as Order;
+}
+
 class DemoOrdersService implements OrdersService {
   constructor() {
     seedDemoData();
@@ -46,8 +57,10 @@ class DemoOrdersService implements OrdersService {
       order_number: order.order_number || 'DLK-' + Math.floor(Math.random() * 9000 + 1000).toString(),
       status: (order.status as any) || 'pending',
       delivery_type: (order.delivery_type as any) || 'home_delivery',
+      delivery_address: order.delivery_address,
       delivery_fee: order.delivery_fee ?? 0,
       total_amount: order.total_amount ?? 0,
+      notes: order.notes,
       created_at: new Date().toISOString(),
       items: (order.items as OrderItem[]) || [],
     } as Order;
@@ -158,39 +171,72 @@ class ErpOrdersService implements OrdersService {
   }
 }
 
+const orderSelect = `
+  *,
+  items:order_items(
+    *,
+    product:products(*)
+  ),
+  delivery:deliveries(
+    *,
+    driver:drivers(*)
+  )
+`;
+
 class SupabaseOrdersService implements OrdersService {
   async listAll() {
-    const { data, error } = await supabase.from('orders').select('*');
+    const { data, error } = await supabase
+      .from('orders')
+      .select(orderSelect)
+      .order('created_at', { ascending: false });
     if (error) throw error;
-    return data as Order[];
+    return (data || []).map(normalizeOrder);
   }
   async listByUser(userId: string) {
-    const { data, error } = await supabase.from('orders').select('*').eq('customer_id', userId);
+    const { data, error } = await supabase
+      .from('orders')
+      .select(orderSelect)
+      .eq('customer_id', userId)
+      .order('created_at', { ascending: false });
     if (error) throw error;
-    return data as Order[];
+    return (data || []).map(normalizeOrder);
   }
   async getById(id: string) {
-    const { data, error } = await supabase.from('orders').select('*').eq('id', id).maybeSingle();
+    const { data, error } = await supabase
+      .from('orders')
+      .select(orderSelect)
+      .eq('id', id)
+      .maybeSingle();
     if (error) throw error;
-    return data as Order | null;
+    return data ? normalizeOrder(data) : null;
   }
   async create(order: CreateOrderInput) {
-    const { data, error } = await supabase.from('orders').insert(order).select().maybeSingle();
+    const { items, ...orderPayload } = order;
+    const { data, error } = await supabase
+      .from('orders')
+      .insert(orderPayload)
+      .select(orderSelect)
+      .maybeSingle();
     if (error) throw error;
-    if (order.items && order.items.length > 0 && data?.id) {
-      const items = order.items.map((item) => ({
+    if (items && items.length > 0 && data?.id) {
+      const orderItems = items.map((item) => ({
         ...item,
         order_id: data.id
       }));
-      const { error: itemsError } = await supabase.from('order_items').insert(items);
+      const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
       if (itemsError) throw itemsError;
     }
-    return data as Order;
+    return data ? normalizeOrder({ ...data, items }) : normalizeOrder(order);
   }
   async updateStatus(id: string, status: string) {
-    const { data, error } = await supabase.from('orders').update({ status }).eq('id', id).select().maybeSingle();
+    const { data, error } = await supabase
+      .from('orders')
+      .update({ status })
+      .eq('id', id)
+      .select(orderSelect)
+      .maybeSingle();
     if (error) throw error;
-    return data as Order | null;
+    return data ? normalizeOrder(data) : null;
   }
 }
 
