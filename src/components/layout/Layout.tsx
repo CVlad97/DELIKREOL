@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
 import { Header } from './Header';
-import { BrandRibbon } from './BrandRibbon';
 import { Footer } from './Footer';
 import { MobileCartBar } from './MobileCartBar';
 import { CookieConsent } from '../CookieConsent';
@@ -14,7 +13,6 @@ export function Layout({ children, title }: LayoutProps) {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <BrandRibbon />
 
       <main className="flex-1">
         {title && (
