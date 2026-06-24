@@ -52,6 +52,7 @@ const AdminFinance = lazy(() => import('./pages/admin/AdminFinance'));
 const AdminFeedback = lazy(() => import('./pages/admin/AdminFeedback'));
 const AdminPilotAccess = lazy(() => import('./pages/admin/AdminPilotAccess'));
 const AdminPartnersApplications = lazy(() => import('./pages/admin/AdminPartnersApplications'));
+const AdminSystemTest = lazy(() => import('./pages/admin/AdminSystemTest'));
 const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/legal/PrivacyPolicy'));
 const CGVPage = lazy(() => import('./pages/legal/CGVPage'));
@@ -151,6 +152,7 @@ export function AppRouter() {
                   <Route path="applications" element={<AdminPartnersApplications />} />
                   <Route path="caterer-validation" element={<AdminCatererValidation />} />
                   <Route path="acces-pilote" element={<AdminPilotAccess />} />
+                  <Route path="test-systeme" element={<AdminSystemTest />} />
                 </Route>
               </Routes>
             </ToastProvider>
