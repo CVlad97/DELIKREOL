@@ -4,6 +4,7 @@
  */
 const https = require('https');
 const http = require('http');
+const fs = require('fs');
 
 const BASE = 'https://cvlad97.github.io/DELIKREOL';
 const visited = new Set();
@@ -50,9 +51,12 @@ async function checkWhatsApp(data) {
 
 (async () => {
   console.log('=== AUDIT COMPLET DELIKREOL ===\n');
+  fs.mkdirSync('reports', { recursive: true });
 
   const pages = [
     { path: '/', name: 'Accueil' },
+    { path: '/connexion', name: 'Connexion' },
+    { path: '/compte', name: 'Compte client' },
     { path: '/catalogue', name: 'Catalogue' },
     { path: '/traiteurs', name: 'Traiteurs' },
     { path: '/traiteur/snack-save-peyia', name: 'Traiteur Save Peyia' },
@@ -60,6 +64,11 @@ async function checkWhatsApp(data) {
     { path: '/traiteur/cocos-food', name: 'Traiteur Coco' },
     { path: '/traiteur/saveurs-dafrique', name: 'Traiteur Saveurs Afrique' },
     { path: '/panier', name: 'Panier' },
+    { path: '/statut-commande', name: 'Statut commande' },
+    { path: '/feedback', name: 'Feedback' },
+    { path: '/pro', name: 'Espace pro' },
+    { path: '/admin', name: 'Admin' },
+    { path: '/admin/test-systeme', name: 'Admin test système' },
     { path: '/devis', name: 'Devis' },
     { path: '/devenir-partenaire', name: 'Partenaire' },
     { path: '/devenir-livreur', name: 'Livreur' },
@@ -134,7 +143,7 @@ async function checkWhatsApp(data) {
     console.log(`📦 ${r.status} ${a} ${r.status === 200 ? '✅' : '❌'}`);
   }
 
-  require('fs').writeFileSync('reports/audit-complet.json', JSON.stringify(results, null, 2));
-  require('fs').writeFileSync('reports/broken-links.json', JSON.stringify(broken, null, 2));
+  fs.writeFileSync('reports/audit-complet.json', JSON.stringify(results, null, 2));
+  fs.writeFileSync('reports/broken-links.json', JSON.stringify(broken, null, 2));
   console.log(`\n✅ Rapports sauvegardés dans reports/`);
 })();
