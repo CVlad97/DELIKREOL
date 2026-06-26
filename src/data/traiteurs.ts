@@ -74,7 +74,7 @@ function resolveHeroImage(name: string) {
   if (name === 'Sweet Family Traiteur Orianne') {
     return assetFromPublic('vendors/sweet-family/hero.jpg');
   }
-  if (name === 'Virtuel Gouté Mwen') {
+  if (name === 'Gouté Mwen') {
     return assetFromPublic('vendors/goute-mwen/hero.jpg');
   }
   return mockProducts.find((product) => product.vendor === name && product.image)?.image ?? null;
@@ -88,17 +88,16 @@ function resolveGalleryImages(name: string) {
     return cocoFoodAssets.gallery;
   }
   if (name === "Saveurs d'Afrique") {
+    // 8 photos validées — gallery-04 (amala mal identifié) et gallery-07 (empanadas) retirées
     return [
-      assetFromPublic('vendors/saveurs-afrique/gallery-01.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/gallery-02.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/gallery-03.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/gallery-04.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/gallery-05.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/gallery-06.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/gallery-07.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/gallery-08.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/gallery-09.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/gallery-10.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/gallery-01.jpg'),  // Ablo + poisson frit
+      assetFromPublic('vendors/saveurs-afrique/gallery-02.jpg'),  // Jus de bissap
+      assetFromPublic('vendors/saveurs-afrique/gallery-03.jpg'),  // Dokô (beignets)
+      assetFromPublic('vendors/saveurs-afrique/gallery-05.jpg'),  // Atassi (riz + haricots)
+      assetFromPublic('vendors/saveurs-afrique/gallery-06.jpg'),  // Fufu + sauce légume
+      assetFromPublic('vendors/saveurs-afrique/gallery-08.jpg'),  // Petits cailloux (chin chin)
+      assetFromPublic('vendors/saveurs-afrique/gallery-09.jpg'),  // Salade béninoise
+      assetFromPublic('vendors/saveurs-afrique/gallery-10.jpg'),  // Yaourt maison
     ];
   }
   if (name === 'Les Delices de Ninice') {
@@ -126,7 +125,7 @@ function resolveGalleryImages(name: string) {
       assetFromPublic('vendors/sweet-family/conditions.jpg'),
     ];
   }
-  if (name === 'Virtuel Gouté Mwen') {
+  if (name === 'Gouté Mwen') {
     return [
       assetFromPublic('vendors/goute-mwen/hero.jpg'),
     ];
@@ -188,7 +187,7 @@ function resolvePortraitImage(name: string) {
     return assetFromPublic('vendors/sweet-family/portrait.jpg');
   }
 // Gouté Mwen: photo Stacy Vilocy
-  if (name === 'Virtuel Gouté Mwen') {
+  if (name === 'Gouté Mwen') {
     return assetFromPublic('vendors/goute-mwen/portrait.jpg');
   }
   return null;
@@ -286,8 +285,8 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
         };
       }
 
-      // Virtuel Gouté Mwen — sirops artisanaux, public confirmé
-      if (profile.name === 'Virtuel Gouté Mwen') {
+      // Gouté Mwen — glaces artisanales, public confirmé
+      if (profile.name === 'Gouté Mwen') {
         return {
           ...buildSpace(profile, 'from-[#eab308] via-[#f97316] to-[#dc2626]', '#fff7ed', 'public confirmé', 'à confirmer'),
           horaires: { lun: { open: '08:00', close: '18:00' }, mar: { open: '08:00', close: '18:00' }, mer: { open: '08:00', close: '18:00' }, jeu: { open: '08:00', close: '18:00' }, ven: { open: '08:00', close: '18:00' }, sam: { open: '09:00', close: '13:00' } },
