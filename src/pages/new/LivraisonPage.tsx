@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Truck,
@@ -50,6 +51,10 @@ const DELIVERY_MODES = [
 ];
 
 export default function LivraisonPage() {
+  useEffect(() => {
+    document.title = 'Livraison & Retrait — DeliKreol | Livraison plats créoles Martinique';
+  }, []);
+
   const openWhatsAppVerify = () => {
     const msg = encodeURIComponent(
       'Bonjour DeliKreol ! Je souhaite vérifier la possibilité de livraison dans ma commune. Merci !'

@@ -127,7 +127,13 @@ function resolveGalleryImages(name: string) {
   }
   if (name === 'Gouté Mwen') {
     return [
-      assetFromPublic('vendors/goute-mwen/hero.jpg'),
+      assetFromPublic('vendors/goute-mwen/hero.jpg'),           // Affiche Tour des Yoles 2026
+      assetFromPublic('vendors/goute-mwen/product-glacee-groseille.jpg'), // Glacé groseille/menthe
+      assetFromPublic('vendors/goute-mwen/snow-boll.jpg'),      // Snow Boll
+      assetFromPublic('vendors/goute-mwen/mangue.jpg'),         // Mangue
+      assetFromPublic('vendors/goute-mwen/prune-cythere.jpg'),  // Prune de Cythère
+      assetFromPublic('vendors/goute-mwen/kumquat.jpg'),        // Kumquat
+      assetFromPublic('vendors/goute-mwen/abricot-pays.jpg'),   // Abricot Pays
     ];
   }
   return [];

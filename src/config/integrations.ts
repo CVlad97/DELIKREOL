@@ -30,11 +30,11 @@ export const integrations: IntegrationsConfig = {
     status: 'pending',
   },
   qonto: {
-    enabled: false,
-    label: 'Qonto',
-    description: 'Compte professionnel et gestion financière',
+    enabled: true,
+    label: 'Qonto — Martinique 972',
+    description: 'Compte pro Qonto pour DeliKreol · IBAN FR · Solo Premium (39€ HT) · Rapprochement auto commandes',
     apiBaseUrl: import.meta.env.VITE_QONTO_API_URL,
-    status: 'pending',
+    status: 'configured',
   },
   revolut: {
     enabled: false,

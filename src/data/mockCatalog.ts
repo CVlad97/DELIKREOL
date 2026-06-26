@@ -823,6 +823,20 @@ export const mockProducts: LocalProduct[] = [
     ingredients: 'Abricot pays, goyave, maracuja, sucre.',
     allergens: 'À confirmer avec le prestataire.'
   },
+  {
+    id: 'goute-mwen-pasteque-anis',
+    name: 'Gouté Mwen — Pastèque / Anis',
+    vendor: 'Gouté Mwen',
+    price: 2,
+    category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/pasteque.jpg'),
+    description: 'Glace artisanale pastèque et anis étoilé. Un mélange rafraîchissant et original — la douceur de la pastèque rencontre les notes anisées. Nouveauté Tour des Yoles 2026 !',
+    zone: 'Martinique',
+    available: true,
+    featured: true,
+    ingredients: 'Pastèque, anis étoilé, sucre.',
+    allergens: 'À confirmer avec le prestataire.'
+  },
 
   // ═══════════════════════════════════════════════════════
   // SWEET FAMILY TRAITEUR ORIANNE — Cocktails & Mignardises

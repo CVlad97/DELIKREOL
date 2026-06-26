@@ -3,17 +3,43 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DELIKREOL</title>
+    <title>DeliKreol — Commandez créole local en Martinique</title>
+    <meta name="description" content="Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait. Commandez en ligne vos plats maison." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://cvlad97.github.io/DELIKREOL/" />
+    <meta property="og:title" content="DeliKreol — Commandez créole local en Martinique | Livraison & Traiteur" />
+    <meta property="og:description" content="Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait. Commandez en ligne vos plats maison." />
+    <meta property="og:url" content="https://cvlad97.github.io/DELIKREOL/" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
     <!--
-      GitHub Pages SPA fallback — BrowserRouter compatible.
-      Ce fichier est ÉCRASÉ à chaque build par le workflow CI
-      qui copie dist/index.html → dist/404.html.
-      Ainsi, toute route inconnue (/) sert l'application React
-      et BrowserRouter gère le routing côté client.
-      Voir .github/workflows/deploy.yml étape "Add SPA fallback".
+      SPA fallback — GitHub Pages compatible.
+      Ce fichier est copié dans dist/404.html à chaque build (full index.html).
+      En attente du CI, cette version sert de fallback minimal avec redirection.
     -->
+    <script>
+      // Redirection vers l'application via sessionStorage (GitHub Pages SPA workaround)
+      (function() {
+        var redirect = sessionStorage.getItem('redirect');
+        if (redirect) {
+          sessionStorage.removeItem('redirect');
+          var base = '/DELIKREOL/';
+          var path = redirect.replace(window.location.origin, '');
+          if (path.startsWith(base)) {
+            window.location.href = redirect;
+          } else {
+            window.location.href = base.replace(/\/+$/, '') + path;
+          }
+        }
+      })();
+    </script>
   </head>
   <body>
-    <p>Chargement de DeliKreol…</p>
+    <p>Redirection vers DeliKreol…</p>
+    <script>
+      // Fallback: rediriger vers la racine de l'application
+      sessionStorage.setItem('redirect', window.location.href);
+      window.location.href = '/DELIKREOL/';
+    </script>
   </body>
 </html>

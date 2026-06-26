@@ -58,8 +58,8 @@ export const additionalPartnerProfiles: PartnerProfile[] = [
     deliveryOptions: ['retraite', 'bateau', 'infirmiere'],
   },
   {
-    name: 'Virtuel Gouté Mwen',
-    legalName: 'Virtuel Gouté Mwen',
+    name: 'Gouté Mwen',
+    legalName: 'Gouté Mwen',
     zone: 'Martinique',
     address: 'Martinique',
     offer: 'Glaces artisanales antillaises — pur fruit, fait maison, inclusif',
@@ -73,7 +73,7 @@ export const additionalPartnerProfiles: PartnerProfile[] = [
     highlights: [
       '18 parfums de glaces artisanales',
       '2€ chaque — prix imbattable',
-      'Sans sucre ajouté : Super Coco, Canne, Pastèque, Ananas',
+      'Sans sucre ajouté : Au Nanan de Coco, Canne, Pastèque, Ananas',
       'Emballage innovant — manger à son rythme',
       'Recette phare : Snow Boll groseille-menthe 🧊',
       'Cocktail exclusif : abricot pays, goyave, maracuja',

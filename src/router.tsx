@@ -12,8 +12,8 @@ import { OrderStatusPage } from './pages/OrderStatusPage';
 
 // New public pages — lazy loaded
 const HomePage = lazy(() => import('./pages/new/HomePage'));
+
 const LoginPage = lazy(() => import('./pages/new/LoginPage'));
-const ClientAccountPage = lazy(() => import('./pages/new/ClientAccountPage'));
 const CataloguePage = lazy(() => import('./pages/new/CataloguePage'));
 const ProductDetailPage = lazy(() => import('./pages/new/ProductDetailPage'));
 const TraiteursListPage = lazy(() => import('./pages/new/TraiteursListPage'));
@@ -52,13 +52,14 @@ const AdminFinance = lazy(() => import('./pages/admin/AdminFinance'));
 const AdminFeedback = lazy(() => import('./pages/admin/AdminFeedback'));
 const AdminPilotAccess = lazy(() => import('./pages/admin/AdminPilotAccess'));
 const AdminPartnersApplications = lazy(() => import('./pages/admin/AdminPartnersApplications'));
-const AdminSystemTest = lazy(() => import('./pages/admin/AdminSystemTest'));
 const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/legal/PrivacyPolicy'));
 const CGVPage = lazy(() => import('./pages/legal/CGVPage'));
 const CookiesPage = lazy(() => import('./pages/legal/CookiesPage'));
 const RemoursementPage = lazy(() => import('./pages/legal/RemoursementPage'));
 const PartnerTermsPage = lazy(() => import('./pages/legal/PartnerTermsPage'));
+
+const basePath = import.meta.env.VITE_BASE_PATH || import.meta.env.BASE_URL || '/';
 
 function PageLoader() {
   return (
@@ -100,8 +101,6 @@ export function AppRouter() {
                 {/* Public routes */}
                 <Route element={<LayoutWrapper />}>
                   <Route index element={<HomePage />} />
-                  <Route path="connexion" element={<LoginPage />} />
-                  <Route path="compte" element={<ClientAccountPage />} />
                   <Route path="catalogue" element={<CataloguePage />} />
                   <Route path="produit/:slug" element={<ProductDetailPage />} />
                   <Route path="traiteurs" element={<TraiteursListPage />} />
@@ -115,6 +114,7 @@ export function AppRouter() {
                   <Route path="livraison" element={<LivraisonPage />} />
                   <Route path="contact" element={<ContactPage />} />
                   <Route path="feedback" element={<FeedbackPage />} />
+                  <Route path="connexion" element={<LoginPage />} />
                   <Route path="inscription-traiteur" element={<CatererSignupPage />} />
                   <Route path="pro" element={<ProSpacePage />} />
                   <Route path="statut-commande" element={<OrderStatusPage />} />
@@ -152,7 +152,6 @@ export function AppRouter() {
                   <Route path="applications" element={<AdminPartnersApplications />} />
                   <Route path="caterer-validation" element={<AdminCatererValidation />} />
                   <Route path="acces-pilote" element={<AdminPilotAccess />} />
-                  <Route path="test-systeme" element={<AdminSystemTest />} />
                 </Route>
               </Routes>
             </ToastProvider>
