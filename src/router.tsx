@@ -53,7 +53,6 @@ const AdminFinance = lazy(() => import('./pages/admin/AdminFinance'));
 const AdminFeedback = lazy(() => import('./pages/admin/AdminFeedback'));
 const AdminPilotAccess = lazy(() => import('./pages/admin/AdminPilotAccess'));
 const AdminPointsRelais = lazy(() => import('./pages/admin/AdminPointsRelais'));
-const AdminTraiteurMedia = lazy(() => import('./pages/admin/AdminTraiteurMedia'));
 const AdminInvoices = lazy(() => import('./pages/admin/AdminInvoices'));
 const AdminPartnersApplications = lazy(() => import('./pages/admin/AdminPartnersApplications'));
 const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));

@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Package, Truck, MapPin, FileText,
   Target, Brain, Settings, Menu, X, Home, ShoppingCart,
-  Briefcase, DollarSign, ChefHat, ClipboardList, MessageCircle, KeyRound, Activity
+  Briefcase, DollarSign, ChefHat, ClipboardList, MessageCircle, KeyRound, Activity, Camera
 } from 'lucide-react';
 
 const adminNav = [
@@ -26,7 +26,7 @@ const adminNav = [
   { label: 'Candidatures', icon: ClipboardList, path: '/admin/applications' },
   { label: 'Validation traiteurs', icon: ChefHat, path: '/admin/caterer-validation' },
   { label: 'Factures', icon: DollarSign, path: '/admin/factures' },
-  { label: 'Médias Traiteurs', icon: Play, path: '/admin/media-traiteurs' },
+  { label: 'Médias Traiteurs', icon: Camera, path: '/admin/media-traiteurs' },
   { label: 'Accès pilote', icon: KeyRound, path: '/admin/acces-pilote' },
 ];
 
