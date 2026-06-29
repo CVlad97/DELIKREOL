@@ -18,6 +18,7 @@ const CataloguePage = lazy(() => import('./pages/new/CataloguePage'));
 const ProductDetailPage = lazy(() => import('./pages/new/ProductDetailPage'));
 const TraiteursListPage = lazy(() => import('./pages/new/TraiteursListPage'));
 const TraiteurDetailPage = lazy(() => import('./pages/new/TraiteurDetailPage'));
+const AccountPage = lazy(() => import('./pages/new/AccountPage'));
 const CartPage = lazy(() => import('./pages/new/CartPage'));
 const DevisPage = lazy(() => import('./pages/new/DevisPage'));
 const DevenirPartenairePage = lazy(() => import('./pages/new/DevenirPartenairePage'));
@@ -51,6 +52,9 @@ const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage')
 const AdminFinance = lazy(() => import('./pages/admin/AdminFinance'));
 const AdminFeedback = lazy(() => import('./pages/admin/AdminFeedback'));
 const AdminPilotAccess = lazy(() => import('./pages/admin/AdminPilotAccess'));
+const AdminPointsRelais = lazy(() => import('./pages/admin/AdminPointsRelais'));
+const AdminTraiteurMedia = lazy(() => import('./pages/admin/AdminTraiteurMedia'));
+const AdminInvoices = lazy(() => import('./pages/admin/AdminInvoices'));
 const AdminPartnersApplications = lazy(() => import('./pages/admin/AdminPartnersApplications'));
 const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/legal/PrivacyPolicy'));
@@ -106,6 +110,7 @@ export function AppRouter() {
                   <Route path="traiteurs" element={<TraiteursListPage />} />
                   <Route path="traiteur/:slug" element={<TraiteurDetailPage />} />
                   <Route path="panier" element={<CartPage />} />
+             <Route path="compte" element={<AccountPage />} />
                   <Route path="devis" element={<DevisPage />} />
                   <Route path="devenir-partenaire" element={<DevenirPartenairePage />} />
                   <Route path="devenir-livreur" element={<DevenirLivreurPage />} />
@@ -152,6 +157,9 @@ export function AppRouter() {
                   <Route path="applications" element={<AdminPartnersApplications />} />
                   <Route path="caterer-validation" element={<AdminCatererValidation />} />
                   <Route path="acces-pilote" element={<AdminPilotAccess />} />
+      <Route path="media-traiteurs" element={<AdminTraiteurMedia />} />
+     <Route path="points-relais" element={<AdminPointsRelais />} />
+             <Route path="factures" element={<AdminInvoices />} />
                 </Route>
               </Routes>
             </ToastProvider>

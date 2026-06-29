@@ -15,6 +15,7 @@ const adminNav = [
   { label: 'Livreurs', icon: Truck, path: '/admin/livreurs' },
   { label: 'Points relais', icon: MapPin, path: '/admin/points-relais' },
   { label: 'Devis', icon: FileText, path: '/admin/devis' },
+  { label: 'Points relais', icon: MapPin, path: '/admin/points-relais' },
   { label: 'Leads', icon: Target, path: '/admin/leads' },
   { label: 'Mémoire projet', icon: Brain, path: '/admin/memoire' },
   { label: 'Paramètres', icon: Settings, path: '/admin/parametres' },
@@ -24,6 +25,8 @@ const adminNav = [
   { label: 'Feedback', icon: MessageCircle, path: '/admin/feedback' },
   { label: 'Candidatures', icon: ClipboardList, path: '/admin/applications' },
   { label: 'Validation traiteurs', icon: ChefHat, path: '/admin/caterer-validation' },
+  { label: 'Factures', icon: DollarSign, path: '/admin/factures' },
+  { label: 'Médias Traiteurs', icon: Play, path: '/admin/media-traiteurs' },
   { label: 'Accès pilote', icon: KeyRound, path: '/admin/acces-pilote' },
 ];
 
