@@ -156,8 +156,7 @@ export function AppRouter() {
                   <Route path="applications" element={<AdminPartnersApplications />} />
                   <Route path="caterer-validation" element={<AdminCatererValidation />} />
                   <Route path="acces-pilote" element={<AdminPilotAccess />} />
-      <Route path="media-traiteurs" element={<AdminTraiteurMedia />} />
-     <Route path="points-relais" element={<AdminPointsRelais />} />
+                  <Route path="points-relais" element={<AdminPointsRelais />} />
              <Route path="factures" element={<AdminInvoices />} />
                 </Route>
               </Routes>

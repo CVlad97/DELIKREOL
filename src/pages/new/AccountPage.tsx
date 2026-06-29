@@ -49,7 +49,7 @@ export default function AccountPage() {
             </h3>
             <div className="space-y-3">
               <div><span className="text-xs text-muted-foreground">Téléphone</span><br />{profile?.phone || '—'}</div>
-              <div><span className="text-xs text-muted-foreground">Commune / Zone</span><br />{profile?.commune || '—'}</div>
+              <div><span className="text-xs text-muted-foreground">Commune / Zone</span><br />{(profile as any)?.commune || '—'}</div>
             </div>
             <Link to="/contact" className="mt-6 inline-block text-sm text-primary hover:underline">Mettre à jour mes infos →</Link>
           </div>
