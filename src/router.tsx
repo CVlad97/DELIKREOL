@@ -23,6 +23,7 @@ const CartPage = lazy(() => import('./pages/new/CartPage'));
 const DevisPage = lazy(() => import('./pages/new/DevisPage'));
 const DevenirPartenairePage = lazy(() => import('./pages/new/DevenirPartenairePage'));
 const DevenirLivreurPage = lazy(() => import('./pages/new/DevenirLivreurPage'));
+const DevenirPointRelaisPage = lazy(() => import('./pages/new/DevenirPointRelaisPage'));
 const PointsRelaisPage = lazy(() => import('./pages/new/PointsRelaisPage'));
 const AidePage = lazy(() => import('./pages/new/AidePage'));
 const LivraisonPage = lazy(() => import('./pages/new/LivraisonPage'));
@@ -113,6 +114,7 @@ export function AppRouter() {
                   <Route path="devis" element={<DevisPage />} />
                   <Route path="devenir-partenaire" element={<DevenirPartenairePage />} />
                   <Route path="devenir-livreur" element={<DevenirLivreurPage />} />
+                  <Route path="devenir-point-relais" element={<DevenirPointRelaisPage />} />
                   <Route path="points-relais" element={<PointsRelaisPage />} />
                   <Route path="aide" element={<AidePage />} />
                   <Route path="livraison" element={<LivraisonPage />} />

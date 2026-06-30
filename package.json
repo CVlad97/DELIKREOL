@@ -10,6 +10,7 @@
     "preview": "npm run build && wrangler dev",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "test": "vitest run",
+    "audit:routes": "node scripts/audit-routes.cjs",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "audit:links": "node scripts/audit-http.cjs",
