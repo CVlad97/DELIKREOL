@@ -137,6 +137,7 @@ function extractLocality(value: string) {
   return firstSegment || 'Localité client non fournie';
 }
 
-function formatMoney(value: number) {
+function formatMoney(value: number | null | undefined) {
+  if (value == null) return 'Prix à confirmer';
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value);
 }

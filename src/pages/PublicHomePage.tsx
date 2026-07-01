@@ -169,6 +169,7 @@ type MapVendor = {
 type GeoStatus = 'idle' | 'loading' | 'success' | 'error' | 'unsupported';
 type GeoConsentState = 'idle' | 'ask' | 'declined' | 'granted';
 type DeliveryCoverageStatus = 'unknown' | 'in_zone' | 'out_zone';
+type MarketplaceTab = 'browse' | 'traiteurs';
 
 const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 const whatsappBase = `https://wa.me/${whatsappNumber}`;
@@ -428,6 +429,7 @@ export function PublicHomePage() {
   const [communeFilter, setCommuneFilter] = useState('Tous');
   const [categoryFilter, setCategoryFilter] = useState('Tous');
   const [budgetFilter, setBudgetFilter] = useState('Tous');
+  const [marketplaceTab, setMarketplaceTab] = useState<MarketplaceTab>('browse');
   const [selectedProducts, setSelectedProducts] = useState<PublicCatalogProduct[]>([]);
   const [fulfillmentMode, setFulfillmentMode] = useState<'delivery' | 'pickup'>('delivery');
   const [customerName, setCustomerName] = useState('');
@@ -488,6 +490,17 @@ export function PublicHomePage() {
   }, []);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'traiteurs' || tab === 'browse') {
+      setMarketplaceTab(tab);
+    }
+    if (window.location.hash === '#traiteurs') {
+      setMarketplaceTab('traiteurs');
+    }
+  }, []);
+
+  useEffect(() => {
     const vendorSlug = new URLSearchParams(window.location.search).get('vendor');
     const vendorSpace = vendorSlug ? getTraiteurSpaceBySlug(vendorSlug) : null;
     if (!vendorSpace) return;
@@ -499,13 +512,7 @@ export function PublicHomePage() {
     loadPublicCatalog()
       .then((result) => {
         if (!active) return;
-        if (result.configured && result.products.length > 0) {
-          setCatalog(result);
-          setError(null);
-          return;
-        }
-
-        setCatalog(buildDemoCatalog());
+        setCatalog(result);
         setError(null);
       })
       .catch(() => {
@@ -588,12 +595,12 @@ export function PublicHomePage() {
                     longitude: product.vendor_longitude,
                     delivery_radius_km: product.vendor_delivery_radius_km,
                     zone_label: product.zone_label,
-                  },
-                  customerPoint,
-                  communeFilter,
-                )
-              : zone.toLowerCase().includes(communeFilter.toLowerCase());
-      const price = product.price;
+                },
+                customerPoint,
+                communeFilter,
+              )
+            : zone.toLowerCase().includes(communeFilter.toLowerCase());
+      const price = product.price ?? Number.POSITIVE_INFINITY;
       const matchBudget =
         budgetFilter === 'Tous' ||
         (budgetFilter === '≤ 15 €' && price <= 15) ||
@@ -622,6 +629,26 @@ export function PublicHomePage() {
       return product;
     });
   }, [filteredProducts]);
+
+  const zoneHighlights = useMemo(() => {
+    const counts = filteredProductsUniqueImages.reduce<Record<string, number>>((acc, product) => {
+      const zone = product.zone_label || 'Martinique';
+      acc[zone] = (acc[zone] || 0) + 1;
+      return acc;
+    }, {});
+
+    return Object.entries(counts)
+      .map(([zone, count]) => ({ zone, count }))
+      .sort((left, right) => right.count - left.count)
+      .slice(0, 4);
+  }, [filteredProductsUniqueImages]);
+
+  const nearbyProducts = useMemo(() => filteredProductsUniqueImages.slice(0, 6), [filteredProductsUniqueImages]);
+
+  const storyTraiteurs = useMemo(
+    () => partnerProfiles.filter((profile) => profile.type === 'Traiteur').slice(0, 4),
+    [],
+  );
 
   const featuredProducts = useMemo(() => filteredProductsUniqueImages.slice(0, 3), [filteredProductsUniqueImages]);
   const standardProducts = useMemo(() => {
@@ -660,7 +687,7 @@ export function PublicHomePage() {
   const selectionEconomics = useMemo(
     () =>
       calculateOrderEconomics({
-        items: selectedProducts.map((product) => ({ price: product.price, commissionRate: 0.15 })),
+        items: selectedProducts.map((product) => ({ price: product.price ?? 0, commissionRate: 0.15 })),
         deliveryFee: fulfillmentMode === 'delivery' && selectedProducts.length > 0 ? 3.5 : 0,
         serviceFee: selectedProducts.length > 0 ? 1 : 0,
       }),
@@ -961,6 +988,10 @@ export function PublicHomePage() {
   }
 
   function addToSelection(product: PublicCatalogProduct) {
+    if (product.price == null) {
+      setCheckoutStatus({ kind: 'error', message: 'Prix à confirmer pour ce produit.' });
+      return;
+    }
     setSelectedProducts((current) => [...current, product]);
     setOrderConfirmed(false);
     setCheckoutStatus({ kind: 'idle' });
@@ -1103,8 +1134,8 @@ export function PublicHomePage() {
       product_name: product.name,
       vendor_name: product.vendor_name,
       quantity: 1,
-      unit_price: product.price,
-      vendor_commission: Number((product.price * 0.15).toFixed(2)),
+      unit_price: product.price ?? 0,
+      vendor_commission: Number(((product.price ?? 0) * 0.15).toFixed(2)),
     }));
 
     const fallbackToOrderForm = async (reason: string) => {
@@ -1604,6 +1635,155 @@ export function PublicHomePage() {
                 ))}
               </div>
             </div>
+          </div>
+        </section>
+
+        <section id="explorer" className="mx-auto max-w-7xl px-4 py-10">
+          <div className="rounded-[2rem] border border-orange-100 bg-white p-5 shadow-soft lg:p-7">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <SectionTitle
+                eyebrow="Découverte locale"
+                title="Mode Uber Eats, mais pensé par zone de livraison."
+                text="La géolocalisation limite l’affichage aux offres proches de votre position. Un onglet séparé présente les traiteurs et leur histoire."
+              />
+              <div className="inline-flex rounded-full border border-orange-100 bg-[#fff7ef] p-1">
+                <button
+                  type="button"
+                  onClick={() => setMarketplaceTab('browse')}
+                  className={`rounded-full px-4 py-2 text-sm font-black transition ${
+                    marketplaceTab === 'browse' ? 'bg-[#d95f2d] text-white shadow-lg shadow-orange-500/20' : 'text-[#7c2d12]'
+                  }`}
+                >
+                  Commander près de moi
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMarketplaceTab('traiteurs')}
+                  className={`rounded-full px-4 py-2 text-sm font-black transition ${
+                    marketplaceTab === 'traiteurs' ? 'bg-[#24170f] text-white shadow-lg shadow-stone-900/10' : 'text-[#7c2d12]'
+                  }`}
+                >
+                  Traiteurs & storytelling
+                </button>
+              </div>
+            </div>
+
+            {marketplaceTab === 'browse' ? (
+              <div className="mt-7 grid gap-6 lg:grid-cols-[1fr_340px]">
+                <div>
+                  <div className="flex flex-wrap gap-2">
+                    {zoneHighlights.length > 0 ? (
+                      zoneHighlights.map((item) => (
+                        <span key={item.zone} className="rounded-full border border-orange-200 bg-[#fff8ef] px-3 py-1.5 text-xs font-black text-[#7c2d12]">
+                          {item.zone} · {item.count} offre(s)
+                        </span>
+                      ))
+                    ) : (
+                      <span className="rounded-full border border-dashed border-orange-200 bg-white px-3 py-1.5 text-xs font-black text-stone-500">
+                        Activez une position pour voir les zones proches
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="mt-5 rounded-[1.75rem] border border-orange-100 bg-[#fffaf4] p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">Proche de vous</p>
+                        <h3 className="mt-1 text-xl font-black text-[#2a190f]">Les premières offres qui comptent</h3>
+                      </div>
+                      <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">
+                        {customerLocation ? 'Tri géolocalisé' : 'Tri par zone'}
+                      </span>
+                    </div>
+                    <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                      {nearbyProducts.map((product) => (
+                        <ProductCard key={`nearby-${product.id}`} product={product} onAdd={() => addToSelection(product)} compact />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <aside className="rounded-[1.75rem] border border-orange-100 bg-[#24170f] p-5 text-white">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-200">Filtre local</p>
+                  <h3 className="mt-2 text-2xl font-black">Catégories et rayon</h3>
+                  <p className="mt-3 text-sm leading-6 text-stone-300">
+                    Les produits affichés ici sont déjà triés selon la catégorie, le budget et la zone de livraison. Quand la position est validée, on ne pousse que les offres compatibles.
+                  </p>
+                  <div className="mt-4 space-y-3">
+                    <div className="rounded-2xl bg-white/8 p-4">
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-orange-200">Catégorie active</p>
+                      <p className="mt-2 text-lg font-black">{categoryFilter}</p>
+                    </div>
+                    <div className="rounded-2xl bg-white/8 p-4">
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-orange-200">Géolocalisation</p>
+                      <p className="mt-2 text-sm leading-6 text-stone-300">
+                        {customerLocation
+                          ? `Position validée avec précision ${customerLocation.accuracy ? `${Math.round(customerLocation.accuracy)} m` : 'non fournie'}`
+                          : 'Géolocalisez-vous pour voir uniquement les offres à proximité.'}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl bg-white/8 p-4">
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-orange-200">Zone de livraison</p>
+                      <p className="mt-2 text-sm leading-6 text-stone-300">
+                        La commune reste un fallback; la carte et le rayon vendeur restent prioritaires.
+                      </p>
+                    </div>
+                  </div>
+                </aside>
+              </div>
+            ) : (
+              <div className="mt-7 grid gap-6 lg:grid-cols-2">
+                {storyTraiteurs.map((profile) => {
+                  const space = featuredTraiteurSpaces.find((item) => item.name === profile.name);
+                  return (
+                    <article key={profile.name} className="overflow-hidden rounded-[1.75rem] border border-orange-100 bg-[#fffaf4] shadow-soft">
+                      <div className={`bg-gradient-to-br ${space?.gradient ?? 'from-[#7c3aed] via-[#ec4899] to-[#c2410c]'} p-5 text-white`}>
+                        <p className="text-xs font-black uppercase tracking-[0.22em] text-white/75">Storytelling traiteur</p>
+                        <h3 className="mt-2 text-3xl font-black">{profile.name}</h3>
+                        <p className="mt-3 text-sm leading-6 text-white/90">{profile.story}</p>
+                      </div>
+                      <div className="p-5">
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div className="rounded-2xl border border-orange-100 bg-white p-4">
+                            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">Promesse</p>
+                            <p className="mt-2 text-sm leading-6 text-stone-600">{profile.promise}</p>
+                          </div>
+                          <div className="rounded-2xl border border-orange-100 bg-white p-4">
+                            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">Signature</p>
+                            <p className="mt-2 text-sm leading-6 text-stone-600">{profile.specialty}</p>
+                          </div>
+                        </div>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {profile.highlights.slice(0, 4).map((item) => (
+                            <span key={item} className="rounded-full border border-orange-200 bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="mt-5 flex flex-wrap gap-3">
+                          <a
+                            href={buildTraiteurSpaceLink(baseUrl, normalizeSpaceSlug(profile.name))}
+                            className="inline-flex items-center justify-center gap-2 rounded-full bg-[#d95f2d] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/20 transition hover:-translate-y-0.5"
+                          >
+                            Voir la vitrine
+                          </a>
+                          <a
+                            href={`#traiteurs`}
+                            onClick={(event) => {
+                              event.preventDefault();
+                              document.getElementById('traiteurs')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }}
+                            className="inline-flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-white px-4 py-2 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5"
+                          >
+                            Ouvrir la section
+                          </a>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </section>
 
@@ -2433,8 +2613,15 @@ function ProductCard({
           <span className="rounded-2xl bg-[#fff4e7] px-3 py-2 text-[#7c2d12]">Rayon {product.vendor_delivery_radius_km} km</span>
           <span className="rounded-2xl bg-emerald-50 px-3 py-2 text-emerald-700">Selon position</span>
         </div>
-        <button data-testid="add-to-cart" type="button" onClick={onAdd} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-orange-500/20">
-          Ajouter au panier <ArrowRight className="h-4 w-4" />
+        <button
+          data-testid="add-to-cart"
+          type="button"
+          onClick={onAdd}
+          disabled={product.price == null}
+          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-orange-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {product.price == null ? 'Prix à confirmer' : 'Ajouter au panier'}
+          <ArrowRight className="h-4 w-4" />
         </button>
       </div>
     </article>
@@ -3212,7 +3399,8 @@ function upsertMeta(name: string, content: string) {
   element.setAttribute('content', content);
 }
 
-function formatPrice(value: number) {
+function formatPrice(value: number | null | undefined) {
+  if (value == null) return 'Prix à confirmer';
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value);
 }
 
