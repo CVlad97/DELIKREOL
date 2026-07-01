@@ -23,7 +23,10 @@ const CartPage = lazy(() => import('./pages/new/CartPage'));
 const DevisPage = lazy(() => import('./pages/new/DevisPage'));
 const DevenirPartenairePage = lazy(() => import('./pages/new/DevenirPartenairePage'));
 const DevenirLivreurPage = lazy(() => import('./pages/new/DevenirLivreurPage'));
-const DevenirPointRelaisPage = lazy(() => import('./pages/new/DevenirPointRelaisPage'));
+const DevenirPointRelaisPage = lazy(async () => {
+  const module = await import('./pages/new/DevenirPointRelaisPage');
+  return { default: module.DevenirPointRelaisPage };
+});
 const PointsRelaisPage = lazy(() => import('./pages/new/PointsRelaisPage'));
 const AidePage = lazy(() => import('./pages/new/AidePage'));
 const LivraisonPage = lazy(() => import('./pages/new/LivraisonPage'));

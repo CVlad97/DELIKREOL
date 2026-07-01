@@ -25,5 +25,12 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src"],
-  "exclude": ["src/components/ui/**", "src/main.ts", "src/counter.ts", "src/lib/supabase-enhanced.ts"]
+  "exclude": [
+    "src/components/ui/**",
+    "src/main.ts",
+    "src/counter.ts",
+    "src/lib/supabase-enhanced.ts",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx"
+  ]
 }
