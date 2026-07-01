@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getLocalMetrics, getPendingMetricsCount } from '../../services/metricsService';
 
 interface PartnerSubmission {
   code: string; partnerName: string; responsable: string; telephone: string;
@@ -15,6 +16,8 @@ export default function AdminDashboardPage() {
   const [submissions, setSubmissions] = useState<PartnerSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
+  const [metrics, setMetrics] = useState(getLocalMetrics());
+  const [pendingMetricsCount, setPendingMetricsCount] = useState(getPendingMetricsCount());
   const [refresh, setRefresh] = useState(0);
 
   useEffect(() => {
@@ -24,6 +27,8 @@ export default function AdminDashboardPage() {
       setEvents(JSON.parse(localStorage.getItem('delikreol_site_events') || '[]'));
       setMessages(JSON.parse(localStorage.getItem('delikreol_contact_messages') || '[]'));
     } catch { /* empty */ }
+    setMetrics(getLocalMetrics());
+    setPendingMetricsCount(getPendingMetricsCount());
     // Auto refresh
     const interval = setInterval(() => setRefresh(r => r + 1), 15000);
     return () => clearInterval(interval);
@@ -32,6 +37,7 @@ export default function AdminDashboardPage() {
   const unreadMessages = messages.filter((m: any) => m.status === 'unread').length;
   const newSubmissions = submissions.filter(s => s.status === 'pending').length;
   const partnersOpened = [...new Set(events.filter(e => e.type === 'partner_access_opened').map(e => e.code))];
+  const partnerAdhesions = submissions.filter((submission) => submission.status === 'pending' || submission.status === 'approved').length;
 
   const partnerLinks = [
     { name: "Coco's Food", code: 'COCO-PILOTE' },
@@ -42,6 +48,26 @@ export default function AdminDashboardPage() {
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <h1 className="text-2xl font-black mb-6">📊 Dashboard coordinateur</h1>
+
+      {/* Audience & adhésions */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="bg-white border rounded-xl p-4">
+          <p className="text-3xl font-black text-orange-600">{metrics.public_view}</p>
+          <p className="text-xs text-gray-500">Vues publiques</p>
+        </div>
+        <div className="bg-white border rounded-xl p-4">
+          <p className="text-3xl font-black text-orange-600">{metrics.partner_lead_success}</p>
+          <p className="text-xs text-gray-500">Adhésions partenaires</p>
+        </div>
+        <div className="bg-white border rounded-xl p-4">
+          <p className="text-3xl font-black text-orange-600">{partnerAdhesions}</p>
+          <p className="text-xs text-gray-500">Candidatures admin</p>
+        </div>
+        <div className="bg-white border rounded-xl p-4">
+          <p className="text-3xl font-black text-orange-600">{pendingMetricsCount}</p>
+          <p className="text-xs text-gray-500">Événements en file</p>
+        </div>
+      </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -60,6 +86,13 @@ export default function AdminDashboardPage() {
           {partnersOpened.length < 3 && <p className="text-sm text-amber-700">• {3 - partnersOpened.length} partenaire(s) n'ont pas encore ouvert leur accès</p>}
         </div>
       )}
+
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8">
+        <p className="font-bold text-blue-900 mb-1">Lecture des chiffres</p>
+        <p className="text-sm text-blue-800">
+          Les vues sont comptées côté site public. Les adhésions correspondent aux formulaires partenaires enregistrés ou envoyés.
+        </p>
+      </div>
 
       {/* Accès partenaires */}
       <div className="bg-white border rounded-xl p-5 mb-6">
