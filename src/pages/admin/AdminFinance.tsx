@@ -1,99 +1,190 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  DollarSign, TrendingUp, Download, FileText,
-  CreditCard, ArrowUpRight, ArrowDownRight, Landmark,
+  DollarSign,
+  Download,
+  FileText,
+  CreditCard,
+  Landmark,
+  RefreshCw,
+  PlusCircle,
+  AlertTriangle,
 } from 'lucide-react';
+import { supabase, isDemoMode, isSupabaseConfigured } from '../../lib/supabase';
 
-/* ─── Données démo réalistes ─── */
-const DEMO_BALANCE = 24_580.42;
+type FinanceSource = 'supabase' | 'local';
 
-interface DemoTransaction {
-  date: string;
-  label: string;
-  amount: number;
-  category: 'commission' | 'reversement' | 'client' | 'frais';
-  status: 'completed' | 'pending';
+type Invoice = {
+  id: string;
+  invoice_number?: string | null;
+  customer_name?: string | null;
+  customer_email?: string | null;
+  customer_phone?: string | null;
+  total_ht?: number | null;
+  total_tva?: number | null;
+  total_ttc?: number | null;
+  currency?: string | null;
+  status?: string | null;
+  qonto_invoice_id?: string | null;
+  created_at?: string | null;
+};
+
+const LOCAL_INVOICES_KEY = 'delikreol_admin_invoices_v1';
+
+function readLocalInvoices(): Invoice[] {
+  try {
+    return JSON.parse(localStorage.getItem(LOCAL_INVOICES_KEY) || '[]');
+  } catch {
+    return [];
+  }
 }
 
-const DEMO_TRANSACTIONS: DemoTransaction[] = [
-  { date: '2026-06-15', label: 'Commission Delikreol — Commande #C-2407', amount: 28.50, category: 'commission', status: 'completed' },
-  { date: '2026-06-14', label: 'Virement client — Commande #C-2406', amount: 189.50, category: 'client', status: 'completed' },
-  { date: '2026-06-13', label: 'Commission Delikreol — Commande #C-2405', amount: 18.95, category: 'commission', status: 'completed' },
-  { date: '2026-06-12', label: 'Reversement traiteur — Les Délices de Ninice', amount: -120.00, category: 'reversement', status: 'completed' },
-  { date: '2026-06-12', label: 'Frais livraison — Livreur Jean-Marc', amount: -15.00, category: 'frais', status: 'completed' },
-  { date: '2026-06-11', label: 'Virement client — Commande #C-2404', amount: 245.00, category: 'client', status: 'completed' },
-  { date: '2026-06-10', label: 'Commission Delikreol — Commande #C-2404', amount: 24.50, category: 'commission', status: 'pending' },
-  { date: '2026-06-09', label: 'Reversement traiteur — Coco\'s Food', amount: -175.00, category: 'reversement', status: 'completed' },
-  { date: '2026-06-08', label: 'Frais livraison — Livreur Marie-Ange', amount: -12.00, category: 'frais', status: 'completed' },
-  { date: '2026-06-07', label: 'Commission Delikreol — Commande #C-2403', amount: 15.00, category: 'commission', status: 'completed' },
-];
+function writeLocalInvoices(invoices: Invoice[]) {
+  localStorage.setItem(LOCAL_INVOICES_KEY, JSON.stringify(invoices));
+}
 
-const COMMISSIONS_DELIKREOL = {
-  total: 86.95,
-  moisPrecedent: 312.40,
-  tauxMoyen: 10,
-  transactions: DEMO_TRANSACTIONS.filter(t => t.category === 'commission'),
-};
+function formatMoney(value?: number | null, currency = 'EUR') {
+  return (value || 0).toLocaleString('fr-FR', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 2,
+  });
+}
 
-const REVERSEMENTS_PARTENAIRES = {
-  total: -295.00,
-  enAttente: 120.00,
-  partenaires: [
-    { nom: 'Les Délices de Ninice', montant: -120.00, date: '2026-06-12', statut: 'payé' },
-    { nom: 'Coco\'s Food', montant: -175.00, date: '2026-06-09', statut: 'payé' },
-  ],
-};
+function formatDate(value?: string | null) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleDateString('fr-FR');
+}
 
-/* ─── Helpers ─── */
-const categoryIcon = (cat: string) => {
-  switch (cat) {
-    case 'commission': return '💰';
-    case 'reversement': return '🏪';
-    case 'client': return '👤';
-    case 'frais': return '🚚';
-    default: return '📄';
-  }
-};
-
-const categoryLabel = (cat: string): string => {
-  switch (cat) {
-    case 'commission': return 'Commission';
-    case 'reversement': return 'Reversement';
-    case 'client': return 'Client';
-    case 'frais': return 'Frais';
-    default: return cat;
-  }
-};
-
-const statusBadge = (status: string): string => {
+function statusClass(status?: string | null) {
   switch (status) {
-    case 'completed': return 'badge badge-success';
-    case 'pending': return 'badge badge-warning';
-    default: return 'badge';
+    case 'paid':
+      return 'bg-emerald-100 text-emerald-700';
+    case 'issued':
+      return 'bg-blue-100 text-blue-700';
+    case 'cancelled':
+      return 'bg-red-100 text-red-700';
+    default:
+      return 'bg-amber-100 text-amber-700';
   }
-};
+}
 
-const statusLabel = (status: string): string => {
-  switch (status) {
-    case 'completed': return 'Validé';
-    case 'pending': return 'En attente';
-    default: return status;
-  }
-};
+function buildTestInvoice(): Omit<Invoice, 'id'> {
+  const stamp = new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
+  return {
+    invoice_number: `DK-${stamp}`,
+    customer_name: 'Client test admin',
+    customer_email: 'client-test@delikreol.local',
+    customer_phone: '0696000000',
+    total_ht: 25,
+    total_tva: 2.13,
+    total_ttc: 27.13,
+    currency: 'EUR',
+    status: 'draft',
+    qonto_invoice_id: null,
+    created_at: new Date().toISOString(),
+  };
+}
 
 export function AdminFinance() {
-  const [transactions] = useState<DemoTransaction[]>(DEMO_TRANSACTIONS);
-  const [balance] = useState(DEMO_BALANCE);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [source, setSource] = useState<FinanceSource>('local');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadInvoices = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    if (isSupabaseConfigured && !isDemoMode) {
+      try {
+        const { data, error: dbError } = await supabase
+          .from('invoices')
+          .select('id,invoice_number,customer_name,customer_email,customer_phone,total_ht,total_tva,total_ttc,currency,status,qonto_invoice_id,created_at')
+          .order('created_at', { ascending: false });
+
+        if (dbError) throw dbError;
+        setInvoices(data || []);
+        setSource('supabase');
+        setLoading(false);
+        return;
+      } catch (err: any) {
+        console.warn('[AdminFinance] Supabase load failed', err);
+        setError(err?.message || 'Lecture Supabase impossible. Affichage local uniquement.');
+      }
+    }
+
+    setInvoices(readLocalInvoices());
+    setSource('local');
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     document.title = 'Finance — Admin DeliKreol';
-  }, []);
+    void loadInvoices();
+  }, [loadInvoices]);
+
+  const stats = useMemo(() => {
+    const totalTtc = invoices.reduce((sum, inv) => sum + Number(inv.total_ttc || 0), 0);
+    const paid = invoices.filter((inv) => inv.status === 'paid');
+    const pending = invoices.filter((inv) => inv.status === 'pending' || inv.status === 'issued');
+    const draft = invoices.filter((inv) => !inv.status || inv.status === 'draft');
+    const qontoLinked = invoices.filter((inv) => Boolean(inv.qonto_invoice_id));
+
+    return {
+      totalTtc,
+      count: invoices.length,
+      paid: paid.length,
+      pending: pending.length,
+      draft: draft.length,
+      qontoLinked: qontoLinked.length,
+    };
+  }, [invoices]);
+
+  const handleCreateTestInvoice = useCallback(async () => {
+    const invoice = buildTestInvoice();
+    setSaving(true);
+    setError(null);
+
+    if (source === 'supabase' && isSupabaseConfigured && !isDemoMode) {
+      try {
+        const { error: dbError } = await supabase.from('invoices').insert(invoice);
+        if (dbError) throw dbError;
+        await loadInvoices();
+        setSaving(false);
+        return;
+      } catch (err: any) {
+        console.warn('[AdminFinance] Supabase insert failed', err);
+        setError(err?.message || 'Création Supabase impossible. Création locale utilisée.');
+      }
+    }
+
+    const localInvoice: Invoice = { ...invoice, id: `local_invoice_${Date.now()}` };
+    const next = [localInvoice, ...readLocalInvoices()];
+    writeLocalInvoices(next);
+    setInvoices(next);
+    setSource('local');
+    setSaving(false);
+  }, [loadInvoices, source]);
 
   const handleExportCSV = useCallback(() => {
-    const headers = 'Date;Libellé;Montant;Catégorie;Statut';
-    const rows = transactions.map(t =>
-      `${t.date};${t.label};${t.amount.toFixed(2)};${categoryLabel(t.category)};${statusLabel(t.status)}`
-    );
+    const headers = 'Numero;Client;Email;Telephone;Total HT;TVA;Total TTC;Devise;Statut;Qonto;Date';
+    const rows = invoices.map((inv) => [
+      inv.invoice_number || inv.id,
+      inv.customer_name || '',
+      inv.customer_email || '',
+      inv.customer_phone || '',
+      Number(inv.total_ht || 0).toFixed(2),
+      Number(inv.total_tva || 0).toFixed(2),
+      Number(inv.total_ttc || 0).toFixed(2),
+      inv.currency || 'EUR',
+      inv.status || 'draft',
+      inv.qonto_invoice_id || '',
+      inv.created_at || '',
+    ].map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(';'));
+
     const csv = [headers, ...rows].join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -102,161 +193,138 @@ export function AdminFinance() {
     a.download = `finance_delikreol_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [transactions]);
+  }, [invoices]);
 
   return (
     <div className="pageSection space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="sectionTitle text-2xl font-display font-bold flex items-center gap-2 text-foreground">
             <Landmark className="w-6 h-6 text-primary" />
-            Finance Delikreol
+            Finance DeliKreol
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Gestion financière &amp; commissions</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Facturation, suivi financier, export CSV et préparation Qonto.
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">Source : {source === 'supabase' ? 'Supabase' : 'localStorage'}</p>
         </div>
-        <button
-          onClick={handleExportCSV}
-          className="btn btnPrimary inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary/90 transition-all"
-        >
-          <Download className="w-4 h-4" />
-          Exporter CSV
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={loadInvoices}
+            className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-bold hover:bg-muted"
+            disabled={loading}
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Actualiser
+          </button>
+          <button
+            onClick={handleCreateTestInvoice}
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary/90 disabled:opacity-60"
+            disabled={saving}
+          >
+            <PlusCircle className="w-4 h-4" />
+            Facture test
+          </button>
+          <button
+            onClick={handleExportCSV}
+            className="inline-flex items-center gap-2 rounded-xl bg-muted px-4 py-2 text-sm font-bold text-muted-foreground hover:text-foreground"
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
+          </button>
+        </div>
       </div>
 
-      {/* Solde Qonto */}
-      <div className="card bg-card rounded-2xl border border-border/50 p-6">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-            <DollarSign className="w-5 h-5" />
+      {error && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          <AlertTriangle className="mr-2 inline h-4 w-4" />
+          {error}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-2xl border bg-card p-5">
+          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Total factures</p>
+          <p className="mt-2 text-3xl font-black text-foreground">{stats.count}</p>
+        </div>
+        <div className="rounded-2xl border bg-card p-5">
+          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Total TTC</p>
+          <p className="mt-2 text-3xl font-black text-emerald-600">{formatMoney(stats.totalTtc)}</p>
+        </div>
+        <div className="rounded-2xl border bg-card p-5">
+          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Payées / attente</p>
+          <p className="mt-2 text-3xl font-black text-foreground">{stats.paid} / {stats.pending}</p>
+        </div>
+        <div className="rounded-2xl border bg-card p-5">
+          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Qonto lié</p>
+          <p className="mt-2 text-3xl font-black text-primary">{stats.qontoLinked}</p>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border bg-card p-5">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <CreditCard className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Solde Qonto</p>
-            <p className="text-3xl font-black text-foreground">
-              {balance.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+            <h2 className="font-bold text-foreground">Qonto ready</h2>
+            <p className="text-xs text-muted-foreground">
+              La page prépare les données. La synchronisation réelle doit rester côté backend Supabase Edge Function.
             </p>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground mt-1">
-          <CreditCard className="w-3 h-3 inline mr-1" />
-          Compte professionnel — Données démo
-        </p>
-      </div>
-
-      {/* Commissions Delikreol + Reversements partenaires */}
-      <div className="cardGrid grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Commissions */}
-        <div className="card bg-card rounded-2xl border border-border/50 p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <TrendingUp className="w-5 h-5 text-emerald-500" />
-            <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Commissions Delikreol</h2>
-          </div>
-          <p className="text-2xl font-black text-emerald-600">
-            {COMMISSIONS_DELIKREOL.total.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Mois précédent : {COMMISSIONS_DELIKREOL.moisPrecedent.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
-            {' · '}Taux moyen : {COMMISSIONS_DELIKREOL.tauxMoyen} %
-          </p>
-          <div className="mt-3 space-y-1.5">
-            {COMMISSIONS_DELIKREOL.transactions.slice(0, 3).map((t, i) => (
-              <div key={i} className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground truncate max-w-[200px]">{t.label}</span>
-                <span className="font-semibold text-emerald-600">+{t.amount.toFixed(2)} €</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Reversements */}
-        <div className="card bg-card rounded-2xl border border-border/50 p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <ArrowUpRight className="w-5 h-5 text-destructive" />
-            <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Reversements partenaires</h2>
-          </div>
-          <p className="text-2xl font-black text-destructive">
-            {Math.abs(REVERSEMENTS_PARTENAIRES.total).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            En attente : {REVERSEMENTS_PARTENAIRES.enAttente.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
-          </p>
-          <div className="mt-3 space-y-1.5">
-            {REVERSEMENTS_PARTENAIRES.partenaires.map((p, i) => (
-              <div key={i} className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground truncate max-w-[160px]">{p.nom}</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-destructive">{p.montant.toFixed(2)} €</span>
-                  <span className={statusBadge(p.statut === 'payé' ? 'completed' : 'pending')}>{p.statut}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="rounded-xl border border-dashed p-3 text-sm text-muted-foreground">
+          Aucun secret Qonto n’est utilisé dans le frontend. Connecter ensuite <code>supabase/functions/qonto-sync</code> avec variables serveur.
         </div>
       </div>
 
-      {/* Transactions récentes */}
-      <div className="sectionTitle flex items-center justify-between mt-2 mb-4">
-        <h2 className="text-lg font-display font-bold text-foreground flex items-center gap-2">
-          <FileText className="w-5 h-5 text-primary" />
-          Transactions récentes
-        </h2>
-      </div>
-      <div className="card bg-card rounded-2xl border border-border/50 overflow-hidden">
+      <div className="rounded-2xl border bg-card overflow-hidden">
+        <div className="border-b px-5 py-4">
+          <h2 className="flex items-center gap-2 text-lg font-display font-bold text-foreground">
+            <FileText className="w-5 h-5 text-primary" />
+            Factures
+          </h2>
+        </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border/50">
-                <th className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Date</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Libellé</th>
-                <th className="text-right px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Montant</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Catégorie</th>
-                <th className="text-center px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Statut</th>
+          <table className="w-full text-sm">
+            <thead className="bg-muted/30">
+              <tr className="border-b">
+                <th className="px-4 py-3 text-left text-xs font-bold uppercase text-muted-foreground">N°</th>
+                <th className="px-4 py-3 text-left text-xs font-bold uppercase text-muted-foreground">Client</th>
+                <th className="px-4 py-3 text-left text-xs font-bold uppercase text-muted-foreground">Contact</th>
+                <th className="px-4 py-3 text-right text-xs font-bold uppercase text-muted-foreground">Total TTC</th>
+                <th className="px-4 py-3 text-center text-xs font-bold uppercase text-muted-foreground">Statut</th>
+                <th className="px-4 py-3 text-left text-xs font-bold uppercase text-muted-foreground">Qonto</th>
+                <th className="px-4 py-3 text-left text-xs font-bold uppercase text-muted-foreground">Date</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/30">
-              {transactions.map((tx, i) => (
-                <tr key={i} className="hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3 text-sm text-foreground whitespace-nowrap">{tx.date}</td>
-                  <td className="px-4 py-3 text-sm text-foreground max-w-xs truncate">
-                    <span className="mr-1.5">{categoryIcon(tx.category)}</span>
-                    {tx.label}
+            <tbody className="divide-y">
+              {loading ? (
+                <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Chargement…</td></tr>
+              ) : invoices.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                    Aucune facture pour le moment. Clique sur “Facture test” pour vérifier le module.
                   </td>
-                  <td className={`px-4 py-3 text-sm font-bold text-right whitespace-nowrap ${tx.amount >= 0 ? 'text-emerald-600' : 'text-destructive'}`}>
-                    {tx.amount >= 0 ? '+' : ''}{tx.amount.toFixed(2)} €
+                </tr>
+              ) : invoices.map((inv) => (
+                <tr key={inv.id} className="hover:bg-muted/20">
+                  <td className="px-4 py-3 font-mono text-xs">{inv.invoice_number || inv.id}</td>
+                  <td className="px-4 py-3 font-semibold">{inv.customer_name || '—'}</td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground">
+                    <div>{inv.customer_email || '—'}</div>
+                    <div>{inv.customer_phone || ''}</div>
                   </td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground hidden md:table-cell">{categoryLabel(tx.category)}</td>
+                  <td className="px-4 py-3 text-right font-bold">{formatMoney(inv.total_ttc, inv.currency || 'EUR')}</td>
                   <td className="px-4 py-3 text-center">
-                    <span className={statusBadge(tx.status)}>
-                      {tx.amount >= 0 ? <ArrowUpRight className="w-3 h-3 inline mr-0.5" /> : <ArrowDownRight className="w-3 h-3 inline mr-0.5" />}
-                      {statusLabel(tx.status)}
-                    </span>
+                    <span className={`rounded-full px-2 py-1 text-xs font-bold ${statusClass(inv.status)}`}>{inv.status || 'draft'}</span>
                   </td>
+                  <td className="px-4 py-3 text-xs">{inv.qonto_invoice_id || 'Non synchronisée'}</td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground">{formatDate(inv.created_at)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* Export CSV card */}
-      <div className="card bg-card rounded-2xl border border-border/50 p-5 mt-2">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <Download className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-bold text-foreground text-sm">Export des données financières</h3>
-              <p className="text-xs text-muted-foreground">Téléchargez les transactions au format CSV</p>
-            </div>
-          </div>
-          <button
-            onClick={handleExportCSV}
-            className="btn btnPrimary inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary/90 transition-all"
-          >
-            <Download className="w-4 h-4" />
-            Exporter CSV
-          </button>
         </div>
       </div>
     </div>
