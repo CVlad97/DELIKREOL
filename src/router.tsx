@@ -5,14 +5,10 @@ import { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { ToastProvider } from './contexts/ToastContext';
-
-// Existing pages (eager)
 import { ProSpacePage } from './pages/ProSpacePage';
 import { OrderStatusPage } from './pages/OrderStatusPage';
 
-// New public pages — lazy loaded
 const HomePage = lazy(() => import('./pages/new/HomePage'));
-
 const LoginPage = lazy(() => import('./pages/new/LoginPage'));
 const CataloguePage = lazy(() => import('./pages/new/CataloguePage'));
 const ProductDetailPage = lazy(() => import('./pages/new/ProductDetailPage'));
@@ -34,10 +30,11 @@ const NotFoundPage = lazy(() => import('./pages/new/NotFoundPage'));
 const ContactPage = lazy(() => import('./pages/new/ContactPage'));
 const FeedbackPage = lazy(() => import('./pages/new/FeedbackPage'));
 const CatererSignupPage = lazy(() => import('./pages/new/CatererSignupPage'));
+const PartnerAccessPage = lazy(() => import('./pages/new/PartnerAccessPage'));
 
-// Admin pages — fully lazy loaded
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminSystemTest = lazy(() => import('./pages/admin/AdminSystemTest'));
 const AdminCommandes = lazy(() => import('./pages/admin/AdminCommandes'));
 const AdminCatalog = lazy(() => import('./pages/admin/AdminCatalog'));
 const AdminPartners = lazy(() => import('./pages/admin/AdminPartners'));
@@ -51,7 +48,6 @@ const AdminOrchestrateur = lazy(() => import('./pages/admin/AdminOrchestrateur')
 const AdminOffres = lazy(() => import('./pages/admin/AdminOffres'));
 const AdminSimulation = lazy(() => import('./pages/admin/AdminSimulation'));
 const AdminCatererValidation = lazy(() => import('./pages/admin/AdminCatererValidation'));
-const PartnerAccessPage = lazy(() => import('./pages/new/PartnerAccessPage'));
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'));
 const AdminFinance = lazy(() => import('./pages/admin/AdminFinance'));
 const AdminFeedback = lazy(() => import('./pages/admin/AdminFeedback'));
@@ -66,35 +62,16 @@ const CookiesPage = lazy(() => import('./pages/legal/CookiesPage'));
 const RemoursementPage = lazy(() => import('./pages/legal/RemoursementPage'));
 const PartnerTermsPage = lazy(() => import('./pages/legal/PartnerTermsPage'));
 
-const basePath = import.meta.env.VITE_BASE_PATH || import.meta.env.BASE_URL || '/';
-
 function PageLoader() {
-  return (
-    <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-10 h-10 rounded-full border-3 border-primary/20 border-t-primary animate-spin" />
-        <p className="text-sm text-muted-foreground">Chargement…</p>
-      </div>
-    </div>
-  );
+  return <div className="flex items-center justify-center min-h-[60vh]"><div className="flex flex-col items-center gap-4"><div className="w-10 h-10 rounded-full border-3 border-primary/20 border-t-primary animate-spin" /><p className="text-sm text-muted-foreground">Chargement…</p></div></div>;
 }
 
 function LayoutWrapper() {
-  return (
-    <Suspense fallback={<PageLoader />}>
-      <Outlet />
-    </Suspense>
-  );
+  return <Suspense fallback={<PageLoader />}><Outlet /></Suspense>;
 }
 
 function AdminWrapper() {
-  return (
-    <ProtectedAdminRoute>
-      <Suspense fallback={<PageLoader />}>
-        <AdminLayout />
-      </Suspense>
-    </ProtectedAdminRoute>
-  );
+  return <ProtectedAdminRoute><Suspense fallback={<PageLoader />}><AdminLayout /></Suspense></ProtectedAdminRoute>;
 }
 
 export function AppRouter() {
@@ -105,7 +82,6 @@ export function AppRouter() {
           <CartProvider>
             <ToastProvider>
               <Routes>
-                {/* Public routes */}
                 <Route element={<LayoutWrapper />}>
                   <Route index element={<HomePage />} />
                   <Route path="catalogue" element={<CataloguePage />} />
@@ -113,7 +89,7 @@ export function AppRouter() {
                   <Route path="traiteurs" element={<TraiteursListPage />} />
                   <Route path="traiteur/:slug" element={<TraiteurDetailPage />} />
                   <Route path="panier" element={<CartPage />} />
-             <Route path="compte" element={<AccountPage />} />
+                  <Route path="compte" element={<AccountPage />} />
                   <Route path="devis" element={<DevisPage />} />
                   <Route path="devenir-partenaire" element={<DevenirPartenairePage />} />
                   <Route path="devenir-livreur" element={<DevenirLivreurPage />} />
@@ -127,9 +103,7 @@ export function AppRouter() {
                   <Route path="inscription-traiteur" element={<CatererSignupPage />} />
                   <Route path="pro" element={<ProSpacePage />} />
                   <Route path="statut-commande" element={<OrderStatusPage />} />
-                  {/* Partenaire */}
                   <Route path="partenaire" element={<PartnerAccessPage />} />
-                  {/* Pages légales */}
                   <Route path="cgu" element={<TermsOfService />} />
                   <Route path="cgv" element={<CGVPage />} />
                   <Route path="confidentialite" element={<PrivacyPolicy />} />
@@ -139,10 +113,9 @@ export function AppRouter() {
                   <Route path="conditions-partenaires" element={<PartnerTermsPage />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Route>
-
-                {/* Admin routes */}
                 <Route path="admin" element={<AdminWrapper />}>
                   <Route index element={<AdminDashboard />} />
+                  <Route path="test-systeme" element={<AdminSystemTest />} />
                   <Route path="commandes" element={<AdminCommandes />} />
                   <Route path="catalogue" element={<AdminCatalog />} />
                   <Route path="partenaires" element={<AdminPartners />} />
@@ -157,12 +130,12 @@ export function AppRouter() {
                   <Route path="simulation" element={<AdminSimulation />} />
                   <Route path="dashboard" element={<AdminDashboardPage />} />
                   <Route path="finance" element={<AdminFinance />} />
+                  <Route path="factures" element={<AdminInvoices />} />
                   <Route path="feedback" element={<AdminFeedback />} />
                   <Route path="applications" element={<AdminPartnersApplications />} />
                   <Route path="caterer-validation" element={<AdminCatererValidation />} />
                   <Route path="acces-pilote" element={<AdminPilotAccess />} />
-                  <Route path="points-relais" element={<AdminPointsRelais />} />
-             <Route path="factures" element={<AdminInvoices />} />
+                  <Route path="points-relais-v2" element={<AdminPointsRelais />} />
                 </Route>
               </Routes>
             </ToastProvider>
