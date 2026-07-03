@@ -128,3 +128,5 @@ export function AdminPointsRelais() {
     </div>
   );
 }
+
+export default AdminPointsRelais;
