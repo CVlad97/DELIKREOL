@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Package, Truck, MapPin, FileText,
   Target, Brain, Settings, Menu, X, Home, ShoppingCart,
-  Briefcase, DollarSign, ChefHat, ClipboardList, MessageCircle, KeyRound, Activity, Camera
+  Briefcase, DollarSign, ChefHat, ClipboardList, MessageCircle, KeyRound, Activity
 } from 'lucide-react';
 
 const adminNav = [
@@ -15,18 +15,16 @@ const adminNav = [
   { label: 'Livreurs', icon: Truck, path: '/admin/livreurs' },
   { label: 'Points relais', icon: MapPin, path: '/admin/points-relais' },
   { label: 'Devis', icon: FileText, path: '/admin/devis' },
-  { label: 'Points relais', icon: MapPin, path: '/admin/points-relais' },
   { label: 'Leads', icon: Target, path: '/admin/leads' },
   { label: 'Mémoire projet', icon: Brain, path: '/admin/memoire' },
   { label: 'Paramètres', icon: Settings, path: '/admin/parametres' },
   { label: 'Orchestrateur', icon: Briefcase, path: '/admin/orchestrateur' },
   { label: 'Offres cash', icon: DollarSign, path: '/admin/offres' },
   { label: 'Finance', icon: DollarSign, path: '/admin/finance' },
+  { label: 'Factures', icon: DollarSign, path: '/admin/factures' },
   { label: 'Feedback', icon: MessageCircle, path: '/admin/feedback' },
   { label: 'Candidatures', icon: ClipboardList, path: '/admin/applications' },
   { label: 'Validation traiteurs', icon: ChefHat, path: '/admin/caterer-validation' },
-  { label: 'Factures', icon: DollarSign, path: '/admin/factures' },
-  { label: 'Médias Traiteurs', icon: Camera, path: '/admin/media-traiteurs' },
   { label: 'Accès pilote', icon: KeyRound, path: '/admin/acces-pilote' },
 ];
 
