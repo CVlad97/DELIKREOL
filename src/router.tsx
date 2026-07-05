@@ -6,6 +6,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { ProSpacePage } from './pages/ProSpacePage';
+import { ProPartnerPlatformPage } from './pages/new/ProPartnerPlatformPage';
 import { OrderStatusPage } from './pages/OrderStatusPage';
 
 const HomePage = lazy(() => import('./pages/new/HomePage'));
@@ -102,6 +103,7 @@ export function AppRouter() {
                   <Route path="connexion" element={<LoginPage />} />
                   <Route path="inscription-traiteur" element={<CatererSignupPage />} />
                   <Route path="pro" element={<ProSpacePage />} />
+                  <Route path="partenaires-plateforme" element={<ProPartnerPlatformPage />} />
                   <Route path="statut-commande" element={<OrderStatusPage />} />
                   <Route path="partenaire" element={<PartnerAccessPage />} />
                   <Route path="cgu" element={<TermsOfService />} />
