@@ -27,6 +27,7 @@ import { traiteurSpaces, formatEuro, type TraiteurSpace } from '../../data/trait
 import { useCart } from '../../contexts/CartContext';
 import { useToast } from '../../contexts/ToastContext';
 import type { Product } from '../../lib/supabase';
+import { resolveTraiteurCoords } from '../../services/partnerGeo';
 import { HowItWorksCompact } from '../../components/HowItWorksCompact';
 import { AutoCarousel } from '../../components/AutoCarousel';
 import { ScrollCarousel } from '../../components/ScrollCarousel';
@@ -118,16 +119,18 @@ export default function HomePage() {
         setGeoPosition(coords);
         setGeoStatus('success');
 
-        // Calculer distances pour tous les traiteurs avec lat/lng
+        // Calculer distances pour tous les traiteurs
         const withDistance = traiteurSpaces
-          .filter((t) => t.latitude != null && t.longitude != null)
-          .map((t) => ({
-            traiteur: t,
-            distance: calculateDistanceKm(coords, {
-              latitude: t.latitude!,
-              longitude: t.longitude!,
-            }),
-          }))
+          .map((t) => {
+            const lat = t.latitude ?? resolveTraiteurCoords(t.zone, t.commune)?.latitude;
+            const lng = t.longitude ?? resolveTraiteurCoords(t.zone, t.commune)?.longitude;
+            if (!lat || !lng) return null;
+            return {
+              traiteur: t,
+              distance: calculateDistanceKm(coords, { latitude: lat, longitude: lng }),
+            };
+          })
+          .filter((item): item is NonNullable<typeof item> => item !== null)
           .sort((a, b) => a.distance - b.distance)
           .slice(0, 3);
 

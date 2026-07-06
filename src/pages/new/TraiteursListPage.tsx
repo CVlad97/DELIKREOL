@@ -3,6 +3,7 @@ import { ChefHat, MapPin, Star, ArrowRight, AlertCircle, Locate, Euro } from 'lu
 import { traiteurSpaces, formatEuro } from '../../data/traiteurs';
 import { useEffect, useState } from 'react';
 import { calculateDistanceKm } from '../../services/geolocation';
+import { resolveTraiteurCoords } from '../../services/partnerGeo';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 import { mockProducts } from '../../data/mockCatalog';
 import { setPageMeta } from '../../services/seo';
@@ -38,8 +39,11 @@ export function TraiteursListPage() {
     );
   };
 
-  const distTo = (lat?: number, lng?: number) => {
-    if (!userPosition || !lat || !lng) return null;
+  const distTo = (t: any) => {
+    if (!userPosition) return null;
+    const lat = t.latitude ?? resolveTraiteurCoords(t.zone, t.commune)?.latitude;
+    const lng = t.longitude ?? resolveTraiteurCoords(t.zone, t.commune)?.longitude;
+    if (!lat || !lng) return null;
     return calculateDistanceKm(userPosition, { latitude: lat, longitude: lng });
   };
 
@@ -71,8 +75,8 @@ export function TraiteursListPage() {
     .filter(t => !selectedCommune || t.zone?.toLowerCase().includes(selectedCommune.toLowerCase()))
     .sort((a, b) => {
       if (userPosition) {
-        const dA = distTo(a.latitude, a.longitude) ?? 999;
-        const dB = distTo(b.latitude, b.longitude) ?? 999;
+        const dA = distTo(a) ?? 999;
+        const dB = distTo(b) ?? 999;
         return dA - dB;
       }
       return 0;
@@ -181,7 +185,7 @@ export function TraiteursListPage() {
                     {traiteur.commune || traiteur.zone || 'Martinique'}
                   </span>
                   {(() => {
-                    const dist = distTo(traiteur.latitude, traiteur.longitude);
+                    const dist = distTo(traiteur);
                     return dist !== null ? (
                       <span className="text-[10px] px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full font-semibold">
                         {dist.toFixed(1)} km

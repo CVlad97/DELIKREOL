@@ -1,6 +1,8 @@
 export type MartiniqueCommune = {
   name: string;
   aliases: string[];
+  latitude?: number;
+  longitude?: number;
 };
 
 export const martiniqueCommunes: MartiniqueCommune[] = [
