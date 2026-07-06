@@ -129,7 +129,7 @@ const initialFormData: CatererFormData = {
 
 function validateMartiniquePhone(phone: string): boolean {
   const cleaned = phone.replace(/[\s\-.]/g, '');
-  return /^(?:\+596|0)696\d{6}$/.test(cleaned);
+  return /^(?:[+]596|0)696\d{6}$/.test(cleaned);
 }
 
 export default function CatererSignupPage() {
