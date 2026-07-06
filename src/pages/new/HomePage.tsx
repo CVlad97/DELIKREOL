@@ -233,14 +233,13 @@ export default function HomePage() {
             loading="lazy"
             src={`${import.meta.env.BASE_URL}branding/hero-tropical.png`}
             alt="Livraison DeliKreol en Martinique"
-            className="hidden h-full w-[58%] object-cover opacity-95 lg:absolute lg:inset-y-0 lg:right-0 lg:block"
+            className="h-full w-full object-cover object-center opacity-32 lg:opacity-55"
           />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(251,146,60,0.16),transparent_28%),radial-gradient(circle_at_86%_20%,rgba(16,185,129,0.13),transparent_24%),linear-gradient(90deg,#fffdf8_0%,#fff9ef_46%,rgba(255,253,248,0.42)_100%)]" />
-          <div className="absolute inset-y-0 right-0 hidden w-[58%] bg-gradient-to-r from-[#fffdf8] via-[#fffdf8]/55 to-transparent lg:block" />
-          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(251,146,60,0.14),transparent_28%),radial-gradient(circle_at_86%_20%,rgba(16,185,129,0.1),transparent_24%),linear-gradient(90deg,rgba(255,253,248,0.98)_0%,rgba(255,249,239,0.94)_48%,rgba(255,253,248,0.38)_100%)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/85" />
         </div>
 
-        <div className="relative mx-auto grid min-h-[720px] max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 md:py-20 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)] lg:px-8 lg:py-24">
+        <div className="relative mx-auto grid min-h-[720px] max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 md:py-20 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)] lg:px-8 lg:py-24">
           <div className="max-w-3xl">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-orange-100 bg-orange-50 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-orange-700 shadow-sm">
               <Sparkles className="h-3.5 w-3.5" />
@@ -360,7 +359,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="relative -mt-14 pb-14 md:pb-20">
+      <section className="relative -mt-10 pb-10 md:-mt-12 md:pb-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-4 md:grid-cols-3">
             {launchCards.map((card) => {
@@ -385,7 +384,7 @@ export default function HomePage() {
             })}
           </div>
 
-          <div className="mt-10 rounded-[2.5rem] border border-orange-100 bg-white p-5 shadow-soft md:p-8">
+          <div className="mt-8 rounded-[2.25rem] border border-orange-100 bg-white p-4 shadow-soft md:p-6">
             <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
               <div>
                 <h2 className="text-3xl font-black tracking-tight text-stone-950 md:text-4xl">À commander maintenant</h2>
