@@ -49,6 +49,17 @@ async function checkWhatsApp(data) {
   return data.includes('wa.me/') || data.includes('WHATSAPP_NUMBER') || data.includes('596696653589');
 }
 
+function isSpaFallback(data) {
+  return (
+    data.includes('SPA fallback') ||
+    data.includes('Redirection vers DeliKreol') ||
+    data.includes("window.location.href = '/DELIKREOL/'") ||
+    data.includes('Redirection vers l\'application') ||
+    data.includes('<div id="root"></div>') ||
+    data.includes('/src/main.tsx')
+  );
+}
+
 (async () => {
   console.log('=== AUDIT COMPLET DELIKREOL ===\n');
   fs.mkdirSync('reports', { recursive: true });
@@ -85,13 +96,15 @@ async function checkWhatsApp(data) {
     const { status, data, error } = await fetch(url);
     const title = data ? await getTitle(data) : error;
     const hasWA = data ? await checkWhatsApp(data) : false;
+    const spaFallback = data ? isSpaFallback(data) : false;
+    const okStatus = status === 200 || (status === 404 && spaFallback);
 
     const record = { page: p.name, url, status, title: title.slice(0, 80), hasWhatsApp: hasWA };
     results.push(record);
     total++;
 
-    if (status === 200) {
-      console.log(`✅ ${status} ${p.path.padEnd(35)} ${title.slice(0, 50)} ${hasWA ? '📞' : '  '}`);
+    if (okStatus) {
+      console.log(`✅ ${status} ${p.path.padEnd(35)} ${title.slice(0, 50)} ${hasWA ? '📞' : '  '}${spaFallback && status === 404 ? ' (SPA)' : ''}`);
       ok++;
     } else {
       console.log(`❌ ${status || error} ${p.path} - ${title?.slice(0, 60)}`);
@@ -104,7 +117,7 @@ async function checkWhatsApp(data) {
       console.log(`   → ${links.length} liens internes trouvés`);
       for (const link of links.slice(0, 20)) {
         const r2 = await fetch(link);
-        if (r2.status !== 200) {
+        if (r2.status !== 200 && !(r2.status === 404 && isSpaFallback(r2.data))) {
           console.log(`   ❌ ${r2.status} ${link.replace(BASE, '')}`);
           broken.push({ url: link, status: r2.status });
         }

@@ -93,6 +93,37 @@ export default function HomePage() {
   const allFeatured = [...featuredProducts, ...featuredTraiteurItems.filter(p => !featuredProducts.find(fp => fp.id === p.id))];
   // Tous les traiteurs confirmés sur l'accueil
   const featuredTraiteurs = traiteurSpaces.filter(t => t.status === 'public confirmé');
+  const heroStats = [
+    { value: `${featuredTraiteurs.length}`, label: 'traiteurs locaux', icon: ChefHat },
+    { value: '34', label: 'communes couvertes', icon: MapPin },
+    { value: '25+', label: 'produits visibles', icon: Utensils },
+  ];
+  const launchCards = [
+    {
+      title: 'Commander maintenant',
+      description: 'Parcours court vers les plats disponibles, retrait ou livraison selon la commune.',
+      to: '/catalogue',
+      cta: 'Voir le catalogue',
+      icon: ShoppingBag,
+      tone: 'from-orange-500 to-amber-500',
+    },
+    {
+      title: 'Demande pro',
+      description: 'Devis rapide pour entreprises, événements, santé, seniors et commandes groupées.',
+      to: '/devis',
+      cta: 'Créer une demande',
+      icon: FileText,
+      tone: 'from-emerald-600 to-teal-500',
+    },
+    {
+      title: 'Rejoindre DeliKreol',
+      description: 'Traiteurs, points relais et livreurs peuvent entrer dans le réseau séparément.',
+      to: '/devenir-partenaire',
+      cta: 'Devenir partenaire',
+      icon: Handshake,
+      tone: 'from-stone-900 to-orange-700',
+    },
+  ];
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -195,89 +226,193 @@ export default function HomePage() {
 
   return (
     <Layout>
-      {/* Hero Section — Image tropicale */}
-      <section className="relative h-[70vh] min-h-[500px] max-h-[700px] overflow-hidden">
-              {/* Background image */}
-              <div className="absolute inset-0">
-                <img loading="lazy"
-                  src={`${import.meta.env.BASE_URL}branding/hero-tropical.png`}
-                  alt="Livraison DeliKreol en Martinique"
-                  className="w-full h-full object-cover"
+      {/* Hero Section — concept moderne orienté conversion */}
+      <section className="relative isolate overflow-hidden bg-[#fffdf8] text-stone-950">
+        <div className="absolute inset-0">
+          <img
+            loading="lazy"
+            src={`${import.meta.env.BASE_URL}branding/hero-tropical.png`}
+            alt="Livraison DeliKreol en Martinique"
+            className="hidden h-full w-[58%] object-cover opacity-95 lg:absolute lg:inset-y-0 lg:right-0 lg:block"
+          />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(251,146,60,0.16),transparent_28%),radial-gradient(circle_at_86%_20%,rgba(16,185,129,0.13),transparent_24%),linear-gradient(90deg,#fffdf8_0%,#fff9ef_46%,rgba(255,253,248,0.42)_100%)]" />
+          <div className="absolute inset-y-0 right-0 hidden w-[58%] bg-gradient-to-r from-[#fffdf8] via-[#fffdf8]/55 to-transparent lg:block" />
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background to-transparent" />
+        </div>
+
+        <div className="relative mx-auto grid min-h-[720px] max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 md:py-20 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)] lg:px-8 lg:py-24">
+          <div className="max-w-3xl">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-orange-100 bg-orange-50 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-orange-700 shadow-sm">
+              <Sparkles className="h-3.5 w-3.5" />
+              Livraison & retrait en Martinique
+            </div>
+
+            <h1 className="max-w-4xl text-5xl font-black leading-[0.95] tracking-tight text-emerald-950 sm:text-6xl lg:text-7xl">
+              Commandez <span className="text-orange-600">créole local</span> en Martinique
+            </h1>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-600 md:text-xl">
+              Plats maison, traiteurs locaux — livraison ou retrait.
+            </p>
+
+            <div className="mt-8 max-w-2xl rounded-[2rem] border border-orange-100 bg-white p-2 shadow-[0_22px_70px_-42px_rgba(42,25,15,0.65)]">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <label className="flex min-h-[58px] flex-1 items-center gap-3 rounded-3xl bg-orange-50/80 px-4 text-left">
+                  <Search className="h-5 w-5 shrink-0 text-orange-500" />
+                  <span className="sr-only">Choisir une commune</span>
+                  <select
+                    value={selectedCommune}
+                    onChange={(e) => {
+                      const nextCommune = e.target.value;
+                      setSelectedCommune(nextCommune);
+                      if (nextCommune) navigate(`/catalogue?commune=${encodeURIComponent(nextCommune)}`);
+                    }}
+                    className="w-full bg-transparent text-sm font-bold text-stone-800 outline-none"
+                  >
+                    <option value="">Choisir ma commune</option>
+                    {martiniqueCommunes.slice(0, 34).map((c) => (
+                      <option key={c.name} value={c.name}>{c.name}</option>
+                    ))}
+                  </select>
+                </label>
+                <Link
+                  to="/catalogue"
+                  className="inline-flex min-h-[58px] items-center justify-center gap-2 rounded-3xl bg-orange-500 px-6 text-sm font-black text-white shadow-lg shadow-orange-500/25 transition-all hover:-translate-y-0.5 hover:bg-orange-600"
+                >
+                  Commander maintenant
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+              <Link
+                to="/devis"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-orange-100 bg-white px-5 py-3 text-sm font-black text-stone-800 shadow-sm transition-all hover:-translate-y-0.5 hover:border-orange-200"
+              >
+                <FileText className="h-4 w-4" />
+                Demande pro
+              </Link>
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Bonjour, je veux lancer une commande DELIKREOL.')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-100 bg-emerald-50 px-5 py-3 text-sm font-black text-emerald-800 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-emerald-100"
+              >
+                <MessageCircle className="h-4 w-4" />
+                WhatsApp rapide
+              </a>
+            </div>
+
+            <div className="mt-9 grid max-w-2xl grid-cols-3 gap-3">
+              {heroStats.map((stat) => {
+                const Icon = stat.icon;
+                return (
+                  <div key={stat.label} className="rounded-3xl border border-orange-100 bg-white/90 p-4 shadow-sm backdrop-blur-xl">
+                    <Icon className="mb-3 h-5 w-5 text-orange-500" />
+                    <div className="text-2xl font-black text-emerald-950">{stat.value}</div>
+                    <div className="mt-1 text-xs font-semibold leading-snug text-stone-500">{stat.label}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="relative hidden lg:block">
+            <div className="absolute -left-10 top-12 h-32 w-32 rounded-full bg-orange-400/20 blur-3xl" />
+            <div className="absolute -right-8 bottom-12 h-40 w-40 rounded-full bg-emerald-400/20 blur-3xl" />
+            <div className="relative rounded-[2.5rem] border border-orange-100 bg-white/72 p-4 shadow-[0_32px_100px_-48px_rgba(42,25,15,0.72)] backdrop-blur-2xl">
+              <div className="overflow-hidden rounded-[2rem] bg-white">
+                <img
+                  loading="lazy"
+                  src={`${import.meta.env.BASE_URL}vendors/ninice/ninice-01-showcase.jpg`}
+                  alt="Plat local DeliKreol"
+                  className="h-[420px] w-full object-cover"
                 />
-                {/* Overlay gradient */}
-                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
               </div>
-
-              {/* Content */}
-              <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
-                <div className="max-w-xl text-white">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white text-xs font-semibold mb-4">
-                    <Sparkles className="w-3 h-3" />
-                    Livraison & retrait en Martinique
+              <div className="absolute -bottom-8 left-8 right-8 rounded-[1.75rem] border border-orange-100 bg-white p-5 text-stone-900 shadow-2xl">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-500">À commander</p>
+                    <h2 className="mt-1 text-xl font-black">Colombo, accras, desserts pays</h2>
+                    <p className="mt-1 text-sm text-stone-500">Sélection locale, disponibilité vérifiée avec le prestataire.</p>
                   </div>
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-3">
-                    Commandez créole<br />
-                    <span className="text-orange-400">local en Martinique</span>
-                  </h1>
-                  <p className="text-base text-white/80 mb-6 max-w-lg">
-                    Plats maison, traiteurs locaux — livraison ou retrait.
-                  </p>
-
-                  {/* Commune Search */}
-                  <div className="max-w-md mb-6">
-                    <div className="flex items-center gap-2 p-1.5 bg-white/95 backdrop-blur-sm rounded-2xl">
-                      <div className="flex-1 flex items-center gap-2 px-3">
-                        <MapPin className="w-4 h-4 text-orange-500 flex-shrink-0" />
-                        <select
-                          value={selectedCommune}
-                          onChange={(e) => {
-                            setSelectedCommune(e.target.value);
-                            if (e.target.value) window.location.href = '/catalogue?commune=' + encodeURIComponent(e.target.value);
-                          }}
-                          className="w-full bg-transparent text-sm text-gray-700 font-medium outline-none py-2"
-                        >
-                          <option value="">Ma commune</option>
-                          {martiniqueCommunes.slice(0, 34).map((c) => (
-                            <option key={c.name} value={c.name}>{c.name}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <Link to="/catalogue" className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold rounded-xl transition-colors whitespace-nowrap">
-                        Commander
-                      </Link>
-                    </div>
-                  </div>
-
-                  {/* Quick links */}
-                  <div className="flex flex-wrap gap-3">
-                    <Link to="/catalogue" className="flex items-center gap-1.5 px-4 py-2 bg-white/15 backdrop-blur-sm hover:bg-white/25 text-white text-sm font-semibold rounded-xl transition-all">
-                      <ShoppingBag className="w-4 h-4" /> Commander
-                    </Link>
-                    <Link to="/inscription-traiteur" className="flex items-center gap-1.5 px-4 py-2 bg-white/15 backdrop-blur-sm hover:bg-white/25 text-white text-sm font-semibold rounded-xl transition-all">
-                      Devenir partenaire
-                    </Link>
-                    <Link to="/devis" className="flex items-center gap-1.5 px-4 py-2 bg-white/15 backdrop-blur-sm hover:bg-white/25 text-white text-sm font-semibold rounded-xl transition-all">
-                      Demande pro
-                    </Link>
+                  <div className="rounded-2xl bg-emerald-50 px-3 py-2 text-right">
+                    <p className="text-xs font-bold text-emerald-700">Retrait</p>
+                    <p className="text-sm font-black text-emerald-900">ou livraison</p>
                   </div>
                 </div>
               </div>
-            </section>
-            <section className="py-12 md:py-16 bg-white">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl md:text-4xl font-black text-gray-900">Nos meilleures ventes</h2>
-                  <p className="text-gray-500 mt-2">Entrées, plats et desserts — les préférés de nos clients</p>
-                </div>
-                <AutoCarousel items={featuredProducts.slice(0, 12)} />
+              <div className="absolute -left-8 top-10 overflow-hidden rounded-3xl border-4 border-white bg-white shadow-2xl">
+                <img
+                  loading="lazy"
+                  src={`${import.meta.env.BASE_URL}vendors/saveurs-afrique/saveurs-afrique-board.jpg`}
+                  alt="Traiteur partenaire DeliKreol"
+                  className="h-32 w-32 object-cover"
+                />
               </div>
-            </section>
+              <div className="absolute -right-7 top-28 rounded-3xl border border-white/50 bg-white/90 p-4 text-stone-900 shadow-2xl backdrop-blur-xl">
+                <Truck className="mb-2 h-6 w-6 text-orange-500" />
+                <p className="text-sm font-black">Créneau planifié</p>
+                <p className="text-xs text-stone-500">commande maîtrisée</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative -mt-14 pb-14 md:pb-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-4 md:grid-cols-3">
+            {launchCards.map((card) => {
+              const Icon = card.icon;
+              return (
+                <Link
+                  key={card.title}
+                  to={card.to}
+                  className="group rounded-[2rem] border border-orange-100 bg-white p-5 shadow-[0_18px_55px_-36px_rgba(42,25,15,0.55)] transition-all hover:-translate-y-1 hover:border-orange-200 hover:shadow-[0_28px_80px_-42px_rgba(42,25,15,0.7)]"
+                >
+                  <div className={`mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${card.tone} text-white shadow-lg`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <h2 className="text-xl font-black text-stone-950">{card.title}</h2>
+                  <p className="mt-2 min-h-[48px] text-sm leading-6 text-stone-500">{card.description}</p>
+                  <span className="mt-5 inline-flex items-center gap-2 text-sm font-black text-orange-600">
+                    {card.cta}
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+
+          <div className="mt-10 rounded-[2.5rem] border border-orange-100 bg-white p-5 shadow-soft md:p-8">
+            <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+              <div>
+                <h2 className="text-3xl font-black tracking-tight text-stone-950 md:text-4xl">À commander maintenant</h2>
+                <p className="mt-2 text-stone-500">Entrées, plats et desserts — les préférés de nos clients</p>
+              </div>
+              <Link
+                to="/catalogue"
+                className="inline-flex items-center gap-2 self-start rounded-2xl bg-stone-950 px-5 py-3 text-sm font-black text-white transition-all hover:bg-orange-600 md:self-auto"
+              >
+                Catalogue complet
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <AutoCarousel items={featuredProducts.slice(0, 12)} />
+          </div>
+        </div>
+      </section>
 
       {/* 📍 Traiteurs près de chez moi */}
-      <section className="py-12 md:py-16 bg-white">
+      <section className="py-14 md:py-20 bg-gradient-to-b from-background via-white to-orange-50/45">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-2">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-orange-700">
+              <Locate className="h-3.5 w-3.5" />
+              Localisation
+            </div>
+            <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">
               Traiteurs près de chez toi
             </h2>
             <p className="text-gray-500 text-base">
@@ -286,7 +421,7 @@ export default function HomePage() {
           </div>
 
           {geoStatus === 'idle' && !showLocationSelector && (
-            <div className="text-center">
+            <div className="text-center rounded-[2.25rem] border border-orange-100 bg-white p-8 shadow-soft">
               <button
                 onClick={handleFindNearby}
                 className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-orange-200 text-base"
@@ -310,7 +445,7 @@ export default function HomePage() {
 
           {geoStatus === 'denied' && !showLocationSelector && (
             <div className="text-center py-8">
-              <div className="inline-flex flex-col items-center gap-4 px-8 py-6 bg-amber-50 rounded-2xl border border-amber-200 max-w-lg mx-auto">
+              <div className="inline-flex flex-col items-center gap-4 px-8 py-7 bg-white rounded-[2rem] border border-amber-200 max-w-lg mx-auto shadow-soft">
                 <MapPin className="w-8 h-8 text-amber-600" />
                 <p className="text-amber-800 font-semibold">
                   Active ta position pour voir les traiteurs près de chez toi
@@ -352,7 +487,7 @@ export default function HomePage() {
                       <Link
                         key={traiteur.slug}
                         to={`/traiteur/${traiteur.slug}`}
-                        className="card group bg-white rounded-3xl border border-orange-100 hover:border-orange-300 overflow-hidden shadow-sm hover:shadow-xl transition-all"
+                        className="card group bg-white rounded-[2rem] border border-orange-100 hover:border-orange-300 overflow-hidden shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all"
                       >
                         <div className={`h-32 bg-gradient-to-br ${traiteur.gradient} relative overflow-hidden`}>
                           {traiteur.heroImage && (
@@ -437,11 +572,11 @@ export default function HomePage() {
 
       {/* Featured Traiteurs */}
       {featuredTraiteurs.length > 0 && (
-        <section className="py-16 md:py-20 bg-[#FFFBF0]">
+        <section className="py-16 md:py-24 bg-gradient-to-b from-orange-50/70 via-white to-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-10">
               <div>
-                <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">
+                <h2 className="text-3xl md:text-5xl font-black tracking-tight text-gray-900 mb-2">
                   Nos traiteurs partenaires
                 </h2>
                 <p className="text-gray-500 text-lg">
@@ -461,7 +596,7 @@ export default function HomePage() {
                 <Link
                   key={traiteur.slug}
                   to={`/traiteur/${traiteur.slug}`}
-                  className="snap-start flex-shrink-0 w-[260px] sm:w-[280px] group bg-white rounded-3xl border border-orange-100 hover:border-orange-300 overflow-hidden shadow-sm hover:shadow-xl transition-all"
+                  className="snap-start flex-shrink-0 w-[260px] sm:w-[290px] group bg-white rounded-[2rem] border border-orange-100 hover:border-orange-300 overflow-hidden shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all"
                 >
                   <div className={`h-36 bg-gradient-to-br ${traiteur.gradient} relative overflow-hidden`}>
                     {traiteur.heroImage && (
@@ -521,11 +656,11 @@ export default function HomePage() {
 
       {/* Featured Products — Carrousel */}
       {allFeatured.length > 0 && (
-        <section className="py-16 md:py-20 bg-white">
+        <section className="py-16 md:py-24 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-10">
               <div>
-                <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">
+                <h2 className="text-3xl md:text-5xl font-black tracking-tight text-gray-900 mb-2">
                   Meilleures ventes
                 </h2>
                 <p className="text-gray-500 text-lg">
@@ -544,7 +679,7 @@ export default function HomePage() {
               {allFeatured.map((product: any) => (
                 <div
                   key={product.id}
-                  className="snap-start flex-shrink-0 w-[280px] sm:w-[300px] group bg-white rounded-3xl border border-orange-100 hover:border-orange-300 overflow-hidden shadow-sm hover:shadow-lg transition-all"
+                  className="snap-start flex-shrink-0 w-[280px] sm:w-[310px] group bg-white rounded-[2rem] border border-orange-100 hover:border-orange-300 overflow-hidden shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all"
                 >
                   <div className="relative aspect-[4/3] overflow-hidden bg-orange-50">
                     {product.image ? (
@@ -609,10 +744,10 @@ export default function HomePage() {
       )}
 
       {/* Categories Quick Links */}
-      <section className="py-16 md:py-20 bg-[#FFFBF0]">
+      <section className="py-16 md:py-20 bg-gradient-to-b from-orange-50/70 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-3">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight text-gray-900 mb-3">
               Catégories
             </h2>
             <p className="text-gray-500 text-lg">Explorez par type de cuisine</p>
@@ -622,7 +757,7 @@ export default function HomePage() {
               <Link
                 key={cat.id}
                 to={`/catalogue?cat=${cat.id}`}
-                className="px-6 py-3 bg-white hover:bg-orange-50 text-gray-700 hover:text-orange-600 font-semibold rounded-2xl border border-orange-100 hover:border-orange-300 transition-all hover:scale-105 shadow-sm text-sm"
+                className="px-6 py-3 bg-white hover:bg-orange-50 text-gray-700 hover:text-orange-600 font-bold rounded-2xl border border-orange-100 hover:border-orange-300 transition-all hover:-translate-y-0.5 shadow-sm text-sm"
               >
                 {cat.name}
               </Link>
@@ -632,13 +767,15 @@ export default function HomePage() {
       </section>
 
       {/* Trust / Le meilleur est à venir */}
-      <section className="py-16 md:py-20 bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 text-white">
+      <section className="relative overflow-hidden py-16 md:py-24 bg-gradient-to-br from-stone-950 via-emerald-950 to-orange-700 text-white">
+        <div className="absolute left-0 top-0 h-64 w-64 rounded-full bg-orange-400/25 blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-emerald-300/15 blur-3xl" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="text-3xl md:text-4xl font-black mb-4">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">
               Le meilleur est à venir
             </h2>
-            <p className="text-lg text-orange-100 leading-relaxed">
+            <p className="text-lg text-white/70 leading-relaxed">
               DeliKreol grandit chaque jour. De nouveaux traiteurs, de nouvelles communes, de nouvelles saveurs rejoignent la plateforme.
             </p>
           </div>
@@ -651,10 +788,10 @@ export default function HomePage() {
             ].map((stat, index) => {
               const Icon = stat.icon;
               return (
-                <div key={index} className="text-center p-6 rounded-2xl bg-white/10 backdrop-blur-sm">
+                <div key={index} className="text-center p-6 rounded-[1.75rem] border border-white/10 bg-white/10 backdrop-blur-sm">
                   <Icon className="w-8 h-8 mx-auto mb-3 text-amber-200" />
                   <div className="text-3xl font-black mb-1">{stat.value}</div>
-                  <div className="text-sm text-orange-100">{stat.label}</div>
+                  <div className="text-sm text-white/70">{stat.label}</div>
                 </div>
               );
             })}
@@ -663,16 +800,16 @@ export default function HomePage() {
       </section>
 
       {/* Pourquoi Delikreol */}
-      <section className="py-16 md:py-20 bg-[#FFFBF0]">
+      <section className="py-16 md:py-24 bg-gradient-to-b from-white to-orange-50/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-3">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight text-gray-900 mb-3">
               Pourquoi Delikreol
             </h2>
             <p className="text-gray-500 text-lg">La plateforme martiniquaise qui valorise nos producteurs</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-3xl p-8 border border-orange-100 shadow-sm hover:shadow-lg transition-all text-center">
+            <div className="bg-white rounded-[2rem] p-8 border border-orange-100 shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all text-center">
               <div className="w-14 h-14 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center mx-auto mb-5">
                 <ChefHat className="w-7 h-7" />
               </div>
@@ -682,7 +819,7 @@ export default function HomePage() {
                 Manger créole, c'est soutenir l'économie de l'île.
               </p>
             </div>
-            <div className="bg-white rounded-3xl p-8 border border-orange-100 shadow-sm hover:shadow-lg transition-all text-center">
+            <div className="bg-white rounded-[2rem] p-8 border border-orange-100 shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all text-center">
               <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-5">
                 <Clock className="w-7 h-7" />
               </div>
@@ -692,7 +829,7 @@ export default function HomePage() {
                 selon votre commune. Vous décidez.
               </p>
             </div>
-            <div className="bg-white rounded-3xl p-8 border border-orange-100 shadow-sm hover:shadow-lg transition-all text-center">
+            <div className="bg-white rounded-[2rem] p-8 border border-orange-100 shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all text-center">
               <div className="w-14 h-14 rounded-2xl bg-green-100 text-green-600 flex items-center justify-center mx-auto mb-5">
                 <MessageCircle className="w-7 h-7" />
               </div>
@@ -707,10 +844,10 @@ export default function HomePage() {
       </section>
 
       {/* Ils nous ont rejoints */}
-      <section className="py-16 md:py-20 bg-white">
+      <section className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-3">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight text-gray-900 mb-3">
               Ils nous ont rejoints
             </h2>
             <p className="text-gray-500 text-lg">
@@ -728,7 +865,7 @@ export default function HomePage() {
               <Link
                 key={caterer.slug}
                 to={`/traiteur/${caterer.slug}`}
-                className="group flex flex-col items-center gap-3 p-5 rounded-2xl bg-[#FFFBF0] border border-orange-100 hover:border-orange-300 hover:shadow-lg transition-all text-center"
+                className="group flex flex-col items-center gap-3 p-5 rounded-[1.75rem] bg-orange-50/70 border border-orange-100 hover:-translate-y-1 hover:border-orange-300 hover:shadow-lg transition-all text-center"
               >
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-orange-200 group-hover:border-orange-400 transition-colors bg-white shadow-sm">
                                   <img loading="lazy"
@@ -747,10 +884,10 @@ export default function HomePage() {
       </section>
 
       {/* Avis clients — Ce que disent nos clients */}
-      <section className="py-16 md:py-20 bg-white">
+      <section className="py-16 md:py-24 bg-gradient-to-b from-white to-orange-50/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <h2 className="sectionTitle text-3xl md:text-4xl font-black text-gray-900 mb-3">
+            <h2 className="sectionTitle text-3xl md:text-5xl font-black tracking-tight text-gray-900 mb-3">
               Ce que disent nos clients
             </h2>
             <p className="text-gray-500 text-lg">
@@ -782,7 +919,7 @@ export default function HomePage() {
             ].map((review, index) => (
               <div
                 key={index}
-                className="card bg-[#FFFBF0] rounded-3xl p-6 border border-orange-100 shadow-sm hover:shadow-lg transition-all"
+                className="card bg-white rounded-[2rem] p-6 border border-orange-100 shadow-sm hover:-translate-y-1 hover:shadow-lg transition-all"
               >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-12 h-12 rounded-full bg-orange-500 text-white flex items-center justify-center text-lg font-bold shrink-0">
@@ -809,14 +946,14 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════
           LIVRAISON SPÉCIALE & SERVICES SANTÉ
           ═══════════════════════════════════════════ */}
-      <section className="py-12 md:py-16 bg-white">
+      <section className="py-14 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
               <span>💚</span>
               Services spéciaux
             </div>
-            <h2 className="text-2xl md:text-4xl font-black text-gray-900 tracking-tight mb-3">
+            <h2 className="text-3xl md:text-5xl font-black text-gray-900 tracking-tight mb-3">
               Livraison adaptée à vos besoins
             </h2>
             <p className="text-gray-500 max-w-2xl mx-auto leading-relaxed">
@@ -826,7 +963,7 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {/* Carte 1 — Livraison retraite */}
-            <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-3xl border border-blue-100 hover:shadow-lg transition-all">
+            <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-[2rem] border border-blue-100 hover:-translate-y-1 hover:shadow-lg transition-all">
               <div className="w-14 h-14 rounded-2xl bg-blue-500 text-white flex items-center justify-center text-2xl mb-4 shadow-md">
                 🏠
               </div>
@@ -846,7 +983,7 @@ export default function HomePage() {
             </div>
 
             {/* Carte 2 — Partenariat infirmier */}
-            <div className="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-3xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-[2rem] border border-emerald-100 hover:-translate-y-1 hover:shadow-lg transition-all">
               <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-2xl mb-4 shadow-md">
                 🩺
               </div>
@@ -866,7 +1003,7 @@ export default function HomePage() {
             </div>
 
             {/* Carte 3 — Livraison bateau */}
-            <div className="p-6 bg-gradient-to-br from-cyan-50 to-cyan-100/50 rounded-3xl border border-cyan-100 hover:shadow-lg transition-all">
+            <div className="p-6 bg-gradient-to-br from-cyan-50 to-cyan-100/50 rounded-[2rem] border border-cyan-100 hover:-translate-y-1 hover:shadow-lg transition-all">
               <div className="w-14 h-14 rounded-2xl bg-cyan-500 text-white flex items-center justify-center text-2xl mb-4 shadow-md">
                 🚤
               </div>
@@ -901,31 +1038,37 @@ export default function HomePage() {
       </section>
 
       {/* CTA Final */}
-      <section className="py-16 md:py-20 bg-white">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-4">
-            Prêt à commander ?
-          </h2>
-          <p className="text-gray-500 text-lg mb-8 leading-relaxed">
-            Choisissez un plat ou un traiteur, indiquez votre commune, puis DeliKreol vérifie la disponibilité avec le prestataire.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              to="/catalogue"
-              className="flex items-center gap-2 px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-orange-200 text-lg"
-            >
-              <ShoppingBag className="w-5 h-5" />
-              Voir le catalogue
-            </Link>
-            <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Bonjour, j\'ai besoin d\'aide sur DELIKREOL.')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-8 py-4 bg-green-500 hover:bg-green-600 text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-green-200 text-lg"
-            >
-              <MessageCircle className="w-5 h-5" fill="white" />
-              Support WhatsApp
-            </a>
+      <section className="py-16 md:py-24 bg-gradient-to-b from-white to-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-stone-950 via-emerald-950 to-orange-700 px-6 py-12 text-center text-white shadow-[0_32px_100px_-55px_rgba(42,25,15,0.75)] md:px-12 md:py-16">
+            <div className="absolute -left-16 top-0 h-56 w-56 rounded-full bg-orange-400/25 blur-3xl" />
+            <div className="absolute -right-10 bottom-0 h-64 w-64 rounded-full bg-emerald-300/15 blur-3xl" />
+            <div className="relative mx-auto max-w-3xl">
+              <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">
+                Prêt à commander ?
+              </h2>
+              <p className="text-white/70 text-lg mb-8 leading-relaxed">
+                Choisissez un plat ou un traiteur, indiquez votre commune, puis DeliKreol vérifie la disponibilité avec le prestataire.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  to="/catalogue"
+                  className="flex items-center gap-2 px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl transition-all hover:-translate-y-0.5 shadow-lg shadow-orange-950/20 text-lg"
+                >
+                  <ShoppingBag className="w-5 h-5" />
+                  Voir le catalogue
+                </Link>
+                <a
+                  href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Bonjour, j\'ai besoin d\'aide sur DELIKREOL.')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold rounded-2xl transition-all hover:-translate-y-0.5 text-lg"
+                >
+                  <MessageCircle className="w-5 h-5" fill="white" />
+                  Support WhatsApp
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>

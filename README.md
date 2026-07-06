@@ -24,6 +24,26 @@ Plateforme de coordination traiteurs, plats créoles, points relais et livraison
 - `/points-relais` — Candidature point relais
 - `/admin` — Dashboard coordinateur
 
+## Operations revenu
+- `REVENUE_OPERATING_BOARD.md` — priorites revenus, separation projets, scripts commerciaux
+- `CAMPAIGN_LAUNCH_KIT.md` — campagnes WhatsApp/email pretes a envoyer
+- `BANK_AND_KEYS_READINESS.md` — banque, cles, paiement, email domaine
+- `REPOS_OPERATING_MAP.md` — role de chaque repo local
+- `OBJECTIVES_SEQUENCE.md` — gates verifiables avant action
+- `SUPABASE_READINESS_AUDIT.md` — audit RLS et migration de durcissement
+- `SUPABASE_MIGRATION_TEST_PLAN.md` — plan de test avant application distante
+- `ANYCLAW_MISSION_CONTROL.md` — cockpit Anyclaw publie
+- `PROSPECTION_PUBLIC_SOURCES.md` — sources publiques de prospection
+- `data/prospection/revenue-prospects-log.csv` — suivi prospects et relances
+
+## Verification
+```bash
+npm run typecheck
+npm run lint
+npm run build
+npm run audit:routes
+```
+
 ## Licence
 Tous droits réservés. Voir LICENSE.
 

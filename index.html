@@ -9,37 +9,35 @@
     <meta http-equiv="Expires" content="0" />
     <link rel="manifest" href="/DELIKREOL/manifest.json" />
 
-    <!-- Facebook / Meta Pixel (activé via variable d'env) -->
-    <script>
-      (function() {
-        var pixelId = '%VITE_FB_PIXEL_ID%';
-        if (window.location.hostname !== 'localhost' && pixelId && pixelId.indexOf('VITE_') !== 0) {
-          !function(f,b,e,v,n,t,s)
-          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-          n.queue=[];t=b.createElement(e);t.async=!0;
-          t.src=v;s=b.getElementsByTagName(e)[0];
-          s.parentNode.insertBefore(t,s)}(window, document,'script',
-          'https://connect.facebook.net/en_US/fbevents.js');
-          fbq('init', pixelId);
-          fbq('track', 'PageView');
-        }
-      })();
-    </script>
+    <!-- Tracking optionnel: charge Meta/GA seulement si les variables Vite existent -->
+    <script type="module">
+      const isLocal = window.location.hostname === 'localhost';
+      const metaPixelId = import.meta.env.VITE_FB_PIXEL_ID;
+      const googleAnalyticsId = import.meta.env.VITE_GA_ID;
 
-    <!-- Google Analytics (via VITE_GA_ID) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_ID%"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      (function() {
-        var id = '%VITE_GA_ID%';
-        if (window.location.hostname !== 'localhost' && id && id.indexOf('VITE_') !== 0) {
-          gtag('js', new Date());
-          gtag('config', id, { anonymize_ip: true });
-        }
-      })();
+      if (!isLocal && metaPixelId) {
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        window.fbq('init', metaPixelId);
+        window.fbq('track', 'PageView');
+      }
+
+      if (!isLocal && googleAnalyticsId) {
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function gtag(){ window.dataLayer.push(arguments); };
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(googleAnalyticsId)}`;
+        document.head.appendChild(script);
+        window.gtag('js', new Date());
+        window.gtag('config', googleAnalyticsId, { anonymize_ip: true });
+      }
     </script>
 
     <title>DeliKreol — Commandez créole local en Martinique | Livraison & Traiteur</title>

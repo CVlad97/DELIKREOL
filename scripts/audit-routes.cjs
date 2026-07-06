@@ -31,13 +31,25 @@ const ROUTES_ADMIN = [
   'admin/factures',
 ];
 
-async function check(url) {
+async function fetchPage(url) {
   try {
-    const res = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(8000) });
-    return { status: res.status, ok: res.status < 500 };
+    const res = await fetch(url, { method: 'GET', signal: AbortSignal.timeout(8000) });
+    const text = await res.text();
+    return { status: res.status, ok: res.status < 500, text };
   } catch {
-    return { status: 0, ok: false };
+    return { status: 0, ok: false, text: '' };
   }
+}
+
+function isSpaFallback(text) {
+  return (
+    text.includes('SPA fallback') ||
+    text.includes('Redirection vers DeliKreol') ||
+    text.includes("window.location.href = '/DELIKREOL/'") ||
+    text.includes('Redirection vers l\'application') ||
+    text.includes('<div id="root"></div>') ||
+    text.includes('/src/main.tsx')
+  );
 }
 
 async function main() {
@@ -47,27 +59,30 @@ async function main() {
   console.log('📄 Routes publiques :');
   for (const path of ROUTES_200) {
     const url = `${BASE}/${path}`;
-    const r = await check(url);
-    const label = r.ok ? '✅' : '❌';
-    console.log(`  ${label} /${path} → ${r.status}`);
-    if (r.ok) ok++; else ko++;
+    const r = await fetchPage(url);
+    const spaFallback = r.status === 404 && isSpaFallback(r.text);
+    const routeOk = r.status === 200 || spaFallback;
+    const label = routeOk ? '✅' : '❌';
+    console.log(`  ${label} /${path} → ${r.status}${spaFallback ? ' (SPA)' : ''}`);
+    if (routeOk) ok++; else ko++;
   }
 
   console.log('\n🔐 Routes admin :');
   for (const path of ROUTES_ADMIN) {
     const url = `${BASE}/${path}`;
-    const r = await check(url);
-    // SPA routes return 404 from server, that's expected
-    const label = r.status <= 404 ? '✅' : '❌';
-    console.log(`  ${label} /${path} → ${r.status} (SPA normal si 404)`);
-    if (r.status <= 404) ok++; else ko++;
+    const r = await fetchPage(url);
+    const spaFallback = r.status === 404 && isSpaFallback(r.text);
+    const routeOk = r.status <= 404 || spaFallback;
+    const label = routeOk ? '✅' : '❌';
+    console.log(`  ${label} /${path} → ${r.status}${spaFallback ? ' (SPA)' : ' (SPA normal si 404)'}`);
+    if (routeOk) ok++; else ko++;
   }
 
   console.log('\n📸 Images :');
   const images = ['branding/logo-mark.svg', 'assets/hero-food.svg', 'vendors/ninice/hero.jpg', 'vendors/coco/hero.jpg', 'vendors/saveurs-afrique/hero.jpg'];
   for (const img of images) {
     const url = `${BASE}/${img}`;
-    const r = await check(url);
+    const r = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(8000) }).then(res => ({ status: res.status })).catch(() => ({ status: 0 }));
     const label = r.status === 200 ? '✅' : '❌';
     console.log(`  ${label} ${img} → ${r.status}`);
     if (r.status === 200) ok++; else ko++;

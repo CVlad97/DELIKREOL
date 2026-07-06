@@ -1,0 +1,6 @@
+segment,nom,commune,contact,canal,offre,priorite,statut,prochaine_action,notes
+entreprise,,,,whatsapp,Repas entreprise,P0,a_contacter,envoyer_message_entreprise,
+traiteur,,,,whatsapp,Pack visibilite traiteur,P1,a_contacter,envoyer_message_partenaire,
+restaurant,,,,instagram,Carte menu digitale,P1,a_contacter,proposer_menu_digital,
+association,,,,email,Devis traiteur evenementiel,P1,a_contacter,demander_besoin_evenement,
+administration,,,,email,Repas entreprise,P0,a_contacter,proposer_devis_reunion,

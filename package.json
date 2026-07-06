@@ -10,6 +10,8 @@
     "preview": "npm run build && wrangler dev",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "test": "vitest run",
+    "check:env": "node scripts/check-env.cjs",
+    "sequence:status": "node scripts/sequence-status.cjs",
     "audit:routes": "node scripts/audit-routes.cjs",
     "test:watch": "vitest",
     "test:e2e": "playwright test",

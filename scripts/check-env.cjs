@@ -13,56 +13,54 @@ const REQUIRED_ENV_VARS = [
     name: 'VITE_SUPABASE_URL',
     description: 'URL du projet Supabase',
     example: 'https://your-project.supabase.co',
-    validation: (val) => val.startsWith('https://') && val.includes('.supabase.co')
+    validation: (val) => val.startsWith('https://') && val.includes('.supabase.co'),
   },
   {
     name: 'VITE_SUPABASE_ANON_KEY',
     description: 'Clé anonyme publique Supabase',
     example: 'SUPABASE_ANON_KEY_REPLACE_ME',
-    // Supabase anon keys often look like JWTs, but we don't enforce a JWT shape here
-    // to avoid encouraging token-like literals in docs/examples.
-    validation: (val) => typeof val === 'string' && val.length >= 20
-  }
+    validation: (val) => typeof val === 'string' && val.length >= 20,
+  },
 ];
 
 const OPTIONAL_ENV_VARS = [
   {
     name: 'VITE_STRIPE_PUBLIC_KEY',
     description: 'Clé publique Stripe (pour paiements)',
-    example: 'pk_...'
+    example: 'pk_...',
   },
   {
     name: 'VITE_GOOGLE_MAPS_API_KEY',
     description: 'Clé API Google Maps (optionnel, pour géolocalisation avancée)',
-    example: 'AIzaSy...'
+    example: 'AIzaSy...',
   },
   {
     name: 'VITE_SENTRY_DSN',
     description: 'Sentry DSN (pour monitoring erreurs)',
-    example: 'https://...@sentry.io/...'
-  }
+    example: 'https://...@sentry.io/...',
+  },
 ];
 
 function checkEnvVar(envVar) {
   const value = process.env[envVar.name];
-  
+
   if (!value) {
     return {
       status: 'missing',
-      message: `❌ ${chalk.red(envVar.name)} manquante`
+      message: `❌ ${chalk.red(envVar.name)} manquante`,
     };
   }
 
   if (envVar.validation && !envVar.validation(value)) {
     return {
       status: 'invalid',
-      message: `⚠️  ${chalk.yellow(envVar.name)} invalide (format incorrect)`
+      message: `⚠️  ${chalk.yellow(envVar.name)} invalide (format incorrect)`,
     };
   }
 
   return {
     status: 'ok',
-    message: `✅ ${chalk.green(envVar.name)} OK`
+    message: `✅ ${chalk.green(envVar.name)} OK`,
   };
 }
 
@@ -72,12 +70,11 @@ function main() {
   let hasErrors = false;
   let hasWarnings = false;
 
-  // Vérifier les variables obligatoires
   console.log(chalk.bold('Variables obligatoires:'));
   for (const envVar of REQUIRED_ENV_VARS) {
     const result = checkEnvVar(envVar);
     console.log(result.message);
-    
+
     if (result.status !== 'ok') {
       console.log(`  ${chalk.gray('Description:')} ${envVar.description}`);
       console.log(`  ${chalk.gray('Exemple:')} ${envVar.example}\n`);
@@ -85,11 +82,10 @@ function main() {
     }
   }
 
-  // Vérifier les variables optionnelles
   console.log(chalk.bold('\nVariables optionnelles:'));
   for (const envVar of OPTIONAL_ENV_VARS) {
     const result = checkEnvVar(envVar);
-    
+
     if (result.status === 'ok') {
       console.log(result.message);
     } else {
@@ -98,7 +94,6 @@ function main() {
     }
   }
 
-  // Résumé
   console.log('\n' + chalk.bold('─'.repeat(60)) + '\n');
 
   if (hasErrors) {
@@ -120,16 +115,14 @@ function main() {
     console.log(chalk.green.bold('✅ SUCCÈS: Toutes les variables sont correctement définies\n'));
   }
 
-  // Afficher les URLs de configuration
   console.log(chalk.blue('🔗 Liens utiles:'));
   console.log(`  Supabase Dashboard: ${chalk.underline('https://supabase.com/dashboard/project/boihlgodmclljtckhmgz')}`);
   console.log(`  Cloudflare Pages: ${chalk.underline('https://dash.cloudflare.com')}`);
   console.log(`  Production: ${chalk.underline('https://delikreol.pages.dev')}\n`);
 
-  process.exit(hasWarnings ? 0 : 0);
+  process.exit(0);
 }
 
-// Exécuter le script
 if (require.main === module) {
   main();
 }
