@@ -54,7 +54,7 @@ export function AdminPointsRelais() {
     load();
   };
 
-  const cleanPhone = (p?: string) => p?.replace(/[\s\-\+]/g, '')?.replace(/^0/, '596') || '';
+  const cleanPhone = (p?: string) => p?.replace(/[\s\-+]/g, '')?.replace(/^0/, '596') || '';
 
   useEffect(() => { load(); }, []);
 
