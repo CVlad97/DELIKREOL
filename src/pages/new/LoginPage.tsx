@@ -1,10 +1,12 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, ShieldCheck, Send } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
 import { supabase, isDemoMode } from '../../lib/supabase';
+import { trackPublicView } from '../../services/metricsService';
 
 export default function LoginPage() {
+  useEffect(() => { trackPublicView(); }, []);
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle');
   const [message, setMessage] = useState('');

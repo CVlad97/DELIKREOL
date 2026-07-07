@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { setPageMeta } from '../../services/seo';
 import type { Product } from '../../types';
 import { ReviewSection, RatingBadge } from '../../components/ReviewSection';
+import { trackPublicView } from '../../services/metricsService';
 
 const WHATSAPP_NUMBER = '596696653589';
 
@@ -41,6 +42,7 @@ export function TraiteurDetailPage() {
     document.title = traiteur
       ? `${traiteur.name} — DeliKreol`
       : 'Traiteur introuvable — DeliKreol';
+    trackPublicView();
   }, [traiteur]);
 
   useEffect(() => {

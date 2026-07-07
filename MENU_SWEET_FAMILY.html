@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sweet Family Traiteur Orianne — Menu</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #1a0a0a;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+    .menu {
+      max-width: 800px;
+      width: 100%;
+      background: linear-gradient(145deg, #1f0f0f 0%, #2d1515 50%, #1a0a0a 100%);
+      border: 2px solid #c9a84c;
+      border-radius: 24px;
+      padding: 48px 40px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .menu::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #c9a84c, #f5d76e, #c9a84c);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 30px;
+      border-bottom: 1px solid #c9a84c33;
+    }
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 42px;
+      background: linear-gradient(135deg, #f5d76e, #c9a84c, #f5d76e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+    .header .subtitle {
+      font-size: 18px;
+      color: #c9a84c;
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+    .header .tagline {
+      font-size: 14px;
+      color: #a08060;
+      margin-top: 12px;
+      font-style: italic;
+    }
+    .header .contact {
+      margin-top: 16px;
+      font-size: 14px;
+      color: #fff;
+      background: #c9a84c22;
+      display: inline-block;
+      padding: 8px 24px;
+      border-radius: 50px;
+      border: 1px solid #c9a84c44;
+    }
+    .section {
+      margin-bottom: 32px;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: #f5d76e;
+      font-weight: 700;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #c9a84c22;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-title .emoji { font-size: 24px; }
+    .item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid #ffffff08;
+    }
+    .item:last-child { border-bottom: none; }
+    .item-info { flex: 1; }
+    .item-name {
+      font-weight: 700;
+      font-size: 16px;
+      color: #fff;
+    }
+    .item-desc {
+      font-size: 13px;
+      color: #a08060;
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+    .item-price {
+      font-weight: 700;
+      font-size: 18px;
+      color: #f5d76e;
+      white-space: nowrap;
+      margin-left: 20px;
+      min-width: 60px;
+      text-align: right;
+    }
+    .item-price .min { font-size: 11px; font-weight: 400; color: #806040; display: block; }
+    .featured-dot { color: #f5d76e; margin-right: 4px; }
+    .footer {
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid #c9a84c33;
+      text-align: center;
+    }
+    .footer p {
+      color: #806040;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .footer .order-info {
+      margin-top: 16px;
+      padding: 16px;
+      background: #c9a84c11;
+      border-radius: 12px;
+      border: 1px dashed #c9a84c44;
+    }
+    .footer .order-info strong { color: #f5d76e; }
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #1a0a0a;
+      background: #f5d76e;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      margin-left: 8px;
+    }
+    @media print {
+      body { padding: 0; background: #1a0a0a; }
+      .menu { border-radius: 0; max-width: 100%; }
+    }
+    @media (max-width: 600px) {
+      .menu { padding: 24px 16px; }
+      .header h1 { font-size: 28px; }
+      .item { flex-direction: column; }
+      .item-price { margin-left: 0; margin-top: 4px; text-align: left; }
+    }
+  </style>
+</head>
+<body>
+<div class="menu">
+
+  <div class="header">
+    <h1>Sweet Family</h1>
+    <div class="subtitle">Traiteur Orianne</div>
+    <div class="tagline">« L'Art de recevoir, la passion des saveurs antillaises »</div>
+    <div class="contact">📞 0696 88 75 28 &nbsp;·&nbsp; Commandes 48h minimum</div>
+  </div>
+
+  <!-- SEAFOOD BOILS -->
+  <div class="section">
+    <div class="section-title"><span class="emoji">🦞</span> Seafood Boils</div>
+    <div class="item">
+      <div class="item-info"><span class="item-name">✦ Seafood Boil Homard</span><span class="badge">Signature</span>
+        <div class="item-desc">Homard entier cuit au bouillon épicé antillais, maïs, pommes de terre, saucisses fumées</div></div>
+      <div class="item-price">35€</div>
+    </div>
+    <div class="item">
+      <div class="item-info"><span class="item-name">✦ Seafood Boil Langouste</span><span class="badge">Premium</span>
+        <div class="item-desc">Langouste royale, bouillon signature, maïs grillé, pommes de terre</div></div>
+      <div class="item-price">45€</div>
+    </div>
+    <div class="item">
+      <div class="item-info"><span class="item-name">✦ Seafood Boil Crabe</span>
+        <div class="item-desc">Demi-crabe farci au bouillon épicé, accompagnements traditionnels</div></div>
+      <div class="item-price">28€</div>
+    </div>
+    <div class="item">
+      <div class="item-info"><span class="item-name">✦ Seafood Boil Crevettes</span>
+        <div class="item-desc">Crevettes sauvages au bouillon épicé, le boil familial par excellence</div></div>
+      <div class="item-price">22€</div>
+    </div>
+    <div class="item">
+      <div class="item-info"><span class="item-name">✦ Seafood Boil Mix</span>
+        <div class="item-desc">Assortiment boil : crevettes, crabe, saucisses et accompagnements</div></div>
+      <div class="item-price">32€</div>
+    </div>
+    <div class="item">
+      <div class="item-info"><span class="item-name">✦ Seafood Boil Végétarien</span>
+        <div class="item-desc">Bouillon signature version végétale : maïs, légumes, saucisses végétales</div></div>
+      <div class="item-price">16€</div>
+    </div>
+  </div>
+
+  <!-- LAND FOOD -->
+  <div class="section">
+    <div class="section-title"><span class="emoji">🥩</span> Land Food</div>
+    <div class="item">
+      <div class="item-info"><span class="item-name">✦ Côtes de Porc Grillé</span>
+        <div class="item-desc">Marinées aux épices antillaises, grillées à la perfection</div></div>
+      <div class="item-price">18€</div>
+    </div>
+  </div>
+
+  <!-- BAO BUNS & NEMS -->
+  <div class="section">
+    <div class="section-title"><span class="emoji">🥟</span> Bao Buns & Nems</div>
+    <div class="item"><div class="item-info"><span class="item-name">Bao Bun Poulet</span><div class="item-desc">Bao vapeur moelleux, poulet mariné aux herbes antillaises</div></div><div class="item-price">1.80€<span class="min">min. 10</span></div></div>
+    <div class="item"><div class="item-info"><span class="item-name">✦ Bao Bun Bœuf</span><div class="item-desc">Bœuf mariné, poivrons caramélisés</div></div><div class="item-price">1.90€<span class="min">min. 10</span></div></div>
+    <div class="item"><div class="item-info"><span class="item-name">✦ Bao Bun Crevette Tempura</span><span class="badge">Best</span><div class="item-desc">Crevette tempura croustillante, sauce épicée</div></div><div class="item-price">2.20€<span class="min">min. 10</span></div></div>
+    <div class="item"><div class="item-info"><span class="item-name">✦ Bao Bun Bœuf Premium</span><div class="item-desc">Bœuf haché premium, garniture raffinée, sauce secrète</div></div><div class="item-price">2.50€<span class="min">min. 10</span></div></div>
+    <div class="item"><div class="item-info"><span class="item-name">✦ Nems Impériaux Crevette</span><div class="item-desc">Croustillants, sauce dipping, l'indispensable cocktail</div></div><div class="item-price">1.50€<span class="min">min. 10</span></div></div>
+    <div class="item"><div class="item-info"><span class="item-name">✦ Nems Lambi des Antilles</span><div class="item-desc">Notre spécialité antillaise au lambi (conch)</div></div><div class="item-price">2.00€<span class="min">min. 10</span></div></div>
+  </div>
+
+  <!-- MINI BURGERS & PIZZAS -->
+  <div class="section">
+    <div class="section-title"><span class="emoji">🍔</span> Mini Burgers & Pizzas</div>
+    <div class="item"><div class="item-info"><span class="item-name">✦ Mini Burger Bœuf</span><div class="item-desc">Brioché, steak bœuf, cheddar fondant, salade, tomate</div></div><div class="item-price">3.00€</div></div>
+    <div class="item"><div class="item-info"><span class="item-name">Mini Burger Poulet</span><div class="item-desc">Filet de poulet tendre, cheddar, condiments maison</div></div><div class="item-price">3.20€</div></div>
+    <div class="item"><div class="item-info"><span class="item-name">Mini Burger Poisson</span><div class="item-desc">Filet poisson pané, sauce tartare maison</div></div><div class="item-price">3.50€</div></div>
+    <div class="item"><div class="item-info"><span class="item-name">Mini Pizza Jambon-Fromage</span><div class="item-desc">Fine croustillante, jambon, fromage fondant</div></div><div class="item-price">1.50€</div></div>
+    <div class="item"><div class="item-info"><span class="item-name">Mini Pizza Crevette</span><div class="item-desc">Aux crevettes et fromage, touche marine</div></div><div class="item-price">2.00€</div></div>
+    <div class="item"><div class="item-info"><span class="item-name">Mini Pizza Saumon Fumé</span><div class="item-desc">Saumon fumé et fromage frais, élégance cocktail</div></div><div class="item-price">2.00€</div></div>
+    <div class="item"><div class="item-info"><span class="item-name">Mini Hot Dog Créole</span><div class="item-desc">Brioché, saucisse grillée, sauce créole maison</div></div><div class="item-price">2.50€</div></div>
+    <div class="item"><div class="item-info"><span class="item-name">Wrap Poulet Croquant</span><div class="item-desc">Poulet, salade croquante, sauce maison</div></div><div class="item-price">2.50€</div></div>
+  </div>
+
+  <!-- VERRINES CRÉOLES -->
+  <div class="section">
+    <div class="section-title"><span class="emoji">🇲🇶</span> Verrines Créoles</div>
+    <div class="item"><div class="item-info"><span class="item-name">✦ Verrine Féroce d'Avocat</span><div class="item-desc">Avocat, morue, farine de manioc, épices antillaises</div></div><div class="item-price">3.00€</div></div>
+    <div class="item"><div class="item-info"><span class="item-name">✦ Verrine Ti Nain Morue</span><div class="item-desc">Banane verte et morue, entrée antillaise authentique</div></div><div class="item-price">3.00€</div></div>
+  </div>
+
+  <!-- DESSERTS -->
+  <div class="section">
+    <div class="section-title"><span class="emoji">🍰</span> Desserts & Gourmandises</div>
+    <div class="item"><div class="item-info"><span class="item-name">✦ Dessert Sweet Snickers</span><div class="item-desc">Caramel onctueux, chocolat noir, cacahuètes croquantes</div></div><div class="item-price">2.50€</div></div>
+    <div class="item"><div class="item-info"><span class="item-name">✦ Dessert Sweet Exotique</span><div class="item-desc">Mangue, maracuja, noix de coco, crème légère</div></div><div class="item-price">2.50€</div></div>
+  </div>
+
+  <div class="footer">
+    <div class="order-info">
+      <strong>📞 Commandes : 0696 88 75 28</strong><br>
+      ⏰ Commande minimum 48h à l'avance<br>
+      🎯 Prestations sur mesure : mariages, baptêmes, cocktails, entreprises<br>
+      📍 Les Hauts de Dillon, 97200 Fort-de-France — Martinique
+    </div>
+    <p style="margin-top: 16px; color: #604020; font-size: 11px;">Menu imprimé depuis DeliKreol — Photos des plats disponibles sur demande</p>
+  </div>
+
+</div>
+</body>
+</html>

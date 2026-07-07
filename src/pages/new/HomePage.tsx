@@ -35,6 +35,7 @@ import { calculateDistanceKm, type Coords } from '../../services/geolocation';
 import { LocationSelector } from '../../components/LocationSelector';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 import { setPageMeta } from '../../services/seo';
+import { trackPublicView } from '../../services/metricsService';
 
 const WHATSAPP_NUMBER = '596696653589';
 
@@ -66,6 +67,7 @@ function localProductToCartProduct(p: LocalProduct): Product {
 }
 
 export default function HomePage() {
+  useEffect(() => { trackPublicView(); }, []);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const { addItem } = useCart();

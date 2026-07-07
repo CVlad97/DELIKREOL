@@ -1,8 +1,9 @@
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageCircle, Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
 import { BackBar } from '../../components/BackBar';
+import { trackPublicView } from '../../services/metricsService';
 
 const WHATSAPP_NUMBER = '596696653589';
 const CONTACT_EMAIL = 'contact@delikreol.mq';
@@ -53,6 +54,7 @@ const initialFormData: ContactFormData = {
 };
 
 export function ContactPage() {
+  useEffect(() => { trackPublicView(); }, []);
   const [form, setForm] = useState<ContactFormData>(initialFormData);
   const [submitted, setSubmitted] = useState(false);
 

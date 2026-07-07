@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { validateMartiniquePhone, PHONE_ERROR_MESSAGE } from '../../utils/phone';
 import { DELIVERY_FEES } from '../../services/pricing';
 import { generateOrderId } from '../../utils/orderId';
+import { trackPublicView } from '../../services/metricsService';
 import {
   ShoppingCart,
   Plus,
@@ -278,6 +279,7 @@ export default function CartPage() {
 
   useEffect(() => {
     document.title = `Panier (${itemCount}) — DeliKreol`;
+    trackPublicView();
   }, [itemCount]);
 
   // Empty state

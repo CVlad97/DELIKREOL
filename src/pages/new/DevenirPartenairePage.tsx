@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Store,
@@ -15,6 +15,7 @@ import { Layout } from '../../components/layout/Layout';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 import { useToast } from '../../contexts/ToastContext';
 import { supabase } from '../../lib/supabase';
+import { trackPublicView } from '../../services/metricsService';
 
 const WHATSAPP_NUMBER = '596696653589';
 
@@ -85,6 +86,7 @@ const BENEFITS = [
 ];
 
 export default function DevenirPartenairePage() {
+  useEffect(() => { trackPublicView(); }, []);
   const [form, setForm] = useState<PartnerFormData>(initialFormData);
   const [submitted, setSubmitted] = useState(false);
   const { showSuccess } = useToast();

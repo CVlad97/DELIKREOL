@@ -6,6 +6,7 @@ import { useCart } from '../../contexts/CartContext';
 import { useToast } from '../../contexts/ToastContext';
 import { useEffect, useMemo, useState } from 'react';
 import type { Product } from '../../types';
+import { trackPublicView } from '../../services/metricsService';
 
 const WHATSAPP_NUMBER = '596696653589';
 
@@ -48,6 +49,7 @@ export function ProductDetailPage() {
     } else {
       document.title = 'Produit introuvable — DeliKreol';
     }
+    trackPublicView();
   }, [product]);
 
   if (!product) {

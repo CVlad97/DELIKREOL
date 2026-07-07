@@ -3,11 +3,12 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Package, Truck, MapPin, FileText,
   Target, Brain, Settings, Menu, X, Home, ShoppingCart,
-  Briefcase, DollarSign, ChefHat, ClipboardList, MessageCircle, KeyRound, Activity
+  Briefcase, DollarSign, ChefHat, ClipboardList, MessageCircle, KeyRound, Activity, BarChart3
 } from 'lucide-react';
 
 const adminNav = [
   { label: 'Vue d\'ensemble', icon: LayoutDashboard, path: '/admin' },
+  { label: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
   { label: 'Test système', icon: Activity, path: '/admin/test-systeme' },
   { label: 'Commandes', icon: ShoppingCart, path: '/admin/commandes' },
   { label: 'Produits', icon: Package, path: '/admin/catalogue' },

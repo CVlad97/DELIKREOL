@@ -9,6 +9,7 @@ import { mockProducts } from '../../data/mockCatalog';
 import { setPageMeta } from '../../services/seo';
 import { RatingBadge } from '../../components/ReviewSection';
 import { BackBar } from '../../components/BackBar';
+import { trackPublicView } from '../../services/metricsService';
 
 export function TraiteursListPage() {
   const [userPosition, setUserPosition] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -17,6 +18,7 @@ export function TraiteursListPage() {
 
   useEffect(() => {
     document.title = 'Nos traiteurs partenaires — DeliKreol';
+    trackPublicView();
   }, []);
 
   useEffect(() => {

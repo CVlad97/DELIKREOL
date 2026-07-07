@@ -28,6 +28,7 @@ import { HEALTH_TAGS, type HealthTag } from '../../data/mockCatalog';
 import { BackBar } from '../../components/BackBar';
 import { calculateDistanceKm } from '../../services/geolocation';
 import type { Product } from '../../lib/supabase';
+import { trackPublicView } from '../../services/metricsService';
 
 const ALL_CATEGORIES = [
   { id: 'tous', name: 'Tous' },
@@ -65,6 +66,7 @@ function localProductToCartProduct(p: LocalProduct): Product {
 }
 
 export default function CataloguePage() {
+  useEffect(() => { trackPublicView(); }, []);
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { addItem } = useCart();
