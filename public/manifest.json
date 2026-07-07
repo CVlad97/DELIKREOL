@@ -8,12 +8,23 @@
   "background_color": "#ffffff",
   "theme_color": "#f97316",
   "orientation": "portrait",
+  "categories": ["food", "lifestyle", "local"],
+  "lang": "fr-MQ",
   "icons": [
     {
       "src": "/DELIKREOL/branding/logo-mark.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/DELIKREOL/branding/logo-mark.svg",
+      "sizes": "48x48 72x72 96x96 128x128 192x192 256x256 384x384 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
-  ]
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false,
+  "related_applications": []
 }
