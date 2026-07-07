@@ -4,6 +4,7 @@ import { validateMartiniquePhone, PHONE_ERROR_MESSAGE } from '../../utils/phone'
 import { DELIVERY_FEES } from '../../services/pricing';
 import { generateOrderId } from '../../utils/orderId';
 import { trackPublicView } from '../../services/metricsService';
+import { setPageMeta } from '../../services/seo';
 import {
   ShoppingCart,
   Plus,
@@ -279,6 +280,7 @@ export default function CartPage() {
 
   useEffect(() => {
     document.title = `Panier (${itemCount}) — DeliKreol`;
+    setPageMeta(`Panier (${itemCount}) — DeliKreol | Commande plats créoles`, 'Votre panier DeliKreol. Commandez vos plats créoles en Martinique. Livraison et retrait.');
     trackPublicView();
   }, [itemCount]);
 

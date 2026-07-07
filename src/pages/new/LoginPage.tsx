@@ -4,9 +4,10 @@ import { Mail, ShieldCheck, Send } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
 import { supabase, isDemoMode } from '../../lib/supabase';
 import { trackPublicView } from '../../services/metricsService';
+import { setPageMeta } from '../../services/seo';
 
 export default function LoginPage() {
-  useEffect(() => { trackPublicView(); }, []);
+  useEffect(() => { trackPublicView(); setPageMeta('Connexion — DeliKreol | Espace partenaire', 'Connectez-vous à votre espace DeliKreol. Accès traiteurs, livreurs et administration.'); }, []);
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle');
   const [message, setMessage] = useState('');

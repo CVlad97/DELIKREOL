@@ -4,6 +4,7 @@ import { MessageCircle, Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
 import { BackBar } from '../../components/BackBar';
 import { trackPublicView } from '../../services/metricsService';
+import { setPageMeta } from '../../services/seo';
 
 const WHATSAPP_NUMBER = '596696653589';
 const CONTACT_EMAIL = 'contact@delikreol.mq';
@@ -54,7 +55,7 @@ const initialFormData: ContactFormData = {
 };
 
 export function ContactPage() {
-  useEffect(() => { trackPublicView(); }, []);
+  useEffect(() => { trackPublicView(); setPageMeta('Contact — DeliKreol | Nous écrire', 'Contactez l\'équipe DeliKreol par WhatsApp, email ou formulaire. Réponse sous 24h.'); }, []);
   const [form, setForm] = useState<ContactFormData>(initialFormData);
   const [submitted, setSubmitted] = useState(false);
 

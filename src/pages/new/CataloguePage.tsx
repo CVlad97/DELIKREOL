@@ -29,6 +29,7 @@ import { BackBar } from '../../components/BackBar';
 import { calculateDistanceKm } from '../../services/geolocation';
 import type { Product } from '../../lib/supabase';
 import { trackPublicView } from '../../services/metricsService';
+import { setPageMeta } from '../../services/seo';
 
 const ALL_CATEGORIES = [
   { id: 'tous', name: 'Tous' },
@@ -282,9 +283,9 @@ export default function CataloguePage() {
     selectedDeliveryOption !== '';
 
   useEffect(() => {
-    document.title = 'Catalogue — DeliKreol | Plats & traiteurs en Martinique';
-  }, []);
-
+      setPageMeta('Catalogue — DeliKreol | Plats & traiteurs en Martinique', 'Parcourez notre sélection de plats créoles et traiteurs partenaires en Martinique. Livraison et retrait.', 'catalogue, plats créoles, traiteurs Martinique, livraison repas');
+      trackPublicView();
+    }, []);
   return (
     <Layout>
       <BackBar label='Accueil' backTo='/' />

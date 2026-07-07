@@ -7,6 +7,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { useEffect, useMemo, useState } from 'react';
 import type { Product } from '../../types';
 import { trackPublicView } from '../../services/metricsService';
+import { setPageMeta } from '../../services/seo';
 
 const WHATSAPP_NUMBER = '596696653589';
 
@@ -46,8 +47,10 @@ export function ProductDetailPage() {
   useEffect(() => {
     if (product) {
       document.title = `${product.name} — DeliKreol`;
+      setPageMeta(`${product.name} — DeliKreol | ${product.vendor}`, `${product.name} chez ${product.vendor} — Commandez en ligne sur DeliKreol. Livraison Martinique.`);
     } else {
       document.title = 'Produit introuvable — DeliKreol';
+      setPageMeta('Produit introuvable — DeliKreol', 'Ce produit n\'est pas disponible sur DeliKreol.');
     }
     trackPublicView();
   }, [product]);

@@ -16,6 +16,7 @@ import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 import { useToast } from '../../contexts/ToastContext';
 import { supabase } from '../../lib/supabase';
 import { trackPublicView } from '../../services/metricsService';
+import { setPageMeta } from '../../services/seo';
 
 const WHATSAPP_NUMBER = '596696653589';
 
@@ -86,7 +87,7 @@ const BENEFITS = [
 ];
 
 export default function DevenirPartenairePage() {
-  useEffect(() => { trackPublicView(); }, []);
+  useEffect(() => { trackPublicView(); setPageMeta('Devenir partenaire — DeliKreol | Traiteur en Martinique', 'Rejoignez DeliKreol comme traiteur partenaire en Martinique. Visibilité, commandes, croissance.'); }, []);
   const [form, setForm] = useState<PartnerFormData>(initialFormData);
   const [submitted, setSubmitted] = useState(false);
   const { showSuccess } = useToast();
