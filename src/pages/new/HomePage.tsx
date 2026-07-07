@@ -20,6 +20,7 @@ import {
   Locate,
   Crosshair,
   Navigation,
+  PenLine,
 } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
 import { mockProducts, type LocalProduct } from '../../data/mockCatalog';
@@ -36,6 +37,8 @@ import { LocationSelector } from '../../components/LocationSelector';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 import { setPageMeta } from '../../services/seo';
 import { trackPublicView } from '../../services/metricsService';
+import { loadLocalReviews } from './ReviewPage';
+import type { ReviewItem } from './ReviewPage';
 
 const WHATSAPP_NUMBER = '596696653589';
 
@@ -64,6 +67,95 @@ function localProductToCartProduct(p: LocalProduct): Product {
     stock_quantity: null,
     created_at: new Date().toISOString(),
   };
+}
+
+// Demo fallback reviews — used until real approved reviews arrive from localStorage
+const DEMO_REVIEWS: Array<{ initial: string; name: string; comment: string }> = [
+  {
+    initial: 'M',
+    name: 'Marie-Line',
+    comment: 'Le colombo de Ninice est un délice. Livré en 45 min à Ducos, parfait !',
+  },
+  {
+    initial: 'J',
+    name: 'Jean-Philippe',
+    comment: "Commander les accras de Coco's Food pour une fête, tout le monde a adoré. Click & collect super pratique.",
+  },
+  {
+    initial: 'S',
+    name: 'Sandra',
+    comment: "Je commande toutes les semaines chez Saveurs d'Afrique. Les plats sont toujours frais et les portions généreuses.",
+  },
+  {
+    initial: 'P',
+    name: 'Patrick',
+    comment: "Le service traiteur événementiel au Marin, nickel. Livraison à l'heure, plat chaud. Je recommande.",
+  },
+];
+
+function ReviewsSection() {
+  const [reviews, setReviews] = useState<ReviewItem[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const stored = loadLocalReviews().filter(r => r.status === 'approved');
+    let homeReviews: ReviewItem[] = [];
+    try {
+      const homeStored = localStorage.getItem('delikreol_home_reviews');
+      if (homeStored) {
+        const parsed = JSON.parse(homeStored);
+        if (Array.isArray(parsed)) homeReviews = parsed;
+      }
+    } catch { /* ignore */ }
+
+    const realReviews = homeReviews.length > 0 ? homeReviews : stored;
+    if (realReviews.length > 0) {
+      setReviews(realReviews);
+    }
+    setLoaded(true);
+  }, []);
+
+  const displayReviews = reviews.length > 0
+    ? reviews.map(r => ({
+        initial: r.name.charAt(0).toUpperCase(),
+        name: r.name,
+        comment: r.comment,
+        rating: r.rating,
+      }))
+    : DEMO_REVIEWS.map(r => ({ ...r, rating: 5 }));
+
+  return (
+    <div className="cardGrid grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {displayReviews.map((review, index) => (
+        <div
+          key={index}
+          className="card bg-white rounded-[2rem] p-6 border border-orange-100 shadow-sm hover:-translate-y-1 hover:shadow-lg transition-all"
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-full bg-orange-500 text-white flex items-center justify-center text-lg font-bold shrink-0">
+              {review.initial}
+            </div>
+            <div>
+              <p className="font-bold text-gray-900">{review.name}</p>
+              <div className="flex items-center gap-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`w-4 h-4 ${
+                      i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+          <p className="text-gray-600 text-sm leading-relaxed italic">
+            &ldquo;{review.comment}&rdquo;
+          </p>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function HomePage() {
@@ -885,64 +977,28 @@ export default function HomePage() {
       </section>
 
       {/* Avis clients — Ce que disent nos clients */}
-      <section className="py-16 md:py-24 bg-gradient-to-b from-white to-orange-50/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <h2 className="sectionTitle text-3xl md:text-5xl font-black tracking-tight text-gray-900 mb-3">
-              Ce que disent nos clients
-            </h2>
-            <p className="text-gray-500 text-lg">
-              Des avis de Martiniquais comme vous
-            </p>
-          </div>
-          <div className="cardGrid grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                initial: 'M',
-                name: 'Marie-Line',
-                comment: 'Le colombo de Ninice est un délice. Livré en 45 min à Ducos, parfait !',
-              },
-              {
-                initial: 'J',
-                name: 'Jean-Philippe',
-                comment: "Commander les accras de Coco's Food pour une fête, tout le monde a adoré. Click & collect super pratique.",
-              },
-              {
-                initial: 'S',
-                name: 'Sandra',
-                comment: "Je commande toutes les semaines chez Saveurs d'Afrique. Les plats sont toujours frais et les portions généreuses.",
-              },
-              {
-                initial: 'P',
-                name: 'Patrick',
-                comment: 'Le service traiteur événementiel au Marin, nickel. Livraison à l\'heure, plat chaud. Je recommande.',
-              },
-            ].map((review, index) => (
-              <div
-                key={index}
-                className="card bg-white rounded-[2rem] p-6 border border-orange-100 shadow-sm hover:-translate-y-1 hover:shadow-lg transition-all"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 rounded-full bg-orange-500 text-white flex items-center justify-center text-lg font-bold shrink-0">
-                    {review.initial}
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-900">{review.name}</p>
-                    <div className="flex items-center gap-0.5">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      ))}
-                    </div>
-                  </div>
+            <section className="py-16 md:py-24 bg-gradient-to-b from-white to-orange-50/50">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-10">
+                  <h2 className="sectionTitle text-3xl md:text-5xl font-black tracking-tight text-gray-900 mb-3">
+                    Ce que disent nos clients
+                  </h2>
+                  <p className="text-gray-500 text-lg">
+                    Des avis de Martiniquais comme vous
+                  </p>
                 </div>
-                <p className="text-gray-600 text-sm leading-relaxed italic">
-                  &ldquo;{review.comment}&rdquo;
-                </p>
+                <ReviewsSection />
+                <div className="mt-8 text-center">
+                  <Link
+                    to="/avis"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all hover:-translate-y-0.5 shadow-lg shadow-orange-200 text-sm"
+                  >
+                    <PenLine className="w-4 h-4" />
+                    Donnez votre avis
+                  </Link>
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            </section>
 
       {/* ═══════════════════════════════════════════
           LIVRAISON SPÉCIALE & SERVICES SANTÉ

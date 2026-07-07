@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Package, Truck, MapPin, FileText,
   Target, Brain, Settings, Menu, X, Home, ShoppingCart,
-  Briefcase, DollarSign, ChefHat, ClipboardList, MessageCircle, KeyRound, Activity, BarChart3
+  Briefcase, DollarSign, ChefHat, ClipboardList, MessageCircle, KeyRound, Activity, BarChart3, Star
 } from 'lucide-react';
 
 const adminNav = [

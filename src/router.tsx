@@ -32,6 +32,7 @@ const ContactPage = lazy(() => import('./pages/new/ContactPage'));
 const FeedbackPage = lazy(() => import('./pages/new/FeedbackPage'));
 const CatererSignupPage = lazy(() => import('./pages/new/CatererSignupPage'));
 const PartnerAccessPage = lazy(() => import('./pages/new/PartnerAccessPage'));
+const ReviewPage = lazy(() => import('./pages/new/ReviewPage'));
 
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
@@ -55,6 +56,7 @@ const AdminFeedback = lazy(() => import('./pages/admin/AdminFeedback'));
 const AdminPilotAccess = lazy(() => import('./pages/admin/AdminPilotAccess'));
 const AdminPointsRelais = lazy(() => import('./pages/admin/AdminPointsRelais'));
 const AdminAnalytics = lazy(() => import('./pages/admin/AdminAnalytics'));
+const AdminReviews = lazy(() => import('./pages/admin/AdminReviews'));
 const AdminInvoices = lazy(() => import('./pages/admin/AdminInvoices'));
 const AdminPartnersApplications = lazy(() => import('./pages/admin/AdminPartnersApplications'));
 const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
@@ -107,6 +109,7 @@ export function AppRouter() {
                   <Route path="partenaires-plateforme" element={<ProPartnerPlatformPage />} />
                   <Route path="statut-commande" element={<OrderStatusPage />} />
                   <Route path="partenaire" element={<PartnerAccessPage />} />
+                  <Route path="avis" element={<ReviewPage />} />
                   <Route path="cgu" element={<TermsOfService />} />
                   <Route path="cgv" element={<CGVPage />} />
                   <Route path="confidentialite" element={<PrivacyPolicy />} />
@@ -140,6 +143,7 @@ export function AppRouter() {
                   <Route path="acces-pilote" element={<AdminPilotAccess />} />
                   <Route path="points-relais-v2" element={<AdminPointsRelais />} />
                   <Route path="analytics" element={<AdminAnalytics />} />
+                  <Route path="avis" element={<AdminReviews />} />
                 </Route>
               </Routes>
             </ToastProvider>
