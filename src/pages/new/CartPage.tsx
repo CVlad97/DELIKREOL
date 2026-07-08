@@ -287,7 +287,7 @@ export default function CartPage() {
     setMessageSent(true);
     clearCart();
     setPreparedMessage(
-      `Commande enregistrée ! Un récapitulatif vous sera envoyé par WhatsApp.`
+      `Demande préparée — à confirmer sur WhatsApp.`
     );
     showSuccess(`Commande enregistrée !`);
     setTimeout(() => navigate(`/statut-commande?order=${orderId}`), 1500);
@@ -334,7 +334,7 @@ export default function CartPage() {
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-green-100 mb-6">
               <CheckCircle2 className="w-10 h-10 text-green-500" />
             </div>
-            <h1 className="text-2xl font-black text-gray-900 mb-3">Commande enregistrée ! 🎉</h1>
+            <h1 className="text-2xl font-black text-gray-900 mb-3">Demande préparée ! 🎉</h1>
             {orderNumber && (
               <p className="text-3xl font-black text-orange-600 mb-2 font-mono">{orderNumber}</p>
             )}
@@ -394,10 +394,10 @@ export default function CartPage() {
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="font-bold text-green-800 text-sm">
-                    Commande enregistrée.
-                  </p>
-                  <p className="text-green-700 text-sm">
+                                  <p className="font-bold text-green-800 text-sm">
+                                    Demande préparée — à confirmer sur WhatsApp.
+                                  </p>
+                                  <p className="text-green-700 text-sm">
                     Commande enregistrée, félicitations ! Le support WhatsApp est disponible si besoin.
                   </p>
                 </div>
@@ -765,7 +765,7 @@ export default function CartPage() {
                   className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl transition-all hover:scale-[1.02] shadow-lg shadow-orange-200 text-lg"
                 >
                   <ShoppingCart className="w-6 h-6" />
-                  Confirmer ma commande
+                  Confirmer ma commande sur WhatsApp
                 </button>
               )}
               <p className="text-xs text-center text-gray-400">

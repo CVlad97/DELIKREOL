@@ -2,7 +2,7 @@
 
 export function validateMartiniquePhone(phone: string): boolean {
   if (!phone || phone.trim() === '0' || phone.trim() === '') return false;
-  const cleaned = phone.replace(/[\s+._\-]/g, '');
+  const cleaned = phone.replace(/[\s+._-]/g, '');
   if (cleaned === '0' || cleaned.length < 10) return false;
   // Accepted formats: 0696xxxxxx, 0697xxxxxx, +596696xxxxxx, +596697xxxxxx, 596696xxxxxx, 596697xxxxxx
   return /^(?:0|596|00596)?(?:696|697)\d{6}$/.test(cleaned);
