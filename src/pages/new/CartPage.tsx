@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { validateMartiniquePhone, PHONE_ERROR_MESSAGE } from '../../utils/phone';
+import { validateEmail } from '../../utils/validation';
 import { DELIVERY_FEES } from '../../services/pricing';
 import { generateOrderId } from '../../utils/orderId';
 import { trackPublicView } from '../../services/metricsService';
@@ -68,6 +69,7 @@ export default function CartPage() {
   const [autreCreneau, setAutreCreneau] = useState('');
   const [notes, setNotes] = useState('');
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [messageSent, setMessageSent] = useState(false);
   const [preparedMessage, setPreparedMessage] = useState('');
@@ -199,12 +201,25 @@ export default function CartPage() {
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMessage)}`;
 
   const handleWhatsAppClick = () => {
-    // Validate phone — obligatoire
-    if (!phone || !validateMartiniquePhone(phone)) {
-      setPhoneError(PHONE_ERROR_MESSAGE || "Merci d'indiquer un num\u00e9ro WhatsApp valide, ex : 0696 XX XX XX");
+    // Panier vide
+    if (items.length === 0) {
+      showError('Votre panier est vide. Ajoutez un plat avant de préparer une demande.');
       return;
     }
-
+    // Anti-double-click
+    if (checkoutStatus === 'processing' || messageSent) {
+      return;
+    }
+    // Validate phone — obligatoire
+    if (!phone || !validateMartiniquePhone(phone)) {
+      setPhoneError("Merci d'indiquer un numéro WhatsApp valide, ex : 0696 XX XX XX");
+      return;
+    }
+    // Email valide si fourni
+    if (email && !validateEmail(email)) {
+      showError("Merci d'indiquer une adresse email valide.");
+      return;
+    }
     // Block multi-traiteur
     if (hasMultipleVendors) {
       showError('Pour cette version test, merci de passer une commande par partenaire. Le panier multi-traiteur arrive bientôt.');
@@ -581,6 +596,26 @@ export default function CartPage() {
                   )}
                 </div>
 
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onBlur={() => email.trim() && flashSaved('email')}
+                    placeholder="nom@exemple.fr"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 text-sm outline-none"
+                  />
+                  {savedField === 'email' && (
+                    <span className="inline-flex items-center gap-1 text-xs text-emerald-600 font-semibold mt-1 animate-pulse">
+                      ✓ Enregistré
+                    </span>
+                  )}
+                </div>
+
                 {/* Commune */}
                 <div className="relative">
                   <label className="block text-sm font-bold text-gray-700 mb-1.5">
@@ -734,7 +769,7 @@ export default function CartPage() {
                 </button>
               )}
               <p className="text-xs text-center text-gray-400">
-                Pas de règlement en ligne pour le moment. La commande est créée et sera confirmée par nos équipes. Besoin d'aide ? Contactez-nous sur WhatsApp.
+                Paiement en ligne bientôt disponible. Pour l'instant, DeliKreol confirme les commandes par WhatsApp.
               </p>
             </div>
           </div>
