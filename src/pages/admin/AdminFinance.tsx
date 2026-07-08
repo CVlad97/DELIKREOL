@@ -71,7 +71,7 @@ function statusClass(status?: string | null) {
 }
 
 function buildTestInvoice(): Omit<Invoice, 'id'> {
-  const stamp = new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
+  const stamp = new Date().toISOString().replace(/[^\d]/g, '').slice(0, 14);
   return {
     invoice_number: `DK-${stamp}`,
     customer_name: 'Client test admin',

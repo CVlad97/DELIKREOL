@@ -34,6 +34,9 @@ const CatererSignupPage = lazy(() => import('./pages/new/CatererSignupPage'));
 const PartnerAccessPage = lazy(() => import('./pages/new/PartnerAccessPage'));
 const ReviewPage = lazy(() => import('./pages/new/ReviewPage'));
 
+const basePath = import.meta.env.VITE_BASE_PATH || import.meta.env.BASE_URL || '/';
+const routerBaseName = basePath === '/' ? undefined : basePath.replace(/\/$/, '');
+
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminSystemTest = lazy(() => import('./pages/admin/AdminSystemTest'));
@@ -81,7 +84,7 @@ function AdminWrapper() {
 export function AppRouter() {
   return (
     <ErrorBoundary>
-      <BrowserRouter basename="/DELIKREOL">
+      <BrowserRouter basename={routerBaseName}>
         <AuthProvider>
           <CartProvider>
             <ToastProvider>
