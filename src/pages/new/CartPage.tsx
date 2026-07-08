@@ -234,20 +234,18 @@ export default function CartPage() {
 
     // Construire la commande
     const order = {
-      id: orderId,
-      items: items.map(i => ({
-        id: i.id,
-        name: i.name,
-        vendor: i.vendor_id,
-        price: i.price,
-        quantity: i.quantity,
-      })),
-      total,
+      order_number: orderId,
+      customer_phone: phone,
+      subtotal: total,
+      total_amount: total + (DELIVERY_FEES[mode]?.fee || 0),
+      delivery_fee: DELIVERY_FEES[mode]?.fee || 0,
+      delivery_type: mode,
       commune,
-      mode,
       creneaux: getCreneauText(),
-      phone,
       notes,
+      source: 'public_checkout',
+      payment_status: 'pending',
+      delivery_status: 'pending',
       status: 'pending',
       created_at: new Date().toISOString(),
     };
@@ -266,13 +264,19 @@ export default function CartPage() {
       if (supabase) {
         try {
           await supabase.from('orders').insert({
-            id: orderId,
+            order_number: orderId,
             customer_phone: phone || 'Non renseigné',
             commune,
-            order_mode: mode,
+            delivery_type: mode,
             subtotal: total,
-            status: 'pending',
+            total_amount: total + (DELIVERY_FEES[mode]?.fee || 0),
+            delivery_fee: DELIVERY_FEES[mode]?.fee || 0,
+            source: 'public_checkout',
+            payment_status: 'pending',
+            delivery_status: 'pending',
+            creneaux: getCreneauText(),
             notes,
+            status: 'pending',
           });
           console.log('[DELIKREOL] Commande créée dans Supabase:', orderId);
         } catch (err) {
