@@ -20,6 +20,7 @@ const CartPage = lazy(() => import('./pages/new/CartPage'));
 const DevisPage = lazy(() => import('./pages/new/DevisPage'));
 const DevenirPartenairePage = lazy(() => import('./pages/new/DevenirPartenairePage'));
 const MarchesPublicsPage = lazy(() => import('./pages/new/MarchesPublicsPage'));
+const ComptabilitePage = lazy(() => import('./pages/new/ComptabilitePage'));
 const DevenirLivreurPage = lazy(() => import('./pages/new/DevenirLivreurPage'));
 const DevenirPointRelaisPage = lazy(async () => {
   const module = await import('./pages/new/DevenirPointRelaisPage');
@@ -101,6 +102,7 @@ export function AppRouter() {
                   <Route path="devis" element={<DevisPage />} />
                   <Route path="devenir-partenaire" element={<DevenirPartenairePage />} />
                   <Route path="marches-publics" element={<MarchesPublicsPage />} />
+                  <Route path="comptabilite" element={<ComptabilitePage />} />
                   <Route path="devenir-livreur" element={<DevenirLivreurPage />} />
                   <Route path="devenir-point-relais" element={<DevenirPointRelaisPage />} />
                   <Route path="points-relais" element={<PointsRelaisPage />} />
