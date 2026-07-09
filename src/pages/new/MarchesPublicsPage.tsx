@@ -16,7 +16,7 @@ const STATUT_STYLES: Record<string, string> = {
   ferme: 'bg-gray-100 text-gray-500',
 };
 
-export function MarchesPublicsPage() {
+export default function MarchesPublicsPage() {
   const [filterType, setFilterType] = useState<string>('tous');
   const [filterStatut, setFilterStatut] = useState<string>('tous');
 
