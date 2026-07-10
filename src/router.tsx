@@ -103,6 +103,7 @@ export function AppRouter() {
                   <Route path="devenir-partenaire" element={<DevenirPartenairePage />} />
                   <Route path="marches-publics" element={<MarchesPublicsPage />} />
                   <Route path="comptabilite" element={<ComptabilitePage />} />
+                  <Route path="demo" element={<DemoPage />} />
                   <Route path="devenir-livreur" element={<DevenirLivreurPage />} />
                   <Route path="devenir-point-relais" element={<DevenirPointRelaisPage />} />
                   <Route path="points-relais" element={<PointsRelaisPage />} />
