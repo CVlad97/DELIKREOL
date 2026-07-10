@@ -8,7 +8,7 @@ import { mockProducts } from '../data/mockCatalog';
 interface MapPartner {
   id: string;
   name: string;
-  type: 'traiteur' | 'relais' | 'livreur';
+  type: 'traiteur' | 'relais' | 'livreur' | 'client';
   latitude: number;
   longitude: number;
   commune: string;
@@ -92,6 +92,7 @@ export default function ExpandableGeoMap() {
       const L = await import('leaflet');
       await import('leaflet/dist/leaflet.css');
 
+      if (!mapRef.current) return;
       const map = L.map(mapRef.current).setView([14.641, -61.014], 10);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
