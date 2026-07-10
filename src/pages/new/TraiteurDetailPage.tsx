@@ -115,16 +115,16 @@ export function TraiteurDetailPage() {
         Tous les traiteurs
       </Link>
 
-      {/* Hero réduit */}
-      <div className="rounded-xl overflow-hidden mb-6 cursor-pointer"
-        onClick={() => {
-          if (traiteur.heroImage) {
-            setSelectedImage(traiteur.heroImage);
-            setSelectedName(traiteur.name);
-            setSelectedDesc('');
-          }
-        }}>
-        <div className="aspect-[3/1] bg-muted relative group">
+      {/* Hero réduit avec portrait superposé */}
+      <div className="relative rounded-xl overflow-hidden mb-6">
+        <div className="aspect-[3/1] bg-muted relative group cursor-pointer"
+          onClick={() => {
+            if (traiteur.heroImage) {
+              setSelectedImage(traiteur.heroImage);
+              setSelectedName(traiteur.name);
+              setSelectedDesc('');
+            }
+          }}>
           {traiteur.heroImage ? (
             <img loading="lazy" src={traiteur.heroImage} alt={traiteur.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
           ) : (
@@ -136,12 +136,9 @@ export function TraiteurDetailPage() {
             <span className="opacity-0 group-hover:opacity-100 bg-white/90 text-gray-800 text-xs px-3 py-1.5 rounded-full font-semibold shadow-lg transition-opacity">🔍 Agrandir</span>
           </div>
         </div>
-      </div>
-
-      {/* Portrait + Bio — BIO EN PREMIER */}
-      <div className="flex flex-col sm:flex-row gap-6 mb-6 items-start">
+        {/* Portrait superposé en bas à gauche */}
         {traiteur.portraitImage && (
-          <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl overflow-hidden bg-muted flex-shrink-0 border-4 border-primary/10 shadow-lg ring-2 ring-amber-200/50 cursor-pointer group"
+          <div className="absolute -bottom-8 left-6 w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-4 border-white shadow-xl ring-2 ring-amber-200/50 cursor-pointer group z-10"
             onClick={() => {
               if (traiteur.portraitImage) {
                 setSelectedImage(traiteur.portraitImage);
@@ -153,6 +150,10 @@ export function TraiteurDetailPage() {
               className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300" />
           </div>
         )}
+      </div>
+
+      {/* Bio section */}
+      <div className="flex flex-col sm:flex-row gap-6 mb-6 items-start pt-8 sm:pt-10">
         <div className="flex-1">
         <div className="flex flex-wrap items-center gap-3 mb-3">
           <h1 className="text-3xl font-display font-bold">{traiteur.name}</h1>
