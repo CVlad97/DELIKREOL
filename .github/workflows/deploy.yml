@@ -40,7 +40,7 @@ jobs:
 
       - name: Build
         env:
-          VITE_BASE_PATH: /DELIKREOL/
+          VITE_BASE_PATH: /
           VITE_SUPABASE_URL: https://boihlgodmclljtckhmgz.supabase.co
           VITE_SUPABASE_ANON_KEY: sb_publishable_LE_NgMgaOlJEhkJlVF_zow_4NNOtTHX
           VITE_DEMO_MODE: "false"
@@ -48,11 +48,11 @@ jobs:
 
       - name: Add SPA fallback and nojekyll marker
         run: |
-          # BrowserRouter compatible — copie index.html → 404.html
-          # GitHub Pages sert 404.html pour toutes les routes inconnues,
-          # ce qui permet à React Router de gérer le routing côté client.
           cp dist/index.html dist/404.html
           touch dist/.nojekyll
+
+      - name: Add CNAME for custom domain
+        run: echo "delikreol.com" > dist/CNAME
 
       - name: Upload dist artifact
         uses: actions/upload-pages-artifact@v3
