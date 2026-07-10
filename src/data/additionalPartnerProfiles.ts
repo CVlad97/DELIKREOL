@@ -89,4 +89,33 @@ export const additionalPartnerProfiles: PartnerProfile[] = [
       label: 'Instagram à confirmer',
     },
   },
+  {
+    name: 'Chef à Mada',
+    legalName: 'Chef à Mada',
+    zone: 'Fort-de-France',
+    address: 'Fort-de-France, Martinique',
+    offer: 'Traiteur malgache et créole — ateliers culinaires, plats sur commande, événements',
+    type: 'Traiteur / Association',
+    availability: 'Sur commande et événement — contacter via HelloAsso',
+    story:
+      'Chef à Mada est une association Loi 1901 basée à Fort-de-France qui promeut la cuisine malgache et créole à travers des ateliers culinaires, des prestations traiteur et des événements culturels. Cuisine authentique, fusion des saveurs de Madagascar et des Antilles.',
+    promise: 'Cuisine malgacho-créole authentique — ateliers et traiteur sur commande',
+    eta: 'À confirmer selon la commande',
+    specialty: 'Cuisine malgache et créole, rougail, poulet massalé, samoussas, ateliers culinaires',
+    highlights: [
+      'Association Loi 1901',
+      'Cuisine malgache et créole',
+      'Fort-de-France',
+      'Ateliers culinaires',
+      'Traiteur événementiel',
+      'HelloAsso : helloasso.com/associations/chef-a-mada',
+    ],
+    contactEmail: '',
+    instagram: {
+      label: '@chefamada',
+    },
+    planifiable: true,
+    enterprise: false,
+    healthTags: ['fait-maison', 'equilibre'],
+  },
 ];
