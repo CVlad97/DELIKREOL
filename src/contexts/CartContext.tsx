@@ -17,32 +17,52 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+function readInitialCart(): CartItem[] {
+  const stripeStatus = new URLSearchParams(window.location.search).get('stripe');
+
+  if (stripeStatus === 'success') {
+    localStorage.removeItem('cart');
+    localStorage.removeItem('pendingStripeOrderId');
+    return [];
+  }
+
+  if (stripeStatus === 'cancelled') {
+    localStorage.removeItem('pendingStripeOrderId');
+  }
+
+  const saved = localStorage.getItem('cart');
+  if (!saved) return [];
+
+  try {
+    const parsed = JSON.parse(saved);
+    return Array.isArray(parsed) ? (parsed as CartItem[]) : [];
+  } catch {
+    localStorage.removeItem('cart');
+    return [];
+  }
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>(() => {
-    const saved = localStorage.getItem('cart');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [items, setItems] = useState<CartItem[]>(readInitialCart);
 
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(items));
   }, [items]);
 
   const addItem = (product: Product) => {
-    setItems((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
+    setItems((previousItems) => {
+      const existing = previousItems.find((item) => item.id === product.id);
       if (existing) {
-        return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+        return previousItems.map((item) =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
         );
       }
-      return [...prev, { ...product, quantity: 1 }];
+      return [...previousItems, { ...product, quantity: 1 }];
     });
   };
 
   const removeItem = (productId: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== productId));
+    setItems((previousItems) => previousItems.filter((item) => item.id !== productId));
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
@@ -50,10 +70,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem(productId);
       return;
     }
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === productId ? { ...item, quantity } : item
-      )
+    setItems((previousItems) =>
+      previousItems.map((item) => (item.id === productId ? { ...item, quantity } : item)),
     );
   };
 
