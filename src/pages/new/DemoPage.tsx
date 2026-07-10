@@ -307,7 +307,7 @@ export default function DemoPage() {
                         <circle cx={x} cy={y} r={i === 0 ? 14 : 10} fill={['#F97316','#10B981','#3B82F6','#8B5CF6','#EC4899'][i] || '#F97316'} opacity={0.3} />
                         <circle cx={x} cy={y} r={i === 0 ? 8 : 6} fill={['#F97316','#10B981','#3B82F6','#8B5CF6','#EC4899'][i] || '#F97316'} stroke="white" strokeWidth="2" />
                         <text x={x + (i === 0 ? -12 : 12)} y={y - 10} textAnchor={i === 0 ? 'end' : 'start'} fontSize="10" fontWeight="bold" fill="#374151">
-                          {t.name || t.business_name}
+                          {t.name}
                         </text>
                         <text x={x + (i === 0 ? -12 : 12)} y={y + 2} textAnchor={i === 0 ? 'end' : 'start'} fontSize="8" fill="#9CA3AF">
                           {t.commune || t.zone}
@@ -324,7 +324,7 @@ export default function DemoPage() {
                   <div key={t.slug} className="flex items-center gap-2 text-xs bg-white rounded-xl px-3 py-2 border border-gray-100">
                     <div className={`w-3 h-3 rounded-full`}
                       style={{ backgroundColor: ['#F97316','#10B981','#3B82F6','#8B5CF6','#EC4899'][i] }} />
-                    <span className="font-semibold">{t.name || t.business_name}</span>
+                    <span className="font-semibold">{t.name}</span>
                     <span className="text-gray-400">{t.commune || t.zone}</span>
                   </div>
                 ))}
@@ -351,7 +351,7 @@ export default function DemoPage() {
                   <div className="space-y-1 text-xs">
                     {traiteurSpaces.map(t => (
                       <div key={t.slug} className="flex justify-between py-1 border-b border-gray-50 last:border-0">
-                        <span>{t.business_name || t.name}</span>
+                        <span>{t.name}</span>
                         <span className="text-gray-400">{t.commune || t.zone}</span>
                         <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
                           t.status === 'public confirmé' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
