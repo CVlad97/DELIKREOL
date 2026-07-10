@@ -149,6 +149,7 @@ export const partnerProfiles: PartnerProfile[] = [
       'Point relais: Barber Shop de Dillon',
       'Commande groupe',
     ],
+    contactPhone: '+596 696 01 93 21',
     contactEmail: 'jereniceeduards@gmail.com',
     instagram: {
       label: 'Instagram a confirmer',
