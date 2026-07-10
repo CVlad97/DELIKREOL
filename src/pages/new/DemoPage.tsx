@@ -99,7 +99,7 @@ export default function DemoPage() {
                           selectedProduct?.id === p.id ? 'border-orange-500 bg-orange-50' : 'border-gray-100 hover:border-orange-200'
                         }`}>
                         <div className="w-full h-20 rounded-xl bg-orange-50 mb-2 overflow-hidden">
-                          {p.image_url && <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" />}
+                          {(p as any).image_url && <img src={(p as any).image_url} alt={p.name} className="w-full h-full object-cover" />}
                         </div>
                         <p className="text-xs font-bold truncate">{p.name}</p>
                         <p className="text-xs text-orange-600 font-bold">{p.price?.toFixed(2)} €</p>
