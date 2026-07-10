@@ -40,10 +40,14 @@ export default function AdminDashboardPage() {
   const partnerAdhesions = submissions.filter((submission) => submission.status === 'pending' || submission.status === 'approved').length;
 
   const partnerLinks = [
-    { name: "Coco's Food", code: 'COCO-PILOTE' },
-    { name: 'Les Délices de Ninice', code: 'NINICE-PILOTE' },
-    { name: "Saveurs d'Afrique", code: 'SAVEURS-PILOTE' },
-  ];
+      { name: "Coco's Food", code: 'COCO-PILOTE' },
+      { name: 'Les Délices de Ninice', code: 'NINICE-PILOTE' },
+      { name: "Saveurs d'Afrique", code: 'SAVEURS-PILOTE' },
+      { name: 'An Tjè Coco', code: 'ANTJECOC-PILOTE' },
+      { name: "Snack Savè Peyi'A", code: 'SAVEPEYI-PILOTE' },
+      { name: 'Sweet Family Traiteur Orianne', code: 'SWEET-PILOTE' },
+      { name: 'Gouté Mwen', code: 'GOUTEMWEN-PILOTE' },
+    ];
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
