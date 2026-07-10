@@ -284,10 +284,10 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
       if (profile.name.startsWith('Snack Savè Peyi')) {
         return {
           ...buildSpace(profile, 'from-[#f59e0b] via-[#dc2626] to-[#15803d]', '#fff7ed', 'public confirmé', 'confirmée'),
-          horaires: { lun: { open: '07:00', close: '19:00' }, mar: { open: '07:00', close: '19:00' }, mer: { open: '07:00', close: '19:00' }, jeu: { open: '07:00', close: '19:00' }, ven: { open: '07:00', close: '19:00' }, sam: { open: '07:00', close: '19:00' } },
-          cutoff_time: '11:30',
-          prep_time: 20,
-          delivery_slots: ['11:30-12:30', '12:30-13:30', '18:00-19:00', '19:00-20:00'],
+          horaires: { mar: { open: '09:00', close: '15:00' }, mer: { open: '09:00', close: '15:00' }, jeu: { open: '09:00', close: '15:00' }, ven: { open: '09:00', close: '01:00' }, sam: { open: '09:00', close: '01:00' } },
+          cutoff_time: '11:00',
+          prep_time: 25,
+          delivery_slots: ['11:30-12:30', '12:30-14:00', '19:30-21:00', '21:00-00:00'],
         };
       }
 
