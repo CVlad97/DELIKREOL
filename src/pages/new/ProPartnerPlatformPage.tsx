@@ -6,11 +6,11 @@ const WHATSAPP_NUMBER = '596696653589';
 const MARTINIQUE_DEP = '972';
 
 const PLATEFORMES = [
-  { name: 'Stuart', type: 'Coursier / livraison', area: 'France + Martinique', app: 'Stuart API', integration: 'API disponible' },
-  { name: 'Mowi', type: 'Coursier local', area: 'Martinique', app: 'Mowi', integration: 'Partenaire direct possible' },
-  { name: 'Allo Resto', type: 'Livraison repas', area: 'Martinique', app: 'Allo Resto', integration: 'À contacter' },
-  { name: 'Uber Eats', type: 'Marketplace livraison', area: 'Martinique', app: 'Uber Eats', integration: 'Commission 30%' },
-  { name: 'Deliveroo', type: 'Marketplace livraison', area: 'Martinique', app: 'Deliveroo', integration: 'Commission 30%' },
+  { name: 'Martinique Coursier', type: 'Coursier', area: 'Toute la Martinique', app: 'Site web', integration: 'Partenaire potentiel' },
+  { name: 'Coursiers Antilles', type: 'Coursier', area: 'FDF, Schœlcher, Lamentin', app: 'Site web', integration: 'Partenaire potentiel' },
+  { name: 'Kréyol Delivery', type: 'Plateforme livraison', area: 'Martinique', app: 'Kréyol Delivery', integration: 'Partenariat possible' },
+  { name: 'Allo Coursier Martinique', type: 'Coursier', area: 'Fort-de-France', app: 'Téléphone', integration: 'À contacter' },
+  { name: 'Groupe Facebook Livreurs 972', type: 'Réseau livreurs', area: 'Toute la Martinique', app: 'Facebook', integration: 'Recrutement direct' },
   { name: 'Livreurs indépendants (WhatsApp)', type: 'Réseau informel', area: 'Martinique', app: 'WhatsApp', integration: 'Manuel' },
 ];
 
