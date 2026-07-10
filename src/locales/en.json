@@ -1,0 +1,100 @@
+{
+  "nav": {
+    "home": "Home",
+    "catalog": "Menu",
+    "traiteurs": "Caterers",
+    "cart": "Cart",
+    "account": "My Account",
+    "admin": "Admin",
+    "partner": "Partner Space",
+    "login": "Sign In",
+    "logout": "Sign Out"
+  },
+  "home": {
+    "hero_title": "Order Creole Food in Martinique",
+    "hero_subtitle": "Home-cooked meals, passionate caterers, fast delivery",
+    "hero_cta": "Browse menu",
+    "hero_traiteur_cta": "I'm a caterer",
+    "hero_suivi_cta": "Track my order",
+    "section_traiteurs": "Our caterers",
+    "section_how_it_works": "How it works",
+    "how_step1": "Choose",
+    "how_step1_desc": "Browse meals near you",
+    "how_step2": "Confirm",
+    "how_step2_desc": "Order in 3 clicks",
+    "how_step3": "Enjoy",
+    "how_step3_desc": "Pickup or delivery",
+    "pilot_badge": "Pilot phase — service improving daily"
+  },
+  "catalog": {
+    "title": "Menu",
+    "filter_commune": "City",
+    "filter_price": "Price",
+    "filter_available": "Available",
+    "sort_distance": "Distance",
+    "sort_price": "Price",
+    "sort_name": "Name",
+    "no_results": "No meals found",
+    "search_placeholder": "Search a meal…"
+  },
+  "product": {
+    "add_to_cart": "Add to cart",
+    "delikreol_price": "DELIKREOL Price",
+    "from": "from",
+    "description": "Description",
+    "ingredients": "Ingredients",
+    "allergens": "Allergens",
+    "nutrition": "Nutrition facts"
+  },
+  "cart": {
+    "title": "Your cart",
+    "empty": "Your cart is empty",
+    "checkout": "Confirm my order",
+    "mode_pickup": "Pickup",
+    "mode_relay": "Relay point",
+    "mode_delivery": "Delivery",
+    "free": "Free",
+    "fee_pickup": "Free pickup",
+    "fee_relay": "Relay point fee",
+    "fee_delivery": "Delivery fee",
+    "total": "Total",
+    "order_success": "Order confirmed!",
+    "order_id": "Order #"
+  },
+  "traiteurs": {
+    "title": "Our partner caterers",
+    "subtitle": "Discover caterers near you",
+    "all_communes": "All cities",
+    "km_away": "km",
+    "not_geolocated": "Enable location to see distance",
+    "hours": "Hours",
+    "delivery_radius": "Delivery area"
+  },
+  "common": {
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "retry": "Try again",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "back": "Back",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "contact": "Contact",
+    "email": "Email",
+    "phone": "Phone",
+    "whatsapp": "WhatsApp",
+    "privacy": "Privacy",
+    "cookies": "Cookies",
+    "terms": "Terms",
+    "legal": "Legal notice"
+  },
+  "footer": {
+    "description": "DELIKREOL connects local caterers with food lovers in Martinique",
+    "quick_links": "Quick links",
+    "contact_us": "Contact us",
+    "follow_us": "Follow us",
+    "copyright": "© DELIKREOL — All rights reserved"
+  }
+}

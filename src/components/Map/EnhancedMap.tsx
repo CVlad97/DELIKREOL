@@ -186,7 +186,7 @@ export default function EnhancedMap({
             mapRef.current!.setView([latitude, longitude], 14);
           },
           (error) => {
-            console.log("Géolocalisation non disponible:", error);
+            console.warn('[EnhancedMap] Géolocalisation refusée ou indisponible:', error);
           }
         );
       }

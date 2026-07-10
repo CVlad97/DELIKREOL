@@ -112,7 +112,7 @@ function _addNotification(
 
   const waLink = _makeWaLink(message);
 
-  console.log(`[notificationService] ${type}: ${title}`);
+  // [notificationService] dispatché
 
   return {
     success: true,
@@ -197,7 +197,6 @@ export function markAsRead(id: string): void {
   const notification = _notifications.find((n) => n.id === id);
   if (notification) {
     notification.read = true;
-    console.log(`[notificationService] Notification ${id} marquée comme lue`);
   }
 }
 
@@ -208,7 +207,6 @@ export function markAllAsRead(): void {
   _notifications.forEach((n) => {
     n.read = true;
   });
-  console.log('[notificationService] Toutes les notifications marquées comme lues');
 }
 
 /**
@@ -232,5 +230,4 @@ export function getDefaultPreferences(): NotificationPreferences {
  */
 export function clearNotifications(): void {
   _notifications = [];
-  console.log('[notificationService] Notifications vidées');
 }

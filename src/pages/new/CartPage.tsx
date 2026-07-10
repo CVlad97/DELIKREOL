@@ -278,7 +278,7 @@ export default function CartPage() {
             notes,
             status: 'pending',
           });
-          console.log('[DELIKREOL] Commande créée dans Supabase:', orderId);
+          // Order event logged in order_events table
         } catch (err) {
           console.warn('[DELIKREOL] Échec Supabase, fallback localStorage:', err);
         }

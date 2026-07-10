@@ -1,0 +1,100 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "catalog": "Catalogue",
+    "traiteurs": "Traiteurs",
+    "cart": "Panier",
+    "account": "Compte",
+    "admin": "Admin",
+    "partner": "Espace Partenaire",
+    "login": "Connexion",
+    "logout": "Déconnexion"
+  },
+  "home": {
+    "hero_title": "Commandez créole local en Martinique",
+    "hero_subtitle": "Plats maison, traiteurs passionnés, livraison rapide",
+    "hero_cta": "Voir le catalogue",
+    "hero_traiteur_cta": "Je suis traiteur",
+    "hero_suivi_cta": "Suivre ma commande",
+    "section_traiteurs": "Nos traiteurs",
+    "section_how_it_works": "Comment ça marche",
+    "how_step1": "Choisissez",
+    "how_step1_desc": "Parcourez les plats près de chez vous",
+    "how_step2": "Confirmez",
+    "how_step2_desc": "Commandez en 3 clics",
+    "how_step3": "Dégustez",
+    "how_step3_desc": "Retrait ou livraison",
+    "pilot_badge": "Phase pilote — service en amélioration continue"
+  },
+  "catalog": {
+    "title": "Catalogue des plats",
+    "filter_commune": "Commune",
+    "filter_price": "Prix",
+    "filter_available": "Disponible",
+    "sort_distance": "Distance",
+    "sort_price": "Prix",
+    "sort_name": "Nom",
+    "no_results": "Aucun plat trouvé",
+    "search_placeholder": "Rechercher un plat…"
+  },
+  "product": {
+    "add_to_cart": "Ajouter au panier",
+    "delikreol_price": "Prix DELIKREOL",
+    "from": "à partir de",
+    "description": "Description",
+    "ingredients": "Ingrédients",
+    "allergens": "Allergènes",
+    "nutrition": "Valeurs nutritionnelles"
+  },
+  "cart": {
+    "title": "Votre panier",
+    "empty": "Votre panier est vide",
+    "checkout": "Confirmer ma commande",
+    "mode_pickup": "Retrait",
+    "mode_relay": "Point relais",
+    "mode_delivery": "Livraison",
+    "free": "Gratuit",
+    "fee_pickup": "Retrait gratuit",
+    "fee_relay": "Frais de point relais",
+    "fee_delivery": "Frais de livraison",
+    "total": "Total",
+    "order_success": "Commande confirmée !",
+    "order_id": "N° de commande"
+  },
+  "traiteurs": {
+    "title": "Nos traiteurs partenaires",
+    "subtitle": "Découvrez les traiteurs près de chez vous",
+    "all_communes": "Toutes les communes",
+    "km_away": "km",
+    "not_geolocated": "Géolocalisez-vous pour voir la distance",
+    "hours": "Horaires",
+    "delivery_radius": "Zone de livraison"
+  },
+  "common": {
+    "loading": "Chargement…",
+    "error": "Une erreur est survenue",
+    "retry": "Réessayer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "close": "Fermer",
+    "yes": "Oui",
+    "no": "Non",
+    "contact": "Contact",
+    "email": "Email",
+    "phone": "Téléphone",
+    "whatsapp": "WhatsApp",
+    "privacy": "Confidentialité",
+    "cookies": "Cookies",
+    "terms": "CGV",
+    "legal": "Mentions légales"
+  },
+  "footer": {
+    "description": "DELIKREOL met en relation les traiteurs locaux avec les gourmands en Martinique",
+    "quick_links": "Liens rapides",
+    "contact_us": "Contactez-nous",
+    "follow_us": "Suivez-nous",
+    "copyright": "© DELIKREOL — Tous droits réservés"
+  }
+}

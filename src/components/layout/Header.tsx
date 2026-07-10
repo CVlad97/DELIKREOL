@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   Bug,
 } from 'lucide-react';
+import { LanguageSwitcher } from '../LanguageSwitcher';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -85,6 +86,7 @@ export function Header() {
           </nav>
 
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <LanguageSwitcher />
             <Link
               to={accountTarget}
               className="flex items-center gap-1.5 rounded-xl bg-stone-950 px-2.5 py-2 text-xs font-black text-white shadow-sm transition-colors hover:bg-orange-600 sm:px-3 sm:text-sm"

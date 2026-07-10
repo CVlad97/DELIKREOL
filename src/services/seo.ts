@@ -83,7 +83,7 @@ export function getLocalBusinessSchema(commune?: string, name?: string): Record<
     '@type': name ? 'Restaurant' : 'LocalBusiness',
     name: name || 'DeliKreol',
     description: 'Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait.',
-    url: 'https://cvlad97.github.io/DELIKREOL/',
+    url: 'https://delikreol.com/',
     telephone: '+596696653589',
     email: 'contact@delikreol.com',
     areaServed: [

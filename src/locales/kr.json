@@ -1,0 +1,100 @@
+{
+  "nav": {
+    "home": "Kay",
+    "catalog": "Katalòg",
+    "traiteurs": "Kwizinnyé",
+    "cart": "Panyen",
+    "account": "Kont mwen",
+    "admin": "Admin",
+    "partner": "Kwizinnyé",
+    "login": "Konekte",
+    "logout": "Dekonekte"
+  },
+  "home": {
+    "hero_title": "Bay lòd manjé kréyòl Matinik",
+    "hero_subtitle": "Manjé lakay, bon kwizinnyé, livrézon rapid",
+    "hero_cta": "Wè katalòg la",
+    "hero_traiteur_cta": "Mwen sé kwizinnyé",
+    "hero_suivi_cta": "Swiv kòmand mwen",
+    "section_traiteurs": "Kwizinnyé nézòt",
+    "section_how_it_works": "Kouman sa maché",
+    "how_step1": "Chwazi",
+    "how_step1_desc": "Gadé manjé bwòkò'w",
+    "how_step2": "Konfimé",
+    "how_step2_desc": "Bay lòd an 3 klik",
+    "how_step3": "Jwi",
+    "how_step3_desc": "Prann-non voyé",
+    "pilot_badge": "Faz pilòt — sévis ka amélyoré toutan"
+  },
+  "catalog": {
+    "title": "Katalòg manjé",
+    "filter_commune": "Vil-la",
+    "filter_price": "PRIX",
+    "filter_available": "Disponib",
+    "sort_distance": "Distans",
+    "sort_price": "PRIX",
+    "sort_name": "Non",
+    "no_results": "Pa ni manjé",
+    "search_placeholder": "Chèché on manjé…"
+  },
+  "product": {
+    "add_to_cart": "Mété an panyen",
+    "delikreol_price": "PRIX DELIKREOL",
+    "from": "adipati",
+    "description": "Dékripsyon",
+    "ingredients": "Enngridyan",
+    "allergens": "Allèjèn",
+    "nutrition": "Valè nourisyon"
+  },
+  "cart": {
+    "title": "Panyen'w",
+    "empty": "Panyen'w vid",
+    "checkout": "Konfimé kòmand mwen",
+    "mode_pickup": "Alé chaché",
+    "mode_relay": "Pwen rlé",
+    "mode_delivery": "Livrézon",
+    "free": "Gratis",
+    "fee_pickup": "Alé chaché gratis",
+    "fee_relay": "Fré pwen rlé",
+    "fee_delivery": "Fré livrézon",
+    "total": "Total",
+    "order_success": "Kòmand konfimé !",
+    "order_id": "N° kòmand"
+  },
+  "traiteurs": {
+    "title": "Kwizinnyé patné nézòt",
+    "subtitle": "Dékouvwè kwizinnyé bwòkò'w",
+    "all_communes": "Tout vil-la",
+    "km_away": "km",
+    "not_geolocated": "Montré kote'w pou wè distans",
+    "hours": "Lè ouvèti",
+    "delivery_radius": "Zòn livrézon"
+  },
+  "common": {
+    "loading": "Chajman…",
+    "error": "Ni on pwoblèm",
+    "retry": "Ésayé ankò",
+    "save": "Sové",
+    "cancel": "Anilé",
+    "confirm": "Konfimé",
+    "back": "Rété",
+    "close": "Fèmen",
+    "yes": "Wi",
+    "no": "Non",
+    "contact": "Kontak",
+    "email": "Imèl",
+    "phone": "Téléfòn",
+    "whatsapp": "Wat'sap",
+    "privacy": "Konfidansyalité",
+    "cookies": "Biskwit",
+    "terms": "CGV",
+    "legal": "Mansyon légal"
+  },
+  "footer": {
+    "description": "DELIKREOL ka mété an kontak kwizinnyé péyi-a ak boug ki anvi manjé Matinik",
+    "quick_links": "Lyen rapid",
+    "contact_us": "Kontakté-nou",
+    "follow_us": "Swiv-nou",
+    "copyright": "© DELIKREOL — Tout dwa rézèrvé"
+  }
+}

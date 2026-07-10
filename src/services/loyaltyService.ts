@@ -141,5 +141,5 @@ export async function spendLoyaltyPoints(
 }
 
 export async function syncLoyaltyToCryptoWallet(userId: string): Promise<void> {
-  console.log('TODO: Sync loyalty points to crypto wallet for user:', userId);
+  // TODO: Sync loyalty points to crypto wallet for user
 }

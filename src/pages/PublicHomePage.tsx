@@ -175,7 +175,7 @@ const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 const whatsappBase = `https://wa.me/${whatsappNumber}`;
 const featuredCategories = ['plats créoles', 'traiteurs', 'box / plateaux', 'desserts', 'boissons', 'commande entreprise'];
 const budgetRanges = ['Tous', '≤ 15 €', '15 € - 30 €', '30 € et plus'];
-const publicSiteUrl = 'https://cvlad97.github.io/DELIKREOL/';
+const publicSiteUrl = 'https://delikreol.com/';
 const defaultMapCenter: [number, number] = [14.6104, -61.0733];
 
 const zoneCenterByLabel: Record<string, [number, number]> = {

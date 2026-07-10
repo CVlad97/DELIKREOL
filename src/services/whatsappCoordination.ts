@@ -92,7 +92,7 @@ Commande : ${orderNumber}
 Zone : ${commune}
 Gain livreur : ${earning.toFixed(2)} €
 
-Cliquez pour voir les détails : https://cvlad97.github.io/DELIKREOL/statut-commande?order=${orderNumber}`;
+Cliquez pour voir les détails : https://delikreol.com/statut-commande?order=${orderNumber}`;
 }
 
 export function driverNeededLink(

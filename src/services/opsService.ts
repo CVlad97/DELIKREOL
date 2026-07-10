@@ -603,7 +603,7 @@ export function getPartnerWhatsAppLink(phone: string, partnerName: string): stri
 
 export function getTelegramShareLink(reference: string): string {
   const text = encodeURIComponent(`Mission ${reference} a suivre dans DELIKREOL OPS.`);
-  return `https://t.me/share/url?url=https://cvlad97.github.io/DELIKREOL/&text=${text}`;
+  return `https://t.me/share/url?url=https://delikreol.com/&text=${text}`;
 }
 
 export function getGoogleMapsLink(zone: string): string {

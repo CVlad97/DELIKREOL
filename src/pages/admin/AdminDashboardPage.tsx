@@ -107,7 +107,7 @@ export default function AdminDashboardPage() {
                   {opened ? '✅ Ouvert' : '⏳ Pas encore'}
                 </span>
                 <code className="text-xs text-gray-500 bg-white px-2 py-1 rounded border">{p.code}</code>
-                <button onClick={() => navigator.clipboard.writeText(`https://cvlad97.github.io/DELIKREOL/partenaire?code=${p.code}`)} className="text-xs text-orange-600 hover:underline">Copier lien</button>
+                <button onClick={() => navigator.clipboard.writeText(`https://delikreol.com/partenaire?code=${p.code}`)} className="text-xs text-orange-600 hover:underline">Copier lien</button>
               </div>
             );
           })}
@@ -153,8 +153,8 @@ export default function AdminDashboardPage() {
           {partnerLinks.map(p => (
             <div key={p.code} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
               <span className="font-semibold w-44">{p.name}</span>
-              <button onClick={() => navigator.clipboard.writeText(`https://cvlad97.github.io/DELIKREOL/partenaire?code=${p.code}`)} className="px-3 py-1 bg-orange-100 text-orange-700 rounded-lg text-xs font-bold hover:bg-orange-200">Copier lien</button>
-              <button onClick={() => navigator.clipboard.writeText(`Bonjour,\n\nVotre espace pilote DELIKREOL est prêt.\n\nLien :\nhttps://cvlad97.github.io/DELIKREOL/partenaire?code=${p.code}\n\nCe lien vous permet d'envoyer vos corrections.\n\nVladimir — DELIKREOL`)} className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-bold hover:bg-green-200">Copier message WhatsApp</button>
+              <button onClick={() => navigator.clipboard.writeText(`https://delikreol.com/partenaire?code=${p.code}`)} className="px-3 py-1 bg-orange-100 text-orange-700 rounded-lg text-xs font-bold hover:bg-orange-200">Copier lien</button>
+              <button onClick={() => navigator.clipboard.writeText(`Bonjour,\n\nVotre espace pilote DELIKREOL est prêt.\n\nLien :\nhttps://delikreol.com/partenaire?code=${p.code}\n\nCe lien vous permet d'envoyer vos corrections.\n\nVladimir — DELIKREOL`)} className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-bold hover:bg-green-200">Copier message WhatsApp</button>
             </div>
           ))}
         </div>
