@@ -3,18 +3,37 @@ import { supabase } from '../lib/supabase';
 const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 
 /**
- * Crée un Payment Intent standard (sans Stripe Connect).
- * Utilisé quand le traiteur n'a pas encore de compte Stripe Connect.
- *
- * @param total - Montant total en euros
- * @param orderId - Identifiant de la commande
- * @param vendorAccountId - (optionnel) ID du compte Stripe du vendeur
- * @returns Le clientSecret du Payment Intent, ou null en cas d'erreur
+ * Crée une session Stripe Checkout hébergée à partir d'une commande déjà
+ * enregistrée. Le montant est recalculé côté serveur depuis la base.
+ */
+export async function createStripeCheckoutSession(
+  orderId: string,
+  returnUrl: string,
+): Promise<string> {
+  const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+    body: { orderId, returnUrl },
+  });
+
+  if (error) {
+    console.error('Error creating Stripe Checkout session:', error);
+    throw error;
+  }
+
+  if (!data?.url || typeof data.url !== 'string') {
+    throw new Error(data?.error || 'Stripe Checkout URL manquante');
+  }
+
+  return data.url;
+}
+
+/**
+ * Crée un PaymentIntent standard. Conservé pour les écrans qui utilisent
+ * Stripe Elements ; le montant transmis à la fonction est en centimes.
  */
 export async function createPaymentIntent(
   total: number,
   orderId: string,
-  vendorAccountId?: string
+  vendorAccountId?: string,
 ): Promise<string | null> {
   try {
     const { data, error } = await supabase.functions.invoke('create-payment-intent', {
@@ -22,6 +41,7 @@ export async function createPaymentIntent(
         amount: Math.round(total * 100),
         currency: 'eur',
         orderId,
+        vendorAccountId,
       },
     });
 
@@ -30,7 +50,7 @@ export async function createPaymentIntent(
       return null;
     }
 
-    return data.clientSecret;
+    return data?.clientSecret ?? null;
   } catch (error) {
     console.error('Error calling payment function:', error);
     return null;
@@ -38,19 +58,13 @@ export async function createPaymentIntent(
 }
 
 /**
- * Crée un Payment Intent Stripe Connect pour un traiteur disposant
- * d'un compte Stripe Connect. Les fonds sont automatiquement
- * répartis entre la plateforme et le vendeur.
- *
- * @param amount - Montant total en euros
- * @param orderId - Identifiant de la commande
- * @param vendorStripeAccountId - ID du compte Stripe Connect du traiteur (acct_xxx)
- * @returns Le clientSecret du Payment Intent, ou null en cas d'erreur
+ * Crée un PaymentIntent Stripe Connect pour un traiteur disposant d'un
+ * compte Connect. Le backend attend vendorAccountId.
  */
 export async function createConnectPaymentIntent(
   amount: number,
   orderId: string,
-  vendorStripeAccountId: string
+  vendorStripeAccountId: string,
 ): Promise<string | null> {
   try {
     const { data, error } = await supabase.functions.invoke('create-payment-intent', {
@@ -58,8 +72,7 @@ export async function createConnectPaymentIntent(
         amount: Math.round(amount * 100),
         currency: 'eur',
         orderId,
-        vendorStripeAccountId,
-        connect: true,
+        vendorAccountId: vendorStripeAccountId,
       },
     });
 
@@ -68,7 +81,7 @@ export async function createConnectPaymentIntent(
       return null;
     }
 
-    return data.clientSecret;
+    return data?.clientSecret ?? null;
   } catch (error) {
     console.error('Error calling Connect payment function:', error);
     return null;
@@ -77,25 +90,15 @@ export async function createConnectPaymentIntent(
 
 /**
  * Récupère un lien d'onboarding Stripe Connect pour un traiteur.
- * Ce lien permet au traiteur de créer ou connecter son compte Stripe.
- *
- * @param email - Email du traiteur (contact@delikreol.com)
- * @param name - Nom commercial du traiteur
- * @param type - Type de business (restaurant, producer, merchant)
- * @returns L'URL d'onboarding Stripe Connect, ou null en cas d'erreur
  */
 export async function getStripeConnectOnboardingLink(
   email: string,
   name: string,
-  type: string
+  type: string,
 ): Promise<string | null> {
   try {
     const { data, error } = await supabase.functions.invoke('stripe-connect-onboard', {
-      body: {
-        email,
-        name,
-        type,
-      },
+      body: { email, name, type },
     });
 
     if (error) {
@@ -103,7 +106,7 @@ export async function getStripeConnectOnboardingLink(
       return null;
     }
 
-    return data.accountLink;
+    return data?.accountLink ?? null;
   } catch (error) {
     console.error('Error calling Connect onboarding function:', error);
     return null;
@@ -112,24 +115,15 @@ export async function getStripeConnectOnboardingLink(
 
 /**
  * Crée un compte Stripe Connect pour un traiteur.
- *
- * @param email - Email du traiteur
- * @param businessName - Nom commercial
- * @param userId - ID utilisateur Supabase
- * @returns L'ID du compte Stripe Connect, ou null en cas d'erreur
  */
 export async function createConnectedAccount(
   email: string,
   businessName: string,
-  userId: string
+  userId: string,
 ): Promise<string | null> {
   try {
     const { data, error } = await supabase.functions.invoke('create-connected-account', {
-      body: {
-        email,
-        businessName,
-        userId,
-      },
+      body: { email, businessName, userId },
     });
 
     if (error) {
@@ -137,16 +131,13 @@ export async function createConnectedAccount(
       return null;
     }
 
-    return data.accountId;
+    return data?.accountId ?? null;
   } catch (error) {
     console.error('Error calling account creation function:', error);
     return null;
   }
 }
 
-/**
- * Retourne la clé publiable Stripe depuis les variables d'environnement.
- */
 export function getStripePublishableKey(): string | undefined {
   return STRIPE_PUBLISHABLE_KEY;
 }
