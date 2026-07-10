@@ -39,6 +39,9 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
   const hasStripeConnect = !!vendor?.stripe_connect_account_id;
   const vendorStripeAccountId = vendor?.stripe_connect_account_id ?? undefined;
 
+  // Stripe direct payment always available (non-Connect)
+  const stripeAvailable = hasStripeConnect || !!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+
   const deliveryFee = deliveryType === 'home_delivery' ? 5.0 : 0;
   const finalTotal = total + deliveryFee;
   const commissionDelikreol = total * 0.2;
@@ -71,8 +74,8 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
       },
     ];
 
-    // Ajouter Stripe si le traiteur a un compte Connect
-    if (hasStripeConnect) {
+    // Ajouter Stripe si disponible
+    if (stripeAvailable) {
       options.unshift({
         id: 'stripe',
         title: 'Carte bancaire (Stripe)',

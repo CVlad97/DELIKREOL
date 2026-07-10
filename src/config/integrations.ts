@@ -22,12 +22,12 @@ export interface IntegrationsConfig {
 
 export const integrations: IntegrationsConfig = {
   stripe: {
-    // Stripe test mode — prêt, activé mais WhatsApp-first
-    enabled: false,
-    label: 'Stripe (test — désactivé)',
-    description: 'Mode test prêt. Activer après validation humaine.',
+    // Stripe activé — paiement par carte bancaire
+    enabled: true,
+    label: 'Stripe (carte bancaire)',
+    description: 'Paiement sécurisé par carte bancaire via Stripe',
     publicKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
-    status: 'pending',
+    status: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY && import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY !== 'pk_test_xxxxxxxxxxxxxxxxxxxx' ? 'configured' : 'pending',
   },
   qonto: {
     enabled: true,
