@@ -21,6 +21,7 @@ export const additionalPartnerProfiles: PartnerProfile[] = [
       'Riz / Lentilles / Légumes pays / Crudités',
       'Fait maison avec amour',
     ],
+    contactPhone: '+596 696 00 27 64',
     instagram: {
       label: 'Instagram à confirmer',
     },
