@@ -12,8 +12,8 @@
 ## Priorite 1 — Contacts et securite
 
 - WhatsApp Business principal : +596 696 65 35 89.
-- Email principal a creer chez Hostinger : contact@delikreol.mq.
-- Emails optionnels : commandes@delikreol.mq, partenaires@delikreol.mq.
+- Email principal a creer chez Hostinger : contact@delikreol.com.
+- Emails optionnels : commandes@delikreol.com, partenaires@delikreol.com.
 - Ne pas afficher de token ou cle secrete.
 - Ne pas afficher de compte demo public en production.
 - Verifier que les boutons WhatsApp pointent vers le numero principal DeliKreol.
@@ -65,7 +65,7 @@ A faire ensuite :
 
 - GitHub Pages doit rester le canal principal tant que Hostinger/Hermes est bloque.
 - Verifier l'URL publique apres chaque commit.
-- Ne pas publier officiellement le domaine delikreol.mq avant checklist finale.
+- Ne pas publier officiellement le domaine delikreol.com avant checklist finale.
 
 ## Validation avant publication
 

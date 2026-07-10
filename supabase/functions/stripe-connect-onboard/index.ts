@@ -73,8 +73,8 @@ serve(async (req) => {
     // --- Génération du lien d'onboarding Stripe ---
     const accountLink = await stripe.accountLinks.create({
       account: stripeAccountId,
-      refresh_url: `${Deno.env.get('PUBLIC_SITE_URL') || 'https://delikreol.mq'}/stripe-onboard/refresh`,
-      return_url: `${Deno.env.get('PUBLIC_SITE_URL') || 'https://delikreol.mq'}/stripe-onboard/success`,
+      refresh_url: `${Deno.env.get('PUBLIC_SITE_URL') || 'https://delikreol.com'}/stripe-onboard/refresh`,
+      return_url: `${Deno.env.get('PUBLIC_SITE_URL') || 'https://delikreol.com'}/stripe-onboard/success`,
       type: 'account_onboarding',
     })
 

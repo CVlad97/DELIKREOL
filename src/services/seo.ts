@@ -85,7 +85,7 @@ export function getLocalBusinessSchema(commune?: string, name?: string): Record<
     description: 'Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait.',
     url: 'https://cvlad97.github.io/DELIKREOL/',
     telephone: '+596696653589',
-    email: 'contact@delikreol.mq',
+    email: 'contact@delikreol.com',
     areaServed: [
       {
         '@type': 'Country',

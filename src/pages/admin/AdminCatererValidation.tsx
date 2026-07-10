@@ -582,8 +582,8 @@ export default function AdminCatererValidation() {
       {/* Footer */}
       <div className="text-center text-xs text-muted-foreground pt-4 border-t border-border">
         Contact :{' '}
-        <a href="mailto:contact@delikreol.mq" className="text-primary hover:underline">
-          contact@delikreol.mq
+        <a href="mailto:contact@delikreol.com" className="text-primary hover:underline">
+          contact@delikreol.com
         </a>
         {' · '}
         <a href={getWhatsAppAdminLink()} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">

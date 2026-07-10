@@ -4,7 +4,7 @@ import { Settings, Save, AlertTriangle } from 'lucide-react';
 export function AdminParametres() {
   const [settings, setSettings] = useState({
     whatsappNumber: '596696653589',
-    contactEmail: 'contact@delikreol.mq',
+    contactEmail: 'contact@delikreol.com',
     minDeliveryAmount: '40',
     deliveryFee: '5',
     platformName: 'DeliKreol',

@@ -12,8 +12,8 @@ Nouveau partenaire a integrer dans DeliKreol.
 
 ## Contact DeliKreol a utiliser sur le site
 - WhatsApp Business principal DeliKreol : +596 696 65 35 89
-- Email professionnel recommande : contact@delikreol.mq
-- Emails optionnels a creer plus tard : commandes@delikreol.mq, partenaires@delikreol.mq
+- Email professionnel recommande : contact@delikreol.com
+- Emails optionnels a creer plus tard : commandes@delikreol.com, partenaires@delikreol.com
 
 ## Contact prestataire
 - Numero direct du snack : a confirmer avant affichage public

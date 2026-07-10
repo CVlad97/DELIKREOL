@@ -7,7 +7,7 @@ import { trackPublicView } from '../../services/metricsService';
 import { setPageMeta } from '../../services/seo';
 
 const WHATSAPP_NUMBER = '596696653589';
-const CONTACT_EMAIL = 'contact@delikreol.mq';
+const CONTACT_EMAIL = 'contact@delikreol.com';
 const WHATSAPP_DISPLAY = '+596 696 65 35 89';
 const SOCIAL_LINKS = [
   {

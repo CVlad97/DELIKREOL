@@ -47,7 +47,7 @@ npx supabase db seed
 
 ---
 
-## 3. Domaine delikreol.mq
+## 3. Domaine delikreol.com
 
 ### DNS Checklist
 | Type | Nom | Valeur |
@@ -57,14 +57,14 @@ npx supabase db seed
 | MX | `@` | Google Workspace MX (si email) |
 | TXT | `@` | `v=spf1 include:_spf.google.com ~all` |
 | TXT | `google._domainkey` | DKIM key (générer dans Google Admin) |
-| TXT | `_dmarc` | `v=DMARC1; p=quarantine; rua=mailto:contact@delikreol.mq` |
+| TXT | `_dmarc` | `v=DMARC1; p=quarantine; rua=mailto:contact@delikreol.com` |
 
 ### Emails
 | Adresse | Usage |
 |---------|-------|
-| `contact@delikreol.mq` | Public / clients |
-| `commandes@delikreol.mq` | Commandes WhatsApp |
-| `partenaires@delikreol.mq` | Prospection partenaires |
+| `contact@delikreol.com` | Public / clients |
+| `commandes@delikreol.com` | Commandes WhatsApp |
+| `partenaires@delikreol.com` | Prospection partenaires |
 
 ### Hébergement conseillé
 - **Phase 1** : GitHub Pages + custom domain (gratuit, HTTPS automatique)

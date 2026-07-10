@@ -177,7 +177,7 @@ export default function AidePage() {
           </a>
 
           <a
-            href="mailto:contact@delikreol.mq"
+            href="mailto:contact@delikreol.com"
             className="flex items-center gap-4 p-5 bg-blue-50 border border-blue-200 rounded-2xl hover:bg-blue-100 transition-colors group"
           >
             <div className="w-12 h-12 bg-blue-500 text-white rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -185,7 +185,7 @@ export default function AidePage() {
             </div>
             <div>
               <p className="text-sm font-bold text-blue-900">Email</p>
-              <p className="text-xs text-blue-700">contact@delikreol.mq</p>
+              <p className="text-xs text-blue-700">contact@delikreol.com</p>
               <p className="text-xs text-blue-600 mt-0.5">Réponse sous 24h</p>
             </div>
           </a>

@@ -55,7 +55,7 @@ export function CookiesPage() {
           <div>
             <h2 className="text-lg font-semibold mb-2">Contact</h2>
             <p>
-              Pour toute question concernant notre politique de cookies ou l'exercice de vos droits, vous pouvez nous contacter à : <a href="mailto:contact@delikreol.mq" className="text-primary underline">contact@delikreol.mq</a>
+              Pour toute question concernant notre politique de cookies ou l'exercice de vos droits, vous pouvez nous contacter à : <a href="mailto:contact@delikreol.com" className="text-primary underline">contact@delikreol.com</a>
             </p>
           </div>
 

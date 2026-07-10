@@ -152,4 +152,4 @@ A utiliser :
 
 ## Decision
 
-Ne pas publier officiellement `delikreol.mq` tant que ces elements ne sont pas branches et testes sur GitHub Pages.
+Ne pas publier officiellement `delikreol.com` tant que ces elements ne sont pas branches et testes sur GitHub Pages.

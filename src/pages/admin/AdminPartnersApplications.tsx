@@ -326,8 +326,8 @@ export default function AdminPartnersApplications() {
       {/* Footer */}
       <div className="text-center text-xs text-gray-400 mt-8">
         Contact support :{' '}
-        <a href={`mailto:contact@delikreol.mq`} className="text-emerald-600 hover:underline">
-          contact@delikreol.mq
+        <a href={`mailto:contact@delikreol.com`} className="text-emerald-600 hover:underline">
+          contact@delikreol.com
         </a>{' '}
         ·{' '}
         <a href={getWhatsAppSupportLink()} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">

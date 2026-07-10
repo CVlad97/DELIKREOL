@@ -57,7 +57,7 @@ test.describe('DeliKreol — Parcours utilisateur', () => {
     await expect(page.locator('h1')).toContainText(/Contact/);
     await expect(page.locator('form')).toBeVisible();
     // Vérifier les coordonnées (WhatsApp, email)
-    await expect(page.locator('text=@delikreol.mq').or(page.locator('text=696'))).toBeVisible();
+    await expect(page.locator('text=@delikreol.com').or(page.locator('text=696'))).toBeVisible();
   });
 
   test('Pages légales — accessibles', async ({ page }) => {

@@ -69,7 +69,7 @@ export function PartnerTermsPage() {
           <div>
             <h2 className="text-lg font-semibold mb-2">Contact</h2>
             <p>
-              Pour toute question relative aux conditions partenaires ou à la phase bêta : <a href="mailto:contact@delikreol.mq" className="text-primary underline">contact@delikreol.mq</a>
+              Pour toute question relative aux conditions partenaires ou à la phase bêta : <a href="mailto:contact@delikreol.com" className="text-primary underline">contact@delikreol.com</a>
             </p>
           </div>
 

@@ -42,12 +42,12 @@
 - [x] is_admin() function prête ✅
 
 ## AVANT DOMAINE
-- [ ] Créer `public/CNAME` → `delikreol.mq`
+- [ ] Créer `public/CNAME` → `delikreol.com`
 - [ ] Créer `public/robots.txt`
 - [ ] Configurer les DNS (Hostinger) :
   - [ ] Apex → GitHub Pages IPs
   - [ ] CNAME www → cvlad97.github.io
-  - [ ] MX → emails delikreol.mq
+  - [ ] MX → emails delikreol.com
   - [ ] SPF, DKIM, DMARC
 - [ ] Vérifier HTTPS après propagation
 - [ ] Vérifier SPA fallback sur le domaine

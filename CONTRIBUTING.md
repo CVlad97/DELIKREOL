@@ -119,7 +119,7 @@ Consulter `docs/SECURITY_NOTES.md`
 
 ## Contact & Support
 
-- **Email** : contact@delikreol.mq (relayé vers vladimir.claveau@gmail.com)
+- **Email** : contact@delikreol.com (relayé vers vladimir.claveau@gmail.com)
 - **Gmail** : vladimir.claveau@gmail.com
 - **Issues** : https://github.com/CVlad97/DELIKREOL/issues
 - **Repository** : https://github.com/CVlad97/DELIKREOL

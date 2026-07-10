@@ -39,5 +39,5 @@ Regle : livraison eloignee possible a partir de 40 EUR, seulement selon validati
 
 ## Limites
 
-Ne pas publier officiellement `delikreol.mq` tant que GitHub Pages n est pas teste et valide.
+Ne pas publier officiellement `delikreol.com` tant que GitHub Pages n est pas teste et valide.
 Ne pas activer paiement ou titre-restaurant comme si c etait disponible.

@@ -227,7 +227,7 @@ export interface QontoOrganizationConfig {
 export const DELIKREOL_ORG: QontoOrganizationConfig = {
   legalName: 'DELIKREOL',
   brandName: 'DeliKreol',
-  contactEmail: 'contact@delikreol.mq',
+  contactEmail: 'contact@delikreol.com',
   phone: '+596 696 00 00 00',
   address: {
     street: 'Rue principale',

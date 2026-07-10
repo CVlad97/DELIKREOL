@@ -94,7 +94,7 @@ CREATE POLICY "service_role_delete_partner_applications"
 -- TEST 3 : admin actif → SELECT autorisé
 -- EXPECTED: données visibles
 -- BEGIN;
---   INSERT INTO admin_users (user_id, email) VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'admin@delikreol.mq');
+--   INSERT INTO admin_users (user_id, email) VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'admin@delikreol.com');
 --   SET LOCAL ROLE authenticated;
 --   SET LOCAL request.jwt.claim.sub = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 --   SELECT * FROM partner_applications LIMIT 1;
@@ -103,7 +103,7 @@ CREATE POLICY "service_role_delete_partner_applications"
 -- TEST 4 : admin inactif → SELECT refusé
 -- EXPECTED: 0 rows ou erreur
 -- BEGIN;
---   INSERT INTO admin_users (user_id, email, is_active) VALUES ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'ancien@delikreol.mq', false);
+--   INSERT INTO admin_users (user_id, email, is_active) VALUES ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'ancien@delikreol.com', false);
 --   SET LOCAL ROLE authenticated;
 --   SET LOCAL request.jwt.claim.sub = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 --   SELECT * FROM partner_applications LIMIT 1;

@@ -4,7 +4,7 @@ import { ArrowRight, MessageCircle, MapPin, Phone } from 'lucide-react';
 const WHATSAPP_NUMBER = '596696653589';
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
 const WHATSAPP_DISPLAY = '+596 696 65 35 89';
-const CONTACT_EMAIL = 'contact@delikreol.mq';
+const CONTACT_EMAIL = 'contact@delikreol.com';
 
 const quickLinks = [
   { label: 'Catalogue', to: '/catalogue' },

@@ -5,17 +5,17 @@ Statut: pret techniquement apres achat/configuration du domaine
 
 ## Decision courte
 
-Oui, le projet peut migrer vers `delikreol.mq`, avec une condition externe: le domaine doit etre achete et les DNS doivent etre configures avant d'activer officiellement le domaine public.
+Oui, le projet peut migrer vers `delikreol.com`, avec une condition externe: le domaine doit etre achete et les DNS doivent etre configures avant d'activer officiellement le domaine public.
 
 Le code a ete ajuste pour supporter deux modes sans casser l'existant:
 
 - GitHub Pages actuel: `https://cvlad97.github.io/DELIKREOL/` avec `VITE_BASE_PATH=/DELIKREOL/`
-- Domaine racine futur: `https://delikreol.mq/` avec `VITE_BASE_PATH=/`
+- Domaine racine futur: `https://delikreol.com/` avec `VITE_BASE_PATH=/`
 
 ## Ce qui a ete finalise aujourd'hui
 
 - Le routage React n'est plus bloque sur `/DELIKREOL`; il suit maintenant `VITE_BASE_PATH` ou `BASE_URL`.
-- Le build racine `delikreol.mq` passe avec `VITE_BASE_PATH=/`.
+- Le build racine `delikreol.com` passe avec `VITE_BASE_PATH=/`.
 - Le build GitHub Pages historique passe avec `VITE_BASE_PATH=/DELIKREOL/`.
 - Le warning CSS de build a ete corrige dans la page finance admin.
 - La sequence operationnelle reste verte: 12 checks OK, 0 echec.
@@ -51,13 +51,13 @@ Resultat:
 
 ### Decision achat
 
-Tu peux tenter l'achat dans ton compte Hostinger si `delikreol.mq` apparait disponible dans leur recherche de domaine. Si Hostinger ne propose pas `.mq`, il faut acheter `delikreol.mq` chez un registrar qui vend les domaines `.mq`, puis pointer les DNS vers GitHub Pages, Cloudflare, Netlify ou Hostinger.
+Tu peux tenter l'achat dans ton compte Hostinger si `delikreol.com` apparait disponible dans leur recherche de domaine. Si Hostinger ne propose pas `.mq`, il faut acheter `delikreol.com` chez un registrar qui vend les domaines `.mq`, puis pointer les DNS vers GitHub Pages, Cloudflare, Netlify ou Hostinger.
 
-Je ne recommande pas d'annoncer publiquement `delikreol.mq` avant achat + DNS + HTTPS + test formulaire.
+Je ne recommande pas d'annoncer publiquement `delikreol.com` avant achat + DNS + HTTPS + test formulaire.
 
 ## Plan DNS GitHub Pages
 
-Pour servir le site a la racine `delikreol.mq` via GitHub Pages:
+Pour servir le site a la racine `delikreol.com` via GitHub Pages:
 
 | Type | Nom | Valeur |
 | --- | --- | --- |
@@ -69,20 +69,20 @@ Pour servir le site a la racine `delikreol.mq` via GitHub Pages:
 
 Ensuite:
 
-1. Dans GitHub Pages, configurer le domaine custom `delikreol.mq`.
+1. Dans GitHub Pages, configurer le domaine custom `delikreol.com`.
 2. Activer `Enforce HTTPS` quand GitHub le permet.
 3. Lancer les tests:
-   - `https://delikreol.mq/`
-   - `https://www.delikreol.mq/`
-   - `https://delikreol.mq/catalogue`
-   - `https://delikreol.mq/contact`
-   - `https://delikreol.mq/admin`
+   - `https://delikreol.com/`
+   - `https://www.delikreol.com/`
+   - `https://delikreol.com/catalogue`
+   - `https://delikreol.com/contact`
+   - `https://delikreol.com/admin`
 
 ## Email domaine
 
 Avant toute campagne mailing:
 
-- Creer `contact@delikreol.mq`.
+- Creer `contact@delikreol.com`.
 - Ajouter MX selon le fournisseur email choisi.
 - Ajouter SPF.
 - Ajouter DKIM.
@@ -95,7 +95,7 @@ Avant toute campagne mailing:
 
 C'est l'option la plus directe et economique.
 
-1. Acheter `delikreol.mq`.
+1. Acheter `delikreol.com`.
 2. Configurer DNS chez le registrar.
 3. Ajouter le domaine custom dans GitHub Pages.
 4. Modifier le workflow de production pour `VITE_BASE_PATH=/` quand le domaine custom devient actif.
@@ -105,7 +105,7 @@ C'est l'option la plus directe et economique.
 
 Recommandee si tu veux plus de controle DNS, securite, cache et redirections.
 
-1. Acheter `delikreol.mq`.
+1. Acheter `delikreol.com`.
 2. Mettre les nameservers Cloudflare.
 3. Pointer vers GitHub Pages ou un autre hebergement.
 4. Gerer redirections, HTTPS, cache et protection depuis Cloudflare.
@@ -116,7 +116,7 @@ Possible si tu veux centraliser domaine/hebergement/email, mais a confirmer dans
 
 ## Blocages restants avant revenus reels
 
-- Achat et possession effective de `delikreol.mq`.
+- Achat et possession effective de `delikreol.com`.
 - DNS + HTTPS verifies.
 - Email domaine configure avant mailing.
 - Variables production confirmees: Supabase, Stripe, email, analytics.

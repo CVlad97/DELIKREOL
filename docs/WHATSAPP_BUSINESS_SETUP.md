@@ -5,7 +5,7 @@
 **Nom :** DeliKreol
 **Catégorie :** Restauration / Service traiteur / Livraison de repas
 **WhatsApp :** +596 696 65 35 89
-**Site web :** https://delikreol.mq
+**Site web :** https://delikreol.com
 
 **Description :**
 DeliKreol connecte les clients aux traiteurs, snacks et plats locaux de Martinique. Commandes, devis traiteur, retrait ou livraison selon disponibilité des partenaires. Le meilleur est à venir.

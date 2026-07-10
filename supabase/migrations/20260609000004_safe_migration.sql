@@ -247,7 +247,7 @@ values ('Martinique', 40, 'active',
 
 insert into admin_settings (key, value) values
   ('whatsapp_number', '"596696653589"'),
-  ('contact_email', '"contact@delikreol.mq"'),
+  ('contact_email', '"contact@delikreol.com"'),
   ('delivery_threshold', '40'),
   ('site_name', '"DeliKreol"'),
   ('order_mode', '"whatsapp_first"'),

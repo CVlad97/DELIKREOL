@@ -318,12 +318,12 @@ export function BecomePartner({ onBack }: BecomePartnerProps) {
             </div>
             <div className="flex flex-col gap-4">
               <a
-                href="mailto:onboarding@delikreol.mq"
+                href="mailto:onboarding@delikreol.com"
                 className="group flex items-center justify-between p-8 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-3xl border border-white/20 transition-all"
               >
                 <div>
                   <div className="text-xs font-black uppercase tracking-widest opacity-60 mb-1">Email Direct</div>
-                  <div className="text-2xl font-black tracking-tight uppercase">onboarding@delikreol.mq</div>
+                  <div className="text-2xl font-black tracking-tight uppercase">onboarding@delikreol.com</div>
                 </div>
                 <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
               </a>

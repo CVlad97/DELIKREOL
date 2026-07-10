@@ -15,7 +15,7 @@ const projects = [
       'Backend Supabase — en place',
       'Données traiteurs réels — à compléter',
       'GitHub Pages — actif',
-      'Domaine delikreol.mq — à configurer',
+      'Domaine delikreol.com — à configurer',
     ],
   },
   {

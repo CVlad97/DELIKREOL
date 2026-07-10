@@ -79,7 +79,7 @@ export async function createConnectPaymentIntent(
  * Récupère un lien d'onboarding Stripe Connect pour un traiteur.
  * Ce lien permet au traiteur de créer ou connecter son compte Stripe.
  *
- * @param email - Email du traiteur (contact@delikreol.mq)
+ * @param email - Email du traiteur (contact@delikreol.com)
  * @param name - Nom commercial du traiteur
  * @param type - Type de business (restaurant, producer, merchant)
  * @returns L'URL d'onboarding Stripe Connect, ou null en cas d'erreur

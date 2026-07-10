@@ -38,8 +38,8 @@ VITE_SUPABASE_ANON_KEY=ANON_PUBLIC_KEY
 VITE_FREE_MODE=true
 VITE_ORDER_MODE=whatsapp_first
 VITE_WHATSAPP_NUMBER=596696653589
-VITE_CONTACT_EMAIL=contact@delikreol.mq
-VITE_OPERATIONS_EMAIL=contact@delikreol.mq
+VITE_CONTACT_EMAIL=contact@delikreol.com
+VITE_OPERATIONS_EMAIL=contact@delikreol.com
 ```
 
 ## Variables interdites cote frontend

@@ -58,7 +58,7 @@ export function TraiteurDetailPage() {
       const schema = {
         '@context': 'https://schema.org',
         '@type': 'FoodEstablishment',
-        '@id': `https://delikreol.mq/traiteur/${traiteur.slug}`,
+        '@id': `https://delikreol.com/traiteur/${traiteur.slug}`,
         name: traiteur.name,
         description: (traiteur.description || traiteur.offer || '').substring(0, 200),
         image: traiteur.heroImage || undefined,

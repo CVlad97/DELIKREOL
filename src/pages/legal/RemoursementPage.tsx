@@ -57,7 +57,7 @@ export function RemoursementPage() {
             </p>
             <ul className="list-disc pl-5 mt-2 space-y-1">
               <li><strong>WhatsApp :</strong> +596 696 65 35 89</li>
-              <li><strong>Email :</strong> <a href="mailto:contact@delikreol.mq" className="text-primary underline">contact@delikreol.mq</a></li>
+              <li><strong>Email :</strong> <a href="mailto:contact@delikreol.com" className="text-primary underline">contact@delikreol.com</a></li>
               <li><strong>Formulaire :</strong> <Link to="/contact" className="text-primary underline">Page de contact</Link></li>
             </ul>
           </div>

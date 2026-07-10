@@ -51,7 +51,7 @@ export function CGVPage() {
 
           <div>
             <h2 className="text-lg font-semibold mb-2">9. Contact</h2>
-            <p>Pour toute réclamation ou question : WhatsApp +596 696 65 35 89 ou email contact@delikreol.mq</p>
+            <p>Pour toute réclamation ou question : WhatsApp +596 696 65 35 89 ou email contact@delikreol.com</p>
           </div>
 
           <div className="border-t pt-6 mt-8 text-xs text-muted-foreground">

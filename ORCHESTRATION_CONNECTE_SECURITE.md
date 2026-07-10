@@ -28,8 +28,8 @@ Cote frontend public, seules les variables publiques suivantes sont acceptables 
 ## Contacts officiels DeliKreol
 
 - WhatsApp Business principal : +596 696 65 35 89
-- Email principal a creer ou configurer chez Hostinger : contact@delikreol.mq
-- Emails optionnels : commandes@delikreol.mq, partenaires@delikreol.mq
+- Email principal a creer ou configurer chez Hostinger : contact@delikreol.com
+- Emails optionnels : commandes@delikreol.com, partenaires@delikreol.com
 
 ## Nouveau partenaire
 
@@ -47,7 +47,7 @@ Cote frontend public, seules les variables publiques suivantes sont acceptables 
 1. Appliquer le fichier HERMES_BANKABLE_OPERATING_PROMPT.md.
 2. Appliquer la fiche partners/snack-save-peyia.md.
 3. Utiliser +596 696 65 35 89 comme WhatsApp public principal.
-4. Utiliser contact@delikreol.mq comme email public principal.
+4. Utiliser contact@delikreol.com comme email public principal.
 5. Retirer toute mention de service role key, token GitHub ou token WhatsApp cote interface.
 6. Retirer les identifiants demo visibles avant publication.
 7. Remplacer les points relais fictifs par : Reseau points relais en constitution — candidatures ouvertes.
