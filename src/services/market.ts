@@ -54,7 +54,7 @@ export function detectCountry(): MarketConfig {
       detectionDone = true;
       return COUNTRY_MARKET[override];
     }
-  } catch {}
+  } catch { /* ignore */ }
 
   // 2. Détection via Cloudflare (en-tête Cf-Ipcountry)
   const cfCountry = (document.querySelector('meta[name="cf-country"]') as HTMLMetaElement)?.content;
@@ -95,7 +95,7 @@ export function setMarketOverride(country: CountryCode) {
     localStorage.setItem('delikreol_market_override', country);
     detectedCountry = country;
     detectionDone = true;
-  } catch {}
+  } catch { /* ignore */ }
 }
 
 export function formatPrice(amount: number): string {
