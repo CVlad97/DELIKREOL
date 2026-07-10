@@ -1,10 +1,19 @@
 import { useMemo, useState } from 'react';
-import { Landmark, MessageCircle, X, MapPin, Store, Package, CreditCard, CheckCircle } from 'lucide-react';
+import {
+  CheckCircle,
+  CreditCard,
+  Landmark,
+  MapPin,
+  MessageCircle,
+  Package,
+  Store,
+  X,
+} from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { ordersService } from '../services/ordersService';
 import { shouldFallbackToDemo } from '../utils/supabaseFallback';
-import { createConnectPaymentIntent } from '../utils/stripe';
+import { createStripeCheckoutSession } from '../utils/stripe';
 import { Order } from '../types';
 
 interface CheckoutModalProps {
@@ -22,6 +31,10 @@ interface SuccessState {
   bankPaymentUrl?: string;
 }
 
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : 'Erreur inconnue';
+}
+
 export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModalProps) {
   const { items, total, clearCart } = useCart();
   const { user } = useAuth();
@@ -34,22 +47,18 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
   const [fallbackWhatsappUrl, setFallbackWhatsappUrl] = useState('');
   const [success, setSuccess] = useState<SuccessState | null>(null);
 
-  // Stripe Connect : détection si le traiteur a un compte Connect
-  const vendor = items[0]?.vendor;
-  const hasStripeConnect = !!vendor?.stripe_connect_account_id;
-  const vendorStripeAccountId = vendor?.stripe_connect_account_id ?? undefined;
-
-  // Stripe direct payment always available (non-Connect)
-  const stripeAvailable = hasStripeConnect || !!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-
-  const deliveryFee = deliveryType === 'home_delivery' ? 5.0 : 0;
+  // The publishable key is used as an explicit public activation switch.
+  // The actual charge is created securely by the Supabase Edge Function.
+  const stripeAvailable = Boolean(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+  const deliveryFee = deliveryType === 'home_delivery' ? 5 : 0;
   const finalTotal = total + deliveryFee;
   const commissionDelikreol = total * 0.2;
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
   const bankPaymentUrl = (import.meta.env.VITE_BANK_PAYMENT_URL as string | undefined) || '';
   const bankPaymentIban = (import.meta.env.VITE_BANK_IBAN as string | undefined) || '';
   const bankPaymentBic = (import.meta.env.VITE_BANK_BIC as string | undefined) || '';
-  const bankPaymentLabel = (import.meta.env.VITE_BANK_PAYMENT_LABEL as string | undefined) || 'Virement / lien bancaire';
+  const bankPaymentLabel =
+    (import.meta.env.VITE_BANK_PAYMENT_LABEL as string | undefined) || 'Virement / lien bancaire';
 
   const paymentOptions = useMemo(() => {
     const options: Array<{
@@ -62,7 +71,7 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
         id: 'bank_transfer',
         title: bankPaymentLabel,
         subtitle: bankPaymentUrl
-          ? 'Ouvrir le lien bancaire (si disponible)'
+          ? 'Ouvrir le lien bancaire après la commande'
           : 'Virement bancaire (IBAN/BIC) sur demande',
         icon: Landmark,
       },
@@ -74,18 +83,17 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
       },
     ];
 
-    // Ajouter Stripe si disponible
     if (stripeAvailable) {
       options.unshift({
         id: 'stripe',
         title: 'Carte bancaire (Stripe)',
-        subtitle: 'Paiement sécurisé par Stripe — votre plat, votre traiteur, votre livraison',
+        subtitle: 'Paiement sécurisé sur la page Stripe',
         icon: CreditCard,
       });
     }
 
     return options;
-  }, [bankPaymentLabel, bankPaymentUrl, hasStripeConnect]);
+  }, [bankPaymentLabel, bankPaymentUrl, stripeAvailable]);
 
   if (!isOpen) return null;
 
@@ -100,10 +108,14 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
     const waText = [
       `Bonjour DELIKREOL, je souhaite confirmer la commande ${orderNumber} (${finalTotal.toFixed(2)} €).`,
       '',
-      `Livraison: ${deliveryType === 'home_delivery' ? `domicile (${address || 'adresse à préciser'})` : 'retrait'}`,
+      `Livraison: ${
+        deliveryType === 'home_delivery' ? `domicile (${address || 'adresse à préciser'})` : 'retrait'
+      }`,
       '',
       'Panier:',
-      ...items.map((i) => `- ${i.name} x${i.quantity} (${(i.price * i.quantity).toFixed(2)} €)`),
+      ...items.map(
+        (item) => `- ${item.name} x${item.quantity} (${(item.price * item.quantity).toFixed(2)} €)`,
+      ),
       '',
       notes.trim() ? `Note: ${notes.trim()}` : '',
       '',
@@ -115,8 +127,8 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
     return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waText)}`;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (!user) return;
 
     if (deliveryType === 'home_delivery' && !address.trim()) {
@@ -128,35 +140,20 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
     setError('');
     setFallbackWhatsappUrl('');
 
-    const paymentLabel = paymentOptions.find((option) => option.id === paymentMode)?.title ?? 'WhatsApp';
+    const paymentLabel =
+      paymentOptions.find((option) => option.id === paymentMode)?.title ?? 'Assistance WhatsApp';
+    const orderNumber = `DK${Date.now().toString().slice(-8)}`;
+    const whatsappUrl = buildWhatsappUrl(orderNumber, paymentLabel);
 
     try {
-      const orderNumber = `DK${Date.now().toString().slice(-8)}`;
-      const whatsappUrl = buildWhatsappUrl(orderNumber, paymentLabel);
-
-      // Traitement Stripe Connect
-      let stripePaymentInfo = '';
-      if (paymentMode === 'stripe' && hasStripeConnect && vendorStripeAccountId) {
-        const clientSecret = await createConnectPaymentIntent(
-          finalTotal,
-          orderNumber,
-          vendorStripeAccountId,
-        );
-        if (clientSecret) {
-          stripePaymentInfo = `Paiement Stripe initie (clientSecret: ${clientSecret.slice(0, 8)}...)`;
-        } else {
-          stripePaymentInfo = 'Paiement Stripe : echec de l initialisation, contactez le service client.';
-        }
-      }
-
       const paymentNotes = [
-        `Mode de paiement souhaite: ${paymentLabel}`,
-        stripePaymentInfo,
+        `Mode de paiement souhaité: ${paymentLabel}`,
+        paymentMode === 'stripe' ? 'Paiement Stripe en attente.' : '',
         `Assistance WhatsApp: https://wa.me/${whatsappNumber}`,
         bankPaymentUrl ? `Lien bancaire: ${bankPaymentUrl}` : '',
         bankPaymentIban ? `IBAN: ${bankPaymentIban}` : '',
         bankPaymentBic ? `BIC: ${bankPaymentBic}` : '',
-        'Paiement final confirme avant preparation.',
+        'Préparation uniquement après confirmation du paiement ou validation humaine.',
       ]
         .filter(Boolean)
         .join('\n');
@@ -175,31 +172,54 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
         order_number: orderNumber,
         status: 'pending',
         delivery_type: deliveryType,
-        delivery_address: deliveryType === 'home_delivery' ? address : undefined,
+        delivery_address: deliveryType === 'home_delivery' ? address.trim() : undefined,
         delivery_fee: deliveryFee,
         total_amount: finalTotal,
         notes: [notes.trim(), paymentNotes].filter(Boolean).join('\n\n') || undefined,
         items: orderItems,
       });
 
-      clearCart();
       onOrderCreated?.(createdOrder);
-      setSuccess({ orderNumber, paymentLabel, whatsappUrl, bankPaymentUrl: bankPaymentUrl || undefined });
+
+      if (paymentMode === 'stripe') {
+        try {
+          const checkoutUrl = await createStripeCheckoutSession(createdOrder.id, window.location.origin);
+          localStorage.setItem('pendingStripeOrderId', createdOrder.id);
+          window.location.assign(checkoutUrl);
+          return;
+        } catch (stripeError) {
+          console.error('Stripe Checkout error:', stripeError);
+          setFallbackWhatsappUrl(whatsappUrl);
+          setError(
+            `Commande ${orderNumber} enregistrée, mais Stripe est indisponible (${errorMessage(
+              stripeError,
+            )}). Utilisez WhatsApp pour finaliser.`,
+          );
+          return;
+        }
+      }
+
+      clearCart();
+      setSuccess({
+        orderNumber,
+        paymentLabel,
+        whatsappUrl,
+        bankPaymentUrl: bankPaymentUrl || undefined,
+      });
+
       if (paymentMode === 'whatsapp') {
         window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
       }
-    } catch (err: any) {
-      console.error('Error creating order:', err);
-      // Si Supabase est en pause / indisponible, on ne bloque pas le client:
-      // on garde le panier et on bascule vers une confirmation WhatsApp.
-      if (shouldFallbackToDemo(err)) {
+    } catch (submitError) {
+      console.error('Error creating order:', submitError);
+      if (shouldFallbackToDemo(submitError)) {
         const fallbackUrl = buildWhatsappUrl('non enregistrée', paymentLabel);
         setFallbackWhatsappUrl(fallbackUrl);
-        setError('Backend indisponible: utilisez WhatsApp pour valider la commande (panier conservé).');
+        setError('Backend indisponible : utilisez WhatsApp pour valider la commande (panier conservé).');
         window.open(fallbackUrl, '_blank', 'noopener,noreferrer');
         return;
       }
-      setError('Erreur lors de la création de la commande');
+      setError(`Erreur lors de la création de la commande : ${errorMessage(submitError)}`);
     } finally {
       setLoading(false);
     }
@@ -207,25 +227,27 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
 
   if (success) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-xl">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="w-full max-w-lg space-y-5 rounded-2xl bg-white p-6 shadow-xl">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="rounded-2xl bg-emerald-50 p-3 text-emerald-700">
                 <CheckCircle size={28} />
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">Commande enregistrée</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">
+                  Commande enregistrée
+                </p>
                 <h2 className="text-2xl font-bold text-gray-900">#{success.orderNumber}</h2>
               </div>
             </div>
-            <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
+            <button type="button" onClick={handleClose} className="text-gray-400 hover:text-gray-600">
               <X size={24} />
             </button>
           </div>
 
           <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-900">
-            Le panier a été vidé uniquement après création de la commande. Mode choisi : <strong>{success.paymentLabel}</strong>.
+            Mode choisi : <strong>{success.paymentLabel}</strong>.
           </div>
 
           <div className="grid gap-3">
@@ -263,23 +285,23 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white p-6 border-b border-gray-200 flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white">
+        <div className="sticky top-0 flex items-center justify-between border-b border-gray-200 bg-white p-6">
           <h2 className="text-2xl font-bold text-gray-900">Finaliser la commande</h2>
-          <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
+          <button type="button" onClick={handleClose} className="text-gray-400 hover:text-gray-600">
             <X size={24} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          <div>
-            <h3 className="font-bold text-lg mb-3">Type de livraison</h3>
+        <form onSubmit={handleSubmit} className="space-y-6 p-6">
+          <section>
+            <h3 className="mb-3 text-lg font-bold">Type de livraison</h3>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setDeliveryType('home_delivery')}
-                className={`p-4 border-2 rounded-lg transition-all ${
+                className={`rounded-lg border-2 p-4 transition-all ${
                   deliveryType === 'home_delivery'
                     ? 'border-emerald-600 bg-emerald-50'
                     : 'border-gray-200 hover:border-gray-300'
@@ -289,11 +311,10 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
                 <p className="font-medium">Livraison</p>
                 <p className="text-sm text-gray-600">À domicile</p>
               </button>
-
               <button
                 type="button"
                 onClick={() => setDeliveryType('pickup')}
-                className={`p-4 border-2 rounded-lg transition-all ${
+                className={`rounded-lg border-2 p-4 transition-all ${
                   deliveryType === 'pickup'
                     ? 'border-emerald-600 bg-emerald-50'
                     : 'border-gray-200 hover:border-gray-300'
@@ -304,13 +325,10 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
                 <p className="text-sm text-gray-600">Sur place</p>
               </button>
             </div>
-          </div>
+          </section>
 
-          <div>
-            <h3 className="font-bold text-lg mb-3">Paiement</h3>
-            <p className="text-sm text-gray-600 mb-3">
-              Choisissez le mode le plus simple. La commande est confirmée avant préparation.
-            </p>
+          <section>
+            <h3 className="mb-3 text-lg font-bold">Paiement</h3>
             <div className="grid gap-3 sm:grid-cols-2">
               {paymentOptions.map((option) => {
                 const Icon = option.icon;
@@ -325,7 +343,11 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className={`rounded-xl p-2 ${active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>
+                      <div
+                        className={`rounded-xl p-2 ${
+                          active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
                         <Icon size={18} />
                       </div>
                       <div>
@@ -337,78 +359,79 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
                 );
               })}
             </div>
-            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
-              La commande est enregistrée avec le mode choisi et peut être confirmée sur WhatsApp si besoin.
-            </div>
-            {hasStripeConnect && paymentMode === 'stripe' && (
-              <div className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800 flex items-center gap-2">
+            {paymentMode === 'stripe' && (
+              <div className="mt-3 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800">
                 <CreditCard size={14} />
-                Paiement sécurisé par Stripe — votre plat, votre traiteur, votre livraison
+                Vous serez redirigé vers Stripe. La commande ne sera préparée qu'après paiement confirmé.
               </div>
             )}
-          </div>
+          </section>
 
           {deliveryType === 'home_delivery' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="checkout-address">
                 Adresse de livraison *
               </label>
               <input
+                id="checkout-address"
                 type="text"
                 value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                placeholder="Ex: 12 Rue Victor Hugo, Fort-de-France"
+                onChange={(event) => setAddress(event.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
+                placeholder="Ex. 12 rue Victor-Hugo, Fort-de-France"
                 required
               />
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="checkout-notes">
               Instructions (optionnel)
             </label>
             <textarea
+              id="checkout-notes"
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={(event) => setNotes(event.target.value)}
               rows={3}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
-              placeholder="Informations supplémentaires pour votre commande..."
+              className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
+              placeholder="Informations supplémentaires pour votre commande…"
             />
           </div>
 
-          <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-            <h3 className="font-bold text-lg mb-3 flex items-center">
+          <div className="space-y-2 rounded-lg bg-gray-50 p-4">
+            <h3 className="mb-3 flex items-center text-lg font-bold">
               <Package className="mr-2 text-emerald-600" size={20} />
               Récapitulatif
             </h3>
             <div className="flex justify-between text-gray-600">
-              <span>Sous-total ({items.length} article{items.length > 1 ? 's' : ''})</span>
+              <span>
+                Sous-total ({items.length} article{items.length > 1 ? 's' : ''})
+              </span>
               <span>{total.toFixed(2)} €</span>
             </div>
-            <div className="flex justify-between text-gray-500 text-sm">
-              <span>Commission Delikreol (incluse)</span>
+            <div className="flex justify-between text-sm text-gray-500">
+              <span>Commission DELIKREOL (incluse)</span>
               <span>{commissionDelikreol.toFixed(2)} €</span>
             </div>
             <div className="flex justify-between text-gray-600">
               <span>Frais de livraison</span>
               <span>{deliveryFee.toFixed(2)} €</span>
             </div>
-            <div className="flex justify-between text-xl font-bold text-gray-900 pt-3 border-t border-gray-300">
+            <div className="flex justify-between border-t border-gray-300 pt-3 text-xl font-bold text-gray-900">
               <span>Total</span>
               <span>{finalTotal.toFixed(2)} €</span>
             </div>
           </div>
 
           {error && (
-            <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm space-y-2">
+            <div className="space-y-2 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
               <p>{error}</p>
               {fallbackWhatsappUrl && (
                 <a
                   href={fallbackWhatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 font-semibold text-red-700 underline"
+                  className="inline-flex items-center gap-2 font-semibold underline"
                 >
                   <MessageCircle size={16} />
                   Ouvrir WhatsApp
@@ -420,13 +443,17 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
           <button
             type="submit"
             disabled={loading || items.length === 0}
-            className="w-full bg-emerald-600 text-white py-4 rounded-lg font-medium text-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
+            className="w-full rounded-lg bg-emerald-600 py-4 text-lg font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
           >
-            {loading ? 'Traitement...' : `Enregistrer la commande ${finalTotal.toFixed(2)} €`}
+            {loading
+              ? 'Traitement…'
+              : paymentMode === 'stripe'
+                ? `Payer ${finalTotal.toFixed(2)} € avec Stripe`
+                : `Enregistrer la commande ${finalTotal.toFixed(2)} €`}
           </button>
 
-          <p className="text-xs text-gray-500 text-center">
-            En passant commande, vous acceptez nos conditions générales de vente
+          <p className="text-center text-xs text-gray-500">
+            En passant commande, vous acceptez nos conditions générales de vente.
           </p>
         </form>
       </div>
