@@ -62,16 +62,16 @@ export const mockProducts: LocalProduct[] = [
   // ═══════════════════════════════════════════════════════
   {
     id: 'save-peyia-cote-porc',
-    name: 'Côte de porc',
+    name: 'Côte de porc riz crudités',
     vendor: 'Snack Save Peyia',
     price: 12,
     category: 'Plats',
-    image: vendorImage('vendors/save-peyia/hero.jpg'),
-    description: 'Côte de porc grillée au feu de bois, tendre et savoureuse, servie avec riz, lentilles pays, légumes et crudités croquants. Le plat signature du Pont de Fer ! 🔥',
+    image: vendorImage('vendors/save-peyia/cote-porc-riz.jpg'),
+    description: 'Côte de porc grillée au feu de bois, tendre et savoureuse, servie avec du riz blanc parfumé et des crudités fraîches. Le plat signature de Snack Savè Peyi\'A, un régal généreux fait maison ! 🔥',
     zone: 'Rivière-Pilote',
     available: true,
     featured: true,
-        ingredients: 'Côte de porc grillée, accompagnée de riz, lentilles, légumes pays et crudités.',
+    ingredients: 'Côte de porc grillée, riz blanc, salade verte, tomate, sauce maison.',
     allergens: 'À confirmer avec le prestataire.'
   },
   {
@@ -90,17 +90,17 @@ export const mockProducts: LocalProduct[] = [
   },
   {
     id: 'save-peyia-crevettes',
-    name: 'Crevettes grillées',
+    name: 'Crevettes riz crudités',
     vendor: 'Snack Save Peyia',
     price: 14,
     category: 'Plats',
-    image: vendorImage('vendors/save-peyia/hero.jpg'),
-    description: 'Crevettes grillées marinées aux épices locales, servies avec riz, lentilles, légumes pays et crudités. La spécialité qui fait la réputation du Pont de Fer ! 🦐',
+    image: vendorImage('vendors/save-peyia/crevettes-riz.jpg'),
+    description: 'Crevettes sautées aux épices locales et oignons, servies avec du riz blanc et une salade fraîche croquante. Un plat léger et savoureux, parfait pour découvrir les saveurs de Snack Savè Peyi\'A ! 🦐',
     zone: 'Rivière-Pilote',
     available: true,
     featured: true,
-        ingredients: 'Crevettes grillées, accompagnées de riz, lentilles, légumes pays et crudités.',
-    allergens: 'Crustacés. Peut contenir des traces de gluten et d\'arachide.'
+    ingredients: 'Crevettes sautées, oignons, tomates, riz blanc, salade verte, tomate, sauce maison.',
+    allergens: 'Crustacés.'
   },
   {
     id: 'save-peyia-cote-agneau',
@@ -269,6 +269,76 @@ export const mockProducts: LocalProduct[] = [
     featured: false,
     ingredients: 'Farine, œufs, lait. Garniture au choix.',
     allergens: 'Gluten, œufs, produits laitiers.'
+  },
+  {
+    id: 'save-peyia-panini-saumon',
+    name: 'Panini saumon',
+    vendor: 'Snack Save Peyia',
+    price: 8,
+    category: 'Snacking',
+    image: vendorImage('vendors/save-peyia/panini-saumon.jpg'),
+    description: 'Panini chaud garni de saumon, laitue, fromage râpé et sauce maison, toasté sur place. Idéal pour un déjeuner rapide et gourmand ! 🥪',
+    zone: 'Rivière-Pilote',
+    available: true,
+    featured: true,
+    ingredients: 'Pain panini, saumon, laitue, fromage râpé, sauce maison.',
+    allergens: 'Gluten, poisson, produits laitiers.'
+  },
+  {
+    id: 'save-peyia-cocktail-fruit',
+    name: 'Cocktail de fruits',
+    vendor: 'Snack Save Peyia',
+    price: 6,
+    category: 'Snacking',
+    image: vendorImage('vendors/save-peyia/cocktail-fruit.jpg'),
+    description: 'Cocktail de fruits frais rafraîchissant — jus naturels, glaçons, citron vert, ananas. Sans alcool. Parfait pour se désaltérer sous le soleil martiniquais ! 🍍🥤',
+    zone: 'Rivière-Pilote',
+    available: true,
+    featured: true,
+    ingredients: 'Jus de fruits frais, glaçons, citron vert, ananas.',
+    allergens: 'Aucun.'
+  },
+  {
+    id: 'save-peyia-cocktail-alcool',
+    name: 'Cocktail fruits (alcool)',
+    vendor: 'Snack Save Peyia',
+    price: 10,
+    category: 'Snacking',
+    image: vendorImage('vendors/save-peyia/cocktail-ananas.jpg'),
+    description: 'Cocktail de fruits frais avec alcool (rhum, punch). Rafraîchissant et festif, idéal pour les soirées vendredi et samedi au Pont de Fer ! 🍹',
+    zone: 'Rivière-Pilote',
+    available: true,
+    featured: false,
+    ingredients: 'Jus de fruits frais, alcool (rhum/punch), glaçons, citron vert, ananas.',
+    allergens: 'Alcool. Service réservé aux adultes.'
+  },
+  {
+    id: 'save-peyia-salade-fruits-assortie',
+    name: 'Salade de fruits frais',
+    vendor: 'Snack Save Peyia',
+    price: 6,
+    category: 'Snacking',
+    image: vendorImage('vendors/save-peyia/salade-fruits-1.jpg'),
+    description: 'Salade de fruits frais de saison — ananas, pastèque, kiwi, raisins — en coupelle. Vitamines et fraîcheur garanties ! 🍉🍍',
+    zone: 'Rivière-Pilote',
+    available: true,
+    featured: true,
+    ingredients: 'Fruits frais de saison (ananas, pastèque, kiwi, raisins).',
+    allergens: 'Aucun.'
+  },
+  {
+    id: 'save-peyia-salade-fruits-rhum',
+    name: 'Salade de fruits au rhum',
+    vendor: 'Snack Save Peyia',
+    price: 10,
+    category: 'Snacking',
+    image: vendorImage('vendors/save-peyia/salade-fruits-rhum.jpg'),
+    description: 'Salade de fruits frais de saison marinée au rhum arrangé. Une explosion de saveurs antillaises ! Idéal pour les soirées. 🥃',
+    zone: 'Rivière-Pilote',
+    available: true,
+    featured: false,
+    ingredients: 'Fruits frais de saison, rhum arrangé, glaçons.',
+    allergens: 'Alcool. Service réservé aux adultes.'
   },
 
   // ═══════════════════════════════════════════════════════
