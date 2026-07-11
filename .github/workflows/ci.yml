@@ -32,27 +32,8 @@ jobs:
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit --fund=false
 
-      - name: Capture typecheck
-        shell: bash
-        run: |
-          set +e
-          npm run typecheck --if-present > typecheck.log 2>&1
-          echo "$?" > typecheck.exit
-          exit 0
-
-      - name: Upload typecheck diagnostics
-        uses: actions/upload-artifact@v4
-        with:
-          name: typecheck-diagnostics
-          path: |
-            typecheck.log
-            typecheck.exit
-
-      - name: Enforce typecheck
-        shell: bash
-        run: |
-          cat typecheck.log
-          test "$(cat typecheck.exit)" = "0"
+      - name: Typecheck
+        run: npm run typecheck --if-present
 
       - name: Lint
         run: npm run lint
