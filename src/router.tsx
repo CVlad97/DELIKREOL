@@ -8,6 +8,7 @@ import { ToastProvider } from './contexts/ToastContext';
 import { ProSpacePage } from './pages/ProSpacePage';
 import { ProPartnerPlatformPage } from './pages/new/ProPartnerPlatformPage';
 import { OrderStatusPage } from './pages/OrderStatusPage';
+import { DiscoveryMapPage } from './pages/DiscoveryMapPage';
 
 const HomePage = lazy(() => import('./pages/new/HomePage'));
 const LoginPage = lazy(() => import('./pages/new/LoginPage'));
@@ -117,6 +118,7 @@ export function AppRouter() {
                   <Route path="pro" element={<ProSpacePage />} />
                   <Route path="partenaires-plateforme" element={<ProPartnerPlatformPage />} />
                   <Route path="statut-commande" element={<OrderStatusPage />} />
+                  <Route path="carte" element={<DiscoveryMapPage />} />
                   <Route path="partenaire" element={<PartnerAccessPage />} />
                   <Route path="avis" element={<ReviewPage />} />
                   <Route path="cgu" element={<TermsOfService />} />
