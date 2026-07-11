@@ -36,7 +36,7 @@ export function LocalProductCard({ product, onAddToRequest }: LocalProductCardPr
         />
       )}
       <div className="group rounded-2xl border border-border/40 hover:border-primary/30 transition-all duration-300 overflow-hidden shadow-sm">
-              <div className="relative aspect-[4/3] overflow-hidden">
+              <div className="relative aspect-[3/2] overflow-hidden">
                 {product.image ? (
                   <button onClick={() => setLightboxOpen(true)} className="w-full h-full block cursor-zoom-in">
                     <img 

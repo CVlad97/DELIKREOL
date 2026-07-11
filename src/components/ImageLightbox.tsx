@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useState } from 'react';
-import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 
 interface ImageLightboxProps {
   images: { src: string; alt: string; caption?: string }[];
@@ -11,6 +11,7 @@ export function ImageLightbox({ images, initialIndex = 0, onClose }: ImageLightb
   const [index, setIndex] = useState(initialIndex);
   const [zoomed, setZoomed] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+  const [fullscreen, setFullscreen] = useState(false);
 
   const current = images[index];
 
@@ -22,6 +23,7 @@ export function ImageLightbox({ images, initialIndex = 0, onClose }: ImageLightb
       if (e.key === 'Escape') onClose();
       if (e.key === 'ArrowRight') goNext();
       if (e.key === 'ArrowLeft') goPrev();
+      if (e.key === 'f') setFullscreen(!fullscreen);
     };
     document.addEventListener('keydown', handleKey);
     document.body.style.overflow = 'hidden';
@@ -29,7 +31,7 @@ export function ImageLightbox({ images, initialIndex = 0, onClose }: ImageLightb
       document.removeEventListener('keydown', handleKey);
       document.body.style.overflow = '';
     };
-  }, [onClose, goNext, goPrev]);
+  }, [onClose, goNext, goPrev, fullscreen]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!zoomed) return;
@@ -44,75 +46,83 @@ export function ImageLightbox({ images, initialIndex = 0, onClose }: ImageLightb
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95"
       onClick={onClose}
     >
-      {/* Close button */}
-      <button
-        onClick={onClose}
-        className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
-      >
-        <X className="w-6 h-6" />
-      </button>
-
-      {/* Counter */}
-      {images.length > 1 && (
-        <div className="absolute top-4 left-4 z-10 text-white/70 text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full">
-          {index + 1} / {images.length}
+      {/* Top bar */}
+      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 py-3 bg-gradient-to-b from-black/60 to-transparent">
+        <div className="flex items-center gap-3">
+          {images.length > 1 && (
+            <span className="text-white/70 text-sm font-medium bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-sm">
+              {index + 1} / {images.length}
+            </span>
+          )}
+          {current.caption && (
+            <span className="text-white/80 text-sm truncate max-w-[300px] hidden sm:block">
+              {current.caption}
+            </span>
+          )}
         </div>
-      )}
-
-      {/* Zoom toggle */}
-      <button
-        onClick={(e) => { e.stopPropagation(); setZoomed(!zoomed); }}
-        className="absolute top-4 right-16 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
-        title={zoomed ? 'Dézoomer' : 'Zoomer'}
-      >
-        {zoomed ? <ZoomOut className="w-5 h-5" /> : <ZoomIn className="w-5 h-5" />}
-      </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={(e) => { e.stopPropagation(); setZoomed(!zoomed); }}
+            className="p-2.5 rounded-full bg-white/10 text-white hover:bg-white/25 transition-all backdrop-blur-sm"
+            title={zoomed ? 'Dézoomer' : 'Zoomer (clic sur l\'image)'}
+          >
+            {zoomed ? <ZoomOut className="w-5 h-5" /> : <ZoomIn className="w-5 h-5" />}
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); setFullscreen(!fullscreen); }}
+            className="p-2.5 rounded-full bg-white/10 text-white hover:bg-white/25 transition-all backdrop-blur-sm"
+            title="Plein écran (F)"
+          >
+            <Maximize2 className="w-5 h-5" />
+          </button>
+          <button
+            onClick={onClose}
+            className="p-2.5 rounded-full bg-white/10 text-white hover:bg-white/25 transition-all backdrop-blur-sm"
+            title="Fermer (Échap)"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
 
       {/* Navigation arrows */}
       {images.length > 1 && (
         <>
           <button
             onClick={(e) => { e.stopPropagation(); goPrev(); }}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+            className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-white/10 text-white hover:bg-white/25 transition-all backdrop-blur-sm opacity-60 hover:opacity-100"
           >
             <ChevronLeft className="w-8 h-8" />
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); goNext(); }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+            className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-white/10 text-white hover:bg-white/25 transition-all backdrop-blur-sm opacity-60 hover:opacity-100"
           >
             <ChevronRight className="w-8 h-8" />
           </button>
         </>
       )}
 
-      {/* Caption */}
-      {current.caption && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 bg-black/60 text-white px-6 py-2 rounded-full text-sm max-w-[80%] text-center truncate">
-          {current.caption}
-        </div>
-      )}
-
-      {/* Image */}
+      {/* Image - immersive full screen */}
       <div
-        className="max-w-[90vw] max-h-[90vh] flex items-center justify-center cursor-crosshair"
+        className={`flex items-center justify-center cursor-crosshair ${fullscreen ? 'w-screen h-screen' : 'max-w-[95vw] max-h-[92vh]'}`}
         onClick={(e) => e.stopPropagation()}
         onMouseMove={handleMouseMove}
       >
         {zoomed ? (
-          <div className="relative overflow-hidden w-[85vw] h-[85vh]">
+          <div className="relative overflow-hidden w-full h-full">
             <img
               src={current.src}
               alt={current.alt}
               className="absolute max-w-none"
               style={{
-                width: '200%',
-                height: '200%',
+                width: '250%',
+                height: '250%',
                 objectFit: 'none',
-                transform: `translate(-${mousePos.x / 2}%, -${mousePos.y / 2}%)`,
+                transform: `translate(-${mousePos.x / 1.5}%, -${mousePos.y / 1.5}%)`,
               }}
             />
           </div>
@@ -120,10 +130,18 @@ export function ImageLightbox({ images, initialIndex = 0, onClose }: ImageLightb
           <img
             src={current.src}
             alt={current.alt}
-            className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+            className="max-w-full max-h-full object-contain drop-shadow-2xl"
+            style={{ maxHeight: fullscreen ? '100vh' : '88vh' }}
           />
         )}
       </div>
+
+      {/* Bottom caption for mobile */}
+      {current.caption && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 sm:hidden bg-black/70 text-white px-4 py-2 rounded-full text-xs max-w-[90%] text-center backdrop-blur-sm">
+          {current.caption}
+        </div>
+      )}
     </div>
   );
 }
