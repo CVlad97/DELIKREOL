@@ -1,7 +1,7 @@
 import { Plus, Sparkles, ZoomIn } from 'lucide-react';
 import { useState } from 'react';
 import { ImageLightbox } from './ImageLightbox';
-import { SmartImage, getFitForImageType, getPositionForImageType } from './SmartImage';
+import { SmartImage } from './SmartImage';
 
 interface LocalProduct {
   id: string;
@@ -68,10 +68,7 @@ export function LocalProductCard({ product, onAddToRequest }: LocalProductCardPr
   const availabilityLabel = product.available === false ? 'Sur confirmation' : 'Disponible';
   const timingLabel = product.available === false ? 'Planifiable' : 'Des que possible';
   
-  const imageType = getProductImageType(product);
-  const fit = getFitForImageType(imageType);
-  const position = getPositionForImageType(imageType);
-  const bgColor = imageType === 'packaging' ? '#FFF8F0' : undefined;
+  const imageType = getProductImageType(product) as any;
   
   return (
     <>
@@ -84,21 +81,20 @@ export function LocalProductCard({ product, onAddToRequest }: LocalProductCardPr
       <div className="group rounded-2xl border border-border/40 hover:border-primary/30 transition-all duration-300 overflow-hidden shadow-sm">
         <div className="relative aspect-[3/2] overflow-hidden">
           {product.image ? (
-            <button onClick={() => setLightboxOpen(true)} className="w-full h-full block cursor-zoom-in">
+            <div className="w-full h-full">
               <SmartImage
                 src={product.image}
                 alt={`${product.name} préparé par ${product.vendor}`}
-                fit={fit}
-                position={position}
-                bgColor={bgColor}
-                className="w-full h-full"
+                kind={imageType}
+                containerClassName="w-full h-full"
+                onClick={() => setLightboxOpen(true)}
               />
               <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors flex items-center justify-center">
                 <span className="opacity-0 group-hover:opacity-100 bg-white/90 text-gray-800 text-xs px-3 py-1.5 rounded-full font-semibold shadow-lg transition-opacity flex items-center gap-1">
                   <ZoomIn className="w-3.5 h-3.5" /> Agrandir
                 </span>
               </div>
-            </button>
+            </div>
           ) : (
             <div className="w-full h-full bg-muted" />
           )}
