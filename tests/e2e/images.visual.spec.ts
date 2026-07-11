@@ -28,7 +28,7 @@ for (const vp of VIEWPORTS) {
       await p.route('**/*.{png,jpg,jpeg,gif,svg}', async route => {
         const url = route.request().url();
         // Only load our own images
-        if (url.includes('delikreol.com')) {
+        if (url.includes(origin)) {
           await route.continue();
         } else {
           await route.abort();

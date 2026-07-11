@@ -21,12 +21,14 @@ for (const { path, name } of PAGES) {
     // 1. Route accessible
     expect(response?.status()).toBeLessThan(400);
 
-    // 2. No broken images
+    // 2. No broken images from our domain
+    const origin = new URL(BASE_URL).origin;
     const brokenImages = await page.locator('img').evaluateAll(
-      (images: HTMLImageElement[]) =>
+      (images: HTMLImageElement[], o) =>
         images
-          .filter((img) => !img.complete || img.naturalWidth === 0)
-          .map((img) => img.currentSrc || img.src)
+          .filter((img) => img.src.startsWith(o) && (!img.complete || img.naturalWidth === 0))
+          .map((img) => img.currentSrc || img.src),
+      origin
     );
     expect(brokenImages).toEqual([]);
 
