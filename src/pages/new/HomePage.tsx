@@ -553,7 +553,7 @@ export default function HomePage() {
                       <img loading="lazy"
                         src={traiteur.heroImage}
                         alt={traiteur.name}
-                        className="w-full h-full object-contain bg-gradient-to-br from-gray-50 to-gray-100 group-hover:scale-105 transition-transform duration-500 mix-blend-overlay opacity-60"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 mix-blend-overlay opacity-60"
                       />
                     )}
                     <div className="absolute inset-0 flex items-end p-4">
@@ -636,7 +636,7 @@ export default function HomePage() {
                       <img loading="lazy"
                         src={product.image}
                         alt={product.name}
-                        className="w-full h-full object-contain bg-gradient-to-br from-gray-50 to-gray-100 group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400">

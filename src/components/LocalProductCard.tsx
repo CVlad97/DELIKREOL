@@ -42,7 +42,7 @@ export function LocalProductCard({ product, onAddToRequest }: LocalProductCardPr
               <img 
                 src={product.image} 
                 alt={product.name}
-                className="w-full h-full object-contain bg-gradient-to-br from-gray-50 to-gray-100 group-hover:scale-105 transition-transform duration-500"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors flex items-center justify-center">
                 <span className="opacity-0 group-hover:opacity-100 bg-white/90 text-gray-800 text-xs px-3 py-1.5 rounded-full font-semibold shadow-lg transition-opacity flex items-center gap-1">
