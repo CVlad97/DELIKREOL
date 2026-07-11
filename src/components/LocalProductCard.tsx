@@ -1,5 +1,6 @@
-import { Plus, Sparkles } from 'lucide-react';
+import { Plus, Sparkles, ZoomIn } from 'lucide-react';
 import { useState } from 'react';
+import { ImageLightbox } from './ImageLightbox';
 
 interface LocalProduct {
   id: string;
@@ -23,21 +24,36 @@ interface LocalProductCardProps {
 
 export function LocalProductCard({ product, onAddToRequest }: LocalProductCardProps) {
   const [showSim, setShowSim] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const availabilityLabel = product.available === false ? 'Sur confirmation' : 'Disponible';
   const timingLabel = product.available === false ? 'Planifiable' : 'Des que possible';
   return (
-    <div className="group bg-card rounded-2xl border border-border hover:border-primary/40 transition-all duration-300 overflow-hidden shadow-soft madras-accent">
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        {product.image ? (
-          <img 
-            src={product.image} 
-            alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
-        ) : (
-          <div className="w-full h-full bg-muted" />
-        )}
-      </div>
+    <>
+      {lightboxOpen && product.image && (
+        <ImageLightbox
+          images={[{ src: product.image, alt: product.name, caption: product.name }]}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
+      <div className="group bg-card rounded-2xl border border-border hover:border-primary/40 transition-all duration-300 overflow-hidden shadow-soft madras-accent">
+        <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+          {product.image ? (
+            <button onClick={() => setLightboxOpen(true)} className="w-full h-full block cursor-zoom-in">
+              <img 
+                src={product.image} 
+                alt={product.name}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors flex items-center justify-center">
+                <span className="opacity-0 group-hover:opacity-100 bg-white/90 text-gray-800 text-xs px-3 py-1.5 rounded-full font-semibold shadow-lg transition-opacity flex items-center gap-1">
+                  <ZoomIn className="w-3.5 h-3.5" /> Agrandir
+                </span>
+              </div>
+            </button>
+          ) : (
+            <div className="w-full h-full bg-muted" />
+          )}
+        </div>
       
       <div className="p-4 space-y-3">
         <div className="space-y-1">
@@ -85,5 +101,6 @@ export function LocalProductCard({ product, onAddToRequest }: LocalProductCardPr
         )}
       </div>
     </div>
+    </>
   );
 }
