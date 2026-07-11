@@ -1,0 +1,51 @@
+name: Patch mock catalogue
+
+on:
+  push:
+    branches:
+      - fix/goute-mwen-photos-bankable
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/goute-mwen-photos-bankable
+
+      - name: Complete incomplete Snack Savè Peyi records
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/data/mockCatalog.ts')
+          text = path.read_text(encoding='utf-8')
+
+          replacements = {
+              "    id: 'save-peyia-salade-fruits',\n    image:": "    id: 'save-peyia-salade-fruits',\n    name: 'Salade de fruits',\n    vendor: 'Snack Save Peyia',\n    price: 0,\n    category: 'Desserts',\n    image:",
+              "    id: 'save-peyia-smoothie',\n    image:": "    id: 'save-peyia-smoothie',\n    name: 'Smoothie aux fruits frais',\n    vendor: 'Snack Save Peyia',\n    price: 0,\n    category: 'Boissons',\n    image:",
+              "    id: 'save-peyia-granita',\n    image:": "    id: 'save-peyia-granita',\n    name: 'Granita / jus local',\n    vendor: 'Snack Save Peyia',\n    price: 0,\n    category: 'Boissons',\n    image:",
+              "    id: 'save-peyia-panini',\n    image:": "    id: 'save-peyia-panini',\n    name: 'Panini',\n    vendor: 'Snack Save Peyia',\n    price: 0,\n    category: 'Snacking',\n    image:",
+          }
+
+          for old, new in replacements.items():
+              if old not in text:
+                  raise SystemExit(f'Expected catalogue pattern not found: {old!r}')
+              text = text.replace(old, new, 1)
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Commit patch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/mockCatalog.ts
+          git commit -m "fix: complete Snack Save Peyia catalogue records"
+          git push origin HEAD:fix/goute-mwen-photos-bankable
