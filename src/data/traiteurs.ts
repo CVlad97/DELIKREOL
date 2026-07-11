@@ -65,7 +65,7 @@ function resolveHeroImage(name: string) {
   if (name === "Saveurs d'Afrique") {
     return assetFromPublic('vendors/saveurs-afrique/hero.jpg');
   }
-  if (name === 'Snack Savè Peyi\\u2019A') {
+  if (name.startsWith('Snack Savè Peyi')) {
     return assetFromPublic('vendors/save-peyia/hero.jpg');
   }
   if (name === 'Les Delices de Ninice') {
