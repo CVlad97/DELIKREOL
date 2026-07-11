@@ -44,7 +44,26 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: E2E tests
-        run: npm run test:e2e
+      - name: Capture E2E diagnostics
+        shell: bash
         env:
           PLAYWRIGHT_USE_PREBUILT: "true"
+        run: |
+          set +e
+          npm run test:e2e > e2e.log 2>&1
+          echo "$?" > e2e.exit
+          exit 0
+
+      - name: Upload E2E diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-diagnostics
+          path: |
+            e2e.log
+            e2e.exit
+
+      - name: Enforce E2E result
+        shell: bash
+        run: |
+          cat e2e.log
+          test "$(cat e2e.exit)" = "0"
