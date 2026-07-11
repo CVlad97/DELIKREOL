@@ -188,6 +188,10 @@ export const mockProducts: LocalProduct[] = [
   },
   {
     id: 'save-peyia-salade-fruits',
+    name: 'Salade de fruits',
+    vendor: 'Snack Save Peyia',
+    price: 0,
+    category: 'Desserts',
     image: vendorImage('vendors/save-peyia/salade-fruits-1.jpg'),
     description: 'Salade de fruits frais de saison, découpés minute. Vitamines et fraîcheur garanties ! 🍍🥭',
     zone: 'Rivière-Pilote',
@@ -198,6 +202,10 @@ export const mockProducts: LocalProduct[] = [
   },
   {
     id: 'save-peyia-smoothie',
+    name: 'Smoothie aux fruits frais',
+    vendor: 'Snack Save Peyia',
+    price: 0,
+    category: 'Boissons',
     image: vendorImage('vendors/save-peyia/menu-plats.jpg'),
     description: 'Smoothie onctueux aux fruits frais, sans sucre ajouté. Rafraîchissant et naturel ! 🥤',
     zone: 'Rivière-Pilote',
@@ -208,6 +216,10 @@ export const mockProducts: LocalProduct[] = [
   },
   {
     id: 'save-peyia-granita',
+    name: 'Granita / jus local',
+    vendor: 'Snack Save Peyia',
+    price: 0,
+    category: 'Boissons',
     image: vendorImage('vendors/save-peyia/menu-plats.jpg'),
     description: 'Jus local frais aux fruits de saison — fait maison sans conservateur. Au choix : groseille, mangue, maracuja, corossol. 🥤',
     zone: 'Rivière-Pilote',
@@ -218,6 +230,10 @@ export const mockProducts: LocalProduct[] = [
   },
   {
     id: 'save-peyia-panini',
+    name: 'Panini',
+    vendor: 'Snack Save Peyia',
+    price: 0,
+    category: 'Snacking',
     image: vendorImage('vendors/save-peyia/panini-saumon.jpg'),
     description: 'Panini chaud garni, grillé sur place. Idéal pour un déjeuner rapide et gourmand ! 🥪',
     zone: 'Rivière-Pilote',
