@@ -1531,6 +1531,20 @@ export const mockProducts: LocalProduct[] = [
     allergens: 'Gluten, moutarde.'
   },
   {
+    id: 'sweet-family-manchon-poulet',
+    name: 'Manchon de poulet',
+    vendor: 'Sweet Family Traiteur Orianne',
+    price: 1,
+    category: 'Apéritifs',
+    image: vendorImage('vendors/sweet-family/manchon-poulet.jpg'),
+    description: 'Manchons de poulet panés, croustillants dorés à souhait, accompagnés de légumes farcis. Idéal pour l\'apéritif ou le buffet ! 🍗',
+    zone: 'Martinique',
+    available: true,
+    featured: true,
+    ingredients: 'Manchons de poulet panés, légumes farcis (tomates, poivrons), herbes.',
+    allergens: 'Gluten.'
+  },
+  {
     id: 'sweet-family-chicken-wrap',
     name: 'Chicken Wrap',
     vendor: 'Sweet Family Traiteur Orianne',
