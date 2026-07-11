@@ -1530,6 +1530,48 @@ export const mockProducts: LocalProduct[] = [
     ingredients: 'Pain hot dog, saucisse, moutarde, ketchup, oignons frits.',
     allergens: 'Gluten, moutarde.'
   },
+  {
+    id: 'sweet-family-chicken-wrap',
+    name: 'Chicken Wrap',
+    vendor: 'Sweet Family Traiteur Orianne',
+    price: 2.50,
+    category: 'Snacking',
+    image: vendorImage('vendors/sweet-family/chicken-wrap.jpg'),
+    description: 'Wrap garni de poulet pané croustillant, laitue fraîche et fromage. Pratique et savoureux, idéal pour un snack rapide ou un buffet ! 🌯',
+    zone: 'Martinique',
+    available: true,
+    featured: true,
+    ingredients: 'Tortilla, poulet pané, laitue, fromage.',
+    allergens: 'Gluten, lait.'
+  },
+  {
+    id: 'sweet-family-mini-pizza',
+    name: 'Mini pizza',
+    vendor: 'Sweet Family Traiteur Orianne',
+    price: 1.10,
+    category: 'Apéritifs',
+    image: vendorImage('vendors/sweet-family/mini-pizza.jpg'),
+    description: 'Mini pizza ronde, sauce tomate, fromage fondant, olives noires. Parfaite pour l\'apéritif ou le buffet, un classique qui plaît à tous ! 🍕',
+    zone: 'Martinique',
+    available: true,
+    featured: true,
+    ingredients: 'Pâte à pizza, sauce tomate, fromage, olives noires.',
+    allergens: 'Gluten, lait.'
+  },
+  {
+    id: 'sweet-family-pizza-vege',
+    name: 'Pizza végé',
+    vendor: 'Sweet Family Traiteur Orianne',
+    price: 1.10,
+    category: 'Apéritifs',
+    image: vendorImage('vendors/sweet-family/pizza-vege.jpg'),
+    description: 'Mini pizza végétarienne : tomate, champignons, fromage, olive noire. Garnie de pousses fraîches et lime. Fraîcheur et saveur garanties ! 🥬',
+    zone: 'Martinique',
+    available: true,
+    featured: true,
+    ingredients: 'Pâte à pizza, tomate, champignons, fromage, olives noires, pousses fraîches.',
+    allergens: 'Gluten, lait.'
+  },
 
 // LES DELICES DE NINICE — Fort-de-France (Dillon)
   // 11 produits avec photos professionnelles retouchées
