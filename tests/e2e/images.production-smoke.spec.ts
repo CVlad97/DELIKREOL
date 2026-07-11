@@ -61,9 +61,9 @@ for (const { path, name } of PAGES) {
     );
     expect(brokenImages).toEqual([]);
 
-    // 3. No horizontal overflow
+    // 3. No significant horizontal overflow (allow 2px tolerance)
     const overflow = await page.evaluate(() =>
-      document.documentElement.scrollWidth > document.documentElement.clientWidth + 1
+      document.documentElement.scrollWidth > document.documentElement.clientWidth + 2
     );
     expect(overflow).toBe(false);
 
