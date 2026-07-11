@@ -1545,6 +1545,34 @@ export const mockProducts: LocalProduct[] = [
     allergens: 'Gluten.'
   },
   {
+    id: 'sweet-family-ti-nain-morue',
+    name: 'Ti nain morue',
+    vendor: 'Sweet Family Traiteur Orianne',
+    price: 3.20,
+    category: 'Apéritifs',
+    image: vendorImage('vendors/sweet-family/ti-nain-morue.jpg'),
+    description: 'Ti nain morue antillais — salade de morue émiettée, poivrons, oignons, persil, servie en coupelle sur lit de salade. Frais, savoureux, parfait pour l\'apéritif ! 🥗',
+    zone: 'Martinique',
+    available: true,
+    featured: true,
+    ingredients: 'Morue émiettée, poivrons rouges et jaunes, oignons, persil, salade verte.',
+    allergens: 'Poisson.'
+  },
+  {
+    id: 'sweet-family-seafood-familiale',
+    name: 'Seafood familiale',
+    vendor: 'Sweet Family Traiteur Orianne',
+    price: 129.90,
+    category: 'Plats',
+    image: vendorImage('vendors/sweet-family/seafood-familiale.jpg'),
+    description: 'Plateau de fruits de mer familial : homard, crabe, crevettes, accompagné de riz blanc et carottes râpées. Idéal pour les grandes tablées ! 🦞',
+    zone: 'Martinique',
+    available: true,
+    featured: true,
+    ingredients: 'Homard, crabe, crevettes, riz blanc, carottes râpées, lime.',
+    allergens: 'Crustacés, mollusques.'
+  },
+  {
     id: 'sweet-family-chicken-wrap',
     name: 'Chicken Wrap',
     vendor: 'Sweet Family Traiteur Orianne',
