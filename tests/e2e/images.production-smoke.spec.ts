@@ -31,11 +31,24 @@ for (const { path, name } of PAGES) {
       await page.locator('img').first().waitFor({ state: 'attached', timeout: 5000 });
     }
     
-    // Scroll down to trigger lazy loading
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    // Scroll to trigger lazy loading for all images
+    await page.evaluate(async () => {
+      const allImages = Array.from(document.querySelectorAll('img'));
+      for (const img of allImages) {
+        img.scrollIntoView({ behavior: 'instant', block: 'center' });
+        await new Promise(r => setTimeout(r, 100));
+      }
+    });
     await page.waitForTimeout(2000);
+
+    // Ensure all visible images are fully loaded
+    await page.waitForFunction(() => {
+      const imgs = Array.from(document.querySelectorAll('img'));
+      return imgs.every(img => img.complete);
+    }, { timeout: 10000 }).catch(() => {});
+
+    // Scroll back to top
     await page.evaluate(() => window.scrollTo(0, 0));
-    await page.waitForTimeout(1000);
 
     // 3. No broken images from our domain
     const origin = new URL(BASE_URL).origin;
