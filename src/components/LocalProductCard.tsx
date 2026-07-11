@@ -35,15 +35,15 @@ export function LocalProductCard({ product, onAddToRequest }: LocalProductCardPr
           onClose={() => setLightboxOpen(false)}
         />
       )}
-      <div className="group bg-card rounded-2xl border border-border hover:border-primary/40 transition-all duration-300 overflow-hidden shadow-soft madras-accent">
-        <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-          {product.image ? (
-            <button onClick={() => setLightboxOpen(true)} className="w-full h-full block cursor-zoom-in">
-              <img 
-                src={product.image} 
-                alt={product.name}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
+      <div className="group rounded-2xl border border-border/40 hover:border-primary/30 transition-all duration-300 overflow-hidden shadow-sm">
+              <div className="relative aspect-[4/3] overflow-hidden">
+                {product.image ? (
+                  <button onClick={() => setLightboxOpen(true)} className="w-full h-full block cursor-zoom-in">
+                    <img 
+                      src={product.image} 
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
               <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors flex items-center justify-center">
                 <span className="opacity-0 group-hover:opacity-100 bg-white/90 text-gray-800 text-xs px-3 py-1.5 rounded-full font-semibold shadow-lg transition-opacity flex items-center gap-1">
                   <ZoomIn className="w-3.5 h-3.5" /> Agrandir
