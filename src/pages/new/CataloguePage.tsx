@@ -557,7 +557,7 @@ export default function CataloguePage() {
                   className="group bg-white rounded-3xl border border-orange-100 hover:border-orange-300 overflow-hidden shadow-sm hover:shadow-lg transition-all flex flex-col"
                 >
                   {/* Image */}
-                  <div className="relative aspect-[4/3] overflow-hidden bg-orange-50">
+                  <div className="relative aspect-[3/2] overflow-hidden bg-orange-50">
                     {product.image ? (
                       <img loading="lazy"
                         src={product.image}

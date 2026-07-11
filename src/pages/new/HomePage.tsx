@@ -631,7 +631,7 @@ export default function HomePage() {
                   key={product.id}
                   className="snap-start flex-shrink-0 w-[280px] sm:w-[310px] group bg-white rounded-[2rem] border border-orange-100 hover:border-orange-300 overflow-hidden shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all"
                 >
-                  <div className="relative aspect-[4/3] overflow-hidden bg-orange-50">
+                  <div className="relative aspect-[3/2] overflow-hidden bg-orange-50">
                     {product.image ? (
                       <img loading="lazy"
                         src={product.image}
