@@ -22,11 +22,35 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: any) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    // Auto-recovery pour chunk loading errors (cache PWA obsolète)
+    if (error.message?.includes('dynamically imported') || error.message?.includes('Loading chunk')) {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          registrations.forEach(reg => reg.unregister());
+        });
+      }
+      if ('caches' in window) {
+        caches.keys().then(names => names.forEach(name => caches.delete(name)));
+      }
+    }
   }
 
   handleReset = () => {
     this.setState({ hasError: false, error: null });
     window.location.href = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
+  };
+
+  handleHardReload = () => {
+    // Force un cache reload complet
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        Promise.all(registrations.map(reg => reg.unregister())).then(() => {
+          window.location.reload();
+        });
+      });
+    } else {
+      window.location.reload();
+    }
   };
 
   render() {
@@ -62,6 +86,14 @@ export class ErrorBoundary extends Component<Props, State> {
               >
                 <RefreshCw size={18} />
                 Recharger
+              </button>
+
+              <button
+                onClick={this.handleHardReload}
+                className="flex-1 bg-red-500 text-white px-4 py-3 rounded-lg hover:bg-red-600 transition-colors font-medium flex items-center justify-center gap-2"
+              >
+                <RefreshCw size={18} />
+                Forcer le rechargement
               </button>
 
               <button
