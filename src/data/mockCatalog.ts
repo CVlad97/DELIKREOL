@@ -566,6 +566,8 @@ export const mockProducts: LocalProduct[] = [
     ingredients: 'Crêpe, Nutella, cacahuète, chantilly, caramel, coco, ananas, chocolat.',
     allergens: 'Gluten, œufs, lait, cacahuète.'
   },
+  //   // ═══════════════════════════════════════════════════════
+  // AN TJÈ COCO — Fort-de-France
   // Pépites artisanales sucrées et salées — sur précommande
   // Source : profil partenaire vérifié
   // ═══════════════════════════════════════════════════════
