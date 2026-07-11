@@ -27,8 +27,8 @@ for (const vp of VIEWPORTS) {
       // Block non-essential resources for consistency
       await p.route('**/*.{png,jpg,jpeg,gif,svg}', async route => {
         const url = route.request().url();
-        // Only load our own images
-        if (url.includes(origin)) {
+        // Only load our own images from localhost
+        if (url.includes('127.0.0.1') || url.includes('localhost')) {
           await route.continue();
         } else {
           await route.abort();
