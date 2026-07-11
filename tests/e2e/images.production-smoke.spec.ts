@@ -21,6 +21,10 @@ for (const { path, name } of PAGES) {
     // 1. Route accessible
     expect(response?.status()).toBeLessThan(400);
 
+    // Wait for images to load
+    await page.waitForTimeout(3000);
+    await page.waitForLoadState('networkidle');
+
     // 2. No broken images from our domain
     const origin = new URL(BASE_URL).origin;
     const brokenImages = await page.locator('img').evaluateAll(
