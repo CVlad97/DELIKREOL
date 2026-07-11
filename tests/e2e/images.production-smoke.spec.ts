@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:4173';
+const BASE_URL = process.env.E2E_BASE_URL || 'http://127.0.0.1:4175';
 
 const PAGES = [
   { path: '/', name: 'accueil' },

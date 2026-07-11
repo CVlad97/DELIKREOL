@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
 
-const SITE = 'https://delikreol.com';
 const VIEWPORTS = [
   { width: 360, height: 800, name: 'mobile-s' },
   { width: 390, height: 844, name: 'mobile-m' },
@@ -36,7 +35,7 @@ for (const vp of VIEWPORTS) {
         }
       });
 
-      await p.goto(`${SITE}${page.path}`, { 
+      await p.goto(page.path, { 
         waitUntil: 'networkidle', 
         timeout: 30000 
       });
