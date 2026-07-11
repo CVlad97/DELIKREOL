@@ -42,4 +42,15 @@ coverage/
 .wrangler/
 
 # ── Rapports ─────────────────────────────────────────────────────────────────
+reports/docs/audits/images/*.png
+docs/audits/images/*.html
+docs/audits/images/*.json
+
+# Playwright
+playwright-report/
+test-results/
+blob-report/
+.last-run.json
+
+# Rapports audités
 reports/
