@@ -21,11 +21,23 @@ for (const { path, name } of PAGES) {
     // 1. Route accessible
     expect(response?.status()).toBeLessThan(400);
 
-    // Wait for images to load
-    await page.waitForTimeout(3000);
-    await page.waitForLoadState('networkidle');
+    // 2. Wait for all images to load
+    await page.waitForTimeout(5000);
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Wait for lazy-loaded images to finish
+    const imgCount = await page.locator('img').count();
+    if (imgCount > 0) {
+      await page.locator('img').first().waitFor({ state: 'attached', timeout: 5000 });
+    }
+    
+    // Scroll down to trigger lazy loading
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(2000);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(1000);
 
-    // 2. No broken images from our domain
+    // 3. No broken images from our domain
     const origin = new URL(BASE_URL).origin;
     const brokenImages = await page.locator('img').evaluateAll(
       (images: HTMLImageElement[], o) =>
