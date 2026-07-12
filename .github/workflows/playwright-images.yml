@@ -1,23 +1,39 @@
-name: Playwright — Images visuelles
+name: Validation expérience publique
+
 on:
   pull_request:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: public-experience-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test:
-    timeout-minutes: 15
+  validate:
+    name: Code, build and browser checks
+    timeout-minutes: 25
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.60.0-jammy
-
+    env:
+      HOME: /root
+      VITE_BASE_PATH: /
+      VITE_SUPABASE_URL: https://boihlgodmclljtckhmgz.supabase.co
+      VITE_SUPABASE_ANON_KEY: sb_publishable_LE_NgMgaOlJEhkJlVF_zow_4NNOtTHX
+      VITE_DEMO_MODE: "false"
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: 'npm'
+          node-version: 20
+          cache: npm
 
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
@@ -25,30 +41,35 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Build
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Build production bundle
         run: npm run build
 
-      - name: Run Playwright visual tests
+      - name: Browser and responsive checks
         run: npm run test:e2e -- --workers=1
         env:
           CI: true
+          PLAYWRIGHT_USE_PREBUILT: "true"
 
-      - name: Run production smoke test
-        run: npm run test:e2e -- images.production-smoke.spec.ts --workers=1
-        env:
-          E2E_BASE_URL: https://delikreol.com
-          CI: true
-
-      - uses: actions/upload-artifact@v4
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+          if-no-files-found: ignore
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload test evidence
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results
           path: test-results/
           retention-days: 7
+          if-no-files-found: ignore
