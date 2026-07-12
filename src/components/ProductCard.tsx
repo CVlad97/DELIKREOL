@@ -4,7 +4,7 @@ import { Product } from '../types';
 import { useCart } from '../contexts/CartContext';
 import { useToast } from '../contexts/ToastContext';
 import { ProductThumbnail } from './ProductThumbnail';
-import { traiteurSpaces } from '../data/traiteurs';
+import { formatEuro, traiteurSpaces } from '../data/traiteurs';
 
 interface ProductCardProps {
   product: Product;
@@ -61,7 +61,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
         <div className="flex items-center justify-between gap-3">
           <div className="text-xl font-black text-foreground">
-            {product.price.toFixed(2)} €
+            {formatEuro(product.price)}
           </div>
           <button
             type="button"
