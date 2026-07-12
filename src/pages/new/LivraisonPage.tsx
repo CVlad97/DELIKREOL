@@ -43,10 +43,10 @@ const DELIVERY_MODES = [
     title: 'Livraison éloignée',
     description:
       'Livraison sur toute la Martinique, possible à partir de 40€ de commande, selon validation du prestataire et disponibilité DeliKreol.',
-    color: 'bg-orange-50 border-orange-200',
-    iconColor: 'bg-orange-500',
+    color: 'bg-primary/8 border-primary/30',
+    iconColor: 'bg-primary/80',
     badge: 'À partir de 40€',
-    badgeColor: 'bg-orange-100 text-orange-700',
+    badgeColor: 'bg-primary/15 text-primary',
   },
 ];
 

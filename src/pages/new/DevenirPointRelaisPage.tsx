@@ -70,7 +70,7 @@ export function DevenirPointRelaisPage() {
           <div><label className="block text-sm font-semibold mb-1">Horaires d'ouverture</label><input value={form.opening_hours} onChange={e => handleChange('opening_hours', e.target.value)} placeholder="ex: Lun-Sam 8h-19h" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-orange-400" /></div>
           <div><label className="block text-sm font-semibold mb-1">Capacité (colis/jour)</label><input value={form.capacity} onChange={e => handleChange('capacity', e.target.value)} placeholder="ex: 30" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-orange-400" /></div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
-          <button type="submit" className="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold rounded-2xl hover:scale-[1.02] transition-all">Envoyer ma candidature</button>
+          <button type="submit" className="w-full py-3 bg-gradient-to-r from-primary to-secondary/80 text-white font-bold rounded-2xl hover:scale-[1.02] transition-all">Envoyer ma candidature</button>
         </form>
       </div>
     </Layout>

@@ -137,9 +137,9 @@ export function TraiteursListPage() {
               {/* Cover image */}
               <div className="aspect-video bg-muted relative overflow-hidden">
                 {traiteur.heroImage ? (
-                  <img loading="lazy" src={traiteur.heroImage} alt={`Logo de ${traiteur.name}`} className="w-full h-full object-contain bg-gradient-to-br from-amber-50 to-orange-50 p-4 group-hover:scale-105 transition-transform duration-500" />
+                  <img loading="lazy" src={traiteur.heroImage} alt={`Logo de ${traiteur.name}`} className="w-full h-full object-contain bg-gradient-to-br from-amber-50 to-primary/50 p-4 group-hover:scale-105 transition-transform duration-500" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50">
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-primary/50">
                     <ChefHat className="w-12 h-12 text-primary/30" />
                   </div>
                 )}

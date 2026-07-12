@@ -47,7 +47,7 @@ export function Header() {
   const accountIcon = user ? <LayoutDashboard className="w-4 h-4" /> : <LogIn className="w-4 h-4" />;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-orange-100/70 bg-white/90 shadow-[0_14px_40px_-34px_rgba(42,25,15,0.55)] backdrop-blur-2xl">
+    <header className="sticky top-0 z-40 border-b border-primary/100/70 bg-white/90 shadow-[0_14px_40px_-34px_rgba(42,25,15,0.55)] backdrop-blur-2xl">
       <div className="madras-strip" />
 
       <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
@@ -62,13 +62,13 @@ export function Header() {
               <span className="block text-base sm:text-xl font-black tracking-tight text-foreground">
                 Deli<span className="text-primary">Kreol</span>
               </span>
-              <span className="hidden sm:block text-[10px] font-bold uppercase tracking-[0.18em] text-orange-500">
+              <span className="hidden sm:block text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
                 Martinique
               </span>
             </div>
           </Link>
 
-          <nav className="hidden items-center gap-1 rounded-2xl border border-orange-100 bg-orange-50/70 p-1 lg:flex">
+          <nav className="hidden items-center gap-1 rounded-2xl border border-primary/100 bg-primary/8/70 p-1 lg:flex">
             {navItems.map((item) => (
               <Link
                 key={item.to}
@@ -89,7 +89,7 @@ export function Header() {
             <LanguageSwitcher />
             <Link
               to={accountTarget}
-              className="flex items-center gap-1.5 rounded-xl bg-stone-950 px-2.5 py-2 text-xs font-black text-white shadow-sm transition-colors hover:bg-orange-600 sm:px-3 sm:text-sm"
+              className="flex items-center gap-1.5 rounded-xl bg-stone-950 px-2.5 py-2 text-xs font-black text-white shadow-sm transition-colors hover:bg-primary/90 sm:px-3 sm:text-sm"
               aria-label={accountLabel}
               title={accountLabel}
             >
@@ -110,7 +110,7 @@ export function Header() {
 
             <Link
               to="/panier"
-              className="relative flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-sm font-bold text-foreground/70 transition-colors hover:bg-orange-50 hover:text-foreground sm:px-3"
+              className="relative flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-sm font-bold text-foreground/70 transition-colors hover:bg-primary/8 hover:text-foreground sm:px-3"
               aria-label={`Panier (${itemCount} articles)`}
             >
               <ShoppingCart className="w-5 h-5" />
@@ -124,7 +124,7 @@ export function Header() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl text-foreground/70 transition-colors hover:bg-orange-50 lg:hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-foreground/70 transition-colors hover:bg-primary/8 lg:hidden"
               aria-label="Menu"
               aria-expanded={mobileMenuOpen}
             >
@@ -140,7 +140,7 @@ export function Header() {
             <Link
               to={accountTarget}
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-white bg-orange-500 hover:bg-orange-600 transition-colors"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-white bg-primary hover:bg-primary/90 transition-colors"
             >
               {accountIcon}
               {accountLabel}

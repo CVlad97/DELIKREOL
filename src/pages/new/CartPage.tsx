@@ -310,7 +310,7 @@ export default function CartPage() {
         <div className="min-h-[60vh] flex items-center justify-center bg-[#FFFBF0]">
           <div className="text-center px-4 max-w-md mx-auto">
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-orange-100 mb-6">
-              <ShoppingCart className="w-10 h-10 text-orange-400" />
+              <ShoppingCart className="w-10 h-10 text-primary/400" />
             </div>
             <h1 className="text-2xl font-black text-gray-900 mb-3">Votre panier est vide</h1>
             <p className="text-gray-500 mb-8 leading-relaxed">
@@ -318,7 +318,7 @@ export default function CartPage() {
             </p>
             <Link
               to="/catalogue"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-orange-200"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-primary/200"
             >
               <ArrowLeft className="w-4 h-4" />
               Voir le catalogue
@@ -340,7 +340,7 @@ export default function CartPage() {
             </div>
             <h1 className="text-2xl font-black text-gray-900 mb-3">Demande préparée ! 🎉</h1>
             {orderNumber && (
-              <p className="text-3xl font-black text-orange-600 mb-2 font-mono">{orderNumber}</p>
+              <p className="text-3xl font-black text-primary mb-2 font-mono">{orderNumber}</p>
             )}
             <p className="text-gray-500 mb-4 leading-relaxed">
               {preparedMessage}
@@ -360,7 +360,7 @@ export default function CartPage() {
               </a>
               <Link
                 to="/catalogue"
-                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white text-orange-600 font-bold rounded-2xl border-2 border-orange-200 transition-all hover:scale-105"
+                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white text-primary font-bold rounded-2xl border-2 border-primary/200 transition-all hover:scale-105"
               >
                 Continuer mes achats
               </Link>
@@ -383,7 +383,7 @@ export default function CartPage() {
               <ShoppingCart className="w-7 h-7" />
               <div>
                 <h1 className="text-2xl md:text-3xl font-black">Mon panier</h1>
-                <p className="text-orange-100 text-sm">
+                <p className="text-primary/100 text-sm">
                   {itemCount} {itemCount === 1 ? 'article' : 'articles'}
                 </p>
               </div>
@@ -428,10 +428,10 @@ export default function CartPage() {
               {items.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-white rounded-2xl border border-orange-100 p-4 flex gap-4 group hover:border-orange-200 transition-all"
+                  className="bg-white rounded-2xl border border-primary/100 p-4 flex gap-4 group hover:border-primary/200 transition-all"
                 >
                   {/* Image */}
-                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden bg-orange-50 flex-shrink-0">
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden bg-primary/8 flex-shrink-0">
                     {item.image_url ? (
                       <img loading="lazy"
                         src={item.image_url}
@@ -449,7 +449,7 @@ export default function CartPage() {
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-gray-900 text-base truncate">{item.name}</h3>
                     <p className="text-sm text-gray-500">{item.vendor_id}</p>
-                    <p className="text-lg font-black text-orange-600 mt-1">
+                    <p className="text-lg font-black text-primary mt-1">
                       {item.price.toFixed(2)} €
                     </p>
                   </div>
@@ -469,14 +469,14 @@ export default function CartPage() {
                     <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-1 py-1">
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:border-orange-300 transition-colors"
+                        className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:border-primary/300 transition-colors"
                       >
                         <Minus className="w-3.5 h-3.5" />
                       </button>
                       <span className="w-8 text-center font-bold text-sm">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:border-orange-300 transition-colors"
+                        className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:border-primary/300 transition-colors"
                       >
                         <Plus className="w-3.5 h-3.5" />
                       </button>
@@ -490,7 +490,7 @@ export default function CartPage() {
 
               <Link
                 to="/catalogue"
-                className="inline-flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700 font-semibold mt-2"
+                className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/700 font-semibold mt-2"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Continuer mes achats
@@ -500,7 +500,7 @@ export default function CartPage() {
             {/* Order summary / WhatsApp form */}
             <div className="space-y-4">
               {/* Subtotal + Delivery */}
-              <div className="bg-white rounded-2xl border border-orange-100 p-6">
+              <div className="bg-white rounded-2xl border border-primary/100 p-6">
                 <h2 className="text-lg font-bold text-gray-900 mb-4">Résumé</h2>
                 <div className="space-y-3 mb-4">
                   <div className="flex justify-between text-sm">
@@ -520,10 +520,10 @@ export default function CartPage() {
                       Livraison éloignée possible à partir de 40 € de commande, sous réserve de validation.
                     </div>
                   )}
-                  <hr className="border-orange-100" />
+                  <hr className="border-primary/100" />
                   <div className="flex justify-between">
                     <span className="font-bold text-gray-900">Total estimé</span>
-                    <span className="text-2xl font-black text-orange-600">
+                    <span className="text-2xl font-black text-primary">
                       {(total + (DELIVERY_FEES[mode]?.fee || 0)).toFixed(2).replace('.', ',')} €
                     </span>
                   </div>
@@ -534,7 +534,7 @@ export default function CartPage() {
               </div>
 
               {/* Paiement info card */}
-              <div className="bg-white rounded-2xl border border-orange-100 p-6">
+              <div className="bg-white rounded-2xl border border-primary/100 p-6">
                 <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
                   <CreditCard className="w-4 h-4" />
                   Paiement
@@ -553,7 +553,7 @@ export default function CartPage() {
               </div>
 
               {/* Delivery info */}
-              <div className="bg-white rounded-2xl border border-orange-100 p-6 space-y-4">
+              <div className="bg-white rounded-2xl border border-primary/100 p-6 space-y-4">
                 <h2 className="text-lg font-bold text-gray-900">Informations de commande</h2>
 
                 {/* Multi-traiteur warning */}
@@ -587,11 +587,11 @@ export default function CartPage() {
                     className={`w-full px-3 py-2.5 rounded-xl border text-sm outline-none ${
                       phoneError
                         ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                        : 'border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100'
+                        : 'border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-orange-100'
                     }`}
                   />
                   {savedField === 'phone' && (
-                    <span className="inline-flex items-center gap-1 text-xs text-emerald-600 font-semibold mt-1 animate-pulse">
+                    <span className="inline-flex items-center gap-1 text-xs text-success font-semibold mt-1 animate-pulse">
                       ✓ Enregistré
                     </span>
                   )}
@@ -611,10 +611,10 @@ export default function CartPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     onBlur={() => email.trim() && flashSaved('email')}
                     placeholder="nom@exemple.fr"
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 text-sm outline-none"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-orange-100 text-sm outline-none"
                   />
                   {savedField === 'email' && (
-                    <span className="inline-flex items-center gap-1 text-xs text-emerald-600 font-semibold mt-1 animate-pulse">
+                    <span className="inline-flex items-center gap-1 text-xs text-success font-semibold mt-1 animate-pulse">
                       ✓ Enregistré
                     </span>
                   )}
@@ -636,23 +636,23 @@ export default function CartPage() {
                       if (commune.trim()) flashSaved('commune');
                     }}
                     placeholder="Fort-de-France, Lamentin..."
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 text-sm outline-none"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-orange-100 text-sm outline-none"
                   />
                   {savedField === 'commune' && (
-                    <span className="inline-flex items-center gap-1 text-xs text-emerald-600 font-semibold mt-1 animate-pulse">
+                    <span className="inline-flex items-center gap-1 text-xs text-success font-semibold mt-1 animate-pulse">
                       ✓ Enregistré
                     </span>
                   )}
                   {showSuggestions && communeSuggestions.length > 0 && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-orange-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-primary/200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
                       {communeSuggestions.map((name) => (
                         <button
                           key={name}
                           type="button"
                           onMouseDown={() => selectCommune(name)}
-                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-orange-50 transition-colors first:rounded-t-xl last:rounded-b-xl"
+                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-primary/8 transition-colors first:rounded-t-xl last:rounded-b-xl"
                         >
-                          <MapPin className="w-3 h-3 inline mr-2 text-orange-400" />
+                          <MapPin className="w-3 h-3 inline mr-2 text-primary/400" />
                           {name}
                         </button>
                       ))}
@@ -668,8 +668,8 @@ export default function CartPage() {
                       onClick={() => setMode('retrait')}
                       className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
                         mode === 'retrait'
-                          ? 'bg-orange-500 text-white shadow-md'
-                          : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-orange-300'
+                          ? 'bg-primary text-white shadow-md'
+                          : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-primary/300'
                       }`}
                     >
                       <Store className="w-4 h-4" />
@@ -679,8 +679,8 @@ export default function CartPage() {
                       onClick={() => setMode('relais')}
                       className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
                         mode === 'relais'
-                          ? 'bg-orange-500 text-white shadow-md'
-                          : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-orange-300'
+                          ? 'bg-primary text-white shadow-md'
+                          : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-primary/300'
                       }`}
                     >
                       <Store className="w-4 h-4" />
@@ -690,8 +690,8 @@ export default function CartPage() {
                       onClick={() => setMode('livraison')}
                       className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
                         mode === 'livraison'
-                          ? 'bg-orange-500 text-white shadow-md'
-                          : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-orange-300'
+                          ? 'bg-primary text-white shadow-md'
+                          : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-primary/300'
                       }`}
                     >
                       <Truck className="w-4 h-4" />
@@ -713,7 +713,7 @@ export default function CartPage() {
                     {CRENEAUX_OPTIONS.map((option) => (
                       <label
                         key={option.id}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-gray-200 hover:border-orange-300 cursor-pointer transition-all text-sm"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-gray-200 hover:border-primary/300 cursor-pointer transition-all text-sm"
                       >
                         <input
                           type="checkbox"
@@ -730,7 +730,7 @@ export default function CartPage() {
                         value={autreCreneau}
                         onChange={(e) => setAutreCreneau(e.target.value)}
                         placeholder="Précisez votre créneau..."
-                        className="w-full px-3 py-2 rounded-xl border border-orange-200 focus:border-orange-400 text-sm outline-none mt-1"
+                        className="w-full px-3 py-2 rounded-xl border border-primary/200 focus:border-primary/400 text-sm outline-none mt-1"
                       />
                     )}
                   </div>
@@ -748,10 +748,10 @@ export default function CartPage() {
                     onBlur={() => notes.trim() && flashSaved('notes')}
                     placeholder="Allergies, préférences, instructions spéciales..."
                     rows={3}
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 text-sm outline-none resize-none"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-orange-100 text-sm outline-none resize-none"
                   />
                   {savedField === 'notes' && (
-                    <span className="inline-flex items-center gap-1 text-xs text-emerald-600 font-semibold mt-1 animate-pulse">
+                    <span className="inline-flex items-center gap-1 text-xs text-success font-semibold mt-1 animate-pulse">
                       ✓ Enregistré
                     </span>
                   )}
@@ -766,7 +766,7 @@ export default function CartPage() {
               ) : (
                 <button
                   onClick={handleWhatsAppClick}
-                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl transition-all hover:scale-[1.02] shadow-lg shadow-orange-200 text-lg"
+                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-2xl transition-all hover:scale-[1.02] shadow-lg shadow-primary/200 text-lg"
                 >
                   <ShoppingCart className="w-6 h-6" />
                   Confirmer ma commande sur WhatsApp

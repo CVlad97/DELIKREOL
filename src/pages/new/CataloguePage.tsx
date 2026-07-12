@@ -329,7 +329,7 @@ export default function CataloguePage() {
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
                   selectedCategory === cat.id
-                    ? 'bg-orange-500 text-white shadow-md'
+                    ? 'bg-primary text-white shadow-md'
                     : 'bg-white text-gray-600 border border-orange-100 hover:border-orange-300 hover:text-orange-600'
                 }`}
               >
@@ -346,8 +346,8 @@ export default function CataloguePage() {
                 onClick={() => setSelectedHealthTag(selectedHealthTag === tag.id ? '' : tag.id)}
                 className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
                   selectedHealthTag === tag.id
-                    ? 'bg-emerald-500 text-white shadow-md'
-                    : 'bg-white text-gray-600 border border-emerald-200 hover:border-emerald-400 hover:text-emerald-600'
+                    ? 'bg-success text-white shadow-md'
+                    : 'bg-white text-gray-600 border border-success200 hover:border-success400 hover:text-success'
                 }`}
                 title={tag.description}
               >
@@ -394,7 +394,7 @@ export default function CataloguePage() {
                 onClick={() => setShowMap(!showMap)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
                   showMap
-                    ? 'bg-orange-500 text-white'
+                    ? 'bg-primary text-white'
                     : 'bg-white text-gray-600 border border-orange-100 hover:border-orange-300'
                 }`}
               >
@@ -405,7 +405,7 @@ export default function CataloguePage() {
                 onClick={() => setShowFilters(!showFilters)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
                   showFilters
-                    ? 'bg-orange-500 text-white'
+                    ? 'bg-primary text-white'
                     : 'bg-white text-gray-600 border border-orange-100 hover:border-orange-300'
                 }`}
               >
@@ -503,7 +503,7 @@ export default function CataloguePage() {
                         onClick={() => setSelectedMode(mode)}
                         className={`flex-1 px-3 py-2 rounded-xl text-sm font-semibold transition-all capitalize ${
                           selectedMode === mode
-                            ? 'bg-orange-500 text-white'
+                            ? 'bg-primary text-white'
                             : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-orange-300'
                         }`}
                       >
@@ -523,7 +523,7 @@ export default function CataloguePage() {
                     onClick={() => setShowAvailableOnly(!showAvailableOnly)}
                     className={`w-full px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                       showAvailableOnly
-                        ? 'bg-emerald-500 text-white'
+                        ? 'bg-success text-white'
                         : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-orange-300'
                     }`}
                   >
@@ -575,7 +575,7 @@ export default function CataloguePage() {
                       <span
                         className={`px-2.5 py-1 rounded-full text-xs font-bold ${
                           product.available !== false
-                            ? 'bg-emerald-100 text-emerald-700'
+                            ? 'bg-emerald-100 text-success/700'
                             : 'bg-amber-100 text-amber-700'
                         }`}
                       >
@@ -586,7 +586,7 @@ export default function CataloguePage() {
 
                   {/* Content */}
                   <div className="p-4 flex flex-col flex-1">
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-orange-500 mb-1">
+                    <div className="text-[11px] font-semibold uppercase tracking-wider text-primary mb-1">
                       {product.category}
                     </div>
                     <h3 className="text-base font-bold text-gray-900 mb-1 line-clamp-1">
@@ -599,7 +599,7 @@ export default function CataloguePage() {
                         {(product.healthTags || vendorHealthMap[product.vendor]?.healthTags || []).slice(0, 3).map((tag: string) => {
                           const tagInfo = HEALTH_TAGS.find(t => t.id === tag);
                           return tagInfo ? (
-                            <span key={tag} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded-md text-[10px] font-semibold" title={tagInfo.description}>
+                            <span key={tag} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-success/10 text-success/700 rounded-md text-[10px] font-semibold" title={tagInfo.description}>
                               {tagInfo.icon} {tagInfo.name}
                             </span>
                           ) : null;
@@ -639,7 +639,7 @@ export default function CataloguePage() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleAddToCart(product)}
-                          className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-sm transition-all hover:scale-[1.02]"
+                          className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-primary hover:bg-orange-600 text-white font-bold rounded-xl text-sm transition-all hover:scale-[1.02]"
                         >
                           <Plus className="w-4 h-4" />
                           Ajouter au panier
@@ -669,7 +669,7 @@ export default function CataloguePage() {
               </p>
               <button
                 onClick={clearFilters}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-orange-600 text-white font-bold rounded-xl transition-all"
               >
                 <X className="w-4 h-4" />
                 Réinitialiser les filtres

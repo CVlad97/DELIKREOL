@@ -59,7 +59,7 @@ export function AutoCarousel({ items }: { items: CarouselItem[] }) {
             key={i}
             onClick={() => setCurrentIndex(i)}
             className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === currentIndex ? 'w-8 bg-orange-500' : 'w-1.5 bg-gray-200 hover:bg-gray-300'
+              i === currentIndex ? 'w-8 bg-primary' : 'w-1.5 bg-gray-200 hover:bg-gray-300'
             }`}
           />
         ))}
@@ -73,16 +73,16 @@ export function AutoCarousel({ items }: { items: CarouselItem[] }) {
             to="/catalogue"
             className={`bg-white rounded-2xl border transition-all duration-500 group ${
               i === 0
-                ? 'w-56 md:w-64 scale-100 border-orange-200 shadow-xl z-10'
+                ? 'w-56 md:w-64 scale-100 border-primary/200 shadow-xl z-10'
                 : 'w-40 md:w-48 scale-90 border-gray-100 shadow-md opacity-70 hidden md:block'
-            } hover:border-orange-300`}
+            } hover:border-primary/300`}
           >
-            <div className={`${i === 0 ? 'aspect-[4/3]' : 'aspect-square'} rounded-t-2xl overflow-hidden bg-orange-50`}>
+            <div className={`${i === 0 ? 'aspect-[4/3]' : 'aspect-square'} rounded-t-2xl overflow-hidden bg-primary/8`}>
               {product.image ? (
                 <img loading="lazy" src={product.image} alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-orange-200 text-3xl">🍽️</div>
+                <div className="w-full h-full flex items-center justify-center text-primary/200 text-3xl">🍽️</div>
               )}
             </div>
             <div className={`p-3 ${i === 0 ? 'p-4' : ''}`}>
@@ -92,11 +92,11 @@ export function AutoCarousel({ items }: { items: CarouselItem[] }) {
               </p>
               {i === 0 && <p className="text-xs text-gray-400 truncate mt-0.5">{product.vendor}</p>}
               <div className="flex items-center justify-between mt-2">
-                <span className={`font-bold text-orange-600 ${i === 0 ? 'text-base' : 'text-sm'}`}>
+                <span className={`font-bold text-primary ${i === 0 ? 'text-base' : 'text-sm'}`}>
                   {product.price.toFixed(2)} €
                 </span>
                 {i === 0 && (
-                  <span className="text-[10px] px-2 py-0.5 bg-orange-50 text-orange-600 rounded-full font-semibold">
+                  <span className="text-[10px] px-2 py-0.5 bg-primary/8 text-primary rounded-full font-semibold">
                     Ajouter
                   </span>
                 )}
@@ -109,13 +109,13 @@ export function AutoCarousel({ items }: { items: CarouselItem[] }) {
       {/* Flèches navigation */}
       <button
         onClick={goPrev}
-        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center text-gray-600 hover:text-orange-500 hover:border-orange-200 transition-all"
+        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center text-gray-600 hover:text-primary hover:border-primary/200 transition-all"
       >
         ◀
       </button>
       <button
         onClick={goNext}
-        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center text-gray-600 hover:text-orange-500 hover:border-orange-200 transition-all"
+        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center text-gray-600 hover:text-primary hover:border-primary/200 transition-all"
       >
         ▶
       </button>

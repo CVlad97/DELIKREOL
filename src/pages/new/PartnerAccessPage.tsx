@@ -226,7 +226,7 @@ export default function PartnerAccessPage() {
               <label className="block text-xs font-bold text-gray-700 mb-1">Modes possibles</label>
               <div className="flex flex-wrap gap-2">
                 {MODES.map(m => (
-                  <button key={m} type="button" onClick={() => toggleMode(m)} className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${form.modes.includes(m) ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-600 border-gray-200'}`}>{m}</button>
+                  <button key={m} type="button" onClick={() => toggleMode(m)} className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${form.modes.includes(m) ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-200'}`}>{m}</button>
                 ))}
               </div>
             </div>
@@ -259,7 +259,7 @@ export default function PartnerAccessPage() {
             <textarea value={form.remarques} onChange={e => setForm(f => ({ ...f, remarques: e.target.value }))} className="w-full px-3 py-2 rounded-xl border text-sm" rows={2} placeholder="Photos à changer, informations supplémentaires..." />
           </div>
 
-          <button disabled={submitStatus === 'saving'} type="submit" className="w-full py-3 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 disabled:opacity-60">
+          <button disabled={submitStatus === 'saving'} type="submit" className="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 disabled:opacity-60">
             {submitStatus === 'saving' ? 'Envoi en cours…' : 'Envoyer mes corrections'}
           </button>
         </form>

@@ -130,10 +130,10 @@ function ReviewsSection() {
       {displayReviews.map((review, index) => (
         <div
           key={index}
-          className="card bg-white rounded-[2rem] p-6 border border-orange-100 shadow-sm hover:-translate-y-1 hover:shadow-lg transition-all"
+          className="card bg-white rounded-[2rem] p-6 border border-primary/20 shadow-sm hover:-translate-y-1 hover:shadow-lg transition-all"
         >
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-full bg-orange-500 text-white flex items-center justify-center text-lg font-bold shrink-0">
+            <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center text-lg font-bold shrink-0">
               {review.initial}
             </div>
             <div>
@@ -208,7 +208,7 @@ export default function HomePage() {
       to: '/devis',
       cta: 'Créer une demande',
       icon: FileText,
-      tone: 'from-emerald-600 to-teal-500',
+      tone: 'from-success600 to-teal-500',
     },
     {
       title: 'Rejoindre DeliKreol',
@@ -216,7 +216,7 @@ export default function HomePage() {
       to: '/devenir-partenaire',
       cta: 'Devenir partenaire',
       icon: Handshake,
-      tone: 'from-stone-900 to-orange-700',
+      tone: 'from-stone-900 to-primary',
     },
   ];
 
@@ -336,22 +336,22 @@ export default function HomePage() {
 
         <div className="relative mx-auto grid min-h-[720px] max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 md:py-20 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)] lg:px-8 lg:py-24">
           <div className="max-w-3xl">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-orange-100 bg-orange-50 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-orange-700 shadow-sm">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-primary/90 shadow-sm">
               <Sparkles className="h-3.5 w-3.5" />
               Livraison & retrait en Martinique
             </div>
 
-            <h1 className="max-w-4xl text-5xl font-black leading-[0.95] tracking-tight text-emerald-950 sm:text-6xl lg:text-7xl">
-              Commandez <span className="text-orange-600">créole local</span> en Martinique
+            <h1 className="max-w-4xl text-5xl font-black leading-[0.95] tracking-tight text-success/950 sm:text-6xl lg:text-7xl">
+              Commandez <span className="text-primary">créole local</span> en Martinique
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-600 md:text-xl">
               Plats maison, traiteurs locaux — livraison ou retrait.
             </p>
 
-            <div className="mt-8 max-w-2xl rounded-[2rem] border border-orange-100 bg-white p-2 shadow-[0_22px_70px_-42px_rgba(42,25,15,0.65)]">
+            <div className="mt-8 max-w-2xl rounded-[2rem] border border-primary/20 bg-white p-2 shadow-[0_22px_70px_-42px_rgba(42,25,15,0.65)]">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <label className="flex min-h-[58px] flex-1 items-center gap-3 rounded-3xl bg-orange-50/80 px-4 text-left">
-                  <Search className="h-5 w-5 shrink-0 text-orange-500" />
+                <label className="flex min-h-[58px] flex-1 items-center gap-3 rounded-3xl bg-primary/8/80 px-4 text-left">
+                  <Search className="h-5 w-5 shrink-0 text-primary" />
                   <span className="sr-only">Choisir une commune</span>
                   <select
                     value={selectedCommune}
@@ -370,7 +370,7 @@ export default function HomePage() {
                 </label>
                 <Link
                   to="/catalogue"
-                  className="inline-flex min-h-[58px] items-center justify-center gap-2 rounded-3xl bg-orange-500 px-6 text-sm font-black text-white shadow-lg shadow-orange-500/25 transition-all hover:-translate-y-0.5 hover:bg-orange-600"
+                  className="inline-flex min-h-[58px] items-center justify-center gap-2 rounded-3xl bg-primary px-6 text-sm font-black text-white shadow-lg shadow-primary/25 transition-all hover:-translate-y-0.5 hover:bg-primary/90"
                 >
                   Commander maintenant
                   <ArrowRight className="h-4 w-4" />
@@ -381,7 +381,7 @@ export default function HomePage() {
             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
               <Link
                 to="/devis"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-orange-100 bg-white px-5 py-3 text-sm font-black text-stone-800 shadow-sm transition-all hover:-translate-y-0.5 hover:border-orange-200"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-primary/20 bg-white px-5 py-3 text-sm font-black text-stone-800 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/30"
               >
                 <FileText className="h-4 w-4" />
                 Demande pro
@@ -390,7 +390,7 @@ export default function HomePage() {
                 href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Bonjour, je veux lancer une commande DELIKREOL.')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-100 bg-emerald-50 px-5 py-3 text-sm font-black text-emerald-800 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-emerald-100"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-success100 bg-success/10 px-5 py-3 text-sm font-black text-success/800 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-emerald-100"
               >
                 <MessageCircle className="h-4 w-4" />
                 WhatsApp rapide
@@ -401,9 +401,9 @@ export default function HomePage() {
               {heroStats.map((stat) => {
                 const Icon = stat.icon;
                 return (
-                  <div key={stat.label} className="rounded-3xl border border-orange-100 bg-white/90 p-4 shadow-sm backdrop-blur-xl">
-                    <Icon className="mb-3 h-5 w-5 text-orange-500" />
-                    <div className="text-2xl font-black text-emerald-950">{stat.value}</div>
+                  <div key={stat.label} className="rounded-3xl border border-primary/20 bg-white/90 p-4 shadow-sm backdrop-blur-xl">
+                    <Icon className="mb-3 h-5 w-5 text-primary" />
+                    <div className="text-2xl font-black text-success/950">{stat.value}</div>
                     <div className="mt-1 text-xs font-semibold leading-snug text-stone-500">{stat.label}</div>
                   </div>
                 );
@@ -412,9 +412,9 @@ export default function HomePage() {
           </div>
 
           <div className="relative hidden lg:block">
-            <div className="absolute -left-10 top-12 h-32 w-32 rounded-full bg-orange-400/20 blur-3xl" />
+            <div className="absolute -left-10 top-12 h-32 w-32 rounded-full bg-primary/20 blur-3xl" />
             <div className="absolute -right-8 bottom-12 h-40 w-40 rounded-full bg-emerald-400/20 blur-3xl" />
-            <div className="relative rounded-[2.5rem] border border-orange-100 bg-white/72 p-4 shadow-[0_32px_100px_-48px_rgba(42,25,15,0.72)] backdrop-blur-2xl">
+            <div className="relative rounded-[2.5rem] border border-primary/20 bg-white/72 p-4 shadow-[0_32px_100px_-48px_rgba(42,25,15,0.72)] backdrop-blur-2xl">
               <div className="overflow-hidden rounded-[2rem] bg-white">
                 <img
                   loading="lazy"
@@ -423,16 +423,16 @@ export default function HomePage() {
                   className="h-[420px] w-full object-cover"
                 />
               </div>
-              <div className="absolute -bottom-8 left-8 right-8 rounded-[1.75rem] border border-orange-100 bg-white p-5 text-stone-900 shadow-2xl">
+              <div className="absolute -bottom-8 left-8 right-8 rounded-[1.75rem] border border-primary/20 bg-white p-5 text-stone-900 shadow-2xl">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-500">À commander</p>
+                    <p className="text-xs font-black uppercase tracking-[0.22em] text-primary">À commander</p>
                     <h2 className="mt-1 text-xl font-black">Colombo, accras, desserts pays</h2>
                     <p className="mt-1 text-sm text-stone-500">Sélection locale, disponibilité vérifiée avec le prestataire.</p>
                   </div>
-                  <div className="rounded-2xl bg-emerald-50 px-3 py-2 text-right">
-                    <p className="text-xs font-bold text-emerald-700">Retrait</p>
-                    <p className="text-sm font-black text-emerald-900">ou livraison</p>
+                  <div className="rounded-2xl bg-success/10 px-3 py-2 text-right">
+                    <p className="text-xs font-bold text-success/700">Retrait</p>
+                    <p className="text-sm font-black text-success/900">ou livraison</p>
                   </div>
                 </div>
               </div>
@@ -445,7 +445,7 @@ export default function HomePage() {
                 />
               </div>
               <div className="absolute -right-7 top-28 rounded-3xl border border-white/50 bg-white/90 p-4 text-stone-900 shadow-2xl backdrop-blur-xl">
-                <Truck className="mb-2 h-6 w-6 text-orange-500" />
+                <Truck className="mb-2 h-6 w-6 text-primary" />
                 <p className="text-sm font-black">Créneau planifié</p>
                 <p className="text-xs text-stone-500">commande maîtrisée</p>
               </div>
@@ -463,14 +463,14 @@ export default function HomePage() {
                 <Link
                   key={card.title}
                   to={card.to}
-                  className="group rounded-[2rem] border border-orange-100 bg-white p-5 shadow-[0_18px_55px_-36px_rgba(42,25,15,0.55)] transition-all hover:-translate-y-1 hover:border-orange-200 hover:shadow-[0_28px_80px_-42px_rgba(42,25,15,0.7)]"
+                  className="group rounded-[2rem] border border-primary/20 bg-white p-5 shadow-[0_18px_55px_-36px_rgba(42,25,15,0.55)] transition-all hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_28px_80px_-42px_rgba(42,25,15,0.7)]"
                 >
                   <div className={`mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${card.tone} text-white shadow-lg`}>
                     <Icon className="h-5 w-5" />
                   </div>
                   <h2 className="text-xl font-black text-stone-950">{card.title}</h2>
                   <p className="mt-2 min-h-[48px] text-sm leading-6 text-stone-500">{card.description}</p>
-                  <span className="mt-5 inline-flex items-center gap-2 text-sm font-black text-orange-600">
+                  <span className="mt-5 inline-flex items-center gap-2 text-sm font-black text-primary">
                     {card.cta}
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </span>
@@ -479,7 +479,7 @@ export default function HomePage() {
             })}
           </div>
 
-          <div className="mt-8 rounded-[2.25rem] border border-orange-100 bg-white p-4 shadow-soft md:p-6">
+          <div className="mt-8 rounded-[2.25rem] border border-primary/20 bg-white p-4 shadow-soft md:p-6">
             <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
               <div>
                 <h2 className="text-3xl font-black tracking-tight text-stone-950 md:text-4xl">À commander maintenant</h2>
@@ -487,7 +487,7 @@ export default function HomePage() {
               </div>
               <Link
                 to="/catalogue"
-                className="inline-flex items-center gap-2 self-start rounded-2xl bg-stone-950 px-5 py-3 text-sm font-black text-white transition-all hover:bg-orange-600 md:self-auto"
+                className="inline-flex items-center gap-2 self-start rounded-2xl bg-stone-950 px-5 py-3 text-sm font-black text-white transition-all hover:bg-primary/90 md:self-auto"
               >
                 Catalogue complet
                 <ArrowRight className="h-4 w-4" />
@@ -499,10 +499,10 @@ export default function HomePage() {
       </section>
 
       {/* 📍 Carte géolocalisation interactive */}
-      <section className="py-14 md:py-20 bg-gradient-to-b from-background via-white to-orange-50/45">
+      <section className="py-14 md:py-20 bg-gradient-to-b from-background via-white to-primary/8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-orange-700">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/15 px-3 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-primary/90">
               <Locate className="h-3.5 w-3.5" />
               Localisation
             </div>
@@ -522,7 +522,7 @@ export default function HomePage() {
 
       {/* Featured Traiteurs */}
       {featuredTraiteurs.length > 0 && (
-        <section className="py-16 md:py-24 bg-gradient-to-b from-orange-50/70 via-white to-white">
+        <section className="py-16 md:py-24 bg-gradient-to-b from-primary/10 via-white to-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-10">
               <div>
@@ -535,7 +535,7 @@ export default function HomePage() {
               </div>
               <Link
                 to="/catalogue"
-                className="hidden md:flex items-center gap-2 text-orange-600 font-bold hover:text-orange-700 transition-colors"
+                className="hidden md:flex items-center gap-2 text-primary font-bold hover:text-primary/90 transition-colors"
               >
                 Voir tous
                 <ArrowRight className="w-4 h-4" />
@@ -546,7 +546,7 @@ export default function HomePage() {
                 <Link
                   key={traiteur.slug}
                   to={`/traiteur/${traiteur.slug}`}
-                  className="snap-start flex-shrink-0 w-[260px] sm:w-[290px] group bg-white rounded-[2rem] border border-orange-100 hover:border-orange-300 overflow-hidden shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all"
+                  className="snap-start flex-shrink-0 w-[260px] sm:w-[290px] group bg-white rounded-[2rem] border border-primary/20 hover:border-primary/40 overflow-hidden shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all"
                 >
                   <div className={`h-36 bg-gradient-to-br ${traiteur.gradient} relative overflow-hidden`}>
                     {traiteur.heroImage && (
@@ -572,13 +572,13 @@ export default function HomePage() {
                     )}
                   </div>
                   <div className="p-5 pt-10">
-                    <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-orange-600 transition-colors">
+                    <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-primary transition-colors">
                       {traiteur.name}
                     </h3>
                     <p className="text-sm text-gray-500 mb-3 line-clamp-2">{traiteur.offer}</p>
                     <div className="flex items-center gap-3 text-xs text-gray-400">
                       {traiteur.startingAt > 0 && (
-                        <span className="font-semibold text-orange-600">
+                        <span className="font-semibold text-primary">
                           À partir de {formatEuro(traiteur.startingAt)}
                         </span>
                       )}
@@ -594,7 +594,7 @@ export default function HomePage() {
             <div className="text-center mt-8 md:hidden">
               <Link
                 to="/catalogue"
-                className="inline-flex items-center gap-2 text-orange-600 font-bold hover:text-orange-700 transition-colors"
+                className="inline-flex items-center gap-2 text-primary font-bold hover:text-primary/90 transition-colors"
               >
                 Voir tous les traiteurs
                 <ArrowRight className="w-4 h-4" />
@@ -619,7 +619,7 @@ export default function HomePage() {
               </div>
               <Link
                 to="/catalogue"
-                className="hidden md:flex items-center gap-2 text-orange-600 font-bold hover:text-orange-700 transition-colors"
+                className="hidden md:flex items-center gap-2 text-primary font-bold hover:text-primary/90 transition-colors"
               >
                 Voir le catalogue
                 <ArrowRight className="w-4 h-4" />
@@ -629,9 +629,9 @@ export default function HomePage() {
               {allFeatured.map((product: any) => (
                 <div
                   key={product.id}
-                  className="snap-start flex-shrink-0 w-[280px] sm:w-[310px] group bg-white rounded-[2rem] border border-orange-100 hover:border-orange-300 overflow-hidden shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all"
+                  className="snap-start flex-shrink-0 w-[280px] sm:w-[310px] group bg-white rounded-[2rem] border border-primary/20 hover:border-primary/40 overflow-hidden shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all"
                 >
-                  <div className="relative aspect-[3/2] overflow-hidden bg-orange-50">
+                  <div className="relative aspect-[3/2] overflow-hidden bg-primary/8">
                     {product.image ? (
                       <img loading="lazy"
                         src={product.image}
@@ -646,7 +646,7 @@ export default function HomePage() {
                     <div className="absolute top-3 right-3">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
                         product.available !== false
-                          ? 'bg-emerald-100 text-emerald-700'
+                          ? 'bg-emerald-100 text-success/700'
                           : 'bg-amber-100 text-amber-700'
                       }`}>
                         {product.available !== false ? 'Disponible' : 'Sur confirmation'}
@@ -661,7 +661,7 @@ export default function HomePage() {
                     )}
                   </div>
                   <div className="p-5">
-                    <div className="text-xs font-semibold uppercase tracking-wider text-orange-500 mb-1">
+                    <div className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">
                       {product.category}
                     </div>
                     <h3 className="text-lg font-bold text-gray-900 mb-1">{product.name}</h3>
@@ -679,7 +679,7 @@ export default function HomePage() {
                       <span className="text-[10px] text-gray-400 block -mt-1">Prix DELIKREOL</span>
                       <button
                         onClick={() => handleAddToCart(product)}
-                        className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-sm transition-all hover:scale-105"
+                        className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl text-sm transition-all hover:scale-105"
                       >
                         <Plus className="w-4 h-4" />
                         Ajouter
@@ -694,7 +694,7 @@ export default function HomePage() {
       )}
 
       {/* Categories Quick Links */}
-      <section className="py-16 md:py-20 bg-gradient-to-b from-orange-50/70 to-white">
+      <section className="py-16 md:py-20 bg-gradient-to-b from-primary/10 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
             <h2 className="text-3xl md:text-5xl font-black tracking-tight text-gray-900 mb-3">
@@ -707,7 +707,7 @@ export default function HomePage() {
               <Link
                 key={cat.id}
                 to={`/catalogue?cat=${cat.id}`}
-                className="px-6 py-3 bg-white hover:bg-orange-50 text-gray-700 hover:text-orange-600 font-bold rounded-2xl border border-orange-100 hover:border-orange-300 transition-all hover:-translate-y-0.5 shadow-sm text-sm"
+                className="px-6 py-3 bg-white hover:bg-primary/8 text-gray-700 hover:text-primary font-bold rounded-2xl border border-primary/20 hover:border-primary/40 transition-all hover:-translate-y-0.5 shadow-sm text-sm"
               >
                 {cat.name}
               </Link>
@@ -717,8 +717,8 @@ export default function HomePage() {
       </section>
 
       {/* Trust / Le meilleur est à venir */}
-      <section className="relative overflow-hidden py-16 md:py-24 bg-gradient-to-br from-stone-950 via-emerald-950 to-orange-700 text-white">
-        <div className="absolute left-0 top-0 h-64 w-64 rounded-full bg-orange-400/25 blur-3xl" />
+      <section className="relative overflow-hidden py-16 md:py-24 bg-gradient-to-br from-stone-950 via-emerald-950 to-primary text-white">
+        <div className="absolute left-0 top-0 h-64 w-64 rounded-full bg-primary/25 blur-3xl" />
         <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-emerald-300/15 blur-3xl" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
@@ -750,7 +750,7 @@ export default function HomePage() {
       </section>
 
       {/* Pourquoi Delikreol */}
-      <section className="py-16 md:py-24 bg-gradient-to-b from-white to-orange-50/70">
+      <section className="py-16 md:py-24 bg-gradient-to-b from-white to-primary/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-5xl font-black tracking-tight text-gray-900 mb-3">
@@ -759,8 +759,8 @@ export default function HomePage() {
             <p className="text-gray-500 text-lg">La plateforme martiniquaise qui valorise nos producteurs</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-[2rem] p-8 border border-orange-100 shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all text-center">
-              <div className="w-14 h-14 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center mx-auto mb-5">
+            <div className="bg-white rounded-[2rem] p-8 border border-primary/20 shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all text-center">
+              <div className="w-14 h-14 rounded-2xl bg-primary/15 text-primary flex items-center justify-center mx-auto mb-5">
                 <ChefHat className="w-7 h-7" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Produits locaux</h3>
@@ -769,7 +769,7 @@ export default function HomePage() {
                 Manger créole, c'est soutenir l'économie de l'île.
               </p>
             </div>
-            <div className="bg-white rounded-[2rem] p-8 border border-orange-100 shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all text-center">
+            <div className="bg-white rounded-[2rem] p-8 border border-primary/20 shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all text-center">
               <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-5">
                 <Clock className="w-7 h-7" />
               </div>
@@ -779,7 +779,7 @@ export default function HomePage() {
                 selon votre commune. Vous décidez.
               </p>
             </div>
-            <div className="bg-white rounded-[2rem] p-8 border border-orange-100 shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all text-center">
+            <div className="bg-white rounded-[2rem] p-8 border border-primary/20 shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all text-center">
               <div className="w-14 h-14 rounded-2xl bg-green-100 text-green-600 flex items-center justify-center mx-auto mb-5">
                 <MessageCircle className="w-7 h-7" />
               </div>
@@ -815,7 +815,7 @@ export default function HomePage() {
               <Link
                 key={caterer.slug}
                 to={`/traiteur/${caterer.slug}`}
-                className="group flex flex-col items-center gap-3 p-5 rounded-[1.75rem] bg-orange-50/70 border border-orange-100 hover:-translate-y-1 hover:border-orange-300 hover:shadow-lg transition-all text-center"
+                className="group flex flex-col items-center gap-3 p-5 rounded-[1.75rem] bg-primary/8/70 border border-primary/20 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg transition-all text-center"
               >
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-orange-200 group-hover:border-orange-400 transition-colors bg-white shadow-sm">
                                   <img loading="lazy"
@@ -824,7 +824,7 @@ export default function HomePage() {
                                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                    />
                 </div>
-                <span className="text-sm font-bold text-gray-700 group-hover:text-orange-600 transition-colors">
+                <span className="text-sm font-bold text-gray-700 group-hover:text-primary transition-colors">
                   {caterer.name}
                 </span>
               </Link>
@@ -848,7 +848,7 @@ export default function HomePage() {
                 <div className="mt-8 text-center">
                   <Link
                     to="/avis"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all hover:-translate-y-0.5 shadow-lg shadow-orange-200 text-sm"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl transition-all hover:-translate-y-0.5 shadow-lg shadow-orange-200 text-sm"
                   >
                     <PenLine className="w-4 h-4" />
                     Donnez votre avis
@@ -863,7 +863,7 @@ export default function HomePage() {
       <section className="py-14 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-success/10 text-success/700 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
               <span>💚</span>
               Services spéciaux
             </div>
@@ -897,8 +897,8 @@ export default function HomePage() {
             </div>
 
             {/* Carte 2 — Partenariat infirmier */}
-            <div className="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-[2rem] border border-emerald-100 hover:-translate-y-1 hover:shadow-lg transition-all">
-              <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-2xl mb-4 shadow-md">
+            <div className="p-6 bg-gradient-to-br from-success50 to-success/100/50 rounded-[2rem] border border-success100 hover:-translate-y-1 hover:shadow-lg transition-all">
+              <div className="w-14 h-14 rounded-2xl bg-success text-white flex items-center justify-center text-2xl mb-4 shadow-md">
                 🩺
               </div>
               <h3 className="text-xl font-black text-gray-900 mb-2">Partenariat infirmier</h3>
@@ -909,7 +909,7 @@ export default function HomePage() {
               <div className="flex flex-wrap gap-1.5">
                 {traiteurSpaces.filter(t => t.deliveryOptions?.includes('infirmiere')).slice(0, 3).map(t => (
                   <Link key={t.slug} to={`/?view=traiteurs&vendor=${t.slug}`}
-                    className="text-xs px-2 py-1 bg-white rounded-lg font-semibold text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all">
+                    className="text-xs px-2 py-1 bg-white rounded-lg font-semibold text-success hover:bg-success hover:text-white transition-all">
                     {t.name}
                   </Link>
                 ))}
@@ -941,7 +941,7 @@ export default function HomePage() {
           <div className="mt-8 text-center">
             <Link
               to="/catalogue"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-success hover:bg-success/90 text-white font-bold rounded-xl transition-all"
             >
               <span>💚</span>
               Voir tous les filtres santé
@@ -954,8 +954,8 @@ export default function HomePage() {
       {/* CTA Final */}
       <section className="py-16 md:py-24 bg-gradient-to-b from-white to-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-stone-950 via-emerald-950 to-orange-700 px-6 py-12 text-center text-white shadow-[0_32px_100px_-55px_rgba(42,25,15,0.75)] md:px-12 md:py-16">
-            <div className="absolute -left-16 top-0 h-56 w-56 rounded-full bg-orange-400/25 blur-3xl" />
+          <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-stone-950 via-emerald-950 to-primary px-6 py-12 text-center text-white shadow-[0_32px_100px_-55px_rgba(42,25,15,0.75)] md:px-12 md:py-16">
+            <div className="absolute -left-16 top-0 h-56 w-56 rounded-full bg-primary/25 blur-3xl" />
             <div className="absolute -right-10 bottom-0 h-64 w-64 rounded-full bg-emerald-300/15 blur-3xl" />
             <div className="relative mx-auto max-w-3xl">
               <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">
@@ -967,7 +967,7 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
                   to="/catalogue"
-                  className="flex items-center gap-2 px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl transition-all hover:-translate-y-0.5 shadow-lg shadow-orange-950/20 text-lg"
+                  className="flex items-center gap-2 px-8 py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-2xl transition-all hover:-translate-y-0.5 shadow-lg shadow-orange-950/20 text-lg"
                 >
                   <ShoppingBag className="w-5 h-5" />
                   Voir le catalogue

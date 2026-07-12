@@ -222,7 +222,7 @@ export function FeedbackPage() {
   return (
     <Layout>
       <div className="max-w-3xl mx-auto px-4 py-8 md:py-12 space-y-8">
-        <Link to="/" className="inline-flex items-center gap-2 text-sm font-bold text-orange-600 hover:underline">
+        <Link to="/" className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline">
           <ArrowLeft size={16} /> Retour accueil
         </Link>
 

@@ -163,7 +163,7 @@ export function TraiteurDetailPage() {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-100 to-orange-200">
-                <ChefHat className="w-20 h-20 text-orange-700/30" />
+                <ChefHat className="w-20 h-20 text-primary/700/30" />
               </div>
             )}
           </div>
@@ -171,7 +171,7 @@ export function TraiteurDetailPage() {
           <div className="absolute inset-x-0 bottom-0 p-5 sm:p-8 lg:p-10 text-white">
             <div className="flex flex-wrap items-center gap-2 mb-3">
               {isVerified && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/90 px-3 py-1 text-xs font-bold">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-success/90 px-3 py-1 text-xs font-bold">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   Partenaire référencé
                 </span>
@@ -263,7 +263,7 @@ export function TraiteurDetailPage() {
               href={`https://wa.me/${WHATSAPP_NUMBER}?text=${devisMessage}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-3 font-black text-white transition-colors"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-success hover:bg-emerald-400 px-4 py-3 font-black text-white transition-colors"
             >
               <MessageCircle className="w-5 h-5" />
               Vérifier les disponibilités
