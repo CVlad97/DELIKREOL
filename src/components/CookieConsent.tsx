@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { loadCookiePrefs, saveCookiePrefs, CookiePreferences, DEFAULT_PREFS, RGPD_NOTICE } from '../services/privacy';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { CookiePreferences, DEFAULT_PREFS, loadCookiePrefs, saveCookiePrefs } from '../services/privacy';
 
 export function CookieConsent() {
   const [visible, setVisible] = useState(false);
@@ -34,33 +35,57 @@ export function CookieConsent() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-[100] p-4">
-      <div className="max-w-lg mx-auto bg-white rounded-2xl shadow-2xl border border-orange-100 p-5">
-        <p className="text-sm text-gray-700 mb-3 leading-relaxed">{RGPD_NOTICE}</p>
+    <aside className="fixed inset-x-0 bottom-0 z-[100] p-3 sm:p-4" aria-label="Préférences de confidentialité">
+      <div className="mx-auto max-w-2xl rounded-3xl border border-primary/20 bg-white p-4 shadow-2xl sm:p-5">
+        <div className="flex items-start gap-3">
+          <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-xl sm:flex" aria-hidden="true">🍪</div>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-base font-black text-foreground">Vos préférences de confidentialité</h2>
+            <p className="mt-1 text-sm leading-5 text-muted-foreground">
+              Les cookies nécessaires font fonctionner le panier. La géolocalisation, les statistiques et le marketing restent optionnels.
+            </p>
+            <Link to="/cookies" className="mt-1 inline-flex min-h-8 items-center text-xs font-bold text-primary underline-offset-2 hover:underline">
+              En savoir plus
+            </Link>
+          </div>
+        </div>
+
         {showDetails && (
-          <div className="space-y-2 mb-4">
-            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled className="accent-orange-500" /> Nécessaires (panier)</label>
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={prefs.geolocation} onChange={e => setPrefs(p => ({ ...p, geolocation: e.target.checked }))} className="accent-orange-500" />
+          <div className="mt-3 grid gap-2 rounded-2xl bg-muted/60 p-3 sm:grid-cols-2">
+            <label className="flex min-h-10 items-center gap-2 text-sm font-semibold text-foreground"><input type="checkbox" checked disabled className="h-5 w-5 accent-primary" /> Nécessaires</label>
+            <label className="flex min-h-10 items-center gap-2 text-sm text-foreground">
+              <input type="checkbox" checked={prefs.geolocation} onChange={event => setPrefs(current => ({ ...current, geolocation: event.target.checked }))} className="h-5 w-5 accent-primary" />
               Géolocalisation
             </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={prefs.analytics} onChange={e => setPrefs(p => ({ ...p, analytics: e.target.checked }))} className="accent-orange-500" />
-              Analytics (amélioration du service)
+            <label className="flex min-h-10 items-center gap-2 text-sm text-foreground">
+              <input type="checkbox" checked={prefs.analytics} onChange={event => setPrefs(current => ({ ...current, analytics: event.target.checked }))} className="h-5 w-5 accent-primary" />
+              Statistiques
             </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={prefs.marketing} onChange={e => setPrefs(p => ({ ...p, marketing: e.target.checked }))} className="accent-orange-500" />
-              Marketing (offres personnalisées)
+            <label className="flex min-h-10 items-center gap-2 text-sm text-foreground">
+              <input type="checkbox" checked={prefs.marketing} onChange={event => setPrefs(current => ({ ...current, marketing: event.target.checked }))} className="h-5 w-5 accent-primary" />
+              Marketing
             </label>
           </div>
         )}
-        <div className="flex flex-wrap gap-2 justify-end">
-          <button onClick={() => setShowDetails(!showDetails)} className="text-xs text-gray-500 hover:text-gray-700 underline">{showDetails ? 'Masquer' : 'Personnaliser'}</button>
-          <button onClick={acceptNecessary} className="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200">Refuser les optionnels</button>
-          {showDetails && <button onClick={saveCustom} className="px-4 py-2 text-xs font-semibold text-white bg-orange-500 rounded-xl hover:bg-orange-600">Sauvegarder</button>}
-          <button onClick={acceptAll} className="px-4 py-2 text-xs font-semibold text-white bg-orange-600 rounded-xl hover:bg-orange-700">Tout accepter</button>
+
+        <div className="mt-4 grid gap-2 sm:grid-cols-[auto_1fr_1fr]">
+          <button type="button" onClick={() => setShowDetails(value => !value)} className="min-h-11 rounded-xl px-3 text-sm font-bold text-primary hover:bg-primary/5">
+            {showDetails ? 'Masquer' : 'Personnaliser'}
+          </button>
+          {showDetails ? (
+            <button type="button" onClick={saveCustom} className="min-h-11 rounded-xl border border-input bg-white px-4 text-sm font-bold text-foreground hover:bg-muted">
+              Enregistrer mes choix
+            </button>
+          ) : (
+            <button type="button" onClick={acceptNecessary} className="min-h-11 rounded-xl border border-input bg-white px-4 text-sm font-bold text-foreground hover:bg-muted">
+              Refuser les optionnels
+            </button>
+          )}
+          <button type="button" onClick={acceptAll} className="min-h-11 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary/90">
+            Tout accepter
+          </button>
         </div>
       </div>
-    </div>
+    </aside>
   );
 }
