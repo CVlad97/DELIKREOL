@@ -21,7 +21,7 @@ function contrastRatio(first: Rgb, second: Rgb): number {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-async function computedPair(locator: Locator, foregroundProperty = 'color', backgroundProperty = 'backgroundColor') {
+async function computedPair(locator: Locator, foregroundProperty = 'color', backgroundProperty = 'background-color') {
   return locator.evaluate((element, properties) => {
     const style = getComputedStyle(element);
     return {
