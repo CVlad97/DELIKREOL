@@ -33,7 +33,7 @@ for (const viewport of viewports) {
   });
 }
 
-test('Save Peyi branded visuals keep their full artwork', async ({ page }) => {
+test('Save Peyi branded visuals keep their full artwork and natural colours', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/', { waitUntil: 'networkidle' });
 
@@ -49,5 +49,5 @@ test('Save Peyi branded visuals keep their full artwork', async ({ page }) => {
   });
 
   expect(style.objectFit).toBe('contain');
-  expect(style.filter).not.toBe('none');
+  expect(style.filter).toBe('none');
 });
