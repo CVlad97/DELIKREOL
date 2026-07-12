@@ -1293,104 +1293,13 @@ export const mockProducts: LocalProduct[] = [
   // Seafood Boils · Bao Buns · Cocktails & Mignardises
   // Menu réécrit pro — Contact : 0696 88 75 28 | 48h min
   // ═══════════════════════════════════════════════════════
-  {
-    id: 'sweet-family-boil-homard',
-    name: 'Seafood Boil Homard',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 35,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-seafood.jpg'),
-    description: 'Notre signature : homard entier cuit dans un bouillon épicé aux herbes antillaises, servi avec épis de maïs, pommes de terre grenailles et saucisses fumées. 🦞',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Homard, épis de maïs, pommes de terre, saucisses fumées, bouillon épicé, beurre à l\'ail.',
-    allergens: 'Crustacés, lait.'
-  },
-  {
-    id: 'sweet-family-boil-langouste',
-    name: 'Seafood Boil Langouste',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 45,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-seafood.jpg'),
-    description: 'Langouste royale — notre bouillon signature, maïs grillé, pommes de terre et saucisses. Prestation haut de gamme. 🦞',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Langouste, épis de maïs, pommes de terre, saucisses fumées, bouillon épicé.',
-    allergens: 'Crustacés, lait.'
-  },
-  {
-    id: 'sweet-family-boil-crabe',
-    name: 'Seafood Boil Crabe',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 28,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-seafood.jpg'),
-    description: 'Demi-crabe farci cuit au bouillon épicé. Idéal pour un plat généreux et convivial. 🦀',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Demi-crabe, épis de maïs, pommes de terre, saucisses, bouillon épicé.',
-    allergens: 'Crustacés.'
-  },
-  {
-    id: 'sweet-family-boil-crevette',
-    name: 'Seafood Boil Crevettes',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 22,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-seafood.jpg'),
-    description: 'Crevettes sauvages au bouillon épicé antillais. Le boil familial par excellence ! 🦐',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Crevettes, épis de maïs, pommes de terre, saucisses, bouillon épicé.',
-    allergens: 'Crustacés.'
-  },
-  {
-    id: 'sweet-family-boil-mix',
-    name: 'Seafood Boil Mix',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 32,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-seafood.jpg'),
-    description: 'Assortiment boil : crevettes, crabe, saucisses et accompagnements. 🎉',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Crevettes, crabe, saucisses, maïs, pommes de terre, bouillon épicé.',
-    allergens: 'Crustacés.'
-  },
-  {
-    id: 'sweet-family-boil-vegan',
-    name: 'Seafood Boil Végétarien',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 16,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-seafood.jpg'),
-    description: 'Notre bouillon signature version végétale : maïs, pommes de terre, saucisses végétales, légumes croquants. 🌽',
-    zone: 'Martinique',
-    available: true,
-    featured: false,
-    ingredients: 'Épis de maïs, pommes de terre, saucisses végétales, légumes, bouillon épicé.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'sweet-family-porc-grill',
-    name: 'Côtes de Porc Grillé',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 18,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-burger.jpg'),
-    description: 'Côtes de porc marinées aux épices antillaises, grillées à la perfection. 🥩',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Côtes de porc, marinade antillaise, épices.',
-    allergens: 'Aucun.'
-  },
+
+
+
+
+
+
+
   {
     id: 'sweet-family-bao-poulet',
     name: 'Bao Bun Poulet',
@@ -1419,34 +1328,8 @@ export const mockProducts: LocalProduct[] = [
     ingredients: 'Pain bao vapeur, bœuf mariné, poivrons caramélisés, herbes fraîches.',
     allergens: 'Gluten.'
   },
-  {
-    id: 'sweet-family-bao-crevette',
-    name: 'Bao Bun Crevette Tempura',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 2.20,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-bao.jpg'),
-    description: 'Bao bun crevette tempura croustillante, sauce épicée. Best-seller cocktail ! Min. 10 pièces.',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Pain bao vapeur, crevette tempura, sauce épicée, herbes fraîches.',
-    allergens: 'Gluten, crustacés.'
-  },
-  {
-    id: 'sweet-family-bao-poisson',
-    name: 'Bao Bun Poisson',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 2.00,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-bao.jpg'),
-    description: 'Bao bun filet de poisson pané, sauce tartare maison. Min. 10 pièces.',
-    zone: 'Martinique',
-    available: true,
-    featured: false,
-    ingredients: 'Pain bao vapeur, filet poisson pané, sauce tartare, herbes fraîches.',
-    allergens: 'Gluten, poisson.'
-  },
+
+
   {
     id: 'sweet-family-bao-boeuf-premium',
     name: 'Bao Bun Bœuf Premium',
@@ -1461,230 +1344,22 @@ export const mockProducts: LocalProduct[] = [
     ingredients: 'Pain bao vapeur, bœuf haché premium, garniture raffinée, sauce secrète.',
     allergens: 'Gluten.'
   },
-  {
-    id: 'sweet-family-nems-crevette',
-    name: 'Nems Impériaux Crevette',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 1.50,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-nems.jpg'),
-    description: 'Nems croustillants crevettes et légumes, sauce dipping. Indispensable cocktail ! Min. 10 pièces.',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Pâte à nem, crevettes, légumes croquants, herbes.',
-    allergens: 'Gluten, crustacés.'
-  },
-  {
-    id: 'sweet-family-nems-lambi',
-    name: 'Nems Lambi des Antilles',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 2.00,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-nems.jpg'),
-    description: 'Nems croustillants au lambi (conch). Notre spécialité antillaise ! Min. 10 pièces.',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Pâte à nem, lambi, épices antillaises, légumes.',
-    allergens: 'Gluten, mollusques.'
-  },
-  {
-    id: 'sweet-family-burger-boeuf',
-    name: 'Mini Burger Bœuf',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 3.00,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-burger.jpg'),
-    description: 'Mini burger brioché, steak bœuf, cheddar fondant, salade, tomate.',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Pain brioché, steak bœuf, cheddar, salade, tomate.',
-    allergens: 'Gluten, lait.'
-  },
-  {
-    id: 'sweet-family-burger-poulet',
-    name: 'Mini Burger Poulet',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 3.20,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-burger.jpg'),
-    description: 'Mini burger brioché, filet de poulet tendre, cheddar, condiments maison.',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Pain brioché, filet poulet, cheddar, salade, tomate.',
-    allergens: 'Gluten, lait.'
-  },
-  {
-    id: 'sweet-family-burger-poisson',
-    name: 'Mini Burger Poisson',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 3.50,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-burger.jpg'),
-    description: 'Mini burger brioché, filet poisson pané, sauce tartare maison.',
-    zone: 'Martinique',
-    available: true,
-    featured: false,
-    ingredients: 'Pain brioché, filet poisson, sauce tartare, salade.',
-    allergens: 'Gluten, poisson.'
-  },
-  {
-    id: 'sweet-family-pizza-jambon',
-    name: 'Mini Pizza Jambon-Fromage',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 1.50,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-pizza.jpg'),
-    description: 'Mini pizza fine croustillante, jambon, fromage fondant, sauce tomate.',
-    zone: 'Martinique',
-    available: true,
-    featured: false,
-    ingredients: 'Pâte à pizza fine, jambon, fromage, sauce tomate.',
-    allergens: 'Gluten, lait.'
-  },
-  {
-    id: 'sweet-family-pizza-crevette',
-    name: 'Mini Pizza Crevette',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 2.00,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-pizza.jpg'),
-    description: 'Mini pizza fine aux crevettes et fromage. Touche marine pour cocktails.',
-    zone: 'Martinique',
-    available: true,
-    featured: false,
-    ingredients: 'Pâte à pizza fine, crevettes, fromage, sauce tomate.',
-    allergens: 'Gluten, lait, crustacés.'
-  },
-  {
-    id: 'sweet-family-pizza-saumon',
-    name: 'Mini Pizza Saumon Fumé',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 2.00,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-pizza.jpg'),
-    description: 'Mini pizza fine au saumon fumé et fromage frais. Élégance en format cocktail.',
-    zone: 'Martinique',
-    available: true,
-    featured: false,
-    ingredients: 'Pâte à pizza fine, saumon fumé, fromage frais.',
-    allergens: 'Gluten, lait, poisson.'
-  },
-  {
-    id: 'sweet-family-hot-dog',
-    name: 'Mini Hot Dog Créole',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 2.50,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-hotdog.jpg'),
-    description: 'Mini hot dog brioché, saucisse grillée, sauce créole maison.',
-    zone: 'Martinique',
-    available: true,
-    featured: false,
-    ingredients: 'Pain brioché, saucisse, sauce créole maison, herbes.',
-    allergens: 'Gluten, lait.'
-  },
-  {
-    id: 'sweet-family-wrap-poulet',
-    name: 'Wrap Poulet Croquant',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 2.50,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-wrap.jpg'),
-    description: 'Wrap frais poulet, salade croquante, sauce maison. Option légère pour buffets.',
-    zone: 'Martinique',
-    available: true,
-    featured: false,
-    ingredients: 'Galette blé, poulet, salade, tomate, sauce maison.',
-    allergens: 'Gluten.'
-  },
-  {
-    id: 'sweet-family-verrine-feroce',
-    name: 'Verrine Féroce d\'Avocat',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 3.00,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-verrine.jpg'),
-    description: 'Verrine créole : avocat, morue, farine de manioc, épices antillaises. 🇲🇶',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Avocat, morue, farine de manioc, oignons, piment, épices.',
-    allergens: 'Poisson.'
-  },
-  {
-    id: 'sweet-family-verrine-ti-nain',
-    name: 'Verrine Ti Nain Morue',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 3.00,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-verrine.jpg'),
-    description: 'Banane verte et morue en verrine élégante. Entrée authentique des Antilles.',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Banane verte, morue, oignons, épices antillaises.',
-    allergens: 'Poisson.'
-  },
-  {
-    id: 'sweet-family-verrine-snickers',
-    name: 'Dessert Sweet Snickers',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 2.50,
-    category: 'Desserts',
-    image: vendorImage('vendors/sweet-family/sf-dessert.jpg'),
-    description: 'Caramel onctueux, chocolat noir, cacahuètes croquantes, crème légère.',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Chocolat noir, caramel au beurre salé, cacahuètes, crème montée.',
-    allergens: 'Lait, fruits à coque.'
-  },
-  {
-    id: 'sweet-family-verrine-exotique',
-    name: 'Dessert Sweet Exotique',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 2.50,
-    category: 'Desserts',
-    image: vendorImage('vendors/sweet-family/sf-dessert.jpg'),
-    description: 'Mangue juteuse, maracuja acidulé, noix de coco râpée, crème légère. 🥭',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Mangue, maracuja (fruit de la passion), noix de coco, crème légère.',
-    allergens: 'Lait.'
-  },
-  {
-    id: 'sweet-family-seafood-homard',
-    name: 'Seafood duo avec homard',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 114.90,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-seafood-duo.jpg'),
-    description: 'Seafood duo avec homard, langouste, crevettes, palourdes, maïs, pommes de terre, saucisses, œuf — un plat royal pour les grandes occasions ! 🦞',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Homard, langouste, crevettes, palourdes, maïs, pommes de terre, saucisses, œuf, épices.',
-    allergens: 'Crustacés, mollusques, œuf.'
-  },
-  {
-    id: 'sweet-family-seafood-langouste',
-    name: 'Seafood duo avec langouste',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 109.90,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-seafood-duo.jpg'),
-    description: 'Seafood duo à la langouste, moules, palourdes, crevettes, maïs, saucisses, œuf — un festin de la mer généreux et coloré ! 🦞',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Langouste, moules, palourdes, crevettes, maïs, saucisses, œuf, épices.',
-    allergens: 'Crustacés, mollusques, œuf.'
-  },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   {
     id: 'sweet-family-landfood-solo',
     name: 'Land food solo',
@@ -1727,20 +1402,7 @@ export const mockProducts: LocalProduct[] = [
     ingredients: 'Galette de riz, poulet haché, légumes, épices.',
     allergens: 'Gluten.'
   },
-  {
-    id: 'sweet-family-hot-dog-2',
-    name: 'Hot dog',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 1,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-hotdog.jpg'),
-    description: 'Hot dog généreux, saucisse grillée, moutarde, ketchup, oignons croustillants. Le snack qui plaît à tout le monde ! 🌭',
-    zone: 'Martinique',
-    available: true,
-    featured: false,
-    ingredients: 'Pain hot dog, saucisse, moutarde, ketchup, oignons frits.',
-    allergens: 'Gluten, moutarde.'
-  },
+
   {
     id: 'sweet-family-manchon-poulet',
     name: 'Manchon de poulet',
@@ -1769,20 +1431,7 @@ export const mockProducts: LocalProduct[] = [
     ingredients: 'Morue émiettée, poivrons rouges et jaunes, oignons, persil, salade verte.',
     allergens: 'Poisson.'
   },
-  {
-    id: 'sweet-family-seafood-familiale',
-    name: 'Seafood familiale',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 129.90,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-seafood-duo.jpg'),
-    description: 'Plateau de fruits de mer familial : homard, crabe, crevettes, accompagné de riz blanc et carottes râpées. Idéal pour les grandes tablées ! 🦞',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Homard, crabe, crevettes, riz blanc, carottes râpées, lime.',
-    allergens: 'Crustacés, mollusques.'
-  },
+
   {
     id: 'sweet-family-chicken-wrap',
     name: 'Chicken Wrap',
@@ -1797,20 +1446,7 @@ export const mockProducts: LocalProduct[] = [
     ingredients: 'Tortilla, poulet pané, laitue, fromage.',
     allergens: 'Gluten, lait.'
   },
-  {
-    id: 'sweet-family-mini-pizza',
-    name: 'Mini pizza',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 1.10,
-    category: 'Apéritifs',
-    image: vendorImage('vendors/sweet-family/sf-pizza.jpg'),
-    description: 'Mini pizza ronde, sauce tomate, fromage fondant, olives noires. Parfaite pour l\'apéritif ou le buffet, un classique qui plaît à tous ! 🍕',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Pâte à pizza, sauce tomate, fromage, olives noires.',
-    allergens: 'Gluten, lait.'
-  },
+
   {
     id: 'sweet-family-pizza-vege',
     name: 'Pizza végé',
