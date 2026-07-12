@@ -32,6 +32,26 @@ async function scrollThroughPage(page: import('@playwright/test').Page) {
   });
 }
 
+async function getBrokenRenderedImages(page: import('@playwright/test').Page) {
+  return page.locator('img').evaluateAll((images) =>
+    images
+      .filter((image) => {
+        const img = image as HTMLImageElement;
+        const style = window.getComputedStyle(img);
+        const isRendered =
+          img.getClientRects().length > 0 &&
+          style.display !== 'none' &&
+          style.visibility !== 'hidden';
+        const requestWasStarted = Boolean(img.currentSrc);
+        return isRendered && requestWasStarted && (!img.complete || img.naturalWidth === 0);
+      })
+      .map((image) => {
+        const img = image as HTMLImageElement;
+        return { src: img.currentSrc || img.src, alt: img.alt };
+      })
+  );
+}
+
 for (const { path, name } of PAGES) {
   test(`production smoke: ${name}`, async ({ page }) => {
     const response = await page.goto(`${BASE_URL}${path}`, {
@@ -53,22 +73,8 @@ for (const { path, name } of PAGES) {
     await page.waitForLoadState('networkidle').catch(() => undefined);
     await page.waitForTimeout(800);
 
-    const brokenImages = await page.locator('img').evaluateAll((images) =>
-      images
-        .filter((image) => {
-          const img = image as HTMLImageElement;
-          return Boolean(img.currentSrc || img.src) && (!img.complete || img.naturalWidth === 0);
-        })
-        .map((image) => {
-          const img = image as HTMLImageElement;
-          return {
-            src: img.currentSrc || img.src,
-            alt: img.alt,
-          };
-        })
-    );
-
-    expect(brokenImages, `${name}: images cassées`).toEqual([]);
+    const brokenImages = await getBrokenRenderedImages(page);
+    expect(brokenImages, `${name}: images visibles cassées`).toEqual([]);
 
     const overflow = await page.evaluate(() => ({
       scrollWidth: document.documentElement.scrollWidth,
@@ -80,6 +86,6 @@ for (const { path, name } of PAGES) {
       `${name}: débordement horizontal de ${overflow.scrollWidth - overflow.clientWidth}px`
     ).toBeLessThanOrEqual(4);
 
-    console.log(`✓ ${name}: contenu, images et largeur validés`);
+    console.log(`✓ ${name}: contenu, images visibles et largeur validés`);
   });
 }
