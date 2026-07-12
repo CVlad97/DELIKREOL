@@ -50,19 +50,19 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b border-primary/20 bg-white/95 shadow-[0_14px_40px_-34px_rgba(42,25,15,0.55)] backdrop-blur-2xl">
       <div className="madras-strip" />
 
-      <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-        <div className="flex h-[68px] items-center justify-between gap-2">
-          <Link to="/" className="flex items-center gap-2 group shrink-0" aria-label="DeliKreol accueil">
+      <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+        <div className="flex h-[68px] min-w-0 items-center justify-between gap-1.5 sm:gap-2">
+          <Link to="/" className="group flex min-w-0 shrink-0 items-center gap-2" aria-label="DeliKreol accueil">
             <img
               src={`${import.meta.env.BASE_URL || '/'}branding/logo-mark.svg`}
               alt="Logo DeliKreol"
-              className="brand-logo-frame h-10 w-10 rounded-2xl object-contain p-1.5 transition-transform group-hover:scale-105 sm:h-11 sm:w-11"
+              className="brand-logo-frame h-10 w-10 shrink-0 rounded-2xl object-contain p-1.5 transition-transform group-hover:scale-105 sm:h-11 sm:w-11"
             />
-            <div className="block leading-tight">
-              <span className="block text-base sm:text-xl font-black tracking-tight text-foreground">
+            <div className="hidden min-[430px]:block leading-tight">
+              <span className="block text-base font-black tracking-tight text-foreground sm:text-xl">
                 Deli<span className="text-primary">Kreol</span>
               </span>
-              <span className="hidden sm:block text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
+              <span className="hidden text-[10px] font-bold uppercase tracking-[0.18em] text-primary sm:block">
                 Martinique
               </span>
             </div>
@@ -85,23 +85,23 @@ export function Header() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-2">
             <LanguageSwitcher />
             <Link
               to={accountTarget}
-              className="flex items-center gap-1.5 rounded-xl bg-stone-950 px-2.5 py-2 text-xs font-black text-white shadow-sm transition-colors hover:bg-primary sm:px-3 sm:text-sm"
+              className="inline-flex h-10 min-w-10 items-center justify-center gap-1.5 rounded-xl bg-stone-950 px-2 text-xs font-black text-white shadow-sm transition-colors hover:bg-primary md:px-3 md:text-sm"
               aria-label={accountLabel}
               title={accountLabel}
             >
               {accountIcon}
-              <span>{accountLabel}</span>
+              <span className="hidden md:inline">{accountLabel}</span>
             </Link>
 
             <a
               href={WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-bold text-accent transition-colors hover:bg-accent/10 sm:flex"
+              className="hidden min-h-10 items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-bold text-accent transition-colors hover:bg-accent/10 sm:flex"
               title="Contactez-nous sur WhatsApp"
             >
               <MessageCircle className="w-4 h-4" />
@@ -110,12 +110,12 @@ export function Header() {
 
             <Link
               to="/panier"
-              className="relative flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-sm font-bold text-foreground/70 transition-colors hover:bg-primary/10 hover:text-foreground sm:px-3"
+              className="relative inline-flex h-10 min-w-10 items-center justify-center rounded-xl text-foreground/70 transition-colors hover:bg-primary/10 hover:text-foreground"
               aria-label={`Panier (${itemCount} articles)`}
             >
               <ShoppingCart className="w-5 h-5" />
               {itemCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-primary text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 animate-scale-in">
+                <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white animate-scale-in">
                   {itemCount}
                 </span>
               )}
@@ -136,11 +136,11 @@ export function Header() {
 
       {mobileMenuOpen && (
         <div className="animate-slide-up border-t border-border/40 bg-white/95 shadow-2xl backdrop-blur-xl lg:hidden">
-          <nav className="mx-auto max-w-7xl px-4 py-4 space-y-1">
+          <nav className="mx-auto max-w-7xl space-y-1 px-4 py-4">
             <Link
               to={accountTarget}
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-white bg-primary hover:bg-primary/90 transition-colors"
+              className="flex min-h-11 items-center gap-3 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-primary/90"
             >
               {accountIcon}
               {accountLabel}
@@ -151,7 +151,7 @@ export function Header() {
                 key={item.to}
                 to={item.to}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                className={`flex min-h-11 items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
                   isActive(item.to)
                     ? 'bg-primary/10 text-primary'
                     : 'text-foreground/70 hover:bg-muted'
@@ -167,7 +167,7 @@ export function Header() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-accent hover:bg-accent/10 transition-colors"
+              className="flex min-h-11 items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-accent transition-colors hover:bg-accent/10"
             >
               <MessageCircle className="w-4 h-4" />
               WhatsApp

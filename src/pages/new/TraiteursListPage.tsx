@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import { ChefHat, MapPin, Star, ArrowRight, AlertCircle, Locate, Euro } from 'lucide-react';
-import { traiteurSpaces, formatEuro } from '../../data/traiteurs';
+import { AlertCircle, ArrowRight, ChefHat, Euro, Locate, MapPin, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { formatEuro, traiteurSpaces } from '../../data/traiteurs';
 import { calculateDistanceKm } from '../../services/geolocation';
 import { resolveTraiteurCoords } from '../../services/partnerGeo';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
@@ -22,12 +22,10 @@ export function TraiteursListPage() {
   }, []);
 
   useEffect(() => {
-    const communeFilter = selectedCommune
-      ? ` à ${selectedCommune}`
-      : '';
+    const communeFilter = selectedCommune ? ` à ${selectedCommune}` : '';
     setPageMeta(
       `Nos traiteurs partenaires${communeFilter} — DeliKreol`,
-      `Les meilleurs traiteurs de Martinique par commune${communeFilter} — livraison repas, plats créoles et cuisine locale.`
+      `Les meilleurs traiteurs de Martinique par commune${communeFilter} — livraison repas, plats créoles et cuisine locale.`,
     );
   }, [selectedCommune]);
 
@@ -35,180 +33,166 @@ export function TraiteursListPage() {
     if (!navigator.geolocation) return;
     setRequested(true);
     navigator.geolocation.getCurrentPosition(
-      (pos) => setUserPosition({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+      (position) => {
+        setUserPosition({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+        setRequested(false);
+      },
       () => setRequested(false),
-      { enableHighAccuracy: false, timeout: 10000 }
+      { enableHighAccuracy: false, timeout: 10000 },
     );
   };
 
-  const distTo = (t: any) => {
+  const distTo = (traiteur: any) => {
     if (!userPosition) return null;
-    const lat = t.latitude ?? resolveTraiteurCoords(t.zone, t.commune)?.latitude;
-    const lng = t.longitude ?? resolveTraiteurCoords(t.zone, t.commune)?.longitude;
-    if (!lat || !lng) return null;
-    return calculateDistanceKm(userPosition, { latitude: lat, longitude: lng });
+    const latitude = traiteur.latitude ?? resolveTraiteurCoords(traiteur.zone, traiteur.commune)?.latitude;
+    const longitude = traiteur.longitude ?? resolveTraiteurCoords(traiteur.zone, traiteur.commune)?.longitude;
+    if (!latitude || !longitude) return null;
+    return calculateDistanceKm(userPosition, { latitude, longitude });
   };
 
   const getStartingPrice = (traiteur: any): string => {
-    // 1) Vérifier priceRange ou price_level (champ futur-compatible)
     if (traiteur.priceRange) return `À partir de ${traiteur.priceRange}`;
     if (traiteur.price_level) return `À partir de ${traiteur.price_level}`;
+    if (traiteur.startingAt && traiteur.startingAt > 0) return `À partir de ${formatEuro(traiteur.startingAt)}`;
 
-    // 2) Utiliser startingAt déjà calculé depuis les menuItems
-    if (traiteur.startingAt && traiteur.startingAt > 0) {
-      return `À partir de ${formatEuro(traiteur.startingAt)}`;
-    }
-
-    // 3) Fallback : chercher dans mockCatalog les produits de ce traiteur
     const traiteurName = (traiteur.name || '').toLowerCase().trim();
-    const products = mockProducts.filter(
-      (p) => p.vendor?.toLowerCase().trim() === traiteurName
-    );
-    if (products.length > 0) {
-      const minPrice = Math.min(...products.map((p) => p.price));
-      return `À partir de ${formatEuro(minPrice)}`;
-    }
-
-    // 4) Rien trouvé
+    const products = mockProducts.filter((product) => product.vendor?.toLowerCase().trim() === traiteurName);
+    if (products.length > 0) return `À partir de ${formatEuro(Math.min(...products.map((product) => product.price)))}`;
     return 'Prix à confirmer';
   };
 
   const filtered = traiteurSpaces
-    .filter(t => !selectedCommune || t.zone?.toLowerCase().includes(selectedCommune.toLowerCase()))
-    .sort((a, b) => {
-      if (userPosition) {
-        const dA = distTo(a) ?? 999;
-        const dB = distTo(b) ?? 999;
-        return dA - dB;
-      }
-      return 0;
+    .filter((traiteur) => !selectedCommune || traiteur.zone?.toLowerCase().includes(selectedCommune.toLowerCase()))
+    .sort((left, right) => {
+      if (!userPosition) return 0;
+      return (distTo(left) ?? 999) - (distTo(right) ?? 999);
     });
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <BackBar label='Accueil' backTo='/' />
-      <div className="text-center mb-10">
-        <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-3">
+    <main className="mx-auto max-w-6xl px-4 py-8">
+      <BackBar label="Accueil" backTo="/" />
+      <header className="mb-10 text-center">
+        <h1 className="mb-3 text-3xl font-display font-bold text-foreground md:text-4xl">
           Nos traiteurs partenaires
         </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-6">
+        <p className="mx-auto mb-6 max-w-2xl text-base text-muted-foreground sm:text-lg">
           Découvrez les traiteurs, snacks et restaurateurs locaux de Martinique référencés sur DeliKreol.
         </p>
 
-        {/* Commune filter + geoloc */}
-        <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
+        <div className="mb-6 flex flex-wrap items-center justify-center gap-3">
           <select
             value={selectedCommune}
-            onChange={e => setSelectedCommune(e.target.value)}
-            className="px-4 py-2 rounded-xl border border-orange-200 text-sm bg-white outline-none focus:border-orange-400"
+            onChange={(event) => setSelectedCommune(event.target.value)}
+            className="min-h-11 rounded-xl border border-input bg-white px-4 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            aria-label="Filtrer les traiteurs par commune"
           >
             <option value="">Toutes les communes</option>
-            {martiniqueCommunes.slice(0, 34).map(c => (
-              <option key={c.name} value={c.name}>{c.name}</option>
+            {martiniqueCommunes.slice(0, 34).map((commune) => (
+              <option key={commune.name} value={commune.name}>{commune.name}</option>
             ))}
           </select>
           {!userPosition && (
-            <button onClick={requestPosition} className="flex items-center gap-2 px-4 py-2 bg-orange-100 text-orange-700 rounded-xl text-sm font-bold hover:bg-orange-200">
-              <Locate className="w-4 h-4" /> Autour de moi
+            <button type="button" onClick={requestPosition} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary/10 px-4 py-2 text-sm font-bold text-primary hover:bg-primary/15">
+              <Locate className="h-4 w-4" /> Autour de moi
             </button>
           )}
           {userPosition && (
-            <span className="text-xs text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full font-semibold">
+            <span className="rounded-full bg-success/10 px-3 py-2 text-xs font-semibold text-success">
               📍 Tri par proximité actif
             </span>
           )}
           {requested && !userPosition && (
-            <span className="text-xs text-gray-400">Demande de position...</span>
+            <span className="text-xs text-muted-foreground">Demande de position…</span>
           )}
         </div>
-      </div>
+      </header>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filtered.map((traiteur) => {
           const isVerified = traiteur.status === 'public confirmé';
           const menuCount = traiteur.menuItems?.length || 0;
+          const distance = distTo(traiteur);
 
           return (
             <Link
               key={traiteur.slug}
               to={`/traiteur/${traiteur.slug}`}
-              className="card group block bg-card rounded-2xl overflow-hidden shadow-elegant hover:shadow-warm transition-all duration-300 hover:-translate-y-1 border border-border"
+              className="card group block overflow-hidden rounded-2xl border border-border bg-card shadow-elegant transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-warm"
             >
-              {/* Cover image */}
-              <div className="aspect-video bg-muted relative overflow-hidden">
+              <div className="relative aspect-video overflow-hidden bg-muted">
                 {traiteur.heroImage ? (
-                  <img loading="lazy" src={traiteur.heroImage} alt={`Logo de ${traiteur.name}`} className="w-full h-full object-contain bg-gradient-to-br from-amber-50 to-primary/50 p-4 group-hover:scale-105 transition-transform duration-500" />
+                  <img
+                    loading="lazy"
+                    src={traiteur.heroImage}
+                    alt={`Vitrine de ${traiteur.name}`}
+                    className="h-full w-full object-contain bg-gradient-to-br from-amber-50 to-primary/10 p-3 transition-transform duration-500 group-hover:scale-[1.03]"
+                  />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-primary/50">
-                    <ChefHat className="w-12 h-12 text-primary/30" />
+                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-50 to-primary/10">
+                    <ChefHat className="h-12 w-12 text-primary/30" />
                   </div>
                 )}
-                {/* Portrait overlay */}
+
                 {traiteur.portraitImage && (
                   <div className="absolute bottom-0 left-4 translate-y-1/3">
-                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
-                      <img loading="lazy" src={traiteur.portraitImage} alt={`Portrait de ${traiteur.name}`} className="w-full h-full object-cover object-center" />
+                    <div className="h-16 w-16 overflow-hidden rounded-full border-4 border-white bg-white shadow-lg md:h-20 md:w-20">
+                      <img loading="lazy" src={traiteur.portraitImage} alt={`Portrait du partenaire ${traiteur.name}`} className="h-full w-full object-cover object-center" />
                     </div>
                   </div>
                 )}
+
                 {!isVerified && (
-                  <div className="absolute top-3 right-3 bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    À vérifier
+                  <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-warning/15 px-2 py-1 text-xs font-bold text-amber-800">
+                    <AlertCircle className="h-3 w-3" /> À vérifier
                   </div>
                 )}
                 {isVerified && (
-                  <div className="absolute top-3 left-3 bg-emerald-100 text-emerald-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                    <Star className="w-3 h-3" />
-                    Partenaire
+                  <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-success/10 px-2 py-1 text-xs font-bold text-success">
+                    <Star className="h-3 w-3" /> Partenaire
                   </div>
                 )}
                 {traiteur.photoStatus && traiteur.photoStatus !== 'confirmée' && (
-                  <div className="absolute bottom-3 left-3 bg-orange-100 text-orange-600 text-xs px-2 py-1 rounded-full">
+                  <div className="absolute bottom-3 left-3 rounded-full bg-white/90 px-2 py-1 text-xs font-bold text-primary shadow-sm">
                     📸 {traiteur.photoStatus === 'externe à vérifier' ? 'Externe' : 'À confirmer'}
                   </div>
                 )}
-                {/* Prix indicatif */}
-                <div className="badge absolute bottom-3 right-3 bg-white/90 text-foreground text-[11px] px-2.5 py-1 rounded-full font-semibold shadow-sm flex items-center gap-1">
-                  <Euro className="w-3 h-3 text-orange-600" />
+                <div className="badge absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-foreground shadow-sm">
+                  <Euro className="h-3 w-3 text-primary" />
                   {getStartingPrice(traiteur)}
                 </div>
               </div>
 
-              {/* Content */}
               <div className="p-5 pt-8">
-                <h3 className="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">
-                                      {traiteur.name}
-                                    </h3>
-                                    <RatingBadge traiteurSlug={traiteur.slug} />
-                <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3">
+                <h2 className="font-bold text-foreground transition-colors group-hover:text-primary">{traiteur.name}</h2>
+                <RatingBadge traiteurSlug={traiteur.slug} />
+
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                   <span className="inline-flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5" />
+                    <MapPin className="h-3.5 w-3.5" />
                     {traiteur.commune || traiteur.zone || 'Martinique'}
                   </span>
-                  {(() => {
-                    const dist = distTo(traiteur);
-                    return dist !== null ? (
-                      <span className="text-[10px] px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full font-semibold">
-                        {dist.toFixed(1)} km
-                      </span>
-                    ) : null;
-                  })()}
-                  {traiteur.specialty && (
-                    <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full">
-                      {traiteur.specialty}
+                  {distance !== null && (
+                    <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent">
+                      {distance.toFixed(1)} km
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+
+                {traiteur.specialty && (
+                  <p className="mt-2 line-clamp-2 text-xs font-semibold leading-5 text-primary">
+                    {traiteur.specialty}
+                  </p>
+                )}
+
+                <p className="mb-4 mt-3 line-clamp-2 text-sm text-muted-foreground">
                   {traiteur.description || traiteur.offer || 'Découvrez les spécialités de ce prestataire.'}
                 </p>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-3">
                   <span className="text-sm text-muted-foreground">
                     {menuCount > 0 ? `${menuCount} plat${menuCount > 1 ? 's' : ''}` : 'Menu à confirmer'}
                   </span>
-                  <span className="text-primary font-semibold text-sm inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                    Voir la vitrine <ArrowRight className="w-4 h-4" />
+                  <span className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-primary transition-all group-hover:gap-2">
+                    Voir la vitrine <ArrowRight className="h-4 w-4" />
                   </span>
                 </div>
               </div>
@@ -217,21 +201,14 @@ export function TraiteursListPage() {
         })}
       </div>
 
-      {/* CTA */}
-      <div className="mt-12 text-center bg-gradient-to-r from-primary/5 to-secondary/5 rounded-2xl p-8">
-        <h2 className="text-xl font-bold mb-2">Vous êtes traiteur en Martinique ?</h2>
-        <p className="text-muted-foreground mb-4">
-          Rejoignez DeliKreol et touchez de nouveaux clients locaux.
-        </p>
-        <Link
-          to="/devenir-partenaire"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/90 transition-colors"
-        >
-          <Star className="w-4 h-4" />
-          Devenir partenaire
+      <section className="mt-12 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/5 p-8 text-center">
+        <h2 className="mb-2 text-xl font-bold text-foreground">Vous êtes traiteur en Martinique ?</h2>
+        <p className="mb-4 text-muted-foreground">Rejoignez DeliKreol et touchez de nouveaux clients locaux.</p>
+        <Link to="/devenir-partenaire" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90">
+          <Star className="h-4 w-4" /> Devenir partenaire
         </Link>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
 

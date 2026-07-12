@@ -2,7 +2,7 @@ import { Plus, Sparkles, ZoomIn } from 'lucide-react';
 import { useState } from 'react';
 import { ImageLightbox } from './ImageLightbox';
 import { ProductThumbnail } from './ProductThumbnail';
-import { traiteurSpaces } from '../data/traiteurs';
+import { formatEuro, traiteurSpaces } from '../data/traiteurs';
 import { isUsableThumbnail } from '../services/catalogImageResolver';
 
 interface LocalProduct {
@@ -65,7 +65,7 @@ export function LocalProductCard({ product, onAddToRequest }: LocalProductCardPr
             productName={product.name}
             vendorName={product.vendor}
             category={product.category}
-            aspectRatio="3 / 2"
+            aspectRatio="4 / 3"
             containerClassName="w-full"
             imgClassName="transition-transform duration-500 group-hover:scale-[1.03]"
             showBadge
@@ -97,7 +97,7 @@ export function LocalProductCard({ product, onAddToRequest }: LocalProductCardPr
 
           <div className="flex items-center justify-between gap-3">
             <div className="text-xl font-black text-foreground">
-              {product.price.toFixed(2)} €
+              {formatEuro(product.price)}
             </div>
             <span className={`text-xs font-semibold ${product.available === false ? 'text-amber-700' : 'text-success'}`}>
               {availabilityLabel}
@@ -107,7 +107,7 @@ export function LocalProductCard({ product, onAddToRequest }: LocalProductCardPr
           <button
             type="button"
             onClick={() => onAddToRequest(product)}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-warm"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-warm"
           >
             <Plus className="h-4 w-4" />
             Ajouter au panier
@@ -116,7 +116,7 @@ export function LocalProductCard({ product, onAddToRequest }: LocalProductCardPr
           <button
             type="button"
             onClick={() => setShowSim(!showSim)}
-            className="inline-flex items-center gap-2 text-xs font-semibold text-primary hover:underline"
+            className="inline-flex min-h-8 items-center gap-2 text-xs font-semibold text-primary hover:underline"
             aria-expanded={showSim}
           >
             <Sparkles className="h-3.5 w-3.5" />
