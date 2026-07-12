@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { SmartImage } from './SmartImage';
 
 interface CarouselItem {
   image?: string;
@@ -21,15 +22,13 @@ export function AutoCarousel({ items }: { items: CarouselItem[] }) {
     setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
   }, [items.length]);
 
-  // Auto-rotation every 5s
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || items.length <= 1) return;
     const timer = setInterval(goNext, 5000);
     return () => clearInterval(timer);
-  }, [goNext, isPaused]);
+  }, [goNext, isPaused, items.length]);
 
   if (items.length === 0) return null;
-  const current = items[currentIndex];
 
   const getCategoryLabel = (product: CarouselItem) => {
     if (product.category === 'Desserts') return '🍨 Dessert';
@@ -39,9 +38,8 @@ export function AutoCarousel({ items }: { items: CarouselItem[] }) {
     return '🍛 Plat';
   };
 
-  // Items visibles (current + 2 suivants)
   const visible = [
-    items[(currentIndex) % items.length],
+    items[currentIndex % items.length],
     items[(currentIndex + 1) % items.length],
     items[(currentIndex + 2) % items.length],
   ];
@@ -51,53 +49,62 @@ export function AutoCarousel({ items }: { items: CarouselItem[] }) {
       className="relative max-w-4xl mx-auto"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      aria-label="Produits mis en avant"
     >
-      {/* Indicateur de progression */}
       <div className="flex justify-center gap-1.5 mb-6">
         {items.slice(0, 8).map((_, i) => (
           <button
             key={i}
+            type="button"
             onClick={() => setCurrentIndex(i)}
+            aria-label={`Afficher le produit ${i + 1}`}
+            aria-current={i === currentIndex ? 'true' : undefined}
             className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === currentIndex ? 'w-8 bg-primary' : 'w-1.5 bg-gray-200 hover:bg-gray-300'
+              i === currentIndex ? 'w-8 bg-primary' : 'w-1.5 bg-border hover:bg-muted-foreground/40'
             }`}
           />
         ))}
       </div>
 
-      {/* Cartes visibles */}
       <div className="flex justify-center gap-4 md:gap-6">
         {visible.map((product, i) => (
           <Link
             key={`${product.name}-${i}`}
             to="/catalogue"
-            className={`bg-white rounded-2xl border transition-all duration-500 group ${
+            className={`overflow-hidden rounded-2xl border bg-card transition-all duration-500 group ${
               i === 0
-                ? 'w-56 md:w-64 scale-100 border-primary/200 shadow-xl z-10'
-                : 'w-40 md:w-48 scale-90 border-gray-100 shadow-md opacity-70 hidden md:block'
-            } hover:border-primary/300`}
+                ? 'w-56 md:w-64 scale-100 border-primary/30 shadow-xl z-10'
+                : 'w-40 md:w-48 scale-90 border-border shadow-md opacity-75 hidden md:block'
+            } hover:border-primary/50 hover:-translate-y-1`}
           >
-            <div className={`${i === 0 ? 'aspect-[4/3]' : 'aspect-square'} rounded-t-2xl overflow-hidden bg-primary/8`}>
+            <div className={`${i === 0 ? 'aspect-[4/3]' : 'aspect-square'} overflow-hidden bg-primary/[0.06]`}>
               {product.image ? (
-                <img loading="lazy" src={product.image} alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <SmartImage
+                  src={product.image}
+                  alt={`${product.name} par ${product.vendor}`}
+                  kind="food"
+                  loading="lazy"
+                  containerClassName="w-full h-full"
+                  imgClassName="group-hover:scale-105"
+                  sizes={i === 0 ? '(max-width: 768px) 224px, 256px' : '192px'}
+                />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-primary/200 text-3xl">🍽️</div>
+                <div className="w-full h-full flex items-center justify-center text-primary/30 text-3xl" aria-hidden="true">🍽️</div>
               )}
             </div>
             <div className={`p-3 ${i === 0 ? 'p-4' : ''}`}>
-              <p className="text-[10px] text-gray-400 uppercase tracking-wider">{getCategoryLabel(product)}</p>
-              <p className={`font-bold text-gray-900 truncate mt-0.5 ${i === 0 ? 'text-base' : 'text-sm'}`}>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{getCategoryLabel(product)}</p>
+              <p className={`font-bold text-foreground truncate mt-0.5 ${i === 0 ? 'text-base' : 'text-sm'}`}>
                 {product.name.split('—').pop() || product.name}
               </p>
-              {i === 0 && <p className="text-xs text-gray-400 truncate mt-0.5">{product.vendor}</p>}
+              {i === 0 && <p className="text-xs text-muted-foreground truncate mt-0.5">{product.vendor}</p>}
               <div className="flex items-center justify-between mt-2">
                 <span className={`font-bold text-primary ${i === 0 ? 'text-base' : 'text-sm'}`}>
                   {product.price.toFixed(2)} €
                 </span>
                 {i === 0 && (
-                  <span className="text-[10px] px-2 py-0.5 bg-primary/8 text-primary rounded-full font-semibold">
-                    Ajouter
+                  <span className="text-[10px] px-2 py-0.5 bg-primary/10 text-primary rounded-full font-semibold">
+                    Voir
                   </span>
                 )}
               </div>
@@ -106,24 +113,30 @@ export function AutoCarousel({ items }: { items: CarouselItem[] }) {
         ))}
       </div>
 
-      {/* Flèches navigation */}
-      <button
-        onClick={goPrev}
-        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center text-gray-600 hover:text-primary hover:border-primary/200 transition-all"
-      >
-        ◀
-      </button>
-      <button
-        onClick={goNext}
-        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center text-gray-600 hover:text-primary hover:border-primary/200 transition-all"
-      >
-        ▶
-      </button>
+      {items.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={goPrev}
+            aria-label="Produit précédent"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 md:-translate-x-4 w-10 h-10 rounded-full bg-white shadow-lg border border-border flex items-center justify-center text-foreground/70 hover:text-primary hover:border-primary/40 transition-all"
+          >
+            ◀
+          </button>
+          <button
+            type="button"
+            onClick={goNext}
+            aria-label="Produit suivant"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 md:translate-x-4 w-10 h-10 rounded-full bg-white shadow-lg border border-border flex items-center justify-center text-foreground/70 hover:text-primary hover:border-primary/40 transition-all"
+          >
+            ▶
+          </button>
+        </>
+      )}
 
-      {/* Pause indicator */}
       {isPaused && (
         <div className="text-center mt-4">
-          <span className="text-[10px] text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">⏸ En pause</span>
+          <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">⏸ En pause</span>
         </div>
       )}
     </div>
