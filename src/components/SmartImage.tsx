@@ -106,12 +106,10 @@ export function SmartImage({
       }}
     >
       {!loaded && (
-        <div
-          className="absolute inset-0 animate-pulse bg-muted"
-          aria-hidden="true"
-        />
+        <div className="absolute inset-0 animate-pulse bg-muted" aria-hidden="true" />
       )}
       <img
+        data-smart-image="true"
         src={activeSrc}
         alt={effectiveAlt}
         aria-hidden={decorative || undefined}
