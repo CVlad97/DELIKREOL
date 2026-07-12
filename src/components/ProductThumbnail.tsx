@@ -1,5 +1,9 @@
+import { useCallback, useEffect, useState } from 'react';
 import { SmartImage } from './SmartImage';
-import { resolveProductThumbnail } from '../services/catalogImageResolver';
+import {
+  resolveProductThumbnail,
+  type ThumbnailSource,
+} from '../services/catalogImageResolver';
 
 interface ProductThumbnailProps {
   src?: string | null;
@@ -37,17 +41,57 @@ export function ProductThumbnail({
     vendor: vendorName,
     category,
   });
+  const [runtimeSource, setRuntimeSource] = useState<ThumbnailSource>(resolved.source);
 
-  const alt = resolved.source === 'product'
+  useEffect(() => {
+    setRuntimeSource(resolved.source);
+  }, [resolved.source, resolved.src]);
+
+  const handleFallbackLevel = useCallback((level: number) => {
+    if (level === 0) {
+      setRuntimeSource(resolved.source);
+      return;
+    }
+
+    if (
+      level === 1 &&
+      resolved.source === 'product' &&
+      resolved.fallbackSrc !== resolved.finalFallbackSrc
+    ) {
+      setRuntimeSource('partner');
+      return;
+    }
+
+    setRuntimeSource('placeholder');
+  }, [resolved.fallbackSrc, resolved.finalFallbackSrc, resolved.source]);
+
+  const label = runtimeSource === 'partner'
+    ? 'Visuel du partenaire'
+    : runtimeSource === 'placeholder'
+      ? 'Photo à venir'
+      : null;
+
+  const alt = runtimeSource === 'product'
     ? `${productName}${vendorName ? ` proposé par ${vendorName}` : ''}`
-    : resolved.source === 'partner'
+    : runtimeSource === 'partner'
       ? `Visuel de ${vendorName || 'ce partenaire'} utilisé en attendant la photo de ${productName}`
       : `Photo de ${productName} prochainement disponible`;
+
+  const runtimeKind = runtimeSource === 'partner'
+    ? 'ambient'
+    : runtimeSource === 'placeholder'
+      ? 'flyer'
+      : resolved.kind;
+  const runtimeFit = runtimeSource === 'partner'
+    ? 'cover'
+    : runtimeSource === 'placeholder'
+      ? 'contain'
+      : resolved.fit;
 
   return (
     <div
       className={`relative overflow-hidden ${containerClassName}`}
-      data-thumbnail-source={resolved.source}
+      data-thumbnail-source={runtimeSource}
       data-thumbnail-product={productName}
     >
       <SmartImage
@@ -55,19 +99,20 @@ export function ProductThumbnail({
         fallbackSrc={resolved.fallbackSrc}
         finalFallbackSrc={resolved.finalFallbackSrc}
         alt={alt}
-        kind={resolved.kind}
-        fit={resolved.fit}
+        kind={runtimeKind}
+        fit={runtimeFit}
         aspectRatio={aspectRatio}
         priority={priority}
         sizes={sizes}
         containerClassName="h-full w-full"
         imgClassName={imgClassName}
+        onFallbackLevelChange={handleFallbackLevel}
         onClick={onClick}
       />
 
-      {showBadge && resolved.label && (
+      {showBadge && label && (
         <span className="pointer-events-none absolute bottom-2 left-2 max-w-[calc(100%-1rem)] rounded-full bg-black/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm backdrop-blur-sm">
-          {resolved.label}
+          {label}
         </span>
       )}
     </div>
