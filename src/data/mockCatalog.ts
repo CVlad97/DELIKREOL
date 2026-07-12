@@ -158,104 +158,13 @@ export const mockProducts: LocalProduct[] = [
     ingredients: 'Cabri grillé. Accompagnements : frites, gratin, légumes pays, riz, lentilles, bananes frites, crudités.',
     allergens: 'À confirmer avec le prestataire.'
   },
-  {
-    id: 'save-peyia-saumon',
-    name: 'Saumon sauce blanche',
-    vendor: 'Snack Save Peyia',
-    price: 17,
-    category: 'Plats',
-    image: vendorImage('vendors/save-peyia/mer.jpg'),
-    description: 'Pavé de saumon tendre nappé d\'une sauce blanche onctueuse, servi avec frites, gratin, légumes ou riz au choix. 🐟',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Pavé de saumon, sauce blanche. Accompagnements : frites, gratin, légumes pays, riz, lentilles, bananes frites, crudités.',
-    allergens: 'Poisson. À confirmer avec le prestataire.'
-  },
-  {
-    id: 'save-peyia-dorade',
-    name: 'Dorade grillée',
-    vendor: 'Snack Save Peyia',
-    price: 15,
-    category: 'Plats',
-    image: vendorImage('vendors/save-peyia/mer.jpg'),
-    description: 'Dorade grillée entière, marinée aux herbes et épices locales, servie avec frites, gratin, légumes pays ou riz au choix. 🐠',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Dorade grillée entière. Accompagnements : frites, gratin, légumes pays, riz, lentilles, bananes frites, crudités.',
-    allergens: 'Poisson. À confirmer avec le prestataire.'
-  },
-  {
-    id: 'save-peyia-salade-fruits',
-    name: 'Salade de fruits frais',
-    vendor: 'Snack Save Peyia',
-    price: 6,
-    category: 'Snacking',
-    image: vendorImage('vendors/save-peyia/salade-fruits-1.jpg'),
-    description: 'Salade de fruits frais de saison, découpés minute. Vitamines et fraîcheur garanties ! 🍍🥭',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Fruits frais de saison découpés.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-smoothie',
-    name: 'Smoothie fruits',
-    vendor: 'Snack Save Peyia',
-    price: 5,
-    category: 'Boissons',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Smoothie onctueux aux fruits frais, sans sucre ajouté. Rafraîchissant et naturel ! 🥤',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Fruits frais mixés.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-granita',
-    name: 'Granita',
-    vendor: 'Snack Save Peyia',
-    price: 4,
-    category: 'Snacking',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Granita artisanale aux fruits locaux. Glacée, rafraîchissante, la boisson antillaise par excellence ! 🧊',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Fruits frais pressés.',
-    allergens: 'À confirmer avec le prestataire.'
-  },
-  {
-    id: 'save-peyia-panini',
-    name: 'Panini',
-    vendor: 'Snack Save Peyia',
-    price: 7,
-    category: 'Snacking',
-    image: vendorImage('vendors/save-peyia/panini-saumon.jpg'),
-    description: 'Panini chaud garni, grillé sur place. Idéal pour un déjeuner rapide et gourmand ! 🥪',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Pain panini, garniture au choix. À confirmer avec le prestataire.',
-    allergens: 'Gluten, produits laitiers.'
-  },
-  {
-    id: 'save-peyia-crepe',
-    name: 'Crêpe',
-    vendor: 'Snack Save Peyia',
-    price: 5,
-    category: 'Snacking',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Crêpe maison, sucrée ou salée, préparée minute. Une touche de douceur à tout moment ! 🥞',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Farine, œufs, lait. Garniture au choix.',
-    allergens: 'Gluten, œufs, produits laitiers.'
-  },
+
+
+
+
+
+
+
   {
     id: 'save-peyia-panini-saumon',
     name: 'Panini saumon',
@@ -328,230 +237,22 @@ export const mockProducts: LocalProduct[] = [
   },
 
   // ═══════════════════ MENU SAVE PEYI'A — CARTE ═══════════════
-  {
-    id: 'save-peyia-coca',
-    name: 'Coca 33cl',
-    vendor: 'Snack Save Peyia',
-    price: 2.50,
-    category: 'Boissons',
-    image: vendorImage('vendors/save-peyia/boisson.jpg'),
-    description: 'Coca-Cola 33cl bien frais. Le classique qui désaltère ! 🥤',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Coca-Cola.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-orangina',
-    name: 'Orangina / Royal Soda / Amigo 33cl',
-    vendor: 'Snack Save Peyia',
-    price: 2.50,
-    category: 'Boissons',
-    image: vendorImage('vendors/save-peyia/boisson.jpg'),
-    description: 'Orangeade ou soda local 33cl. Rafraîchissant et fruité ! 🍊',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Orangina ou soda local.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-heineken',
-    name: 'Heineken 25cl',
-    vendor: 'Snack Save Peyia',
-    price: 2.50,
-    category: 'Boissons',
-    image: vendorImage('vendors/save-peyia/boisson.jpg'),
-    description: 'Bière Heineken pression ou bouteille. 25cl à 2,50€ / 50cl à 3,50€. Bien fraîche ! 🍺',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Bière Heineken.',
-    allergens: 'Gluten, orge.'
-  },
-  {
-    id: 'save-peyia-jus-local-bt',
-    name: 'Jus local 25cl',
-    vendor: 'Snack Save Peyia',
-    price: 2.50,
-    category: 'Boissons',
-    image: vendorImage('vendors/save-peyia/boisson.jpg'),
-    description: 'Jus local artisanal — orange, ananas ou goyave. Pur fruit, fait maison ! 🥤',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Jus de fruits frais pressés.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-smoothie-fruits',
-    name: 'Smoothie aux fruits',
-    vendor: 'Snack Save Peyia',
-    price: 4,
-    category: 'Boissons',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Smoothie aux fruits frais de saison, onctueux et naturel. Pur fruit, sans additif ! 🥭🍍',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: true,
-    ingredients: 'Fruits frais de saison mixés.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-milkshake',
-    name: 'Milkshake aux fruits',
-    vendor: 'Snack Save Peyia',
-    price: 4.50,
-    category: 'Boissons',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Milkshake onctueux aux fruits frais. Supplément chantilly +1,50€ ! 🥤',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Fruits frais, lait, glace.',
-    allergens: 'Lait.'
-  },
-  {
-    id: 'save-peyia-granita-sirop',
-    name: 'Granita sirop local',
-    vendor: 'Snack Save Peyia',
-    price: 2,
-    category: 'Snacking',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Granita rafraîchissante au sirop local. Glacée et fruitée ! 🧊',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Sirop local, glace pilée.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-nectar-ss',
-    name: 'Nectar de jus sans sucre',
-    vendor: 'Snack Save Peyia',
-    price: 2.50,
-    category: 'Boissons',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Nectar de jus sans sucre ajouté. Pur fruit, naturellement sucré ! 🥤',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Fruits selon saison, sans sucre ajouté.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-glace-1b',
-    name: 'Glace locale 1 boule',
-    vendor: 'Snack Save Peyia',
-    price: 3,
-    category: 'Desserts',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Sorbet ou glace artisanale locale. Fruits selon saison. En cornet, timbale ou bol ! 🍦',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Glace artisanale locale, fruits de saison.',
-    allergens: 'Lait.'
-  },
-  {
-    id: 'save-peyia-fruits-seches',
-    name: 'Fruits séchés 100g',
-    vendor: 'Snack Save Peyia',
-    price: 2.50,
-    category: 'Snacking',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Fruits séchés 100% naturels, selon saison. Sain et gourmand ! 🥭',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Fruits de saison séchés.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-epices',
-    name: 'Épices en poudre 30g',
-    vendor: 'Snack Save Peyia',
-    price: 2,
-    category: 'Épicerie',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Épices en poudre — gingembre, bois d\'inde, curcuma. 100% naturel ! 🌿',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Gingembre, bois d\'inde, curcuma.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-formule-duo',
-    name: 'Formule duo Panini + Boisson',
-    vendor: 'Snack Save Peyia',
-    price: 9.50,
-    category: 'Plats',
-    image: vendorImage('vendors/save-peyia/duo.jpg'),
-    description: 'Formule duo : panini au choix + boisson. Le repas complet au meilleur prix ! 🥪🥤',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: true,
-    ingredients: 'Panini garni au choix + boisson.',
-    allergens: 'Gluten, selon garniture.'
-  },
-  {
-    id: 'save-peyia-crepe-salee',
-    name: 'Crêpe salée',
-    vendor: 'Snack Save Peyia',
-    price: 6.50,
-    category: 'Plats',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Crêpe salée garnie : jambon, saucisse, steak, poulet, crevette ou saumon. Supplément fromage +1,50€ ! 🥞',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Crêpe (farine, œufs, lait). Garniture salée au choix.',
-    allergens: 'Gluten, œufs, lait.'
-  },
-  {
-    id: 'save-peyia-crepe-sucree',
-    name: 'Crêpe sucrée',
-    vendor: 'Snack Save Peyia',
-    price: 4,
-    category: 'Desserts',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Crêpe sucrée — Nutella, ananas, banane, coco, beurre de cacahuète. Supplément chantilly +1,50€ ! 🥞🍫',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Crêpe (farine, œufs, lait). Garniture sucrée au choix.',
-    allergens: 'Gluten, œufs, lait.'
-  },
-  {
-    id: 'save-peyia-spec-salee',
-    name: 'Spécialité salée',
-    vendor: 'Snack Save Peyia',
-    price: 11,
-    category: 'Plats',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Spécialité salée : jambon-œuf-champignon-fromage (11€), steak-œuf-champignon (12€), jambon-saumon-œuf (12,50€). Généreuse ! 🥞',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Crêpe garnie : jambon, œuf, champignon, fromage, steak ou saumon.',
-    allergens: 'Gluten, œufs, lait.'
-  },
-  {
-    id: 'save-peyia-spec-sucree',
-    name: 'Spécialité sucrée',
-    vendor: 'Snack Save Peyia',
-    price: 7,
-    category: 'Desserts',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Spécialité sucrée : Nutella-cacahuète-chantilly-caramel (7€), coco-ananas-chantilly-chocolat (8€). Un régal ! 🥞🍫',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Crêpe, Nutella, cacahuète, chantilly, caramel, coco, ananas, chocolat.',
-    allergens: 'Gluten, œufs, lait, cacahuète.'
-  },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   //   // ═══════════════════════════════════════════════════════
   // AN TJÈ COCO — Fort-de-France
   // Pépites artisanales sucrées et salées — sur précommande
@@ -1293,104 +994,13 @@ export const mockProducts: LocalProduct[] = [
   // Seafood Boils · Bao Buns · Cocktails & Mignardises
   // Menu réécrit pro — Contact : 0696 88 75 28 | 48h min
   // ═══════════════════════════════════════════════════════
-  {
-    id: 'sweet-family-boil-homard',
-    name: 'Seafood Boil Homard',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 35,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-seafood.jpg'),
-    description: 'Notre signature : homard entier cuit dans un bouillon épicé aux herbes antillaises, servi avec épis de maïs, pommes de terre grenailles et saucisses fumées. 🦞',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Homard, épis de maïs, pommes de terre, saucisses fumées, bouillon épicé, beurre à l\'ail.',
-    allergens: 'Crustacés, lait.'
-  },
-  {
-    id: 'sweet-family-boil-langouste',
-    name: 'Seafood Boil Langouste',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 45,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-seafood.jpg'),
-    description: 'Langouste royale — notre bouillon signature, maïs grillé, pommes de terre et saucisses. Prestation haut de gamme. 🦞',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Langouste, épis de maïs, pommes de terre, saucisses fumées, bouillon épicé.',
-    allergens: 'Crustacés, lait.'
-  },
-  {
-    id: 'sweet-family-boil-crabe',
-    name: 'Seafood Boil Crabe',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 28,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-seafood.jpg'),
-    description: 'Demi-crabe farci cuit au bouillon épicé. Idéal pour un plat généreux et convivial. 🦀',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Demi-crabe, épis de maïs, pommes de terre, saucisses, bouillon épicé.',
-    allergens: 'Crustacés.'
-  },
-  {
-    id: 'sweet-family-boil-crevette',
-    name: 'Seafood Boil Crevettes',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 22,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-seafood.jpg'),
-    description: 'Crevettes sauvages au bouillon épicé antillais. Le boil familial par excellence ! 🦐',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Crevettes, épis de maïs, pommes de terre, saucisses, bouillon épicé.',
-    allergens: 'Crustacés.'
-  },
-  {
-    id: 'sweet-family-boil-mix',
-    name: 'Seafood Boil Mix',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 32,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-seafood.jpg'),
-    description: 'Assortiment boil : crevettes, crabe, saucisses et accompagnements. 🎉',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Crevettes, crabe, saucisses, maïs, pommes de terre, bouillon épicé.',
-    allergens: 'Crustacés.'
-  },
-  {
-    id: 'sweet-family-boil-vegan',
-    name: 'Seafood Boil Végétarien',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 16,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-seafood.jpg'),
-    description: 'Notre bouillon signature version végétale : maïs, pommes de terre, saucisses végétales, légumes croquants. 🌽',
-    zone: 'Martinique',
-    available: true,
-    featured: false,
-    ingredients: 'Épis de maïs, pommes de terre, saucisses végétales, légumes, bouillon épicé.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'sweet-family-porc-grill',
-    name: 'Côtes de Porc Grillé',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 18,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-burger.jpg'),
-    description: 'Côtes de porc marinées aux épices antillaises, grillées à la perfection. 🥩',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Côtes de porc, marinade antillaise, épices.',
-    allergens: 'Aucun.'
-  },
+
+
+
+
+
+
+
   {
     id: 'sweet-family-bao-poulet',
     name: 'Bao Bun Poulet',
@@ -1419,34 +1029,8 @@ export const mockProducts: LocalProduct[] = [
     ingredients: 'Pain bao vapeur, bœuf mariné, poivrons caramélisés, herbes fraîches.',
     allergens: 'Gluten.'
   },
-  {
-    id: 'sweet-family-bao-crevette',
-    name: 'Bao Bun Crevette Tempura',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 2.20,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-bao.jpg'),
-    description: 'Bao bun crevette tempura croustillante, sauce épicée. Best-seller cocktail ! Min. 10 pièces.',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Pain bao vapeur, crevette tempura, sauce épicée, herbes fraîches.',
-    allergens: 'Gluten, crustacés.'
-  },
-  {
-    id: 'sweet-family-bao-poisson',
-    name: 'Bao Bun Poisson',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 2.00,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-bao.jpg'),
-    description: 'Bao bun filet de poisson pané, sauce tartare maison. Min. 10 pièces.',
-    zone: 'Martinique',
-    available: true,
-    featured: false,
-    ingredients: 'Pain bao vapeur, filet poisson pané, sauce tartare, herbes fraîches.',
-    allergens: 'Gluten, poisson.'
-  },
+
+
   {
     id: 'sweet-family-bao-boeuf-premium',
     name: 'Bao Bun Bœuf Premium',
@@ -1461,230 +1045,22 @@ export const mockProducts: LocalProduct[] = [
     ingredients: 'Pain bao vapeur, bœuf haché premium, garniture raffinée, sauce secrète.',
     allergens: 'Gluten.'
   },
-  {
-    id: 'sweet-family-nems-crevette',
-    name: 'Nems Impériaux Crevette',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 1.50,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-nems.jpg'),
-    description: 'Nems croustillants crevettes et légumes, sauce dipping. Indispensable cocktail ! Min. 10 pièces.',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Pâte à nem, crevettes, légumes croquants, herbes.',
-    allergens: 'Gluten, crustacés.'
-  },
-  {
-    id: 'sweet-family-nems-lambi',
-    name: 'Nems Lambi des Antilles',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 2.00,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-nems.jpg'),
-    description: 'Nems croustillants au lambi (conch). Notre spécialité antillaise ! Min. 10 pièces.',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Pâte à nem, lambi, épices antillaises, légumes.',
-    allergens: 'Gluten, mollusques.'
-  },
-  {
-    id: 'sweet-family-burger-boeuf',
-    name: 'Mini Burger Bœuf',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 3.00,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-burger.jpg'),
-    description: 'Mini burger brioché, steak bœuf, cheddar fondant, salade, tomate.',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Pain brioché, steak bœuf, cheddar, salade, tomate.',
-    allergens: 'Gluten, lait.'
-  },
-  {
-    id: 'sweet-family-burger-poulet',
-    name: 'Mini Burger Poulet',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 3.20,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-burger.jpg'),
-    description: 'Mini burger brioché, filet de poulet tendre, cheddar, condiments maison.',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Pain brioché, filet poulet, cheddar, salade, tomate.',
-    allergens: 'Gluten, lait.'
-  },
-  {
-    id: 'sweet-family-burger-poisson',
-    name: 'Mini Burger Poisson',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 3.50,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-burger.jpg'),
-    description: 'Mini burger brioché, filet poisson pané, sauce tartare maison.',
-    zone: 'Martinique',
-    available: true,
-    featured: false,
-    ingredients: 'Pain brioché, filet poisson, sauce tartare, salade.',
-    allergens: 'Gluten, poisson.'
-  },
-  {
-    id: 'sweet-family-pizza-jambon',
-    name: 'Mini Pizza Jambon-Fromage',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 1.50,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-pizza.jpg'),
-    description: 'Mini pizza fine croustillante, jambon, fromage fondant, sauce tomate.',
-    zone: 'Martinique',
-    available: true,
-    featured: false,
-    ingredients: 'Pâte à pizza fine, jambon, fromage, sauce tomate.',
-    allergens: 'Gluten, lait.'
-  },
-  {
-    id: 'sweet-family-pizza-crevette',
-    name: 'Mini Pizza Crevette',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 2.00,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-pizza.jpg'),
-    description: 'Mini pizza fine aux crevettes et fromage. Touche marine pour cocktails.',
-    zone: 'Martinique',
-    available: true,
-    featured: false,
-    ingredients: 'Pâte à pizza fine, crevettes, fromage, sauce tomate.',
-    allergens: 'Gluten, lait, crustacés.'
-  },
-  {
-    id: 'sweet-family-pizza-saumon',
-    name: 'Mini Pizza Saumon Fumé',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 2.00,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-pizza.jpg'),
-    description: 'Mini pizza fine au saumon fumé et fromage frais. Élégance en format cocktail.',
-    zone: 'Martinique',
-    available: true,
-    featured: false,
-    ingredients: 'Pâte à pizza fine, saumon fumé, fromage frais.',
-    allergens: 'Gluten, lait, poisson.'
-  },
-  {
-    id: 'sweet-family-hot-dog',
-    name: 'Mini Hot Dog Créole',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 2.50,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-hotdog.jpg'),
-    description: 'Mini hot dog brioché, saucisse grillée, sauce créole maison.',
-    zone: 'Martinique',
-    available: true,
-    featured: false,
-    ingredients: 'Pain brioché, saucisse, sauce créole maison, herbes.',
-    allergens: 'Gluten, lait.'
-  },
-  {
-    id: 'sweet-family-wrap-poulet',
-    name: 'Wrap Poulet Croquant',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 2.50,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-wrap.jpg'),
-    description: 'Wrap frais poulet, salade croquante, sauce maison. Option légère pour buffets.',
-    zone: 'Martinique',
-    available: true,
-    featured: false,
-    ingredients: 'Galette blé, poulet, salade, tomate, sauce maison.',
-    allergens: 'Gluten.'
-  },
-  {
-    id: 'sweet-family-verrine-feroce',
-    name: 'Verrine Féroce d\'Avocat',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 3.00,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-verrine.jpg'),
-    description: 'Verrine créole : avocat, morue, farine de manioc, épices antillaises. 🇲🇶',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Avocat, morue, farine de manioc, oignons, piment, épices.',
-    allergens: 'Poisson.'
-  },
-  {
-    id: 'sweet-family-verrine-ti-nain',
-    name: 'Verrine Ti Nain Morue',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 3.00,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-verrine.jpg'),
-    description: 'Banane verte et morue en verrine élégante. Entrée authentique des Antilles.',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Banane verte, morue, oignons, épices antillaises.',
-    allergens: 'Poisson.'
-  },
-  {
-    id: 'sweet-family-verrine-snickers',
-    name: 'Dessert Sweet Snickers',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 2.50,
-    category: 'Desserts',
-    image: vendorImage('vendors/sweet-family/sf-dessert.jpg'),
-    description: 'Caramel onctueux, chocolat noir, cacahuètes croquantes, crème légère.',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Chocolat noir, caramel au beurre salé, cacahuètes, crème montée.',
-    allergens: 'Lait, fruits à coque.'
-  },
-  {
-    id: 'sweet-family-verrine-exotique',
-    name: 'Dessert Sweet Exotique',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 2.50,
-    category: 'Desserts',
-    image: vendorImage('vendors/sweet-family/sf-dessert.jpg'),
-    description: 'Mangue juteuse, maracuja acidulé, noix de coco râpée, crème légère. 🥭',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Mangue, maracuja (fruit de la passion), noix de coco, crème légère.',
-    allergens: 'Lait.'
-  },
-  {
-    id: 'sweet-family-seafood-homard',
-    name: 'Seafood duo avec homard',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 114.90,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-seafood-duo.jpg'),
-    description: 'Seafood duo avec homard, langouste, crevettes, palourdes, maïs, pommes de terre, saucisses, œuf — un plat royal pour les grandes occasions ! 🦞',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Homard, langouste, crevettes, palourdes, maïs, pommes de terre, saucisses, œuf, épices.',
-    allergens: 'Crustacés, mollusques, œuf.'
-  },
-  {
-    id: 'sweet-family-seafood-langouste',
-    name: 'Seafood duo avec langouste',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 109.90,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-seafood-duo.jpg'),
-    description: 'Seafood duo à la langouste, moules, palourdes, crevettes, maïs, saucisses, œuf — un festin de la mer généreux et coloré ! 🦞',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Langouste, moules, palourdes, crevettes, maïs, saucisses, œuf, épices.',
-    allergens: 'Crustacés, mollusques, œuf.'
-  },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   {
     id: 'sweet-family-landfood-solo',
     name: 'Land food solo',
@@ -1727,20 +1103,7 @@ export const mockProducts: LocalProduct[] = [
     ingredients: 'Galette de riz, poulet haché, légumes, épices.',
     allergens: 'Gluten.'
   },
-  {
-    id: 'sweet-family-hot-dog-2',
-    name: 'Hot dog',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 1,
-    category: 'Snacking',
-    image: vendorImage('vendors/sweet-family/sf-hotdog.jpg'),
-    description: 'Hot dog généreux, saucisse grillée, moutarde, ketchup, oignons croustillants. Le snack qui plaît à tout le monde ! 🌭',
-    zone: 'Martinique',
-    available: true,
-    featured: false,
-    ingredients: 'Pain hot dog, saucisse, moutarde, ketchup, oignons frits.',
-    allergens: 'Gluten, moutarde.'
-  },
+
   {
     id: 'sweet-family-manchon-poulet',
     name: 'Manchon de poulet',
@@ -1769,20 +1132,7 @@ export const mockProducts: LocalProduct[] = [
     ingredients: 'Morue émiettée, poivrons rouges et jaunes, oignons, persil, salade verte.',
     allergens: 'Poisson.'
   },
-  {
-    id: 'sweet-family-seafood-familiale',
-    name: 'Seafood familiale',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 129.90,
-    category: 'Plats',
-    image: vendorImage('vendors/sweet-family/sf-seafood-duo.jpg'),
-    description: 'Plateau de fruits de mer familial : homard, crabe, crevettes, accompagné de riz blanc et carottes râpées. Idéal pour les grandes tablées ! 🦞',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Homard, crabe, crevettes, riz blanc, carottes râpées, lime.',
-    allergens: 'Crustacés, mollusques.'
-  },
+
   {
     id: 'sweet-family-chicken-wrap',
     name: 'Chicken Wrap',
@@ -1797,20 +1147,7 @@ export const mockProducts: LocalProduct[] = [
     ingredients: 'Tortilla, poulet pané, laitue, fromage.',
     allergens: 'Gluten, lait.'
   },
-  {
-    id: 'sweet-family-mini-pizza',
-    name: 'Mini pizza',
-    vendor: 'Sweet Family Traiteur Orianne',
-    price: 1.10,
-    category: 'Apéritifs',
-    image: vendorImage('vendors/sweet-family/sf-pizza.jpg'),
-    description: 'Mini pizza ronde, sauce tomate, fromage fondant, olives noires. Parfaite pour l\'apéritif ou le buffet, un classique qui plaît à tous ! 🍕',
-    zone: 'Martinique',
-    available: true,
-    featured: true,
-    ingredients: 'Pâte à pizza, sauce tomate, fromage, olives noires.',
-    allergens: 'Gluten, lait.'
-  },
+
   {
     id: 'sweet-family-pizza-vege',
     name: 'Pizza végé',
@@ -1983,6 +1320,48 @@ export const mockProducts: LocalProduct[] = [
     featured: false,
     ingredients: 'Bœuf, marinade Saoto, épices.',
     allergens: 'À confirmer avec le prestataire.'
+  },
+  {
+    id: 'goute-mwen-cacahuete',
+    name: 'Gouté Mwen — Cacahuète (sans lactose)',
+    vendor: 'Gouté Mwen',
+    price: 2,
+    category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/cacahuete.jpg'),
+    description: 'Glace artisanale à la cacahuète, sans lactose. Onctueuse et gourmande, elle ravit les amateurs de saveurs authentiques ! 🥜',
+    zone: 'Martinique',
+    available: true,
+    featured: true,
+    ingredients: 'Cacahuète, lait végétal, sucre.',
+    allergens: 'Arachide.'
+  },
+  {
+    id: 'goute-mwen-pistache',
+    name: 'Gouté Mwen — Pistache (sans lactose)',
+    vendor: 'Gouté Mwen',
+    price: 2,
+    category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/pistache.jpg'),
+    description: 'Glace artisanale à la pistache, sans lactose. Onctueuse, parfumée et délicatement verte — un délice authentique des Antilles ! 🍦',
+    zone: 'Martinique',
+    available: true,
+    featured: true,
+    ingredients: 'Pistache, lait végétal, sucre.',
+    allergens: 'Fruits à coque.'
+  },
+  {
+    id: 'goute-mwen-choco',
+    name: 'Gouté Mwen — Choco (sans lactose)',
+    vendor: 'Gouté Mwen',
+    price: 2,
+    category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/choco.jpg'),
+    description: 'Glace artisanale au chocolat, cacao amer et eau de coco, sans lactose. Riche, onctueuse et intense — comme un voyage sous les tropiques ! 🍫🥥',
+    zone: 'Martinique',
+    available: true,
+    featured: true,
+    ingredients: 'Cacao, eau de coco, nan-nan (lait de coco), sucre.',
+    allergens: 'Aucun.'
   },
 ];
 

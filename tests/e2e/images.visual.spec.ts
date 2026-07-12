@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
 
-const SITE = 'https://delikreol.com';
 const VIEWPORTS = [
   { width: 360, height: 800, name: 'mobile-s' },
   { width: 390, height: 844, name: 'mobile-m' },
@@ -28,15 +27,15 @@ for (const vp of VIEWPORTS) {
       // Block non-essential resources for consistency
       await p.route('**/*.{png,jpg,jpeg,gif,svg}', async route => {
         const url = route.request().url();
-        // Only load our own images
-        if (url.includes('delikreol.com')) {
+        // Only load our own images from localhost
+        if (url.includes('127.0.0.1') || url.includes('localhost')) {
           await route.continue();
         } else {
           await route.abort();
         }
       });
 
-      await p.goto(`${SITE}${page.path}`, { 
+      await p.goto(page.path, { 
         waitUntil: 'networkidle', 
         timeout: 30000 
       });
