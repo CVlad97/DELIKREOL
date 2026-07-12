@@ -2,6 +2,12 @@
    Loaded after index.css so legacy utility aliases and responsive safeguards
    remain effective without changing the visual identity. */
 
+/* Audited brand orange: white text = 5.46:1; 90% hover blend = 4.59:1. */
+:root {
+  --primary: 21 94% 37%;
+  --ring: 21 94% 37%;
+}
+
 html,
 body,
 #root {
