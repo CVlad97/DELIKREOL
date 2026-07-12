@@ -158,104 +158,13 @@ export const mockProducts: LocalProduct[] = [
     ingredients: 'Cabri grillé. Accompagnements : frites, gratin, légumes pays, riz, lentilles, bananes frites, crudités.',
     allergens: 'À confirmer avec le prestataire.'
   },
-  {
-    id: 'save-peyia-saumon',
-    name: 'Saumon sauce blanche',
-    vendor: 'Snack Save Peyia',
-    price: 17,
-    category: 'Plats',
-    image: vendorImage('vendors/save-peyia/mer.jpg'),
-    description: 'Pavé de saumon tendre nappé d\'une sauce blanche onctueuse, servi avec frites, gratin, légumes ou riz au choix. 🐟',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Pavé de saumon, sauce blanche. Accompagnements : frites, gratin, légumes pays, riz, lentilles, bananes frites, crudités.',
-    allergens: 'Poisson. À confirmer avec le prestataire.'
-  },
-  {
-    id: 'save-peyia-dorade',
-    name: 'Dorade grillée',
-    vendor: 'Snack Save Peyia',
-    price: 15,
-    category: 'Plats',
-    image: vendorImage('vendors/save-peyia/mer.jpg'),
-    description: 'Dorade grillée entière, marinée aux herbes et épices locales, servie avec frites, gratin, légumes pays ou riz au choix. 🐠',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Dorade grillée entière. Accompagnements : frites, gratin, légumes pays, riz, lentilles, bananes frites, crudités.',
-    allergens: 'Poisson. À confirmer avec le prestataire.'
-  },
-  {
-    id: 'save-peyia-salade-fruits',
-    name: 'Salade de fruits frais',
-    vendor: 'Snack Save Peyia',
-    price: 6,
-    category: 'Snacking',
-    image: vendorImage('vendors/save-peyia/salade-fruits-1.jpg'),
-    description: 'Salade de fruits frais de saison, découpés minute. Vitamines et fraîcheur garanties ! 🍍🥭',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Fruits frais de saison découpés.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-smoothie',
-    name: 'Smoothie fruits',
-    vendor: 'Snack Save Peyia',
-    price: 5,
-    category: 'Boissons',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Smoothie onctueux aux fruits frais, sans sucre ajouté. Rafraîchissant et naturel ! 🥤',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Fruits frais mixés.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-granita',
-    name: 'Granita',
-    vendor: 'Snack Save Peyia',
-    price: 4,
-    category: 'Snacking',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Granita artisanale aux fruits locaux. Glacée, rafraîchissante, la boisson antillaise par excellence ! 🧊',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Fruits frais pressés.',
-    allergens: 'À confirmer avec le prestataire.'
-  },
-  {
-    id: 'save-peyia-panini',
-    name: 'Panini',
-    vendor: 'Snack Save Peyia',
-    price: 7,
-    category: 'Snacking',
-    image: vendorImage('vendors/save-peyia/panini-saumon.jpg'),
-    description: 'Panini chaud garni, grillé sur place. Idéal pour un déjeuner rapide et gourmand ! 🥪',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Pain panini, garniture au choix. À confirmer avec le prestataire.',
-    allergens: 'Gluten, produits laitiers.'
-  },
-  {
-    id: 'save-peyia-crepe',
-    name: 'Crêpe',
-    vendor: 'Snack Save Peyia',
-    price: 5,
-    category: 'Snacking',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Crêpe maison, sucrée ou salée, préparée minute. Une touche de douceur à tout moment ! 🥞',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Farine, œufs, lait. Garniture au choix.',
-    allergens: 'Gluten, œufs, produits laitiers.'
-  },
+
+
+
+
+
+
+
   {
     id: 'save-peyia-panini-saumon',
     name: 'Panini saumon',
@@ -328,230 +237,22 @@ export const mockProducts: LocalProduct[] = [
   },
 
   // ═══════════════════ MENU SAVE PEYI'A — CARTE ═══════════════
-  {
-    id: 'save-peyia-coca',
-    name: 'Coca 33cl',
-    vendor: 'Snack Save Peyia',
-    price: 2.50,
-    category: 'Boissons',
-    image: vendorImage('vendors/save-peyia/boisson.jpg'),
-    description: 'Coca-Cola 33cl bien frais. Le classique qui désaltère ! 🥤',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Coca-Cola.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-orangina',
-    name: 'Orangina / Royal Soda / Amigo 33cl',
-    vendor: 'Snack Save Peyia',
-    price: 2.50,
-    category: 'Boissons',
-    image: vendorImage('vendors/save-peyia/boisson.jpg'),
-    description: 'Orangeade ou soda local 33cl. Rafraîchissant et fruité ! 🍊',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Orangina ou soda local.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-heineken',
-    name: 'Heineken 25cl',
-    vendor: 'Snack Save Peyia',
-    price: 2.50,
-    category: 'Boissons',
-    image: vendorImage('vendors/save-peyia/boisson.jpg'),
-    description: 'Bière Heineken pression ou bouteille. 25cl à 2,50€ / 50cl à 3,50€. Bien fraîche ! 🍺',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Bière Heineken.',
-    allergens: 'Gluten, orge.'
-  },
-  {
-    id: 'save-peyia-jus-local-bt',
-    name: 'Jus local 25cl',
-    vendor: 'Snack Save Peyia',
-    price: 2.50,
-    category: 'Boissons',
-    image: vendorImage('vendors/save-peyia/boisson.jpg'),
-    description: 'Jus local artisanal — orange, ananas ou goyave. Pur fruit, fait maison ! 🥤',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Jus de fruits frais pressés.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-smoothie-fruits',
-    name: 'Smoothie aux fruits',
-    vendor: 'Snack Save Peyia',
-    price: 4,
-    category: 'Boissons',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Smoothie aux fruits frais de saison, onctueux et naturel. Pur fruit, sans additif ! 🥭🍍',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: true,
-    ingredients: 'Fruits frais de saison mixés.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-milkshake',
-    name: 'Milkshake aux fruits',
-    vendor: 'Snack Save Peyia',
-    price: 4.50,
-    category: 'Boissons',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Milkshake onctueux aux fruits frais. Supplément chantilly +1,50€ ! 🥤',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Fruits frais, lait, glace.',
-    allergens: 'Lait.'
-  },
-  {
-    id: 'save-peyia-granita-sirop',
-    name: 'Granita sirop local',
-    vendor: 'Snack Save Peyia',
-    price: 2,
-    category: 'Snacking',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Granita rafraîchissante au sirop local. Glacée et fruitée ! 🧊',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Sirop local, glace pilée.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-nectar-ss',
-    name: 'Nectar de jus sans sucre',
-    vendor: 'Snack Save Peyia',
-    price: 2.50,
-    category: 'Boissons',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Nectar de jus sans sucre ajouté. Pur fruit, naturellement sucré ! 🥤',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Fruits selon saison, sans sucre ajouté.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-glace-1b',
-    name: 'Glace locale 1 boule',
-    vendor: 'Snack Save Peyia',
-    price: 3,
-    category: 'Desserts',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Sorbet ou glace artisanale locale. Fruits selon saison. En cornet, timbale ou bol ! 🍦',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Glace artisanale locale, fruits de saison.',
-    allergens: 'Lait.'
-  },
-  {
-    id: 'save-peyia-fruits-seches',
-    name: 'Fruits séchés 100g',
-    vendor: 'Snack Save Peyia',
-    price: 2.50,
-    category: 'Snacking',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Fruits séchés 100% naturels, selon saison. Sain et gourmand ! 🥭',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Fruits de saison séchés.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-epices',
-    name: 'Épices en poudre 30g',
-    vendor: 'Snack Save Peyia',
-    price: 2,
-    category: 'Épicerie',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Épices en poudre — gingembre, bois d\'inde, curcuma. 100% naturel ! 🌿',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Gingembre, bois d\'inde, curcuma.',
-    allergens: 'Aucun.'
-  },
-  {
-    id: 'save-peyia-formule-duo',
-    name: 'Formule duo Panini + Boisson',
-    vendor: 'Snack Save Peyia',
-    price: 9.50,
-    category: 'Plats',
-    image: vendorImage('vendors/save-peyia/duo.jpg'),
-    description: 'Formule duo : panini au choix + boisson. Le repas complet au meilleur prix ! 🥪🥤',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: true,
-    ingredients: 'Panini garni au choix + boisson.',
-    allergens: 'Gluten, selon garniture.'
-  },
-  {
-    id: 'save-peyia-crepe-salee',
-    name: 'Crêpe salée',
-    vendor: 'Snack Save Peyia',
-    price: 6.50,
-    category: 'Plats',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Crêpe salée garnie : jambon, saucisse, steak, poulet, crevette ou saumon. Supplément fromage +1,50€ ! 🥞',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Crêpe (farine, œufs, lait). Garniture salée au choix.',
-    allergens: 'Gluten, œufs, lait.'
-  },
-  {
-    id: 'save-peyia-crepe-sucree',
-    name: 'Crêpe sucrée',
-    vendor: 'Snack Save Peyia',
-    price: 4,
-    category: 'Desserts',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Crêpe sucrée — Nutella, ananas, banane, coco, beurre de cacahuète. Supplément chantilly +1,50€ ! 🥞🍫',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Crêpe (farine, œufs, lait). Garniture sucrée au choix.',
-    allergens: 'Gluten, œufs, lait.'
-  },
-  {
-    id: 'save-peyia-spec-salee',
-    name: 'Spécialité salée',
-    vendor: 'Snack Save Peyia',
-    price: 11,
-    category: 'Plats',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Spécialité salée : jambon-œuf-champignon-fromage (11€), steak-œuf-champignon (12€), jambon-saumon-œuf (12,50€). Généreuse ! 🥞',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Crêpe garnie : jambon, œuf, champignon, fromage, steak ou saumon.',
-    allergens: 'Gluten, œufs, lait.'
-  },
-  {
-    id: 'save-peyia-spec-sucree',
-    name: 'Spécialité sucrée',
-    vendor: 'Snack Save Peyia',
-    price: 7,
-    category: 'Desserts',
-    image: vendorImage('vendors/save-peyia/creme.jpg'),
-    description: 'Spécialité sucrée : Nutella-cacahuète-chantilly-caramel (7€), coco-ananas-chantilly-chocolat (8€). Un régal ! 🥞🍫',
-    zone: 'Rivière-Pilote',
-    available: true,
-    featured: false,
-    ingredients: 'Crêpe, Nutella, cacahuète, chantilly, caramel, coco, ananas, chocolat.',
-    allergens: 'Gluten, œufs, lait, cacahuète.'
-  },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   //   // ═══════════════════════════════════════════════════════
   // AN TJÈ COCO — Fort-de-France
   // Pépites artisanales sucrées et salées — sur précommande
