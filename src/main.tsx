@@ -9,6 +9,17 @@ import { AppRouter } from './router';
 const LEGACY_IMAGE_FALLBACK =
   'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"%3E%3Crect width="800" height="600" fill="%23f5ece4"/%3E%3Cpath d="M280 360l80-90 55 62 45-50 90 108H250z" fill="%23c9b7a8"/%3E%3Ccircle cx="320" cy="220" r="34" fill="%23d8c8ba"/%3E%3Ctext x="400" y="455" text-anchor="middle" font-family="Arial,sans-serif" font-size="28" fill="%236b5b50"%3EPhoto prochainement%3C/text%3E%3C/svg%3E';
 
+const initialUrl = new URL(window.location.href);
+const communeFilter = initialUrl.searchParams.get('commune');
+if (
+  initialUrl.pathname.endsWith('/catalogue') &&
+  communeFilter &&
+  !initialUrl.searchParams.get('q')
+) {
+  initialUrl.searchParams.set('q', communeFilter);
+  window.history.replaceState(window.history.state, '', initialUrl);
+}
+
 document.addEventListener(
   'error',
   (event) => {
