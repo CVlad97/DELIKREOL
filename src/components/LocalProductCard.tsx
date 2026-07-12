@@ -2,7 +2,7 @@ import { Plus, Sparkles, ZoomIn } from 'lucide-react';
 import { useState } from 'react';
 import { ImageLightbox } from './ImageLightbox';
 import { ProductThumbnail } from './ProductThumbnail';
-import { traiteurSpaces } from '../data/traiteurs';
+import { formatEuro, traiteurSpaces } from '../data/traiteurs';
 import { isUsableThumbnail } from '../services/catalogImageResolver';
 
 interface LocalProduct {
@@ -97,7 +97,7 @@ export function LocalProductCard({ product, onAddToRequest }: LocalProductCardPr
 
           <div className="flex items-center justify-between gap-3">
             <div className="text-xl font-black text-foreground">
-              {product.price.toFixed(2)} €
+              {formatEuro(product.price)}
             </div>
             <span className={`text-xs font-semibold ${product.available === false ? 'text-amber-700' : 'text-success'}`}>
               {availabilityLabel}
