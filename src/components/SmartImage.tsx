@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export type ImageKind = 'food' | 'ambient' | 'packaging' | 'logo' | 'portrait' | 'flyer';
 type ImageFit = 'cover' | 'contain';
@@ -27,16 +26,20 @@ interface SmartImageProps {
   onClick?: () => void;
 }
 
-const KIND_DEFAULTS: Record<ImageKind, { fit: ImageFit; position: ImagePosition; bg?: string; padding?: number }> = {
-  food:      { fit: 'cover', position: '50% 50%' },
-  ambient:   { fit: 'cover', position: '50% 50%' },
-  packaging: { fit: 'contain', position: 'center', bg: '#FFF8F0' },
-  logo:      { fit: 'contain', position: 'center', bg: '#FFF8F0' },
-  portrait:  { fit: 'cover', position: '50% 25%' },
-  flyer:     { fit: 'contain', position: 'center' },
+const KIND_DEFAULTS: Record<
+  ImageKind,
+  { fit: ImageFit; position: ImagePosition; background?: string; padding?: number }
+> = {
+  food: { fit: 'cover', position: '50% 50%' },
+  ambient: { fit: 'cover', position: '50% 50%' },
+  packaging: { fit: 'contain', position: 'center', background: '#fffaf4', padding: 6 },
+  logo: { fit: 'contain', position: 'center', background: '#fffaf4', padding: 8 },
+  portrait: { fit: 'cover', position: '50% 25%' },
+  flyer: { fit: 'contain', position: 'center', background: '#ffffff', padding: 3 },
 };
 
-const FALLBACK_IMG = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200" fill="%23ddd"%3E%3Crect width="200" height="200"/%3E%3Ctext x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23999"%3EImage%3C/text%3E%3C/svg%3E';
+const FALLBACK_IMG =
+  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"%3E%3Crect width="800" height="600" fill="%23f5ece4"/%3E%3Cpath d="M280 360l80-90 55 62 45-50 90 108H250z" fill="%23c9b7a8"/%3E%3Ccircle cx="320" cy="220" r="34" fill="%23d8c8ba"/%3E%3Ctext x="400" y="455" text-anchor="middle" font-family="Arial,sans-serif" font-size="28" fill="%236b5b50"%3EPhoto prochainement%3C/text%3E%3C/svg%3E';
 
 export function SmartImage({
   src,
@@ -59,80 +62,79 @@ export function SmartImage({
   onError,
   onClick,
 }: SmartImageProps) {
-  const [error, setError] = useState(false);
+  const [activeSrc, setActiveSrc] = useState(src);
   const [loaded, setLoaded] = useState(false);
-  const prevSrc = useRef(src);
+  const [fallbackLevel, setFallbackLevel] = useState(0);
 
-  // Reset when src changes
   useEffect(() => {
-    if (prevSrc.current !== src) {
-      setError(false);
-      setLoaded(false);
-      prevSrc.current = src;
-    }
+    setActiveSrc(src);
+    setLoaded(false);
+    setFallbackLevel(0);
   }, [src]);
 
-  const defaults = KIND_DEFAULTS[kind] || KIND_DEFAULTS.food;
+  const defaults = KIND_DEFAULTS[kind];
   const fit = fitProp ?? defaults.fit;
   const position = positionProp ?? defaults.position;
   const loading = loadingProp ?? (priority ? 'eager' : 'lazy');
   const fetchPriority: 'high' | 'low' | 'auto' = priority ? 'high' : 'auto';
   const effectiveAlt = decorative ? '' : alt;
 
-  if (error) {
-    return (
-      <div
-        className={`flex items-center justify-center bg-muted/30 ${containerClassName}`}
-        style={{ aspectRatio, width, height }}
-        role="img"
-        aria-label={effectiveAlt || undefined}
-      >
-        <div className="text-center text-muted-foreground p-4">
-          <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-          <p className="text-xs opacity-50">Image non disponible</p>
-        </div>
-      </div>
-    );
-  }
+  const handleImageError = () => {
+    setLoaded(false);
 
-  const imgContent = (
+    if (fallbackLevel === 0 && fallbackSrc && fallbackSrc !== activeSrc) {
+      setActiveSrc(fallbackSrc);
+      setFallbackLevel(1);
+      return;
+    }
+
+    if (activeSrc !== FALLBACK_IMG) {
+      setActiveSrc(FALLBACK_IMG);
+      setFallbackLevel(2);
+      onError?.();
+    }
+  };
+
+  const image = (
     <div
       className={`relative overflow-hidden ${containerClassName}`}
       style={{
         aspectRatio: aspectRatio || undefined,
         width: width || undefined,
         height: height || undefined,
-        backgroundColor: defaults.bg || undefined,
+        backgroundColor: defaults.background || undefined,
       }}
-      onClick={onClick}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); } : undefined}
     >
-      {!loaded && !error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-muted/20 animate-pulse">
-          <div className="w-8 h-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-        </div>
+      {!loaded && (
+        <div
+          className="absolute inset-0 animate-pulse bg-muted"
+          aria-hidden="true"
+        />
       )}
       <img
-        src={src}
+        src={activeSrc}
         alt={effectiveAlt}
+        aria-hidden={decorative || undefined}
         loading={loading}
         fetchPriority={fetchPriority}
         decoding="async"
         srcSet={srcSet}
-        sizes={sizes}
+        sizes={srcSet ? sizes : undefined}
         width={width}
         height={height}
-        onLoad={() => { setLoaded(true); onLoad?.(); }}
-        onError={() => { setError(true); onError?.(); }}
+        draggable={false}
+        onLoad={() => {
+          setLoaded(true);
+          onLoad?.();
+        }}
+        onError={handleImageError}
         style={{
           width: '100%',
           height: '100%',
           objectFit: fit,
           objectPosition: position,
           opacity: loaded ? 1 : 0,
-          transition: 'opacity 0.3s ease, transform 0.5s ease',
+          transition: 'opacity 0.25s ease, transform 0.45s ease',
           padding: defaults.padding ? `${defaults.padding}%` : undefined,
           boxSizing: 'border-box',
         }}
@@ -141,19 +143,16 @@ export function SmartImage({
     </div>
   );
 
-  if (onClick) {
-    return (
-      <button
-        onClick={onClick}
-        className={`p-0 border-0 bg-transparent cursor-zoom-in block w-full ${containerClassName}`}
-        style={{ aspectRatio: aspectRatio || undefined, width: width || undefined }}
-        type="button"
-        aria-label={`Agrandir ${alt}`}
-      >
-        {imgContent}
-      </button>
-    );
-  }
+  if (!onClick) return image;
 
-  return imgContent;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="block w-full cursor-zoom-in rounded-[inherit] border-0 bg-transparent p-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      aria-label={`Agrandir : ${alt}`}
+    >
+      {image}
+    </button>
+  );
 }
