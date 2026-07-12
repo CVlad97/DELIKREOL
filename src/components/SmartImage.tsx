@@ -24,6 +24,7 @@ interface SmartImageProps {
   decorative?: boolean;
   onLoad?: () => void;
   onError?: () => void;
+  onFallbackLevelChange?: (level: number) => void;
   onClick?: () => void;
 }
 
@@ -62,6 +63,7 @@ export function SmartImage({
   decorative = false,
   onLoad,
   onError,
+  onFallbackLevelChange,
   onClick,
 }: SmartImageProps) {
   const initialSrc = src || fallbackSrc || finalFallbackSrc || FALLBACK_IMG;
@@ -73,7 +75,8 @@ export function SmartImage({
     setActiveSrc(src || fallbackSrc || finalFallbackSrc || FALLBACK_IMG);
     setLoaded(false);
     setFallbackLevel(0);
-  }, [src, fallbackSrc, finalFallbackSrc]);
+    onFallbackLevelChange?.(0);
+  }, [src, fallbackSrc, finalFallbackSrc, onFallbackLevelChange]);
 
   const defaults = KIND_DEFAULTS[kind];
   const fit = fitProp ?? defaults.fit;
@@ -82,24 +85,27 @@ export function SmartImage({
   const fetchPriority: 'high' | 'low' | 'auto' = priority ? 'high' : 'auto';
   const effectiveAlt = decorative ? '' : alt;
 
+  const switchFallback = (nextSrc: string, level: number) => {
+    setActiveSrc(nextSrc);
+    setFallbackLevel(level);
+    onFallbackLevelChange?.(level);
+  };
+
   const handleImageError = () => {
     setLoaded(false);
 
     if (fallbackLevel === 0 && fallbackSrc && fallbackSrc !== activeSrc) {
-      setActiveSrc(fallbackSrc);
-      setFallbackLevel(1);
+      switchFallback(fallbackSrc, 1);
       return;
     }
 
     if (fallbackLevel <= 1 && finalFallbackSrc && finalFallbackSrc !== activeSrc) {
-      setActiveSrc(finalFallbackSrc);
-      setFallbackLevel(2);
+      switchFallback(finalFallbackSrc, 2);
       return;
     }
 
     if (activeSrc !== FALLBACK_IMG) {
-      setActiveSrc(FALLBACK_IMG);
-      setFallbackLevel(3);
+      switchFallback(FALLBACK_IMG, 3);
       onError?.();
     }
   };
@@ -116,9 +122,7 @@ export function SmartImage({
       data-smart-image-container="true"
       data-fallback-level={fallbackLevel}
     >
-      {!loaded && (
-        <div className="absolute inset-0 animate-pulse bg-muted" aria-hidden="true" />
-      )}
+      {!loaded && <div className="absolute inset-0 animate-pulse bg-muted" aria-hidden="true" />}
       <img
         data-smart-image="true"
         src={activeSrc}
