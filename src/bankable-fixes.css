@@ -1,0 +1,137 @@
+/* Emergency production hardening for the public storefront.
+   Keep this file loaded after index.css so invalid legacy utility tokens
+   and horizontal carousel overflow cannot break the live layout. */
+
+html,
+body,
+#root {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+@supports (overflow: clip) {
+  html,
+  body,
+  #root {
+    overflow-x: clip;
+  }
+}
+
+img {
+  max-width: 100%;
+}
+
+/* Responsive cards: 1 mobile, 2 tablet, 3 laptop, 4 desktop. */
+.scroll-carousel-track {
+  scroll-padding-inline: 0.25rem;
+}
+
+.scroll-carousel-track > * {
+  box-sizing: border-box;
+  flex: 0 0 calc(100% - 2rem) !important;
+  min-width: 0 !important;
+  width: auto !important;
+}
+
+@media (min-width: 640px) {
+  .scroll-carousel-track > * {
+    flex-basis: calc(50% - 0.5rem) !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .scroll-carousel-track > * {
+    flex-basis: calc(33.333% - 0.7rem) !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .scroll-carousel-track > * {
+    flex-basis: calc(25% - 0.75rem) !important;
+  }
+}
+
+/* Product-card footer: price and CTA stay readable without clipping. */
+.scroll-carousel-track > * > .p-5 > .flex.items-center.justify-between {
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.scroll-carousel-track > * > .p-5 > .flex.items-center.justify-between > button {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.scroll-carousel-track > * h3 {
+  overflow-wrap: anywhere;
+}
+
+/* Neutralise the over-saturated image-processing pass visible on production. */
+.product-photo-natural,
+.scroll-carousel-track img,
+img[src*="/vendors/save-peyia/"] {
+  filter: saturate(0.78) contrast(0.92) brightness(0.91);
+}
+
+/* Save Peyi'a uses branded square/flyer visuals: keep the whole artwork visible. */
+img[src*="/vendors/save-peyia/"] {
+  object-fit: contain !important;
+  background: #fffaf4;
+  padding: 0.2rem;
+}
+
+img[src*="ninice-01-showcase"],
+img[src*="hero-tropical"] {
+  filter: saturate(0.72) contrast(0.9) brightness(0.82);
+}
+
+img[src*="ninice-01-showcase"] {
+  object-position: center 46%;
+}
+
+/* Legacy token aliases introduced by the previous automated colour pass.
+   These values are valid CSS even when Tailwind did not generate the class. */
+.bg-primary\/8,
+.bg-primary\/8\/80 {
+  background-color: hsl(var(--primary) / 0.08) !important;
+}
+
+.text-success\/700,
+.text-success\/800,
+.text-success\/900 {
+  color: hsl(var(--success)) !important;
+}
+
+.text-success\/950 {
+  color: hsl(var(--accent)) !important;
+}
+
+.border-success100 {
+  border-color: hsl(var(--success) / 0.22) !important;
+}
+
+.bg-white\/72 {
+  background-color: rgb(255 255 255 / 0.82) !important;
+}
+
+.opacity-32 {
+  opacity: 0.32 !important;
+}
+
+.from-success600 {
+  --tw-gradient-from: hsl(var(--success)) var(--tw-gradient-from-position);
+  --tw-gradient-to: hsl(var(--success) / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-carousel-track {
+    scroll-behavior: auto;
+  }
+
+  .product-photo-natural,
+  .scroll-carousel-track img {
+    transition: none !important;
+  }
+}

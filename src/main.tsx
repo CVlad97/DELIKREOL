@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './services/i18n';
 import './leaflet.css';
 import './index.css';
+import './bankable-fixes.css';
 import { AppRouter } from './router';
 
 const Loader = () => (
