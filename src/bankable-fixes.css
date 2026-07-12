@@ -1,6 +1,6 @@
-/* Emergency production hardening for the public storefront.
-   Keep this file loaded after index.css so invalid legacy utility tokens
-   and horizontal carousel overflow cannot break the live layout. */
+/* Production hardening for the public storefront.
+   Loaded after index.css so legacy utility aliases and responsive safeguards
+   remain effective without changing the visual identity. */
 
 html,
 body,
@@ -18,6 +18,7 @@ body,
 }
 
 img {
+  display: block;
   max-width: 100%;
 }
 
@@ -37,14 +38,31 @@ img {
   max-width: calc(100% - 1rem);
   border-radius: 999px;
   padding: 0.3rem 0.65rem;
-  background: rgb(0 0 0 / 0.72);
+  background: rgb(0 0 0 / 0.78);
   color: #fff;
   font-size: 0.625rem;
   font-weight: 800;
-  line-height: 1;
+  line-height: 1.15;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   pointer-events: none;
+}
+
+/* Product thumbnails use one stable 4:3 format on the public catalogue. */
+[data-catalogue-grid="true"] [data-thumbnail-source] [data-smart-image-container="true"] {
+  aspect-ratio: 4 / 3 !important;
+}
+
+/* Form boundaries must remain perceivable on white and warm backgrounds. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+select,
+textarea {
+  border-color: #a48a78;
+}
+
+/* White text on the translucent primary hover previously dropped below 4.5:1. */
+.hover\:bg-primary\/90:hover {
+  background-color: hsl(var(--primary)) !important;
 }
 
 /* Responsive cards: 1 mobile, 2 tablet, 3 laptop, 4 desktop. */
@@ -93,11 +111,10 @@ img {
   overflow-wrap: anywhere;
 }
 
-/* Neutralise the over-saturated image-processing pass visible on production. */
+/* Keep photographs faithful to their source. Do not apply global colour filters. */
 .product-photo-natural,
-.scroll-carousel-track img,
-img[src*="/vendors/save-peyia/"] {
-  filter: saturate(0.78) contrast(0.92) brightness(0.91);
+.scroll-carousel-track img {
+  filter: none;
 }
 
 /* Save Peyi'a uses branded square/flyer visuals: keep the whole artwork visible. */
@@ -105,19 +122,19 @@ img[src*="/vendors/save-peyia/"] {
   object-fit: contain !important;
   background: #fffaf4;
   padding: 0.2rem;
-}
-
-img[src*="ninice-01-showcase"],
-img[src*="hero-tropical"] {
-  filter: saturate(0.72) contrast(0.9) brightness(0.82);
+  filter: none;
 }
 
 img[src*="ninice-01-showcase"] {
   object-position: center 46%;
+  filter: none;
 }
 
-/* Legacy token aliases introduced by the previous automated colour pass.
-   These values are valid CSS even when Tailwind did not generate the class. */
+img[src*="hero-tropical"] {
+  filter: none;
+}
+
+/* Legacy token aliases introduced by the previous automated colour pass. */
 .bg-primary\/8,
 .bg-primary\/8\/80 {
   background-color: hsl(var(--primary) / 0.08) !important;
@@ -134,11 +151,11 @@ img[src*="ninice-01-showcase"] {
 }
 
 .border-success100 {
-  border-color: hsl(var(--success) / 0.22) !important;
+  border-color: hsl(var(--success) / 0.35) !important;
 }
 
 .bg-white\/72 {
-  background-color: rgb(255 255 255 / 0.82) !important;
+  background-color: rgb(255 255 255 / 0.84) !important;
 }
 
 .opacity-32 {
