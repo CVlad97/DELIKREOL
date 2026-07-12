@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Layout } from '../../components/layout/Layout';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 import { validateMartiniquePhone } from '../../utils/validation';
@@ -7,7 +6,6 @@ import { validateMartiniquePhone } from '../../utils/validation';
 const WHATSAPP_NUMBER = '596696653589';
 
 export function DevenirPointRelaisPage() {
-  const navigate = useNavigate();
   const [form, setForm] = useState({ business_name: '', manager_name: '', phone: '', whatsapp: '', email: '', commune: '', address: '', opening_hours: '', capacity: '' });
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
