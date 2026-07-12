@@ -69,8 +69,16 @@ img {
 
 /* Neutralise the over-saturated image-processing pass visible on production. */
 .product-photo-natural,
-.scroll-carousel-track img {
+.scroll-carousel-track img,
+img[src*="/vendors/save-peyia/"] {
   filter: saturate(0.78) contrast(0.92) brightness(0.91);
+}
+
+/* Save Peyi'a uses branded square/flyer visuals: keep the whole artwork visible. */
+img[src*="/vendors/save-peyia/"] {
+  object-fit: contain !important;
+  background: #fffaf4;
+  padding: 0.2rem;
 }
 
 img[src*="ninice-01-showcase"],
