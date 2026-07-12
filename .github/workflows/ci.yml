@@ -33,7 +33,12 @@ jobs:
         run: npm ci --prefer-offline --no-audit --fund=false
 
       - name: Typecheck
-        run: npm run typecheck --if-present
+        shell: bash
+        run: |
+          if ! npx tsc --noEmit -p tsconfig.app.json --pretty false > /tmp/typecheck.log 2>&1; then
+            tail -n 80 /tmp/typecheck.log
+            exit 1
+          fi
 
       - name: Lint
         run: npm run lint
