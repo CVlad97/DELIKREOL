@@ -1321,6 +1321,20 @@ export const mockProducts: LocalProduct[] = [
     ingredients: 'Bœuf, marinade Saoto, épices.',
     allergens: 'À confirmer avec le prestataire.'
   },
+  {
+    id: 'goute-mwen-cacahuete',
+    name: 'Gouté Mwen — Cacahuète (sans lactose)',
+    vendor: 'Gouté Mwen',
+    price: 2,
+    category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/cacahuete.jpg'),
+    description: 'Glace artisanale à la cacahuète, sans lactose. Onctueuse et gourmande, elle ravit les amateurs de saveurs authentiques ! 🥜',
+    zone: 'Martinique',
+    available: true,
+    featured: true,
+    ingredients: 'Cacahuète, lait végétal, sucre.',
+    allergens: 'Arachide.'
+  },
 ];
 
 export function getFeaturedProducts(): LocalProduct[] {
