@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, MessageCircle, MapPin, Phone } from 'lucide-react';
+import { ArrowRight, Mail, MessageCircle, MapPin, Phone } from 'lucide-react';
 
 const WHATSAPP_NUMBER = '596696653589';
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
+const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+  'Bonjour, je souhaite obtenir une information sur DeliKreol.'
+)}`;
 const WHATSAPP_DISPLAY = '+596 696 65 35 89';
 const CONTACT_EMAIL = 'contact@delikreol.com';
 
@@ -46,58 +48,62 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className="relative mt-auto border-t border-border/40">
-      {/* Madras strip */}
-      <div className="madras-strip" />
+    <footer className="relative mt-auto border-t border-border">
+      <div className="madras-strip" aria-hidden="true" />
 
-      <div className="bg-gradient-to-b from-white to-muted/40">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-          <div className="mb-12 rounded-[2rem] bg-gradient-to-br from-stone-950 via-emerald-950 to-orange-700 p-6 text-white shadow-[0_28px_80px_-52px_rgba(42,25,15,0.8)] md:p-8">
+      <div className="bg-gradient-to-b from-white to-muted/50">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+          <div className="mb-12 rounded-[2rem] bg-gradient-to-br from-foreground via-accent to-primary p-6 text-white shadow-elegant md:p-8">
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">
-                  DeliKreol opérationnel
+              <div className="max-w-2xl">
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-secondary">
+                  Un interlocuteur local
                 </p>
                 <h2 className="mt-2 text-2xl font-black tracking-tight md:text-3xl">
-                  Commande client, demande pro ou partenariat.
+                  Commande client, devis professionnel ou partenariat.
                 </h2>
+                <p className="mt-2 text-sm leading-6 text-white/75">
+                  DeliKreol centralise la demande et confirme les disponibilités avec chaque partenaire.
+                </p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Link
                   to="/catalogue"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-orange-500 px-5 py-3 text-sm font-black text-white transition-all hover:bg-orange-600"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-black text-primary-foreground shadow-sm transition-all hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 >
-                  Catalogue
+                  Voir le catalogue
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
-                  to="/devis"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-black text-white transition-all hover:bg-white/20"
+                  to="/devenir-partenaire"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-5 py-3 text-sm font-black text-white transition-all hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 >
-                  Demande pro
+                  Rejoindre le réseau
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
-            {/* Brand */}
+
+          <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
             <div className="sm:col-span-2 lg:col-span-1">
-              <Link to="/" className="inline-flex items-center gap-2 group">
+              <Link to="/" className="group inline-flex items-center gap-2 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 <img
                   src={`${import.meta.env.BASE_URL || '/'}branding/logo-mark.svg`}
-                  alt="Logo DeliKreol"
+                  alt=""
+                  aria-hidden="true"
+                  width="40"
+                  height="40"
                   className="brand-logo-frame h-10 w-10 rounded-2xl object-contain p-1.5 transition-transform group-hover:scale-105"
                 />
-                <span className="text-lg font-bold tracking-tight text-foreground">
+                <span className="text-lg font-black tracking-tight text-foreground">
                   Deli<span className="text-primary">Kreol</span>
                 </span>
               </Link>
-              <p className="mt-3 text-sm text-muted-foreground leading-relaxed max-w-xs">
-                Le goût local, simple à commander.
+              <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
+                Le goût local, simple à découvrir et à commander en Martinique.
               </p>
 
-              {/* Social */}
               <div className="mt-5 flex items-center gap-3">
                 {socialLinks.map((social) => (
                   <a
@@ -105,7 +111,7 @@ export function Footer() {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-xl bg-card border border-border/60 px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
+                    className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-muted-foreground transition-all hover:border-primary/30 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     aria-label={social.label}
                   >
                     {social.icon}
@@ -115,18 +121,14 @@ export function Footer() {
               </div>
             </div>
 
-            {/* Quick links */}
             <div>
-              <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4">
-                Liens rapides
+              <h3 className="mb-4 text-sm font-black uppercase tracking-wider text-foreground">
+                Accès rapides
               </h3>
               <ul className="space-y-2.5">
                 {quickLinks.map((link) => (
                   <li key={link.to}>
-                    <Link
-                      to={link.to}
-                      className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                    >
+                    <Link to={link.to} className="text-sm text-muted-foreground transition-colors hover:text-primary">
                       {link.label}
                     </Link>
                   </li>
@@ -134,9 +136,8 @@ export function Footer() {
               </ul>
             </div>
 
-            {/* Contact */}
             <div>
-              <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4">
+              <h3 className="mb-4 text-sm font-black uppercase tracking-wider text-foreground">
                 Contact
               </h3>
               <ul className="space-y-3">
@@ -145,64 +146,68 @@ export function Footer() {
                     href={WHATSAPP_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2.5 text-sm text-muted-foreground hover:text-accent transition-colors group"
+                    className="group flex items-center gap-2.5 text-sm text-muted-foreground transition-colors hover:text-accent"
                   >
-                    <MessageCircle className="w-4 h-4 text-accent group-hover:scale-110 transition-transform" />
+                    <MessageCircle className="h-4 w-4 text-accent transition-transform group-hover:scale-110" />
                     {WHATSAPP_DISPLAY}
                   </a>
                 </li>
                 <li>
                   <a
-                    href={`mailto:${CONTACT_EMAIL}`}
-                    className="flex items-center gap-2.5 text-sm text-muted-foreground hover:text-primary transition-colors"
+                    href={`tel:+${WHATSAPP_NUMBER}`}
+                    className="flex items-center gap-2.5 text-sm text-muted-foreground transition-colors hover:text-primary"
                   >
-                    <Phone className="w-4 h-4" />
+                    <Phone className="h-4 w-4" />
+                    Appeler DeliKreol
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={`mailto:${CONTACT_EMAIL}`}
+                    className="flex items-center gap-2.5 text-sm text-muted-foreground transition-colors hover:text-primary"
+                  >
+                    <Mail className="h-4 w-4" />
                     {CONTACT_EMAIL}
                   </a>
                 </li>
                 <li className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                  <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
                   <span>Martinique, Antilles françaises</span>
                 </li>
               </ul>
             </div>
 
-            {/* Legal */}
             <div>
-              <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4">
+              <h3 className="mb-4 text-sm font-black uppercase tracking-wider text-foreground">
                 Informations légales
               </h3>
               <ul className="space-y-2.5">
                 {legalLinks.map((link) => (
                   <li key={link.to}>
-                    <Link
-                      to={link.to}
-                      className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                    >
+                    <Link to={link.to} className="text-sm text-muted-foreground transition-colors hover:text-primary">
                       {link.label}
                     </Link>
                   </li>
                 ))}
                 <li>
-                  <Link
-                    to="/livraison"
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    Infos livraison
+                  <Link to="/livraison" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+                    Informations livraison
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/feedback" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+                    Signaler un problème
                   </Link>
                 </li>
               </ul>
             </div>
           </div>
 
-          {/* Bottom bar */}
-          <div className="mt-12 pt-6 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 sm:flex-row">
             <p className="text-xs text-muted-foreground">
-              © 2026 DeliKreol — Martinique. Tous droits réservés. Propriété exclusive.
+              © 2026 DeliKreol — Martinique. Tous droits réservés.
             </p>
-            <p className="text-xs text-muted-foreground/60">
-              Fait avec 🧡 en Martinique
-            </p>
+            <p className="text-xs text-muted-foreground/70">Conçu en Martinique pour les acteurs locaux.</p>
           </div>
         </div>
       </div>
