@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { SmartImage, type ImageKind } from './SmartImage';
+import { ProductThumbnail } from './ProductThumbnail';
+import { traiteurSpaces } from '../data/traiteurs';
 
 interface CarouselItem {
   image?: string;
@@ -11,23 +12,19 @@ interface CarouselItem {
   category?: string;
 }
 
-function getImageKind(product: CarouselItem): ImageKind {
-  const vendor = product.vendor.toLowerCase();
-  const name = product.name.toLowerCase();
+function normalizeVendor(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[’']/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+}
 
-  if (vendor.includes('save pey') || vendor.includes('savè pey')) return 'flyer';
-  if (
-    vendor.includes('gouté mwen') ||
-    vendor.includes('goute mwen') ||
-    name.includes('bouteille') ||
-    name.includes('bocal') ||
-    name.includes('sauce') ||
-    name.includes('sirop')
-  ) {
-    return 'packaging';
-  }
-
-  return 'food';
+function getPartnerImage(vendor: string): string | null {
+  const normalized = normalizeVendor(vendor);
+  const space = traiteurSpaces.find((item) => normalizeVendor(item.name) === normalized);
+  return space?.heroImage || space?.galleryImages?.[0] || space?.portraitImage || null;
 }
 
 export function AutoCarousel({ items }: { items: CarouselItem[] }) {
@@ -118,13 +115,16 @@ export function AutoCarousel({ items }: { items: CarouselItem[] }) {
               index === 0 ? 'border-primary/35' : 'border-border'
             } ${index > 0 ? 'hidden md:block' : ''}`}
           >
-            <SmartImage
-              src={product.image ?? ''}
-              alt={`${product.name} proposé par ${product.vendor}`}
-              kind={getImageKind(product)}
+            <ProductThumbnail
+              src={product.image}
+              partnerImage={getPartnerImage(product.vendor)}
+              productName={product.name}
+              vendorName={product.vendor}
+              category={product.category}
               aspectRatio="4 / 3"
               containerClassName="w-full bg-muted"
               imgClassName="product-photo-natural transition-transform duration-500 group-hover:scale-[1.02]"
+              showBadge
             />
 
             <div className="p-4">
