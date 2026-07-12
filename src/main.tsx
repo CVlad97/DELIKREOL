@@ -5,6 +5,9 @@ import './leaflet.css';
 import './index.css';
 import './bankable-fixes.css';
 import { AppRouter } from './router';
+import { installNativeImageFallbacks } from './services/nativeImageFallback';
+
+installNativeImageFallbacks();
 
 const Loader = () => (
   <div className="min-h-screen flex items-center justify-center">

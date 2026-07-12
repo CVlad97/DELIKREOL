@@ -23,13 +23,13 @@ test('catalogue: search and filters render', async ({ page }) => {
   await page.goto('/catalogue');
   await expect(page.getByRole('heading', { name: 'Catalogue' })).toBeVisible();
   await expect(
-    page.getByPlaceholder(/Rechercher un plat, traiteur ou commune/i)
+    page.getByPlaceholder(/Rechercher un plat, (un )?traiteur ou (une )?commune/i)
   ).toBeVisible();
   await expect(page.getByRole('button', { name: 'Plats', exact: true })).toBeVisible();
 
   const filtersButton = page.getByRole('button', { name: 'Filtres', exact: true });
   await expect(filtersButton).toBeVisible();
   await filtersButton.click();
-  await expect(page.getByText('Budget', { exact: true })).toBeVisible();
-  await expect(page.getByText('Commune', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Budget')).toBeVisible();
+  await expect(page.getByLabel('Commune')).toBeVisible();
 });
