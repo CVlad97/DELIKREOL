@@ -1,20 +1,20 @@
 import { test, expect } from '@playwright/test';
 
-test('public home: hero CTA opens catalogue and product can be added', async ({ page }) => {
+test('public home: catalogue CTA opens catalogue and product can be added', async ({ page }) => {
   await page.goto('/');
   await expect(
-    page.getByRole('heading', { name: /Commandez créole local en Martinique/i })
+    page.getByRole('heading', { name: /Le goût local, simple à commander/i })
   ).toBeVisible();
 
-  const catalogueCta = page.getByRole('link', { name: /Commander maintenant/i }).first();
+  const catalogueCta = page.getByRole('link', { name: /Voir les offres/i });
   await expect(catalogueCta).toBeVisible();
   await catalogueCta.click();
 
   await expect(page).toHaveURL(/\/catalogue/);
   await expect(page.getByRole('heading', { name: 'Catalogue' })).toBeVisible();
 
-  const addButton = page.getByRole('button', { name: /Ajouter/i }).first();
-  await expect(addButton).toBeVisible({ timeout: 15000 });
+  const addButton = page.getByRole('button', { name: /Ajouter au panier/i }).first();
+  await expect(addButton).toBeVisible({ timeout: 15_000 });
   await addButton.click();
   await expect(page.getByText(/ajouté au panier/i).first()).toBeVisible();
 });
