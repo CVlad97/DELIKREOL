@@ -8,30 +8,78 @@ const PAGES = [
   { path: '/traiteurs', name: 'traiteurs' },
   { path: '/traiteur/snack-save-peyia', name: 'save-peyia' },
   { path: '/traiteur/sweet-family-traiteur-orianne', name: 'sweet-family' },
-  { path: '/carte', name: 'carte-interactive' },
+  { path: '/traiteur/goute-mwen', name: 'goute-mwen' },
+  { path: '/devis', name: 'devis' },
+  { path: '/panier', name: 'panier' },
+  { path: '/contact', name: 'contact' },
 ];
+
+async function scrollThroughPage(page: import('@playwright/test').Page) {
+  await page.evaluate(async () => {
+    await new Promise<void>((resolve) => {
+      let position = 0;
+      const step = Math.max(window.innerHeight * 0.8, 500);
+      const timer = window.setInterval(() => {
+        window.scrollTo(0, position);
+        position += step;
+        if (position >= document.documentElement.scrollHeight) {
+          window.clearInterval(timer);
+          window.scrollTo(0, document.documentElement.scrollHeight);
+          window.setTimeout(resolve, 400);
+        }
+      }, 80);
+    });
+  });
+}
 
 for (const { path, name } of PAGES) {
   test(`production smoke: ${name}`, async ({ page }) => {
-    // 1. Navigate and wait for SPA to render
-    await page.goto(`${BASE_URL}${path}`, {
-      waitUntil: 'networkidle',
-      timeout: 30000,
+    const response = await page.goto(`${BASE_URL}${path}`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 30_000,
     });
 
-    // 2. Wait for content to render
-    await page.waitForTimeout(2000);
+    expect(response, `${name}: aucune réponse HTTP`).not.toBeNull();
+    expect(response?.status(), `${name}: statut HTTP invalide`).toBeLessThan(400);
 
-    // 3. Check page has content (not white screen)
-    const bodyText = await page.locator('body').textContent();
-    expect(bodyText?.length).toBeGreaterThan(50);
+    await expect(page.locator('body')).not.toBeEmpty();
+    await expect(page.locator('body')).not.toContainText('Application error');
+    await expect(page.locator('body')).not.toContainText('Unexpected Application Error');
 
-    // 4. Log image stats (non-blocking)
-    const imgStats = await page.evaluate(() => {
-      const all = document.querySelectorAll('img');
-      const loaded = Array.from(all).filter(i => i.complete && i.naturalWidth > 0).length;
-      return { total: all.length, loaded };
-    });
-    console.log(`  📊 ${name}: ${imgStats.loaded}/${imgStats.total} images loaded`);
+    const bodyText = (await page.locator('body').innerText()).trim();
+    expect(bodyText.length, `${name}: écran presque vide`).toBeGreaterThan(80);
+
+    await scrollThroughPage(page);
+    await page.waitForLoadState('networkidle').catch(() => undefined);
+    await page.waitForTimeout(800);
+
+    const brokenImages = await page.locator('img').evaluateAll((images) =>
+      images
+        .filter((image) => {
+          const img = image as HTMLImageElement;
+          return Boolean(img.currentSrc || img.src) && (!img.complete || img.naturalWidth === 0);
+        })
+        .map((image) => {
+          const img = image as HTMLImageElement;
+          return {
+            src: img.currentSrc || img.src,
+            alt: img.alt,
+          };
+        })
+    );
+
+    expect(brokenImages, `${name}: images cassées`).toEqual([]);
+
+    const overflow = await page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+    }));
+
+    expect(
+      overflow.scrollWidth - overflow.clientWidth,
+      `${name}: débordement horizontal de ${overflow.scrollWidth - overflow.clientWidth}px`
+    ).toBeLessThanOrEqual(4);
+
+    console.log(`✓ ${name}: contenu, images et largeur validés`);
   });
 }
