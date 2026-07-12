@@ -11,22 +11,41 @@ export default defineConfig(({ mode }) => {
 
   return {
     base,
-    plugins: [react(), VitePWA({
-      mode: 'development',
-      registerType: 'autoUpdate',
-      includeAssets: ['branding/*.svg', 'branding/*.png'],
-      manifest: false,
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,webp,ico,json}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: { cacheName: 'google-fonts', expiration: { maxEntries: 4, maxAgeSeconds: 365 * 24 * 60 * 60 } },
-          },
-        ],
-      },
-    })],
+    plugins: [
+      react(),
+      VitePWA({
+        mode: mode === 'development' ? 'development' : 'production',
+        registerType: 'autoUpdate',
+        includeAssets: ['branding/*.svg', 'branding/*.png'],
+        manifest: false,
+        workbox: {
+          cleanupOutdatedCaches: true,
+          clientsClaim: true,
+          skipWaiting: true,
+          globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,webp,ico,json}'],
+          navigateFallback: 'index.html',
+          runtimeCaching: [
+            {
+              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts-stylesheets',
+                expiration: { maxEntries: 4, maxAgeSeconds: 365 * 24 * 60 * 60 },
+              },
+            },
+            {
+              urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts-webfonts',
+                expiration: { maxEntries: 8, maxAgeSeconds: 365 * 24 * 60 * 60 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
+          ],
+        },
+      }),
+    ],
     resolve: {
       alias: {
         '@': path.resolve(projectRoot, 'src'),
