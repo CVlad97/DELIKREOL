@@ -30,6 +30,6 @@ test('catalogue: search and filters render', async ({ page }) => {
   const filtersButton = page.getByRole('button', { name: 'Filtres', exact: true });
   await expect(filtersButton).toBeVisible();
   await filtersButton.click();
-  await expect(page.getByText('Budget', { exact: true })).toBeVisible();
-  await expect(page.getByText('Commune', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Budget')).toBeVisible();
+  await expect(page.getByLabel('Commune')).toBeVisible();
 });
