@@ -1335,6 +1335,20 @@ export const mockProducts: LocalProduct[] = [
     ingredients: 'Cacahuète, lait végétal, sucre.',
     allergens: 'Arachide.'
   },
+  {
+    id: 'goute-mwen-pistache',
+    name: 'Gouté Mwen — Pistache (sans lactose)',
+    vendor: 'Gouté Mwen',
+    price: 2,
+    category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/pistache.jpg'),
+    description: 'Glace artisanale à la pistache, sans lactose. Onctueuse, parfumée et délicatement verte — un délice authentique des Antilles ! 🍦',
+    zone: 'Martinique',
+    available: true,
+    featured: true,
+    ingredients: 'Pistache, lait végétal, sucre.',
+    allergens: 'Fruits à coque.'
+  },
 ];
 
 export function getFeaturedProducts(): LocalProduct[] {
