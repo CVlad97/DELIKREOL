@@ -35,10 +35,16 @@ jobs:
       - name: Typecheck
         shell: bash
         run: |
-          if ! npx tsc --noEmit -p tsconfig.app.json --pretty false > /tmp/typecheck.log 2>&1; then
-            tail -n 80 /tmp/typecheck.log
-            exit 1
-          fi
+          npx tsc --noEmit -p tsconfig.app.json --pretty false 2>&1 | tee /tmp/typecheck.log
+          test ${PIPESTATUS[0]} -eq 0
+
+      - name: Upload TypeScript diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: typecheck-diagnostics
+          path: /tmp/typecheck.log
+          retention-days: 3
 
       - name: Lint
         run: npm run lint
