@@ -159,7 +159,7 @@ export function DiscoveryMapPage() {
     });
   };
 
-  const DISTANCE_COLORS = ['#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6'];
+  const DISTANCE_COLORS = ['hsl(var(--primary))', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6'];
   const FILTERS: { key: FilterType; label: string; icon: React.ElementType; count: number }[] = [
     { key: 'traiteurs', label: 'Traiteurs', icon: ChefHat, count: allPoints.filter(p => p.type === 'traiteurs').length },
     { key: 'relais', label: 'Points relais', icon: Package, count: allPoints.filter(p => p.type === 'relais').length },

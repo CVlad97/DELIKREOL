@@ -7,36 +7,36 @@
     --font-sans: 'Sora', system-ui, -apple-system, sans-serif;
     --font-display: 'Fraunces', Georgia, serif;
 
-    --background: 36 100% 98%;
-    --foreground: 18 32% 11%;
+    --background: 30 100% 97%;
+    --foreground: 18 40% 12%;
 
-    --primary: 21 92% 52%;
+    --primary: 21 92% 40%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 41 92% 60%;
-    --secondary-foreground: 20 20% 10%;
+    --secondary: 38 80% 45%;
+    --secondary-foreground: 20 30% 10%;
 
     --accent: 156 47% 24%;
     --accent-foreground: 0 0% 100%;
 
-    --success: 152 60% 42%;
+    --success: 152 60% 32%;
     --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%;
-    --warning-foreground: 20 20% 10%;
+    --warning-foreground: 20 30% 10%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 72% 45%;
     --destructive-foreground: 0 0% 100%;
 
     --muted: 30 42% 95%;
-    --muted-foreground: 20 10% 42%;
+    --muted-foreground: 20 12% 38%;
 
     --card: 0 0% 100%;
-    --card-foreground: 18 32% 11%;
+    --card-foreground: 18 40% 12%;
 
-    --border: 31 28% 88%;
-    --input: 31 28% 86%;
-    --ring: 21 92% 52%;
+    --border: 31 28% 85%;
+    --input: 31 28% 82%;
+    --ring: 21 92% 40%;
 
     --radius: 1rem;
 
@@ -54,9 +54,9 @@
     -moz-osx-font-smoothing: grayscale;
     line-height: 1.6;
     background-image:
-      radial-gradient(circle at top left, rgba(251, 146, 60, 0.08), transparent 28%),
-      radial-gradient(circle at top right, rgba(22, 101, 52, 0.06), transparent 24%),
-      linear-gradient(180deg, rgba(255, 248, 237, 1) 0%, rgba(255, 252, 247, 1) 100%);
+      radial-gradient(circle at top left, hsl(var(--primary) / 0.08), transparent 28%),
+      radial-gradient(circle at top right, hsl(var(--accent) / 0.06), transparent 24%),
+      linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--card)) 100%);
     background-attachment: fixed;
   }
 

@@ -17,7 +17,7 @@ interface MapPartner {
 }
 
 const COLORS = {
-  traiteur: { marker: '#f97316', bg: 'bg-orange-100', text: 'text-orange-700', icon: '🧑‍🍳' },
+  traiteur: { marker: 'hsl(var(--primary))', bg: 'bg-orange-100', text: 'text-orange-700', icon: '🧑‍🍳' },
   relais: { marker: '#3b82f6', bg: 'bg-blue-100', text: 'text-blue-700', icon: '📦' },
   livreur: { marker: '#22c55e', bg: 'bg-green-100', text: 'text-green-700', icon: '🛵' },
   client: { marker: '#8b5cf6', bg: 'bg-purple-100', text: 'text-purple-700', icon: '📍' },
@@ -114,7 +114,7 @@ export default function ExpandableGeoMap() {
       }
 
       allPoints.forEach(p => {
-        const color = COLORS[p.type]?.marker || '#f97316';
+        const color = COLORS[p.type]?.marker || 'hsl(var(--primary))';
         const icon = L.divIcon({
           className: 'custom-marker',
           html: `<div style="width:32px;height:32px;background:${color};border:3px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,0.3);">${COLORS[p.type]?.icon || '📍'}</div>`,
@@ -128,7 +128,7 @@ export default function ExpandableGeoMap() {
             <p style="font-weight:bold;margin:0 0 4px;font-size:14px">${p.name}</p>
             <p style="margin:0 0 2px;font-size:12px;color:#666">${p.type === 'traiteur' ? '🧑‍🍳 Traiteur' : p.type === 'relais' ? '📦 Point relais' : p.type === 'client' ? '📍 Vous' : '🛵 Livreur'}</p>
             ${p.commune ? `<p style="margin:0;font-size:12px;color:#666">📍 ${p.commune}</p>` : ''}
-            ${userPosition ? `<p style="margin:4px 0 0;font-size:12px;color:#f97316;font-weight:bold">${distFromUser(p)?.toFixed(1)} km</p>` : ''}
+            ${userPosition ? `<p style="margin:4px 0 0;font-size:12px;color:hsl(var(--primary));font-weight:bold">${distFromUser(p)?.toFixed(1)} km</p>` : ''}
             ${p.type !== 'client' ? `<a href="${getGoogleMapsLink({ latitude: p.latitude, longitude: p.longitude })}" target="_blank" style="display:inline-block;margin-top:6px;padding:4px 10px;background:#4285F4;color:white;border-radius:6px;text-decoration:none;font-size:11px">🗺️ Google Maps</a>` : ''}
           </div>
         `);

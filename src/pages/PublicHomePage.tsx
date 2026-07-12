@@ -1499,7 +1499,7 @@ export function PublicHomePage() {
           <a href="#accueil" className="brand-logo-frame flex items-center gap-3 rounded-2xl px-3 py-2" aria-label="DELIKREOL accueil">
             <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-12 w-12 rounded-2xl bg-white p-1.5 shadow-lg sm:h-14 sm:w-14" />
             <div className="leading-none">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#c2410c]">Local premium</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[hsl(var(--primary))]">Local premium</p>
               <p className="text-lg font-black tracking-tight text-[#2a190f] sm:text-xl">DELIKREOL</p>
             </div>
           </a>
@@ -1514,8 +1514,8 @@ export function PublicHomePage() {
 
           <div className="hidden items-end gap-3 xl:flex">
             <div className="text-right leading-tight">
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#c2410c]">Contact dédié</p>
-              <a href={`https://wa.me/${whatsappNumber}`} className="text-sm font-black text-[#2a190f] hover:text-[#c2410c]">
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[hsl(var(--primary))]">Contact dédié</p>
+              <a href={`https://wa.me/${whatsappNumber}`} className="text-sm font-black text-[#2a190f] hover:text-[hsl(var(--primary))]">
                 WhatsApp {formatWhatsAppLabel(whatsappNumber)}
               </a>
               <a href={publicSiteUrl} className="block text-[11px] font-semibold text-stone-500 hover:text-[#7c2d12]" target="_blank" rel="noreferrer">
@@ -1528,7 +1528,7 @@ export function PublicHomePage() {
                 event.preventDefault();
                 gotoCustomer();
               }}
-              className="inline-flex rounded-full bg-[#d95f2d] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/25 transition hover:-translate-y-0.5"
+              className="inline-flex rounded-full bg-[hsl(var(--primary))] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/25 transition hover:-translate-y-0.5"
             >
               Commander
             </a>
@@ -1557,7 +1557,7 @@ export function PublicHomePage() {
               <div className="mt-7 rounded-[2rem] border border-white/80 bg-white/88 p-3 shadow-2xl shadow-orange-900/10 backdrop-blur">
                 <div className="grid gap-3 lg:grid-cols-[1fr_210px]">
                   <label className="relative block">
-                    <Search className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-[#c2410c]" />
+                    <Search className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-[hsl(var(--primary))]" />
                     <input
                       value={query}
                       onChange={(event) => setQuery(event.target.value)}
@@ -1568,7 +1568,7 @@ export function PublicHomePage() {
                   <button
                     type="button"
                     onClick={() => gotoCustomer()}
-                    className="inline-flex h-16 items-center justify-center gap-2 rounded-[1.35rem] bg-[#d95f2d] px-5 text-sm font-black uppercase tracking-[0.12em] text-white shadow-xl shadow-orange-500/25 transition hover:-translate-y-0.5"
+                    className="inline-flex h-16 items-center justify-center gap-2 rounded-[1.35rem] bg-[hsl(var(--primary))] px-5 text-sm font-black uppercase tracking-[0.12em] text-white shadow-xl shadow-orange-500/25 transition hover:-translate-y-0.5"
                   >
                     Commander maintenant <ArrowRight className="h-5 w-5" />
                   </button>
@@ -1651,7 +1651,7 @@ export function PublicHomePage() {
                   type="button"
                   onClick={() => setMarketplaceTab('browse')}
                   className={`rounded-full px-4 py-2 text-sm font-black transition ${
-                    marketplaceTab === 'browse' ? 'bg-[#d95f2d] text-white shadow-lg shadow-orange-500/20' : 'text-[#7c2d12]'
+                    marketplaceTab === 'browse' ? 'bg-[hsl(var(--primary))] text-white shadow-lg shadow-orange-500/20' : 'text-[#7c2d12]'
                   }`}
                 >
                   Commander près de moi
@@ -1688,7 +1688,7 @@ export function PublicHomePage() {
                   <div className="mt-5 rounded-[1.75rem] border border-orange-100 bg-[#fffaf4] p-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">Proche de vous</p>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Proche de vous</p>
                         <h3 className="mt-1 text-xl font-black text-[#2a190f]">Les premières offres qui comptent</h3>
                       </div>
                       <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">
@@ -1737,7 +1737,7 @@ export function PublicHomePage() {
                   const space = featuredTraiteurSpaces.find((item) => item.name === profile.name);
                   return (
                     <article key={profile.name} className="overflow-hidden rounded-[1.75rem] border border-orange-100 bg-[#fffaf4] shadow-soft">
-                      <div className={`bg-gradient-to-br ${space?.gradient ?? 'from-[#7c3aed] via-[#ec4899] to-[#c2410c]'} p-5 text-white`}>
+                      <div className={`bg-gradient-to-br ${space?.gradient ?? 'from-[#7c3aed] via-[#ec4899] to-[hsl(var(--primary))]'} p-5 text-white`}>
                         <p className="text-xs font-black uppercase tracking-[0.22em] text-white/75">Storytelling traiteur</p>
                         <h3 className="mt-2 text-3xl font-black">{profile.name}</h3>
                         <p className="mt-3 text-sm leading-6 text-white/90">{profile.story}</p>
@@ -1745,11 +1745,11 @@ export function PublicHomePage() {
                       <div className="p-5">
                         <div className="grid gap-3 sm:grid-cols-2">
                           <div className="rounded-2xl border border-orange-100 bg-white p-4">
-                            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">Promesse</p>
+                            <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Promesse</p>
                             <p className="mt-2 text-sm leading-6 text-stone-600">{profile.promise}</p>
                           </div>
                           <div className="rounded-2xl border border-orange-100 bg-white p-4">
-                            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">Signature</p>
+                            <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Signature</p>
                             <p className="mt-2 text-sm leading-6 text-stone-600">{profile.specialty}</p>
                           </div>
                         </div>
@@ -1763,7 +1763,7 @@ export function PublicHomePage() {
                         <div className="mt-5 flex flex-wrap gap-3">
                           <a
                             href={buildTraiteurSpaceLink(baseUrl, normalizeSpaceSlug(profile.name))}
-                            className="inline-flex items-center justify-center gap-2 rounded-full bg-[#d95f2d] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/20 transition hover:-translate-y-0.5"
+                            className="inline-flex items-center justify-center gap-2 rounded-full bg-[hsl(var(--primary))] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/20 transition hover:-translate-y-0.5"
                           >
                             Voir la vitrine
                           </a>
@@ -1887,7 +1887,7 @@ export function PublicHomePage() {
                                 )}
                               </div>
                             </div>
-                            <strong className="shrink-0 text-lg font-black text-[#c2410c]">{formatEuro(item.price)}</strong>
+                            <strong className="shrink-0 text-lg font-black text-[hsl(var(--primary))]">{formatEuro(item.price)}</strong>
                           </div>
                         </div>
                       ))}
@@ -1896,7 +1896,7 @@ export function PublicHomePage() {
                     <div className="mt-5 flex flex-wrap gap-3">
                       <a
                         href={buildTraiteurSpaceLink(baseUrl, space.slug)}
-                        className="inline-flex items-center justify-center gap-2 rounded-full bg-[#d95f2d] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/20 transition hover:-translate-y-0.5"
+                        className="inline-flex items-center justify-center gap-2 rounded-full bg-[hsl(var(--primary))] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/20 transition hover:-translate-y-0.5"
                       >
                         Ouvrir la vitrine <ArrowRight className="h-4 w-4" />
                       </a>
@@ -1926,7 +1926,7 @@ export function PublicHomePage() {
                 <button
                   type="button"
                   onClick={() => gotoCustomer()}
-                  className="inline-flex w-fit items-center gap-2 rounded-full bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25"
+                  className="inline-flex w-fit items-center gap-2 rounded-full bg-[hsl(var(--primary))] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25"
                 >
                   Commander maintenant <ShoppingBag className="h-5 w-5" />
                 </button>
@@ -1941,7 +1941,7 @@ export function PublicHomePage() {
 
             <div className="mt-8 grid gap-4 rounded-[2rem] border border-orange-100 bg-[#24170f] p-4 shadow-elegant lg:grid-cols-[1fr_220px_220px_220px]">
               <label className="relative block">
-                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#c2410c]" />
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[hsl(var(--primary))]" />
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
@@ -1984,7 +1984,7 @@ export function PublicHomePage() {
                     type="button"
                     onClick={useCustomerPosition}
                     disabled={geoStatus === 'loading'}
-                    className="rounded-xl bg-[#d95f2d] px-4 py-2 text-sm font-black text-white disabled:opacity-60"
+                    className="rounded-xl bg-[hsl(var(--primary))] px-4 py-2 text-sm font-black text-white disabled:opacity-60"
                   >
                     Oui, autoriser
                   </button>
@@ -2008,7 +2008,7 @@ export function PublicHomePage() {
                   <CircleMarker
                     center={[customerMapPreviewLocation.lat, customerMapPreviewLocation.lng]}
                     radius={8}
-                    pathOptions={{ color: '#d95f2d', fillColor: '#d95f2d', fillOpacity: 0.9 }}
+                    pathOptions={{ color: 'hsl(var(--primary))', fillColor: 'hsl(var(--primary))', fillOpacity: 0.9 }}
                   >
                     <Popup>Votre position</Popup>
                   </CircleMarker>
@@ -2043,7 +2043,7 @@ export function PublicHomePage() {
                     onClick={() => setCategoryFilter(category)}
                     className={`shrink-0 rounded-xl border px-4 py-2 text-sm font-black transition ${
                       active
-                        ? 'border-transparent bg-[#d95f2d] text-white shadow-lg shadow-orange-500/20'
+                        ? 'border-transparent bg-[hsl(var(--primary))] text-white shadow-lg shadow-orange-500/20'
                         : 'border-orange-200 bg-white text-[#7c2d12] hover:-translate-y-0.5'
                     }`}
                   >
@@ -2068,7 +2068,7 @@ export function PublicHomePage() {
                 {filteredProductsUniqueImages.length > 0 && (
                   <>
                     <div className="mb-4 flex items-center justify-between gap-3">
-                      <p className="text-sm font-black uppercase tracking-[0.18em] text-[#c2410c]">Sélection en vedette</p>
+                      <p className="text-sm font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Sélection en vedette</p>
                       <span className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">{featuredProducts.length} cartes</span>
                     </div>
                     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -2147,7 +2147,7 @@ export function PublicHomePage() {
               </div>
 
               <aside className="rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
-                <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">Fiche produit</p>
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-[hsl(var(--primary))]">Fiche produit</p>
                 <h3 className="mt-2 text-2xl font-black text-[#2a190f]">Lecture rapide</h3>
                 <p className="mt-2 text-sm leading-6 text-stone-600">
                   Chaque fiche montre l’essentiel: nom du plat, prix, vendeur, rayon de livraison et bouton direct pour commander.
@@ -2162,7 +2162,7 @@ export function PublicHomePage() {
                       )}
                     </div>
                     <div className="space-y-3 p-4">
-                      <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">
+                      <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">
                         <BadgeCheck className="h-4 w-4" />
                         partenaire visible
                       </div>
@@ -2174,7 +2174,7 @@ export function PublicHomePage() {
                         <InfoLine label="Service" value="Retrait / livraison selon adresse client" />
                         <InfoLine label="Disponibilité" value={heroProduct.available ? 'Disponible' : 'À confirmer'} />
                       </div>
-                      <button type="button" onClick={() => addToSelection(heroProduct)} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white">
+                      <button type="button" onClick={() => addToSelection(heroProduct)} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[hsl(var(--primary))] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white">
                         Ajouter et commander
                       </button>
                     </div>
@@ -2212,7 +2212,7 @@ export function PublicHomePage() {
               </div>
               <div className="mt-8 overflow-hidden rounded-[1.5rem] border border-orange-100 bg-white">
                 <div className="border-b border-orange-100 bg-[#fff8ef] p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">Carte interactive</p>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Carte interactive</p>
                   <p className="mt-1 text-sm text-stone-600">
                     Bleu: vendeur (rayon 3 km). Vert: client en zone. Rouge: client hors zone. Violet: livreur pilote. Orange: point relais.
                   </p>
@@ -2260,7 +2260,7 @@ export function PublicHomePage() {
                       key={`relay-${relay.id}`}
                       center={[relay.lat, relay.lng]}
                       radius={7}
-                      pathOptions={{ color: '#ea580c', fillColor: '#f97316', fillOpacity: 0.9 }}
+                      pathOptions={{ color: '#ea580c', fillColor: 'hsl(var(--primary))', fillOpacity: 0.9 }}
                     >
                       <Popup>
                         <strong>{relay.name}</strong>
@@ -2322,7 +2322,7 @@ export function PublicHomePage() {
             <div className="mt-4 flex flex-wrap gap-3">
               <a
                 href={proSpaceUrl}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[hsl(var(--primary))] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white"
               >
                 Ouvrir espace pro <ChevronRight className="h-4 w-4" />
               </a>
@@ -2359,7 +2359,7 @@ export function PublicHomePage() {
         </section>
 
         <section id="contact" className="mx-auto max-w-7xl px-4 py-14">
-          <div className="grid gap-4 rounded-[1.75rem] border border-orange-100 bg-[linear-gradient(135deg,_#24170f_0%,_#392115_52%,_#d95f2d_180%)] p-6 text-white lg:grid-cols-[1.1fr_0.9fr] lg:p-8">
+          <div className="grid gap-4 rounded-[1.75rem] border border-orange-100 bg-[linear-gradient(135deg,_#24170f_0%,_#392115_52%,_hsl(var(--primary))_180%)] p-6 text-white lg:grid-cols-[1.1fr_0.9fr] lg:p-8">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-200">Contact / WhatsApp</p>
               <h2 className="mt-3 text-3xl font-black sm:text-5xl">Une réponse rapide, directe, locale.</h2>
@@ -2425,11 +2425,11 @@ export function PublicHomePage() {
       <div data-testid="mobile-cart-bar" className="fixed inset-x-4 bottom-4 z-50 md:hidden">
         <div className="rounded-[1.5rem] border border-orange-100 bg-white p-3 shadow-2xl shadow-orange-900/20">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#fff3e5] text-[#d95f2d]">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#fff3e5] text-[hsl(var(--primary))]">
               <ShoppingBag className="h-6 w-6" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">
                 {selectedProducts.length > 0 ? `${selectedProducts.length} article(s)` : 'Panier vide'}
               </p>
               <p className="truncate text-sm font-bold text-[#2a190f]">
@@ -2441,7 +2441,7 @@ export function PublicHomePage() {
             <button
               type="button"
               onClick={selectedProducts.length > 0 ? scrollToCheckoutPanel : () => gotoCustomer()}
-              className="inline-flex items-center justify-center rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black text-white"
+              className="inline-flex items-center justify-center rounded-2xl bg-[hsl(var(--primary))] px-4 py-3 text-sm font-black text-white"
             >
               {selectedProducts.length > 0 ? 'Voir panier' : 'Commander'}
             </button>
@@ -2474,7 +2474,7 @@ export function PublicHomePage() {
 function BadgeRow() {
   return (
     <div className="flex flex-wrap gap-2">
-      <span className="rounded-lg border border-orange-200 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-[#c2410c] shadow-sm">
+      <span className="rounded-lg border border-orange-200 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))] shadow-sm">
         plateforme locale premium
       </span>
       <span className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-800">
@@ -2514,7 +2514,7 @@ function ZoneCard({ zone }: { zone: string }) {
   return (
     <div className="rounded-[1.6rem] border border-white/70 bg-white/88 px-4 py-4 shadow-soft backdrop-blur">
       <div className="flex items-center gap-2">
-        <span className="h-2.5 w-2.5 rounded-full bg-[#d95f2d] shadow-[0_0_0_5px_rgba(217,95,45,0.12)]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--primary))] shadow-[0_0_0_5px_rgba(217,95,45,0.12)]" />
         <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">commune</p>
       </div>
       <p className="mt-3 text-base font-black text-[#2a190f]">{zone}</p>
@@ -2526,7 +2526,7 @@ function ZoneCard({ zone }: { zone: string }) {
 function ValueCard({ title, text, icon: Icon }: { title: string; text: string; icon: ComponentType<{ className?: string }> }) {
   return (
     <div className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-soft">
-      <div className="inline-flex rounded-2xl bg-[#fff3e5] p-3 text-[#c2410c]">
+      <div className="inline-flex rounded-2xl bg-[#fff3e5] p-3 text-[hsl(var(--primary))]">
         <Icon className="h-5 w-5" />
       </div>
       <h3 className="mt-4 text-xl font-black text-[#2a190f]">{title}</h3>
@@ -2555,7 +2555,7 @@ function RoleCard({
           <h3 className="text-xl font-black text-[#2a190f]">{title}</h3>
           <p className="mt-2 text-sm leading-6 text-stone-600">{text}</p>
         </div>
-        <span className="rounded-2xl bg-[#fff3e5] p-3 text-[#c2410c]">
+        <span className="rounded-2xl bg-[#fff3e5] p-3 text-[hsl(var(--primary))]">
           <Icon className="h-5 w-5" />
         </span>
       </div>
@@ -2569,7 +2569,7 @@ function RoleCard({
 function StepCard({ index, title, text }: { index: number; title: string; text: string }) {
   return (
     <div className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-soft">
-      <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#d95f2d] text-sm font-black text-white">{index}</div>
+      <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[hsl(var(--primary))] text-sm font-black text-white">{index}</div>
       <h3 className="mt-4 text-xl font-black text-[#2a190f]">{title}</h3>
       <p className="mt-2 text-sm leading-6 text-stone-600">{text}</p>
     </div>
@@ -2618,7 +2618,7 @@ function ProductCard({
           type="button"
           onClick={onAdd}
           disabled={product.price == null}
-          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-orange-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[hsl(var(--primary))] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-orange-500/20 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {product.price == null ? 'Prix à confirmer' : 'Ajouter au panier'}
           <ArrowRight className="h-4 w-4" />
@@ -2641,7 +2641,7 @@ function VendorCard({ vendor }: { vendor: PublicCatalogVendor }) {
     <article className="rounded-[1.9rem] border border-white/80 bg-white/90 p-5 shadow-soft backdrop-blur">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c2410c]">{vendor.business_type}</p>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">{vendor.business_type}</p>
           <h3 className="mt-2 text-2xl font-black text-[#2a190f]">{vendor.business_name}</h3>
         </div>
         <BadgeCheck className="h-7 w-7 text-emerald-600" />
@@ -2665,7 +2665,7 @@ function VendorCard({ vendor }: { vendor: PublicCatalogVendor }) {
               <div key={`${vendor.id}-${event.title}`} className="rounded-2xl bg-white p-4 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <h4 className="text-sm font-black text-[#2a190f]">{event.title}</h4>
-                  <span className="rounded-full bg-[#fff4e7] px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#c2410c]">
+                  <span className="rounded-full bg-[#fff4e7] px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[hsl(var(--primary))]">
                     {event.status}
                   </span>
                 </div>
@@ -2796,7 +2796,7 @@ function SelectionPanel({
     <aside data-testid="cart-panel" className="h-fit rounded-[2rem] border border-orange-100 bg-white p-5 shadow-elegant lg:sticky lg:top-28">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="rounded-2xl bg-[#fff3e5] p-3 text-[#d95f2d]">
+          <span className="rounded-2xl bg-[#fff3e5] p-3 text-[hsl(var(--primary))]">
             <ShoppingBag className="h-5 w-5" />
           </span>
           <div>
@@ -2842,7 +2842,7 @@ function SelectionPanel({
                   key={mode}
                   onClick={() => onFulfillmentModeChange(mode as 'delivery' | 'pickup')}
                   className={`rounded-2xl border px-3 py-3 text-sm font-black ${
-                    active ? 'border-[#d95f2d] bg-[#fff3e5] text-[#7c2d12]' : 'border-orange-100 bg-white text-stone-500'
+                    active ? 'border-[hsl(var(--primary))] bg-[#fff3e5] text-[#7c2d12]' : 'border-orange-100 bg-white text-stone-500'
                   }`}
                 >
                   {label}
@@ -2918,7 +2918,7 @@ function SelectionPanel({
                     type="button"
                     onClick={onConfirmCustomerPosition}
                     disabled={geoStatus === 'loading'}
-                    className="rounded-xl bg-[#d95f2d] px-3 py-2 text-xs font-black text-white disabled:opacity-60"
+                    className="rounded-xl bg-[hsl(var(--primary))] px-3 py-2 text-xs font-black text-white disabled:opacity-60"
                   >
                     Oui, autoriser
                   </button>
@@ -2947,7 +2947,7 @@ function SelectionPanel({
                   <CircleMarker
                     center={[mapPreviewLocation.lat, mapPreviewLocation.lng]}
                     radius={8}
-                    pathOptions={{ color: '#d95f2d', fillColor: '#d95f2d', fillOpacity: 0.9 }}
+                    pathOptions={{ color: 'hsl(var(--primary))', fillColor: 'hsl(var(--primary))', fillOpacity: 0.9 }}
                   >
                     <Popup>Votre position</Popup>
                   </CircleMarker>
@@ -3043,7 +3043,7 @@ function SelectionPanel({
                 type="button"
                 onClick={onConfirmOrder}
                 disabled={checkoutStatus.kind === 'saving' || (fulfillmentMode === 'delivery' && deliveryCoverageStatus === 'out_zone')}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#d95f2d] px-4 py-3 text-sm font-black text-white disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[hsl(var(--primary))] px-4 py-3 text-sm font-black text-white disabled:opacity-60"
               >
                 <ShoppingBag className="h-4 w-4" /> Enregistrer la commande
               </button>
@@ -3066,7 +3066,7 @@ function SelectionPanel({
 
           <div className="rounded-2xl border border-orange-100 bg-white p-4">
             <div className="flex items-center gap-2">
-              <Bell className="h-4 w-4 text-[#d95f2d]" />
+              <Bell className="h-4 w-4 text-[hsl(var(--primary))]" />
               <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">Alertes utiles</p>
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2">
@@ -3095,7 +3095,7 @@ function SelectionPanel({
             </button>
           </div>
 
-          <button onClick={onConfirmOrder} disabled={checkoutStatus.kind === 'saving'} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d95f2d] px-5 py-3 font-black uppercase tracking-[0.14em] text-white disabled:opacity-60">
+          <button onClick={onConfirmOrder} disabled={checkoutStatus.kind === 'saving'} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[hsl(var(--primary))] px-5 py-3 font-black uppercase tracking-[0.14em] text-white disabled:opacity-60">
             {checkoutStatus.kind === 'saving' ? 'Enregistrement...' : 'Confirmer la commande'} <ArrowRight className="h-4 w-4" />
           </button>
           {checkoutStatus.kind === 'error' && (
@@ -3141,13 +3141,13 @@ function SelectionPanel({
 function EmptyState({ title, text, action }: { title: string; text: string; action?: string }) {
   return (
     <div className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-soft">
-      <div className="inline-flex rounded-2xl bg-[#fff3e5] p-3 text-[#c2410c]">
+      <div className="inline-flex rounded-2xl bg-[#fff3e5] p-3 text-[hsl(var(--primary))]">
         <Package className="h-6 w-6" />
       </div>
       <h3 className="mt-4 text-2xl font-black text-[#2a190f]">{title}</h3>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">{text}</p>
       {action && (
-        <a href={action} className="mt-5 inline-flex rounded-2xl bg-[#d95f2d] px-5 py-3 text-sm font-black text-white">
+        <a href={action} className="mt-5 inline-flex rounded-2xl bg-[hsl(var(--primary))] px-5 py-3 text-sm font-black text-white">
           Devenir partenaire
         </a>
       )}
@@ -3172,7 +3172,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
 function ProofCard({ title }: { title: string }) {
   return (
     <div className="rounded-[1.5rem] border border-orange-100 bg-white p-5 shadow-soft">
-      <div className="inline-flex rounded-2xl bg-[#fff3e5] p-3 text-[#c2410c]">
+      <div className="inline-flex rounded-2xl bg-[#fff3e5] p-3 text-[hsl(var(--primary))]">
         <Star className="h-5 w-5" />
       </div>
       <h3 className="mt-4 text-lg font-black text-[#2a190f]">{title}</h3>
@@ -3186,7 +3186,7 @@ function ProofCard({ title }: { title: string }) {
 function SectionTitle({ eyebrow, title, text }: { eyebrow: string; title: string; text: string }) {
   return (
     <div>
-      <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">{eyebrow}</p>
+      <p className="text-xs font-black uppercase tracking-[0.24em] text-[hsl(var(--primary))]">{eyebrow}</p>
       <h2 className="mt-2 max-w-3xl font-display text-3xl font-black tracking-tight text-[#2a190f] sm:text-4xl">{title}</h2>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600 sm:text-base sm:leading-7">{text}</p>
     </div>
@@ -3333,7 +3333,7 @@ function MiniMetric({ label, value }: { label: string; value: string }) {
 function StatChip({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-[1.25rem] border border-orange-100 bg-[#fffaf4] px-4 py-3 shadow-sm">
-      <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#c2410c]">{label}</p>
+      <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[hsl(var(--primary))]">{label}</p>
       <p className="mt-1 text-base font-black text-[#2a190f]">{value}</p>
     </div>
   );
@@ -3347,7 +3347,7 @@ function HeroFallback({ name, loading, configured }: { name: string; loading?: b
   return (
     <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_30%_30%,rgba(217,95,45,0.28),transparent_35%),linear-gradient(135deg,#fde9d6,#fff3e4,#dfefe9)]">
       <div className="rounded-full bg-white/85 px-6 py-4 text-center shadow-lg">
-        <Utensils className="mx-auto h-8 w-8 text-[#c2410c]" />
+        <Utensils className="mx-auto h-8 w-8 text-[hsl(var(--primary))]" />
         <p className="mt-2 max-w-[220px] text-sm font-black text-[#2a190f]">
           {loading ? 'Chargement...' : configured === false ? 'Catalogue non configuré' : name}
         </p>
@@ -3367,7 +3367,7 @@ function NavLink({ href, children }: { href: string; children: ReactNode }) {
 function FooterBlock({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="space-y-3">
-      <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">{title}</p>
+      <p className="text-xs font-black uppercase tracking-[0.22em] text-[hsl(var(--primary))]">{title}</p>
       <div className="space-y-2">{children}</div>
     </div>
   );

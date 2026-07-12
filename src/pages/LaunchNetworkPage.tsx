@@ -220,9 +220,9 @@ export function LaunchNetworkPage() {
             <a href="#client" className="rounded-full border border-orange-200 px-5 py-2.5 text-sm font-bold text-[#7c2d12]">Client</a>
             <a href="#ops" className="rounded-full border border-orange-200 px-5 py-2.5 text-sm font-bold text-[#7c2d12]">Ops</a>
             <a href="#partenaires" className="rounded-full border border-orange-200 px-5 py-2.5 text-sm font-bold text-[#7c2d12]">Partenaires</a>
-            <a href="#lancement" className="rounded-full bg-[#f97316] px-5 py-2.5 text-sm font-black text-white">Pret a partager</a>
+            <a href="#lancement" className="rounded-full bg-[hsl(var(--primary))] px-5 py-2.5 text-sm font-black text-white">Pret a partager</a>
           </nav>
-          <a href={shareLink} className="rounded-full bg-[#f97316] px-4 py-2 text-sm font-black text-white md:hidden">Partager</a>
+          <a href={shareLink} className="rounded-full bg-[hsl(var(--primary))] px-4 py-2 text-sm font-black text-white md:hidden">Partager</a>
         </div>
       </header>
 
@@ -230,7 +230,7 @@ export function LaunchNetworkPage() {
         <section className="relative overflow-hidden border-b border-orange-100 bg-[radial-gradient(circle_at_10%_15%,rgba(251,146,60,0.24),transparent_30%),radial-gradient(circle_at_90%_8%,rgba(16,185,129,0.18),transparent_30%),linear-gradient(135deg,#fff7ed_0%,#fff_46%,#fff4e6_100%)]">
           <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-[1.05fr_0.95fr] md:py-16 lg:py-20">
             <div className="flex flex-col justify-center">
-              <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-orange-200 bg-white/80 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-[#c2410c] shadow-sm">
+              <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-orange-200 bg-white/80 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-[hsl(var(--primary))] shadow-sm">
                 <MapPin className="h-4 w-4" /> Martinique uniquement
               </div>
               <h1 className="max-w-5xl text-4xl font-black tracking-tight text-[#301607] md:text-6xl lg:text-7xl">
@@ -240,7 +240,7 @@ export function LaunchNetworkPage() {
                 DELIKREOL est presente comme une plateforme directement lisible : commande client, suivi de livraison, cockpit operationnel, validation humaine, reseau partenaires et lancement par zone pilote.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <a href="#client" className="inline-flex items-center gap-2 rounded-2xl bg-[#f97316] px-6 py-4 font-black text-white shadow-xl shadow-orange-500/25">Voir le parcours client <ArrowRight className="h-5 w-5" /></a>
+                <a href="#client" className="inline-flex items-center gap-2 rounded-2xl bg-[hsl(var(--primary))] px-6 py-4 font-black text-white shadow-xl shadow-orange-500/25">Voir le parcours client <ArrowRight className="h-5 w-5" /></a>
                 <a href="#ops" className="inline-flex items-center gap-2 rounded-2xl border border-orange-200 bg-white px-6 py-4 font-bold text-[#7c2d12]">Voir le cockpit ops</a>
                 <a href="#partenaires" className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-4 font-bold text-emerald-800">Voir le reseau partenaire</a>
               </div>
@@ -253,7 +253,7 @@ export function LaunchNetworkPage() {
             </div>
 
             <div className="rounded-[2rem] border border-orange-100 bg-white/92 p-6 shadow-2xl shadow-orange-900/10 backdrop-blur">
-              <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">Etat de la plateforme</p>
+              <p className="text-xs font-black uppercase tracking-[0.24em] text-[hsl(var(--primary))]">Etat de la plateforme</p>
               <h2 className="mt-3 text-3xl font-black text-[#301607]">Une facade faite pour etre partagee presque immediatement.</h2>
               <p className="mt-4 text-sm leading-6 text-stone-600">
                 En quelques secondes, le visiteur comprend ce que voit le client, ce que gere l exploitation, comment les partenaires entrent, et comment un lancement pilote peut tourner rapidement.
@@ -283,7 +283,7 @@ export function LaunchNetworkPage() {
               <div className="rounded-[1.75rem] border border-orange-100 bg-[#fff8ed] p-6 shadow-sm">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">Commande exemple</p>
+                    <p className="text-xs font-black uppercase tracking-[0.24em] text-[hsl(var(--primary))]">Commande exemple</p>
                     <h3 className="mt-2 text-2xl font-black text-[#301607]">Plateau creole + jus local</h3>
                     <p className="mt-1 text-sm text-stone-500">Fort-de-France - livraison domicile ou point relais selon zone</p>
                   </div>
@@ -336,7 +336,7 @@ export function LaunchNetworkPage() {
               <div className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-sm">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">Mode d exploitation</p>
+                    <p className="text-xs font-black uppercase tracking-[0.24em] text-[hsl(var(--primary))]">Mode d exploitation</p>
                     <h3 className="mt-2 text-2xl font-black text-[#301607]">Semi-automatise, jamais aveugle</h3>
                   </div>
                   <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-800">Reprise en main humaine</span>
@@ -399,7 +399,7 @@ export function LaunchNetworkPage() {
                     <input value={partnerForm.activity_type} onChange={(event) => setPartnerForm((current) => ({ ...current, activity_type: event.target.value }))} placeholder="Type d activite" className={inputClass()} />
                     <textarea value={partnerForm.opening_hours} onChange={(event) => setPartnerForm((current) => ({ ...current, opening_hours: event.target.value }))} placeholder="Horaires et creneaux" className={textareaClass('sm:col-span-2')} rows={3} />
                   </div>
-                  <button type="submit" disabled={partnerStatus.kind === 'saving'} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#f97316] px-5 py-4 font-black text-white disabled:opacity-70">{partnerStatus.kind === 'saving' ? 'Envoi en cours...' : 'Envoyer la demande partenaire'}</button>
+                  <button type="submit" disabled={partnerStatus.kind === 'saving'} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[hsl(var(--primary))] px-5 py-4 font-black text-white disabled:opacity-70">{partnerStatus.kind === 'saving' ? 'Envoi en cours...' : 'Envoyer la demande partenaire'}</button>
                   <StatusBanner status={partnerStatus} />
                 </form>
               </FormCard>
@@ -424,7 +424,7 @@ export function LaunchNetworkPage() {
                     <input value={productForm.stock_quantity} onChange={(event) => setProductForm((current) => ({ ...current, stock_quantity: event.target.value }))} placeholder="Stock" className={inputClass()} />
                     <textarea value={productForm.description} onChange={(event) => setProductForm((current) => ({ ...current, description: event.target.value }))} placeholder="Description courte" className={textareaClass('sm:col-span-2')} rows={3} />
                     <label className="flex items-center justify-between rounded-2xl border border-dashed border-orange-200 bg-orange-50/50 px-4 py-3 text-sm font-semibold text-stone-600 sm:col-span-2">
-                      <span className="inline-flex items-center gap-2"><Camera className="h-4 w-4 text-[#c2410c]" />{productPhoto ? productPhoto.name : 'Ajouter une photo produit'}</span>
+                      <span className="inline-flex items-center gap-2"><Camera className="h-4 w-4 text-[hsl(var(--primary))]" />{productPhoto ? productPhoto.name : 'Ajouter une photo produit'}</span>
                       <input type="file" accept="image/*" className="hidden" onChange={(event) => setProductPhoto(event.target.files?.[0] ?? null)} />
                       <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">Choisir</span>
                     </label>
@@ -458,7 +458,7 @@ export function LaunchNetworkPage() {
               <div className="rounded-[1.75rem] border border-white/10 bg-white/8 p-6">
                 <p className="text-sm font-black text-orange-200">Actions immediates</p>
                 <div className="mt-4 flex flex-wrap gap-3">
-                  <a href={shareLink} className="rounded-2xl bg-[#f97316] px-5 py-4 font-black text-white">Partager maintenant</a>
+                  <a href={shareLink} className="rounded-2xl bg-[hsl(var(--primary))] px-5 py-4 font-black text-white">Partager maintenant</a>
                   <a href={partnerLink} className="rounded-2xl border border-white/20 px-5 py-4 font-bold text-white">Recruter des partenaires</a>
                   <a href={proLink} className="rounded-2xl border border-emerald-300 bg-emerald-400 px-5 py-4 font-black text-emerald-950">Recevoir une demande pro</a>
                 </div>
@@ -488,7 +488,7 @@ export function LaunchNetworkPage() {
 
       <div className="fixed inset-x-0 bottom-0 z-50 border-t border-orange-100 bg-white/95 p-3 shadow-2xl backdrop-blur md:hidden">
         <div className="mx-auto grid max-w-md grid-cols-4 gap-2 text-center text-xs font-black">
-          <a href="#client" className="rounded-xl bg-[#f97316] px-2 py-3 text-white">Client</a>
+          <a href="#client" className="rounded-xl bg-[hsl(var(--primary))] px-2 py-3 text-white">Client</a>
           <a href="#ops" className="rounded-xl border border-orange-200 px-2 py-3 text-[#7c2d12]">Ops</a>
           <a href="#partenaires" className="rounded-xl border border-orange-200 px-2 py-3 text-[#7c2d12]">Pro</a>
           <a href="#lancement" className="rounded-xl border border-emerald-200 bg-emerald-50 px-2 py-3 text-emerald-800">Go</a>
@@ -499,7 +499,7 @@ export function LaunchNetworkPage() {
 }
 
 function SectionIntro({ eyebrow, title, text }: { eyebrow: string; title: string; text: string }) {
-  return <div><p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">{eyebrow}</p><h2 className="mt-2 text-3xl font-black tracking-tight text-[#301607] md:text-4xl">{title}</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600">{text}</p></div>;
+  return <div><p className="text-xs font-black uppercase tracking-[0.24em] text-[hsl(var(--primary))]">{eyebrow}</p><h2 className="mt-2 text-3xl font-black tracking-tight text-[#301607] md:text-4xl">{title}</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600">{text}</p></div>;
 }
 
 function TrustPill({ icon, label }: { icon: ReactNode; label: string }) {
@@ -511,15 +511,15 @@ function StatCard({ label, value }: { label: string; value: string }) {
 }
 
 function ReadyFlag({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-2xl border border-orange-100 bg-orange-50/60 px-4 py-3 text-sm font-bold text-[#7c2d12]"><span className="mr-2 text-[#f97316]">●</span>{label} : {value}</div>;
+  return <div className="rounded-2xl border border-orange-100 bg-orange-50/60 px-4 py-3 text-sm font-bold text-[#7c2d12]"><span className="mr-2 text-[hsl(var(--primary))]">●</span>{label} : {value}</div>;
 }
 
 function FeatureCard({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
-  return <div className="rounded-[1.5rem] border border-orange-100 bg-white p-6 shadow-sm"><div className="mb-4 inline-flex rounded-2xl bg-orange-100 p-3 text-[#c2410c]">{icon}</div><h3 className="text-xl font-black text-[#301607]">{title}</h3><p className="mt-2 text-sm leading-6 text-stone-600">{text}</p></div>;
+  return <div className="rounded-[1.5rem] border border-orange-100 bg-white p-6 shadow-sm"><div className="mb-4 inline-flex rounded-2xl bg-orange-100 p-3 text-[hsl(var(--primary))]">{icon}</div><h3 className="text-xl font-black text-[#301607]">{title}</h3><p className="mt-2 text-sm leading-6 text-stone-600">{text}</p></div>;
 }
 
 function MiniCard({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
-  return <div className="rounded-[1.25rem] border border-orange-100 bg-white p-4 shadow-sm"><div className="mb-3 inline-flex rounded-xl bg-orange-100 p-2 text-[#c2410c]">{icon}</div><h4 className="text-sm font-black text-[#301607]">{title}</h4><p className="mt-1 text-sm leading-6 text-stone-600">{text}</p></div>;
+  return <div className="rounded-[1.25rem] border border-orange-100 bg-white p-4 shadow-sm"><div className="mb-3 inline-flex rounded-xl bg-orange-100 p-2 text-[hsl(var(--primary))]">{icon}</div><h4 className="text-sm font-black text-[#301607]">{title}</h4><p className="mt-1 text-sm leading-6 text-stone-600">{text}</p></div>;
 }
 
 function TimelineItem({ title, text, active }: { title: string; text: string; active?: boolean }) {
@@ -539,7 +539,7 @@ function DarkInfoCard({ title, icon, children }: { title: string; icon: ReactNod
 }
 
 function FormCard({ title, icon, children }: { title: string; icon: ReactNode; children: ReactNode }) {
-  return <div className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-sm"><div className="mb-4 flex items-center gap-3 text-[#c2410c]">{icon}<h3 className="text-xl font-black text-[#301607]">{title}</h3></div>{children}</div>;
+  return <div className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-sm"><div className="mb-4 flex items-center gap-3 text-[hsl(var(--primary))]">{icon}<h3 className="text-xl font-black text-[#301607]">{title}</h3></div>{children}</div>;
 }
 
 function LaunchCard({ title, text }: { title: string; text: string }) {

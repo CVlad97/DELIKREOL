@@ -91,7 +91,7 @@ function SignupsByCategory() {
                 <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-500"
-                    style={{ width: `${pct}%`, backgroundColor: cat.color.match(/bg-(\w+)-(\d+)/)?.[0]?.replace('text-', '') || '#f97316' }}
+                    style={{ width: `${pct}%`, backgroundColor: cat.color.match(/bg-(\w+)-(\d+)/)?.[0]?.replace('text-', '') || 'hsl(var(--primary))' }}
                   />
                 </div>
               </div>
@@ -138,7 +138,7 @@ function ConversionFunnel() {
                 style={{
                   width: `${step.pct}%`,
                   background: i === 0
-                    ? 'linear-gradient(90deg, #f97316, #fb923c)'
+                    ? 'linear-gradient(90deg, hsl(var(--primary)), #fb923c)'
                     : i === 1
                       ? 'linear-gradient(90deg, #8b5cf6, #a78bfa)'
                       : i === 2

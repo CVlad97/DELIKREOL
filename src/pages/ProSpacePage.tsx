@@ -8,7 +8,7 @@ export function ProSpacePage() {
       <div className="min-h-screen bg-[#fbf4ea] text-[#2a190f]">
         <main className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
         <div className="rounded-[2rem] border border-orange-100 bg-white p-6 shadow-soft sm:p-8">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">DELIKREOL</p>
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-[hsl(var(--primary))]">DELIKREOL</p>
           <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Espace DeliKreol</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600">
             Choisissez votre entrée selon votre rôle : client, partenaire, livreur, point relais ou admin.
@@ -19,7 +19,7 @@ export function ProSpacePage() {
               to="/compte"
               className="rounded-[1.4rem] border border-orange-200 bg-[#fff8ef] p-5 transition hover:-translate-y-0.5"
             >
-              <div className="inline-flex rounded-xl bg-white p-2 text-[#d95f2d]">
+              <div className="inline-flex rounded-xl bg-white p-2 text-[hsl(var(--primary))]">
                 <UserRound className="h-5 w-5" />
               </div>
               <h2 className="mt-3 text-xl font-black">Mon espace client</h2>
@@ -33,7 +33,7 @@ export function ProSpacePage() {
               to="/devenir-partenaire"
               className="rounded-[1.4rem] border border-orange-200 bg-[#fff8ef] p-5 transition hover:-translate-y-0.5"
             >
-              <div className="inline-flex rounded-xl bg-white p-2 text-[#d95f2d]">
+              <div className="inline-flex rounded-xl bg-white p-2 text-[hsl(var(--primary))]">
                 <Store className="h-5 w-5" />
               </div>
               <h2 className="mt-3 text-xl font-black">Devenir partenaire</h2>
@@ -47,7 +47,7 @@ export function ProSpacePage() {
               to="/partenaire"
               className="rounded-[1.4rem] border border-orange-200 bg-white p-5 transition hover:-translate-y-0.5"
             >
-              <div className="inline-flex rounded-xl bg-[#fff3e5] p-2 text-[#d95f2d]">
+              <div className="inline-flex rounded-xl bg-[#fff3e5] p-2 text-[hsl(var(--primary))]">
                 <Building2 className="h-5 w-5" />
               </div>
               <h2 className="mt-3 text-xl font-black">Accès partenaire</h2>
@@ -61,7 +61,7 @@ export function ProSpacePage() {
               to="/admin"
               className="rounded-[1.4rem] border border-orange-200 bg-white p-5 transition hover:-translate-y-0.5"
             >
-              <div className="inline-flex rounded-xl bg-[#fff3e5] p-2 text-[#d95f2d]">
+              <div className="inline-flex rounded-xl bg-[#fff3e5] p-2 text-[hsl(var(--primary))]">
                 <ShieldCheck className="h-5 w-5" />
               </div>
               <h2 className="mt-3 text-xl font-black">Accès admin</h2>
@@ -75,7 +75,7 @@ export function ProSpacePage() {
               to="/"
               className="rounded-[1.4rem] border border-orange-200 bg-white p-5 transition hover:-translate-y-0.5"
             >
-              <div className="inline-flex rounded-xl bg-[#fff3e5] p-2 text-[#d95f2d]">
+              <div className="inline-flex rounded-xl bg-[#fff3e5] p-2 text-[hsl(var(--primary))]">
                 <Truck className="h-5 w-5" />
               </div>
               <h2 className="mt-3 text-xl font-black">Retour accueil</h2>

@@ -126,7 +126,7 @@ export function TraiteursPage() {
           <a href={`${baseUrl}?view=customer`} className="flex items-center gap-3 rounded-2xl px-2 py-1">
             <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-11 w-11 rounded-2xl bg-white p-1.5 shadow-sm" />
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#c2410c]">Espace traiteurs</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[hsl(var(--primary))]">Espace traiteurs</p>
               <p className="text-lg font-black tracking-tight text-[#2a190f]">DELIKREOL</p>
             </div>
           </a>
@@ -145,7 +145,7 @@ export function TraiteursPage() {
             </a>
             <a
               href={`${baseUrl}?view=customer`}
-              className="inline-flex items-center justify-center rounded-full bg-[#d95f2d] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/25 transition hover:-translate-y-0.5"
+              className="inline-flex items-center justify-center rounded-full bg-[hsl(var(--primary))] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/25 transition hover:-translate-y-0.5"
             >
               Commander
             </a>
@@ -172,7 +172,7 @@ export function TraiteursPage() {
 
           <div className="mt-5 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2410c]">Vitrines locales</p>
+              <p className="text-xs font-black uppercase tracking-[0.24em] text-[hsl(var(--primary))]">Vitrines locales</p>
               <h1 className="mt-3 max-w-3xl text-4xl font-black leading-[0.95] tracking-tight sm:text-6xl">
                 Des espaces traiteurs clairs, des prix lisibles, une commande directe.
               </h1>
@@ -294,7 +294,7 @@ export function TraiteursPage() {
                 <Separator className="mx-6 bg-orange-100" />
 
                 <div className="p-6">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">Points forts</p>
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-[hsl(var(--primary))]">Points forts</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {activeSpace.highlights.map((item) => (
                       <Badge key={item} variant="outline" className="rounded-full border-orange-200 bg-[#fffaf3] text-[#7c2d12]">
@@ -369,7 +369,7 @@ export function TraiteursPage() {
                       </div>
 
                       <div className="rounded-[1.35rem] border border-orange-100 bg-[#fffaf3] p-4">
-                        <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">Spécialité</p>
+                        <p className="text-xs font-black uppercase tracking-[0.22em] text-[hsl(var(--primary))]">Spécialité</p>
                         <p className="mt-2 text-sm leading-6 text-stone-600">{space.specialty}</p>
                       </div>
 
@@ -379,7 +379,7 @@ export function TraiteursPage() {
                       </div>
 
                       <div className="rounded-[1.35rem] border border-orange-100 bg-[#fffaf3] p-4">
-                        <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">Coordonnées</p>
+                        <p className="text-xs font-black uppercase tracking-[0.22em] text-[hsl(var(--primary))]">Coordonnées</p>
                         <div className="mt-2 space-y-1 text-sm leading-6 text-stone-600">
                           {space.legalName && (
                             <p>
@@ -418,7 +418,7 @@ export function TraiteursPage() {
                       <Separator className="bg-orange-100" />
 
                       <div className="flex flex-wrap gap-3">
-                        <Button asChild className="bg-[#d95f2d] text-white shadow-lg shadow-orange-500/20 hover:bg-[#c85529]">
+                        <Button asChild className="bg-[hsl(var(--primary))] text-white shadow-lg shadow-orange-500/20 hover:bg-[#c85529]">
                           <a href={buildCustomerSpaceLink(baseUrl, space.slug)}>
                             Commander ce traiteur
                             <ArrowRight className="h-4 w-4" />
@@ -433,7 +433,7 @@ export function TraiteursPage() {
 
                   <Card className="border-orange-100 bg-white shadow-soft">
                     <CardHeader>
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c2410c]">Menu & prix</p>
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-[hsl(var(--primary))]">Menu & prix</p>
                       <CardTitle className="text-2xl text-[#2a190f]">Carte du moment</CardTitle>
                       <CardDescription>Descriptions et tarifs issus du catalogue local.</CardDescription>
                     </CardHeader>
@@ -456,7 +456,7 @@ export function TraiteursPage() {
                                 </div>
                                 <p className="mt-1 text-sm leading-6 text-stone-600">{item.description}</p>
                               </div>
-                              <p className="shrink-0 text-lg font-black text-[#c2410c]">{formatEuro(item.price)}</p>
+                              <p className="shrink-0 text-lg font-black text-[hsl(var(--primary))]">{formatEuro(item.price)}</p>
                             </div>
                             <div className="mt-3 flex flex-wrap gap-2">
                               <Badge variant="outline" className="rounded-full border-orange-200 bg-white text-[#7c2d12]">
@@ -481,7 +481,7 @@ export function TraiteursPage() {
 function MetricCard({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
   return (
     <div className="rounded-[1.4rem] border border-orange-100 bg-[#fffaf4] p-4 shadow-sm">
-      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#fff3e5] text-[#d95f2d]">{icon}</div>
+      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#fff3e5] text-[hsl(var(--primary))]">{icon}</div>
       <p className="mt-3 text-[11px] font-black uppercase tracking-[0.22em] text-stone-400">{label}</p>
       <p className="mt-1 text-lg font-black text-[#2a190f]">{value}</p>
     </div>
@@ -491,7 +491,7 @@ function MetricCard({ icon, label, value }: { icon: ReactNode; label: string; va
 function MiniStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-[1.25rem] border border-orange-100 bg-[#fffaf4] p-4 shadow-sm">
-      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#c2410c]">{label}</p>
+      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[hsl(var(--primary))]">{label}</p>
       <p className="mt-2 text-base font-black text-[#2a190f]">{value}</p>
     </div>
   );
