@@ -1349,6 +1349,20 @@ export const mockProducts: LocalProduct[] = [
     ingredients: 'Pistache, lait végétal, sucre.',
     allergens: 'Fruits à coque.'
   },
+  {
+    id: 'goute-mwen-choco',
+    name: 'Gouté Mwen — Choco (sans lactose)',
+    vendor: 'Gouté Mwen',
+    price: 2,
+    category: 'Desserts',
+    image: vendorImage('vendors/goute-mwen/choco.jpg'),
+    description: 'Glace artisanale au chocolat, cacao amer et eau de coco, sans lactose. Riche, onctueuse et intense — comme un voyage sous les tropiques ! 🍫🥥',
+    zone: 'Martinique',
+    available: true,
+    featured: true,
+    ingredients: 'Cacao, eau de coco, nan-nan (lait de coco), sucre.',
+    allergens: 'Aucun.'
+  },
 ];
 
 export function getFeaturedProducts(): LocalProduct[] {
