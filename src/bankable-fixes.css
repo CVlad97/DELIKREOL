@@ -21,6 +21,32 @@ img {
   max-width: 100%;
 }
 
+/* Native images that fail outside SmartImage receive an honest branded vignette. */
+.native-image-fallback-host {
+  position: relative !important;
+  overflow: hidden;
+  background: #fffaf4;
+}
+
+.native-image-fallback-host::after {
+  content: attr(data-image-fallback-label);
+  position: absolute;
+  left: 0.5rem;
+  bottom: 0.5rem;
+  z-index: 3;
+  max-width: calc(100% - 1rem);
+  border-radius: 999px;
+  padding: 0.3rem 0.65rem;
+  background: rgb(0 0 0 / 0.72);
+  color: #fff;
+  font-size: 0.625rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
 /* Responsive cards: 1 mobile, 2 tablet, 3 laptop, 4 desktop. */
 .scroll-carousel-track {
   scroll-padding-inline: 0.25rem;
