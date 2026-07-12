@@ -3,24 +3,27 @@ import { useState } from 'react';
 import { Product } from '../types';
 import { useCart } from '../contexts/CartContext';
 import { useToast } from '../contexts/ToastContext';
-import { SmartImage, type ImageKind } from './SmartImage';
+import { ProductThumbnail } from './ProductThumbnail';
+import { traiteurSpaces } from '../data/traiteurs';
 
 interface ProductCardProps {
   product: Product;
 }
 
-function getProductImageKind(product: Product): ImageKind {
-  const value = `${product.name} ${product.category ?? ''}`
+function normalizeVendor(value: string): string {
+  return value
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase();
+    .replace(/[’']/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+}
 
-  const packagingTerms = [
-    'boisson', 'jus', 'sirop', 'sauce', 'bocal', 'bouteille', 'pot',
-    'sachet', 'epice', 'confiture', 'punch', 'nectar', 'soda', 'biere',
-  ];
-
-  return packagingTerms.some((term) => value.includes(term)) ? 'packaging' : 'food';
+function findPartnerImage(vendorName?: string | null): string | null {
+  if (!vendorName) return null;
+  const normalized = normalizeVendor(vendorName);
+  const space = traiteurSpaces.find((item) => normalizeVendor(item.name) === normalized);
+  return space?.heroImage || space?.galleryImages?.[0] || space?.portraitImage || null;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
@@ -29,33 +32,28 @@ export function ProductCard({ product }: ProductCardProps) {
   const [showSim, setShowSim] = useState(false);
   const vendorLabel = product.vendor?.business_name ?? (product.vendor_id ? 'Vendeur local' : null);
   const isAvailable = product.is_available !== false;
-  const imageKind = getProductImageKind(product);
+  const partnerImage = findPartnerImage(vendorLabel);
 
   return (
     <article className="group overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-elegant">
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        {product.image_url ? (
-          <SmartImage
-            src={product.image_url}
-            alt={`${product.name}${vendorLabel ? ` par ${vendorLabel}` : ''}`}
-            kind={imageKind}
-            containerClassName="w-full h-full"
-            imgClassName={imageKind === 'food' ? 'group-hover:scale-105' : 'p-4 group-hover:scale-[1.02]'}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          />
-        ) : (
-          <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-sm">
-            Photo à venir
-          </div>
-        )}
-      </div>
+      <ProductThumbnail
+        src={product.image_url}
+        partnerImage={partnerImage}
+        productName={product.name}
+        vendorName={vendorLabel}
+        category={product.category}
+        aspectRatio="4 / 3"
+        containerClassName="w-full bg-muted"
+        imgClassName="transition-transform duration-500 group-hover:scale-[1.03]"
+        showBadge
+      />
 
-      <div className="p-4 space-y-3">
+      <div className="space-y-3 p-4">
         <div className="space-y-1">
           <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             {product.category}
           </div>
-          <h3 className="text-lg font-bold text-foreground line-clamp-2">{product.name}</h3>
+          <h3 className="line-clamp-2 text-lg font-bold text-foreground">{product.name}</h3>
           {vendorLabel && (
             <div className="text-xs text-muted-foreground">{vendorLabel}</div>
           )}
@@ -74,7 +72,7 @@ export function ProductCard({ product }: ProductCardProps) {
             disabled={!isAvailable}
             className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-warm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="h-4 w-4" />
             Ajouter
           </button>
         </div>
@@ -85,7 +83,7 @@ export function ProductCard({ product }: ProductCardProps) {
           className="inline-flex items-center gap-2 text-xs font-semibold text-primary hover:underline"
           aria-expanded={showSim}
         >
-          <Sparkles className="w-3.5 h-3.5" />
+          <Sparkles className="h-3.5 w-3.5" />
           Délai estimé
         </button>
         {showSim && (
