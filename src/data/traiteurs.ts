@@ -72,7 +72,7 @@ function resolveHeroImage(name: string) {
     return assetFromPublic('vendors/ninice/hero.jpg');
   }
   if (name === 'Sweet Family Traiteur Orianne') {
-    return assetFromPublic('vendors/sweet-family/hero.jpg');
+    return assetFromPublic('vendors/sweet-family/cocktails-mignardises-hero.webp');
   }
   if (name === 'Gouté Mwen') {
     return assetFromPublic('vendors/goute-mwen/hero.jpg');
@@ -120,9 +120,15 @@ function resolveGalleryImages(name: string) {
   }
   if (name === 'Sweet Family Traiteur Orianne') {
     return [
-      assetFromPublic('vendors/sweet-family/bao-buns.jpg'),
-      assetFromPublic('vendors/sweet-family/cocktails-mignardises.jpg'),
-      assetFromPublic('vendors/sweet-family/conditions.jpg'),
+      assetFromPublic('vendors/sweet-family/cocktails-mignardises-hero.webp'),
+      assetFromPublic('vendors/sweet-family/cocktails-mignardises-menu.webp'),
+      assetFromPublic('vendors/sweet-family/bao-buns-menu.webp'),
+      assetFromPublic('vendors/sweet-family/commande-conditions.webp'),
+      assetFromPublic('vendors/sweet-family/seafood-boil-1.webp'),
+      assetFromPublic('vendors/sweet-family/seafood-boil-2.webp'),
+      assetFromPublic('vendors/sweet-family/seafood-boil-3.webp'),
+      assetFromPublic('vendors/sweet-family/seafood-boil-4.webp'),
+      assetFromPublic('vendors/sweet-family/seafood-boil-5.webp'),
     ];
   }
   if (name === 'Gouté Mwen') {
