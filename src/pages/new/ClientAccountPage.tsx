@@ -114,7 +114,7 @@ export default function ClientAccountPage() {
                 <p className="mt-2 text-sm text-gray-600">Retrouve tes commandes, ton suivi, tes raccourcis et le support DeliKreol.</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <Link to="/catalogue" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-black text-white hover:bg-primary/90"><ShoppingBag className="h-4 w-4" /> Commander</Link>
+                <Link to="/catalogue" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-black text-white hover:bg-primary"><ShoppingBag className="h-4 w-4" /> Commander</Link>
                 <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappText}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-green-500 px-4 py-3 text-sm font-black text-white hover:bg-green-600"><MessageCircle className="h-4 w-4" /> Support</a>
                 <button onClick={() => void signOut()} className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50"><LogOut className="h-4 w-4" /> Déconnexion</button>
               </div>
@@ -136,7 +136,7 @@ export default function ClientAccountPage() {
             </div>
 
             {orders.length === 0 ? (
-              <div className="rounded-2xl bg-gray-50 p-8 text-center"><PackageSearch className="mx-auto h-10 w-10 text-gray-400" /><h3 className="mt-3 font-black text-gray-900">Aucune commande trouvée</h3><p className="mt-2 text-sm text-gray-600">Passe une commande test depuis le catalogue ou contacte-nous sur WhatsApp.</p><Link to="/catalogue" className="mt-4 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-black text-white hover:bg-primary/90">Voir le catalogue</Link></div>
+              <div className="rounded-2xl bg-gray-50 p-8 text-center"><PackageSearch className="mx-auto h-10 w-10 text-gray-400" /><h3 className="mt-3 font-black text-gray-900">Aucune commande trouvée</h3><p className="mt-2 text-sm text-gray-600">Passe une commande test depuis le catalogue ou contacte-nous sur WhatsApp.</p><Link to="/catalogue" className="mt-4 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-black text-white hover:bg-primary">Voir le catalogue</Link></div>
             ) : (
               <div className="space-y-3">
                 {orders.map((order) => {
@@ -159,7 +159,7 @@ export default function ClientAccountPage() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <Link to="/feedback" className="rounded-2xl border border-red-100 bg-red-50 p-5 text-red-700 hover:bg-red-100"><AlertTriangle className="mb-3 h-6 w-6" /><h3 className="font-black">Signaler un problème</h3><p className="mt-1 text-sm">Décris un bug et ajoute une capture si besoin.</p></Link>
-            <Link to="/aide" className="rounded-2xl border border-primary/20 bg-primary/8 p-5 text-primary hover:bg-primary/15"><MessageCircle className="mb-3 h-6 w-6" /><h3 className="font-black">Aide & informations</h3><p className="mt-1 text-sm">Comprendre la livraison, le retrait et les commandes.</p></Link>
+            <Link to="/aide" className="rounded-2xl border border-primary/20 bg-primary/[0.08] p-5 text-primary hover:bg-primary/15"><MessageCircle className="mb-3 h-6 w-6" /><h3 className="font-black">Aide & informations</h3><p className="mt-1 text-sm">Comprendre la livraison, le retrait et les commandes.</p></Link>
           </div>
         </div>
       </section>

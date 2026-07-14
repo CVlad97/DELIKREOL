@@ -406,7 +406,7 @@ export default function CataloguePage() {
                         </div>
 
                         <div className="mt-4 grid grid-cols-[1fr_auto] gap-2">
-                          <button type="button" onClick={() => addToCart(product)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2.5 text-sm font-black text-primary-foreground hover:bg-primary/90">
+                          <button type="button" onClick={() => addToCart(product)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2.5 text-sm font-black text-primary-foreground hover:bg-primary">
                             <Plus className="h-4 w-4" /> Ajouter
                           </button>
                           <Link to={`/produit/${product.id}`} className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-muted hover:border-primary/40 hover:text-primary" aria-label={`Voir le détail de ${product.name}`}>

@@ -107,7 +107,7 @@ export function LocalProductCard({ product, onAddToRequest }: LocalProductCardPr
           <button
             type="button"
             onClick={() => onAddToRequest(product)}
-            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-warm"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground transition-all hover:bg-primary hover:shadow-warm"
           >
             <Plus className="h-4 w-4" />
             Ajouter au panier

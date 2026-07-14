@@ -81,7 +81,7 @@ export function CookieConsent() {
               Refuser les optionnels
             </button>
           )}
-          <button type="button" onClick={acceptAll} className="min-h-11 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary/90">
+          <button type="button" onClick={acceptAll} className="min-h-11 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary">
             Tout accepter
           </button>
         </div>

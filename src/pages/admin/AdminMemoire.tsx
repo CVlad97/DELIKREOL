@@ -55,7 +55,7 @@ export function AdminMemoire() {
         </div>
         <input value={newEntry.title} onChange={e => setNewEntry(p => ({...p, title: e.target.value}))} placeholder="Titre" className="w-full px-3 py-2 rounded-lg border bg-background text-sm mb-3" />
         <textarea value={newEntry.content} onChange={e => setNewEntry(p => ({...p, content: e.target.value}))} placeholder="Contenu" rows={3} className="w-full px-3 py-2 rounded-lg border bg-background text-sm mb-3 resize-none" />
-        <button onClick={addEntry} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors">
+        <button onClick={addEntry} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary transition-colors">
           <Plus className="w-4 h-4" /> Ajouter
         </button>
       </div>

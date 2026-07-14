@@ -58,7 +58,7 @@ export function AdminParametres() {
             <p className="text-xs text-amber-700">Le paiement en ligne est prévu en phase 2. Ne pas activer sans validation complète.</p>
           </div>
         )}
-        <button onClick={handleSave} className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors">
+        <button onClick={handleSave} className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary transition-colors">
           <Save className="w-4 h-4" /> Sauvegarder
         </button>
       </div>

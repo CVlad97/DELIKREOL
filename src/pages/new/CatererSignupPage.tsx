@@ -483,7 +483,7 @@ export default function CatererSignupPage() {
             </a>
             <Link
               to="/"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary text-primary-foreground rounded-xl font-bold transition-colors"
             >
               Retour à l'accueil
             </Link>

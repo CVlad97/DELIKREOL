@@ -89,7 +89,7 @@ export function Header() {
             <LanguageSwitcher />
             <Link
               to={accountTarget}
-              className="inline-flex h-10 min-w-10 items-center justify-center gap-1.5 rounded-xl bg-stone-950 px-2 text-xs font-black text-white shadow-sm transition-colors hover:bg-primary md:px-3 md:text-sm"
+              className="inline-flex h-10 min-w-10 items-center justify-center gap-1.5 rounded-xl bg-foreground px-2 text-xs font-black text-white shadow-sm transition-colors hover:bg-primary md:px-3 md:text-sm"
               aria-label={accountLabel}
               title={accountLabel}
             >
@@ -140,7 +140,7 @@ export function Header() {
             <Link
               to={accountTarget}
               onClick={() => setMobileMenuOpen(false)}
-              className="flex min-h-11 items-center gap-3 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-primary/90"
+              className="flex min-h-11 items-center gap-3 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-primary"
             >
               {accountIcon}
               {accountLabel}
