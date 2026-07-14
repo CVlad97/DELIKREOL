@@ -126,7 +126,7 @@ export default function PointsRelaisPage() {
             </button>
             <Link
               to="/"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary text-primary-foreground rounded-xl font-bold transition-colors"
             >
               Retour à l'accueil
             </Link>
@@ -369,7 +369,7 @@ export default function PointsRelaisPage() {
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               type="submit"
-              className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold text-sm transition-colors shadow-lg"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary text-primary-foreground rounded-xl font-bold text-sm transition-colors shadow-lg"
             >
               <Send size={16} />
               Envoyer ma candidature

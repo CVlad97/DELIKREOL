@@ -259,7 +259,7 @@ export default function PartnerAccessPage() {
             <textarea value={form.remarques} onChange={e => setForm(f => ({ ...f, remarques: e.target.value }))} className="w-full px-3 py-2 rounded-xl border text-sm" rows={2} placeholder="Photos à changer, informations supplémentaires..." />
           </div>
 
-          <button disabled={submitStatus === 'saving'} type="submit" className="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 disabled:opacity-60">
+          <button disabled={submitStatus === 'saving'} type="submit" className="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary disabled:opacity-60">
             {submitStatus === 'saving' ? 'Envoi en cours…' : 'Envoyer mes corrections'}
           </button>
         </form>

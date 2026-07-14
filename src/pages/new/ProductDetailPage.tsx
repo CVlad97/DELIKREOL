@@ -234,7 +234,7 @@ export function ProductDetailPage() {
               <button
                 type="button"
                 onClick={handleAddToCart}
-                className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-black text-primary-foreground transition hover:bg-primary/90"
+                className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-black text-primary-foreground transition hover:bg-primary"
               >
                 <ShoppingCart className="h-5 w-5" /> Ajouter au panier
               </button>

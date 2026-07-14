@@ -43,8 +43,8 @@ const DELIVERY_MODES = [
     title: 'Livraison éloignée',
     description:
       'Livraison sur toute la Martinique, possible à partir de 40€ de commande, selon validation du prestataire et disponibilité DeliKreol.',
-    color: 'bg-primary/8 border-primary/30',
-    iconColor: 'bg-primary/80',
+    color: 'bg-primary/[0.08] border-primary/30',
+    iconColor: 'bg-primary/[0.08]0',
     badge: 'À partir de 40€',
     badgeColor: 'bg-primary/15 text-primary',
   },
@@ -211,7 +211,7 @@ export default function LivraisonPage() {
       <div className="mt-8 text-center">
         <Link
           to="/catalogue"
-          className="inline-flex items-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold text-sm transition-colors shadow-lg"
+          className="inline-flex items-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary text-primary-foreground rounded-xl font-bold text-sm transition-colors shadow-lg"
         >
           <ShoppingCart size={16} />
           Voir le catalogue

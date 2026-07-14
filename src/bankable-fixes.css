@@ -67,9 +67,6 @@ textarea {
 }
 
 /* White text on the translucent primary hover previously dropped below 4.5:1. */
-.hover\:bg-primary\/90:hover {
-  background-color: hsl(var(--primary)) !important;
-}
 
 /* Responsive cards: 1 mobile, 2 tablet, 3 laptop, 4 desktop. */
 .scroll-carousel-track {
@@ -141,22 +138,10 @@ img[src*="hero-tropical"] {
 }
 
 /* Legacy token aliases introduced by the previous automated colour pass. */
-.bg-primary\/8,
-.bg-primary\/8\/80 {
-  background-color: hsl(var(--primary) / 0.08) !important;
-}
 
-.text-success\/700,
-.text-success\/800,
-.text-success\/900 {
-  color: hsl(var(--success)) !important;
-}
 
-.text-success\/950 {
-  color: hsl(var(--accent)) !important;
-}
 
-.border-success100 {
+.border-success/35 {
   border-color: hsl(var(--success) / 0.35) !important;
 }
 
@@ -164,11 +149,11 @@ img[src*="hero-tropical"] {
   background-color: rgb(255 255 255 / 0.84) !important;
 }
 
-.opacity-32 {
+.opacity-[0.32] {
   opacity: 0.32 !important;
 }
 
-.from-success600 {
+.from-success {
   --tw-gradient-from: hsl(var(--success)) var(--tw-gradient-from-position);
   --tw-gradient-to: hsl(var(--success) / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);

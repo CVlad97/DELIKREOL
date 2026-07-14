@@ -204,7 +204,7 @@ export function TraiteursListPage() {
       <section className="mt-12 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/5 p-8 text-center">
         <h2 className="mb-2 text-xl font-bold text-foreground">Vous êtes traiteur en Martinique ?</h2>
         <p className="mb-4 text-muted-foreground">Rejoignez DeliKreol et touchez de nouveaux clients locaux.</p>
-        <Link to="/devenir-partenaire" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90">
+        <Link to="/devenir-partenaire" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary">
           <Star className="h-4 w-4" /> Devenir partenaire
         </Link>
       </section>

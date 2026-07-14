@@ -145,7 +145,7 @@ export default function DevenirLivreurPage() {
             <button onClick={openWhatsApp} className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-500 px-6 py-3 font-bold text-white hover:bg-green-600">
               <MessageCircle size={18} /> Envoyer aussi par WhatsApp
             </button>
-            <Link to="/" className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 font-bold text-primary-foreground hover:bg-primary/90">
+            <Link to="/" className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 font-bold text-primary-foreground hover:bg-primary">
               Retour accueil
             </Link>
           </div>
@@ -209,7 +209,7 @@ export default function DevenirLivreurPage() {
           {error && <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <button type="submit" disabled={submitting} className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-60">
+            <button type="submit" disabled={submitting} className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-bold text-primary-foreground hover:bg-primary disabled:opacity-60">
               <Send size={18} /> {submitting ? 'Envoi...' : 'Envoyer la candidature'}
             </button>
             <button type="button" onClick={openWhatsApp} className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-500 px-6 py-3 font-bold text-white hover:bg-green-600">

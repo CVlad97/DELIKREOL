@@ -12,14 +12,14 @@ export function BackBar({ label, backTo }: { label?: string; backTo?: string }) 
     <div className="flex items-center justify-between gap-3 mb-6">
       <button
         onClick={() => backTo ? navigate(backTo) : navigate(-1)}
-        className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-orange-600 transition-colors px-3 py-2 rounded-xl hover:bg-orange-50"
+        className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors px-3 py-2 rounded-xl hover:bg-primary/10"
       >
         <ArrowLeft className="w-4 h-4" />
         {label || 'Retour'}
       </button>
       <Link
         to="/"
-        className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-400 hover:text-orange-600 transition-colors px-3 py-2 rounded-xl hover:bg-orange-50"
+        className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-primary transition-colors px-3 py-2 rounded-xl hover:bg-primary/10"
       >
         <Home className="w-3.5 h-3.5" />
         Accueil

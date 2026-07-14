@@ -160,7 +160,7 @@ export function AdminQonto() {
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="btn btnPrimary inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary/90 transition-all disabled:opacity-50"
+            className="btn btnPrimary inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary transition-all disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             Actualiser
@@ -592,7 +592,7 @@ function WorkflowTab() {
             </div>
           </div>
           <button
-            className="btn btnPrimary inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary/90 transition-all"
+            className="btn btnPrimary inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary transition-all"
             onClick={() => {
               const headers = 'Étape;Nom;Compte;Catégorie;Auto';
               const rows = DELIKREOL_RECONCILIATION_WORKFLOW.map(s =>
@@ -696,7 +696,7 @@ function PlanTab() {
                 rel="noopener noreferrer"
                 className={`block w-full text-center py-2.5 rounded-xl font-bold text-sm transition-all ${
                   isRecommended
-                    ? 'bg-primary text-white hover:bg-primary/90'
+                    ? 'bg-primary text-white hover:bg-primary'
                     : 'bg-muted/50 text-foreground hover:bg-muted/70 border border-border/30'
                 }`}
               >

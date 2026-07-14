@@ -125,7 +125,7 @@ export function ContactPage() {
                 setSubmitted(false);
                 setForm(initialFormData);
               }}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary text-primary-foreground rounded-xl font-bold transition-colors"
             >
               Nouveau message
             </button>
@@ -252,7 +252,7 @@ export function ContactPage() {
 
               <button
                 type="submit"
-                className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold transition-colors"
+                className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary text-primary-foreground rounded-xl font-bold transition-colors"
               >
                 <Send size={18} />
                 Envoyer le message

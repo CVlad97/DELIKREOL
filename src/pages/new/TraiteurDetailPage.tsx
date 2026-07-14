@@ -316,7 +316,7 @@ export function TraiteurDetailPage() {
                       <button
                         type="button"
                         onClick={() => handleAddToCart(item)}
-                        className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2.5 text-sm font-black text-primary-foreground transition hover:bg-primary/90"
+                        className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2.5 text-sm font-black text-primary-foreground transition hover:bg-primary"
                       >
                         <ShoppingCart className="h-4 w-4" /> Ajouter
                       </button>

@@ -4,47 +4,49 @@
 
 @layer base {
   :root {
-    --font-sans: 'Sora', system-ui, -apple-system, sans-serif;
-    --font-display: 'Fraunces', Georgia, serif;
+      --font-sans: 'Sora', system-ui, -apple-system, sans-serif;
+      --font-display: 'Fraunces', Georgia, serif;
 
-    --background: 30 100% 97%;
-    --foreground: 18 40% 12%;
+      --background: 30 100% 97%;
+      --foreground: 18 40% 12%;
 
-    --primary: 21 92% 40%;
-    --primary-foreground: 0 0% 100%;
+      --primary: 21 94% 37%;
+      --primary-foreground: 0 0% 100%;
 
-    --secondary: 38 80% 45%;
-    --secondary-foreground: 20 30% 10%;
+      --secondary: 38 80% 45%;
+      --secondary-foreground: 20 30% 10%;
 
-    --accent: 156 47% 24%;
-    --accent-foreground: 0 0% 100%;
+      --accent: 156 47% 24%;
+      --accent-foreground: 0 0% 100%;
 
-    --success: 152 55% 30%;
-    --success-foreground: 0 0% 100%;
+      --success: 152 55% 30%;
+      --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 20 30% 10%;
+      --warning: 38 92% 50%;
+      --warning-foreground: 20 30% 10%;
 
-    --destructive: 0 72% 45%;
-    --destructive-foreground: 0 0% 100%;
+      --destructive: 0 72% 45%;
+      --destructive-foreground: 0 0% 100%;
 
-    --muted: 30 42% 95%;
-    --muted-foreground: 20 12% 38%;
+      --muted: 30 42% 95%;
+      --muted-foreground: 20 12% 38%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 18 40% 12%;
+      --card: 0 0% 100%;
+      --card-foreground: 18 40% 12%;
 
-    --border: 31 28% 85%;
-    --input: 31 28% 82%;
-    --ring: 21 92% 40%;
+      --border-subtle: 31 28% 85%;
+      --border-strong: 27 19% 56%;
+      --border: var(--border-subtle);
+      --input: var(--border-strong);
+      --ring: 21 94% 37%;
 
-    --radius: 1rem;
+      --radius: 1rem;
 
-    --shadow-elegant: 0 10px 30px -8px hsl(var(--primary) / 0.22), 0 22px 50px -18px hsl(var(--accent) / 0.18);
-    --shadow-warm: 0 10px 30px -8px hsl(var(--secondary) / 0.24), 0 20px 44px -16px hsl(var(--primary) / 0.14);
-    --shadow-soft: 0 8px 24px -8px hsl(var(--foreground) / 0.08), 0 18px 40px -18px hsl(var(--foreground) / 0.06);
-    --shadow-glow: 0 0 24px -10px hsl(var(--primary) / 0.45);
-  }
+      --shadow-elegant: 0 10px 30px -8px hsl(var(--primary) / 0.22), 0 22px 50px -18px hsl(var(--accent) / 0.18);
+      --shadow-warm: 0 10px 30px -8px hsl(var(--secondary) / 0.24), 0 20px 44px -16px hsl(var(--primary) / 0.14);
+      --shadow-soft: 0 8px 24px -8px hsl(var(--foreground) / 0.08), 0 18px 40px -18px hsl(var(--foreground) / 0.06);
+      --shadow-glow: 0 0 24px -10px hsl(var(--primary) / 0.45);
+    }
 
   body {
     @apply bg-background text-foreground antialiased;

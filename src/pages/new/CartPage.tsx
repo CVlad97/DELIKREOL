@@ -318,7 +318,7 @@ export default function CartPage() {
             </p>
             <Link
               to="/catalogue"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-primary/200"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary hover:bg-primary text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-primary/200"
             >
               <ArrowLeft className="w-4 h-4" />
               Voir le catalogue
@@ -431,7 +431,7 @@ export default function CartPage() {
                   className="bg-white rounded-2xl border border-primary/100 p-4 flex gap-4 group hover:border-primary/200 transition-all"
                 >
                   {/* Image */}
-                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden bg-primary/8 flex-shrink-0">
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden bg-primary/[0.08] flex-shrink-0">
                     {item.image_url ? (
                       <img loading="lazy"
                         src={item.image_url}
@@ -650,7 +650,7 @@ export default function CartPage() {
                           key={name}
                           type="button"
                           onMouseDown={() => selectCommune(name)}
-                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-primary/8 transition-colors first:rounded-t-xl last:rounded-b-xl"
+                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-primary/[0.08] transition-colors first:rounded-t-xl last:rounded-b-xl"
                         >
                           <MapPin className="w-3 h-3 inline mr-2 text-primary/400" />
                           {name}
@@ -766,7 +766,7 @@ export default function CartPage() {
               ) : (
                 <button
                   onClick={handleWhatsAppClick}
-                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-2xl transition-all hover:scale-[1.02] shadow-lg shadow-primary/200 text-lg"
+                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-primary hover:bg-primary text-white font-bold rounded-2xl transition-all hover:scale-[1.02] shadow-lg shadow-primary/200 text-lg"
                 >
                   <ShoppingCart className="w-6 h-6" />
                   Confirmer ma commande sur WhatsApp
