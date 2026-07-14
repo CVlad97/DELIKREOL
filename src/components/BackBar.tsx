@@ -10,7 +10,7 @@ export function BackBar({ label, backTo }: { label?: string; backTo?: string }) 
 
   return (
     <div className="flex items-center justify-between gap-3 mb-6">
-      <button
+      <button type="button"
         onClick={() => backTo ? navigate(backTo) : navigate(-1)}
         className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors px-3 py-2 rounded-xl hover:bg-primary/10"
       >

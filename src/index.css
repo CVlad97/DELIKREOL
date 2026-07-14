@@ -35,7 +35,7 @@
       --card-foreground: 18 40% 12%;
 
       --border-subtle: 31 28% 85%;
-      --border-strong: 27 19% 56%;
+      --border-strong: 27 19% 55%;
       --border: var(--border-subtle);
       --input: var(--border-strong);
       --ring: 21 94% 37%;

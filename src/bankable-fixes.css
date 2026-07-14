@@ -2,12 +2,6 @@
    Loaded after index.css so legacy utility aliases and responsive safeguards
    remain effective without changing the visual identity. */
 
-/* Audited brand orange: white text = 5.46:1; 90% hover blend = 4.59:1. */
-:root {
-  --primary: 21 94% 37%;
-  --ring: 21 94% 37%;
-}
-
 html,
 body,
 #root {
@@ -60,13 +54,7 @@ img {
 }
 
 /* Form boundaries must remain perceivable on white and warm backgrounds. */
-input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-select,
-textarea {
-  border-color: #a48a78;
-}
 
-/* White text on the translucent primary hover previously dropped below 4.5:1. */
 
 /* Responsive cards: 1 mobile, 2 tablet, 3 laptop, 4 desktop. */
 .scroll-carousel-track {
@@ -137,27 +125,19 @@ img[src*="hero-tropical"] {
   filter: none;
 }
 
-/* Legacy token aliases introduced by the previous automated colour pass. */
 
 
 
-.border-success/35 {
-  border-color: hsl(var(--success) / 0.35) !important;
-}
+
+
 
 .bg-white\/72 {
   background-color: rgb(255 255 255 / 0.84) !important;
 }
 
-.opacity-[0.32] {
-  opacity: 0.32 !important;
-}
 
-.from-success {
-  --tw-gradient-from: hsl(var(--success)) var(--tw-gradient-from-position);
-  --tw-gradient-to: hsl(var(--success) / 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
-}
+
+
 
 @media (prefers-reduced-motion: reduce) {
   .scroll-carousel-track {

@@ -200,7 +200,7 @@ export default function HomePage() {
       to: '/catalogue',
       cta: 'Voir le catalogue',
       icon: ShoppingBag,
-      tone: 'from-orange-500 to-amber-500',
+      tone: 'from-primary to-primary',
     },
     {
       title: 'Demande pro',
@@ -208,7 +208,7 @@ export default function HomePage() {
       to: '/devis',
       cta: 'Créer une demande',
       icon: FileText,
-      tone: 'from-success to-teal-500',
+      tone: 'from-success to-accent',
     },
     {
       title: 'Rejoindre DeliKreol',
@@ -487,7 +487,7 @@ export default function HomePage() {
               </div>
               <Link
                 to="/catalogue"
-                className="inline-flex items-center gap-2 self-start rounded-2xl bg-stone-950 px-5 py-3 text-sm font-black text-white transition-all hover:bg-primary md:self-auto"
+                className="inline-flex items-center gap-2 self-start rounded-2xl bg-foreground px-5 py-3 text-sm font-black text-white transition-all hover:bg-primary md:self-auto"
               >
                 Catalogue complet
                 <ArrowRight className="h-4 w-4" />
