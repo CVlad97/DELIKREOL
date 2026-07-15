@@ -17,7 +17,7 @@ interface MapPartner {
 }
 
 const COLORS = {
-  traiteur: { marker: 'hsl(var(--primary))', bg: 'bg-orange-100', text: 'text-orange-700', icon: '🧑‍🍳' },
+  traiteur: { marker: 'hsl(var(--primary))', bg: 'bg-primary/15', text: 'text-primary', icon: '🧑‍🍳' },
   relais: { marker: '#3b82f6', bg: 'bg-blue-100', text: 'text-blue-700', icon: '📦' },
   livreur: { marker: '#22c55e', bg: 'bg-green-100', text: 'text-green-700', icon: '🛵' },
   client: { marker: '#8b5cf6', bg: 'bg-purple-100', text: 'text-purple-700', icon: '📍' },
@@ -156,15 +156,15 @@ export default function ExpandableGeoMap() {
   }, [expanded, partners, userPosition]);
 
   return (
-    <div className="bg-white rounded-2xl border border-orange-100 overflow-hidden shadow-sm transition-all duration-300">
+    <div className="bg-white rounded-2xl border border-primary/20 overflow-hidden shadow-sm transition-all duration-300">
       {/* Header toujours visible */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-orange-50 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:bg-primary/8 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
-            <MapPin className="w-5 h-5 text-orange-600" />
+          <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+            <MapPin className="w-5 h-5 text-primary" />
           </div>
           <div className="text-left">
             <h3 className="font-bold text-gray-900">Géolocalisation</h3>
@@ -179,7 +179,7 @@ export default function ExpandableGeoMap() {
           {!userPosition && !geoLoading && (
             <button
               onClick={(e) => { e.stopPropagation(); handleGeoRequest(); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary/90 text-white text-xs font-bold rounded-lg transition-colors"
             >
               <Locate className="w-3 h-3" />
               Me localiser
@@ -216,7 +216,7 @@ export default function ExpandableGeoMap() {
               <div
                 key={p.id}
                 onClick={() => setSelectedPartner(p)}
-                className={`flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition-colors ${selectedPartner?.id === p.id ? 'bg-orange-50' : ''}`}
+                className={`flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition-colors ${selectedPartner?.id === p.id ? 'bg-primary/8' : ''}`}
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${color.bg}`}>
                   {color.icon}
@@ -227,7 +227,7 @@ export default function ExpandableGeoMap() {
                 </div>
                 <div className="text-right">
                   {dist !== null ? (
-                    <span className="text-xs font-bold text-orange-600">{dist.toFixed(1)} km</span>
+                    <span className="text-xs font-bold text-primary">{dist.toFixed(1)} km</span>
                   ) : (
                     <span className="text-xs text-gray-400">—</span>
                   )}

@@ -309,7 +309,7 @@ export default function CartPage() {
       <Layout>
         <div className="min-h-[60vh] flex items-center justify-center bg-[#FFFBF0]">
           <div className="text-center px-4 max-w-md mx-auto">
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-orange-100 mb-6">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary/15 mb-6">
               <ShoppingCart className="w-10 h-10 text-primary/400" />
             </div>
             <h1 className="text-2xl font-black text-gray-900 mb-3">Votre panier est vide</h1>
@@ -377,7 +377,7 @@ export default function CartPage() {
     <Layout>
       <div className="bg-[#FFFBF0] min-h-screen">
         {/* Header */}
-        <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white">
+        <div className="bg-gradient-to-r from-primary to-secondary text-white">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
             <div className="flex items-center gap-3">
               <ShoppingCart className="w-7 h-7" />
@@ -516,7 +516,7 @@ export default function CartPage() {
                     </span>
                   </div>
                   {mode === 'livraison' && total < 40 && (
-                    <div className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2">
+                    <div className="text-xs text-secondary bg-secondary/10 rounded-lg px-3 py-2">
                       Livraison éloignée possible à partir de 40 € de commande, sous réserve de validation.
                     </div>
                   )}
@@ -543,7 +543,7 @@ export default function CartPage() {
                   <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-semibold">
                     Confirmation sur le site
                   </span>
-                  <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full font-semibold">
+                  <span className="text-xs px-2 py-0.5 bg-secondary/15 text-secondary rounded-full font-semibold">
                     Paiement en ligne bientôt disponible
                   </span>
                 </div>
@@ -558,11 +558,11 @@ export default function CartPage() {
 
                 {/* Multi-traiteur warning */}
                 {hasMultipleVendors && (
-                  <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
-                    <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-3 bg-secondary/10 border border-secondary/30 rounded-xl p-4">
+                    <AlertCircle className="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
                     <div className="text-sm">
-                      <p className="font-bold text-amber-800">Panier multi-partenaires</p>
-                      <p className="text-amber-700">
+                      <p className="font-bold text-secondary">Panier multi-partenaires</p>
+                      <p className="text-secondary">
                         Pour cette version test, merci de valider une commande par partenaire. Le panier multi-traiteur arrive bientôt.
                       </p>
                     </div>
@@ -587,7 +587,7 @@ export default function CartPage() {
                     className={`w-full px-3 py-2.5 rounded-xl border text-sm outline-none ${
                       phoneError
                         ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                        : 'border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-orange-100'
+                        : 'border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-ring/30'
                     }`}
                   />
                   {savedField === 'phone' && (
@@ -611,7 +611,7 @@ export default function CartPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     onBlur={() => email.trim() && flashSaved('email')}
                     placeholder="nom@exemple.fr"
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-orange-100 text-sm outline-none"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-ring/30 text-sm outline-none"
                   />
                   {savedField === 'email' && (
                     <span className="inline-flex items-center gap-1 text-xs text-success font-semibold mt-1 animate-pulse">
@@ -636,7 +636,7 @@ export default function CartPage() {
                       if (commune.trim()) flashSaved('commune');
                     }}
                     placeholder="Fort-de-France, Lamentin..."
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-orange-100 text-sm outline-none"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-ring/30 text-sm outline-none"
                   />
                   {savedField === 'commune' && (
                     <span className="inline-flex items-center gap-1 text-xs text-success font-semibold mt-1 animate-pulse">
@@ -719,7 +719,7 @@ export default function CartPage() {
                           type="checkbox"
                           checked={selectedCreneaux.includes(option.id)}
                           onChange={() => toggleCreneau(option.id)}
-                          className="w-4 h-4 accent-orange-500"
+                          className="w-4 h-4 accent-primary"
                         />
                         {option.label}
                       </label>
@@ -748,7 +748,7 @@ export default function CartPage() {
                     onBlur={() => notes.trim() && flashSaved('notes')}
                     placeholder="Allergies, préférences, instructions spéciales..."
                     rows={3}
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-orange-100 text-sm outline-none resize-none"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-ring/30 text-sm outline-none resize-none"
                   />
                   {savedField === 'notes' && (
                     <span className="inline-flex items-center gap-1 text-xs text-success font-semibold mt-1 animate-pulse">
@@ -760,7 +760,7 @@ export default function CartPage() {
 
               {/* Bouton principal — Supabase-first */}
               {checkoutStatus === 'processing' ? (
-                <div className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-orange-400 text-white font-bold rounded-2xl text-lg">
+                <div className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-primary text-white font-bold rounded-2xl text-lg">
                   Enregistrement en cours...
                 </div>
               ) : (

@@ -71,7 +71,7 @@ export function TraiteurDetailPage() {
       <Layout>
         <main className="flex min-h-[60vh] items-center justify-center px-4">
           <div className="text-center">
-            <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-amber-600" />
+            <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-secondary" />
             <h1 className="text-2xl font-black">Traiteur introuvable</h1>
             <p className="mt-2 text-muted-foreground">Cette fiche n’est pas encore disponible.</p>
             <Link to="/traiteurs" className="mt-6 inline-flex rounded-xl bg-primary px-5 py-3 font-bold text-primary-foreground">
@@ -220,7 +220,7 @@ export function TraiteurDetailPage() {
             </div>
 
             <aside className="h-fit rounded-3xl bg-neutral-950 p-6 text-white shadow-sm sm:p-8">
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-300">Commander</p>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-secondary">Commander</p>
               <h2 className="mt-2 text-2xl font-black">Envie de goûter ?</h2>
               <p className="mt-2 text-sm text-white/70">
                 Ajoutez les produits au panier ou vérifiez les disponibilités avec DeliKreol.

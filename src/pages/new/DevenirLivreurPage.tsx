@@ -140,7 +140,7 @@ export default function DevenirLivreurPage() {
           <p className="text-muted-foreground leading-relaxed">
             {savedInSupabase ? 'La candidature est enregistrée dans l’admin DeliKreol.' : 'La candidature est sauvegardée localement. Envoie aussi par WhatsApp pour être sûr.'}
           </p>
-          {error && <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">{error}</div>}
+          {error && <div className="rounded-xl border border-secondary/30 bg-secondary/10 p-3 text-sm text-secondary">{error}</div>}
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
             <button onClick={openWhatsApp} className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-500 px-6 py-3 font-bold text-white hover:bg-green-600">
               <MessageCircle size={18} /> Envoyer aussi par WhatsApp
@@ -158,13 +158,13 @@ export default function DevenirLivreurPage() {
     <Layout>
       <div className="mx-auto max-w-3xl px-4 py-8 md:py-12">
         <div className="mb-8 space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-700">
+          <div className="inline-flex items-center gap-2 rounded-full bg-success/15 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-success">
             <Truck size={14} /> Candidature livreur
           </div>
           <h1 className="text-2xl font-black tracking-tight text-foreground md:text-3xl">Devenir livreur DeliKreol</h1>
-          <div className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
-            <AlertTriangle size={20} className="mt-0.5 flex-shrink-0 text-amber-600" />
-            <p className="text-sm text-amber-900">Les livreurs sont validés progressivement selon les zones, disponibilités et documents.</p>
+          <div className="flex gap-3 rounded-xl border border-secondary/30 bg-secondary/10 p-4">
+            <AlertTriangle size={20} className="mt-0.5 flex-shrink-0 text-secondary" />
+            <p className="text-sm text-secondary">Les livreurs sont validés progressivement selon les zones, disponibilités et documents.</p>
           </div>
         </div>
 

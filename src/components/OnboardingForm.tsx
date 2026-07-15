@@ -232,7 +232,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
               type="text"
               value={vendorData.business_name}
               onChange={(e) => setVendorData({ ...vendorData, business_name: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               required
             />
           </div>
@@ -244,7 +244,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
             <select
               value={vendorData.business_type}
               onChange={(e) => setVendorData({ ...vendorData, business_type: e.target.value as BusinessType })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               required
             >
               <option value="restaurant">Restaurant</option>
@@ -261,7 +261,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
               type="tel"
               value={vendorData.phone}
               onChange={(e) => setVendorData({ ...vendorData, phone: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               placeholder="0696 XX XX XX"
               required
             />
@@ -274,7 +274,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
             <textarea
               value={vendorData.description}
               onChange={(e) => setVendorData({ ...vendorData, description: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               rows={3}
               placeholder="Décrivez votre spécialité, vos produits..."
             />
@@ -294,7 +294,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
               type="text"
               value={vendorData.address}
               onChange={(e) => setVendorData({ ...vendorData, address: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               placeholder="Adresse, Code postal, Ville"
               required
             />
@@ -308,7 +308,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
               type="number"
               value={vendorData.delivery_radius_km}
               onChange={(e) => setVendorData({ ...vendorData, delivery_radius_km: parseInt(e.target.value) })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               min="1"
               max="50"
             />
@@ -321,7 +321,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
             <textarea
               value={vendorData.opening_hours}
               onChange={(e) => setVendorData({ ...vendorData, opening_hours: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent font-mono text-sm"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent font-mono text-sm"
               rows={4}
               placeholder='{"lundi": "9h-18h", "mardi": "9h-18h"}'
             />
@@ -681,7 +681,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
         <div className={`sticky top-0 bg-gradient-to-r ${
-          roleType === 'vendor' ? 'from-green-500 to-emerald-600' :
+          roleType === 'vendor' ? 'from-green-500 to-success' :
           roleType === 'relay_host' ? 'from-blue-500 to-cyan-500' :
           'from-teal-500 to-green-600'
         } text-white p-6 rounded-t-3xl z-10`}>

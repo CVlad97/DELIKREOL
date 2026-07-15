@@ -91,7 +91,7 @@ export function ProductDetailPage() {
       <Layout>
         <main className="flex min-h-[60vh] items-center justify-center px-4">
           <div className="text-center">
-            <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-amber-600" />
+            <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-secondary" />
             <h1 className="text-2xl font-black">Produit introuvable</h1>
             <p className="mt-2 text-muted-foreground">Ce produit n’existe pas ou n’est plus disponible.</p>
             <Link to="/catalogue" className="mt-6 inline-flex rounded-xl bg-primary px-5 py-3 font-bold text-primary-foreground">
@@ -171,7 +171,7 @@ export function ProductDetailPage() {
               <span className={`rounded-full px-3 py-1 text-xs font-bold ${
                 product.available !== false
                   ? 'bg-success/10 text-success'
-                  : 'bg-amber-100 text-amber-800'
+                  : 'bg-secondary/15 text-secondary'
               }`}>
                 {product.available !== false ? 'Disponible' : 'Sur confirmation'}
               </span>
@@ -204,7 +204,7 @@ export function ProductDetailPage() {
             )}
 
             {thumbnail.source !== 'product' && (
-              <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+              <div className="mt-6 rounded-2xl border border-secondary/30 bg-secondary/10 p-4 text-sm text-secondary">
                 <p className="font-bold">Photo produit en cours de validation</p>
                 <p className="mt-1">Le visuel affiché est identifié comme {thumbnail.source === 'partner' ? 'un visuel du partenaire' : 'une vignette temporaire'}.</p>
               </div>

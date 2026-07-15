@@ -56,7 +56,7 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 p-4">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-primary/8 p-4">
           <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <AlertCircle className="w-8 h-8 text-red-600" />
@@ -82,7 +82,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="flex gap-3">
               <button
                 onClick={() => window.location.reload()}
-                className="flex-1 bg-emerald-600 text-white px-4 py-3 rounded-lg hover:bg-emerald-700 transition-colors font-medium flex items-center justify-center gap-2"
+                className="flex-1 bg-success text-white px-4 py-3 rounded-lg hover:bg-success/90 transition-colors font-medium flex items-center justify-center gap-2"
               >
                 <RefreshCw size={18} />
                 Recharger

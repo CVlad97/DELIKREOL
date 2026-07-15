@@ -37,11 +37,11 @@ export default function DemoPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-semibold mb-4 uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 text-primary text-xs font-semibold mb-4 uppercase tracking-wider">
             🧪 MODE DÉMO
           </div>
           <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-3">
-            Découvrir <span className="text-orange-500">DELIKREOL</span>
+            Découvrir <span className="text-primary">DELIKREOL</span>
           </h1>
           <p className="text-gray-500 max-w-2xl mx-auto">
             Teste le parcours complet sans inscription. Explore les dashboards, la carte et les bases de données.
@@ -60,8 +60,8 @@ export default function DemoPage() {
             <button key={o.id} onClick={() => setOnglet(o.id as Onglet)}
               className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-bold transition-all ${
                 onglet === o.id
-                  ? 'bg-orange-500 text-white shadow-lg shadow-orange-200'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:border-orange-300'
+                  ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:border-primary/40'
               }`}
             >
               {o.label}
@@ -77,12 +77,12 @@ export default function DemoPage() {
               {[1, 2, 3, 4].map(s => (
                 <div key={s} className="flex items-center gap-2">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
-                    step >= s ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-400'
+                    step >= s ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'
                   }`}>{s}</div>
-                  <span className={`text-xs ${step === s ? 'text-orange-600 font-bold' : 'text-gray-400'}`}>
+                  <span className={`text-xs ${step === s ? 'text-primary font-bold' : 'text-gray-400'}`}>
                     {['Choisis', 'Panier', 'Mode', 'Confirme'][s-1]}
                   </span>
-                  {s < 4 && <div className={`w-8 h-0.5 ${step > s ? 'bg-orange-500' : 'bg-gray-200'}`} />}
+                  {s < 4 && <div className={`w-8 h-0.5 ${step > s ? 'bg-primary' : 'bg-gray-200'}`} />}
                 </div>
               ))}
             </div>
@@ -96,13 +96,13 @@ export default function DemoPage() {
                     {demoProducts.map(p => (
                       <button key={p.id} onClick={() => { setSelectedProduct(p); setStep(2); }}
                         className={`text-left p-3 rounded-2xl border-2 transition-all ${
-                          selectedProduct?.id === p.id ? 'border-orange-500 bg-orange-50' : 'border-gray-100 hover:border-orange-200'
+                          selectedProduct?.id === p.id ? 'border-primary bg-primary/8' : 'border-gray-100 hover:border-primary/30'
                         }`}>
-                        <div className="w-full h-20 rounded-xl bg-orange-50 mb-2 overflow-hidden">
+                        <div className="w-full h-20 rounded-xl bg-primary/8 mb-2 overflow-hidden">
                           {(p as any).image_url && <img src={(p as any).image_url} alt={p.name} className="w-full h-full object-cover" />}
                         </div>
                         <p className="text-xs font-bold truncate">{p.name}</p>
-                        <p className="text-xs text-orange-600 font-bold">{p.price?.toFixed(2)} €</p>
+                        <p className="text-xs text-primary font-bold">{p.price?.toFixed(2)} €</p>
                       </button>
                     ))}
                   </div>
@@ -114,24 +114,24 @@ export default function DemoPage() {
                 <div>
                   <h2 className="text-xl font-bold mb-4">2. Ton panier</h2>
                   {selectedProduct && (
-                    <div className="flex items-center gap-4 p-4 bg-orange-50 rounded-2xl">
-                      <div className="w-16 h-16 rounded-xl bg-orange-100 overflow-hidden flex-shrink-0">
+                    <div className="flex items-center gap-4 p-4 bg-primary/8 rounded-2xl">
+                      <div className="w-16 h-16 rounded-xl bg-primary/15 overflow-hidden flex-shrink-0">
                         {selectedProduct.image_url && <img src={selectedProduct.image_url} className="w-full h-full object-cover" />}
                       </div>
                       <div className="flex-1">
                         <p className="font-bold">{selectedProduct.name}</p>
                         <p className="text-sm text-gray-500">{selectedProduct.price?.toFixed(2)} €</p>
                       </div>
-                      <span className="px-3 py-1 bg-orange-500 text-white rounded-lg text-sm font-bold">1</span>
+                      <span className="px-3 py-1 bg-primary text-white rounded-lg text-sm font-bold">1</span>
                     </div>
                   )}
                   <div className="mt-4 p-4 bg-gray-50 rounded-2xl">
                     <div className="flex justify-between text-sm"><span>Sous-total</span><span className="font-bold">{selectedProduct?.price?.toFixed(2)} €</span></div>
                     <div className="flex justify-between text-sm mt-2 text-gray-500">
-                      <span>Frais de service</span><span className={mode === 'retrait' ? 'text-emerald-600' : ''}>{mode === 'retrait' ? 'Gratuit' : 'À confirmer'}</span>
+                      <span>Frais de service</span><span className={mode === 'retrait' ? 'text-success' : ''}>{mode === 'retrait' ? 'Gratuit' : 'À confirmer'}</span>
                     </div>
                     <hr className="my-2" />
-                    <div className="flex justify-between font-bold"><span>Total estimé</span><span className="text-orange-600">{selectedProduct?.price?.toFixed(2)} €</span></div>
+                    <div className="flex justify-between font-bold"><span>Total estimé</span><span className="text-primary">{selectedProduct?.price?.toFixed(2)} €</span></div>
                   </div>
                 </div>
               )}
@@ -142,12 +142,12 @@ export default function DemoPage() {
                   <h2 className="text-xl font-bold mb-4">3. Choisis ton mode</h2>
                   <div className="grid md:grid-cols-2 gap-4">
                     {[
-                      { id: 'retrait', icon: Store, label: 'Retrait', desc: 'Gratuit — chez le partenaire', color: 'text-emerald-600 bg-emerald-50' },
-                      { id: 'livraison', icon: Truck, label: 'Livraison', desc: 'Programmée — à partir de 40€', color: 'text-orange-600 bg-orange-50' },
+                      { id: 'retrait', icon: Store, label: 'Retrait', desc: 'Gratuit — chez le partenaire', color: 'text-success bg-success/10' },
+                      { id: 'livraison', icon: Truck, label: 'Livraison', desc: 'Programmée — à partir de 40€', color: 'text-primary bg-primary/8' },
                     ].map(m => (
                       <button key={m.id} onClick={() => { setMode(m.id as any); setStep(4); }}
                         className={`p-6 rounded-2xl border-2 text-left transition-all ${
-                          mode === m.id ? 'border-orange-500 bg-orange-50' : 'border-gray-100 hover:border-orange-200'
+                          mode === m.id ? 'border-primary bg-primary/8' : 'border-gray-100 hover:border-primary/30'
                         }`}>
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${m.color} mb-3`}>
                           <m.icon className="w-6 h-6" />
@@ -189,9 +189,9 @@ export default function DemoPage() {
                 <button onClick={() => setStep(Math.max(1, step - 1))} disabled={step === 1}
                   className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold disabled:opacity-30">← Retour</button>
                 {step < 4 && <button onClick={() => setStep(step + 1)}
-                  className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-sm transition-all">Suivant →</button>}
+                  className="px-6 py-2 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl text-sm transition-all">Suivant →</button>}
                 {step === 4 && <button onClick={() => setStep(1)}
-                  className="px-4 py-2 rounded-xl border border-orange-200 text-orange-600 text-sm font-semibold">Recommencer</button>}
+                  className="px-4 py-2 rounded-xl border border-primary/30 text-primary text-sm font-semibold">Recommencer</button>}
               </div>
             </div>
           </div>
@@ -201,12 +201,12 @@ export default function DemoPage() {
         {onglet === 'dashboard-partenaires' && (
           <div className="space-y-4">
             <div className="bg-white rounded-3xl border border-gray-100 p-6">
-              <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><ChefHat className="w-6 h-6 text-orange-500" /> Dashboard Partenaire</h2>
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><ChefHat className="w-6 h-6 text-primary" /> Dashboard Partenaire</h2>
               <p className="text-gray-500 text-sm mb-6">Aperçu de ce que voit un traiteur connecté à son espace.</p>
               <div className="grid md:grid-cols-3 gap-4 mb-6">
                 {[
-                  { label: 'Commandes du jour', value: '3', sub: '+1 aujourd\'hui', color: 'bg-orange-50 text-orange-700' },
-                  { label: 'Revenu du mois', value: '1 240 €', sub: '+15% vs juin', color: 'bg-emerald-50 text-emerald-700' },
+                  { label: 'Commandes du jour', value: '3', sub: '+1 aujourd\'hui', color: 'bg-primary/8 text-primary' },
+                  { label: 'Revenu du mois', value: '1 240 €', sub: '+15% vs juin', color: 'bg-success/10 text-success' },
                   { label: 'Avis clients', value: '4.8 ⭐', sub: '12 avis', color: 'bg-blue-50 text-blue-700' },
                 ].map(k => (
                   <div key={k.label} className={`rounded-2xl p-5 ${k.color}`}>
@@ -227,12 +227,12 @@ export default function DemoPage() {
                     <div><span className="font-mono text-xs text-gray-400">{cmd.id}</span><p className="font-semibold">{cmd.client}</p></div>
                     <div className="text-right"><p>{cmd.plat}</p><span className="text-xs text-gray-400">{cmd.montant}</span></div>
                     <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
-                      cmd.statut === 'À préparer' ? 'bg-amber-100 text-amber-700' : cmd.statut === 'Prête' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'
+                      cmd.statut === 'À préparer' ? 'bg-secondary/15 text-secondary' : cmd.statut === 'Prête' ? 'bg-blue-100 text-blue-700' : 'bg-success/15 text-success'
                     }`}>{cmd.statut}</span>
                   </div>
                 ))}
               </div>
-              <Link to="/partenaire?code=SAVEURS-PILOTE" className="inline-flex items-center gap-2 mt-4 text-sm text-orange-600 font-bold hover:underline">
+              <Link to="/partenaire?code=SAVEURS-PILOTE" className="inline-flex items-center gap-2 mt-4 text-sm text-primary font-bold hover:underline">
                 Accéder à mon espace →
               </Link>
             </div>
@@ -242,7 +242,7 @@ export default function DemoPage() {
         {/* ─── DASHBOARD CLIENTS ─────────────────────────────── */}
         {onglet === 'dashboard-clients' && (
           <div className="bg-white rounded-3xl border border-gray-100 p-6">
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Users className="w-6 h-6 text-orange-500" /> Dashboard Client</h2>
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Users className="w-6 h-6 text-primary" /> Dashboard Client</h2>
             <p className="text-gray-500 text-sm mb-6">Suis tes commandes, gère tes favoris et accède à tes informations.</p>
             <div className="grid md:grid-cols-3 gap-4 mb-6">
               {[
@@ -251,17 +251,17 @@ export default function DemoPage() {
                 { label: 'Dernière commande', value: 'Il y a 3j', icon: Clock },
               ].map(k => (
                 <div key={k.label} className="bg-gray-50 rounded-2xl p-4 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
-                    <k.icon className="w-5 h-5 text-orange-600" />
+                  <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+                    <k.icon className="w-5 h-5 text-primary" />
                   </div>
                   <div><p className="text-xs text-gray-500">{k.label}</p><p className="font-bold">{k.value}</p></div>
                 </div>
               ))}
             </div>
-            <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100">
+            <div className="p-4 bg-secondary/10 rounded-2xl border border-secondary/20">
               <p className="font-bold text-sm mb-1">📍 Commande en cours</p>
-              <p className="text-sm">DK-202607-001 — Colombo poulet — <span className="text-amber-700 font-semibold">À confirmer sur WhatsApp</span></p>
-              <Link to="/statut-commande" className="text-sm text-orange-600 font-bold hover:underline mt-2 inline-block">Voir le suivi →</Link>
+              <p className="text-sm">DK-202607-001 — Colombo poulet — <span className="text-secondary font-semibold">À confirmer sur WhatsApp</span></p>
+              <Link to="/statut-commande" className="text-sm text-primary font-bold hover:underline mt-2 inline-block">Voir le suivi →</Link>
             </div>
             <div className="mt-4 p-4 bg-gray-50 rounded-2xl">
               <p className="font-bold text-sm mb-3">📋 Historique</p>
@@ -273,7 +273,7 @@ export default function DemoPage() {
                   <span className="text-xs text-gray-400 font-mono">{h.id}</span>
                   <span>{h.plat}</span>
                   <span className="text-gray-500">{h.total}</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">{h.statut}</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-success/15 text-success">{h.statut}</span>
                 </div>
               ))}
             </div>
@@ -283,11 +283,11 @@ export default function DemoPage() {
         {/* ─── CARTE ─────────────────────────────────────────── */}
         {onglet === 'carte' && (
           <div className="bg-white rounded-3xl border border-gray-100 p-6">
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><MapPin className="w-6 h-6 text-orange-500" /> Carte des traiteurs</h2>
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><MapPin className="w-6 h-6 text-primary" /> Carte des traiteurs</h2>
             <p className="text-gray-500 text-sm mb-4">Positionnement de chaque partenaire DELIKREOL en Martinique.</p>
-            <div className="bg-[#FFF8F0] rounded-2xl p-6 border border-orange-100 min-h-[400px] relative overflow-hidden">
+            <div className="bg-[#FFF8F0] rounded-2xl p-6 border border-primary/20 min-h-[400px] relative overflow-hidden">
               {/* Carte simplifiée Martinique */}
-              <div className="relative w-full h-[400px] bg-gradient-to-br from-orange-50/50 to-amber-50/50 rounded-xl overflow-hidden">
+              <div className="relative w-full h-[400px] bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl overflow-hidden">
                 {/* SVG simplifié de la Martinique avec positions */}
                 <svg viewBox="0 0 600 400" className="w-full h-full">
                   {/* Fond carte */}
@@ -337,14 +337,14 @@ export default function DemoPage() {
         {onglet === 'bases' && (
           <div className="space-y-4">
             <div className="bg-white rounded-3xl border border-gray-100 p-6">
-              <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Package className="w-6 h-6 text-orange-500" /> Bases de données</h2>
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Package className="w-6 h-6 text-primary" /> Bases de données</h2>
               <p className="text-gray-500 text-sm mb-6">Accès aux différentes tables et espaces du système.</p>
 
               <div className="grid md:grid-cols-3 gap-4">
                 {/* Traiteurs */}
-                <div className="border border-orange-100 rounded-2xl p-5 hover:shadow-md transition-all">
-                  <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center mb-3">
-                    <ChefHat className="w-5 h-5 text-orange-600" />
+                <div className="border border-primary/20 rounded-2xl p-5 hover:shadow-md transition-all">
+                  <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center mb-3">
+                    <ChefHat className="w-5 h-5 text-primary" />
                   </div>
                   <h3 className="font-bold text-sm mb-1">Traiteurs</h3>
                   <p className="text-xs text-gray-500 mb-3">{traiteurSpaces.length} partenaires</p>
@@ -354,12 +354,12 @@ export default function DemoPage() {
                         <span>{t.name}</span>
                         <span className="text-gray-400">{t.commune || t.zone}</span>
                         <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
-                          t.status === 'public confirmé' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
+                          t.status === 'public confirmé' ? 'bg-success/15 text-success' : 'bg-gray-100 text-gray-500'
                         }`}>{t.status === 'public confirmé' ? '✅ Actif' : '⏳ Test'}</span>
                       </div>
                     ))}
                   </div>
-                  <Link to="/traiteurs" className="text-xs text-orange-600 font-bold hover:underline mt-2 inline-block">Voir la page →</Link>
+                  <Link to="/traiteurs" className="text-xs text-primary font-bold hover:underline mt-2 inline-block">Voir la page →</Link>
                 </div>
 
                 {/* Livreurs */}
@@ -375,15 +375,15 @@ export default function DemoPage() {
                 </div>
 
                 {/* Points relais */}
-                <div className="border border-emerald-100 rounded-2xl p-5 hover:shadow-md transition-all">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center mb-3">
-                    <Store className="w-5 h-5 text-emerald-600" />
+                <div className="border border-success/25 rounded-2xl p-5 hover:shadow-md transition-all">
+                  <div className="w-10 h-10 rounded-xl bg-success/15 flex items-center justify-center mb-3">
+                    <Store className="w-5 h-5 text-success" />
                   </div>
                   <h3 className="font-bold text-sm mb-1">Points relais</h3>
                   <p className="text-xs text-gray-500 mb-3">Table `relay_point_applications` (Supabase)</p>
                   <p className="text-xs text-gray-400 mb-2">Inscription via le formulaire public.</p>
-                  <Link to="/devenir-point-relais" className="text-xs text-emerald-600 font-bold hover:underline block">Devenir point relais →</Link>
-                  <Link to="/admin/points-relais" className="text-xs text-emerald-600 font-bold hover:underline block">Admin relais →</Link>
+                  <Link to="/devenir-point-relais" className="text-xs text-success font-bold hover:underline block">Devenir point relais →</Link>
+                  <Link to="/admin/points-relais" className="text-xs text-success font-bold hover:underline block">Admin relais →</Link>
                 </div>
               </div>
 
@@ -405,7 +405,7 @@ export default function DemoPage() {
 
         {/* CTA retour */}
         <div className="text-center mt-8">
-          <Link to="/catalogue" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold rounded-2xl hover:scale-105 transition-all shadow-lg shadow-orange-200">
+          <Link to="/catalogue" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white font-bold rounded-2xl hover:scale-105 transition-all shadow-lg shadow-primary/20">
             🛒 Voir le vrai catalogue
           </Link>
         </div>

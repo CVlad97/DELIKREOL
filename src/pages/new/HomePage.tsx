@@ -415,7 +415,7 @@ export default function HomePage() {
 
           <div className="relative hidden lg:block">
             <div className="absolute -left-10 top-12 h-32 w-32 rounded-full bg-primary/20 blur-3xl" />
-            <div className="absolute -right-8 bottom-12 h-40 w-40 rounded-full bg-emerald-400/20 blur-3xl" />
+            <div className="absolute -right-8 bottom-12 h-40 w-40 rounded-full bg-success/20 blur-3xl" />
             <div className="relative rounded-[2.5rem] border border-primary/20 bg-white/[0.84] p-4 shadow-[0_32px_100px_-48px_rgba(42,25,15,0.72)] backdrop-blur-2xl">
               <div className="overflow-hidden rounded-[2rem] bg-white">
                 <img
@@ -649,8 +649,8 @@ export default function HomePage() {
                     <div className="absolute top-3 right-3">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
                         product.available !== false
-                          ? 'bg-emerald-100 text-success'
-                          : 'bg-amber-100 text-amber-700'
+                          ? 'bg-success/15 text-success'
+                          : 'bg-secondary/15 text-secondary'
                       }`}>
                         {product.available !== false ? 'Disponible' : 'Sur confirmation'}
                       </span>
@@ -720,9 +720,9 @@ export default function HomePage() {
       </section>
 
       {/* Trust / Le meilleur est à venir */}
-      <section className="relative overflow-hidden py-16 md:py-24 bg-gradient-to-br from-stone-950 via-emerald-950 to-primary text-white">
+      <section className="relative overflow-hidden py-16 md:py-24 bg-gradient-to-br from-stone-950 via-accent to-primary text-white">
         <div className="absolute left-0 top-0 h-64 w-64 rounded-full bg-primary/25 blur-3xl" />
-        <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-emerald-300/15 blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-success/15 blur-3xl" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">
@@ -742,7 +742,7 @@ export default function HomePage() {
               const Icon = stat.icon;
               return (
                 <div key={index} className="text-center p-6 rounded-[1.75rem] border border-white/10 bg-white/10 backdrop-blur-sm">
-                  <Icon className="w-8 h-8 mx-auto mb-3 text-amber-200" />
+                  <Icon className="w-8 h-8 mx-auto mb-3 text-secondary" />
                   <div className="text-3xl font-black mb-1">{stat.value}</div>
                   <div className="text-sm text-white/70">{stat.label}</div>
                 </div>
@@ -773,7 +773,7 @@ export default function HomePage() {
               </p>
             </div>
             <div className="bg-white rounded-[2rem] p-8 border border-primary/20 shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all text-center">
-              <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-5">
+              <div className="w-14 h-14 rounded-2xl bg-secondary/15 text-secondary flex items-center justify-center mx-auto mb-5">
                 <Clock className="w-7 h-7" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-3">Livraison programmée</h3>
@@ -820,7 +820,7 @@ export default function HomePage() {
                 to={`/traiteur/${caterer.slug}`}
                 className="group flex flex-col items-center gap-3 p-5 rounded-[1.75rem] bg-primary/[0.08]/70 border border-primary/20 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg transition-all text-center"
               >
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-orange-200 group-hover:border-orange-400 transition-colors bg-white shadow-sm">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-primary/30 group-hover:border-primary transition-colors bg-white shadow-sm">
                                   <img loading="lazy"
                                      src={caterer.image}
                                      alt={caterer.name}
@@ -837,7 +837,7 @@ export default function HomePage() {
       </section>
 
       {/* Avis clients — Ce que disent nos clients */}
-            <section className="py-16 md:py-24 bg-gradient-to-b from-white to-orange-50/50">
+            <section className="py-16 md:py-24 bg-gradient-to-b from-white to-primary/5">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-10">
                   <h2 className="sectionTitle text-3xl md:text-5xl font-black tracking-tight text-foreground mb-3">
@@ -851,7 +851,7 @@ export default function HomePage() {
                 <div className="mt-8 text-center">
                   <Link
                     to="/avis"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary text-white font-bold rounded-xl transition-all hover:-translate-y-0.5 shadow-lg shadow-orange-200 text-sm"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary text-white font-bold rounded-xl transition-all hover:-translate-y-0.5 shadow-lg shadow-primary/20 text-sm"
                   >
                     <PenLine className="w-4 h-4" />
                     Donnez votre avis
@@ -957,9 +957,9 @@ export default function HomePage() {
       {/* CTA Final */}
       <section className="py-16 md:py-24 bg-gradient-to-b from-white to-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-stone-950 via-emerald-950 to-primary px-6 py-12 text-center text-white shadow-[0_32px_100px_-55px_rgba(42,25,15,0.75)] md:px-12 md:py-16">
+          <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-stone-950 via-accent to-primary px-6 py-12 text-center text-white shadow-[0_32px_100px_-55px_rgba(42,25,15,0.75)] md:px-12 md:py-16">
             <div className="absolute -left-16 top-0 h-56 w-56 rounded-full bg-primary/25 blur-3xl" />
-            <div className="absolute -right-10 bottom-0 h-64 w-64 rounded-full bg-emerald-300/15 blur-3xl" />
+            <div className="absolute -right-10 bottom-0 h-64 w-64 rounded-full bg-success/15 blur-3xl" />
             <div className="relative mx-auto max-w-3xl">
               <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">
                 Prêt à commander ?
@@ -970,7 +970,7 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
                   to="/catalogue"
-                  className="flex items-center gap-2 px-8 py-4 bg-primary hover:bg-primary text-white font-bold rounded-2xl transition-all hover:-translate-y-0.5 shadow-lg shadow-orange-950/20 text-lg"
+                  className="flex items-center gap-2 px-8 py-4 bg-primary hover:bg-primary text-white font-bold rounded-2xl transition-all hover:-translate-y-0.5 shadow-lg shadow-primary/20 text-lg"
                 >
                   <ShoppingBag className="w-5 h-5" />
                   Voir le catalogue

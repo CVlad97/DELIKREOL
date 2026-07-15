@@ -316,8 +316,8 @@ export function AuthModal({ isOpen, onClose, onBack, initialMode = 'signin' }: A
         </form>
 
         <div className="mt-6 border-t border-gray-200 pt-4">
-          <div className="mb-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
-            <p className="text-[11px] font-black uppercase tracking-[0.25em] text-emerald-600">Espace de test interne</p>
+          <div className="mb-4 rounded-2xl border border-success/20 bg-success/5 p-4">
+            <p className="text-[11px] font-black uppercase tracking-[0.25em] text-success">Espace de test interne</p>
             <p className="mt-2 text-sm font-medium text-slate-700">
               Accès réservé aux vérifications fonctionnelles avant publication opérationnelle.
             </p>
@@ -329,35 +329,35 @@ export function AuthModal({ isOpen, onClose, onBack, initialMode = 'signin' }: A
             <button
               type="button"
               onClick={() => handleDemoAccess('customer')}
-              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
+              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-success hover:bg-success/10 text-sm font-medium text-gray-700 transition-colors"
             >
               Client
             </button>
             <button
               type="button"
               onClick={() => handleDemoAccess('vendor')}
-              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
+              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-success hover:bg-success/10 text-sm font-medium text-gray-700 transition-colors"
             >
               Vendeur
             </button>
             <button
               type="button"
               onClick={() => handleDemoAccess('relay_host')}
-              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
+              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-success hover:bg-success/10 text-sm font-medium text-gray-700 transition-colors"
             >
               Hôte relais
             </button>
             <button
               type="button"
               onClick={() => handleDemoAccess('driver')}
-              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
+              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-success hover:bg-success/10 text-sm font-medium text-gray-700 transition-colors"
             >
               Livreur
             </button>
             <button
               type="button"
               onClick={() => handleDemoAccess('admin')}
-              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
+              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-success hover:bg-success/10 text-sm font-medium text-gray-700 transition-colors"
             >
               Admin
             </button>

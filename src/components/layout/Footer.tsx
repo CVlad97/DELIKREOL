@@ -55,7 +55,7 @@ export function Footer() {
           <div className="mb-12 rounded-[2rem] bg-gradient-to-br from-foreground via-accent to-primary p-6 text-white shadow-[0_28px_80px_-52px_rgba(42,25,15,0.8)] md:p-8">
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-secondary">
                   DeliKreol opérationnel
                 </p>
                 <h2 className="mt-2 text-2xl font-black tracking-tight md:text-3xl">

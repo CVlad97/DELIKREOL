@@ -178,9 +178,9 @@ export default function PartnerAccessPage() {
     <Layout>
       <BackBar label='Retour' backTo='/' />
       <div className="max-w-2xl mx-auto px-4 py-8">
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6">
-          <p className="text-sm font-bold text-amber-800">🧪 Accès pilote gratuit</p>
-          <p className="text-xs text-amber-700">Code : <strong>{code}</strong> — Lien provisoire de test, pas un mot de passe définitif. Envoyez vos corrections, DELIKREOL les applique gratuitement.</p>
+        <div className="bg-secondary/10 border border-secondary/30 rounded-2xl p-4 mb-6">
+          <p className="text-sm font-bold text-secondary">🧪 Accès pilote gratuit</p>
+          <p className="text-xs text-secondary">Code : <strong>{code}</strong> — Lien provisoire de test, pas un mot de passe définitif. Envoyez vos corrections, DELIKREOL les applique gratuitement.</p>
         </div>
 
         <h1 className="text-2xl font-black mb-1">{partnerName}</h1>

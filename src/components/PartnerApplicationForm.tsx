@@ -54,7 +54,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.business_name || ''}
           onChange={(e) => updateField('business_name', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
         />
       </div>
 
@@ -66,7 +66,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.business_type || ''}
           onChange={(e) => updateField('business_type', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
         >
           <option value="">Sélectionner...</option>
           <option value="restaurant">Restaurant</option>
@@ -84,7 +84,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           value={formData.description || ''}
           onChange={(e) => updateField('description', e.target.value)}
           rows={3}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           placeholder="Décrivez vos produits, votre cuisine, etc."
         />
       </div>
@@ -98,7 +98,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.address || ''}
           onChange={(e) => updateField('address', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
         />
       </div>
 
@@ -111,7 +111,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.phone || ''}
           onChange={(e) => updateField('phone', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           placeholder="+596 696 XX XX XX"
         />
       </div>
@@ -125,7 +125,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.email || ''}
           onChange={(e) => updateField('email', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
         />
       </div>
 
@@ -138,7 +138,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.siret || ''}
           onChange={(e) => updateField('siret', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
         />
       </div>
 
@@ -151,7 +151,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.product_categories || ''}
           onChange={(e) => updateField('product_categories', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           placeholder="Ex: Plats créoles, Produits bio, Viennoiseries..."
         />
       </div>
@@ -162,7 +162,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
             type="checkbox"
             checked={formData.health_compliance || false}
             onChange={(e) => updateField('health_compliance', e.target.checked)}
-            className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+            className="w-4 h-4 text-success border-gray-300 rounded focus:ring-ring"
           />
           <span className="text-sm text-gray-700">
             Je certifie être en conformité sanitaire *
@@ -174,7 +174,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
 
   const renderDriverFields = () => (
     <>
-      <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-900">
+      <div className="rounded-lg border border-success/25 bg-success/10 p-4 text-sm text-success">
         <p className="font-semibold">Espace livreur</p>
         <p className="mt-1">
           Indiquez votre zone, votre rayon, votre disponibilité, votre véhicule et votre objectif de rémunération.
@@ -190,7 +190,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.service_zone || ''}
           onChange={(e) => updateField('service_zone', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           placeholder="Ex: Fort-de-France, Lamentin, Schoelcher"
         />
       </div>
@@ -205,7 +205,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.delivery_radius_km || ''}
           onChange={(e) => updateField('delivery_radius_km', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           placeholder="Ex: 8"
         />
       </div>
@@ -219,7 +219,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.full_name || ''}
           onChange={(e) => updateField('full_name', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
         />
       </div>
 
@@ -232,7 +232,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.phone || ''}
           onChange={(e) => updateField('phone', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           placeholder="+596 696 XX XX XX"
         />
       </div>
@@ -246,7 +246,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.email || ''}
           onChange={(e) => updateField('email', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
         />
       </div>
 
@@ -259,7 +259,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.siret || ''}
           onChange={(e) => updateField('siret', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
         />
       </div>
 
@@ -271,7 +271,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.vehicle_type || ''}
           onChange={(e) => updateField('vehicle_type', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
         >
           <option value="">Sélectionner...</option>
           <option value="bike">Vélo</option>
@@ -289,7 +289,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.license_number || ''}
           onChange={(e) => updateField('license_number', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
         />
       </div>
 
@@ -302,7 +302,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.availability || ''}
           onChange={(e) => updateField('availability', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           placeholder="Ex: Lundi-Vendredi 9h-18h"
         />
       </div>
@@ -316,7 +316,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.expected_remuneration || ''}
           onChange={(e) => updateField('expected_remuneration', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           placeholder="Ex: 70% des frais livraison + bonus distance"
         />
       </div>
@@ -327,7 +327,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
             type="checkbox"
             checked={formData.insurance_proof || false}
             onChange={(e) => updateField('insurance_proof', e.target.checked)}
-            className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+            className="w-4 h-4 text-success border-gray-300 rounded focus:ring-ring"
           />
           <span className="text-sm text-gray-700">
             Je certifie avoir une assurance responsabilité civile *
@@ -348,7 +348,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.location_name || ''}
           onChange={(e) => updateField('location_name', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           placeholder="Ex: Épicerie Durand, Bar PMU..."
         />
       </div>
@@ -362,7 +362,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.owner_name || ''}
           onChange={(e) => updateField('owner_name', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
         />
       </div>
 
@@ -375,7 +375,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.address || ''}
           onChange={(e) => updateField('address', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
         />
       </div>
 
@@ -388,7 +388,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.phone || ''}
           onChange={(e) => updateField('phone', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           placeholder="+596 696 XX XX XX"
         />
       </div>
@@ -402,7 +402,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.email || ''}
           onChange={(e) => updateField('email', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
         />
       </div>
 
@@ -423,7 +423,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
                     : current.filter((t: string) => t !== type)
                   );
                 }}
-                className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                className="w-4 h-4 text-success border-gray-300 rounded focus:ring-ring"
               />
               <span className="text-sm text-gray-700 capitalize">
                 {type === 'cold' ? 'Réfrigéré' : type === 'hot' ? 'Chaud' : type === 'dry' ? 'Sec' : 'Congelé'}
@@ -443,7 +443,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           min="5"
           value={formData.total_capacity || ''}
           onChange={(e) => updateField('total_capacity', parseInt(e.target.value))}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
         />
       </div>
 
@@ -456,7 +456,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           required
           value={formData.opening_hours || ''}
           onChange={(e) => updateField('opening_hours', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           placeholder="Ex: Lun-Sam 8h-20h"
         />
       </div>
@@ -470,7 +470,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
           value={formData.security_measures || ''}
           onChange={(e) => updateField('security_measures', e.target.value)}
           rows={2}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           placeholder="Ex: Caméras, local fermé, alarme..."
         />
       </div>
@@ -481,7 +481,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
             type="checkbox"
             checked={formData.parking_available || false}
             onChange={(e) => updateField('parking_available', e.target.checked)}
-            className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+            className="w-4 h-4 text-success border-gray-300 rounded focus:ring-ring"
           />
           <span className="text-sm text-gray-700">Parking disponible</span>
         </label>
@@ -491,7 +491,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
             type="checkbox"
             checked={formData.pmr_accessible || false}
             onChange={(e) => updateField('pmr_accessible', e.target.checked)}
-            className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+            className="w-4 h-4 text-success border-gray-300 rounded focus:ring-ring"
           />
           <span className="text-sm text-gray-700">Accessible PMR</span>
         </label>
@@ -536,7 +536,7 @@ export function PartnerApplicationForm({ isOpen, onClose, partnerType }: Partner
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 px-6 py-3 bg-success text-white rounded-lg hover:bg-success/90 transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>

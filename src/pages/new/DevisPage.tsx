@@ -360,7 +360,7 @@ export default function DevisPage() {
 
             <div className="space-y-1.5">
               <label htmlFor="allergies" className="block text-sm font-semibold text-foreground">
-                <AlertCircle size={14} className="inline mr-1 text-orange-500" />
+                <AlertCircle size={14} className="inline mr-1 text-primary" />
                 Allergies à signaler
               </label>
               <textarea

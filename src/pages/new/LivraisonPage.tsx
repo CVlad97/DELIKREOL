@@ -79,9 +79,9 @@ export default function LivraisonPage() {
 
       {/* Important notices */}
       <div className="space-y-3 mb-8">
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex gap-3">
-          <AlertCircle size={18} className="text-amber-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-amber-900 leading-relaxed">
+        <div className="p-4 bg-secondary/10 border border-secondary/30 rounded-xl flex gap-3">
+          <AlertCircle size={18} className="text-secondary flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-secondary leading-relaxed">
             <strong>Livraison éloignée</strong> possible à partir de <strong>40€ de commande</strong>,
             selon validation du prestataire et disponibilité DeliKreol.
           </p>
@@ -188,7 +188,7 @@ export default function LivraisonPage() {
       </div>
 
       {/* Not sure? WhatsApp */}
-      <div className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl">
+      <div className="p-6 bg-gradient-to-r from-green-50 to-success/10 border border-green-200 rounded-2xl">
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <div className="flex-1 space-y-2">
             <h3 className="font-bold text-foreground">Pas sûr(e) de votre zone ?</h3>

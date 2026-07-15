@@ -33,7 +33,7 @@ export function ProtectedAdminRoute({ children }: { children: React.ReactNode })
         <div className="text-6xl mb-4">🔒</div>
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Accès réservé</h1>
         <p className="text-gray-500 mb-6">Cette section est réservée aux administrateurs DeliKreol.</p>
-        <a href="/DELIKREOL/pro" className="px-6 py-3 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-colors">
+        <a href="/DELIKREOL/pro" className="px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors">
           Retour à l’espace pro
         </a>
       </div>

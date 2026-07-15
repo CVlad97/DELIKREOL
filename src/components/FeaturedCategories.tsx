@@ -17,9 +17,9 @@ export function FeaturedCategories({ onSelectCategory }: FeaturedCategoriesProps
     { id: 'restaurant', name: 'Restaurants', icon: UtensilsCrossed, color: 'bg-red-500', count: 45 },
     { id: 'producer', name: 'Producteurs', icon: Apple, color: 'bg-green-500', count: 32 },
     { id: 'merchant', name: 'Commerçants', icon: Store, color: 'bg-blue-500', count: 28 },
-    { id: 'cafe', name: 'Cafés', icon: Coffee, color: 'bg-amber-500', count: 18 },
-    { id: 'fast-food', name: 'Fast Food', icon: Pizza, color: 'bg-orange-500', count: 24 },
-    { id: 'healthy', name: 'Healthy', icon: Salad, color: 'bg-emerald-500', count: 15 },
+    { id: 'cafe', name: 'Cafés', icon: Coffee, color: 'bg-secondary/100', count: 18 },
+    { id: 'fast-food', name: 'Fast Food', icon: Pizza, color: 'bg-primary', count: 24 },
+    { id: 'healthy', name: 'Healthy', icon: Salad, color: 'bg-success', count: 15 },
   ];
 
   return (
@@ -27,7 +27,7 @@ export function FeaturedCategories({ onSelectCategory }: FeaturedCategoriesProps
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold text-gray-900">Catégories</h2>
-          <button className="text-orange-600 font-medium hover:text-orange-700">
+          <button className="text-primary font-medium hover:text-primary">
             Voir tout
           </button>
         </div>

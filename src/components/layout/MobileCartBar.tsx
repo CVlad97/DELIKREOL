@@ -9,7 +9,7 @@ export function MobileCartBar() {
 
   return (
     <div className="fixed bottom-0 inset-x-0 z-50 md:hidden animate-slide-up">
-      <div className="mx-2 mb-2 rounded-2xl bg-gradient-to-r from-primary to-orange-600 text-white shadow-elegant">
+      <div className="mx-2 mb-2 rounded-2xl bg-gradient-to-r from-primary to-primary text-white shadow-elegant">
         <Link
           to="/panier"
           className="flex items-center justify-between px-4 py-3"

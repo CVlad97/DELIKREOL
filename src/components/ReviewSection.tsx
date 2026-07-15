@@ -50,10 +50,10 @@ export function ReviewSection({ traiteurSlug, traiteurName }: { traiteurSlug: st
         <div className="flex items-center gap-3">
           <h2 className="text-2xl font-display font-bold">Avis clients</h2>
           {count > 0 && (
-            <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 rounded-full">
+            <div className="flex items-center gap-2 px-3 py-1 bg-secondary/10 rounded-full">
               <Stars rating={Math.round(average)} size={14} />
-              <span className="text-sm font-bold text-amber-700">{average.toFixed(1)}</span>
-              <span className="text-xs text-amber-500">({count} avis)</span>
+              <span className="text-sm font-bold text-secondary">{average.toFixed(1)}</span>
+              <span className="text-xs text-secondary">({count} avis)</span>
             </div>
           )}
         </div>
@@ -67,7 +67,7 @@ export function ReviewSection({ traiteurSlug, traiteurName }: { traiteurSlug: st
 
       {/* Formulaire d'avis */}
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-amber-50 rounded-2xl p-5 mb-6 border border-amber-200">
+        <form onSubmit={handleSubmit} className="bg-secondary/10 rounded-2xl p-5 mb-6 border border-secondary/30">
           <h3 className="font-bold text-gray-900 mb-3">Votre avis sur {traiteurName}</h3>
           
           <div className="mb-3">
@@ -78,7 +78,7 @@ export function ReviewSection({ traiteurSlug, traiteurName }: { traiteurSlug: st
                   <Star
                     size={28}
                     className={`cursor-pointer transition-colors ${
-                      star <= newRating ? 'text-amber-400 fill-amber-400' : 'text-gray-300 hover:text-amber-300'
+                      star <= newRating ? 'text-secondary fill-secondary' : 'text-gray-300 hover:text-secondary'
                     }`}
                   />
                 </button>
@@ -91,7 +91,7 @@ export function ReviewSection({ traiteurSlug, traiteurName }: { traiteurSlug: st
             <input
               type="text" value={newAuthor} onChange={e => setNewAuthor(e.target.value)}
               placeholder="Ex: Marie"
-              className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-amber-400 outline-none text-sm"
+              className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-ring outline-none text-sm"
               required
             />
           </div>
@@ -101,7 +101,7 @@ export function ReviewSection({ traiteurSlug, traiteurName }: { traiteurSlug: st
             <textarea
               value={newComment} onChange={e => setNewComment(e.target.value)}
               placeholder="Partagez votre expérience..."
-              className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-amber-400 outline-none text-sm resize-none h-20"
+              className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-ring outline-none text-sm resize-none h-20"
               required
             />
           </div>
@@ -109,7 +109,7 @@ export function ReviewSection({ traiteurSlug, traiteurName }: { traiteurSlug: st
           <button
             type="submit"
             disabled={newRating === 0 || !newComment.trim() || !newAuthor.trim()}
-            className="px-5 py-2 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-white font-bold rounded-xl text-sm transition-colors"
+            className="px-5 py-2 bg-primary hover:bg-primary/90 disabled:bg-gray-300 text-white font-bold rounded-xl text-sm transition-colors"
           >
             Publier mon avis
           </button>
@@ -127,7 +127,7 @@ export function ReviewSection({ traiteurSlug, traiteurName }: { traiteurSlug: st
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-gray-900 text-sm">{review.authorName}</span>
                   {review.verified && (
-                    <span className="text-[10px] px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full flex items-center gap-0.5">
+                    <span className="text-[10px] px-1.5 py-0.5 bg-success/15 text-success rounded-full flex items-center gap-0.5">
                       <Verified size={10} /> Commande vérifiée
                     </span>
                   )}
@@ -150,7 +150,7 @@ export function RatingBadge({ traiteurSlug }: { traiteurSlug: string }) {
   if (count === 0) return null;
   return (
     <div className="flex items-center gap-1 text-xs">
-      <Star size={12} className="text-amber-400 fill-amber-400" />
+      <Star size={12} className="text-secondary fill-secondary" />
       <span className="font-semibold text-gray-700">{average.toFixed(1)}</span>
       <span className="text-gray-400">({count})</span>
     </div>

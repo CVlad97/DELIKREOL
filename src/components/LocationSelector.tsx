@@ -56,7 +56,7 @@ export function LocationSelector({ onSelect, compact }: LocationSelectorProps) {
   };
 
   return (
-    <div className={`bg-white rounded-2xl border border-orange-100 ${compact ? 'p-3' : 'p-4 shadow-sm'}`}>
+    <div className={`bg-white rounded-2xl border border-primary/20 ${compact ? 'p-3' : 'p-4 shadow-sm'}`}>
       <p className="text-xs text-gray-500 mb-2 flex items-center gap-1">
         <MapPin className="w-3 h-3" />
         Nous utilisons votre position uniquement pour estimer les distances, délais et options disponibles.
@@ -83,7 +83,7 @@ export function LocationSelector({ onSelect, compact }: LocationSelectorProps) {
             <div className="absolute top-full left-0 right-0 z-20 mt-1 bg-white border rounded-xl shadow-lg max-h-48 overflow-y-auto">
               {filtered.slice(0, 34).map(c => (
                 <button key={c.name} onClick={() => handleSelect(c.name)}
-                  className={`w-full text-left px-3 py-2 text-sm hover:bg-orange-50 ${c.name === selectedCommune ? 'bg-orange-50 text-orange-600 font-semibold' : 'text-gray-700'}`}>
+                  className={`w-full text-left px-3 py-2 text-sm hover:bg-primary/8 ${c.name === selectedCommune ? 'bg-primary/8 text-primary font-semibold' : 'text-gray-700'}`}>
                   {c.name}
                 </button>
               ))}
@@ -94,7 +94,7 @@ export function LocationSelector({ onSelect, compact }: LocationSelectorProps) {
 
         {/* Bouton géolocalisation */}
         {!position && (
-          <button onClick={requestGeolocation} className="flex items-center gap-1 px-3 py-2 bg-orange-100 text-orange-700 rounded-xl text-xs font-bold hover:bg-orange-200">
+          <button onClick={requestGeolocation} className="flex items-center gap-1 px-3 py-2 bg-primary/15 text-primary rounded-xl text-xs font-bold hover:bg-primary/20">
             <Locate className="w-3 h-3" />
             {compact ? '' : 'Ma position'}
           </button>
@@ -104,7 +104,7 @@ export function LocationSelector({ onSelect, compact }: LocationSelectorProps) {
       {position && (
         <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
           <span>📍 Position utilisée pour le classement</span>
-          <button onClick={() => { setPosition(null); }} className="text-orange-600 hover:underline">Réinitialiser</button>
+          <button onClick={() => { setPosition(null); }} className="text-primary hover:underline">Réinitialiser</button>
         </div>
       )}
     </div>

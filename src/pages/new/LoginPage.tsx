@@ -49,13 +49,13 @@ export default function LoginPage() {
 
   return (
     <Layout>
-      <section className="min-h-[70vh] bg-gradient-to-br from-orange-50 via-amber-50 to-emerald-50 px-4 py-10">
-        <div className="mx-auto max-w-md rounded-[2rem] border border-orange-100 bg-white p-6 shadow-xl sm:p-8">
+      <section className="min-h-[70vh] bg-gradient-to-br from-primary/8 via-secondary/8 to-success/10 px-4 py-10">
+        <div className="mx-auto max-w-md rounded-[2rem] border border-primary/20 bg-white p-6 shadow-xl sm:p-8">
           <div className="text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/15 text-primary">
               <ShieldCheck className="h-7 w-7" />
             </div>
-            <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-600">DELIKREOL</p>
+            <p className="text-xs font-black uppercase tracking-[0.24em] text-primary">DELIKREOL</p>
             <h1 className="mt-2 text-2xl font-black text-gray-900">Se connecter</h1>
             <p className="mt-2 text-sm leading-6 text-gray-600">
               Entre ton email. Tu recevras un lien sécurisé pour ouvrir ton espace.
@@ -75,14 +75,14 @@ export default function LoginPage() {
                 onChange={(event) => setEmail(event.target.value)}
                 required
                 placeholder="vladimir.claveau@gmail.com"
-                className="w-full rounded-2xl border border-gray-200 py-3 pl-11 pr-4 text-sm outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                className="w-full rounded-2xl border border-gray-200 py-3 pl-11 pr-4 text-sm outline-none focus:border-ring focus:ring-4 focus:ring-ring/30"
               />
             </div>
 
             <button
               type="submit"
               disabled={status === 'loading'}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-orange-500 px-5 py-3 font-black text-white shadow-lg shadow-orange-200 transition hover:bg-orange-600 disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-3 font-black text-white shadow-lg shadow-primary/20 transition hover:bg-primary/90 disabled:opacity-60"
             >
               <Send className="h-5 w-5" />
               {status === 'loading' ? 'Envoi...' : 'Recevoir mon lien'}
@@ -108,7 +108,7 @@ export default function LoginPage() {
           </button>
 
           {message && (
-            <div className={`mt-5 rounded-2xl p-4 text-sm ${status === 'error' ? 'border border-red-200 bg-red-50 text-red-700' : 'border border-emerald-200 bg-emerald-50 text-emerald-700'}`}>
+            <div className={`mt-5 rounded-2xl p-4 text-sm ${status === 'error' ? 'border border-red-200 bg-red-50 text-red-700' : 'border border-success/30 bg-success/10 text-success'}`}>
               {message}
             </div>
           )}
@@ -118,7 +118,7 @@ export default function LoginPage() {
           </div>
 
           <div className="mt-5 flex justify-center gap-4 text-sm font-bold">
-            <Link to="/pro" className="text-orange-600 hover:underline">Espace pro</Link>
+            <Link to="/pro" className="text-primary hover:underline">Espace pro</Link>
             <button type="button" onClick={() => navigate('/')} className="text-gray-600 hover:underline">Accueil</button>
           </div>
         </div>

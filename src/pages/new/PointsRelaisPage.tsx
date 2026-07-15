@@ -112,7 +112,7 @@ export default function PointsRelaisPage() {
           <p className="text-xs text-muted-foreground">
             Statut initial : <span className="font-bold text-blue-600">candidat</span>
           </p>
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-900 max-w-md mx-auto">
+          <div className="p-4 bg-secondary/10 border border-secondary/30 rounded-xl text-sm text-secondary max-w-md mx-auto">
             <strong>Note :</strong> Votre point relais ne sera pas affiché comme actif tant qu'il
             n'aura pas été validé par l'équipe DeliKreol.
           </div>
@@ -141,7 +141,7 @@ export default function PointsRelaisPage() {
       <div className="max-w-3xl mx-auto px-4 py-8 md:py-12">
         {/* Header */}
         <div className="mb-8 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-100 text-amber-700 rounded-full text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-secondary/15 text-secondary rounded-full text-xs font-bold uppercase tracking-wider">
             <MapPin size={14} />
             Points relais
           </div>

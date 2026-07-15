@@ -73,9 +73,9 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
     pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
     confirmed: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
     preparing: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-    ready: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
+    ready: 'bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary',
     in_delivery: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400',
-    delivered: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
+    delivered: 'bg-success/15 text-success dark:bg-success/20 dark:text-success',
     cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
   };
 
@@ -105,7 +105,7 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
               onClick={() => setActiveTab('profile')}
               className={`flex-1 py-3 font-medium transition-colors ${
                 activeTab === 'profile'
-                  ? 'text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-600 dark:border-emerald-400'
+                  ? 'text-success dark:text-success border-b-2 border-success dark:border-success'
                   : 'text-gray-600 dark:text-gray-400'
               }`}
             >
@@ -116,7 +116,7 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
               onClick={() => setActiveTab('orders')}
               className={`flex-1 py-3 font-medium transition-colors ${
                 activeTab === 'orders'
-                  ? 'text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-600 dark:border-emerald-400'
+                  ? 'text-success dark:text-success border-b-2 border-success dark:border-success'
                   : 'text-gray-600 dark:text-gray-400'
               }`}
             >
@@ -127,7 +127,7 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
               onClick={() => setActiveTab('favorites')}
               className={`flex-1 py-3 font-medium transition-colors ${
                 activeTab === 'favorites'
-                  ? 'text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-600 dark:border-emerald-400'
+                  ? 'text-success dark:text-success border-b-2 border-success dark:border-success'
                   : 'text-gray-600 dark:text-gray-400'
               }`}
             >
@@ -140,7 +140,7 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
             {activeTab === 'profile' && (
               <div className="space-y-4">
                 <div className="flex items-center justify-center mb-6">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-3xl font-bold">
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-success to-teal-500 flex items-center justify-center text-white text-3xl font-bold">
                     {profile.full_name.charAt(0).toUpperCase()}
                   </div>
                 </div>
@@ -181,9 +181,9 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
                   />
                 </div>
 
-                <div className="flex items-center justify-between px-4 py-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
-                  <span className="text-sm font-medium text-emerald-900 dark:text-emerald-300">Type de compte</span>
-                  <span className="px-3 py-1 bg-emerald-600 text-white text-xs font-medium rounded-full">
+                <div className="flex items-center justify-between px-4 py-3 bg-success/10 dark:bg-success/15 rounded-lg">
+                  <span className="text-sm font-medium text-success dark:text-success">Type de compte</span>
+                  <span className="px-3 py-1 bg-success text-white text-xs font-medium rounded-full">
                     {profile.user_type}
                   </span>
                 </div>
@@ -199,7 +199,7 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
                     <button
                       onClick={handleSaveProfile}
                       disabled={loading}
-                      className="flex-1 py-3 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 disabled:opacity-50"
+                      className="flex-1 py-3 bg-success text-white rounded-lg font-medium hover:bg-success/90 disabled:opacity-50"
                     >
                       {loading ? 'Enregistrement...' : 'Enregistrer'}
                     </button>
@@ -207,7 +207,7 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
                 ) : (
                   <button
                     onClick={() => setEditMode(true)}
-                    className="w-full py-3 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700"
+                    className="w-full py-3 bg-success text-white rounded-lg font-medium hover:bg-success/90"
                   >
                     Modifier le profil
                   </button>
@@ -252,7 +252,7 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
                         <span className="text-gray-600 dark:text-gray-400">
                           {order.delivery_type === 'home_delivery' ? 'Livraison' : 'Retrait'}
                         </span>
-                        <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                        <span className="font-bold text-success dark:text-success">
                           {order.total_amount.toFixed(2)} €
                         </span>
                       </div>

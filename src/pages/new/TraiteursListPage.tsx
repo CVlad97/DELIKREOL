@@ -125,10 +125,10 @@ export function TraiteursListPage() {
                     loading="lazy"
                     src={traiteur.heroImage}
                     alt={`Vitrine de ${traiteur.name}`}
-                    className="h-full w-full object-contain bg-gradient-to-br from-amber-50 to-primary/10 p-3 transition-transform duration-500 group-hover:scale-[1.03]"
+                    className="h-full w-full object-contain bg-gradient-to-br from-secondary/8 to-primary/10 p-3 transition-transform duration-500 group-hover:scale-[1.03]"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-50 to-primary/10">
+                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-secondary/8 to-primary/10">
                     <ChefHat className="h-12 w-12 text-primary/30" />
                   </div>
                 )}
@@ -142,7 +142,7 @@ export function TraiteursListPage() {
                 )}
 
                 {!isVerified && (
-                  <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-warning/15 px-2 py-1 text-xs font-bold text-amber-800">
+                  <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-warning/15 px-2 py-1 text-xs font-bold text-secondary">
                     <AlertCircle className="h-3 w-3" /> À vérifier
                   </div>
                 )}

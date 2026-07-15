@@ -104,7 +104,7 @@ export default function ClientAccountPage() {
 
   return (
     <Layout>
-      <section className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-emerald-50 px-4 py-8">
+      <section className="min-h-screen bg-gradient-to-br from-primary/8 via-white to-success/10 px-4 py-8">
         <div className="mx-auto max-w-6xl space-y-6">
           <div className="rounded-[2rem] border border-primary/20 bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -127,7 +127,7 @@ export default function ClientAccountPage() {
             <div className="rounded-2xl border border-primary/20 bg-white p-5 shadow-sm"><div className="flex items-center gap-3"><div className="rounded-xl bg-blue-100 p-3 text-blue-600"><UserRound className="h-5 w-5" /></div><div><p className="text-xs text-gray-500">Compte</p><p className="text-sm font-bold text-gray-900 truncate">{user?.email}</p></div></div></div>
           </div>
 
-          {loadError && <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">{loadError}</div>}
+          {loadError && <div className="rounded-2xl border border-secondary/30 bg-secondary/10 p-4 text-sm text-secondary">{loadError}</div>}
 
           <div className="rounded-[2rem] border border-primary/20 bg-white p-6 shadow-sm">
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
