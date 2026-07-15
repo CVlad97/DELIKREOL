@@ -6,9 +6,9 @@ export default function PrivacyPolicy() {
   return (
     <Layout>
       <div className="min-h-screen bg-white">
-      <section className="relative bg-gradient-to-br from-emerald-50 to-teal-50 py-12 px-4">
+      <section className="relative bg-gradient-to-br from-success/8 to-accent/8 py-12 px-4">
         <div className="max-w-4xl mx-auto">
-          <Link to="/" className="text-emerald-600 hover:text-emerald-700 mb-4 inline-block">
+          <Link to="/" className="text-success hover:text-success mb-4 inline-block">
             ← Retour à l'accueil
           </Link>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
@@ -190,13 +190,13 @@ export default function PrivacyPolicy() {
           <ul>
             <li>Email : {PUBLIC_CONTACT_EMAIL}</li>
             <li>Messages : relayés vers le compte Gmail de gestion</li>
-            <li>Formulaire de contact : <Link to="/contact" className="text-emerald-600 hover:text-emerald-700">cliquez ici</Link></li>
+            <li>Formulaire de contact : <Link to="/contact" className="text-success hover:text-success">cliquez ici</Link></li>
           </ul>
           <p>
             Vous avez également le droit d'introduire une réclamation auprès de la Commission Nationale de l'Informatique et des Libertés (CNIL) :
           </p>
           <ul>
-            <li>Site web : <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:text-emerald-700">www.cnil.fr</a></li>
+            <li>Site web : <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer" className="text-success hover:text-success">www.cnil.fr</a></li>
             <li>Adresse : 3 Place de Fontenoy - TSA 80715 - 75334 PARIS CEDEX 07</li>
           </ul>
         </div>

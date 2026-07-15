@@ -381,7 +381,7 @@ export default function AdminCatererValidation() {
                     {/* Specialties & Price */}
                     <div className="flex flex-wrap items-center gap-3 text-xs">
                       {app.specialties && app.specialties.length > 0 && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-50 text-orange-700 rounded-full">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/8 text-primary rounded-full">
                           <Utensils className="w-3 h-3" />
                           {app.specialties.join(', ')}
                         </span>
@@ -468,7 +468,7 @@ export default function AdminCatererValidation() {
                       href={getWhatsAppLink(app.phone)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-semibold transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 bg-success hover:bg-success text-white rounded-lg text-xs font-semibold transition-colors"
                       title="Contacter par WhatsApp"
                     >
                       <MessageCircle className="w-4 h-4" />

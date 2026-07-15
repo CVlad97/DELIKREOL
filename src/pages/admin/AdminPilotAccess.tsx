@@ -39,7 +39,7 @@ export default function AdminPilotAccess() {
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-600">Pilote partenaires</p>
+        <p className="text-xs font-black uppercase tracking-[0.2em] text-primary">Pilote partenaires</p>
         <h1 className="text-3xl font-black text-gray-900">Accès de test DELIKREOL</h1>
         <p className="text-gray-600 mt-2 max-w-3xl">
           Utilise ces liens pour un test réel limité. Ce ne sont pas des mots de passe : ce sont des accès pilotes pour corriger les fiches partenaires.
@@ -71,7 +71,7 @@ export default function AdminPilotAccess() {
                 <div className="min-w-0">
                   <h2 className="text-xl font-black text-gray-900">{partner.name}</h2>
                   <p className="text-sm text-gray-500 mt-1">Code pilote : <span className="font-mono font-bold">{partner.code}</span></p>
-                  <a href={link} target="_blank" rel="noopener noreferrer" className="text-sm text-orange-600 hover:underline break-all mt-2 inline-flex items-center gap-1">
+                  <a href={link} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline break-all mt-2 inline-flex items-center gap-1">
                     {link}
                     <ExternalLink className="w-3 h-3" />
                   </a>

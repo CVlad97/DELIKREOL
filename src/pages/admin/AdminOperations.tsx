@@ -46,8 +46,8 @@ const statusLabels: Record<string, string> = {
 
 const statusColors: Record<string, string> = {
   pending: 'bg-amber-100 text-amber-800', confirmed: 'bg-sky-100 text-sky-800',
-  preparing: 'bg-orange-100 text-orange-800', ready: 'bg-teal-100 text-teal-800',
-  in_delivery: 'bg-blue-100 text-blue-800', delivered: 'bg-emerald-100 text-emerald-800',
+  preparing: 'bg-primary/15 text-orange-800', ready: 'bg-accent100 text-teal-800',
+  in_delivery: 'bg-blue-100 text-blue-800', delivered: 'bg-success/15 text-emerald-800',
   cancelled: 'bg-red-100 text-red-800',
 };
 
@@ -180,11 +180,11 @@ export default function AdminOperations() {
         </div>
         <div className="bg-card rounded-2xl border border-border/50 p-5">
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-5 h-5 text-emerald-500" />
+            <TrendingUp className="w-5 h-5 text-success" />
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">CA livre</span>
           </div>
           <div className="text-2xl font-black text-foreground">{stats.revenue_total.toFixed(0)} EUR</div>
-          <div className="text-xs text-emerald-600 font-bold">{stats.orders_delivered} livrees</div>
+          <div className="text-xs text-success font-bold">{stats.orders_delivered} livrees</div>
         </div>
       </div>
 
@@ -267,7 +267,7 @@ export default function AdminOperations() {
                           {statusLabels[nextStatus[o.status]]}
                         </button>
                       ) : o.status === 'delivered' ? (
-                        <CheckCircle2 className="w-5 h-5 text-emerald-500 ml-auto" />
+                        <CheckCircle2 className="w-5 h-5 text-success ml-auto" />
                       ) : null}
                     </td>
                   </tr>

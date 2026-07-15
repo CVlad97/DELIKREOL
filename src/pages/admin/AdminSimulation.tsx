@@ -68,21 +68,21 @@ export default function AdminSimulation() {
       <h1 className="text-2xl font-black mb-6">🧪 Simulateur de commande</h1>
 
       <div className="flex flex-wrap gap-3 mb-6">
-        <button onClick={() => setSelectedMode('retrait')} className={`px-4 py-2 rounded-xl font-semibold text-sm ${selectedMode === 'retrait' ? 'bg-orange-500 text-white' : 'bg-gray-100'}`}>Retrait</button>
-        <button onClick={() => setSelectedMode('relais')} className={`px-4 py-2 rounded-xl font-semibold text-sm ${selectedMode === 'relais' ? 'bg-orange-500 text-white' : 'bg-gray-100'}`}>Point relais</button>
-        <button onClick={() => setSelectedMode('livraison')} className={`px-4 py-2 rounded-xl font-semibold text-sm ${selectedMode === 'livraison' ? 'bg-orange-500 text-white' : 'bg-gray-100'}`}>Livraison</button>
+        <button onClick={() => setSelectedMode('retrait')} className={`px-4 py-2 rounded-xl font-semibold text-sm ${selectedMode === 'retrait' ? 'bg-primary text-white' : 'bg-gray-100'}`}>Retrait</button>
+        <button onClick={() => setSelectedMode('relais')} className={`px-4 py-2 rounded-xl font-semibold text-sm ${selectedMode === 'relais' ? 'bg-primary text-white' : 'bg-gray-100'}`}>Point relais</button>
+        <button onClick={() => setSelectedMode('livraison')} className={`px-4 py-2 rounded-xl font-semibold text-sm ${selectedMode === 'livraison' ? 'bg-primary text-white' : 'bg-gray-100'}`}>Livraison</button>
       </div>
 
       <div className="flex gap-3 mb-8">
-        <button onClick={runCompleteSimulation} className="px-6 py-3 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600">Simuler commande complète</button>
+        <button onClick={runCompleteSimulation} className="px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary">Simuler commande complète</button>
         <button onClick={resetDemo} className="px-6 py-3 bg-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-300">Reset demo</button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white border rounded-xl p-4"><p className="text-2xl font-black text-orange-600">{traiteurSpaces.length}</p><p className="text-xs text-gray-500">Traiteurs</p></div>
-        <div className="bg-white border rounded-xl p-4"><p className="text-2xl font-black text-orange-600">{mockProducts.length}</p><p className="text-xs text-gray-500">Produits</p></div>
-        <div className="bg-white border rounded-xl p-4"><p className="text-2xl font-black text-orange-600">{mockProducts.filter(p => !p.description || p.description.includes('valider')).length}</p><p className="text-xs text-gray-500">Descriptions à valider</p></div>
+        <div className="bg-white border rounded-xl p-4"><p className="text-2xl font-black text-primary">{traiteurSpaces.length}</p><p className="text-xs text-gray-500">Traiteurs</p></div>
+        <div className="bg-white border rounded-xl p-4"><p className="text-2xl font-black text-primary">{mockProducts.length}</p><p className="text-xs text-gray-500">Produits</p></div>
+        <div className="bg-white border rounded-xl p-4"><p className="text-2xl font-black text-primary">{mockProducts.filter(p => !p.description || p.description.includes('valider')).length}</p><p className="text-xs text-gray-500">Descriptions à valider</p></div>
       </div>
 
       {/* Log */}

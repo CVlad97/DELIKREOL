@@ -53,7 +53,7 @@ export function AdminOffres() {
                 href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(`Offre: ${offre.name}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-emerald-600 hover:text-emerald-700 flex-shrink-0"
+                className="text-success hover:text-success flex-shrink-0"
               >
                 <MessageCircle className="w-5 h-5" />
               </a>
