@@ -71,8 +71,8 @@ export default defineConfig(({ mode }) => {
       globals: true,
       environment: 'jsdom',
       setupFiles: [],
-      include: ['src/**/*.{test,spec}.{ts,tsx}'],
-      exclude: ['node_modules', 'dist', 'tests/**'],
+      include: ['src/**/*.{test,spec}.{ts,tsx}', 'tests/supabase/**/*.{test,spec}.{ts,tsx}'],
+      exclude: ['node_modules', 'dist', 'tests/e2e/**'],
     },
   };
 });

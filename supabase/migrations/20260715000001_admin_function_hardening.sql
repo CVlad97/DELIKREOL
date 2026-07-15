@@ -1,100 +1,88 @@
 -- =============================================================================
--- DELIKREOL — Admin function hardening + RLS optimization
+-- DELIKREOL — Admin function hardening + test de privilèges
 -- Date: 2026-07-15
 -- =============================================================================
+-- REMPLACE 20260715000001 (version permissive supprimée)
+-- Politiques supprimées de la version précédente : AUCUNE
+-- Les politiques "Anyone can insert..." WITH CHECK (true) ne sont PAS créées.
+-- Les politiques strictes existantes sont PRESERVEES.
 
--- 1. Sécuriser la fonction admin
+-- 1. Tester la fonction admin (sans la recréer)
 DO $$
+DECLARE
+  func_exists boolean;
 BEGIN
-  REVOKE ALL ON FUNCTION public.is_delikreol_admin() FROM PUBLIC;
-  REVOKE ALL ON FUNCTION public.is_delikreol_admin() FROM anon;
-  GRANT EXECUTE ON FUNCTION public.is_delikreol_admin() TO authenticated;
-EXCEPTION
-  WHEN undefined_function THEN NULL;
+  SELECT EXISTS (
+    SELECT 1 FROM pg_proc WHERE proname = 'is_delikreol_admin' AND pronamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'public')
+  ) INTO func_exists;
+
+  IF NOT func_exists THEN
+    RAISE WARNING 'is_delikreol_admin() not found — run previous migration first';
+  ELSE
+    RAISE NOTICE 'is_delikreol_admin() exists and is accessible';
+  END IF;
 END;
 $$;
 
--- 2. Politiques RLS — optimisation auth.uid() -> (select auth.uid())
-DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
-CREATE POLICY "Users can view own profile" ON public.profiles
-  FOR SELECT TO authenticated
-  USING (id = (select auth.uid()) OR public.is_delikreol_admin());
+-- 2. Vérifier les privilèges actuels de la fonction
+SELECT
+  p.proname AS function_name,
+  CASE WHEN has_function_privilege('anon', p.oid, 'EXECUTE') THEN '⚠️ anon CAN execute' ELSE '✅ anon cannot execute' END AS anon_access,
+  CASE WHEN has_function_privilege('authenticated', p.oid, 'EXECUTE') THEN '✅ authenticated CAN execute' ELSE '⚠️ authenticated cannot execute' END AS auth_access,
+  CASE WHEN has_function_privilege('public', p.oid, 'EXECUTE') THEN '⚠️ PUBLIC CAN execute' ELSE '✅ public cannot execute' END AS public_access
+FROM pg_proc p
+JOIN pg_namespace n ON p.pronamespace = n.oid
+WHERE n.nspname = 'public' AND p.proname = 'is_delikreol_admin';
 
-DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
-CREATE POLICY "Users can update own profile" ON public.profiles
-  FOR UPDATE TO authenticated
-  USING (id = (select auth.uid()))
-  WITH CHECK (id = (select auth.uid()));
+-- 3. Ajouter UNIQUEMENT les politiques admin manquantes
+DO $$
+BEGIN
+  -- profiles: admin peut tout lire
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'profiles' AND policyname = 'admin_read_all_profiles') THEN
+    CREATE POLICY "admin_read_all_profiles" ON public.profiles
+      FOR SELECT TO authenticated USING (public.is_delikreol_admin());
+  END IF;
 
--- 3. partner_applications
-DROP POLICY IF EXISTS "Applicant can view own application" ON public.partner_applications;
-CREATE POLICY "Applicant can view own application" ON public.partner_applications
-  FOR SELECT TO authenticated
-  USING (user_id = (select auth.uid()) OR public.is_delikreol_admin());
+  -- orders: admin peut tout voir
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'orders' AND policyname = 'admin_read_all_orders') THEN
+    CREATE POLICY "admin_read_all_orders" ON public.orders
+      FOR SELECT TO authenticated USING (public.is_delikreol_admin());
+  END IF;
 
-DROP POLICY IF EXISTS "Anyone can insert application" ON public.partner_applications;
-CREATE POLICY "Anyone can insert application" ON public.partner_applications
-  FOR INSERT TO authenticated
-  WITH CHECK (true);
+  -- contact_messages: admin peut lire
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'contact_messages' AND policyname = 'admin_read_contact_messages') THEN
+    CREATE POLICY "admin_read_contact_messages" ON public.contact_messages
+      FOR SELECT TO authenticated USING (public.is_delikreol_admin());
+  END IF;
 
--- 4. contact_messages
-DROP POLICY IF EXISTS "Anyone can submit contact message" ON public.contact_messages;
-CREATE POLICY "Anyone can submit contact message" ON public.contact_messages
-  FOR INSERT TO anon, authenticated
-  WITH CHECK (true);
+  -- partner_applications: admin peut tout voir
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'partner_applications' AND policyname = 'admin_read_all_partner_applications') THEN
+    CREATE POLICY "admin_read_all_partner_applications" ON public.partner_applications
+      FOR SELECT TO authenticated USING (public.is_delikreol_admin());
+  END IF;
 
-DROP POLICY IF EXISTS "Admin can read contact messages" ON public.contact_messages;
-CREATE POLICY "Admin can read contact messages" ON public.contact_messages
-  FOR SELECT TO authenticated
-  USING (public.is_delikreol_admin());
+  -- client_requests: admin peut tout voir
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'client_requests' AND policyname = 'admin_read_all_client_requests') THEN
+    CREATE POLICY "admin_read_all_client_requests" ON public.client_requests
+      FOR SELECT TO authenticated USING (public.is_delikreol_admin());
+  END IF;
 
--- 5. reviews
-DROP POLICY IF EXISTS "Anyone can read public reviews" ON public.reviews;
-CREATE POLICY "Anyone can read public reviews" ON public.reviews
-  FOR SELECT TO anon, authenticated
-  USING (status = 'approved' OR public.is_delikreol_admin());
+  -- reviews: admin peut tout voir
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'reviews' AND policyname = 'admin_read_all_reviews') THEN
+    CREATE POLICY "admin_read_all_reviews" ON public.reviews
+      FOR SELECT TO authenticated USING (public.is_delikreol_admin());
+  END IF;
 
-DROP POLICY IF EXISTS "Authenticated users can create reviews" ON public.reviews;
-CREATE POLICY "Authenticated users can create reviews" ON public.reviews
-  FOR INSERT TO authenticated
-  WITH CHECK (user_id = (select auth.uid()));
+  -- vendors: admin ALL
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'vendors' AND policyname = 'admin_all_vendors') THEN
+    CREATE POLICY "admin_all_vendors" ON public.vendors
+      FOR ALL TO authenticated USING (public.is_delikreol_admin()) WITH CHECK (public.is_delikreol_admin());
+  END IF;
 
--- 6. orders
-DROP POLICY IF EXISTS "Users can view own orders" ON public.orders;
-CREATE POLICY "Users can view own orders" ON public.orders
-  FOR SELECT TO authenticated
-  USING (customer_id = (select auth.uid()) OR public.is_delikreol_admin());
-
-DROP POLICY IF EXISTS "Users can view own order items" ON public.order_items;
-CREATE POLICY "Users can view own order items" ON public.order_items
-  FOR SELECT TO authenticated
-  USING (order_id IN (SELECT id FROM public.orders WHERE customer_id = (select auth.uid())) OR public.is_delikreol_admin());
-
--- 7. client_requests
-DROP POLICY IF EXISTS "Users can view own requests" ON public.client_requests;
-CREATE POLICY "Users can view own requests" ON public.client_requests
-  FOR SELECT TO authenticated
-  USING (user_id = (select auth.uid()) OR public.is_delikreol_admin());
-
-DROP POLICY IF EXISTS "Anyone can create request" ON public.client_requests;
-CREATE POLICY "Anyone can create request" ON public.client_requests
-  FOR INSERT TO anon, authenticated
-  WITH CHECK (true);
-
--- 8. vendors
-DROP POLICY IF EXISTS "Public can view active vendors" ON public.vendors;
-CREATE POLICY "Public can view active vendors" ON public.vendors
-  FOR SELECT TO anon, authenticated
-  USING (is_public = true AND status = 'verified');
-
-DROP POLICY IF EXISTS "Admin manages all vendors" ON public.vendors;
-CREATE POLICY "Admin manages all vendors" ON public.vendors
-  FOR ALL TO authenticated
-  USING (public.is_delikreol_admin())
-  WITH CHECK (public.is_delikreol_admin());
-
--- 9. products
-DROP POLICY IF EXISTS "Public can view active products" ON public.products;
-CREATE POLICY "Public can view active products" ON public.products
-  FOR SELECT TO anon, authenticated
-  USING (vendor_id IN (SELECT id FROM public.vendors WHERE is_public = true AND status = 'verified'));
+  -- products: admin ALL
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'products' AND policyname = 'admin_all_products') THEN
+    CREATE POLICY "admin_all_products" ON public.products
+      FOR ALL TO authenticated USING (public.is_delikreol_admin()) WITH CHECK (public.is_delikreol_admin());
+  END IF;
+END;
+$$;

@@ -17,6 +17,10 @@
     "test:e2e": "playwright test",
     "audit:links": "node scripts/audit-http.cjs",
     "audit:all": "npm run typecheck && npm run build && npm run audit:links",
+    "audit:secrets": "node scripts/audit-secrets.mjs",
+    "partners:sync:dry": "node scripts/partners-sync.mjs --dry-run",
+    "partners:sync:apply": "node scripts/partners-sync.mjs --apply",
+    "test:supabase": "vitest run tests/supabase",
     "deploy": "npm run build && wrangler deploy",
     "prepare": "husky"
   },
