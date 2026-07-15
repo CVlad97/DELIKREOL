@@ -140,7 +140,7 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
             {activeTab === 'profile' && (
               <div className="space-y-4">
                 <div className="flex items-center justify-center mb-6">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-success to-teal-500 flex items-center justify-center text-white text-3xl font-bold">
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-success to-accent flex items-center justify-center text-white text-3xl font-bold">
                     {profile.full_name.charAt(0).toUpperCase()}
                   </div>
                 </div>

@@ -80,7 +80,7 @@ export default function ContactMessages() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader className="h-8 w-8 text-emerald-600 animate-spin" />
+        <Loader className="h-8 w-8 text-success animate-spin" />
       </div>
     );
   }
@@ -118,7 +118,7 @@ export default function ContactMessages() {
               onClick={() => setFilter('all')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filter === 'all'
-                  ? 'bg-emerald-600 text-white'
+                  ? 'bg-success text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -128,7 +128,7 @@ export default function ContactMessages() {
               onClick={() => setFilter('new')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filter === 'new'
-                  ? 'bg-emerald-600 text-white'
+                  ? 'bg-success text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -138,7 +138,7 @@ export default function ContactMessages() {
               onClick={() => setFilter('read')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filter === 'read'
-                  ? 'bg-emerald-600 text-white'
+                  ? 'bg-success text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -148,7 +148,7 @@ export default function ContactMessages() {
               onClick={() => setFilter('archived')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filter === 'archived'
-                  ? 'bg-emerald-600 text-white'
+                  ? 'bg-success text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >

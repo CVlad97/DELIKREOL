@@ -34,7 +34,7 @@ function StatCardWidget({ card }: { card: StatCard }) {
           <Icon className="w-5 h-5" />
         </div>
         {card.growth !== undefined && (
-          <span className={`flex items-center gap-1 text-xs font-bold ${card.growth >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+          <span className={`flex items-center gap-1 text-xs font-bold ${card.growth >= 0 ? 'text-success' : 'text-red-600'}`}>
             {card.growth >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
             {Math.abs(card.growth)}%
           </span>
@@ -57,8 +57,8 @@ function SignupsByCategory() {
   const orders = loadFromStorage('delikreol_orders');
 
   const categories = [
-    { label: 'Traiteurs (partenaires)', value: partners.length, icon: ChefHat, color: 'text-orange-600 bg-orange-50' },
-    { label: 'Livreurs', value: drivers.length, icon: Truck, color: 'text-emerald-600 bg-emerald-50' },
+    { label: 'Traiteurs (partenaires)', value: partners.length, icon: ChefHat, color: 'text-primary bg-primary/8' },
+    { label: 'Livreurs', value: drivers.length, icon: Truck, color: 'text-success bg-success/10' },
     { label: 'Points relais', value: relays.length, icon: MapPin, color: 'text-amber-600 bg-amber-50' },
     { label: 'Demandes devis traiteur', value: catering.length, icon: FileText, color: 'text-purple-600 bg-purple-50' },
     { label: 'Leads', value: leads.length, icon: Target, color: 'text-indigo-600 bg-indigo-50' },
@@ -183,13 +183,13 @@ function RealtimeStats() {
           <p className="text-2xl font-black text-blue-600">{metrics.public_view || 0}</p>
           <p className="text-xs text-blue-700 font-medium">Vues totales</p>
         </div>
-        <div className="p-3 bg-emerald-50 rounded-xl text-center">
-          <p className="text-2xl font-black text-emerald-600">{todayOrders}</p>
-          <p className="text-xs text-emerald-700 font-medium">Commandes aujourd'hui</p>
+        <div className="p-3 bg-success/10 rounded-xl text-center">
+          <p className="text-2xl font-black text-success">{todayOrders}</p>
+          <p className="text-xs text-success font-medium">Commandes aujourd'hui</p>
         </div>
-        <div className="p-3 bg-orange-50 rounded-xl text-center">
-          <p className="text-2xl font-black text-orange-600">{todayPartners}</p>
-          <p className="text-xs text-orange-700 font-medium">Nouveaux inscrits</p>
+        <div className="p-3 bg-primary/8 rounded-xl text-center">
+          <p className="text-2xl font-black text-primary">{todayPartners}</p>
+          <p className="text-xs text-primary font-medium">Nouveaux inscrits</p>
         </div>
         <div className="p-3 bg-purple-50 rounded-xl text-center">
           <p className="text-2xl font-black text-purple-600">{loadFromStorage('delikreol_orders').length}</p>
@@ -225,7 +225,7 @@ function ActionRecommendations() {
       title: '🤝 Recruter des traiteurs',
       desc: 'Contacter les traiteurs locaux Martinique (WhatsApp, bouche-à-oreille). Proposer le forfait gratuit ou lancement.',
       icon: ChefHat,
-      color: 'text-orange-600 bg-orange-50',
+      color: 'text-primary bg-primary/8',
     });
   }
   if (drivers < 2) {
@@ -234,7 +234,7 @@ function ActionRecommendations() {
       title: '🚚 Recruter des livreurs',
       desc: 'Les livreurs sont essentiels. Publier l\'offre sur les réseaux martiniquais.',
       icon: Truck,
-      color: 'text-emerald-600 bg-emerald-50',
+      color: 'text-success bg-success/10',
     });
   }
   if (orders === 0) {
@@ -253,7 +253,7 @@ function ActionRecommendations() {
       title: '🎉 Bonne dynamique !',
       desc: 'Continue d\'alimenter le catalogue et de recruter. Prochaine étape : automatiser le marketing.',
       icon: TrendingUp,
-      color: 'text-emerald-600 bg-emerald-50',
+      color: 'text-success bg-success/10',
     });
   }
 
@@ -276,7 +276,7 @@ function ActionRecommendations() {
                   <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
                     rec.priority === 'P0' ? 'bg-red-100 text-red-700' :
                     rec.priority === 'P1' ? 'bg-amber-100 text-amber-700' :
-                    'bg-emerald-100 text-emerald-700'
+                    'bg-success/15 text-success'
                   }`}>{rec.priority}</span>
                   <span className="font-bold text-sm text-foreground">{rec.title}</span>
                 </div>
@@ -308,9 +308,9 @@ export default function AdminAnalytics() {
 
   const summaryCards: StatCard[] = [
     { label: 'Vues du site', value: metrics.public_view || 0, icon: Eye, color: 'text-blue-600 bg-blue-50', growth: 0, sub: 'toutes sessions confondues' },
-    { label: 'Inscriptions total', value: totalSignups, icon: Users, color: 'text-orange-600 bg-orange-50', sub: `${partners.length} traiteurs · ${drivers.length} livreurs · ${relays.length} relais` },
+    { label: 'Inscriptions total', value: totalSignups, icon: Users, color: 'text-primary bg-primary/8', sub: `${partners.length} traiteurs · ${drivers.length} livreurs · ${relays.length} relais` },
     { label: 'Demandes de devis', value: catering.length, icon: FileText, color: 'text-purple-600 bg-purple-50', sub: 'traiteur événementiel' },
-    { label: 'Commandes', value: orders.length, icon: ShoppingCart, color: 'text-emerald-600 bg-emerald-50', sub: `${leads.length} leads` },
+    { label: 'Commandes', value: orders.length, icon: ShoppingCart, color: 'text-success bg-success/10', sub: `${leads.length} leads` },
   ];
 
   return (

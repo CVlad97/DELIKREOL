@@ -92,7 +92,7 @@ export function AdminPartners() {
       under_review: 'bg-yellow-500/20 text-yellow-300',
       approved: 'bg-green-500/20 text-green-300',
       rejected: 'bg-red-500/20 text-red-300',
-      expired: 'bg-orange-500/20 text-orange-300',
+      expired: 'bg-primary/20 text-orange-300',
     };
     return <span className={`rounded-full px-3 py-1 text-xs font-black ${styles[value]}`}>{labels[value]}</span>;
   };
@@ -168,7 +168,7 @@ export function AdminPartners() {
           onClick={() => setFilterStatus('all')}
           className={`p-4 rounded-lg border-2 transition-all ${
             filterStatus === 'all'
-              ? 'border-emerald-500 bg-emerald-500/10'
+              ? 'border-emerald-500 bg-success/10'
               : 'border-slate-700 bg-slate-800 hover:border-slate-600'
           }`}
         >
@@ -465,7 +465,7 @@ export function AdminPartners() {
                 <textarea
                   value={adminNotes}
                   onChange={(e) => setAdminNotes(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-50 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-50 focus:ring-2 focus:ring-ring focus:border-transparent"
                   rows={4}
                   placeholder="Notes internes sur cette candidature..."
                 />

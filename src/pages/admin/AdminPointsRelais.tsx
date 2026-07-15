@@ -62,7 +62,7 @@ export function AdminPointsRelais() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-black">Points relais</h1>
-        <span className={`text-xs px-3 py-1 rounded-full font-semibold ${source === 'supabase' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+        <span className={`text-xs px-3 py-1 rounded-full font-semibold ${source === 'supabase' ? 'bg-success/15 text-success' : 'bg-amber-100 text-amber-700'}`}>
           Source: {source}
         </span>
       </div>
@@ -97,7 +97,7 @@ export function AdminPointsRelais() {
                   <td className="p-3">{r.phone || '—'}</td>
                   <td className="p-3">
                     {r.whatsapp || r.phone ? (
-                      <a href={`https://wa.me/${cleanPhone(r.whatsapp || r.phone)}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline text-xs">💬 WhatsApp</a>
+                      <a href={`https://wa.me/${cleanPhone(r.whatsapp || r.phone)}`} target="_blank" rel="noopener noreferrer" className="text-success hover:underline text-xs">💬 WhatsApp</a>
                     ) : '—'}
                   </td>
                   <td className="p-3 text-xs">{r.email ? <a href={`mailto:${r.email}`} className="text-blue-600 hover:underline">{r.email}</a> : '—'}</td>

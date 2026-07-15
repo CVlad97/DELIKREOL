@@ -575,7 +575,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
             <select
               value={driverData.vehicle_type}
               onChange={(e) => setDriverData({ ...driverData, vehicle_type: e.target.value as VehicleType })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               required
             >
               <option value="bike">Vélo</option>
@@ -592,7 +592,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
               type="text"
               value={driverData.license_number}
               onChange={(e) => setDriverData({ ...driverData, license_number: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               required
             />
           </div>
@@ -611,7 +611,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
               type="text"
               value={driverData.vehicle_registration}
               onChange={(e) => setDriverData({ ...driverData, vehicle_registration: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               placeholder="XX-XXX-XX"
             />
           </div>
@@ -624,7 +624,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
               type="text"
               value={driverData.insurance_number}
               onChange={(e) => setDriverData({ ...driverData, insurance_number: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
             />
           </div>
 
@@ -648,7 +648,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
               type="text"
               value={driverData.bank_iban}
               onChange={(e) => setDriverData({ ...driverData, bank_iban: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               placeholder="FR76 XXXX XXXX XXXX XXXX XXXX XXX"
             />
           </div>
@@ -661,7 +661,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
               type="text"
               value={driverData.bank_bic}
               onChange={(e) => setDriverData({ ...driverData, bank_bic: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               placeholder="XXXXXXXX"
             />
           </div>
@@ -683,7 +683,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
         <div className={`sticky top-0 bg-gradient-to-r ${
           roleType === 'vendor' ? 'from-green-500 to-success' :
           roleType === 'relay_host' ? 'from-blue-500 to-cyan-500' :
-          'from-teal-500 to-green-600'
+          'from-success to-accent'
         } text-white p-6 rounded-t-3xl z-10`}>
           <div className="flex justify-between items-start">
             <div>
@@ -754,7 +754,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
                 className={`flex-1 px-6 py-3 rounded-lg font-medium text-white transition-colors ${
                   roleType === 'vendor' ? 'bg-green-600 hover:bg-green-700' :
                   roleType === 'relay_host' ? 'bg-blue-600 hover:bg-blue-700' :
-                  'bg-teal-600 hover:bg-teal-700'
+                  'bg-accent hover:bg-accent/90'
                 }`}
               >
                 Suivant
@@ -766,7 +766,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
                 className={`flex-1 px-6 py-3 rounded-lg font-bold text-white transition-colors disabled:opacity-50 ${
                   roleType === 'vendor' ? 'bg-green-600 hover:bg-green-700' :
                   roleType === 'relay_host' ? 'bg-blue-600 hover:bg-blue-700' :
-                  'bg-teal-600 hover:bg-teal-700'
+                  'bg-accent hover:bg-accent/90'
                 }`}
               >
                 {loading ? 'Envoi en cours...' : 'Soumettre ma candidature'}

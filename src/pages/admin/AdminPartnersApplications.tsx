@@ -133,7 +133,7 @@ export default function AdminPartnersApplications() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader className="h-8 w-8 text-emerald-600 animate-spin" />
+        <Loader className="h-8 w-8 text-success animate-spin" />
       </div>
     );
   }
@@ -148,7 +148,7 @@ export default function AdminPartnersApplications() {
             href={getWhatsAppSupportLink()}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-emerald-600 hover:text-emerald-700 font-medium"
+            className="text-success hover:text-success font-medium"
           >
             contacter le support
           </a>
@@ -309,7 +309,7 @@ export default function AdminPartnersApplications() {
                         href={getWhatsAppLink(app.phone)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                        className="p-2 text-success hover:bg-success/10 rounded-lg transition-colors"
                         title="Contacter par WhatsApp"
                       >
                         <MessageCircle className="h-5 w-5" />
@@ -326,11 +326,11 @@ export default function AdminPartnersApplications() {
       {/* Footer */}
       <div className="text-center text-xs text-gray-400 mt-8">
         Contact support :{' '}
-        <a href={`mailto:contact@delikreol.com`} className="text-emerald-600 hover:underline">
+        <a href={`mailto:contact@delikreol.com`} className="text-success hover:underline">
           contact@delikreol.com
         </a>{' '}
         ·{' '}
-        <a href={getWhatsAppSupportLink()} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">
+        <a href={getWhatsAppSupportLink()} target="_blank" rel="noopener noreferrer" className="text-success hover:underline">
           WhatsApp
         </a>
       </div>

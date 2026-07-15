@@ -10,7 +10,7 @@ const slides = [
     icon: Store,
     title: 'Découvrez les saveurs de Martinique',
     description: 'Explorez des restaurants, producteurs locaux et commerçants près de chez vous',
-    color: 'from-success to-teal-500',
+    color: 'from-success to-accent',
   },
   {
     icon: ShoppingBag,
@@ -53,7 +53,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   const Icon = slide.icon;
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-success to-teal-700 dark:from-gray-900 dark:to-gray-800 z-50 flex flex-col">
+    <div className="fixed inset-0 bg-gradient-to-br from-success to-accent dark:from-gray-900 dark:to-gray-800 z-50 flex flex-col">
       <div className="flex justify-end p-6">
         <button
           onClick={handleSkip}

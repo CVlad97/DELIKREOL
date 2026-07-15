@@ -240,7 +240,7 @@ export default function AdminCatalog() {
                     <td className="px-4 py-3 text-center">
                       <button onClick={() => toggleAvailability(p)} className="inline-flex">
                         {p.is_available
-                          ? <ToggleRight className="w-6 h-6 text-emerald-500" />
+                          ? <ToggleRight className="w-6 h-6 text-success" />
                           : <ToggleLeft className="w-6 h-6 text-muted-foreground" />
                         }
                       </button>
@@ -346,7 +346,7 @@ export default function AdminCatalog() {
                       className="inline-flex"
                     >
                       {form.is_available
-                        ? <ToggleRight className="w-8 h-8 text-emerald-500" />
+                        ? <ToggleRight className="w-8 h-8 text-success" />
                         : <ToggleLeft className="w-8 h-8 text-muted-foreground" />
                       }
                     </button>

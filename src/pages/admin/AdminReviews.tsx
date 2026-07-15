@@ -52,7 +52,7 @@ function ReviewCard({
               </span>
             )}
             {review.traiteur && (
-              <span className="text-xs text-orange-600 font-medium">
+              <span className="text-xs text-primary font-medium">
                 🍽️ {review.traiteur}
               </span>
             )}

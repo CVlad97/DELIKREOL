@@ -173,7 +173,7 @@ export function AdminHub() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-emerald-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-success mx-auto mb-4"></div>
           <p className="text-gray-700 font-medium">Chargement du Hub Logistique...</p>
         </div>
       </div>
@@ -203,7 +203,7 @@ export function AdminHub() {
                 <p className="text-2xl font-bold">{metrics?.availableDrivers || 0}</p>
               </div>
 
-              <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-4 rounded-xl shadow-lg">
+              <div className="bg-gradient-to-br from-primary to-primary text-white p-4 rounded-xl shadow-lg">
                 <MapPin className="w-6 h-6 mb-2 opacity-80" />
                 <p className="text-sm opacity-90">Points Relais</p>
                 <p className="text-2xl font-bold">{metrics?.totalRelayPoints || 0}</p>
@@ -218,7 +218,7 @@ export function AdminHub() {
 
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-emerald-600" />
+                <MapPin className="w-5 h-5 text-success" />
                 Carte des Opérations
               </h2>
               <MapView
@@ -239,7 +239,7 @@ export function AdminHub() {
                 <button
                   onClick={handleGenerateRoutes}
                   disabled={aiLoading}
-                  className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 bg-success text-white px-4 py-2 rounded-lg hover:bg-success/90 transition-colors disabled:opacity-50"
                 >
                   <Truck className="w-4 h-4" />
                   Générer les tournées
@@ -248,8 +248,8 @@ export function AdminHub() {
 
               {routeOptimization && (
                 <div className="space-y-3">
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-                    <p className="font-medium text-emerald-900 mb-2">Résumé de l'optimisation:</p>
+                  <div className="bg-success/10 border border-success/30 rounded-lg p-4">
+                    <p className="font-medium text-success mb-2">Résumé de l'optimisation:</p>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div>
                         <span className="text-gray-600">Commandes assignées:</span>
@@ -271,7 +271,7 @@ export function AdminHub() {
                       <div className="space-y-1 text-sm">
                         {assignment.orders.map((order: any, idx: number) => (
                           <div key={order.orderId} className="flex items-start gap-2">
-                            <span className="font-bold text-emerald-600">{idx + 1}.</span>
+                            <span className="font-bold text-success">{idx + 1}.</span>
                             <div className="flex-1">
                               <p className="font-medium">{order.orderNumber}</p>
                               <p className="text-gray-600 text-xs">{order.address}</p>
@@ -294,7 +294,7 @@ export function AdminHub() {
                   onClick={() => handleQuickQuestion('Quels relais sont proches de la saturation ?')}
                   className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-3 rounded-lg transition-colors text-left"
                 >
-                  <AlertCircle className="w-5 h-5 text-orange-600" />
+                  <AlertCircle className="w-5 h-5 text-primary" />
                   <span className="text-sm font-medium">Relais saturés</span>
                 </button>
 
@@ -341,7 +341,7 @@ export function AdminHub() {
                             </p>
                           )}
                           {app.ai_feedback.weaknesses?.length > 0 && (
-                            <p className="text-orange-700">
+                            <p className="text-primary">
                               ⚠ {app.ai_feedback.weaknesses[0]}
                             </p>
                           )}
@@ -349,7 +349,7 @@ export function AdminHub() {
                       )}
                       <button
                         onClick={() => handleApproveApplication(app.id)}
-                        className="w-full bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium"
+                        className="w-full bg-success text-white px-4 py-2 rounded-lg hover:bg-success/90 transition-colors text-sm font-medium"
                       >
                         Approuver
                       </button>
@@ -383,7 +383,7 @@ export function AdminHub() {
                         </h4>
                         <ul className="space-y-1">
                           {copilotSummary.alerts.map((alert, idx) => (
-                            <li key={idx} className="text-xs text-orange-700">• {alert}</li>
+                            <li key={idx} className="text-xs text-primary">• {alert}</li>
                           ))}
                         </ul>
                       </div>
@@ -417,7 +417,7 @@ export function AdminHub() {
                         key={idx}
                         className={`${
                           msg.role === 'user'
-                            ? 'bg-emerald-100 ml-8'
+                            ? 'bg-success/15 ml-8'
                             : 'bg-gray-100 mr-8'
                         } p-3 rounded-lg`}
                       >
@@ -446,13 +446,13 @@ export function AdminHub() {
                       onChange={(e) => setChatInput(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleChatSubmit()}
                       placeholder="Posez votre question..."
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-sm"
                       disabled={aiLoading}
                     />
                     <button
                       onClick={handleChatSubmit}
                       disabled={!chatInput.trim() || aiLoading}
-                      className="bg-emerald-600 text-white p-2 rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                      className="bg-success text-white p-2 rounded-lg hover:bg-success/90 transition-colors disabled:opacity-50"
                     >
                       <Send className="w-5 h-5" />
                     </button>

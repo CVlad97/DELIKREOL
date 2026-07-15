@@ -154,7 +154,7 @@ export function CommunityFundAdmin() {
     <div className="p-6 space-y-6 bg-slate-950">
       <div>
         <h1 className="text-3xl font-bold text-slate-50 mb-2 flex items-center gap-3">
-          <Heart className="w-8 h-8 text-emerald-500" />
+          <Heart className="w-8 h-8 text-success" />
           Fonds Communautaire - Admin
         </h1>
         <p className="text-slate-400">Gestion des projets d'investissement participatif</p>
@@ -164,7 +164,7 @@ export function CommunityFundAdmin() {
         <div className="grid md:grid-cols-4 gap-4">
           <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
             <div className="flex items-center gap-3 mb-2">
-              <BarChart3 className="w-5 h-5 text-emerald-500" />
+              <BarChart3 className="w-5 h-5 text-success" />
               <div className="text-slate-400 text-sm">Points investis</div>
             </div>
             <div className="text-3xl font-bold text-emerald-400">
@@ -217,7 +217,7 @@ export function CommunityFundAdmin() {
         <h2 className="text-xl font-bold text-slate-50">Tous les projets</h2>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="bg-emerald-500 text-slate-950 px-4 py-2 rounded-lg hover:bg-emerald-400 transition-all font-medium flex items-center gap-2"
+          className="bg-success text-slate-950 px-4 py-2 rounded-lg hover:bg-emerald-400 transition-all font-medium flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
           Nouveau projet
@@ -258,7 +258,7 @@ export function CommunityFundAdmin() {
                       >
                         {getStatusLabel(project.status)}
                       </span>
-                      <span className="text-xs px-2 py-1 rounded bg-emerald-500/10 text-emerald-400">
+                      <span className="text-xs px-2 py-1 rounded bg-success/10 text-emerald-400">
                         {projectTypeLabels[project.project_type]}
                       </span>
                       {project.zone_label && (
@@ -285,7 +285,7 @@ export function CommunityFundAdmin() {
                   </div>
                   <div className="w-full bg-slate-900 rounded-full h-3">
                     <div
-                      className="bg-emerald-500 h-3 rounded-full transition-all"
+                      className="bg-success h-3 rounded-full transition-all"
                       style={{ width: `${progress}%` }}
                     ></div>
                   </div>
@@ -329,7 +329,7 @@ export function CommunityFundAdmin() {
                   onChange={(e) =>
                     setNewProject({ ...newProject, title: e.target.value })
                   }
-                  className="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-slate-50 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  className="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-slate-50 focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="Ex: Hub Relais Fort-de-France Nord"
                 />
               </div>
@@ -343,7 +343,7 @@ export function CommunityFundAdmin() {
                   onChange={(e) =>
                     setNewProject({ ...newProject, description: e.target.value })
                   }
-                  className="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-slate-50 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  className="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-slate-50 focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="Décrivez le projet, son impact, etc."
                   rows={4}
                 />
@@ -362,7 +362,7 @@ export function CommunityFundAdmin() {
                         project_type: e.target.value as ProjectType,
                       })
                     }
-                    className="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-slate-50 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    className="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-slate-50 focus:ring-2 focus:ring-ring focus:border-transparent"
                   >
                     <option value="relay_hub">Hub Relais</option>
                     <option value="dark_kitchen">Dark Kitchen</option>
@@ -382,7 +382,7 @@ export function CommunityFundAdmin() {
                     onChange={(e) =>
                       setNewProject({ ...newProject, target_points: e.target.value })
                     }
-                    className="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-slate-50 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    className="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-slate-50 focus:ring-2 focus:ring-ring focus:border-transparent"
                     placeholder="Ex: 10000"
                   />
                 </div>
@@ -398,7 +398,7 @@ export function CommunityFundAdmin() {
                   onChange={(e) =>
                     setNewProject({ ...newProject, zone_label: e.target.value })
                   }
-                  className="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-slate-50 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  className="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-slate-50 focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="Ex: Fort-de-France nord"
                 />
               </div>
@@ -406,7 +406,7 @@ export function CommunityFundAdmin() {
               <div className="flex gap-2">
                 <button
                   onClick={handleCreateProject}
-                  className="flex-1 bg-emerald-500 text-slate-950 px-4 py-3 rounded-lg hover:bg-emerald-400 transition-all font-medium"
+                  className="flex-1 bg-success text-slate-950 px-4 py-3 rounded-lg hover:bg-emerald-400 transition-all font-medium"
                 >
                   Créer le projet
                 </button>
