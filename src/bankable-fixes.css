@@ -125,20 +125,6 @@ img[src*="hero-tropical"] {
   filter: none;
 }
 
-
-
-
-
-
-
-.bg-white\/72 {
-  background-color: rgb(255 255 255 / 0.84) !important;
-}
-
-
-
-
-
 @media (prefers-reduced-motion: reduce) {
   .scroll-carousel-track {
     scroll-behavior: auto;

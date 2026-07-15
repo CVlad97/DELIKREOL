@@ -32,6 +32,11 @@ import {
   normalizeCommuneQuery,
 } from '../../data/martiniqueCommunes';
 import { OrderSummaryByPartner, groupItemsByPartner } from '../../components/OrderSummaryByPartner';
+import type { Product } from '../../lib/supabase';
+
+interface CartItem extends Product {
+  quantity: number;
+}
 
 const WHATSAPP_NUMBER = '596696653589';
 
@@ -57,6 +62,68 @@ function formatPhoneError(): string {
   return 'Merci d\'indiquer un numéro WhatsApp valide, par exemple 0696 XX XX XX ou +596 696 XX XX XX.';
 }
 
+/**
+ * Construit le message WhatsApp complet pour une commande.
+ * Inclut le n° de commande pour dédoublonnage côté partenaire.
+ */
+function buildWhatsAppOrderMessage(params: {
+  items: CartItem[];
+  total: number;
+  mode: 'retrait' | 'relais' | 'livraison';
+  commune: string;
+  creneauText: string;
+  notes: string;
+  traiteurs: string[];
+  phone: string;
+  orderId: string;
+}): string {
+  const { items, total, mode, commune, creneauText, notes, traiteurs, phone, orderId } = params;
+  const modeFee = DELIVERY_FEES[mode]?.fee || 0;
+  const partnerGroups = groupItemsByPartner(items);
+  const productList = partnerGroups
+    .map((group) => {
+      const lines = group.items
+        .map(
+          (item) =>
+            `  • ${item.name} x${item.quantity} — ${(item.price * item.quantity).toFixed(2)}€`
+        )
+        .join('\n');
+      const header = partnerGroups.length > 1
+        ? `🏪 ${group.name} (sous-total ${group.subtotal.toFixed(2)}€) :\n`
+        : '';
+      return `${header}${lines}`;
+    })
+    .join('\n\n');
+
+  const traiteurText = traiteurs.length > 0 ? traiteurs.join(', ') : 'Non précisé';
+
+  const lines = [
+    'Bonjour 👋 Nouvelle commande DeliKreol.',
+    `📋 Commande n° ${orderId}`,
+    '',
+    'Produits :',
+    productList,
+    '',
+    `Total : ${(total + modeFee).toFixed(2).replace('.', ',')} € (dont ${modeFee.toFixed(2).replace('.', ',')} € de ${mode === 'retrait' ? 'retrait' : mode === 'relais' ? 'point relais' : 'livraison'})`,
+    `Commune : ${commune || 'Non précisée'}`,
+    `Type : ${mode === 'retrait' ? 'Retrait' : mode === 'relais' ? 'Point relais' : 'Livraison'}`,
+    `Créneau(x) souhaité(s) : ${creneauText || 'Non précisé'}`,
+    `Traiteur : ${traiteurText}`,
+    phone ? `Téléphone : ${phone}` : '',
+    '',
+    mode === 'livraison'
+      ? `Livraison éloignée possible à partir de 40 € de commande, selon validation du prestataire et disponibilité DeliKreol.`
+      : '',
+    notes ? `\nMessage : ${notes}` : '',
+    '',
+    'Merci de confirmer la disponibilité avec le prestataire.',
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  return lines;
+}
+
 export default function CartPage() {
   const { items, updateQuantity, removeItem, clearCart, total, itemCount } = useCart();
   const { showSuccess, showError } = useToast();
@@ -75,6 +142,7 @@ export default function CartPage() {
   const [messageSent, setMessageSent] = useState(false);
   const [preparedMessage, setPreparedMessage] = useState('');
   const [orderNumber, setOrderNumber] = useState('');
+  const [whatsappShareUrl, setWhatsappShareUrl] = useState('');
   const [checkoutStatus, setCheckoutStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [savedField, setSavedField] = useState<string | null>(null);
   const panierRef = useRef<HTMLDivElement>(null);
@@ -160,56 +228,6 @@ export default function CartPage() {
 
   const hasMultipleVendors = traiteurs.length > 1;
 
-  // Build WhatsApp message
-  const whatsappMessage = useMemo(() => {
-    if (items.length === 0) return '';
-    const modeFee = DELIVERY_FEES[mode]?.fee || 0;
-
-    const partnerGroups = groupItemsByPartner(items);
-    const productList = partnerGroups
-      .map((group) => {
-        const lines = group.items
-          .map(
-            (item) =>
-              `  • ${item.name} x${item.quantity} — ${(item.price * item.quantity).toFixed(2)}€`
-          )
-          .join('\n');
-        const header = partnerGroups.length > 1
-          ? `🏪 ${group.name} (sous-total ${group.subtotal.toFixed(2)}€) :\n`
-          : '';
-        return `${header}${lines}`;
-      })
-      .join('\n\n');
-
-    const traiteurText = traiteurs.length > 0 ? traiteurs.join(', ') : 'Non précisé';
-    const creneauText = getCreneauText();
-
-    const lines = [
-      'Bonjour 👋 Nouvelle commande DeliKreol.',
-      '',
-      `Produits :`,
-      productList,
-      '',
-      `Total : ${(total + modeFee).toFixed(2).replace('.', ',')} € (dont ${modeFee.toFixed(2).replace('.', ',')} € de ${mode === 'retrait' ? 'retrait' : mode === 'relais' ? 'point relais' : 'livraison'})`,
-      `Commune : ${commune || 'Non précisée'}`,
-      `Type : ${mode === 'retrait' ? 'Retrait' : mode === 'relais' ? 'Point relais' : 'Livraison'}`,
-      `Créneau(x) souhaité(s) : ${creneauText || 'Non précisé'}`,
-      `Traiteur : ${traiteurText}`,
-      phone ? `Téléphone : ${phone}` : '',
-      '',
-      mode === 'livraison' ? `Livraison éloignée possible à partir de 40 € de commande, selon validation du prestataire et disponibilité DeliKreol.` : '',
-      notes ? `\nMessage : ${notes}` : '',
-      '',
-      'Merci de confirmer la disponibilité avec le prestataire.',
-    ]
-      .filter(Boolean)
-      .join('\n');
-
-    return lines;
-  }, [items, total, commune, mode, getCreneauText, notes, traiteurs, phone]);
-
-  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMessage)}`;
-
   const handleWhatsAppClick = () => {
     // Panier vide
     if (items.length === 0) {
@@ -260,14 +278,37 @@ export default function CartPage() {
       created_at: new Date().toISOString(),
     };
 
-    // Sauvegarder en local (fallback)
-    try {
-      const localOrders = JSON.parse(localStorage.getItem('delikreol_local_orders_v1') || '[]');
-      localOrders.push(order);
-      localStorage.setItem('delikreol_local_orders_v1', JSON.stringify(localOrders));
-    } catch (e) {
-      console.warn('[DELIKREOL] Échec sauvegarde locale:', e);
+    // Construire le message WhatsApp groupé par partenaire (avec n° de commande)
+    const whatsappText = buildWhatsAppOrderMessage({
+      items,
+      total,
+      mode,
+      commune,
+      creneauText: getCreneauText(),
+      notes,
+      traiteurs,
+      phone,
+      orderId,
+    });
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappText)}`;
+    setWhatsappShareUrl(whatsappUrl);
+
+    // Ouvrir WhatsApp dans un nouvel onglet (dans le geste utilisateur)
+    const opened = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    if (!opened) {
+      // Si popup bloqué, le bouton « Renvoyer sur WhatsApp » sur la page de confirmation s'activera
     }
+
+    // Sauvegarder en local (fallback uniquement si Supabase échoue)
+    const saveLocal = () => {
+      try {
+        const localOrders = JSON.parse(localStorage.getItem('delikreol_local_orders_v1') || '[]');
+        localOrders.push(order);
+        localStorage.setItem('delikreol_local_orders_v1', JSON.stringify(localOrders));
+      } catch (e) {
+        console.warn('[DELIKREOL] Échec sauvegarde locale:', e);
+      }
+    };
 
     // Tenter Supabase si configuré
     import('../../lib/supabase').then(async ({ supabase }) => {
@@ -288,21 +329,22 @@ export default function CartPage() {
             notes,
             status: 'pending',
           });
-          // Order event logged in order_events table
         } catch (err) {
           console.warn('[DELIKREOL] Échec Supabase, fallback localStorage:', err);
+          saveLocal();
         }
+      } else {
+        saveLocal();
       }
     }).catch(() => {
       console.warn('[DELIKREOL] Supabase non disponible, fallback localStorage');
+      saveLocal();
     });
 
     setCheckoutStatus('success');
     setMessageSent(true);
     clearCart();
-    setPreparedMessage(
-      `Demande préparée — à confirmer sur WhatsApp.`
-    );
+    setPreparedMessage(`Demande préparée — à confirmer sur WhatsApp.`);
     showSuccess(`Commande enregistrée !`);
     setTimeout(() => navigate(`/statut-commande?order=${orderId}`), 1500);
   };
