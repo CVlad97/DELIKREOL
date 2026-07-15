@@ -59,7 +59,7 @@ export function AdminOrchestrateur() {
             </div>
             <div className="flex items-center gap-2 mb-4">
               <span className="text-xs px-2 py-1 bg-muted rounded-full">{project.priority}</span>
-              <span className={`text-xs px-2 py-1 rounded-full ${project.status === 'En cours' ? 'bg-green-100 text-green-700' : project.status === 'Actif' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
+              <span className={`text-xs px-2 py-1 rounded-full ${project.status === 'En cours' ? 'bg-green-100 text-green-700' : project.status === 'Actif' ? 'bg-blue-100 text-blue-700' : 'bg-muted text-muted-foreground'}`}>
                 {project.status}
               </span>
             </div>

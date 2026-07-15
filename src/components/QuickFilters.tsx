@@ -15,7 +15,7 @@ export function QuickFilters({ selectedFilters, onToggleFilter }: QuickFiltersPr
   ];
 
   return (
-    <div className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
+    <div className="bg-white border-b border-input sticky top-0 z-30 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex gap-2 overflow-x-auto scrollbar-hide">
           {filters.map((filter) => {
@@ -28,7 +28,7 @@ export function QuickFilters({ selectedFilters, onToggleFilter }: QuickFiltersPr
                 className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap font-medium transition-all ${
                   isSelected
                     ? 'bg-primary text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : 'bg-muted text-foreground hover:bg-gray-200'
                 }`}
               >
                 <Icon className={`w-4 h-4 ${isSelected ? 'text-white' : filter.color}`} />

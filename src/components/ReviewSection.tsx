@@ -68,17 +68,17 @@ export function ReviewSection({ traiteurSlug, traiteurName }: { traiteurSlug: st
       {/* Formulaire d'avis */}
       {showForm && (
         <form onSubmit={handleSubmit} className="bg-secondary/10 rounded-2xl p-5 mb-6 border border-secondary/30">
-          <h3 className="font-bold text-gray-900 mb-3">Votre avis sur {traiteurName}</h3>
+          <h3 className="font-bold text-foreground mb-3">Votre avis sur {traiteurName}</h3>
           
           <div className="mb-3">
-            <label className="text-xs text-gray-600 font-semibold mb-1 block">Note</label>
+            <label className="text-xs text-muted-foreground font-semibold mb-1 block">Note</label>
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button key={star} type="button" onClick={() => setNewRating(star)}>
                   <Star
                     size={28}
                     className={`cursor-pointer transition-colors ${
-                      star <= newRating ? 'text-secondary fill-secondary' : 'text-gray-300 hover:text-secondary'
+                      star <= newRating ? 'text-secondary fill-secondary' : 'text-muted-foreground hover:text-secondary'
                     }`}
                   />
                 </button>
@@ -87,21 +87,21 @@ export function ReviewSection({ traiteurSlug, traiteurName }: { traiteurSlug: st
           </div>
 
           <div className="mb-3">
-            <label className="text-xs text-gray-600 font-semibold mb-1 block">Votre prénom</label>
+            <label className="text-xs text-muted-foreground font-semibold mb-1 block">Votre prénom</label>
             <input
               type="text" value={newAuthor} onChange={e => setNewAuthor(e.target.value)}
               placeholder="Ex: Marie"
-              className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-ring outline-none text-sm"
+              className="w-full px-3 py-2 rounded-xl border border-input focus:border-ring outline-none text-sm"
               required
             />
           </div>
 
           <div className="mb-3">
-            <label className="text-xs text-gray-600 font-semibold mb-1 block">Votre commentaire</label>
+            <label className="text-xs text-muted-foreground font-semibold mb-1 block">Votre commentaire</label>
             <textarea
               value={newComment} onChange={e => setNewComment(e.target.value)}
               placeholder="Partagez votre expérience..."
-              className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-ring outline-none text-sm resize-none h-20"
+              className="w-full px-3 py-2 rounded-xl border border-input focus:border-ring outline-none text-sm resize-none h-20"
               required
             />
           </div>
@@ -118,14 +118,14 @@ export function ReviewSection({ traiteurSlug, traiteurName }: { traiteurSlug: st
 
       {/* Liste des avis */}
       {reviews.length === 0 ? (
-        <p className="text-sm text-gray-400 italic">Aucun avis pour le moment. Soyez le premier !</p>
+        <p className="text-sm text-muted-foreground italic">Aucun avis pour le moment. Soyez le premier !</p>
       ) : (
         <div className="space-y-3">
           {reviews.map((review) => (
-            <div key={review.id} className="bg-white rounded-xl border border-gray-100 p-4">
+            <div key={review.id} className="bg-white rounded-xl border border-input p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-gray-900 text-sm">{review.authorName}</span>
+                  <span className="font-semibold text-foreground text-sm">{review.authorName}</span>
                   {review.verified && (
                     <span className="text-[10px] px-1.5 py-0.5 bg-success/15 text-success rounded-full flex items-center gap-0.5">
                       <Verified size={10} /> Commande vérifiée
@@ -134,8 +134,8 @@ export function ReviewSection({ traiteurSlug, traiteurName }: { traiteurSlug: st
                 </div>
                 <Stars rating={review.rating} />
               </div>
-              <p className="text-sm text-gray-600">{review.comment}</p>
-              <p className="text-[10px] text-gray-400 mt-2">{new Date(review.createdAt).toLocaleDateString('fr-FR')}</p>
+              <p className="text-sm text-muted-foreground">{review.comment}</p>
+              <p className="text-[10px] text-muted-foreground mt-2">{new Date(review.createdAt).toLocaleDateString('fr-FR')}</p>
             </div>
           ))}
         </div>
@@ -151,8 +151,8 @@ export function RatingBadge({ traiteurSlug }: { traiteurSlug: string }) {
   return (
     <div className="flex items-center gap-1 text-xs">
       <Star size={12} className="text-secondary fill-secondary" />
-      <span className="font-semibold text-gray-700">{average.toFixed(1)}</span>
-      <span className="text-gray-400">({count})</span>
+      <span className="font-semibold text-foreground">{average.toFixed(1)}</span>
+      <span className="text-muted-foreground">({count})</span>
     </div>
   );
 }

@@ -60,9 +60,9 @@ export function ImagePreview({ src, alt, className = '', imgClassName = '', load
             <div className="flex max-h-[82vh] items-center justify-center bg-neutral-950">
               <img src={src} alt={alt} className="max-h-[82vh] w-full object-contain" />
             </div>
-            <div className="bg-white px-4 py-3 text-sm font-semibold text-gray-700">
+            <div className="bg-white px-4 py-3 text-sm font-semibold text-foreground">
               {alt}
-              <span className="ml-2 text-xs text-gray-400">Échap ou clic dehors pour fermer</span>
+              <span className="ml-2 text-xs text-muted-foreground">Échap ou clic dehors pour fermer</span>
             </div>
           </div>
         </div>

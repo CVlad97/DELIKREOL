@@ -101,12 +101,12 @@ export function MapView({
           <Popup>
             <div className="p-2 min-w-[200px]">
               <h3 className="font-bold text-lg mb-1">{point.name}</h3>
-              <p className="text-sm text-gray-600 mb-2">{point.address}</p>
+              <p className="text-sm text-muted-foreground mb-2">{point.address}</p>
 
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-yellow-500">★</span>
                 <span className="text-sm font-medium">{point.rating.toFixed(1)}</span>
-                <span className="text-xs text-gray-500">({point.total_pickups} retraits)</span>
+                <span className="text-xs text-muted-foreground">({point.total_pickups} retraits)</span>
               </div>
 
               {point.storage_capacities && point.storage_capacities.length > 0 && (
@@ -132,7 +132,7 @@ export function MapView({
               </div>
 
               {point.distance && (
-                <p className="text-sm text-gray-600 mt-2">
+                <p className="text-sm text-muted-foreground mt-2">
                   📍 {point.distance.toFixed(1)} km
                 </p>
               )}
@@ -153,8 +153,8 @@ export function MapView({
           <Popup>
             <div className="p-2 min-w-[200px]">
               <h3 className="font-bold text-lg mb-1">{vendor.business_name}</h3>
-              <p className="text-xs text-gray-500 mb-1 capitalize">{vendor.business_type}</p>
-              <p className="text-sm text-gray-600 mb-2">{vendor.address}</p>
+              <p className="text-xs text-muted-foreground mb-1 capitalize">{vendor.business_type}</p>
+              <p className="text-sm text-muted-foreground mb-2">{vendor.address}</p>
               {vendor.description && (
                 <p className="text-sm">{vendor.description}</p>
               )}

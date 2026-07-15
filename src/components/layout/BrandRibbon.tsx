@@ -12,7 +12,7 @@ export function BrandRibbon() {
             className="h-11 w-11 rounded-xl object-contain"
           />
           <div className="leading-tight">
-            <div className="text-xl font-black tracking-tight text-gray-900">
+            <div className="text-xl font-black tracking-tight text-foreground">
               Deli<span className="text-primary">Kreol</span>
             </div>
             <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">

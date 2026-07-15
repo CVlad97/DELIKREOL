@@ -62,18 +62,18 @@ export class ErrorBoundary extends Component<Props, State> {
               <AlertCircle className="w-8 h-8 text-red-600" />
             </div>
 
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl font-bold text-foreground mb-2">
               Oups, une erreur est survenue
             </h1>
 
-            <p className="text-gray-600 mb-6">
+            <p className="text-muted-foreground mb-6">
               Ne vous inquiétez pas, nous avons enregistré le problème.
               Vous pouvez recharger la page ou revenir à l'accueil.
             </p>
 
             {this.state.error && (
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-6 text-left">
-                <p className="text-xs text-gray-500 font-mono break-all">
+              <div className="bg-muted border border-input rounded-lg p-3 mb-6 text-left">
+                <p className="text-xs text-muted-foreground font-mono break-all">
                   {this.state.error.message}
                 </p>
               </div>
@@ -98,13 +98,13 @@ export class ErrorBoundary extends Component<Props, State> {
 
               <button
                 onClick={this.handleReset}
-                className="flex-1 bg-gray-100 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                className="flex-1 bg-muted text-foreground px-4 py-3 rounded-lg hover:bg-gray-200 transition-colors font-medium"
               >
                 Accueil
               </button>
             </div>
 
-            <p className="text-xs text-gray-500 mt-6">
+            <p className="text-xs text-muted-foreground mt-6">
               Si le problème persiste, contactez-nous sur WhatsApp
             </p>
           </div>

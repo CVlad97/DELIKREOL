@@ -39,7 +39,7 @@ function ReviewCard({
         <div className="min-w-0 flex-1 space-y-3">
           {/* Header: name + status + date */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-bold text-gray-900 text-sm">
+            <span className="font-bold text-foreground text-sm">
               {review.name}
             </span>
             <span className={`px-2 py-0.5 rounded-full text-xs font-semibold inline-flex items-center gap-1 ${statusConfig.color}`}>
@@ -79,7 +79,7 @@ function ReviewCard({
                 }`}
               />
             ))}
-            <span className="ml-2 text-sm font-semibold text-gray-500">
+            <span className="ml-2 text-sm font-semibold text-muted-foreground">
               {review.rating}/5
             </span>
           </div>

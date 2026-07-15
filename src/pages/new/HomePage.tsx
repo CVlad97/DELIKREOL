@@ -579,7 +579,7 @@ export default function HomePage() {
                       {traiteur.name}
                     </h3>
                     <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{traiteur.offer}</p>
-                    <div className="flex items-center gap-3 text-xs text-gray-400">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       {traiteur.startingAt > 0 && (
                         <span className="font-semibold text-primary">
                           À partir de {formatEuro(traiteur.startingAt)}
@@ -642,7 +642,7 @@ export default function HomePage() {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                         <ChefHat className="w-12 h-12" />
                       </div>
                     )}
@@ -657,7 +657,7 @@ export default function HomePage() {
                     </div>
                     {!product.image && (
                       <div className="absolute bottom-3 left-3">
-                        <span className="px-2.5 py-1 rounded-full bg-gray-100 text-muted-foreground text-xs font-medium">
+                        <span className="px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium">
                           Photo à confirmer
                         </span>
                       </div>
@@ -670,7 +670,7 @@ export default function HomePage() {
                     <h3 className="text-lg font-bold text-foreground mb-1">{product.name}</h3>
                     <p className="text-sm text-muted-foreground mb-1">{product.vendor}</p>
                     {product.zone && (
-                      <p className="text-xs text-gray-400 flex items-center gap-1 mb-3">
+                      <p className="text-xs text-muted-foreground flex items-center gap-1 mb-3">
                         <MapPin className="w-3 h-3" />
                         {product.zone}
                       </p>
@@ -679,7 +679,7 @@ export default function HomePage() {
                       <span className="text-2xl font-black text-foreground">
                         {product.price.toFixed(2).replace('.', ',')} €
                       </span>
-                      <span className="text-[10px] text-gray-400 block -mt-1">Prix DELIKREOL</span>
+                      <span className="text-[10px] text-muted-foreground block -mt-1">Prix DELIKREOL</span>
                       <button
                         onClick={() => handleAddToCart(product)}
                         className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary text-white font-bold rounded-xl text-sm transition-all hover:scale-105"
@@ -710,7 +710,7 @@ export default function HomePage() {
               <Link
                 key={cat.id}
                 to={`/catalogue?cat=${cat.id}`}
-                className="px-6 py-3 bg-white hover:bg-primary/[0.08] text-gray-700 hover:text-primary font-bold rounded-2xl border border-primary/20 hover:border-primary/40 transition-all hover:-translate-y-0.5 shadow-sm text-sm"
+                className="px-6 py-3 bg-white hover:bg-primary/[0.08] text-foreground hover:text-primary font-bold rounded-2xl border border-primary/20 hover:border-primary/40 transition-all hover:-translate-y-0.5 shadow-sm text-sm"
               >
                 {cat.name}
               </Link>
@@ -827,7 +827,7 @@ export default function HomePage() {
                                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                    />
                 </div>
-                <span className="text-sm font-bold text-gray-700 group-hover:text-primary transition-colors">
+                <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
                   {caterer.name}
                 </span>
               </Link>

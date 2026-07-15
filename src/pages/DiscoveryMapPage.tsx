@@ -228,7 +228,7 @@ export function DiscoveryMapPage() {
                   <Popup>
                     <div className="text-center">
                       <p className="font-bold text-emerald-600">✅ Ma position</p>
-                      <p className="text-xs text-gray-500">Validée</p>
+                      <p className="text-xs text-muted-foreground">Validée</p>
                     </div>
                   </Popup>
                 </Marker>
@@ -248,11 +248,11 @@ export function DiscoveryMapPage() {
                         {p.type === 'livreurs' && <Truck className="w-4 h-4 text-green-500" />}
                         <h3 className="font-bold">{p.name}</h3>
                       </div>
-                      {p.address && <p className="text-sm text-gray-600">{p.address}</p>}
+                      {p.address && <p className="text-sm text-muted-foreground">{p.address}</p>}
                       {p.phone && <a href={`https://wa.me/${p.phone.replace(/\D/g,'')}`} className="block text-sm text-green-600 hover:underline mt-1" target="_blank">📱 {p.phone}</a>}
                       {p.status && <p className="text-xs mt-2">{p.status}</p>}
                       {userPos && (
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-muted-foreground mt-1">
                           📍 {calculateDistanceKm({ latitude: userPos.lat, longitude: userPos.lng }, { latitude: p.lat, longitude: p.lng }).toFixed(1)} km
                         </p>
                       )}

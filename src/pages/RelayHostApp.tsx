@@ -79,7 +79,7 @@ export function RelayHostApp() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       {renderView()}
       <Navigation userType="relay_host" currentView={currentView} onNavigate={setCurrentView} />
       {showScanner && (

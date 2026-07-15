@@ -11,10 +11,10 @@ export default function PrivacyPolicy() {
           <Link to="/" className="text-success hover:text-success mb-4 inline-block">
             ← Retour à l'accueil
           </Link>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground">
             Politique de Confidentialité
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-muted-foreground mt-2">
             Dernière mise à jour : 19 décembre 2024
           </p>
         </div>

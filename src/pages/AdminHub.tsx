@@ -171,21 +171,21 @@ export function AdminHub() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-muted">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-success mx-auto mb-4"></div>
-          <p className="text-gray-700 font-medium">Chargement du Hub Logistique...</p>
+          <p className="text-foreground font-medium">Chargement du Hub Logistique...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       <div className="max-w-7xl mx-auto px-4 py-6 pb-24">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Hub Logistique DELIKREOL</h1>
-          <p className="text-gray-600">Orchestration intelligente des opérations</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Hub Logistique DELIKREOL</h1>
+          <p className="text-muted-foreground">Orchestration intelligente des opérations</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -252,21 +252,21 @@ export function AdminHub() {
                     <p className="font-medium text-success mb-2">Résumé de l'optimisation:</p>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div>
-                        <span className="text-gray-600">Commandes assignées:</span>
+                        <span className="text-muted-foreground">Commandes assignées:</span>
                         <span className="font-bold ml-2">{routeOptimization.summary.assignedOrders}/{routeOptimization.summary.totalOrders}</span>
                       </div>
                       <div>
-                        <span className="text-gray-600">Livreurs utilisés:</span>
+                        <span className="text-muted-foreground">Livreurs utilisés:</span>
                         <span className="font-bold ml-2">{routeOptimization.summary.driversUsed}</span>
                       </div>
                     </div>
                   </div>
 
                   {routeOptimization.assignments.map((assignment: any) => (
-                    <div key={assignment.driverId} className="border border-gray-200 rounded-lg p-4">
+                    <div key={assignment.driverId} className="border border-input rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-bold">{assignment.driverName}</h3>
-                        <span className="text-sm text-gray-600">{assignment.orders.length} commandes</span>
+                        <span className="text-sm text-muted-foreground">{assignment.orders.length} commandes</span>
                       </div>
                       <div className="space-y-1 text-sm">
                         {assignment.orders.map((order: any, idx: number) => (
@@ -274,13 +274,13 @@ export function AdminHub() {
                             <span className="font-bold text-success">{idx + 1}.</span>
                             <div className="flex-1">
                               <p className="font-medium">{order.orderNumber}</p>
-                              <p className="text-gray-600 text-xs">{order.address}</p>
+                              <p className="text-muted-foreground text-xs">{order.address}</p>
                             </div>
-                            <span className="text-gray-600 text-xs">{order.distance}km</span>
+                            <span className="text-muted-foreground text-xs">{order.distance}km</span>
                           </div>
                         ))}
                       </div>
-                      <div className="mt-2 pt-2 border-t flex justify-between text-xs text-gray-600">
+                      <div className="mt-2 pt-2 border-t flex justify-between text-xs text-muted-foreground">
                         <span>Distance totale: {assignment.totalDistance}km</span>
                         <span>Temps estimé: {assignment.estimatedTotalTime}min</span>
                       </div>
@@ -292,7 +292,7 @@ export function AdminHub() {
               <div className="grid grid-cols-2 gap-3 mt-4">
                 <button
                   onClick={() => handleQuickQuestion('Quels relais sont proches de la saturation ?')}
-                  className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-3 rounded-lg transition-colors text-left"
+                  className="flex items-center gap-2 bg-muted hover:bg-gray-200 px-4 py-3 rounded-lg transition-colors text-left"
                 >
                   <AlertCircle className="w-5 h-5 text-primary" />
                   <span className="text-sm font-medium">Relais saturés</span>
@@ -300,7 +300,7 @@ export function AdminHub() {
 
                 <button
                   onClick={() => handleQuickQuestion('Quelle zone est la plus rentable aujourd\'hui ?')}
-                  className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-3 rounded-lg transition-colors text-left"
+                  className="flex items-center gap-2 bg-muted hover:bg-gray-200 px-4 py-3 rounded-lg transition-colors text-left"
                 >
                   <TrendingUp className="w-5 h-5 text-green-600" />
                   <span className="text-sm font-medium">Zone rentable</span>
@@ -316,11 +316,11 @@ export function AdminHub() {
                 </h2>
                 <div className="space-y-3">
                   {applications.slice(0, 3).map((app) => (
-                    <div key={app.id} className="border border-gray-200 rounded-lg p-4">
+                    <div key={app.id} className="border border-input rounded-lg p-4">
                       <div className="flex items-start justify-between mb-2">
                         <div>
                           <h3 className="font-bold">{app.applicant_name}</h3>
-                          <p className="text-sm text-gray-600 capitalize">{app.partner_type}</p>
+                          <p className="text-sm text-muted-foreground capitalize">{app.partner_type}</p>
                         </div>
                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                           app.ai_score === 'A' ? 'bg-green-100 text-green-800' :
@@ -332,7 +332,7 @@ export function AdminHub() {
                       </div>
                       {app.ai_feedback && (
                         <div className="text-sm space-y-1 mb-3">
-                          <p className="text-gray-600">
+                          <p className="text-muted-foreground">
                             Complétude: {app.ai_feedback.completeness_score}%
                           </p>
                           {app.ai_feedback.strengths?.length > 0 && (
@@ -363,7 +363,7 @@ export function AdminHub() {
           {copilotSummary && (
             <div className="lg:col-span-1">
               <div className="bg-white rounded-xl shadow-lg sticky top-6">
-                <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+                <div className="p-4 border-b border-input flex items-center justify-between">
                   <h2 className="font-bold flex items-center gap-2">
                     <Brain className="w-5 h-5 text-purple-600" />
                     Assistant IA
@@ -371,9 +371,9 @@ export function AdminHub() {
                 </div>
 
                 {copilotSummary && (
-                  <div className="p-4 border-b border-gray-200 bg-gradient-to-br from-purple-50 to-blue-50">
+                  <div className="p-4 border-b border-input bg-gradient-to-br from-purple-50 to-blue-50">
                     <h3 className="font-bold text-sm text-purple-900 mb-2">Résumé de la journée</h3>
-                    <p className="text-sm text-gray-700 mb-3">{copilotSummary.summary}</p>
+                    <p className="text-sm text-foreground mb-3">{copilotSummary.summary}</p>
 
                     {copilotSummary.alerts.length > 0 && (
                       <div className="mb-3">
@@ -407,7 +407,7 @@ export function AdminHub() {
 
                 <div className="h-96 overflow-y-auto p-4 space-y-3">
                   {chatMessages.length === 0 ? (
-                    <div className="text-center text-gray-500 text-sm py-8">
+                    <div className="text-center text-muted-foreground text-sm py-8">
                       <Brain className="w-12 h-12 mx-auto mb-2 opacity-30" />
                       <p>Posez-moi des questions sur vos opérations</p>
                     </div>
@@ -418,27 +418,27 @@ export function AdminHub() {
                         className={`${
                           msg.role === 'user'
                             ? 'bg-success/15 ml-8'
-                            : 'bg-gray-100 mr-8'
+                            : 'bg-muted mr-8'
                         } p-3 rounded-lg`}
                       >
                         <p className="text-sm">{msg.content}</p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-muted-foreground mt-1">
                           {msg.timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
                     ))
                   )}
                   {aiLoading && (
-                    <div className="bg-gray-100 mr-8 p-3 rounded-lg">
+                    <div className="bg-muted mr-8 p-3 rounded-lg">
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 animate-spin" />
-                        <p className="text-sm text-gray-600">Réflexion en cours...</p>
+                        <p className="text-sm text-muted-foreground">Réflexion en cours...</p>
                       </div>
                     </div>
                   )}
                 </div>
 
-                <div className="p-4 border-t border-gray-200">
+                <div className="p-4 border-t border-input">
                   <div className="flex gap-2">
                     <input
                       type="text"

@@ -191,9 +191,9 @@ export function RoleInfoModal({ isOpen, onClose, roleType }: RoleInfoModalProps)
                 <Euro className="text-white" size={32} />
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{info.earnings.label}</h3>
+                <h3 className="text-xl font-bold text-foreground mb-2">{info.earnings.label}</h3>
                 <div className="text-4xl font-bold text-green-600 mb-2">{info.earnings.amount}</div>
-                <p className="text-gray-700 text-lg">{info.earnings.details}</p>
+                <p className="text-foreground text-lg">{info.earnings.details}</p>
               </div>
             </div>
           </div>
@@ -201,13 +201,13 @@ export function RoleInfoModal({ isOpen, onClose, roleType }: RoleInfoModalProps)
           <div>
             <div className="flex items-center gap-3 mb-4">
               <TrendingUp className="text-primary" size={28} />
-              <h3 className="text-2xl font-bold text-gray-900">Vos objectifs</h3>
+              <h3 className="text-2xl font-bold text-foreground">Vos objectifs</h3>
             </div>
             <ul className="space-y-3">
               {info.objectives.map((objective, index) => (
                 <li key={index} className="flex items-start gap-3">
                   <CheckCircle className="text-green-500 flex-shrink-0 mt-1" size={20} />
-                  <span className="text-gray-700 text-lg">{objective}</span>
+                  <span className="text-foreground text-lg">{objective}</span>
                 </li>
               ))}
             </ul>
@@ -215,24 +215,24 @@ export function RoleInfoModal({ isOpen, onClose, roleType }: RoleInfoModalProps)
 
           <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-blue-50 rounded-2xl p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Avantages</h3>
+              <h3 className="text-xl font-bold text-foreground mb-4">Avantages</h3>
               <ul className="space-y-3">
                 {info.benefits.map((benefit, index) => (
                   <li key={index} className="flex items-start gap-2">
                     <CheckCircle className="text-blue-500 flex-shrink-0 mt-0.5" size={18} />
-                    <span className="text-gray-700">{benefit}</span>
+                    <span className="text-foreground">{benefit}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
             <div className="bg-primary/8 rounded-2xl p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Prérequis</h3>
+              <h3 className="text-xl font-bold text-foreground mb-4">Prérequis</h3>
               <ul className="space-y-3">
                 {info.requirements.map((req, index) => (
                   <li key={index} className="flex items-start gap-2">
                     <CheckCircle className="text-primary flex-shrink-0 mt-0.5" size={18} />
-                    <span className="text-gray-700">{req}</span>
+                    <span className="text-foreground">{req}</span>
                   </li>
                 ))}
               </ul>
@@ -242,7 +242,7 @@ export function RoleInfoModal({ isOpen, onClose, roleType }: RoleInfoModalProps)
           <div>
             <div className="flex items-center gap-3 mb-4">
               <Clock className="text-primary" size={28} />
-              <h3 className="text-2xl font-bold text-gray-900">Comment ça marche ?</h3>
+              <h3 className="text-2xl font-bold text-foreground">Comment ça marche ?</h3>
             </div>
             <div className="space-y-4">
               {info.process.map((step, index) => (
@@ -251,7 +251,7 @@ export function RoleInfoModal({ isOpen, onClose, roleType }: RoleInfoModalProps)
                     {index + 1}
                   </div>
                   <div className="flex-1 pt-2">
-                    <p className="text-gray-700 text-lg">{step}</p>
+                    <p className="text-foreground text-lg">{step}</p>
                   </div>
                 </div>
               ))}

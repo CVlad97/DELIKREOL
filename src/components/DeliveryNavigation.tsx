@@ -105,20 +105,20 @@ export const DeliveryNavigation: React.FC<DeliveryNavigationProps> = ({
           Navigation {driverName}
         </h3>
         {distance && (
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-muted-foreground">
             ~{distance.toFixed(1)} km
           </span>
         )}
       </div>
 
       {/* Destination */}
-      <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-md">
+      <div className="flex items-start gap-3 p-3 bg-muted rounded-md">
         <MapPin className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
         <div>
-          <p className="text-sm font-medium text-gray-700">Destination</p>
-          <p className="text-sm text-gray-600">{destination.address}</p>
+          <p className="text-sm font-medium text-foreground">Destination</p>
+          <p className="text-sm text-muted-foreground">{destination.address}</p>
           {destination.lat && destination.lng && (
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               {destination.lat.toFixed(6)}, {destination.lng.toFixed(6)}
             </p>
           )}
@@ -130,11 +130,11 @@ export const DeliveryNavigation: React.FC<DeliveryNavigationProps> = ({
         <div className="flex items-start gap-3 p-3 bg-green-50 rounded-md">
           <Navigation className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-sm font-medium text-gray-700">Position actuelle</p>
-            <p className="text-xs text-gray-600">
+            <p className="text-sm font-medium text-foreground">Position actuelle</p>
+            <p className="text-xs text-muted-foreground">
               {currentLocation.coords.latitude.toFixed(6)}, {currentLocation.coords.longitude.toFixed(6)}
             </p>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Précision: {currentLocation.coords.accuracy.toFixed(0)}m
             </p>
           </div>
@@ -189,7 +189,7 @@ export const DeliveryNavigation: React.FC<DeliveryNavigationProps> = ({
       </div>
 
       {/* Instructions */}
-      <div className="text-xs text-gray-500 text-center pt-2 border-t">
+      <div className="text-xs text-muted-foreground text-center pt-2 border-t">
         Cliquez sur l'application de votre choix pour démarrer la navigation en temps réel
       </div>
     </div>

@@ -24,7 +24,7 @@ const TYPE_CONFIG: Record<FeedbackType, { label: string; icon: any; color: strin
   connexion: { label: 'Connexion', icon: AlertTriangle, color: 'text-purple-600 bg-purple-50' },
   suggestion: { label: 'Suggestion', icon: Lightbulb, color: 'text-amber-600 bg-amber-50' },
   amelioration: { label: 'Amélioration', icon: Inbox, color: 'text-blue-600 bg-blue-50' },
-  autre: { label: 'Autre', icon: MessageCircle, color: 'text-gray-600 bg-gray-50' },
+  autre: { label: 'Autre', icon: MessageCircle, color: 'text-muted-foreground bg-muted' },
 };
 
 const STATUS_CONFIG: Record<FeedbackStatus, { label: string; color: string }> = {

@@ -43,10 +43,10 @@ export default function MarketingContact() {
       <section className="relative bg-gradient-to-br from-emerald-50 to-teal-50 py-16 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
               Contactez-nous
             </h1>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-muted-foreground">
               Une question ? Une suggestion ? Nous sommes à votre écoute.
             </p>
           </div>
@@ -57,12 +57,12 @@ export default function MarketingContact() {
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              <h2 className="text-2xl font-bold text-foreground mb-6">
                 Envoyez-nous un message
               </h2>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
                     Nom complet
                   </label>
                   <input
@@ -76,7 +76,7 @@ export default function MarketingContact() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
                     Email
                   </label>
                   <input
@@ -90,7 +90,7 @@ export default function MarketingContact() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">
                     Message
                   </label>
                   <textarea
@@ -121,7 +121,7 @@ export default function MarketingContact() {
             </div>
 
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              <h2 className="text-2xl font-bold text-foreground mb-6">
                 Nos coordonnées
               </h2>
               <div className="space-y-6">
@@ -130,9 +130,9 @@ export default function MarketingContact() {
                     <Mail className="h-6 w-6 text-emerald-600" />
                   </div>
                   <div className="ml-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">Email</h3>
-                    <p className="text-gray-600">{PUBLIC_CONTACT_EMAIL}</p>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <h3 className="text-lg font-semibold text-foreground mb-1">Email</h3>
+                    <p className="text-muted-foreground">{PUBLIC_CONTACT_EMAIL}</p>
+                    <p className="text-sm text-muted-foreground mt-1">
                       Les messages sont relayés vers vladimir.claveau@gmail.com.
                     </p>
                   </div>
@@ -143,9 +143,9 @@ export default function MarketingContact() {
                     <Phone className="h-6 w-6 text-emerald-600" />
                   </div>
                   <div className="ml-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">Téléphone</h3>
-                    <p className="text-gray-600">+590 690 XX XX XX</p>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <h3 className="text-lg font-semibold text-foreground mb-1">Téléphone</h3>
+                    <p className="text-muted-foreground">+590 690 XX XX XX</p>
+                    <p className="text-sm text-muted-foreground mt-1">
                       Du lundi au vendredi, 9h-18h
                     </p>
                   </div>
@@ -156,9 +156,9 @@ export default function MarketingContact() {
                     <MapPin className="h-6 w-6 text-emerald-600" />
                   </div>
                   <div className="ml-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">Localisation</h3>
-                    <p className="text-gray-600">Guadeloupe</p>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <h3 className="text-lg font-semibold text-foreground mb-1">Localisation</h3>
+                    <p className="text-muted-foreground">Guadeloupe</p>
+                    <p className="text-sm text-muted-foreground mt-1">
                       Au service de toute l'île
                     </p>
                   </div>
@@ -166,10 +166,10 @@ export default function MarketingContact() {
               </div>
 
               <div className="mt-12 p-6 bg-emerald-50 rounded-xl">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-foreground mb-2">
                   Vous êtes commerçant ?
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-muted-foreground mb-4">
                   Découvrez comment rejoindre notre réseau de partenaires et développer votre activité.
                 </p>
                 <a

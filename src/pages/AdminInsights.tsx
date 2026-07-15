@@ -172,14 +172,14 @@ Réponds en français de manière claire et actionnable. Propose des recommandat
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-muted p-6">
       <div className="max-w-6xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
             <Brain className="text-purple-600" size={32} />
             Assistant IA - Insights
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-muted-foreground mt-2">
             Posez des questions et obtenez des analyses automatisées de votre plateforme
           </p>
         </div>
@@ -193,7 +193,7 @@ Réponds en français de manière claire et actionnable. Propose des recommandat
               className="bg-white hover:bg-purple-50 border-2 border-purple-200 hover:border-purple-400 rounded-xl p-4 text-left transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <action.icon className="text-purple-600 mb-2" size={24} />
-              <p className="text-sm font-medium text-gray-900">{action.label}</p>
+              <p className="text-sm font-medium text-foreground">{action.label}</p>
             </button>
           ))}
         </div>
@@ -209,7 +209,7 @@ Réponds en français de manière claire et actionnable. Propose des recommandat
                   className={`max-w-3xl px-4 py-3 rounded-2xl ${
                     msg.role === 'user'
                       ? 'bg-purple-600 text-white'
-                      : 'bg-gray-100 text-gray-900'
+                      : 'bg-muted text-foreground'
                   }`}
                 >
                   <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
@@ -218,14 +218,14 @@ Réponds en français de manière claire et actionnable. Propose des recommandat
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 px-4 py-3 rounded-2xl">
+                <div className="bg-muted px-4 py-3 rounded-2xl">
                   <Loader className="animate-spin text-purple-600" size={20} />
                 </div>
               </div>
             )}
           </div>
 
-          <div className="border-t border-gray-200 p-4 bg-gray-50">
+          <div className="border-t border-input p-4 bg-muted">
             <div className="flex gap-2">
               <input
                 type="text"
@@ -234,7 +234,7 @@ Réponds en français de manière claire et actionnable. Propose des recommandat
                 onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                 placeholder="Posez votre question..."
                 disabled={loading}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-gray-100"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-muted"
               />
               <button
                 onClick={() => handleSend()}
@@ -250,26 +250,26 @@ Réponds en français de manière claire et actionnable. Propose des recommandat
 
         {contextData && (
           <div className="mt-6 bg-white rounded-xl shadow p-6">
-            <h3 className="font-bold text-gray-900 mb-3">Données en contexte</h3>
+            <h3 className="font-bold text-foreground mb-3">Données en contexte</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
-                <p className="text-gray-600">Commandes aujourd'hui</p>
-                <p className="text-2xl font-bold text-gray-900">{contextData.orders_today?.count || 0}</p>
+                <p className="text-muted-foreground">Commandes aujourd'hui</p>
+                <p className="text-2xl font-bold text-foreground">{contextData.orders_today?.count || 0}</p>
               </div>
               <div>
-                <p className="text-gray-600">Chiffre d'affaires</p>
+                <p className="text-muted-foreground">Chiffre d'affaires</p>
                 <p className="text-2xl font-bold text-green-600">
                   {contextData.orders_today?.total_revenue?.toFixed(2) || 0}€
                 </p>
               </div>
               <div>
-                <p className="text-gray-600">Livreurs disponibles</p>
+                <p className="text-muted-foreground">Livreurs disponibles</p>
                 <p className="text-2xl font-bold text-blue-600">
                   {contextData.drivers?.available || 0}/{contextData.drivers?.total || 0}
                 </p>
               </div>
               <div>
-                <p className="text-gray-600">Points relais actifs</p>
+                <p className="text-muted-foreground">Points relais actifs</p>
                 <p className="text-2xl font-bold text-orange-600">
                   {contextData.relay_points?.length || 0}
                 </p>

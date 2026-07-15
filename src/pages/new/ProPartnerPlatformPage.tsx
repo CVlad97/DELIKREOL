@@ -42,10 +42,10 @@ export function ProPartnerPlatformPage() {
 
         {/* HERO */}
         <div className="text-center">
-          <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
+          <h1 className="text-4xl md:text-5xl font-black text-foreground mb-4">
             Partenariat <span className="text-primary">plateforme livreurs</span>
           </h1>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             DELIKREOL s'associe aux plateformes de livraison, coursiers indépendants 
             et professionnels certifiés HACCP en Martinique pour offrir un service fiable.
           </p>
@@ -53,8 +53,8 @@ export function ProPartnerPlatformPage() {
 
         {/* PLATEFORMES LIVREURS */}
         <section>
-          <h2 className="text-2xl font-black text-gray-900 mb-6">📦 Plateformes livreurs en Martinique</h2>
-          <div className="overflow-x-auto rounded-2xl border border-gray-100">
+          <h2 className="text-2xl font-black text-foreground mb-6">📦 Plateformes livreurs en Martinique</h2>
+          <div className="overflow-x-auto rounded-2xl border border-input">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-primary/8 text-left">
@@ -69,9 +69,9 @@ export function ProPartnerPlatformPage() {
                 {PLATEFORMES.map((p, i) => (
                   <tr key={i} className="border-t border-gray-50 hover:bg-primary/8/30">
                     <td className="p-3 font-medium">{p.name}</td>
-                    <td className="p-3 text-gray-600">{p.type}</td>
-                    <td className="p-3 text-gray-600">{p.area}</td>
-                    <td className="p-3 text-gray-600">{p.app}</td>
+                    <td className="p-3 text-muted-foreground">{p.type}</td>
+                    <td className="p-3 text-muted-foreground">{p.area}</td>
+                    <td className="p-3 text-muted-foreground">{p.app}</td>
                     <td className="p-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
                         p.integration.includes('30%') ? 'bg-red-100 text-red-700' :
@@ -87,31 +87,31 @@ export function ProPartnerPlatformPage() {
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-gray-400 mt-3">
+          <p className="text-xs text-muted-foreground mt-3">
             DELIKREOL privilégie les partenaires locaux et les livreurs indépendants pour garder une commission basse (15%).
           </p>
         </section>
 
         {/* HACCP */}
         <section className="bg-secondary/10/50 rounded-3xl p-8 border border-secondary/20">
-          <h2 className="text-2xl font-black text-gray-900 mb-2">🛡️ Licence HACCP — Obligation légale</h2>
-          <p className="text-sm text-gray-500 mb-6">
+          <h2 className="text-2xl font-black text-foreground mb-2">🛡️ Licence HACCP — Obligation légale</h2>
+          <p className="text-sm text-muted-foreground mb-6">
             Tout partenaire DELIKREOL manipulant des aliments doit être en règle avec la réglementation française.
           </p>
           <div className="grid md:grid-cols-2 gap-4">
             {HACCP_INFOS.map((info, i) => (
               <div key={i} className="bg-white rounded-xl p-4 border border-secondary/20">
                 <p className="text-xs text-primary font-semibold uppercase tracking-wider mb-1">{info.label}</p>
-                <p className="text-sm text-gray-800">{info.value}</p>
+                <p className="text-sm text-foreground">{info.value}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* VÉRIFICATEUR SIRET */}
-        <section className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
-          <h2 className="text-2xl font-black text-gray-900 mb-2">🔍 Vérifier un partenaire (SIRET)</h2>
-          <p className="text-sm text-gray-500 mb-6">
+        <section className="bg-white rounded-3xl p-8 border border-input shadow-sm">
+          <h2 className="text-2xl font-black text-foreground mb-2">🔍 Vérifier un partenaire (SIRET)</h2>
+          <p className="text-sm text-muted-foreground mb-6">
             Validez un SIRET de partenaire, livreur ou point relais via l'API Entreprise data.gouv.fr.
           </p>
           <div className="flex gap-3 max-w-md">
@@ -120,7 +120,7 @@ export function ProPartnerPlatformPage() {
               onChange={e => { setSiret(e.target.value); setSiretResult(null); }}
               placeholder="SIRET (14 chiffres)"
               maxLength={14}
-              className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-ring"
+              className="flex-1 px-4 py-2.5 rounded-xl border border-input text-sm outline-none focus:border-ring"
             />
             <button onClick={verifySiret} disabled={siret.length !== 14 || siretLoading}
               className="px-6 py-2.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl transition-all text-sm disabled:opacity-50">
@@ -130,8 +130,8 @@ export function ProPartnerPlatformPage() {
           {siretResult && (
             <div className={`mt-4 p-4 rounded-xl ${siretResult.valid ? 'bg-success/10 border border-success/30' : 'bg-red-50 border border-red-200'}`}>
               <p className="text-sm font-semibold">{siretResult.valid ? '✅ SIRET valide' : '❌ SIRET non trouvé ou inactif'}</p>
-              {siretResult.name && <p className="text-xs text-gray-600 mt-1">{siretResult.name}</p>}
-              {siretResult.commune && <p className="text-xs text-gray-500">{siretResult.commune}</p>}
+              {siretResult.name && <p className="text-xs text-muted-foreground mt-1">{siretResult.name}</p>}
+              {siretResult.commune && <p className="text-xs text-muted-foreground">{siretResult.commune}</p>}
             </div>
           )}
         </section>
