@@ -37,24 +37,20 @@ test.describe('PWA, SEO et Performance', () => {
   test('panier a robots noindex', async ({ page }) => {
     await page.goto('/panier');
     // Attendre que React rende et que setPageMeta mette à jour le meta robots
-    await page.waitForTimeout(2000);
-    const robotsMeta = page.locator('meta[name="robots"]');
-    await expect(robotsMeta).toHaveAttribute('content', 'noindex, follow');
+    await page.waitForSelector('main, [class*="container"], form', { timeout: 10000 });
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, follow', { timeout: 10000 });
   });
 
   test('connexion a robots noindex', async ({ page }) => {
     await page.goto('/connexion');
-    await page.waitForTimeout(2000);
-    const robotsMeta = page.locator('meta[name="robots"]');
-    await expect(robotsMeta).toHaveAttribute('content', 'noindex, follow');
+    await page.waitForSelector('form, main, [class*="container"]', { timeout: 10000 });
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, follow', { timeout: 10000 });
   });
 
   test('accueil a robots index', async ({ page }) => {
     await page.goto('/');
-    // Attendre que React rende et que setPageMeta s'exécute
-    await page.waitForTimeout(1000);
-    const robotsMeta = page.locator('meta[name="robots"]');
-    await expect(robotsMeta).toHaveAttribute('content', 'index, follow');
+    await page.waitForSelector('main, section, [class*="container"]', { timeout: 10000 });
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'index, follow', { timeout: 10000 });
   });
 
   test('sitemap ne contient pas panier/connexion/feedback', async ({ request }) => {
