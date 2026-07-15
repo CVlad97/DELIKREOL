@@ -4,12 +4,13 @@ import { useState } from 'react';
 
 function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
   return (
-    <div className="flex gap-0.5">
+    <div className="flex gap-0.5" role="img" aria-label={`Note : ${rating} sur 5`}>
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
           size={size}
-          className={star <= rating ? 'text-amber-400 fill-amber-400' : 'text-gray-300'}
+          aria-hidden="true"
+          className={star <= rating ? 'text-secondary fill-secondary' : 'text-border-strong'}
         />
       ))}
     </div>

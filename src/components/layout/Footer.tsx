@@ -52,7 +52,7 @@ export function Footer() {
 
       <div className="bg-gradient-to-b from-white to-muted/40">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-          <div className="mb-12 rounded-[2rem] bg-gradient-to-br from-stone-950 via-emerald-950 to-orange-700 p-6 text-white shadow-[0_28px_80px_-52px_rgba(42,25,15,0.8)] md:p-8">
+          <div className="mb-12 rounded-[2rem] bg-gradient-to-br from-foreground via-accent to-primary p-6 text-white shadow-[0_28px_80px_-52px_rgba(42,25,15,0.8)] md:p-8">
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">
@@ -65,7 +65,7 @@ export function Footer() {
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Link
                   to="/catalogue"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-orange-500 px-5 py-3 text-sm font-black text-white transition-all hover:bg-orange-600"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-black text-primary-foreground transition-all hover:bg-primary/90"
                 >
                   Catalogue
                   <ArrowRight className="h-4 w-4" />

@@ -1,0 +1,15 @@
+foreground,background,ratio,seuil,statut
+primary,primary-fg,5.47,4.5,PASS
+primary,background,5.17,4.5,PASS
+foreground,background,15.81,4.5,PASS
+secondary,secondary-fg,6.15,4.5,PASS
+accent,accent-fg,8.06,4.5,PASS
+success,success-fg,5.52,4.5,PASS
+success,background,5.22,4.5,PASS
+warning,warning-fg,8.21,4.5,PASS
+muted-fg,background,5.94,4.5,PASS
+muted-fg,muted,5.66,4.5,PASS
+destructive,destructive-fg,5.81,4.5,PASS
+border-strong,card,3.37,3.0,PASS
+border-strong,background,3.18,3.0,PASS
+ring,background,5.17,3.0,PASS

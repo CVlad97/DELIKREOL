@@ -138,15 +138,17 @@ function ReviewsSection() {
             </div>
             <div>
               <p className="font-bold text-foreground">{review.name}</p>
-              <div className="flex items-center gap-0.5">
+              <div className="flex items-center gap-0.5" role="img" aria-label={`Note : ${review.rating} sur 5`}>
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
+                    aria-hidden="true"
                     className={`w-4 h-4 ${
-                      i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'
+                      i < review.rating ? 'fill-secondary text-secondary' : 'text-border-strong'
                     }`}
                   />
                 ))}
+                <span className="ml-1 text-xs text-muted-foreground">{review.rating}/5</span>
               </div>
             </div>
           </div>
@@ -548,16 +550,17 @@ export default function HomePage() {
                   to={`/traiteur/${traiteur.slug}`}
                   className="snap-start flex-shrink-0 w-[260px] sm:w-[290px] group bg-white rounded-[2rem] border border-primary/20 hover:border-primary/40 overflow-hidden shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all"
                 >
-                  <div className={`h-36 bg-gradient-to-br ${traiteur.gradient} relative overflow-hidden`}>
+                  <div className="h-36 relative overflow-hidden bg-muted">
                     {traiteur.heroImage && (
                       <img loading="lazy"
                         src={traiteur.heroImage}
                         alt={traiteur.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 mix-blend-overlay opacity-60"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
                     <div className="absolute inset-0 flex items-end p-4">
-                      <div className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold text-gray-700 flex items-center gap-1">
+                      <div className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold text-foreground flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
                         {traiteur.zone}
                       </div>

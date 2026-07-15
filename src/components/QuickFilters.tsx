@@ -8,7 +8,7 @@ interface QuickFiltersProps {
 export function QuickFilters({ selectedFilters, onToggleFilter }: QuickFiltersProps) {
   const filters = [
     { id: 'fastest', label: 'Livraison rapide', icon: Zap, color: 'text-yellow-600' },
-    { id: 'top-rated', label: 'Mieux notés', icon: Star, color: 'text-orange-600' },
+    { id: 'top-rated', label: 'Mieux notés', icon: Star, color: 'text-primary' },
     { id: 'open-now', label: 'Ouvert maintenant', icon: Clock, color: 'text-green-600' },
     { id: 'budget', label: 'Petit budget', icon: DollarSign, color: 'text-blue-600' },
     { id: 'local', label: 'Produits locaux', icon: Leaf, color: 'text-emerald-600' },
