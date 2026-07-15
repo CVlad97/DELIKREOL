@@ -91,7 +91,7 @@ export function AdminDashboard() {
   const cards = [
     { label: 'Commandes', value: stats.orders, icon: ShoppingCart, color: 'text-blue-600 bg-blue-50', link: '/admin/commandes' },
     { label: 'Devis traiteur', value: stats.cateringRequests, icon: FileText, color: 'text-purple-600 bg-purple-50', link: '/admin/devis' },
-    { label: 'Partenaires', value: stats.partnerApplications, icon: ChefHat, color: 'text-primary bg-primary/8', link: '/admin/partenaires' },
+    { label: 'Partenaires', value: stats.partnerApplications, icon: ChefHat, color: 'text-primary bg-primary/[0.08]', link: '/admin/partenaires' },
     { label: 'Candidatures livreurs', value: stats.driverApplications, icon: Truck, color: 'text-success bg-success/10', link: '/admin/livreurs' },
     { label: 'Candidatures relais', value: stats.relayApplications, icon: MapPin, color: 'text-amber-600 bg-amber-50', link: '/admin/points-relais' },
     { label: 'Leads', value: stats.leads, icon: Target, color: 'text-indigo-600 bg-indigo-50', link: '/admin/leads' },
@@ -101,7 +101,7 @@ export function AdminDashboard() {
   const quickCards = [
     { label: 'Commandes aujourd\'hui', value: DEMO_STATS.ordersToday, icon: CalendarDays, color: 'text-blue-600 bg-blue-50' },
     { label: 'Revenus du mois', value: `${DEMO_STATS.revenueMonth.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €`, icon: DollarSign, color: 'text-success bg-success/10' },
-    { label: 'Partenaires actifs', value: DEMO_STATS.activePartners, icon: Users, color: 'text-primary bg-primary/8' },
+    { label: 'Partenaires actifs', value: DEMO_STATS.activePartners, icon: Users, color: 'text-primary bg-primary/[0.08]' },
     { label: 'Livraisons en cours', value: DEMO_STATS.ongoingDeliveries, icon: Bike, color: 'text-purple-600 bg-purple-50' },
   ];
 

@@ -46,7 +46,7 @@ const DELIVERY_MODES = [
     color: 'bg-primary/[0.08] border-primary/30',
     iconColor: 'bg-primary/[0.08]0',
     badge: 'À partir de 40€',
-    badgeColor: 'bg-primary/15 text-primary',
+    badgeColor: 'bg-primary/[0.15] text-primary',
   },
 ];
 

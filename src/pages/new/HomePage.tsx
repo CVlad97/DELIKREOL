@@ -327,7 +327,9 @@ export default function HomePage() {
       <section className="relative isolate overflow-hidden bg-background text-foreground">
         <div className="absolute inset-0">
           <img
-            loading="lazy"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
             src={`${import.meta.env.BASE_URL}branding/hero-tropical.png`}
             alt="Livraison DeliKreol en Martinique"
             className="h-full w-full object-cover object-center opacity-[0.32] lg:opacity-55"
@@ -392,7 +394,7 @@ export default function HomePage() {
                 href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Bonjour, je veux lancer une commande DELIKREOL.')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-success/35 bg-success/10 px-5 py-3 text-sm font-black text-success shadow-sm transition-all hover:-translate-y-0.5 hover:bg-success/15"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-success/[0.35] bg-success/10 px-5 py-3 text-sm font-black text-success shadow-sm transition-all hover:-translate-y-0.5 hover:bg-success/[0.15]"
               >
                 <MessageCircle className="h-4 w-4" />
                 WhatsApp rapide
@@ -501,10 +503,10 @@ export default function HomePage() {
       </section>
 
       {/* 📍 Carte géolocalisation interactive */}
-      <section className="py-14 md:py-20 bg-gradient-to-b from-background via-white to-primary/8">
+      <section className="py-14 md:py-20 bg-gradient-to-b from-background via-white to-primary/[0.08]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/15 px-3 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-primary/90">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/[0.15] px-3 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-primary/90">
               <Locate className="h-3.5 w-3.5" />
               Localisation
             </div>
@@ -649,7 +651,7 @@ export default function HomePage() {
                     <div className="absolute top-3 right-3">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
                         product.available !== false
-                          ? 'bg-success/15 text-success'
+                          ? 'bg-success/[0.15] text-success'
                           : 'bg-secondary/15 text-secondary'
                       }`}>
                         {product.available !== false ? 'Disponible' : 'Sur confirmation'}
@@ -722,7 +724,7 @@ export default function HomePage() {
       {/* Trust / Le meilleur est à venir */}
       <section className="relative overflow-hidden py-16 md:py-24 bg-gradient-to-br from-stone-950 via-accent to-primary text-white">
         <div className="absolute left-0 top-0 h-64 w-64 rounded-full bg-primary/25 blur-3xl" />
-        <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-success/15 blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-success/[0.15] blur-3xl" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">
@@ -763,7 +765,7 @@ export default function HomePage() {
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white rounded-[2rem] p-8 border border-primary/20 shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all text-center">
-              <div className="w-14 h-14 rounded-2xl bg-primary/15 text-primary flex items-center justify-center mx-auto mb-5">
+              <div className="w-14 h-14 rounded-2xl bg-primary/[0.15] text-primary flex items-center justify-center mx-auto mb-5">
                 <ChefHat className="w-7 h-7" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-3">Produits locaux</h3>
@@ -900,7 +902,7 @@ export default function HomePage() {
             </div>
 
             {/* Carte 2 — Partenariat infirmier */}
-            <div className="p-6 bg-gradient-to-br from-success50 to-success/100/50 rounded-[2rem] border border-success/35 hover:-translate-y-1 hover:shadow-lg transition-all">
+            <div className="p-6 bg-gradient-to-br from-success50 to-success/100/50 rounded-[2rem] border border-success/[0.35] hover:-translate-y-1 hover:shadow-lg transition-all">
               <div className="w-14 h-14 rounded-2xl bg-success text-white flex items-center justify-center text-2xl mb-4 shadow-md">
                 🩺
               </div>
@@ -959,7 +961,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-stone-950 via-accent to-primary px-6 py-12 text-center text-white shadow-[0_32px_100px_-55px_rgba(42,25,15,0.75)] md:px-12 md:py-16">
             <div className="absolute -left-16 top-0 h-56 w-56 rounded-full bg-primary/25 blur-3xl" />
-            <div className="absolute -right-10 bottom-0 h-64 w-64 rounded-full bg-success/15 blur-3xl" />
+            <div className="absolute -right-10 bottom-0 h-64 w-64 rounded-full bg-success/[0.15] blur-3xl" />
             <div className="relative mx-auto max-w-3xl">
               <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">
                 Prêt à commander ?

@@ -11,7 +11,7 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const STATUT_STYLES: Record<string, string> = {
-  ouvert: 'bg-success/15 text-success',
+  ouvert: 'bg-success/[0.15] text-success',
   bientot: 'bg-secondary/15 text-secondary',
   ferme: 'bg-muted text-muted-foreground',
 };
@@ -32,7 +32,7 @@ export default function MarchesPublicsPage() {
       <div className="max-w-6xl mx-auto px-4 py-10">
         {/* Hero */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 text-primary text-xs font-semibold mb-4 uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/[0.15] text-primary text-xs font-semibold mb-4 uppercase tracking-wider">
             📋 NOUVEAU
           </div>
           <h1 className="text-4xl md:text-5xl font-black text-foreground mb-3">

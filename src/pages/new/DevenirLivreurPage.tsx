@@ -158,7 +158,7 @@ export default function DevenirLivreurPage() {
     <Layout>
       <div className="mx-auto max-w-3xl px-4 py-8 md:py-12">
         <div className="mb-8 space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full bg-success/15 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-success">
+          <div className="inline-flex items-center gap-2 rounded-full bg-success/[0.15] px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-success">
             <Truck size={14} /> Candidature livreur
           </div>
           <h1 className="text-2xl font-black tracking-tight text-foreground md:text-3xl">Devenir livreur DeliKreol</h1>

@@ -12,17 +12,34 @@ export default defineConfig(({ mode }) => {
   return {
     base,
     plugins: [react(), VitePWA({
-      mode: 'development',
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['branding/*.svg', 'branding/*.png'],
       manifest: false,
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,webp,ico,json}'],
+        cleanupOutdatedCaches: true,
+        globPatterns: ['**/*.{js,css,html,svg,ico,json}'],
         runtimeCaching: [
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|webp)$/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'delikreol-images',
+              expiration: {
+                maxEntries: 80,
+                maxAgeSeconds: 604800,
+              },
+            },
+          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
-            options: { cacheName: 'google-fonts', expiration: { maxEntries: 4, maxAgeSeconds: 365 * 24 * 60 * 60 } },
+            options: {
+              cacheName: 'google-fonts',
+              expiration: {
+                maxEntries: 4,
+                maxAgeSeconds: 31536000,
+              },
+            },
           },
         ],
       },

@@ -57,7 +57,7 @@ export function ProPartnerPlatformPage() {
           <div className="overflow-x-auto rounded-2xl border border-input">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-primary/8 text-left">
+                <tr className="bg-primary/[0.08] text-left">
                   <th className="p-3 font-semibold">Plateforme</th>
                   <th className="p-3 font-semibold">Type</th>
                   <th className="p-3 font-semibold">Zone</th>
@@ -75,7 +75,7 @@ export function ProPartnerPlatformPage() {
                     <td className="p-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
                         p.integration.includes('30%') ? 'bg-red-100 text-red-700' :
-                        p.integration === 'API disponible' ? 'bg-success/15 text-success' :
+                        p.integration === 'API disponible' ? 'bg-success/[0.15] text-success' :
                         p.integration === 'Partenaire direct possible' ? 'bg-blue-100 text-blue-700' :
                         'bg-secondary/15 text-secondary'
                       }`}>

@@ -127,7 +127,7 @@ export function ReviewSection({ traiteurSlug, traiteurName }: { traiteurSlug: st
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-foreground text-sm">{review.authorName}</span>
                   {review.verified && (
-                    <span className="text-[10px] px-1.5 py-0.5 bg-success/15 text-success rounded-full flex items-center gap-0.5">
+                    <span className="text-[10px] px-1.5 py-0.5 bg-success/[0.15] text-success rounded-full flex items-center gap-0.5">
                       <Verified size={10} /> Commande vérifiée
                     </span>
                   )}

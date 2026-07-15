@@ -157,7 +157,7 @@ export default function AdminDashboardPage() {
           {partnerLinks.map(p => (
             <div key={p.code} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
               <span className="font-semibold w-44">{p.name}</span>
-              <button onClick={() => navigator.clipboard.writeText(`https://delikreol.com/partenaire?code=${p.code}`)} className="px-3 py-1 bg-primary/15 text-primary rounded-lg text-xs font-bold hover:bg-orange-200">Copier lien</button>
+              <button onClick={() => navigator.clipboard.writeText(`https://delikreol.com/partenaire?code=${p.code}`)} className="px-3 py-1 bg-primary/[0.15] text-primary rounded-lg text-xs font-bold hover:bg-orange-200">Copier lien</button>
               <button onClick={() => navigator.clipboard.writeText(`Bonjour,\n\nVotre espace pilote DELIKREOL est prêt.\n\nLien :\nhttps://delikreol.com/partenaire?code=${p.code}\n\nCe lien vous permet d'envoyer vos corrections.\n\nVladimir — DELIKREOL`)} className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-bold hover:bg-green-200">Copier message WhatsApp</button>
             </div>
           ))}

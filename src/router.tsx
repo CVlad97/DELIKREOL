@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { PWAUpdatePrompt } from './components/PWAUpdatePrompt';
 import { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
@@ -92,6 +93,7 @@ export function AppRouter() {
         <AuthProvider>
           <CartProvider>
             <ToastProvider>
+              <PWAUpdatePrompt />
               <Routes>
                 <Route element={<LayoutWrapper />}>
                   <Route index element={<HomePage />} />

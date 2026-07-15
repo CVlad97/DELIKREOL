@@ -73,9 +73,9 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
     pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
     confirmed: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
     preparing: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-    ready: 'bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary',
+    ready: 'bg-primary/[0.15] text-primary dark:bg-primary/20 dark:text-primary',
     in_delivery: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400',
-    delivered: 'bg-success/15 text-success dark:bg-success/20 dark:text-success',
+    delivered: 'bg-success/[0.15] text-success dark:bg-success/20 dark:text-success',
     cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
   };
 
@@ -181,7 +181,7 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
                   />
                 </div>
 
-                <div className="flex items-center justify-between px-4 py-3 bg-success/10 dark:bg-success/15 rounded-lg">
+                <div className="flex items-center justify-between px-4 py-3 bg-success/10 dark:bg-success/[0.15] rounded-lg">
                   <span className="text-sm font-medium text-success dark:text-success">Type de compte</span>
                   <span className="px-3 py-1 bg-success text-white text-xs font-medium rounded-full">
                     {profile.user_type}

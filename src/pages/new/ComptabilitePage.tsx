@@ -8,7 +8,7 @@ const PARTNER_KEYS = Object.keys(PARTENAIRES_DEMO);
 const STATUS_LABELS: Record<string, { label: string; style: string }> = {
   draft: { label: 'Brouillon', style: 'bg-muted text-muted-foreground' },
   sent: { label: 'Envoyée', style: 'bg-blue-100 text-blue-700' },
-  paid: { label: 'Payée', style: 'bg-success/15 text-success' },
+  paid: { label: 'Payée', style: 'bg-success/[0.15] text-success' },
   overdue: { label: 'En retard', style: 'bg-red-100 text-red-700' },
   cancelled: { label: 'Annulée', style: 'bg-muted text-muted-foreground' },
 };
@@ -50,7 +50,7 @@ export default function ComptabilitePage() {
 
         {/* Header */}
         <div className="text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 text-primary text-xs font-semibold mb-4 uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/[0.15] text-primary text-xs font-semibold mb-4 uppercase tracking-wider">
             🧾 NOUVEAU
           </div>
           <h1 className="text-4xl md:text-5xl font-black text-foreground mb-3">
@@ -105,7 +105,7 @@ export default function ComptabilitePage() {
             {[
               { label: 'CA Total (HT)', value: `${totalHT.toFixed(2)} €`, icon: Euro, color: 'text-success bg-success/10' },
               { label: 'TVA Collectée', value: `${totalTVA.toFixed(2)} €`, icon: Percent, color: 'text-blue-600 bg-blue-50' },
-              { label: 'Total TTC', value: `${totalTTC.toFixed(2)} €`, icon: Calculator, color: 'text-primary bg-primary/8' },
+              { label: 'Total TTC', value: `${totalTTC.toFixed(2)} €`, icon: Calculator, color: 'text-primary bg-primary/[0.08]' },
               { label: 'Payé', value: `${totalPaye.toFixed(2)} €`, icon: CheckCircle, color: 'text-green-600 bg-green-50' },
             ].map(kpi => (
               <div key={kpi.label} className={`rounded-2xl p-5 ${kpi.color}`}>
@@ -185,7 +185,7 @@ export default function ComptabilitePage() {
                   <p className="text-sm font-semibold text-foreground">{e.type === 'tva' ? 'Déclaration TVA' : e.type === 'tva_ca12' ? 'CA12' : 'Déclaration revenus'} — {e.period}</p>
                   <p className="text-xs text-muted-foreground">Échéance : {new Date(e.dueDate).toLocaleDateString('fr-FR')}</p>
                 </div>
-                <span className={`text-xs px-3 py-1 rounded-full font-semibold ${e.status === 'a_faire' ? 'bg-red-100 text-red-700' : 'bg-success/15 text-success'}`}>
+                <span className={`text-xs px-3 py-1 rounded-full font-semibold ${e.status === 'a_faire' ? 'bg-red-100 text-red-700' : 'bg-success/[0.15] text-success'}`}>
                   {e.status === 'a_faire' ? 'À faire' : 'Validée'}
                 </span>
               </div>

@@ -62,7 +62,7 @@ export function AdminPointsRelais() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-black">Points relais</h1>
-        <span className={`text-xs px-3 py-1 rounded-full font-semibold ${source === 'supabase' ? 'bg-success/15 text-success' : 'bg-amber-100 text-amber-700'}`}>
+        <span className={`text-xs px-3 py-1 rounded-full font-semibold ${source === 'supabase' ? 'bg-success/[0.15] text-success' : 'bg-amber-100 text-amber-700'}`}>
           Source: {source}
         </span>
       </div>

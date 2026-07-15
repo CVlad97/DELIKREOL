@@ -13,6 +13,7 @@ export interface MetaConfig {
   title: string;
   description: string;
   keywords?: string;
+  robots?: 'index, follow' | 'noindex, follow';
 }
 
 /**
@@ -30,7 +31,7 @@ export interface MetaConfig {
  *   'ninice, fort-de-france, livraison repas Martinique, plats créoles'
  * );
  */
-export function setPageMeta(title: string, description: string, keywords?: string): void {
+export function setPageMeta(title: string, description: string, keywords?: string, robots?: 'index, follow' | 'noindex, follow'): void {
   document.title = title;
 
   /**
@@ -63,6 +64,9 @@ export function setPageMeta(title: string, description: string, keywords?: strin
   if (keywords !== undefined) {
     upsertMeta('name', 'keywords', keywords);
   }
+
+  // Robots : 'index, follow' par défaut, 'noindex, follow' pour les pages utilitaires
+  upsertMeta('name', 'robots', robots || 'index, follow');
 }
 
 /**

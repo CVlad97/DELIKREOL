@@ -381,7 +381,7 @@ export default function AdminCatererValidation() {
                     {/* Specialties & Price */}
                     <div className="flex flex-wrap items-center gap-3 text-xs">
                       {app.specialties && app.specialties.length > 0 && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/8 text-primary rounded-full">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/[0.08] text-primary rounded-full">
                           <Utensils className="w-3 h-3" />
                           {app.specialties.join(', ')}
                         </span>

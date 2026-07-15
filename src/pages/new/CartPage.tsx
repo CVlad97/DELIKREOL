@@ -361,7 +361,7 @@ export default function CartPage() {
       <Layout>
         <div className="min-h-[60vh] flex items-center justify-center bg-[#FFFBF0]">
           <div className="text-center px-4 max-w-md mx-auto">
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary/15 mb-6">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary/[0.15] mb-6">
               <ShoppingCart className="w-10 h-10 text-primary/400" />
             </div>
             <h1 className="text-2xl font-black text-foreground mb-3">Votre panier est vide</h1>

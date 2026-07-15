@@ -17,7 +17,7 @@ interface MapPartner {
 }
 
 const COLORS = {
-  traiteur: { marker: 'hsl(var(--primary))', bg: 'bg-primary/15', text: 'text-primary', icon: '🧑‍🍳' },
+  traiteur: { marker: 'hsl(var(--primary))', bg: 'bg-primary/[0.15]', text: 'text-primary', icon: '🧑‍🍳' },
   relais: { marker: '#3b82f6', bg: 'bg-blue-100', text: 'text-blue-700', icon: '📦' },
   livreur: { marker: '#22c55e', bg: 'bg-green-100', text: 'text-green-700', icon: '🛵' },
   client: { marker: '#8b5cf6', bg: 'bg-purple-100', text: 'text-purple-700', icon: '📍' },
@@ -160,10 +160,10 @@ export default function ExpandableGeoMap() {
       {/* Header toujours visible */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-primary/8 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:bg-primary/[0.08] transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-primary/[0.15] flex items-center justify-center">
             <MapPin className="w-5 h-5 text-primary" />
           </div>
           <div className="text-left">
@@ -216,7 +216,7 @@ export default function ExpandableGeoMap() {
               <div
                 key={p.id}
                 onClick={() => setSelectedPartner(p)}
-                className={`flex items-center gap-3 p-3 hover:bg-muted cursor-pointer transition-colors ${selectedPartner?.id === p.id ? 'bg-primary/8' : ''}`}
+                className={`flex items-center gap-3 p-3 hover:bg-muted cursor-pointer transition-colors ${selectedPartner?.id === p.id ? 'bg-primary/[0.08]' : ''}`}
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${color.bg}`}>
                   {color.icon}

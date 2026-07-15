@@ -345,7 +345,7 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
                     <div className="flex items-start gap-3">
                       <div
                         className={`rounded-xl p-2 ${
-                          active ? 'bg-success/15 text-success' : 'bg-muted text-muted-foreground'
+                          active ? 'bg-success/[0.15] text-success' : 'bg-muted text-muted-foreground'
                         }`}
                       >
                         <Icon size={18} />

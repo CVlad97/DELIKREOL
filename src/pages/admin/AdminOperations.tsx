@@ -46,8 +46,8 @@ const statusLabels: Record<string, string> = {
 
 const statusColors: Record<string, string> = {
   pending: 'bg-amber-100 text-amber-800', confirmed: 'bg-sky-100 text-sky-800',
-  preparing: 'bg-primary/15 text-orange-800', ready: 'bg-accent100 text-teal-800',
-  in_delivery: 'bg-blue-100 text-blue-800', delivered: 'bg-success/15 text-emerald-800',
+  preparing: 'bg-primary/[0.15] text-orange-800', ready: 'bg-accent100 text-teal-800',
+  in_delivery: 'bg-blue-100 text-blue-800', delivered: 'bg-success/[0.15] text-emerald-800',
   cancelled: 'bg-red-100 text-red-800',
 };
 

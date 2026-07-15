@@ -226,7 +226,7 @@ export function RoleInfoModal({ isOpen, onClose, roleType }: RoleInfoModalProps)
               </ul>
             </div>
 
-            <div className="bg-primary/8 rounded-2xl p-6">
+            <div className="bg-primary/[0.08] rounded-2xl p-6">
               <h3 className="text-xl font-bold text-foreground mb-4">Prérequis</h3>
               <ul className="space-y-3">
                 {info.requirements.map((req, index) => (
@@ -262,7 +262,7 @@ export function RoleInfoModal({ isOpen, onClose, roleType }: RoleInfoModalProps)
             <p className="text-xl mb-4">Prêt à rejoindre Delikreol ?</p>
             <button
               onClick={handleContinue}
-              className="bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-primary/8 transition-colors transform hover:scale-105 duration-200 shadow-lg"
+              className="bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-primary/[0.08] transition-colors transform hover:scale-105 duration-200 shadow-lg"
             >
               {user ? 'Remplir le formulaire' : `Créer mon compte ${info.title.toLowerCase()}`}
             </button>

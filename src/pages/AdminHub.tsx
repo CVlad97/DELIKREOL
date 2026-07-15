@@ -417,7 +417,7 @@ export function AdminHub() {
                         key={idx}
                         className={`${
                           msg.role === 'user'
-                            ? 'bg-success/15 ml-8'
+                            ? 'bg-success/[0.15] ml-8'
                             : 'bg-muted mr-8'
                         } p-3 rounded-lg`}
                       >

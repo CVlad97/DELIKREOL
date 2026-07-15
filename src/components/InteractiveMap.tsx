@@ -64,14 +64,14 @@ export function InteractiveMap({ points, clientCoords, onSelectPoint, compact }:
   return (
     <div className={`bg-white rounded-2xl border border-primary/20 overflow-hidden ${compact ? '' : 'shadow-sm'}`}>
       {/* En-tête avec position */}
-      <div className="p-4 border-b border-primary/15">
+      <div className="p-4 border-b border-primary/[0.15]">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-bold text-foreground flex items-center gap-2">
             <MapPin className="w-4 h-4 text-primary" />
             {userPosition ? 'À proximité' : 'Points disponibles'}
           </h3>
           {!userPosition && (
-            <button onClick={requestPosition} className="flex items-center gap-1 px-3 py-1.5 bg-primary/15 text-primary rounded-lg text-xs font-bold hover:bg-primary/20">
+            <button onClick={requestPosition} className="flex items-center gap-1 px-3 py-1.5 bg-primary/[0.15] text-primary rounded-lg text-xs font-bold hover:bg-primary/20">
               <Locate className="w-3 h-3" /> Ma position
             </button>
           )}
@@ -85,9 +85,9 @@ export function InteractiveMap({ points, clientCoords, onSelectPoint, compact }:
           </button>
           {showList && (
             <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border rounded-xl shadow-lg max-h-48 overflow-y-auto">
-              <button onClick={() => { setSelectedCommune(''); setShowList(false); }} className="w-full text-left px-3 py-2 text-sm text-muted-foreground hover:bg-primary/8">Toutes</button>
+              <button onClick={() => { setSelectedCommune(''); setShowList(false); }} className="w-full text-left px-3 py-2 text-sm text-muted-foreground hover:bg-primary/[0.08]">Toutes</button>
               {martiniqueCommunes.slice(0, 34).map(c => (
-                <button key={c.name} onClick={() => { setSelectedCommune(c.name); setShowList(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-primary/8">{c.name}</button>
+                <button key={c.name} onClick={() => { setSelectedCommune(c.name); setShowList(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-primary/[0.08]">{c.name}</button>
               ))}
             </div>
           )}
@@ -111,7 +111,7 @@ export function InteractiveMap({ points, clientCoords, onSelectPoint, compact }:
               <div
                 key={i}
                 onClick={() => { onSelectPoint?.(p); }}
-                className="flex items-center gap-3 p-3 hover:bg-primary/8 cursor-pointer transition-colors"
+                className="flex items-center gap-3 p-3 hover:bg-primary/[0.08] cursor-pointer transition-colors"
               >
                 <span className="text-xl">{icon(p.type)}</span>
                 <div className="flex-1 min-w-0">
@@ -143,7 +143,7 @@ export function InteractiveMap({ points, clientCoords, onSelectPoint, compact }:
       </div>
 
       {userPosition && (
-        <div className="px-4 py-2 bg-primary/8 text-xs text-muted-foreground">
+        <div className="px-4 py-2 bg-primary/[0.08] text-xs text-muted-foreground">
           📍 Position actuelle utilisée pour le classement
         </div>
       )}

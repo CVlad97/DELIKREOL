@@ -83,7 +83,7 @@ export function LocationSelector({ onSelect, compact }: LocationSelectorProps) {
             <div className="absolute top-full left-0 right-0 z-20 mt-1 bg-white border rounded-xl shadow-lg max-h-48 overflow-y-auto">
               {filtered.slice(0, 34).map(c => (
                 <button key={c.name} onClick={() => handleSelect(c.name)}
-                  className={`w-full text-left px-3 py-2 text-sm hover:bg-primary/8 ${c.name === selectedCommune ? 'bg-primary/8 text-primary font-semibold' : 'text-foreground'}`}>
+                  className={`w-full text-left px-3 py-2 text-sm hover:bg-primary/[0.08] ${c.name === selectedCommune ? 'bg-primary/[0.08] text-primary font-semibold' : 'text-foreground'}`}>
                   {c.name}
                 </button>
               ))}
@@ -94,7 +94,7 @@ export function LocationSelector({ onSelect, compact }: LocationSelectorProps) {
 
         {/* Bouton géolocalisation */}
         {!position && (
-          <button onClick={requestGeolocation} className="flex items-center gap-1 px-3 py-2 bg-primary/15 text-primary rounded-xl text-xs font-bold hover:bg-primary/20">
+          <button onClick={requestGeolocation} className="flex items-center gap-1 px-3 py-2 bg-primary/[0.15] text-primary rounded-xl text-xs font-bold hover:bg-primary/20">
             <Locate className="w-3 h-3" />
             {compact ? '' : 'Ma position'}
           </button>

@@ -2,29 +2,26 @@
   "name": "DeliKreol — Plats créoles Martinique",
   "short_name": "DeliKreol",
   "description": "Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait.",
-  "start_url": "/DELIKREOL/",
-  "scope": "/DELIKREOL/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#f97316",
+  "background_color": "#fff8f0",
+  "theme_color": "#b74406",
   "orientation": "portrait",
   "categories": ["food", "lifestyle", "local"],
   "lang": "fr-MQ",
   "icons": [
     {
-      "src": "/DELIKREOL/branding/logo-mark.svg",
+      "src": "/branding/logo-mark.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/DELIKREOL/branding/logo-mark.svg",
-      "sizes": "48x48 72x72 96x96 128x128 192x192 256x256 384x384 512x512",
+      "src": "/branding/app-icon.svg",
+      "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any"
+      "purpose": "maskable"
     }
-  ],
-  "screenshots": [],
-  "prefer_related_applications": false,
-  "related_applications": []
+  ]
 }

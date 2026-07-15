@@ -49,10 +49,10 @@ export default function LoginPage() {
 
   return (
     <Layout>
-      <section className="min-h-[70vh] bg-gradient-to-br from-primary/8 via-secondary/8 to-success/10 px-4 py-10">
+      <section className="min-h-[70vh] bg-gradient-to-br from-primary/[0.08] via-secondary/8 to-success/10 px-4 py-10">
         <div className="mx-auto max-w-md rounded-[2rem] border border-primary/20 bg-white p-6 shadow-xl sm:p-8">
           <div className="text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/[0.15] text-primary">
               <ShieldCheck className="h-7 w-7" />
             </div>
             <p className="text-xs font-black uppercase tracking-[0.24em] text-primary">DELIKREOL</p>

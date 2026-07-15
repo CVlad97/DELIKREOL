@@ -524,7 +524,7 @@ export default function CatererSignupPage() {
         </div>
 
         {/* 👥 Compteur traiteurs */}
-        <div className="mb-6 text-center bg-gradient-to-r from-primary/8 to-secondary/8 border border-primary/30 rounded-2xl p-4">
+        <div className="mb-6 text-center bg-gradient-to-r from-primary/[0.08] to-secondary/8 border border-primary/30 rounded-2xl p-4">
           <p className="text-sm font-bold text-primary">
             👥 {catererCount} traiteur{catererCount !== 1 ? 's' : ''} {catererCount > 1 ? 'ont déjà rejoint' : 'a déjà rejoint'} Delikreol
           </p>
@@ -976,7 +976,7 @@ export default function CatererSignupPage() {
             </button>
             <Link
               to="/"
-              className="btn btnSecondary inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white hover:bg-primary/8 text-primary font-bold rounded-2xl border-2 border-primary/30 transition-all hover:scale-105 text-base"
+              className="btn btnSecondary inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white hover:bg-primary/[0.08] text-primary font-bold rounded-2xl border-2 border-primary/30 transition-all hover:scale-105 text-base"
             >
               Annuler
             </Link>

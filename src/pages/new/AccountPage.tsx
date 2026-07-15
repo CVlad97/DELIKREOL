@@ -32,7 +32,7 @@ export default function AccountPage() {
         <BackBar label="Retour à l'accueil" backTo="/" />
 
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-primary/15 flex items-center justify-center">
+          <div className="w-16 h-16 rounded-2xl bg-primary/[0.15] flex items-center justify-center">
             <User className="w-8 h-8 text-primary" />
           </div>
           <div>

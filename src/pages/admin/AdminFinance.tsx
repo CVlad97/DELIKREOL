@@ -60,7 +60,7 @@ function formatDate(value?: string | null) {
 function statusClass(status?: string | null) {
   switch (status) {
     case 'paid':
-      return 'bg-success/15 text-success';
+      return 'bg-success/[0.15] text-success';
     case 'issued':
       return 'bg-blue-100 text-blue-700';
     case 'cancelled':

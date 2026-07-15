@@ -57,7 +57,7 @@ function SignupsByCategory() {
   const orders = loadFromStorage('delikreol_orders');
 
   const categories = [
-    { label: 'Traiteurs (partenaires)', value: partners.length, icon: ChefHat, color: 'text-primary bg-primary/8' },
+    { label: 'Traiteurs (partenaires)', value: partners.length, icon: ChefHat, color: 'text-primary bg-primary/[0.08]' },
     { label: 'Livreurs', value: drivers.length, icon: Truck, color: 'text-success bg-success/10' },
     { label: 'Points relais', value: relays.length, icon: MapPin, color: 'text-amber-600 bg-amber-50' },
     { label: 'Demandes devis traiteur', value: catering.length, icon: FileText, color: 'text-purple-600 bg-purple-50' },
@@ -187,7 +187,7 @@ function RealtimeStats() {
           <p className="text-2xl font-black text-success">{todayOrders}</p>
           <p className="text-xs text-success font-medium">Commandes aujourd'hui</p>
         </div>
-        <div className="p-3 bg-primary/8 rounded-xl text-center">
+        <div className="p-3 bg-primary/[0.08] rounded-xl text-center">
           <p className="text-2xl font-black text-primary">{todayPartners}</p>
           <p className="text-xs text-primary font-medium">Nouveaux inscrits</p>
         </div>
@@ -225,7 +225,7 @@ function ActionRecommendations() {
       title: '🤝 Recruter des traiteurs',
       desc: 'Contacter les traiteurs locaux Martinique (WhatsApp, bouche-à-oreille). Proposer le forfait gratuit ou lancement.',
       icon: ChefHat,
-      color: 'text-primary bg-primary/8',
+      color: 'text-primary bg-primary/[0.08]',
     });
   }
   if (drivers < 2) {
@@ -276,7 +276,7 @@ function ActionRecommendations() {
                   <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
                     rec.priority === 'P0' ? 'bg-red-100 text-red-700' :
                     rec.priority === 'P1' ? 'bg-amber-100 text-amber-700' :
-                    'bg-success/15 text-success'
+                    'bg-success/[0.15] text-success'
                   }`}>{rec.priority}</span>
                   <span className="font-bold text-sm text-foreground">{rec.title}</span>
                 </div>
@@ -308,7 +308,7 @@ export default function AdminAnalytics() {
 
   const summaryCards: StatCard[] = [
     { label: 'Vues du site', value: metrics.public_view || 0, icon: Eye, color: 'text-blue-600 bg-blue-50', growth: 0, sub: 'toutes sessions confondues' },
-    { label: 'Inscriptions total', value: totalSignups, icon: Users, color: 'text-primary bg-primary/8', sub: `${partners.length} traiteurs · ${drivers.length} livreurs · ${relays.length} relais` },
+    { label: 'Inscriptions total', value: totalSignups, icon: Users, color: 'text-primary bg-primary/[0.08]', sub: `${partners.length} traiteurs · ${drivers.length} livreurs · ${relays.length} relais` },
     { label: 'Demandes de devis', value: catering.length, icon: FileText, color: 'text-purple-600 bg-purple-50', sub: 'traiteur événementiel' },
     { label: 'Commandes', value: orders.length, icon: ShoppingCart, color: 'text-success bg-success/10', sub: `${leads.length} leads` },
   ];

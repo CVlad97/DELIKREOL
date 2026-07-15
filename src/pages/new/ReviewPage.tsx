@@ -179,7 +179,7 @@ export default function ReviewPage() {
                 </Link>
                 <Link
                   to="/catalogue"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-primary/20 text-foreground font-bold rounded-xl hover:bg-primary/8 transition-all"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-primary/20 text-foreground font-bold rounded-xl hover:bg-primary/[0.08] transition-all"
                 >
                   <ChefHat className="w-4 h-4" />
                   Voir le catalogue
@@ -198,7 +198,7 @@ export default function ReviewPage() {
         <div className="max-w-xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/15 px-3 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-primary">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/[0.15] px-3 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-primary">
               Avis client
             </div>
             <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground mb-2">

@@ -104,7 +104,7 @@ export default function ClientAccountPage() {
 
   return (
     <Layout>
-      <section className="min-h-screen bg-gradient-to-br from-primary/8 via-white to-success/10 px-4 py-8">
+      <section className="min-h-screen bg-gradient-to-br from-primary/[0.08] via-white to-success/10 px-4 py-8">
         <div className="mx-auto max-w-6xl space-y-6">
           <div className="rounded-[2rem] border border-primary/20 bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -122,7 +122,7 @@ export default function ClientAccountPage() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-primary/20 bg-white p-5 shadow-sm"><div className="flex items-center gap-3"><div className="rounded-xl bg-primary/15 p-3 text-primary"><ClipboardList className="h-5 w-5" /></div><div><p className="text-xs text-gray-500">Commandes</p><p className="text-2xl font-black text-gray-900">{orders.length}</p></div></div></div>
+            <div className="rounded-2xl border border-primary/20 bg-white p-5 shadow-sm"><div className="flex items-center gap-3"><div className="rounded-xl bg-primary/[0.15] p-3 text-primary"><ClipboardList className="h-5 w-5" /></div><div><p className="text-xs text-gray-500">Commandes</p><p className="text-2xl font-black text-gray-900">{orders.length}</p></div></div></div>
             <div className="rounded-2xl border border-primary/20 bg-white p-5 shadow-sm"><div className="flex items-center gap-3"><div className="rounded-xl bg-green-100 p-3 text-green-600"><CheckCircle2 className="h-5 w-5" /></div><div><p className="text-xs text-gray-500">Dernier statut</p><p className="text-lg font-black text-gray-900">{latestOrder ? STATUS_LABEL[latestOrder.status || 'pending'] || latestOrder.status || 'En attente' : 'Aucune'}</p></div></div></div>
             <div className="rounded-2xl border border-primary/20 bg-white p-5 shadow-sm"><div className="flex items-center gap-3"><div className="rounded-xl bg-blue-100 p-3 text-blue-600"><UserRound className="h-5 w-5" /></div><div><p className="text-xs text-gray-500">Compte</p><p className="text-sm font-bold text-gray-900 truncate">{user?.email}</p></div></div></div>
           </div>
@@ -159,7 +159,7 @@ export default function ClientAccountPage() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <Link to="/feedback" className="rounded-2xl border border-red-100 bg-red-50 p-5 text-red-700 hover:bg-red-100"><AlertTriangle className="mb-3 h-6 w-6" /><h3 className="font-black">Signaler un problème</h3><p className="mt-1 text-sm">Décris un bug et ajoute une capture si besoin.</p></Link>
-            <Link to="/aide" className="rounded-2xl border border-primary/20 bg-primary/[0.08] p-5 text-primary hover:bg-primary/15"><MessageCircle className="mb-3 h-6 w-6" /><h3 className="font-black">Aide & informations</h3><p className="mt-1 text-sm">Comprendre la livraison, le retrait et les commandes.</p></Link>
+            <Link to="/aide" className="rounded-2xl border border-primary/20 bg-primary/[0.08] p-5 text-primary hover:bg-primary/[0.15]"><MessageCircle className="mb-3 h-6 w-6" /><h3 className="font-black">Aide & informations</h3><p className="mt-1 text-sm">Comprendre la livraison, le retrait et les commandes.</p></Link>
           </div>
         </div>
       </section>

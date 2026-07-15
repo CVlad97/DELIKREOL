@@ -92,7 +92,7 @@ export function TraiteursListPage() {
             ))}
           </select>
           {!userPosition && (
-            <button type="button" onClick={requestPosition} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary/10 px-4 py-2 text-sm font-bold text-primary hover:bg-primary/15">
+            <button type="button" onClick={requestPosition} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary/10 px-4 py-2 text-sm font-bold text-primary hover:bg-primary/[0.15]">
               <Locate className="h-4 w-4" /> Autour de moi
             </button>
           )}
