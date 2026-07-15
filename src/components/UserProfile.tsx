@@ -93,20 +93,20 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
     <>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
         <div className="bg-white dark:bg-gray-800 w-full sm:max-w-2xl sm:rounded-t-2xl rounded-t-2xl max-h-[90vh] flex flex-col">
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Mon profil</h2>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+          <div className="p-4 border-b border-input dark:border-gray-700 flex items-center justify-between">
+            <h2 className="text-xl font-bold text-foreground dark:text-white">Mon profil</h2>
+            <button onClick={onClose} className="text-muted-foreground hover:text-muted-foreground dark:hover:text-muted-foreground">
               <X size={24} />
             </button>
           </div>
 
-          <div className="flex border-b border-gray-200 dark:border-gray-700">
+          <div className="flex border-b border-input dark:border-gray-700">
             <button
               onClick={() => setActiveTab('profile')}
               className={`flex-1 py-3 font-medium transition-colors ${
                 activeTab === 'profile'
                   ? 'text-success dark:text-success border-b-2 border-success dark:border-success'
-                  : 'text-gray-600 dark:text-gray-400'
+                  : 'text-muted-foreground dark:text-muted-foreground'
               }`}
             >
               <User className="inline-block mr-2" size={18} />
@@ -117,7 +117,7 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
               className={`flex-1 py-3 font-medium transition-colors ${
                 activeTab === 'orders'
                   ? 'text-success dark:text-success border-b-2 border-success dark:border-success'
-                  : 'text-gray-600 dark:text-gray-400'
+                  : 'text-muted-foreground dark:text-muted-foreground'
               }`}
             >
               <Package className="inline-block mr-2" size={18} />
@@ -128,7 +128,7 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
               className={`flex-1 py-3 font-medium transition-colors ${
                 activeTab === 'favorites'
                   ? 'text-success dark:text-success border-b-2 border-success dark:border-success'
-                  : 'text-gray-600 dark:text-gray-400'
+                  : 'text-muted-foreground dark:text-muted-foreground'
               }`}
             >
               <Heart className="inline-block mr-2" size={18} />
@@ -146,7 +146,7 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-foreground dark:text-muted-foreground mb-1">
                     Nom complet
                   </label>
                   <input
@@ -154,22 +154,22 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     disabled={!editMode}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-60"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-foreground dark:text-white disabled:opacity-60"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-foreground dark:text-muted-foreground mb-1">
                     Email
                   </label>
-                  <div className="flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900">
-                    <Mail size={18} className="text-gray-400 mr-2" />
-                    <span className="text-gray-600 dark:text-gray-400">{user.email}</span>
+                  <div className="flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-muted dark:bg-gray-900">
+                    <Mail size={18} className="text-muted-foreground mr-2" />
+                    <span className="text-muted-foreground dark:text-muted-foreground">{user.email}</span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-foreground dark:text-muted-foreground mb-1">
                     Téléphone
                   </label>
                   <input
@@ -177,7 +177,7 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     disabled={!editMode}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-60"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-foreground dark:text-white disabled:opacity-60"
                   />
                 </div>
 
@@ -192,7 +192,7 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
                   <div className="flex gap-3">
                     <button
                       onClick={() => setEditMode(false)}
-                      className="flex-1 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700"
+                      className="flex-1 py-3 border border-gray-300 dark:border-gray-600 text-foreground dark:text-muted-foreground rounded-lg font-medium hover:bg-muted dark:hover:bg-gray-700"
                     >
                       Annuler
                     </button>
@@ -218,23 +218,23 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
             {activeTab === 'orders' && (
               <div className="space-y-3">
                 {loading ? (
-                  <p className="text-center text-gray-600 dark:text-gray-400 py-8">Chargement...</p>
+                  <p className="text-center text-muted-foreground dark:text-muted-foreground py-8">Chargement...</p>
                 ) : orders.length === 0 ? (
                   <div className="text-center py-12">
-                    <Package size={64} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-                    <p className="text-gray-600 dark:text-gray-400">Aucune commande</p>
+                    <Package size={64} className="mx-auto text-muted-foreground dark:text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground dark:text-muted-foreground">Aucune commande</p>
                   </div>
                 ) : (
                   orders.map((order) => (
                     <div
                       key={order.id}
                       onClick={() => setSelectedOrderId(order.id)}
-                      className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow"
+                      className="bg-white dark:bg-gray-700 border border-input dark:border-gray-600 rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <p className="font-bold text-gray-900 dark:text-white">{order.order_number}</p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <p className="font-bold text-foreground dark:text-white">{order.order_number}</p>
+                          <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                             {new Date(order.created_at).toLocaleDateString('fr-FR', {
                               day: 'numeric',
                               month: 'long',
@@ -249,7 +249,7 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600 dark:text-gray-400">
+                        <span className="text-muted-foreground dark:text-muted-foreground">
                           {order.delivery_type === 'home_delivery' ? 'Livraison' : 'Retrait'}
                         </span>
                         <span className="font-bold text-success dark:text-success">
@@ -264,9 +264,9 @@ export function UserProfile({ isOpen, onClose }: UserProfileProps) {
 
             {activeTab === 'favorites' && (
               <div className="text-center py-12">
-                <Heart size={64} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-                <p className="text-gray-600 dark:text-gray-400">Aucun favori pour le moment</p>
-                <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+                <Heart size={64} className="mx-auto text-muted-foreground dark:text-muted-foreground mb-4" />
+                <p className="text-muted-foreground dark:text-muted-foreground">Aucun favori pour le moment</p>
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground mt-2">
                   Ajoutez vos restaurants préférés ici
                 </p>
               </div>

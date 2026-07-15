@@ -88,7 +88,7 @@ function SignupsByCategory() {
                   <span className="font-medium text-foreground truncate">{cat.label}</span>
                   <span className="font-bold text-foreground ml-2">{cat.value}</span>
                 </div>
-                <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{ width: `${pct}%`, backgroundColor: cat.color.match(/bg-(\w+)-(\d+)/)?.[0]?.replace('text-', '') || 'hsl(var(--primary))' }}
@@ -132,7 +132,7 @@ function ConversionFunnel() {
               <span className="text-muted-foreground">{step.label}</span>
               <span className="font-bold text-foreground">{step.value.toLocaleString('fr-FR')}</span>
             </div>
-            <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+            <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-700"
                 style={{

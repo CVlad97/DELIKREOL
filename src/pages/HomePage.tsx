@@ -160,7 +160,7 @@ export function HomePage() {
             <h2 className="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-600 mb-3">
               La Plateforme Logistique Locale Intelligente
             </h2>
-            <p className="text-gray-700 max-w-3xl mx-auto font-medium leading-relaxed">
+            <p className="text-foreground max-w-3xl mx-auto font-medium leading-relaxed">
               DELIKREOL n'est pas qu'une marketplace : c'est un écosystème collaboratif qui mutualise
               la logistique locale avec des points relais de proximité et une optimisation par IA.
             </p>
@@ -171,8 +171,8 @@ export function HomePage() {
               <div className="bg-gradient-to-br from-cyan-400 to-blue-500 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 transition-all transform group-hover:scale-110 group-hover:rotate-6 shadow-lg">
                 <Users className="w-10 h-10 text-white" />
               </div>
-              <h3 className="font-black text-gray-900 mb-2 text-lg">Réseau Mutualisé</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <h3 className="font-black text-foreground mb-2 text-lg">Réseau Mutualisé</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Points relais partagés entre tous les vendeurs pour une logistique optimale
               </p>
             </div>
@@ -181,8 +181,8 @@ export function HomePage() {
               <div className="bg-gradient-to-br from-yellow-400 to-orange-500 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 transition-all transform group-hover:scale-110 group-hover:rotate-6 shadow-lg">
                 <Zap className="w-10 h-10 text-white" />
               </div>
-              <h3 className="font-black text-gray-900 mb-2 text-lg">Optimisation IA</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <h3 className="font-black text-foreground mb-2 text-lg">Optimisation IA</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Tournées intelligentes et affectations automatiques pour livraisons rapides
               </p>
             </div>
@@ -191,8 +191,8 @@ export function HomePage() {
               <div className="bg-gradient-to-br from-red-500 to-pink-500 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 transition-all transform group-hover:scale-110 group-hover:rotate-6 shadow-lg">
                 <Shield className="w-10 h-10 text-white" />
               </div>
-              <h3 className="font-black text-gray-900 mb-2 text-lg">Écosystème Local</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <h3 className="font-black text-foreground mb-2 text-lg">Écosystème Local</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Soutenez les producteurs et commerces martiniquais avec chaque commande
               </p>
             </div>
@@ -227,7 +227,7 @@ export function HomePage() {
               className={`px-5 py-2.5 rounded-xl font-bold whitespace-nowrap transition-all transform hover:scale-105 ${
                 selectedType === 'all'
                   ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg'
-                  : 'bg-white text-gray-700 hover:bg-orange-50 border-2 border-gray-200'
+                  : 'bg-white text-foreground hover:bg-orange-50 border-2 border-input'
               }`}
             >
               Tous
@@ -237,7 +237,7 @@ export function HomePage() {
               className={`px-5 py-2.5 rounded-xl font-bold whitespace-nowrap transition-all transform hover:scale-105 ${
                 selectedType === 'restaurant'
                   ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg'
-                  : 'bg-white text-gray-700 hover:bg-orange-50 border-2 border-gray-200'
+                  : 'bg-white text-foreground hover:bg-orange-50 border-2 border-input'
               }`}
             >
               Restaurants
@@ -247,7 +247,7 @@ export function HomePage() {
               className={`px-5 py-2.5 rounded-xl font-bold whitespace-nowrap transition-all transform hover:scale-105 ${
                 selectedType === 'producer'
                   ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg'
-                  : 'bg-white text-gray-700 hover:bg-orange-50 border-2 border-gray-200'
+                  : 'bg-white text-foreground hover:bg-orange-50 border-2 border-input'
               }`}
             >
               Producteurs
@@ -257,7 +257,7 @@ export function HomePage() {
               className={`px-5 py-2.5 rounded-xl font-bold whitespace-nowrap transition-all transform hover:scale-105 ${
                 selectedType === 'merchant'
                   ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg'
-                  : 'bg-white text-gray-700 hover:bg-orange-50 border-2 border-gray-200'
+                  : 'bg-white text-foreground hover:bg-orange-50 border-2 border-input'
               }`}
             >
               Commerçants
@@ -280,13 +280,13 @@ export function HomePage() {
         ) : loading ? (
           <div className="text-center py-16">
             <Loader2 className="w-16 h-16 text-orange-500 mx-auto mb-4 animate-spin" />
-            <p className="text-gray-600 font-medium text-lg">Chargement des saveurs locales...</p>
+            <p className="text-muted-foreground font-medium text-lg">Chargement des saveurs locales...</p>
           </div>
         ) : filteredVendors.length === 0 ? (
           <div className="bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-orange-200 rounded-2xl p-12 text-center">
             <div className="text-6xl mb-4">🔍</div>
             <h3 className="text-2xl font-black text-gray-800 mb-2">Aucun résultat</h3>
-            <p className="text-gray-600 font-medium mb-6">Aucun vendeur ne correspond à votre recherche.</p>
+            <p className="text-muted-foreground font-medium mb-6">Aucun vendeur ne correspond à votre recherche.</p>
             <button
               onClick={() => {
                 setSearchTerm('');
@@ -372,7 +372,7 @@ function VendorDetailModal({ vendorId, onClose }: { vendorId: string; onClose: (
           <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-600">{vendor?.business_name}</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-full transition-all transform hover:scale-110"
+            className="text-muted-foreground hover:text-red-600 hover:bg-red-50 p-2 rounded-full transition-all transform hover:scale-110"
           >
             <X size={24} />
           </button>
@@ -382,13 +382,13 @@ function VendorDetailModal({ vendorId, onClose }: { vendorId: string; onClose: (
           {loading ? (
             <div className="text-center py-16">
               <Loader2 className="w-16 h-16 text-orange-500 mx-auto mb-4 animate-spin" />
-              <p className="text-gray-600 font-medium text-lg">Chargement des produits...</p>
+              <p className="text-muted-foreground font-medium text-lg">Chargement des produits...</p>
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-16">
               <div className="text-6xl mb-4">📦</div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">Aucun produit disponible</h3>
-              <p className="text-gray-600">Ce vendeur n'a pas encore de produits en ligne.</p>
+              <p className="text-muted-foreground">Ce vendeur n'a pas encore de produits en ligne.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

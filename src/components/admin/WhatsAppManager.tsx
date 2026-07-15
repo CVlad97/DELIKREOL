@@ -132,52 +132,52 @@ export function WhatsAppManager() {
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <MessageCircle className="text-green-600" />
           WhatsApp Business
         </h2>
-        <p className="text-gray-600 mt-1">Gestion des conversations et notifications</p>
+        <p className="text-muted-foreground mt-1">Gestion des conversations et notifications</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white rounded-xl shadow-md p-6">
           <div className="flex items-center justify-between mb-2">
             <MessageCircle className="w-8 h-8 text-green-600" />
-            <span className="text-2xl font-bold text-gray-900">{stats.totalMessages}</span>
+            <span className="text-2xl font-bold text-foreground">{stats.totalMessages}</span>
           </div>
-          <p className="text-sm text-gray-600">Messages totaux</p>
+          <p className="text-sm text-muted-foreground">Messages totaux</p>
         </div>
 
         <div className="bg-white rounded-xl shadow-md p-6">
           <div className="flex items-center justify-between mb-2">
             <Users className="w-8 h-8 text-blue-600" />
-            <span className="text-2xl font-bold text-gray-900">{stats.activeSessions}</span>
+            <span className="text-2xl font-bold text-foreground">{stats.activeSessions}</span>
           </div>
-          <p className="text-sm text-gray-600">Sessions actives</p>
+          <p className="text-sm text-muted-foreground">Sessions actives</p>
         </div>
 
         <div className="bg-white rounded-xl shadow-md p-6">
           <div className="flex items-center justify-between mb-2">
             <TrendingUp className="w-8 h-8 text-orange-600" />
-            <span className="text-2xl font-bold text-gray-900">{stats.messagesLast24h}</span>
+            <span className="text-2xl font-bold text-foreground">{stats.messagesLast24h}</span>
           </div>
-          <p className="text-sm text-gray-600">Dernières 24h</p>
+          <p className="text-sm text-muted-foreground">Dernières 24h</p>
         </div>
 
         <div className="bg-white rounded-xl shadow-md p-6">
           <div className="flex items-center justify-between mb-2">
             <Clock className="w-8 h-8 text-purple-600" />
-            <span className="text-2xl font-bold text-gray-900">{stats.avgResponseTime}min</span>
+            <span className="text-2xl font-bold text-foreground">{stats.avgResponseTime}min</span>
           </div>
-          <p className="text-sm text-gray-600">Temps de réponse</p>
+          <p className="text-sm text-muted-foreground">Temps de réponse</p>
         </div>
       </div>
 
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-3 h-[600px]">
-          <div className="border-r border-gray-200 overflow-y-auto">
-            <div className="p-4 bg-gray-50 border-b border-gray-200">
-              <h3 className="font-bold text-gray-900">Conversations</h3>
+          <div className="border-r border-input overflow-y-auto">
+            <div className="p-4 bg-muted border-b border-input">
+              <h3 className="font-bold text-foreground">Conversations</h3>
             </div>
             <div className="divide-y divide-gray-200">
               {Object.entries(conversations).map(([number, msgs]) => {
@@ -186,7 +186,7 @@ export function WhatsAppManager() {
                   <button
                     key={number}
                     onClick={() => setSelectedConversation(number)}
-                    className={`w-full p-4 text-left hover:bg-gray-50 transition-colors ${
+                    className={`w-full p-4 text-left hover:bg-muted transition-colors ${
                       selectedConversation === number ? 'bg-green-50' : ''
                     }`}
                   >
@@ -195,13 +195,13 @@ export function WhatsAppManager() {
                         <MessageCircle size={20} className="text-green-600" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-gray-900 truncate">{number}</div>
-                        <div className="text-sm text-gray-600 truncate">
+                        <div className="font-medium text-foreground truncate">{number}</div>
+                        <div className="text-sm text-muted-foreground truncate">
                           {lastMessage.message_content}
                         </div>
                       </div>
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-muted-foreground mt-1">
                       {new Date(lastMessage.created_at).toLocaleString('fr-FR')}
                     </div>
                   </button>
@@ -217,7 +217,7 @@ export function WhatsAppManager() {
                   <h3 className="font-bold">{selectedConversation}</h3>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted">
                   {conversations[selectedConversation]
                     ?.slice()
                     .reverse()
@@ -230,13 +230,13 @@ export function WhatsAppManager() {
                           className={`max-w-xs px-4 py-2 rounded-2xl ${
                             msg.direction === 'outbound'
                               ? 'bg-green-600 text-white'
-                              : 'bg-white text-gray-900 shadow'
+                              : 'bg-white text-foreground shadow'
                           }`}
                         >
                           <p className="text-sm">{msg.message_content}</p>
                           <div
                             className={`text-xs mt-1 ${
-                              msg.direction === 'outbound' ? 'text-green-100' : 'text-gray-500'
+                              msg.direction === 'outbound' ? 'text-green-100' : 'text-muted-foreground'
                             }`}
                           >
                             {new Date(msg.created_at).toLocaleTimeString('fr-FR', {
@@ -249,30 +249,30 @@ export function WhatsAppManager() {
                     ))}
                 </div>
 
-                <div className="p-4 border-t border-gray-200 bg-white">
+                <div className="p-4 border-t border-input bg-white">
                   <div className="flex gap-2">
                     <input
                       type="text"
                       placeholder="Réponse automatique uniquement..."
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-muted"
                       disabled
                     />
                     <button
-                      className="px-6 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
+                      className="px-6 py-2 bg-gray-300 text-muted-foreground rounded-lg cursor-not-allowed"
                       disabled
                     >
                       <Send size={20} />
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-muted-foreground mt-2">
                     Les réponses sont gérées automatiquement par le bot WhatsApp
                   </p>
                 </div>
               </>
             ) : (
-              <div className="flex items-center justify-center h-full text-gray-500">
+              <div className="flex items-center justify-center h-full text-muted-foreground">
                 <div className="text-center">
-                  <MessageCircle className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                  <MessageCircle className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
                   <p>Sélectionnez une conversation</p>
                 </div>
               </div>

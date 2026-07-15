@@ -26,7 +26,7 @@ export function FeaturedCategories({ onSelectCategory }: FeaturedCategoriesProps
     <div className="bg-white py-6">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold text-gray-900">Catégories</h2>
+          <h2 className="text-2xl font-bold text-foreground">Catégories</h2>
           <button className="text-primary font-medium hover:text-primary">
             Voir tout
           </button>
@@ -39,15 +39,15 @@ export function FeaturedCategories({ onSelectCategory }: FeaturedCategoriesProps
               <button
                 key={category.id}
                 onClick={() => onSelectCategory(category.id)}
-                className="flex flex-col items-center p-4 rounded-2xl hover:bg-gray-50 transition-all transform hover:scale-105"
+                className="flex flex-col items-center p-4 rounded-2xl hover:bg-muted transition-all transform hover:scale-105"
               >
                 <div className={`w-16 h-16 ${category.color} rounded-2xl flex items-center justify-center mb-3 shadow-lg`}>
                   <Icon className="w-8 h-8 text-white" />
                 </div>
-                <span className="text-sm font-medium text-gray-900 text-center">
+                <span className="text-sm font-medium text-foreground text-center">
                   {category.name}
                 </span>
-                <span className="text-xs text-gray-500 mt-1">
+                <span className="text-xs text-muted-foreground mt-1">
                   {category.count} lieux
                 </span>
               </button>

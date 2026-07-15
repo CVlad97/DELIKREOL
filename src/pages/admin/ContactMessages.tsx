@@ -88,14 +88,14 @@ export default function ContactMessages() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Messages de contact</h1>
-        <p className="text-gray-600">Gérez les messages reçus via le formulaire de contact</p>
+        <h1 className="text-3xl font-bold text-foreground mb-2">Messages de contact</h1>
+        <p className="text-muted-foreground">Gérez les messages reçus via le formulaire de contact</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <div className="text-sm text-gray-600 mb-1">Total</div>
-          <div className="text-3xl font-bold text-gray-900">{stats.total}</div>
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-input">
+          <div className="text-sm text-muted-foreground mb-1">Total</div>
+          <div className="text-3xl font-bold text-foreground">{stats.total}</div>
         </div>
         <div className="bg-blue-50 p-6 rounded-lg shadow-sm border border-blue-200">
           <div className="text-sm text-blue-600 mb-1">Nouveaux</div>
@@ -105,21 +105,21 @@ export default function ContactMessages() {
           <div className="text-sm text-green-600 mb-1">Lus</div>
           <div className="text-3xl font-bold text-green-900">{stats.read}</div>
         </div>
-        <div className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-300">
-          <div className="text-sm text-gray-600 mb-1">Archivés</div>
-          <div className="text-3xl font-bold text-gray-700">{stats.archived}</div>
+        <div className="bg-muted p-6 rounded-lg shadow-sm border border-gray-300">
+          <div className="text-sm text-muted-foreground mb-1">Archivés</div>
+          <div className="text-3xl font-bold text-foreground">{stats.archived}</div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-        <div className="p-4 border-b border-gray-200">
+      <div className="bg-white rounded-lg shadow-sm border border-input mb-6">
+        <div className="p-4 border-b border-input">
           <div className="flex gap-2">
             <button
               onClick={() => setFilter('all')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filter === 'all'
                   ? 'bg-success text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-muted text-foreground hover:bg-gray-200'
               }`}
             >
               Tous ({stats.total})
@@ -129,7 +129,7 @@ export default function ContactMessages() {
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filter === 'new'
                   ? 'bg-success text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-muted text-foreground hover:bg-gray-200'
               }`}
             >
               Nouveaux ({stats.new})
@@ -139,7 +139,7 @@ export default function ContactMessages() {
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filter === 'read'
                   ? 'bg-success text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-muted text-foreground hover:bg-gray-200'
               }`}
             >
               Lus ({stats.read})
@@ -149,7 +149,7 @@ export default function ContactMessages() {
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filter === 'archived'
                   ? 'bg-success text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-muted text-foreground hover:bg-gray-200'
               }`}
             >
               Archivés ({stats.archived})
@@ -159,16 +159,16 @@ export default function ContactMessages() {
 
         <div className="divide-y divide-gray-200">
           {filteredMessages.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-muted-foreground">
               Aucun message à afficher
             </div>
           ) : (
             filteredMessages.map((message) => (
-              <div key={message.id} className="p-6 hover:bg-gray-50">
+              <div key={message.id} className="p-6 hover:bg-muted">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-semibold text-foreground">
                         {message.name}
                       </h3>
                       {message.status === 'new' && (
@@ -182,12 +182,12 @@ export default function ContactMessages() {
                         </span>
                       )}
                       {message.status === 'archived' && (
-                        <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
+                        <span className="px-2 py-1 text-xs font-medium bg-muted text-gray-800 rounded-full">
                           Archivé
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
                       <span className="flex items-center gap-1">
                         <Mail className="h-4 w-4" />
                         {message.email}
@@ -203,7 +203,7 @@ export default function ContactMessages() {
                         })}
                       </span>
                     </div>
-                    <p className="text-gray-700 whitespace-pre-wrap">{message.message}</p>
+                    <p className="text-foreground whitespace-pre-wrap">{message.message}</p>
                   </div>
                   <div className="flex gap-2 ml-4">
                     {message.status === 'new' && (
@@ -218,7 +218,7 @@ export default function ContactMessages() {
                     {message.status !== 'archived' && (
                       <button
                         onClick={() => updateMessageStatus(message.id, 'archived')}
-                        className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        className="p-2 text-muted-foreground hover:bg-muted rounded-lg transition-colors"
                         title="Archiver"
                       >
                         <Archive className="h-5 w-5" />

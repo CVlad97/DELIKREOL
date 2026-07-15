@@ -13,8 +13,8 @@ export function HowItWorksCompact() {
   return (
     <section className="py-8 bg-white">
       <div className="max-w-3xl mx-auto px-4 text-center">
-        <h2 className="text-xl font-black text-gray-900 mb-1.5">Comment ça marche</h2>
-        <p className="text-xs sm:text-sm text-gray-500 mb-5">3 étapes simples pour commander local</p>
+        <h2 className="text-xl font-black text-foreground mb-1.5">Comment ça marche</h2>
+        <p className="text-xs sm:text-sm text-muted-foreground mb-5">3 étapes simples pour commander local</p>
 
         <div className="grid grid-cols-3 gap-3 mb-4">
           {STEPS.map((step, i) => (
@@ -22,7 +22,7 @@ export function HowItWorksCompact() {
               <div className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-primary/15 text-primary mb-2.5">
                 <step.icon className="w-5 h-5" />
               </div>
-              <h3 className="text-xs sm:text-sm font-bold text-gray-900">{step.title}</h3>
+              <h3 className="text-xs sm:text-sm font-bold text-foreground">{step.title}</h3>
             </div>
           ))}
         </div>
@@ -41,8 +41,8 @@ export function HowItWorksCompact() {
               <div key={i} className="flex items-start gap-3 rounded-xl bg-primary/8 p-3">
                 <step.icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">{step.title}</p>
-                  <p className="text-xs text-gray-600">{step.detail}</p>
+                  <p className="text-sm font-semibold text-foreground">{step.title}</p>
+                  <p className="text-xs text-muted-foreground">{step.detail}</p>
                 </div>
               </div>
             ))}

@@ -27,20 +27,20 @@ function LatestApplications() {
   }, []);
 
   if (apps.length === 0) {
-    return <p className="text-sm text-gray-400 italic">Aucune candidature pour le moment</p>;
+    return <p className="text-sm text-muted-foreground italic">Aucune candidature pour le moment</p>;
   }
 
   return (
     <div className="space-y-3">
       {apps.map((app, i) => (
-        <div key={i} className="text-sm p-3 bg-gray-50 rounded-xl flex items-center justify-between gap-2">
+        <div key={i} className="text-sm p-3 bg-muted rounded-xl flex items-center justify-between gap-2">
           <div className="min-w-0 flex-1">
             <p className="font-semibold text-gray-800 truncate">{app.business_name || app.nomActivite || '—'}</p>
-            <p className="text-xs text-gray-500 truncate">
+            <p className="text-xs text-muted-foreground truncate">
               {app.name || app.nomResponsable || ''}{app.name || app.nomResponsable ? ' • ' : ''}{app.commune || ''}{app.phone ? ` • ${app.phone}` : ''}
             </p>
           </div>
-          <span className="text-[10px] text-gray-400 whitespace-nowrap shrink-0">
+          <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
             {new Date(app.createdAt || app.created_at || 0).toLocaleDateString('fr-FR')}
           </span>
         </div>

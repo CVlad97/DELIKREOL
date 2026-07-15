@@ -352,7 +352,7 @@ export default function AdminCatererValidation() {
                   <div className="flex-1 min-w-0 space-y-2">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="text-base font-bold text-foreground">{app.business_name}</h3>
-                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${STATUS_CONFIG[app.status]?.class || 'bg-gray-100 text-gray-700 border-gray-300'}`}>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${STATUS_CONFIG[app.status]?.class || 'bg-muted text-foreground border-gray-300'}`}>
                         {STATUS_CONFIG[app.status]?.label || app.status}
                       </span>
                     </div>

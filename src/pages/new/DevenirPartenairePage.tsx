@@ -264,7 +264,7 @@ export default function DevenirPartenairePage() {
               <h3 className="font-bold text-lg">Mise en ligne</h3>
               <p className="text-3xl font-black text-primary my-2">49 €</p>
               <p className="text-xs text-muted-foreground mb-3">Import jusqu'à 10 photos + correction descriptions</p>
-              <ul className="text-xs space-y-1 text-gray-600">
+              <ul className="text-xs space-y-1 text-muted-foreground">
                 <li>📸 Import jusqu'à 10 photos</li>
                 <li>✏️ Correction descriptions principales</li>
                 <li>🚀 Mise en ligne complète</li>
@@ -275,7 +275,7 @@ export default function DevenirPartenairePage() {
               <h3 className="font-bold text-lg">Catalogue optimisé</h3>
               <p className="text-3xl font-black text-primary my-2">89 €</p>
               <p className="text-xs text-muted-foreground mb-3">Import 25 photos + rédaction complète + bio optimisée</p>
-              <ul className="text-xs space-y-1 text-gray-600">
+              <ul className="text-xs space-y-1 text-muted-foreground">
                 <li>📸 Import jusqu'à 25 photos</li>
                 <li>✍️ Rédaction descriptions complètes</li>
                 <li>📂 Structuration catégories</li>
@@ -284,7 +284,7 @@ export default function DevenirPartenairePage() {
             </div>
             <div className="rounded-2xl border border-secondary/30 bg-secondary/10 p-5">
               <h3 className="font-bold text-lg">Gestion mensuelle</h3>
-              <p className="text-3xl font-black text-secondary my-2">39 €<span className="text-sm font-normal text-gray-500">/mois</span></p>
+              <p className="text-3xl font-black text-secondary my-2">39 €<span className="text-sm font-normal text-muted-foreground">/mois</span></p>
               <p className="text-xs text-muted-foreground mb-3">Mise à jour régulière : nouveaux plats, prix, promos</p>
               <ul className="text-xs space-y-1 text-secondary">
                 <li>🔄 Mise à jour mensuelle</li>

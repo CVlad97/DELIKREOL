@@ -364,8 +364,8 @@ export default function CartPage() {
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary/15 mb-6">
               <ShoppingCart className="w-10 h-10 text-primary/400" />
             </div>
-            <h1 className="text-2xl font-black text-gray-900 mb-3">Votre panier est vide</h1>
-            <p className="text-gray-500 mb-8 leading-relaxed">
+            <h1 className="text-2xl font-black text-foreground mb-3">Votre panier est vide</h1>
+            <p className="text-muted-foreground mb-8 leading-relaxed">
               Ajoutez un plat pour préparer une commande. Parcourez notre catalogue de traiteurs martiniquais.
             </p>
             <Link
@@ -390,14 +390,14 @@ export default function CartPage() {
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-green-100 mb-6">
               <CheckCircle2 className="w-10 h-10 text-green-500" />
             </div>
-            <h1 className="text-2xl font-black text-gray-900 mb-3">Demande préparée ! 🎉</h1>
+            <h1 className="text-2xl font-black text-foreground mb-3">Demande préparée ! 🎉</h1>
             {orderNumber && (
               <p className="text-3xl font-black text-primary mb-2 font-mono">{orderNumber}</p>
             )}
-            <p className="text-gray-500 mb-4 leading-relaxed">
+            <p className="text-muted-foreground mb-4 leading-relaxed">
               {preparedMessage}
             </p>
-            <p className="text-sm text-gray-400 mb-8">
+            <p className="text-sm text-muted-foreground mb-8">
               Besoin d'aide ? Contactez-nous sur WhatsApp.
             </p>
             <div className="flex flex-col gap-3">
@@ -467,7 +467,7 @@ export default function CartPage() {
             {/* Cart items */}
             <div className="lg:col-span-2 space-y-4" ref={panierRef}>
               <div className="flex items-center justify-between mb-2">
-                <h2 className="text-lg font-bold text-gray-900">Articles</h2>
+                <h2 className="text-lg font-bold text-foreground">Articles</h2>
                 <button
                   onClick={handleClearCart}
                   className="text-sm text-red-500 hover:text-red-600 font-medium flex items-center gap-1"
@@ -491,7 +491,7 @@ export default function CartPage() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                         <ChefHat className="w-8 h-8" />
                       </div>
                     )}
@@ -499,8 +499,8 @@ export default function CartPage() {
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-gray-900 text-base truncate">{item.name}</h3>
-                    <p className="text-sm text-gray-500">{item.vendor_id}</p>
+                    <h3 className="font-bold text-foreground text-base truncate">{item.name}</h3>
+                    <p className="text-sm text-muted-foreground">{item.vendor_id}</p>
                     <p className="text-lg font-black text-primary mt-1">
                       {item.price.toFixed(2)} €
                     </p>
@@ -513,27 +513,27 @@ export default function CartPage() {
                         removeItem(item.id);
                         showSuccess(`${item.name} retiré`);
                       }}
-                      className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                      className="p-1.5 text-muted-foreground hover:text-red-500 transition-colors"
                       title="Retirer"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
-                    <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-1 py-1">
+                    <div className="flex items-center gap-2 bg-muted rounded-xl px-1 py-1">
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:border-primary/300 transition-colors"
+                        className="w-8 h-8 rounded-lg bg-white border border-input flex items-center justify-center hover:border-primary/300 transition-colors"
                       >
                         <Minus className="w-3.5 h-3.5" />
                       </button>
                       <span className="w-8 text-center font-bold text-sm">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:border-primary/300 transition-colors"
+                        className="w-8 h-8 rounded-lg bg-white border border-input flex items-center justify-center hover:border-primary/300 transition-colors"
                       >
                         <Plus className="w-3.5 h-3.5" />
                       </button>
                     </div>
-                    <span className="text-sm font-bold text-gray-700">
+                    <span className="text-sm font-bold text-foreground">
                       {(item.price * item.quantity).toFixed(2)} €
                     </span>
                   </div>
@@ -553,17 +553,17 @@ export default function CartPage() {
             <div className="space-y-4">
               {/* Subtotal + Delivery */}
               <div className="bg-white rounded-2xl border border-primary/100 p-6">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">Résumé</h2>
+                <h2 className="text-lg font-bold text-foreground mb-4">Résumé</h2>
                 <div className="space-y-3 mb-4">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Sous-total ({itemCount} articles)</span>
-                    <span className="font-bold text-gray-900">{total.toFixed(2).replace('.', ',')} €</span>
+                    <span className="text-muted-foreground">Sous-total ({itemCount} articles)</span>
+                    <span className="font-bold text-foreground">{total.toFixed(2).replace('.', ',')} €</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">
+                    <span className="text-muted-foreground">
                       {mode === 'retrait' ? 'Frais retrait' : mode === 'relais' ? 'Frais point relais' : 'Frais livraison'}
                     </span>
-                    <span className="text-gray-400 text-xs">
+                    <span className="text-muted-foreground text-xs">
                       {mode === 'retrait' ? 'Gratuit' : `${(DELIVERY_FEES[mode]?.fee || 0).toFixed(2).replace('.', ',')} €`}
                     </span>
                   </div>
@@ -574,12 +574,12 @@ export default function CartPage() {
                   )}
                   <hr className="border-primary/100" />
                   <div className="flex justify-between">
-                    <span className="font-bold text-gray-900">Total estimé</span>
+                    <span className="font-bold text-foreground">Total estimé</span>
                     <span className="text-2xl font-black text-primary">
                       {(total + (DELIVERY_FEES[mode]?.fee || 0)).toFixed(2).replace('.', ',')} €
                     </span>
                   </div>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-muted-foreground">
                     Total final confirmé après vérification par WhatsApp.
                   </p>
                 </div>
@@ -590,7 +590,7 @@ export default function CartPage() {
 
               {/* Paiement info card */}
               <div className="bg-white rounded-2xl border border-primary/100 p-6">
-                <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <h3 className="text-sm font-bold text-foreground mb-2 flex items-center gap-2">
                   <CreditCard className="w-4 h-4" />
                   Paiement
                 </h3>
@@ -602,14 +602,14 @@ export default function CartPage() {
                     Paiement en ligne bientôt disponible
                   </span>
                 </div>
-                <p className="text-xs text-gray-500 leading-relaxed">
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   Le paiement en ligne n'est pas encore activé sur cette version test. Votre commande est confirmée sur le site et le support WhatsApp est disponible si besoin.
                 </p>
               </div>
 
               {/* Delivery info */}
               <div className="bg-white rounded-2xl border border-primary/100 p-6 space-y-4">
-                <h2 className="text-lg font-bold text-gray-900">Informations de commande</h2>
+                <h2 className="text-lg font-bold text-foreground">Informations de commande</h2>
 
                 {/* Multi-traiteur warning */}
                 {hasMultipleVendors && (
@@ -626,7 +626,7 @@ export default function CartPage() {
 
                 {/* Téléphone */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                  <label className="block text-sm font-bold text-foreground mb-1.5">
                     <MessageCircle className="w-4 h-4 inline mr-1" />
                     Téléphone WhatsApp
                   </label>
@@ -642,7 +642,7 @@ export default function CartPage() {
                     className={`w-full px-3 py-2.5 rounded-xl border text-sm outline-none ${
                       phoneError
                         ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                        : 'border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-ring/30'
+                        : 'border-input focus:border-primary/400 focus:ring-2 focus:ring-ring/30'
                     }`}
                   />
                   {savedField === 'phone' && (
@@ -657,7 +657,7 @@ export default function CartPage() {
 
                 {/* Email */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                  <label className="block text-sm font-bold text-foreground mb-1.5">
                     Email
                   </label>
                   <input
@@ -666,7 +666,7 @@ export default function CartPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     onBlur={() => email.trim() && flashSaved('email')}
                     placeholder="nom@exemple.fr"
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-ring/30 text-sm outline-none"
+                    className="w-full px-3 py-2.5 rounded-xl border border-input focus:border-primary/400 focus:ring-2 focus:ring-ring/30 text-sm outline-none"
                   />
                   {savedField === 'email' && (
                     <span className="inline-flex items-center gap-1 text-xs text-success font-semibold mt-1 animate-pulse">
@@ -677,7 +677,7 @@ export default function CartPage() {
 
                 {/* Commune */}
                 <div className="relative">
-                  <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                  <label className="block text-sm font-bold text-foreground mb-1.5">
                     <MapPin className="w-4 h-4 inline mr-1" />
                     Votre commune
                   </label>
@@ -691,7 +691,7 @@ export default function CartPage() {
                       if (commune.trim()) flashSaved('commune');
                     }}
                     placeholder="Fort-de-France, Lamentin..."
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-ring/30 text-sm outline-none"
+                    className="w-full px-3 py-2.5 rounded-xl border border-input focus:border-primary/400 focus:ring-2 focus:ring-ring/30 text-sm outline-none"
                   />
                   {savedField === 'commune' && (
                     <span className="inline-flex items-center gap-1 text-xs text-success font-semibold mt-1 animate-pulse">
@@ -717,14 +717,14 @@ export default function CartPage() {
 
                 {/* Mode */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1.5">Mode</label>
+                  <label className="block text-sm font-bold text-foreground mb-1.5">Mode</label>
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       onClick={() => setMode('retrait')}
                       className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
                         mode === 'retrait'
                           ? 'bg-primary text-white shadow-md'
-                          : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-primary/300'
+                          : 'bg-muted text-muted-foreground border border-input hover:border-primary/300'
                       }`}
                     >
                       <Store className="w-4 h-4" />
@@ -735,7 +735,7 @@ export default function CartPage() {
                       className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
                         mode === 'relais'
                           ? 'bg-primary text-white shadow-md'
-                          : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-primary/300'
+                          : 'bg-muted text-muted-foreground border border-input hover:border-primary/300'
                       }`}
                     >
                       <Store className="w-4 h-4" />
@@ -746,7 +746,7 @@ export default function CartPage() {
                       className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
                         mode === 'livraison'
                           ? 'bg-primary text-white shadow-md'
-                          : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-primary/300'
+                          : 'bg-muted text-muted-foreground border border-input hover:border-primary/300'
                       }`}
                     >
                       <Truck className="w-4 h-4" />
@@ -757,18 +757,18 @@ export default function CartPage() {
 
                 {/* Créneaux - checkboxes */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                  <label className="block text-sm font-bold text-foreground mb-1.5">
                     <Clock className="w-4 h-4 inline mr-1" />
                     Créneau(x) souhaité(s)
                   </label>
-                  <p className="text-xs text-gray-400 mb-2">
+                  <p className="text-xs text-muted-foreground mb-2">
                     Choisissez un ou plusieurs créneaux possibles :
                   </p>
                   <div className="space-y-2">
                     {CRENEAUX_OPTIONS.map((option) => (
                       <label
                         key={option.id}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-gray-200 hover:border-primary/300 cursor-pointer transition-all text-sm"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-input hover:border-primary/300 cursor-pointer transition-all text-sm"
                       >
                         <input
                           type="checkbox"
@@ -793,7 +793,7 @@ export default function CartPage() {
 
                 {/* Notes */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                  <label className="block text-sm font-bold text-foreground mb-1.5">
                     <FileText className="w-4 h-4 inline mr-1" />
                     Notes (optionnel)
                   </label>
@@ -803,7 +803,7 @@ export default function CartPage() {
                     onBlur={() => notes.trim() && flashSaved('notes')}
                     placeholder="Allergies, préférences, instructions spéciales..."
                     rows={3}
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-ring/30 text-sm outline-none resize-none"
+                    className="w-full px-3 py-2.5 rounded-xl border border-input focus:border-primary/400 focus:ring-2 focus:ring-ring/30 text-sm outline-none resize-none"
                   />
                   {savedField === 'notes' && (
                     <span className="inline-flex items-center gap-1 text-xs text-success font-semibold mt-1 animate-pulse">
@@ -827,7 +827,7 @@ export default function CartPage() {
                   Confirmer ma commande sur WhatsApp
                 </button>
               )}
-              <p className="text-xs text-center text-gray-400">
+              <p className="text-xs text-center text-muted-foreground">
                 Paiement en ligne bientôt disponible. Pour l'instant, DeliKreol confirme les commandes par WhatsApp.
               </p>
             </div>

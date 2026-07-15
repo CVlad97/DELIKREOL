@@ -141,8 +141,8 @@ export default function AdminPartnersApplications() {
   return (
     <div className="pageSection">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Candidatures partenaires</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold text-foreground mb-2">Candidatures partenaires</h1>
+        <p className="text-muted-foreground">
           Gérez les candidatures reçues via le formulaire "Devenir partenaire" —{' '}
           <a
             href={getWhatsAppSupportLink()}
@@ -158,8 +158,8 @@ export default function AdminPartnersApplications() {
       {/* Stats cards */}
       <div className="grid grid-cols-4 gap-4 mb-8">
         <div className="card">
-          <div className="text-sm text-gray-600 mb-1">Total</div>
-          <div className="text-3xl font-bold text-gray-900">{stats.total}</div>
+          <div className="text-sm text-muted-foreground mb-1">Total</div>
+          <div className="text-3xl font-bold text-foreground">{stats.total}</div>
         </div>
         <div className="card" style={{ backgroundColor: '#fef3c7', borderColor: '#fbbf24' }}>
           <div className="text-sm text-amber-700 mb-1">Nouveaux</div>
@@ -177,7 +177,7 @@ export default function AdminPartnersApplications() {
 
       {/* Filters */}
       <div className="card mb-6">
-        <div className="p-4 border-b border-gray-200">
+        <div className="p-4 border-b border-input">
           <div className="flex gap-2 flex-wrap">
             {(['all', 'new', 'contacted', 'validated'] as const).map((f) => (
               <button
@@ -199,7 +199,7 @@ export default function AdminPartnersApplications() {
         {/* Applications list */}
         <div className="divide-y divide-gray-200">
           {filteredApplications.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-muted-foreground">
               Aucune candidature à afficher
             </div>
           ) : (
@@ -209,15 +209,15 @@ export default function AdminPartnersApplications() {
                 <div
                   key={app.id}
                   className={`p-6 transition-colors ${
-                    isUnread ? 'bg-amber-50/50' : 'hover:bg-gray-50'
+                    isUnread ? 'bg-amber-50/50' : 'hover:bg-muted'
                   }`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       {/* Header */}
                       <div className="flex items-center gap-3 mb-2 flex-wrap">
-                        <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                          <Store className="h-4 w-4 text-gray-400" />
+                        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                          <Store className="h-4 w-4 text-muted-foreground" />
                           {app.business_name}
                         </h3>
                         <span className={`badge ${STATUS_CONFIG[app.status]?.class || 'badge-warning'}`}>
@@ -232,11 +232,11 @@ export default function AdminPartnersApplications() {
 
                       {/* Details */}
                       <div className="space-y-1.5">
-                        <p className="text-sm text-gray-700 flex items-center gap-2">
-                          <User className="h-3.5 w-3.5 text-gray-400" />
+                        <p className="text-sm text-foreground flex items-center gap-2">
+                          <User className="h-3.5 w-3.5 text-muted-foreground" />
                           {app.name}
                         </p>
-                        <div className="flex items-center gap-4 text-sm text-gray-600 flex-wrap">
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
                           {app.email && (
                             <span className="flex items-center gap-1">
                               <Mail className="h-3.5 w-3.5" />
@@ -252,7 +252,7 @@ export default function AdminPartnersApplications() {
                             {app.commune}
                           </span>
                         </div>
-                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3.5 w-3.5" />
                             {new Date(app.created_at).toLocaleDateString('fr-FR', {
@@ -263,14 +263,14 @@ export default function AdminPartnersApplications() {
                               minute: '2-digit',
                             })}
                           </span>
-                          <span className="text-gray-400">|</span>
+                          <span className="text-muted-foreground">|</span>
                           <span className="capitalize">{app.activity_type}</span>
                         </div>
                       </div>
 
                       {/* Description */}
                       {app.description && (
-                        <p className="mt-3 text-sm text-gray-600 whitespace-pre-wrap bg-gray-50 rounded-lg p-3 border border-gray-100">
+                        <p className="mt-3 text-sm text-muted-foreground whitespace-pre-wrap bg-muted rounded-lg p-3 border border-input">
                           {app.description}
                         </p>
                       )}
@@ -324,7 +324,7 @@ export default function AdminPartnersApplications() {
       </div>
 
       {/* Footer */}
-      <div className="text-center text-xs text-gray-400 mt-8">
+      <div className="text-center text-xs text-muted-foreground mt-8">
         Contact support :{' '}
         <a href={`mailto:contact@delikreol.com`} className="text-success hover:underline">
           contact@delikreol.com
