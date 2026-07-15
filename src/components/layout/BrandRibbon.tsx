@@ -3,9 +3,9 @@ import { Bug } from 'lucide-react';
 
 export function BrandRibbon() {
   return (
-    <div className="border-b border-orange-100 bg-gradient-to-r from-orange-50 via-white to-amber-50">
+    <div className="border-b border-primary/20 bg-gradient-to-r from-primary/8 via-white to-secondary/8">
       <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-2 sm:flex-row sm:items-center sm:justify-between">
-        <Link to="/" className="inline-flex items-center justify-center gap-3 rounded-2xl bg-white/90 px-3 py-2 shadow-sm ring-1 ring-orange-100 sm:justify-start">
+        <Link to="/" className="inline-flex items-center justify-center gap-3 rounded-2xl bg-white/90 px-3 py-2 shadow-sm ring-1 ring-ring/30 sm:justify-start">
           <img
             src={`${import.meta.env.BASE_URL || '/'}branding/logo-mark.svg`}
             alt="Logo DeliKreol"
@@ -13,9 +13,9 @@ export function BrandRibbon() {
           />
           <div className="leading-tight">
             <div className="text-xl font-black tracking-tight text-gray-900">
-              Deli<span className="text-orange-600">Kreol</span>
+              Deli<span className="text-primary">Kreol</span>
             </div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-orange-500">
+            <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
               Le goût local — Martinique
             </div>
           </div>
@@ -23,7 +23,7 @@ export function BrandRibbon() {
 
         <Link
           to="/feedback"
-          className="inline-flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-white/80 px-3 py-2 text-xs font-bold text-orange-700 shadow-sm transition hover:bg-orange-50 hover:text-orange-800"
+          className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/30 bg-white/80 px-3 py-2 text-xs font-bold text-primary shadow-sm transition hover:bg-primary/8 hover:text-primary"
           aria-label="Signaler un bug"
           title="Signaler un bug"
         >

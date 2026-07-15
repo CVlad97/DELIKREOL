@@ -502,7 +502,7 @@ export default function CatererSignupPage() {
             <Store size={14} />
             Traiteur bêta
           </div>
-          <div className="badge inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 text-amber-700 rounded-full text-xs font-bold">
+          <div className="badge inline-flex items-center gap-1.5 px-3 py-1.5 bg-secondary/15 text-secondary rounded-full text-xs font-bold">
             🧪 Bêta test gratuit
           </div>
           <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
@@ -513,7 +513,7 @@ export default function CatererSignupPage() {
             bêta. Nous vous accompagnons pour créer votre fiche, publier vos photos et recevoir
             vos premières commandes.
           </p>
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-sm text-amber-800 leading-relaxed">
+          <div className="bg-secondary/10 border border-secondary/30 rounded-2xl p-4 text-sm text-secondary leading-relaxed">
             <p>
               Vous rejoignez DELIKREOL en tant que traiteur bêta testeur. L'intégration est gratuite
               pendant la phase de test. Envoyez vos photos, votre bio, vos descriptions et vos
@@ -524,8 +524,8 @@ export default function CatererSignupPage() {
         </div>
 
         {/* 👥 Compteur traiteurs */}
-        <div className="mb-6 text-center bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-2xl p-4">
-          <p className="text-sm font-bold text-orange-700">
+        <div className="mb-6 text-center bg-gradient-to-r from-primary/8 to-secondary/8 border border-primary/30 rounded-2xl p-4">
+          <p className="text-sm font-bold text-primary">
             👥 {catererCount} traiteur{catererCount !== 1 ? 's' : ''} {catererCount > 1 ? 'ont déjà rejoint' : 'a déjà rejoint'} Delikreol
           </p>
         </div>
@@ -969,14 +969,14 @@ export default function CatererSignupPage() {
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <button
               type="submit"
-              className="btn btnPrimary inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-orange-200 text-base"
+              className="btn btnPrimary inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-primary/20 text-base"
             >
               <Send size={18} />
               Envoyer ma candidature
             </button>
             <Link
               to="/"
-              className="btn btnSecondary inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white hover:bg-orange-50 text-orange-600 font-bold rounded-2xl border-2 border-orange-200 transition-all hover:scale-105 text-base"
+              className="btn btnSecondary inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white hover:bg-primary/8 text-primary font-bold rounded-2xl border-2 border-primary/30 transition-all hover:scale-105 text-base"
             >
               Annuler
             </Link>
@@ -984,7 +984,7 @@ export default function CatererSignupPage() {
         </form>
 
         {/* Info text */}
-        <div className="mt-8 bg-amber-50 border border-amber-200 rounded-2xl p-4 text-sm text-amber-800 leading-relaxed">
+        <div className="mt-8 bg-secondary/10 border border-secondary/30 rounded-2xl p-4 text-sm text-secondary leading-relaxed">
           <p>
             Vous rejoignez DELIKREOL en tant que traiteur bêta testeur. L'intégration est gratuite
             pendant la phase de test. Envoyez vos photos, votre bio, vos descriptions et vos

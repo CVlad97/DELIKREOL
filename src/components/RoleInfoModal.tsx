@@ -169,11 +169,11 @@ export function RoleInfoModal({ isOpen, onClose, roleType }: RoleInfoModalProps)
     <>
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-        <div className="sticky top-0 bg-gradient-to-r from-orange-500 to-red-500 text-white p-6 rounded-t-3xl">
+        <div className="sticky top-0 bg-gradient-to-r from-primary/80 to-red-500 text-white p-6 rounded-t-3xl">
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-3xl font-bold mb-2">{info.title}</h2>
-              <p className="text-orange-100 text-lg">{info.subtitle}</p>
+              <p className="text-primary-foreground/90 text-lg">{info.subtitle}</p>
             </div>
             <button
               onClick={onClose}
@@ -185,7 +185,7 @@ export function RoleInfoModal({ isOpen, onClose, roleType }: RoleInfoModalProps)
         </div>
 
         <div className="p-8 space-y-8">
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border-2 border-green-200">
+          <div className="bg-gradient-to-br from-green-50 to-success/10 rounded-2xl p-6 border-2 border-green-200">
             <div className="flex items-start gap-4">
               <div className="bg-green-500 rounded-full p-3">
                 <Euro className="text-white" size={32} />
@@ -200,7 +200,7 @@ export function RoleInfoModal({ isOpen, onClose, roleType }: RoleInfoModalProps)
 
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <TrendingUp className="text-orange-600" size={28} />
+              <TrendingUp className="text-primary" size={28} />
               <h3 className="text-2xl font-bold text-gray-900">Vos objectifs</h3>
             </div>
             <ul className="space-y-3">
@@ -226,12 +226,12 @@ export function RoleInfoModal({ isOpen, onClose, roleType }: RoleInfoModalProps)
               </ul>
             </div>
 
-            <div className="bg-orange-50 rounded-2xl p-6">
+            <div className="bg-primary/8 rounded-2xl p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-4">Prérequis</h3>
               <ul className="space-y-3">
                 {info.requirements.map((req, index) => (
                   <li key={index} className="flex items-start gap-2">
-                    <CheckCircle className="text-orange-500 flex-shrink-0 mt-0.5" size={18} />
+                    <CheckCircle className="text-primary flex-shrink-0 mt-0.5" size={18} />
                     <span className="text-gray-700">{req}</span>
                   </li>
                 ))}
@@ -241,13 +241,13 @@ export function RoleInfoModal({ isOpen, onClose, roleType }: RoleInfoModalProps)
 
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <Clock className="text-orange-600" size={28} />
+              <Clock className="text-primary" size={28} />
               <h3 className="text-2xl font-bold text-gray-900">Comment ça marche ?</h3>
             </div>
             <div className="space-y-4">
               {info.process.map((step, index) => (
                 <div key={index} className="flex items-start gap-4">
-                  <div className="bg-gradient-to-br from-orange-500 to-red-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold flex-shrink-0">
+                  <div className="bg-gradient-to-br from-primary/80 to-red-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold flex-shrink-0">
                     {index + 1}
                   </div>
                   <div className="flex-1 pt-2">
@@ -258,11 +258,11 @@ export function RoleInfoModal({ isOpen, onClose, roleType }: RoleInfoModalProps)
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-6 text-white text-center">
+          <div className="bg-gradient-to-r from-primary/80 to-red-500 rounded-2xl p-6 text-white text-center">
             <p className="text-xl mb-4">Prêt à rejoindre Delikreol ?</p>
             <button
               onClick={handleContinue}
-              className="bg-white text-orange-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-orange-50 transition-colors transform hover:scale-105 duration-200 shadow-lg"
+              className="bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-primary/8 transition-colors transform hover:scale-105 duration-200 shadow-lg"
             >
               {user ? 'Remplir le formulaire' : `Créer mon compte ${info.title.toLowerCase()}`}
             </button>

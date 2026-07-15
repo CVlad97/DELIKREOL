@@ -150,9 +150,9 @@ export default function ReviewPage() {
   if (submitted) {
     return (
       <Layout>
-        <section className="py-16 md:py-24 bg-gradient-to-b from-white to-orange-50/50">
+        <section className="py-16 md:py-24 bg-gradient-to-b from-white to-primary/5">
           <div className="max-w-lg mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div className="bg-white rounded-[2.5rem] border border-orange-100 p-8 md:p-12 shadow-soft">
+            <div className="bg-white rounded-[2.5rem] border border-primary/20 p-8 md:p-12 shadow-soft">
               <div className="mx-auto mb-6 w-16 h-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
@@ -173,13 +173,13 @@ export default function ReviewPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link
                   to="/"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl transition-all"
                 >
                   Retour à l'accueil
                 </Link>
                 <Link
                   to="/catalogue"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-orange-100 text-gray-700 font-bold rounded-xl hover:bg-orange-50 transition-all"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-primary/20 text-gray-700 font-bold rounded-xl hover:bg-primary/8 transition-all"
                 >
                   <ChefHat className="w-4 h-4" />
                   Voir le catalogue
@@ -194,11 +194,11 @@ export default function ReviewPage() {
 
   return (
     <Layout>
-      <section className="py-16 md:py-24 bg-gradient-to-b from-white to-orange-50/50">
+      <section className="py-16 md:py-24 bg-gradient-to-b from-white to-primary/5">
         <div className="max-w-xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-orange-700">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/15 px-3 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-primary">
               Avis client
             </div>
             <h1 className="text-3xl md:text-4xl font-black tracking-tight text-gray-900 mb-2">
@@ -210,7 +210,7 @@ export default function ReviewPage() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="bg-white rounded-[2.5rem] border border-orange-100 p-6 md:p-8 shadow-soft space-y-6">
+          <form onSubmit={handleSubmit} className="bg-white rounded-[2.5rem] border border-primary/20 p-6 md:p-8 shadow-soft space-y-6">
             {/* Rating */}
             <div>
               <label className="block text-sm font-bold text-gray-800 mb-2">
@@ -233,7 +233,7 @@ export default function ReviewPage() {
                 placeholder="Partagez votre expérience… (minimum 10 caractères)"
                 rows={4}
                 maxLength={1000}
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none resize-y transition-all"
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-ring focus:ring-2 focus:ring-ring/30 outline-none resize-y transition-all"
               />
               <div className="flex items-center justify-between mt-1">
                 {comment.trim().length > 0 && comment.trim().length < 10 ? (
@@ -258,7 +258,7 @@ export default function ReviewPage() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Votre prénom ou pseudo"
                 maxLength={60}
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all"
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-ring focus:ring-2 focus:ring-ring/30 outline-none transition-all"
               />
             </div>
 
@@ -273,7 +273,7 @@ export default function ReviewPage() {
                 onChange={(e) => setCommune(e.target.value)}
                 placeholder="Ex: Fort-de-France, Ducos…"
                 maxLength={60}
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all"
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-ring focus:ring-2 focus:ring-ring/30 outline-none transition-all"
               />
             </div>
 
@@ -286,7 +286,7 @@ export default function ReviewPage() {
                 <select
                   value={traiteur}
                   onChange={(e) => setTraiteur(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 appearance-none bg-white focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all"
+                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 appearance-none bg-white focus:border-ring focus:ring-2 focus:ring-ring/30 outline-none transition-all"
                 >
                   {TRAITEURS_LIST.map((t) => (
                     <option key={t.value} value={t.value}>
@@ -308,7 +308,7 @@ export default function ReviewPage() {
               disabled={!isValid || submitting}
               className={`w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold text-base transition-all ${
                 isValid && !submitting
-                  ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-200 hover:-translate-y-0.5'
+                  ? 'bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 hover:-translate-y-0.5'
                   : 'bg-gray-100 text-gray-400 cursor-not-allowed'
               }`}
             >

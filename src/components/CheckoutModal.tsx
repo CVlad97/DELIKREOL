@@ -231,11 +231,11 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
         <div className="w-full max-w-lg space-y-5 rounded-2xl bg-white p-6 shadow-xl">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-2xl bg-emerald-50 p-3 text-emerald-700">
+              <div className="rounded-2xl bg-success/10 p-3 text-success">
                 <CheckCircle size={28} />
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">
+                <p className="text-xs font-bold uppercase tracking-widest text-success">
                   Commande enregistrée
                 </p>
                 <h2 className="text-2xl font-bold text-gray-900">#{success.orderNumber}</h2>
@@ -246,7 +246,7 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
             </button>
           </div>
 
-          <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-900">
+          <div className="rounded-xl border border-success/25 bg-success/10 p-4 text-sm text-success">
             Mode choisi : <strong>{success.paymentLabel}</strong>.
           </div>
 
@@ -303,11 +303,11 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
                 onClick={() => setDeliveryType('home_delivery')}
                 className={`rounded-lg border-2 p-4 transition-all ${
                   deliveryType === 'home_delivery'
-                    ? 'border-emerald-600 bg-emerald-50'
+                    ? 'border-success bg-success/10'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <MapPin className="mx-auto mb-2 text-emerald-600" size={32} />
+                <MapPin className="mx-auto mb-2 text-success" size={32} />
                 <p className="font-medium">Livraison</p>
                 <p className="text-sm text-gray-600">À domicile</p>
               </button>
@@ -316,11 +316,11 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
                 onClick={() => setDeliveryType('pickup')}
                 className={`rounded-lg border-2 p-4 transition-all ${
                   deliveryType === 'pickup'
-                    ? 'border-emerald-600 bg-emerald-50'
+                    ? 'border-success bg-success/10'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <Store className="mx-auto mb-2 text-emerald-600" size={32} />
+                <Store className="mx-auto mb-2 text-success" size={32} />
                 <p className="font-medium">Retrait</p>
                 <p className="text-sm text-gray-600">Sur place</p>
               </button>
@@ -339,13 +339,13 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
                     type="button"
                     onClick={() => setPaymentMode(option.id)}
                     className={`rounded-2xl border-2 p-4 text-left transition-all ${
-                      active ? 'border-emerald-600 bg-emerald-50' : 'border-gray-200 hover:border-gray-300'
+                      active ? 'border-success bg-success/10' : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
                     <div className="flex items-start gap-3">
                       <div
                         className={`rounded-xl p-2 ${
-                          active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'
+                          active ? 'bg-success/15 text-success' : 'bg-gray-100 text-gray-600'
                         }`}
                       >
                         <Icon size={18} />
@@ -360,7 +360,7 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
               })}
             </div>
             {paymentMode === 'stripe' && (
-              <div className="mt-3 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800">
+              <div className="mt-3 flex items-center gap-2 rounded-lg border border-success/30 bg-success/10 px-4 py-3 text-xs text-success">
                 <CreditCard size={14} />
                 Vous serez redirigé vers Stripe. La commande ne sera préparée qu'après paiement confirmé.
               </div>
@@ -377,7 +377,7 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
                 type="text"
                 value={address}
                 onChange={(event) => setAddress(event.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-ring"
                 placeholder="Ex. 12 rue Victor-Hugo, Fort-de-France"
                 required
               />
@@ -393,14 +393,14 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
               rows={3}
-              className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
+              className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-ring"
               placeholder="Informations supplémentaires pour votre commande…"
             />
           </div>
 
           <div className="space-y-2 rounded-lg bg-gray-50 p-4">
             <h3 className="mb-3 flex items-center text-lg font-bold">
-              <Package className="mr-2 text-emerald-600" size={20} />
+              <Package className="mr-2 text-success" size={20} />
               Récapitulatif
             </h3>
             <div className="flex justify-between text-gray-600">
@@ -443,7 +443,7 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
           <button
             type="submit"
             disabled={loading || items.length === 0}
-            className="w-full rounded-lg bg-emerald-600 py-4 text-lg font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
+            className="w-full rounded-lg bg-success py-4 text-lg font-medium text-white transition-colors hover:bg-success/90 disabled:opacity-50"
           >
             {loading
               ? 'Traitement…'

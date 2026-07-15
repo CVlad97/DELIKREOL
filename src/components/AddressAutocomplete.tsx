@@ -61,7 +61,7 @@ export function AddressAutocomplete({ value, onChange, onSelectAddress, error }:
   const getConfidenceBadge = (confidence: string) => {
     switch (confidence) {
       case 'high':
-        return <span className="text-xs text-emerald-400">Correspondance exacte</span>;
+        return <span className="text-xs text-success">Correspondance exacte</span>;
       case 'medium':
         return <span className="text-xs text-blue-400">Bon match</span>;
       default:
@@ -81,11 +81,11 @@ export function AddressAutocomplete({ value, onChange, onSelectAddress, error }:
           placeholder="Tapez votre adresse ou votre commune"
           className={`w-full pl-10 pr-4 py-3 bg-slate-900 border ${
             error ? 'border-red-500' : 'border-slate-700'
-          } rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors`}
+          } rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-ring transition-colors`}
         />
         {loading && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-500"></div>
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-success"></div>
           </div>
         )}
       </div>
@@ -108,7 +108,7 @@ export function AddressAutocomplete({ value, onChange, onSelectAddress, error }:
                 onClick={() => handleSelectSuggestion(result)}
                 className="w-full px-4 py-3 text-left hover:bg-slate-700 transition-colors flex items-start gap-3 border-b border-slate-700 last:border-0"
               >
-                <MapPin className="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0" />
+                <MapPin className="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-slate-200 font-medium">{result.address}</span>
@@ -116,12 +116,12 @@ export function AddressAutocomplete({ value, onChange, onSelectAddress, error }:
                   </div>
                   <div className="text-sm text-slate-400">{result.displayName}</div>
                   {inZone ? (
-                    <div className="flex items-center gap-1 mt-1 text-xs text-emerald-400">
+                    <div className="flex items-center gap-1 mt-1 text-xs text-success">
                       <Check className="w-3 h-3" />
                       Zone couverte
                     </div>
                   ) : (
-                    <div className="flex items-center gap-1 mt-1 text-xs text-orange-400">
+                    <div className="flex items-center gap-1 mt-1 text-xs text-primary">
                       <AlertCircle className="w-3 h-3" />
                       Hors zone pour l'instant
                     </div>

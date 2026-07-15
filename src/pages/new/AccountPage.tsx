@@ -32,8 +32,8 @@ export default function AccountPage() {
         <BackBar label="Retour à l'accueil" backTo="/" />
 
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-orange-100 flex items-center justify-center">
-            <User className="w-8 h-8 text-orange-600" />
+          <div className="w-16 h-16 rounded-2xl bg-primary/15 flex items-center justify-center">
+            <User className="w-8 h-8 text-primary" />
           </div>
           <div>
             <h1 className="text-3xl font-black">Bonjour {profile?.full_name || 'Vous'}</h1>
@@ -60,7 +60,7 @@ export default function AccountPage() {
               <Clock className="w-4 h-4" /> Mes dernières commandes
             </h3>
             <p className="text-sm text-muted-foreground">Aucune commande pour le moment.</p>
-            <Link to="/catalogue" className="mt-3 inline-block text-sm text-orange-600 font-semibold">Commander maintenant →</Link>
+            <Link to="/catalogue" className="mt-3 inline-block text-sm text-primary font-semibold">Commander maintenant →</Link>
           </div>
 
           {/* Support rapide */}

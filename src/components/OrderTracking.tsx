@@ -56,8 +56,8 @@ export function OrderTracking({ orderId, onClose }: OrderTrackingProps) {
 
   if (!order) {
     return (
-      <div className="bg-card w-full rounded-[2.5rem] border border-amber-100 p-8 text-center space-y-4">
-        <AlertCircle className="mx-auto h-10 w-10 text-amber-500" />
+      <div className="bg-card w-full rounded-[2.5rem] border border-secondary/20 p-8 text-center space-y-4">
+        <AlertCircle className="mx-auto h-10 w-10 text-secondary" />
         <div>
           <h2 className="text-lg font-black uppercase tracking-tight text-foreground">Suivi indisponible</h2>
           <p className="mt-2 text-sm font-medium text-muted-foreground">{error || 'Commande introuvable.'}</p>
@@ -84,7 +84,7 @@ export function OrderTracking({ orderId, onClose }: OrderTrackingProps) {
       </div>
 
       {error && (
-        <div className="mx-8 mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <div className="mx-8 mt-6 rounded-2xl border border-secondary/30 bg-secondary/10 px-4 py-3 text-sm text-secondary">
           {error}
         </div>
       )}

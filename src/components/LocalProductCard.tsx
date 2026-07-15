@@ -99,7 +99,7 @@ export function LocalProductCard({ product, onAddToRequest }: LocalProductCardPr
             <div className="text-xl font-black text-foreground">
               {formatEuro(product.price)}
             </div>
-            <span className={`text-xs font-semibold ${product.available === false ? 'text-amber-700' : 'text-success'}`}>
+            <span className={`text-xs font-semibold ${product.available === false ? 'text-secondary' : 'text-success'}`}>
               {availabilityLabel}
             </span>
           </div>

@@ -400,7 +400,7 @@ export default function CataloguePage() {
                             <p className="text-2xl font-black">{product.price.toFixed(2).replace('.', ',')} €</p>
                             <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Prix DELIKREOL</p>
                           </div>
-                          <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${product.available !== false ? 'bg-success/10 text-success' : 'bg-amber-100 text-amber-800'}`}>
+                          <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${product.available !== false ? 'bg-success/10 text-success' : 'bg-secondary/15 text-secondary'}`}>
                             {product.available !== false ? 'Disponible' : 'Sur confirmation'}
                           </span>
                         </div>
