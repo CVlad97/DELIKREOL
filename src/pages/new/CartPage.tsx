@@ -31,6 +31,7 @@ import {
   martiniqueCommunes,
   normalizeCommuneQuery,
 } from '../../data/martiniqueCommunes';
+import { OrderSummaryByPartner, groupItemsByPartner } from '../../components/OrderSummaryByPartner';
 
 const WHATSAPP_NUMBER = '596696653589';
 
@@ -164,12 +165,21 @@ export default function CartPage() {
     if (items.length === 0) return '';
     const modeFee = DELIVERY_FEES[mode]?.fee || 0;
 
-    const productList = items
-      .map(
-        (item) =>
-          `• ${item.name} x${item.quantity} — ${(item.price * item.quantity).toFixed(2)}€`
-      )
-      .join('\n');
+    const partnerGroups = groupItemsByPartner(items);
+    const productList = partnerGroups
+      .map((group) => {
+        const lines = group.items
+          .map(
+            (item) =>
+              `  • ${item.name} x${item.quantity} — ${(item.price * item.quantity).toFixed(2)}€`
+          )
+          .join('\n');
+        const header = partnerGroups.length > 1
+          ? `🏪 ${group.name} (sous-total ${group.subtotal.toFixed(2)}€) :\n`
+          : '';
+        return `${header}${lines}`;
+      })
+      .join('\n\n');
 
     const traiteurText = traiteurs.length > 0 ? traiteurs.join(', ') : 'Non précisé';
     const creneauText = getCreneauText();
@@ -532,6 +542,9 @@ export default function CartPage() {
                   </p>
                 </div>
               </div>
+
+              {/* Récapitulatif par partenaire */}
+              <OrderSummaryByPartner items={items} />
 
               {/* Paiement info card */}
               <div className="bg-white rounded-2xl border border-primary/100 p-6">
