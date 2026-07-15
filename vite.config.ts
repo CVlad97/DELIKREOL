@@ -42,7 +42,6 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks: {
-            'react-vendor': ['react', 'react-dom'],
             'map-vendor': ['leaflet', 'react-leaflet'],
             'qr-vendor': ['html5-qrcode', 'qrcode.react'],
           },
