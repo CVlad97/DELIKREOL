@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import { AlertCircle, Calendar, CheckCircle2, Clock, FileText, ShieldCheck, Upload, XCircle } from 'lucide-react';
+import { AlertCircle, Calendar, CheckCircle2, Clock, CreditCard, FileText, ShieldCheck, Upload, XCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import {
@@ -189,6 +189,23 @@ export function PartnerDashboardPage() {
                 </p>
               </div>
             )}
+          </div>
+        </section>
+
+        <section className="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex gap-3">
+              <CreditCard className="mt-1 h-5 w-5 shrink-0 text-emerald-700" />
+              <div>
+                <h2 className="font-black text-emerald-950">Terminal mobile de test</h2>
+                <p className="mt-1 text-sm leading-6 text-emerald-900">
+                  Créez une vente comptoir, préparez le paiement SumUp, la facture email/WhatsApp et le suivi commande.
+                </p>
+              </div>
+            </div>
+            <a href="/terminal-partenaire" className="rounded-2xl bg-emerald-700 px-5 py-3 text-center text-sm font-black text-white">
+              Ouvrir le terminal
+            </a>
           </div>
         </section>
 

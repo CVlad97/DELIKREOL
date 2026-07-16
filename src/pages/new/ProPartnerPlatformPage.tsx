@@ -137,6 +137,21 @@ export function ProPartnerPlatformPage() {
         </section>
 
         {/* CTA CONTACT */}
+        <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-8">
+          <h2 className="text-2xl font-black text-emerald-950 mb-2">📲 Terminal partenaire mobile</h2>
+          <p className="text-sm text-emerald-900 mb-5">
+            Encaissement comptoir via SumUp Tap to Pay ou lien de paiement, facture prête à envoyer par email/WhatsApp,
+            suivi commande et rapprochement Qonto. Aucune donnée carte n’est manipulée par DELIKREOL.
+          </p>
+          <a
+            href="/terminal-partenaire"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-2xl transition-all"
+          >
+            Ouvrir le terminal de test
+          </a>
+        </section>
+
+        {/* CTA CONTACT */}
         <section className="text-center bg-gradient-to-br from-primary to-secondary rounded-3xl p-10 text-white">
           <h2 className="text-3xl font-black mb-3">Vous êtes plateforme ou livreur ?</h2>
           <p className="text-primary-foreground/90 mb-6 max-w-lg mx-auto">
