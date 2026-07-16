@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export type ImageKind = 'food' | 'ambient' | 'packaging' | 'logo' | 'portrait' | 'flyer';
 type ImageFit = 'cover' | 'contain';
@@ -67,6 +67,7 @@ export function SmartImage({
   onClick,
 }: SmartImageProps) {
   const initialSrc = src || fallbackSrc || finalFallbackSrc || FALLBACK_IMG;
+  const imageRef = useRef<HTMLImageElement | null>(null);
   const [activeSrc, setActiveSrc] = useState(initialSrc);
   const [loaded, setLoaded] = useState(false);
   const [fallbackLevel, setFallbackLevel] = useState(0);
@@ -78,11 +79,19 @@ export function SmartImage({
     onFallbackLevelChange?.(0);
   }, [src, fallbackSrc, finalFallbackSrc, onFallbackLevelChange]);
 
+  useEffect(() => {
+    const imageElement = imageRef.current;
+
+    if (imageElement?.complete && imageElement.naturalWidth > 0) {
+      setLoaded(true);
+    }
+  }, [activeSrc]);
+
   const defaults = KIND_DEFAULTS[kind];
   const fit = fitProp ?? defaults.fit;
   const position = positionProp ?? defaults.position;
   const loading = loadingProp ?? (priority ? 'eager' : 'lazy');
-  const fetchPriority: 'high' | 'low' | 'auto' = priority ? 'high' : 'auto';
+  const fetchPriorityProps = priority ? { fetchpriority: 'high' } : {};
   const effectiveAlt = decorative ? '' : alt;
 
   const switchFallback = (nextSrc: string, level: number) => {
@@ -124,12 +133,13 @@ export function SmartImage({
     >
       {!loaded && <div className="absolute inset-0 animate-pulse bg-muted" aria-hidden="true" />}
       <img
+        ref={imageRef}
         data-smart-image="true"
         src={activeSrc}
         alt={effectiveAlt}
         aria-hidden={decorative || undefined}
         loading={loading}
-        fetchPriority={fetchPriority}
+        {...fetchPriorityProps}
         decoding="async"
         srcSet={srcSet}
         sizes={srcSet ? sizes : undefined}

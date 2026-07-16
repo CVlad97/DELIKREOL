@@ -104,18 +104,17 @@ function resolveGalleryImages(name: string) {
     ];
   }
   if (name === 'Les Delices de Ninice') {
-    // 10 vraies photos WhatsApp mai 2026 — optimisées et rehaussées
+    // Photos recadrées 4:3 depuis les visuels validés, sans placeholders 4 KB.
     return [
-      assetFromPublic('vendors/ninice/gallery-01.jpg'),  // Colombo — ragoût poulet épicé
-      assetFromPublic('vendors/ninice/gallery-02.jpg'),  // Bami des Îles — bowl nouilles complet
-      assetFromPublic('vendors/ninice/gallery-03.jpg'),  // Brochettes Saoto — présentation traiteur
-      assetFromPublic('vendors/ninice/gallery-04.jpg'),  // Bowl complet poulet grillé + plantain
-      assetFromPublic('vendors/ninice/gallery-05.jpg'),  // Gulab Jamun — douceurs sucrées
-      assetFromPublic('vendors/ninice/gallery-06.jpg'),  // Bara — beignets croustillants
-      assetFromPublic('vendors/ninice/gallery-07.jpg'),  // Packaging + logo Les Délices de Ninice
-      assetFromPublic('vendors/ninice/gallery-08.jpg'),  // Moksi Aleisi — riz sauté végétarien
-      assetFromPublic('vendors/ninice/gallery-09.jpg'),  // Bara version traiteur en boîte
-      assetFromPublic('vendors/ninice/gallery-10.jpg'),  // Condiment mariné fait maison
+      assetFromPublic('vendors/ninice/thumbs/ninice-01.webp'),  // Colombo
+      assetFromPublic('vendors/ninice/thumbs/ninice-02.webp'),  // Moksi Aleisi végétarien
+      assetFromPublic('vendors/ninice/thumbs/ninice-05.webp'),  // Bami des Îles
+      assetFromPublic('vendors/ninice/thumbs/ninice-06.webp'),  // Bara
+      assetFromPublic('vendors/ninice/thumbs/ninice-07.webp'),  // Gulab Jamun amande
+      assetFromPublic('vendors/ninice/thumbs/ninice-08.webp'),  // Gulab Jamun coco
+      assetFromPublic('vendors/ninice/thumbs/ninice-09.webp'),  // Brochettes Saoto
+      assetFromPublic('vendors/ninice/thumbs/ninice-10.webp'),  // Brochettes porc
+      assetFromPublic('vendors/ninice/thumbs/ninice-11.webp'),  // Brochettes bœuf
     ];
   }
     if (name === 'Snack Savè Peyi\u2019A') {

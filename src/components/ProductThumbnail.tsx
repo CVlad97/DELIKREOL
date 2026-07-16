@@ -90,7 +90,7 @@ export function ProductThumbnail({
 
   return (
     <div
-      className={`relative overflow-hidden ${containerClassName}`}
+      className={`relative overflow-hidden bg-[#fff7ed] ${containerClassName}`}
       data-thumbnail-source={runtimeSource}
       data-thumbnail-product={productName}
     >
@@ -105,7 +105,7 @@ export function ProductThumbnail({
         priority={priority}
         sizes={sizes}
         containerClassName="h-full w-full"
-        imgClassName={imgClassName}
+        imgClassName={`product-photo-natural ${imgClassName}`.trim()}
         onFallbackLevelChange={handleFallbackLevel}
         onClick={onClick}
       />

@@ -57,7 +57,7 @@ export function LocalProductCard({ product, onAddToRequest }: LocalProductCardPr
         />
       )}
 
-      <article className="group overflow-hidden rounded-2xl border border-border/40 shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-lg">
+      <article className="group overflow-hidden rounded-2xl border border-border/40 bg-card shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-lg">
         <div className="relative">
           <ProductThumbnail
             src={product.image}

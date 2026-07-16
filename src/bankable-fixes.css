@@ -53,6 +53,18 @@ img {
   aspect-ratio: 4 / 3 !important;
 }
 
+[data-thumbnail-source] {
+  background: linear-gradient(135deg, #fff7ed 0%, #fff3e4 100%);
+}
+
+[data-thumbnail-source] [data-smart-image-container="true"] {
+  border-bottom: 1px solid rgb(120 75 35 / 0.1);
+}
+
+[data-thumbnail-source="product"] img[data-smart-image="true"] {
+  object-position: center center;
+}
+
 /* Form boundaries must remain perceivable on white and warm backgrounds. */
 
 
@@ -105,14 +117,6 @@ img {
 /* Keep photographs faithful to their source. Do not apply global colour filters. */
 .product-photo-natural,
 .scroll-carousel-track img {
-  filter: none;
-}
-
-/* Save Peyi'a uses branded square/flyer visuals: keep the whole artwork visible. */
-img[src*="/vendors/save-peyia/"] {
-  object-fit: contain !important;
-  background: #fffaf4;
-  padding: 0.2rem;
   filter: none;
 }
 

@@ -328,7 +328,7 @@ export default function HomePage() {
         <div className="absolute inset-0">
           <img
             loading="eager"
-            fetchPriority="high"
+            {...{ fetchpriority: 'high' }}
             decoding="async"
             src={`${import.meta.env.BASE_URL}branding/hero-tropical.png`}
             alt="Livraison DeliKreol en Martinique"

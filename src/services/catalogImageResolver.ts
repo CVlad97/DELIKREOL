@@ -66,9 +66,7 @@ export function inferProductImageKind(input: Pick<ThumbnailInput, 'name' | 'vend
   if (
     value.includes('flyer') ||
     value.includes('menu') ||
-    value.includes('affiche') ||
-    value.includes('save peyi') ||
-    value.includes('save peyia')
+    value.includes('affiche')
   ) {
     return 'flyer';
   }
