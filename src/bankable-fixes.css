@@ -65,6 +65,15 @@ img {
   object-position: center center;
 }
 
+/* Save Peyi hero and portrait are branded artwork, not edge-to-edge food photos. */
+img[src*="/vendors/save-peyia/hero."],
+img[src*="/vendors/save-peyia/portrait."] {
+  object-fit: contain !important;
+  object-position: center center;
+  filter: none !important;
+  background: linear-gradient(135deg, #fff7ed 0%, #fff3e4 100%);
+}
+
 /* Form boundaries must remain perceivable on white and warm backgrounds. */
 
 
