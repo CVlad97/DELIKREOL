@@ -26,6 +26,7 @@ const routes = [
   'inscription-traiteur',
   'pro',
   'partenaires-plateforme',
+  'terminal-partenaire',
   'statut-commande',
   'carte',
   'partenaire',
