@@ -118,6 +118,7 @@ img {
 .product-photo-natural,
 .scroll-carousel-track img {
   filter: none;
+  transform: none !important;
 }
 
 img[src*="ninice-01-showcase"] {

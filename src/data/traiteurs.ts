@@ -63,7 +63,7 @@ function resolveHeroImage(name: string) {
     return cocoFoodAssets.hero;
   }
   if (name === "Saveurs d'Afrique") {
-    return assetFromPublic('vendors/saveurs-afrique/hero.jpg');
+    return assetFromPublic('vendors/saveurs-afrique/drive-import/drive-02.webp');
   }
   if (name.startsWith('Snack Savè Peyi')) {
     return assetFromPublic('vendors/save-peyia/hero.jpg');
@@ -91,14 +91,20 @@ function resolveGalleryImages(name: string) {
     return cocoFoodAssets.gallery;
   }
   if (name === "Saveurs d'Afrique") {
-    // Photos WhatsApp Drive réimportées, sans cartes ni coordonnées privées.
+    // Photos WhatsApp Drive HD, sans cartes ni coordonnées privées.
     return [
-      assetFromPublic('vendors/saveurs-afrique/thumbs/drive-01.webp'),
-      assetFromPublic('vendors/saveurs-afrique/thumbs/drive-02.webp'),
-      assetFromPublic('vendors/saveurs-afrique/thumbs/drive-03.webp'),
-      assetFromPublic('vendors/saveurs-afrique/thumbs/drive-04.webp'),
-      assetFromPublic('vendors/saveurs-afrique/thumbs/drive-05.webp'),
-      assetFromPublic('vendors/saveurs-afrique/thumbs/drive-06.webp'),
+      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-02.webp'),
+      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-03.webp'),
+      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-04.webp'),
+      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-05.webp'),
+      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-06.webp'),
+      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-07.webp'),
+      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-08.webp'),
+      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-09.webp'),
+      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-10.webp'),
+      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-11.webp'),
+      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-12.webp'),
+      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-13.webp'),
       assetFromPublic('vendors/saveurs-afrique/gallery-01.jpg'),  // Ablo + poisson frit
       assetFromPublic('vendors/saveurs-afrique/gallery-02.jpg'),  // Jus de bissap
       assetFromPublic('vendors/saveurs-afrique/gallery-03.jpg'),  // Dokô (beignets)
@@ -110,14 +116,14 @@ function resolveGalleryImages(name: string) {
     ];
   }
   if (name === 'Les Delices de Ninice') {
-    // Photos Drive recadrées 4:3, cartes et affiches exclues.
+    // Photos Drive HD produits, cartes et affiches exclues.
     return [
-      assetFromPublic('vendors/ninice/thumbs/drive-01.webp'),
-      assetFromPublic('vendors/ninice/thumbs/drive-02.webp'),
-      assetFromPublic('vendors/ninice/thumbs/drive-03.webp'),
-      assetFromPublic('vendors/ninice/thumbs/drive-04.webp'),
-      assetFromPublic('vendors/ninice/thumbs/drive-05.webp'),
-      assetFromPublic('vendors/ninice/thumbs/drive-06.webp'),
+      assetFromPublic('vendors/ninice/drive-import/drive-01.webp'),
+      assetFromPublic('vendors/ninice/drive-import/drive-02.webp'),
+      assetFromPublic('vendors/ninice/drive-import/drive-04.webp'),
+      assetFromPublic('vendors/ninice/drive-import/drive-05.webp'),
+      assetFromPublic('vendors/ninice/drive-import/drive-06.webp'),
+      assetFromPublic('vendors/ninice/drive-import/drive-07.webp'),
       assetFromPublic('vendors/ninice/thumbs/ninice-01.webp'),  // Colombo
       assetFromPublic('vendors/ninice/thumbs/ninice-02.webp'),  // Moksi Aleisi végétarien
       assetFromPublic('vendors/ninice/thumbs/ninice-05.webp'),  // Bami des Îles
@@ -129,28 +135,35 @@ function resolveGalleryImages(name: string) {
       assetFromPublic('vendors/ninice/thumbs/ninice-11.webp'),  // Brochettes bœuf
     ];
   }
-    if (name === 'Snack Savè Peyi\u2019A') {
+  if (name === 'Snack Savè Peyi\u2019A') {
     return [
-      assetFromPublic('vendors/save-peyia/thumbs/drive-01.webp'),
-      assetFromPublic('vendors/save-peyia/thumbs/drive-02.webp'),
-      assetFromPublic('vendors/save-peyia/thumbs/drive-03.webp'),
-      assetFromPublic('vendors/save-peyia/thumbs/drive-04.webp'),
-      assetFromPublic('vendors/save-peyia/thumbs/drive-05.webp'),
-      assetFromPublic('vendors/save-peyia/thumbs/drive-06.webp'),
+      assetFromPublic('vendors/save-peyia/drive-import/drive-01.webp'),
+      assetFromPublic('vendors/save-peyia/drive-import/drive-02.webp'),
+      assetFromPublic('vendors/save-peyia/drive-import/drive-03.webp'),
+      assetFromPublic('vendors/save-peyia/drive-import/drive-04.webp'),
+      assetFromPublic('vendors/save-peyia/drive-import/drive-05.webp'),
+      assetFromPublic('vendors/save-peyia/drive-import/drive-06.webp'),
+      assetFromPublic('vendors/save-peyia/drive-import/drive-07.webp'),
+      assetFromPublic('vendors/save-peyia/drive-import/drive-08.webp'),
+      assetFromPublic('vendors/save-peyia/drive-import/drive-09.webp'),
+      assetFromPublic('vendors/save-peyia/drive-import/drive-10.webp'),
+      assetFromPublic('vendors/save-peyia/drive-import/drive-11.webp'),
+      assetFromPublic('vendors/save-peyia/drive-import/drive-12.webp'),
     ];
   }
   if (name === 'Sweet Family Traiteur Orianne') {
     return [
-      assetFromPublic('vendors/sweet-family/thumbs/drive-01.webp'),
-      assetFromPublic('vendors/sweet-family/thumbs/drive-02.webp'),
-      assetFromPublic('vendors/sweet-family/thumbs/drive-03.webp'),
-      assetFromPublic('vendors/sweet-family/thumbs/drive-04.webp'),
-      assetFromPublic('vendors/sweet-family/thumbs/drive-05.webp'),
-      assetFromPublic('vendors/sweet-family/thumbs/drive-06.webp'),
-      assetFromPublic('vendors/sweet-family/cocktails-mignardises-hero.webp'),
-      assetFromPublic('vendors/sweet-family/cocktails-mignardises-menu.webp'),
-      assetFromPublic('vendors/sweet-family/bao-buns-menu.webp'),
-      assetFromPublic('vendors/sweet-family/commande-conditions.webp'),
+      assetFromPublic('vendors/sweet-family/drive-import/drive-01.webp'),
+      assetFromPublic('vendors/sweet-family/drive-import/drive-02.webp'),
+      assetFromPublic('vendors/sweet-family/drive-import/drive-03.webp'),
+      assetFromPublic('vendors/sweet-family/drive-import/drive-04.webp'),
+      assetFromPublic('vendors/sweet-family/drive-import/drive-05.webp'),
+      assetFromPublic('vendors/sweet-family/drive-import/drive-06.webp'),
+      assetFromPublic('vendors/sweet-family/drive-import/drive-07.webp'),
+      assetFromPublic('vendors/sweet-family/drive-import/drive-08.webp'),
+      assetFromPublic('vendors/sweet-family/drive-import/drive-09.webp'),
+      assetFromPublic('vendors/sweet-family/drive-import/drive-10.webp'),
+      assetFromPublic('vendors/sweet-family/drive-import/drive-11.webp'),
       assetFromPublic('vendors/sweet-family/seafood-boil-1.webp'),
       assetFromPublic('vendors/sweet-family/seafood-boil-2.webp'),
       assetFromPublic('vendors/sweet-family/seafood-boil-3.webp'),

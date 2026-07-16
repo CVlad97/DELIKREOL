@@ -157,7 +157,7 @@ export function SmartImage({
           objectFit: fit,
           objectPosition: position,
           opacity: loaded ? 1 : 0,
-          transition: 'opacity 0.25s ease, transform 0.45s ease',
+          transition: 'opacity 0.25s ease',
           padding: defaults.padding ? `${defaults.padding}%` : undefined,
           boxSizing: 'border-box',
         }}
