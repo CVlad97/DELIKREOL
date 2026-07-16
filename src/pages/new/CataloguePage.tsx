@@ -377,7 +377,7 @@ export default function CataloguePage() {
                 const tags: HealthTag[] = product.healthTags || vendorData?.healthTags || [];
 
                 return (
-                  <article key={product.id} className="group flex min-w-0 flex-col overflow-hidden rounded-3xl border border-border bg-white shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg" data-product-card={product.id}>
+                  <article key={product.id} className="group relative flex min-w-0 flex-col overflow-hidden rounded-3xl border border-border bg-white shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg" data-product-card={product.id}>
                     <ProductThumbnail
                       src={product.image}
                       partnerImage={vendorData?.partnerImage || null}
@@ -394,7 +394,7 @@ export default function CataloguePage() {
                     <button
                       type="button"
                       onClick={() => openProductPreview(product, vendorData?.partnerImage)}
-                      className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/70 px-3 py-1.5 text-[11px] font-black uppercase tracking-wide text-white opacity-0 shadow-sm backdrop-blur transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                      className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/70 px-3 py-1.5 text-[11px] font-black uppercase tracking-wide text-white shadow-sm backdrop-blur transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
                       aria-label={`Voir ${product.name} en gros plan`}
                     >
                       <Eye className="h-3.5 w-3.5" /> Voir
