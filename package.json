@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && echo \"delikreol.com\" > dist/CNAME && touch dist/.nojekyll",
+    "build": "vite build && node scripts/generate-spa-route-copies.mjs && echo \"delikreol.com\" > dist/CNAME && touch dist/.nojekyll",
     "lint": "eslint .",
     "preview": "npm run build && wrangler dev",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
