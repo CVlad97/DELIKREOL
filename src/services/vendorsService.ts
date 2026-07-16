@@ -155,8 +155,8 @@ export function mergeVendorWithStatic(
     highlights,
     contactPhone: nonEmptyText(vendor.phone) || profileFallback?.contactPhone,
     contactEmail: nonEmptyText(vendor.email) || profileFallback?.contactEmail,
-    planifiable: vendor.planifiable ?? profileFallback?.planifiable ?? false,
-    enterprise: vendor.enterprise ?? profileFallback?.enterprise ?? false,
+    planifiable: fallback ? profileFallback?.planifiable ?? false : vendor.planifiable ?? false,
+    enterprise: fallback ? profileFallback?.enterprise ?? false : vendor.enterprise ?? false,
   };
 
   return {
@@ -201,13 +201,13 @@ function staticPublicVendors(): TraiteurSpace[] {
   return traiteurSpaces.filter((vendor) => vendor.status === 'public confirmé');
 }
 
-export async function getPublicVendors(): Promise<{ vendors: TraiteurSpace[]; source: SourceMode | 'static' }> {
+export async function getPublicVendors(): Promise<{ vendors: TraiteurSpace[]; source: SourceMode }> {
   if (SOURCE_MODE === 'static' || !publicSupabase) {
     return { vendors: staticPublicVendors(), source: 'static' };
   }
 
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 2500);
+  const timeout = globalThis.setTimeout(() => controller.abort(), 2500);
 
   try {
     const { data, error } = await publicSupabase
@@ -243,17 +243,17 @@ export async function getPublicVendors(): Promise<{ vendors: TraiteurSpace[]; so
     }
     return { vendors: staticPublicVendors(), source: 'static' };
   } finally {
-    window.clearTimeout(timeout);
+    globalThis.clearTimeout(timeout);
   }
 }
 
-let hydrationPromise: Promise<{ vendors: TraiteurSpace[]; source: SourceMode | 'static' }> | null = null;
+let hydrationPromise: Promise<{ vendors: TraiteurSpace[]; source: SourceMode }> | null = null;
 
 /**
  * Charge une seule fois le catalogue public avant le rendu React, puis remplace
  * le contenu du tableau partagé sans casser les imports historiques.
  */
-export function primePublicVendors(): Promise<{ vendors: TraiteurSpace[]; source: SourceMode | 'static' }> {
+export function primePublicVendors(): Promise<{ vendors: TraiteurSpace[]; source: SourceMode }> {
   if (!hydrationPromise) {
     hydrationPromise = getPublicVendors().then((result) => {
       if (result.vendors.length > 0) {
@@ -266,7 +266,7 @@ export function primePublicVendors(): Promise<{ vendors: TraiteurSpace[]; source
   return hydrationPromise;
 }
 
-export async function getVendorBySlug(slug: string): Promise<{ vendor: TraiteurSpace | null; source: SourceMode | 'static' }> {
+export async function getVendorBySlug(slug: string): Promise<{ vendor: TraiteurSpace | null; source: SourceMode }> {
   const { vendors, source } = await getPublicVendors();
   const normalizedSlug = normalizeSpaceSlug(slug);
   const vendor = vendors.find((item) => normalizeSpaceSlug(item.slug) === normalizedSlug) || null;
