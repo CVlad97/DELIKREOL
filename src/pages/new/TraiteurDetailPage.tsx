@@ -85,6 +85,7 @@ export function TraiteurDetailPage() {
 
   const menuItems = traiteur.menuItems || [];
   const isGouteMwen = traiteur.slug === 'goute-mwen';
+  const useContainedHero = isGouteMwen || traiteur.slug === 'an-tje-coco';
   const firstProductImage = menuItems.find((item) => Boolean(item.image))?.image || null;
   const galleryImages = uniqueImages([
     traiteur.heroImage,
@@ -139,8 +140,8 @@ export function TraiteurDetailPage() {
               fallbackSrc={partnerFallback}
               finalFallbackSrc={getThumbnailPlaceholder()}
               alt={`${traiteur.name} — visuel principal`}
-              kind={isGouteMwen ? 'packaging' : 'ambient'}
-              fit={isGouteMwen ? 'contain' : 'cover'}
+              kind={useContainedHero ? 'packaging' : 'ambient'}
+              fit={useContainedHero ? 'contain' : 'cover'}
               aspectRatio="16 / 8"
               priority
               containerClassName="w-full min-h-[360px] sm:min-h-[430px]"

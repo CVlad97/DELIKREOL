@@ -66,13 +66,13 @@ function resolveHeroImage(name: string) {
     return assetFromPublic('vendors/saveurs-afrique/drive-import/drive-02.webp');
   }
   if (name.startsWith('Snack Savè Peyi')) {
-    return assetFromPublic('vendors/save-peyia/hero.jpg');
+    return assetFromPublic('vendors/save-peyia/drive-import/drive-01.webp');
   }
   if (name === 'Les Delices de Ninice') {
-    return assetFromPublic('vendors/ninice/hero.jpg');
+    return assetFromPublic('vendors/ninice/drive-import/drive-01.webp');
   }
   if (name === 'Sweet Family Traiteur Orianne') {
-    return assetFromPublic('vendors/sweet-family/cocktails-mignardises-hero.webp');
+    return assetFromPublic('vendors/sweet-family/drive-import/drive-02.webp');
   }
   if (name === 'Gouté Mwen') {
     return assetFromPublic('vendors/goute-mwen/hero.jpg');
@@ -167,7 +167,6 @@ function resolveGalleryImages(name: string) {
       assetFromPublic('vendors/sweet-family/seafood-boil-1.webp'),
       assetFromPublic('vendors/sweet-family/seafood-boil-2.webp'),
       assetFromPublic('vendors/sweet-family/seafood-boil-3.webp'),
-      assetFromPublic('vendors/sweet-family/seafood-boil-4.webp'),
       assetFromPublic('vendors/sweet-family/seafood-boil-5.webp'),
     ];
   }
@@ -227,19 +226,19 @@ function resolvePortraitImage(name: string) {
     return assetFromPublic('vendors/ninice/portrait.jpg');
   }
   if (name === 'An Tjè Coco') {
-    return assetFromPublic('vendors/an-tje-coco/portrait.jpg');
+    return assetFromPublic('vendors/an-tje-coco/clean/hero-clean.webp');
   }
   if (name === "Coco's Food") {
-    return assetFromPublic('vendors/coco/portrait.jpg');
+    return assetFromPublic('vendors/coco/drive-import/drive-01.webp');
   }
   if (name === "Saveurs d'Afrique") {
     return assetFromPublic('vendors/saveurs-afrique/portrait.jpg');
   }
   if (name === 'Snack Savè Peyi\u2019A') {
-    return assetFromPublic('vendors/save-peyia/portrait.jpg');
+    return assetFromPublic('vendors/save-peyia/drive-import/drive-01.webp');
   }
   if (name === 'Sweet Family Traiteur Orianne') {
-    return assetFromPublic('vendors/sweet-family/portrait.jpg');
+    return assetFromPublic('vendors/sweet-family/drive-import/drive-04.webp');
   }
 // Gouté Mwen: photo Stacy Vilocy
   if (name === 'Gouté Mwen') {

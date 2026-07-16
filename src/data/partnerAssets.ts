@@ -4,34 +4,40 @@ function assetFromPublic(relativePath: string): string {
 }
 
 export const anTjeCocoAssets = {
-  hero: assetFromPublic('vendors/an-tje-coco/hero.jpg'),
+  hero: assetFromPublic('vendors/an-tje-coco/clean/hero-clean.webp'),
   gallery: [
-    assetFromPublic('vendors/an-tje-coco/gallery-01.jpg'),
-    assetFromPublic('vendors/an-tje-coco/gallery-02.jpg'),
-    assetFromPublic('vendors/an-tje-coco/gallery-03.jpg'),
-    assetFromPublic('vendors/an-tje-coco/gallery-04.jpg'),
-    assetFromPublic('vendors/an-tje-coco/gallery-05.jpg'),
+    assetFromPublic('vendors/an-tje-coco/clean/gallery-01-clean.webp'),
+    assetFromPublic('vendors/an-tje-coco/clean/gallery-02-clean.webp'),
+    assetFromPublic('vendors/an-tje-coco/clean/gallery-03-clean.webp'),
+    assetFromPublic('vendors/an-tje-coco/clean/gallery-04-clean.webp'),
+    assetFromPublic('vendors/an-tje-coco/clean/gallery-05-clean.webp'),
   ],
   event: 'https://api.cloudly.space/resize/crop/1200/627/60/aHR0cDovL21lZGlhcy50b3VyaXNtLXN5c3RlbS5jb20vNy8yLzgwNDcxN180MjIxMDY0NDlfMzgyMzMzMzc0NDkzOTczXzM3OTE3NTkwNjM3OTIwNjc4MzFfbi5qcGVn/image.jpg',
 };
 
 export const cocoFoodAssets = {
-  hero: assetFromPublic('vendors/coco/hero.jpg'),
+  hero: assetFromPublic('vendors/coco/drive-import/drive-09.webp'),
   gallery: [
-    // 14 vraies photos WhatsApp mai 2026 — optimisées et rehaussées
-    assetFromPublic('vendors/coco/gallery-01.jpg'),  // Plat complet festif
-    assetFromPublic('vendors/coco/gallery-02.jpg'),  // Assiette généreuse
-    assetFromPublic('vendors/coco/gallery-03.jpg'),  // Plateau traiteur
-    assetFromPublic('vendors/coco/gallery-04.jpg'),  // Grande préparation
-    assetFromPublic('vendors/coco/gallery-05.jpg'),  // Plat en portion
-    assetFromPublic('vendors/coco/gallery-06.jpg'),  // Plateau complet
-    assetFromPublic('vendors/coco/gallery-07.jpg'),  // Poulet rôti, riz & crudités
-    assetFromPublic('vendors/coco/gallery-08.jpg'),  // Friture caramélisée (plantains + viande)
-    assetFromPublic('vendors/coco/gallery-09.jpg'),  // Box viande grillée & riz aux pois
-    assetFromPublic('vendors/coco/gallery-10.jpg'),  // Salade de viande marinée
-    assetFromPublic('vendors/coco/gallery-11.jpg'),  // Box poisson & avocat
-    assetFromPublic('vendors/coco/gallery-12.jpg'),  // Box viande grillée
-    assetFromPublic('vendors/coco/gallery-13.jpg'),  // Friture caramélisée
-    assetFromPublic('vendors/coco/gallery-14.jpg'),  // Poulet rôti, riz aux pois
+    // Originaux Drive mai 2026, sans cadres ni saturation artificielle.
+    assetFromPublic('vendors/coco/drive-import/drive-01.webp'),
+    assetFromPublic('vendors/coco/drive-import/drive-02.webp'),
+    assetFromPublic('vendors/coco/drive-import/drive-03.webp'),
+    assetFromPublic('vendors/coco/drive-import/drive-05.webp'),
+    assetFromPublic('vendors/coco/drive-import/drive-06.webp'),
+    assetFromPublic('vendors/coco/drive-import/drive-08.webp'),
+    assetFromPublic('vendors/coco/drive-import/drive-09.webp'),
+    assetFromPublic('vendors/coco/drive-import/drive-12.webp'),
+    assetFromPublic('vendors/coco/drive-import/drive-14.webp'),
+    assetFromPublic('vendors/coco/drive-import/drive-16.webp'),
+    assetFromPublic('vendors/coco/drive-import/drive-17.webp'),
+    assetFromPublic('vendors/coco/drive-import/drive-18.webp'),
+    assetFromPublic('vendors/coco/drive-import/drive-19.webp'),
+    assetFromPublic('vendors/coco/drive-import/drive-20.webp'),
+    assetFromPublic('vendors/coco/drive-import/drive-21.webp'),
+    assetFromPublic('vendors/coco/drive-import/drive-22.webp'),
+    assetFromPublic('vendors/coco/drive-import/drive-23.webp'),
+    assetFromPublic('vendors/coco/drive-import/drive-24.webp'),
+    assetFromPublic('vendors/coco/drive-import/drive-25.webp'),
+    assetFromPublic('vendors/coco/drive-import/drive-26.webp'),
   ],
 };
