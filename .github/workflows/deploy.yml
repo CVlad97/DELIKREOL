@@ -43,6 +43,7 @@ jobs:
           VITE_BASE_PATH: /
           VITE_SUPABASE_URL: https://boihlgodmclljtckhmgz.supabase.co
           VITE_SUPABASE_ANON_KEY: sb_publishable_LE_NgMgaOlJEhkJlVF_zow_4NNOtTHX
+          VITE_PUBLIC_VENDOR_SOURCE: hybrid
           VITE_DEMO_MODE: "false"
           VITE_STRIPE_PUBLISHABLE_KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
         run: npm run build
