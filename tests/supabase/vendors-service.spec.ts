@@ -14,7 +14,7 @@ describe('vendorsService', () => {
     const { getPublicVendors } = await import('../../src/services/vendorsService');
     const result = await getPublicVendors();
     expect(result.source).toBe('static');
-    expect(result.vendors.length).toBeGreaterThanOrEqual(7);
+    expect(result.vendors.length).toBeGreaterThanOrEqual(8);
     expect(result.vendors[0].status).toBe('public confirmé');
   });
 
@@ -39,7 +39,7 @@ describe('vendorsService', () => {
     const result = await getPublicVendors();
     // Should fall back to static data
     expect(result.source).toBe('static');
-    expect(result.vendors.length).toBeGreaterThanOrEqual(7);
+    expect(result.vendors.length).toBeGreaterThanOrEqual(8);
   });
 
   it('should return vendor by slug', async () => {
@@ -61,5 +61,11 @@ describe('vendorsService', () => {
     const slugs = result.vendors.map(v => v.slug);
     const uniqueSlugs = new Set(slugs);
     expect(uniqueSlugs.size).toBe(slugs.length);
+  });
+
+  it('should include Chef à Mada from mixed traiteur type profiles', async () => {
+    const { getPublicVendors } = await import('../../src/services/vendorsService');
+    const result = await getPublicVendors();
+    expect(result.vendors.some(v => v.slug === 'chef-a-mada')).toBe(true);
   });
 });

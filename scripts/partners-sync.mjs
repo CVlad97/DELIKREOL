@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
  * partners-sync.mjs — Synchronisation des partenaires frontend → Supabase
- * Modes: --dry-run (default), --apply (requires CONFIRM_PARTNER_SYNC=YES)
- * Usage: node scripts/partners-sync.mjs [--dry-run|--apply]
+ * Modes: --dry-run (default), --apply (requires CONFIRM_PARTNER_SYNC=YES), --sql
+ * Usage: node scripts/partners-sync.mjs [--dry-run|--apply|--sql]
  */
 import { createClient } from '@supabase/supabase-js';
 
-const mode = process.argv.includes('--apply') ? 'apply' : 'dry-run';
+const mode = process.argv.includes('--apply') ? 'apply' : process.argv.includes('--sql') ? 'sql' : 'dry-run';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -192,12 +192,113 @@ function toVendorPayload(partner) {
 
 const payloads = frontendPartners.map(toVendorPayload);
 
+function sqlLiteral(value) {
+  if (value === null || value === undefined) return 'NULL';
+  return `'${String(value).replace(/'/g, "''")}'`;
+}
+
+function sqlJson(value) {
+  return `${sqlLiteral(JSON.stringify(value ?? []))}::jsonb`;
+}
+
+function buildPartnerSql(payload) {
+  const textColumns = [
+    'business_name',
+    'legal_name',
+    'status',
+    'zone_label',
+    'commune',
+    'phone',
+    'whatsapp',
+    'email',
+    'description',
+    'story',
+    'promise',
+    'specialty',
+    'hero_image',
+    'portrait_image',
+    'gradient',
+    'accent',
+    'photo_status',
+    'public_display_status',
+  ];
+
+  const updateAssignments = [
+    ...textColumns.map((column) => `${column} = ${sqlLiteral(payload[column])}`),
+    `is_public = ${payload.is_public}`,
+    `is_active = ${payload.is_active}`,
+    `is_demo = ${payload.is_demo}`,
+    `highlights = ${sqlJson(payload.highlights)}`,
+    `gallery_images = ${sqlJson(payload.gallery_images)}`,
+    `delivery_radius_km = ${Number(payload.delivery_radius_km)}`,
+    `updated_at = now()`,
+  ];
+
+  const insertColumns = [
+    'name',
+    ...textColumns,
+    'is_public',
+    'is_active',
+    'is_demo',
+    'highlights',
+    'gallery_images',
+    'delivery_radius_km',
+    'created_at',
+    'updated_at',
+  ];
+
+  const insertValues = [
+    sqlLiteral(payload.name),
+    ...textColumns.map((column) => sqlLiteral(payload[column])),
+    String(payload.is_public),
+    String(payload.is_active),
+    String(payload.is_demo),
+    sqlJson(payload.highlights),
+    sqlJson(payload.gallery_images),
+    String(Number(payload.delivery_radius_km)),
+    'now()',
+    'now()',
+  ];
+
+  return `-- ${payload.name}
+DO $$
+BEGIN
+  UPDATE public.vendors
+     SET ${updateAssignments.join(',\n         ')}
+   WHERE lower(coalesce(business_name, name)) = lower(${sqlLiteral(payload.name)})
+      OR lower(name) = lower(${sqlLiteral(payload.name)});
+
+  IF NOT FOUND THEN
+    INSERT INTO public.vendors (${insertColumns.join(', ')})
+    VALUES (${insertValues.join(', ')});
+  END IF;
+END $$;`;
+}
+
+function printSql() {
+  console.log(`-- DELIKREOL partner import
+-- Generated from scripts/partners-sync.mjs.
+-- Idempotent: updates matching vendors by name/business_name, inserts missing vendors.
+-- Run in Supabase SQL Editor on project Delikreol after schema migrations are applied.
+
+BEGIN;
+
+${payloads.map(buildPartnerSql).join('\n\n')}
+
+COMMIT;`);
+}
+
 function printPayloadSummary() {
   console.log('=== FRONTEND PARTNERS PAYLOAD ===\n');
   console.log(`Frontend partners: ${payloads.length}`);
   for (const partner of payloads) {
     console.log(`  📦 ${partner.name} (slug: ${normalizeSlug(partner.name)}, commune: ${partner.commune})`);
   }
+}
+
+if (mode === 'sql') {
+  printSql();
+  process.exit(0);
 }
 
 if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {

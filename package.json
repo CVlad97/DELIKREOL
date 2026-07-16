@@ -20,6 +20,8 @@
     "audit:secrets": "node scripts/audit-secrets.mjs",
     "partners:sync:dry": "node scripts/partners-sync.mjs --dry-run",
     "partners:sync:apply": "node scripts/partners-sync.mjs --apply",
+    "partners:sql": "node scripts/partners-sync.mjs --sql",
+    "partners:sql:write": "node scripts/partners-sync.mjs --sql > supabase/seed.partners.sql",
     "test:supabase": "vitest run tests/supabase",
     "deploy": "npm run build && wrangler deploy",
     "prepare": "husky"
