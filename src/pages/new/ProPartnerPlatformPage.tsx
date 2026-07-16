@@ -67,7 +67,7 @@ export function ProPartnerPlatformPage() {
               </thead>
               <tbody>
                 {PLATEFORMES.map((p, i) => (
-                  <tr key={i} className="border-t border-gray-50 hover:bg-primary/8/30">
+                  <tr key={i} className="border-t border-gray-50 hover:bg-primary/10">
                     <td className="p-3 font-medium">{p.name}</td>
                     <td className="p-3 text-muted-foreground">{p.type}</td>
                     <td className="p-3 text-muted-foreground">{p.area}</td>
@@ -93,7 +93,7 @@ export function ProPartnerPlatformPage() {
         </section>
 
         {/* HACCP */}
-        <section className="bg-secondary/10/50 rounded-3xl p-8 border border-secondary/20">
+        <section className="bg-secondary/10 rounded-3xl p-8 border border-secondary/20">
           <h2 className="text-2xl font-black text-foreground mb-2">🛡️ Licence HACCP — Obligation légale</h2>
           <p className="text-sm text-muted-foreground mb-6">
             Tout partenaire DELIKREOL manipulant des aliments doit être en règle avec la réglementation française.

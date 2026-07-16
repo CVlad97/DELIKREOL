@@ -77,6 +77,9 @@ function resolveHeroImage(name: string) {
   if (name === 'Gouté Mwen') {
     return assetFromPublic('vendors/goute-mwen/hero.jpg');
   }
+  if (name === 'Chef à Mada') {
+    return assetFromPublic('vendors/chef-a-mada/logo.jpg');
+  }
   return mockProducts.find((product) => product.vendor === name && product.image)?.image ?? null;
 }
 
@@ -142,6 +145,9 @@ function resolveGalleryImages(name: string) {
       assetFromPublic('vendors/goute-mwen/abricot-pays.jpg'),   // Abricot Pays
     ];
   }
+  if (name === 'Chef à Mada') {
+    return [assetFromPublic('vendors/chef-a-mada/logo.jpg')];
+  }
   return [];
 }
 
@@ -202,6 +208,9 @@ function resolvePortraitImage(name: string) {
   if (name === 'Gouté Mwen') {
     return assetFromPublic('vendors/goute-mwen/portrait.jpg');
   }
+  if (name === 'Chef à Mada') {
+    return assetFromPublic('vendors/chef-a-mada/logo.jpg');
+  }
   return null;
 }
 
@@ -255,7 +264,7 @@ function buildSpace(profile: PartnerProfile, gradient: string, accent: string, s
 
 export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfiles) {
   return profiles
-    .filter((profile) => profile.type.toLowerCase() === 'traiteur')
+    .filter((profile) => profile.type.toLowerCase().includes('traiteur'))
     .map((profile) => {
       if (profile.name === 'Les Delices de Ninice') {
         return {
@@ -319,9 +328,19 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
         };
       }
 
+      if (profile.name === 'Chef à Mada') {
+        return {
+          ...buildSpace(profile, 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'public confirmé', 'à confirmer'),
+          horaires: { lun: { open: '09:00', close: '18:00' }, mar: { open: '09:00', close: '18:00' }, mer: { open: '09:00', close: '18:00' }, jeu: { open: '09:00', close: '18:00' }, ven: { open: '09:00', close: '18:00' } },
+          cutoff_time: '10:00',
+          prep_time: 45,
+          delivery_slots: ['11:30-12:30', '12:30-13:30', '18:00-19:00'],
+        };
+      }
+
       // Saveurs d'Afrique — public confirmé
       return {
-        ...buildSpace(profile, 'from-[#0f766e] via-[#14b8a6] to-[#14532d]', '#ecfeff', 'public confirmé', 'confirmée'),
+        ...buildSpace(profile, 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'public confirmé', 'confirmée'),
         horaires: { lun: { open: '09:00', close: '18:00' }, mar: { open: '09:00', close: '18:00' }, mer: { open: '09:00', close: '18:00' }, jeu: { open: '09:00', close: '18:00' }, ven: { open: '09:00', close: '18:00' }, sam: { open: '10:00', close: '16:00' } },
         cutoff_time: '10:00',
         prep_time: 35,

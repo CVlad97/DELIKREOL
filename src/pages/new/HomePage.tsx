@@ -820,7 +820,7 @@ export default function HomePage() {
               <Link
                 key={caterer.slug}
                 to={`/traiteur/${caterer.slug}`}
-                className="group flex flex-col items-center gap-3 p-5 rounded-[1.75rem] bg-primary/[0.08]/70 border border-primary/20 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg transition-all text-center"
+                className="group flex flex-col items-center gap-3 p-5 rounded-[1.75rem] bg-primary/[0.08] border border-primary/20 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg transition-all text-center"
               >
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-primary/30 group-hover:border-primary transition-colors bg-white shadow-sm">
                                   <img loading="lazy"
@@ -902,7 +902,7 @@ export default function HomePage() {
             </div>
 
             {/* Carte 2 — Partenariat infirmier */}
-            <div className="p-6 bg-gradient-to-br from-success50 to-success/100/50 rounded-[2rem] border border-success/[0.35] hover:-translate-y-1 hover:shadow-lg transition-all">
+            <div className="p-6 bg-gradient-to-br from-success/10 to-accent/10 rounded-[2rem] border border-success/[0.35] hover:-translate-y-1 hover:shadow-lg transition-all">
               <div className="w-14 h-14 rounded-2xl bg-success text-white flex items-center justify-center text-2xl mb-4 shadow-md">
                 🩺
               </div>

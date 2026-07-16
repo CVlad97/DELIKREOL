@@ -109,7 +109,7 @@ export default function MarchesPublicsPage() {
         </div>
 
         {/* Sources officielles */}
-        <section className="mt-12 bg-secondary/10/50 rounded-3xl p-8 border border-secondary/20">
+        <section className="mt-12 bg-secondary/10 rounded-3xl p-8 border border-secondary/20">
           <h2 className="text-xl font-black text-foreground mb-4">📡 Sources officielles</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {SOURCES_OFFICIELLES.map(s => (
