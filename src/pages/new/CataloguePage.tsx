@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import {
   ChefHat,
   Eye,
@@ -12,6 +12,7 @@ import {
   X,
 } from 'lucide-react';
 import { BackBar } from '../../components/BackBar';
+import { ImageLightbox } from '../../components/ImageLightbox';
 import { InteractiveMap } from '../../components/InteractiveMap';
 import { ProductThumbnail } from '../../components/ProductThumbnail';
 import { Layout } from '../../components/layout/Layout';
@@ -110,6 +111,7 @@ export default function CataloguePage() {
   const [showMap, setShowMap] = useState(false);
   const [locating, setLocating] = useState(false);
   const [position, setPosition] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string; caption: string } | null>(null);
 
   useEffect(() => {
     setPageMeta(
@@ -247,6 +249,17 @@ export default function CataloguePage() {
     showSuccess(`${product.name} ajouté au panier`);
   };
 
+  const openProductPreview = (product: LocalProduct, partnerImage?: string | null) => {
+    const src = product.image || partnerImage;
+    if (!src) return;
+
+    setLightboxImage({
+      src,
+      alt: product.name,
+      caption: `${product.name} — ${product.vendor}`,
+    });
+  };
+
   return (
     <Layout>
       <BackBar label="Accueil" backTo="/" />
@@ -372,10 +385,20 @@ export default function CataloguePage() {
                       vendorName={product.vendor}
                       category={product.category}
                       aspectRatio="3 / 2"
-                      containerClassName="w-full bg-muted"
+                      containerClassName="w-full cursor-zoom-in bg-muted"
                       imgClassName="transition-transform duration-500 group-hover:scale-[1.03]"
                       showBadge
+                      onClick={() => openProductPreview(product, vendorData?.partnerImage)}
                     />
+
+                    <button
+                      type="button"
+                      onClick={() => openProductPreview(product, vendorData?.partnerImage)}
+                      className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/70 px-3 py-1.5 text-[11px] font-black uppercase tracking-wide text-white opacity-0 shadow-sm backdrop-blur transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                      aria-label={`Voir ${product.name} en gros plan`}
+                    >
+                      <Eye className="h-3.5 w-3.5" /> Voir
+                    </button>
 
                     <div className="flex flex-1 flex-col p-4">
                       <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">{product.category}</p>
@@ -409,9 +432,9 @@ export default function CataloguePage() {
                           <button type="button" onClick={() => addToCart(product)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2.5 text-sm font-black text-primary-foreground hover:bg-primary">
                             <Plus className="h-4 w-4" /> Ajouter
                           </button>
-                          <Link to={`/produit/${product.id}`} className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-muted hover:border-primary/40 hover:text-primary" aria-label={`Voir le détail de ${product.name}`}>
+                          <button type="button" onClick={() => openProductPreview(product, vendorData?.partnerImage)} className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-muted hover:border-primary/40 hover:text-primary" aria-label={`Voir ${product.name} en gros plan`}>
                             <Eye className="h-4 w-4" />
-                          </Link>
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -428,6 +451,9 @@ export default function CataloguePage() {
             </div>
           )}
         </section>
+        {lightboxImage && (
+          <ImageLightbox images={[lightboxImage]} onClose={() => setLightboxImage(null)} />
+        )}
       </main>
     </Layout>
   );
