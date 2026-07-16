@@ -38,6 +38,14 @@ const routes = [
   'cookies',
   'remboursement',
   'conditions-partenaires',
+  'traiteur/an-tje-coco',
+  'traiteur/chef-a-mada',
+  'traiteur/cocos-food',
+  'traiteur/goute-mwen',
+  'traiteur/les-delices-de-ninice',
+  'traiteur/saveurs-dafrique',
+  'traiteur/snack-save-peyia',
+  'traiteur/sweet-family-traiteur-orianne',
 ];
 
 if (!existsSync(indexPath)) {
