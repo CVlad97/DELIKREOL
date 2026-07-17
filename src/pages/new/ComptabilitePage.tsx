@@ -174,7 +174,7 @@ export default function ComptabilitePage() {
         )}
 
         {/* Échéances fiscales */}
-        <div className="bg-secondary/10 rounded-2xl p-6 border border-secondary/20">
+        <div className="bg-secondary/10/30 rounded-2xl p-6 border border-secondary/20">
           <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
             <Calendar className="w-5 h-5 text-secondary" /> Échéances fiscales 2026
           </h2>

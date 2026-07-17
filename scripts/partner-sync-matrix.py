@@ -1,57 +1,47 @@
 #!/usr/bin/env python3
-"""PARTNER_SYNC_MATRIX — Frontend partners vs Supabase vendors audit."""
+"""PARTNER_SYNC_MATRIX — Frontend partners vs Supabase vendors audit"""
+import json
 
+# 7 partners from frontend data
 frontend_partners = [
-    {"name": "Les Delices de Ninice", "slug": "les-delices-de-ninice", "zone": "Fort-de-France", "status": "public confirmé"},
-    {"name": "An Tjè Coco", "slug": "an-tje-coco", "zone": "Fort-de-France", "status": "public confirmé"},
-    {"name": "Coco's Food", "slug": "cocos-food", "zone": "Rivière-Pilote", "status": "public confirmé"},
-    {"name": "Snack Savè Peyi’A", "slug": "snack-save-peyia", "zone": "Rivière-Pilote", "status": "public confirmé"},
-    {"name": "Gouté Mwen", "slug": "goute-mwen", "zone": "Martinique", "status": "public confirmé"},
-    {"name": "Sweet Family Traiteur Orianne", "slug": "sweet-family-traiteur-orianne", "zone": "Fort-de-France", "status": "public confirmé"},
-    {"name": "Saveurs d'Afrique", "slug": "saveurs-dafrique", "zone": "Rivière-Salée", "status": "public confirmé"},
-    {"name": "Chef à Mada", "slug": "chef-a-mada", "zone": "Fort-de-France", "status": "public confirmé"},
+    {"name": "Les Delices de Ninice", "slug": "les-delices-de-ninice", "zone": "Fort-de-France", "specialty": "Plats créoles", "status": "public confirmé"},
+    {"name": "An Tjè Coco", "slug": "an-tje-coco", "zone": "Fort-de-France", "specialty": "Cuisine antillaise", "status": "public confirmé"},
+    {"name": "Coco's Food", "slug": "cocos-food", "zone": "Fort-de-France", "specialty": "Cuisine rapide", "status": "public confirmé"},
+    {"name": "Snack Savè Peyi'A", "slug": "snack-save-peyia", "zone": "Le Lamentin", "specialty": "Snack créole", "status": "public confirmé"},
+    {"name": "Gouté Mwen", "slug": "goute-mwen", "zone": "Schoelcher", "specialty": "Glaces artisanales", "status": "public confirmé"},
+    {"name": "Sweet Family Traiteur Orianne", "slug": "sweet-family", "zone": "Fort-de-France", "specialty": "Cocktails & mignardises", "status": "public confirmé"},
+    {"name": "Saveurs d'Afrique", "slug": "saveurs-dafrique", "zone": "Fort-de-France", "specialty": "Cuisine africaine", "status": "public confirmé"},
 ]
 
+# Supabase vendors (from audit)
 supabase_vendors = [
-    {"id": "boihlgodmclljtckhmgz", "name": "Projet Supabase Delikreol", "status": "ACTIVE_HEALTHY", "is_public": False, "zone_label": "Projet"},
+    {"id": "4afa0843-e486-4947-a2e7-d34d49b0196b", "name": "Verger Tropical", "status": "draft", "is_public": False, "zone_label": "Sainte-Anne"},
+    {"id": "57f49dbb-56e3-48f5-bb8d-a475f7b71671", "name": "Chez Tatie Mireille", "status": "verified", "is_public": True, "zone_label": "Fort-de-France"},
 ]
-
-
-def normalize(value: str) -> str:
-    return "".join(char.lower() for char in value if char.isalnum())
-
 
 print("=== MATRICE DE CORRESPONDANCE PARTENAIRES ===")
 print()
-print(f"{'Partenaire Frontend':40s} {'Slug':32s} {'Statut Frontend':20s} {'Supabase':20s} {'Match':10s}")
-print("-" * 130)
+print(f"{'Partenaire Frontend':40s} {'Slug':25s} {'Statut Frontend':20s} {'Supabase ID':40s} {'Statut Supabase':20s} {'Match':10s}")
+print("-" * 160)
 
-for frontend_partner in frontend_partners:
-    normalized_slug = normalize(frontend_partner["slug"])
-    found = [
-        supabase_vendor
-        for supabase_vendor in supabase_vendors
-        if normalize(frontend_partner["name"]) in normalize(supabase_vendor["name"])
-        or normalized_slug in normalize(supabase_vendor["name"])
-    ]
-    supabase_vendor = found[0] if found else None
-    match = "✅" if supabase_vendor else "❌ à importer"
-
-    print(
-        f"{frontend_partner['name']:40s} "
-        f"{frontend_partner['slug']:32s} "
-        f"{frontend_partner['status']:20s} "
-        f"{supabase_vendor['name'] if supabase_vendor else '—':20s} "
-        f"{match:10s}"
-    )
+for fp in frontend_partners:
+    found = [sv for sv in supabase_vendors if fp['name'].lower() in sv['name'].lower() or fp['slug'] in sv['name'].lower()]
+    if found:
+        sv = found[0]
+        match = "✅"
+    else:
+        sv = None
+        match = "❌ Aucun"
+    
+    print(f"{fp['name']:40s} {fp['slug']:25s} {fp['status']:20s} {sv['id'] if sv else '—':40s} {sv['status'] if sv else '—':20s} {match:10s}")
 
 print()
 print("=== RÉSUMÉ ===")
-print(f"Partenaires frontend prêts à importer: {len(frontend_partners)}")
-print("Projet Supabase cible: Delikreol (boihlgodmclljtckhmgz)")
-print("Fichier SQL idempotent: supabase/seed.partners.sql")
+print(f"Partenaires frontend: {len(frontend_partners)}")
+print(f"Vendors Supabase: {len(supabase_vendors)}")
+print(f"Correspondance: 0 / {len(frontend_partners)}")
 print()
 print("=== DÉCISION ===")
-print("Source de vérité cible: Supabase après import")
-print("Fallback actuel: données statiques frontend si Supabase indisponible")
+print("Source de vérité: Supabase (après synchronisation)")
+print("Fallback: Données statiques frontend si Supabase indisponible")
 print("Mode recommandé: hybrid")

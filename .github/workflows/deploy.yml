@@ -16,9 +16,15 @@ concurrency:
 
 jobs:
   build:
-    name: Lint, typecheck and build
+    name: Validate and build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    env:
+      VITE_BASE_PATH: /
+      VITE_SUPABASE_URL: https://boihlgodmclljtckhmgz.supabase.co
+      VITE_SUPABASE_ANON_KEY: sb_publishable_LE_NgMgaOlJEhkJlVF_zow_4NNOtTHX
+      VITE_DEMO_MODE: "false"
+      VITE_STRIPE_PUBLISHABLE_KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,20 +38,19 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
+      - name: Check environment
+        run: npm run check:env
+
       - name: Typecheck
         run: npm run typecheck
 
       - name: Lint
         run: npm run lint
 
+      - name: Unit tests
+        run: npm run test
+
       - name: Build
-        env:
-          VITE_BASE_PATH: /
-          VITE_SUPABASE_URL: https://boihlgodmclljtckhmgz.supabase.co
-          VITE_SUPABASE_ANON_KEY: sb_publishable_LE_NgMgaOlJEhkJlVF_zow_4NNOtTHX
-          VITE_PUBLIC_VENDOR_SOURCE: hybrid
-          VITE_DEMO_MODE: "false"
-          VITE_STRIPE_PUBLISHABLE_KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
         run: npm run build
 
       - name: Add SPA fallback and nojekyll marker

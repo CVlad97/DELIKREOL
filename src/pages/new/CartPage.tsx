@@ -262,17 +262,8 @@ export default function CartPage() {
 
     // Construire la commande
     const order = {
-      id: orderId,
       order_number: orderId,
       customer_phone: phone,
-      customer_email: email || null,
-      items: items.map((item) => ({
-        id: item.id,
-        name: item.name,
-        quantity: item.quantity,
-        unit_price: item.price,
-        vendor_name: item.vendor?.business_name || item.vendor_id || null,
-      })),
       subtotal: total,
       total_amount: total + (DELIVERY_FEES[mode]?.fee || 0),
       delivery_fee: DELIVERY_FEES[mode]?.fee || 0,
@@ -282,8 +273,6 @@ export default function CartPage() {
       notes,
       source: 'public_checkout',
       payment_status: 'pending',
-      invoice_status: 'draft',
-      qonto_status: 'pending_reconciliation',
       delivery_status: 'pending',
       status: 'pending',
       created_at: new Date().toISOString(),

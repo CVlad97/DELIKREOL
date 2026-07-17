@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   ShoppingCart,
@@ -24,26 +24,15 @@ interface NavItem {
   label: string;
   to: string;
   icon: React.ReactNode;
-  activePrefixes?: string[];
 }
 
-const primaryNavItems: NavItem[] = [
-  { label: 'Catalogue', to: '/catalogue', icon: <Store className="h-4 w-4" /> },
-  {
-    label: 'Traiteurs',
-    to: '/traiteurs',
-    icon: <ChefHat className="h-4 w-4" />,
-    activePrefixes: ['/traiteurs', '/traiteur'],
-  },
-  { label: 'Commander', to: '/devis', icon: <FileText className="h-4 w-4" /> },
-  { label: 'Partenaire', to: '/devenir-partenaire', icon: <Users className="h-4 w-4" /> },
+const navItems: NavItem[] = [
+  { label: 'Catalogue', to: '/catalogue', icon: <Store className="w-4 h-4" /> },
+  { label: 'Traiteurs', to: '/traiteurs', icon: <ChefHat className="w-4 h-4" /> },
+  { label: 'Commander', to: '/devis', icon: <FileText className="w-4 h-4" /> },
+  { label: 'Partenaire', to: '/devenir-partenaire', icon: <Users className="w-4 h-4" /> },
+  { label: 'Signaler un bug', to: '/feedback', icon: <Bug className="w-4 h-4" /> },
 ];
-
-const secondaryNavItems: NavItem[] = [
-  { label: 'Signaler un bug', to: '/feedback', icon: <Bug className="h-4 w-4" /> },
-];
-
-const allMobileNavItems = [...primaryNavItems, ...secondaryNavItems];
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -51,202 +40,136 @@ export function Header() {
   const { user, profile } = useAuth();
   const location = useLocation();
 
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location.pathname]);
-
-  const isActive = (item: NavItem) => {
-    const prefixes = item.activePrefixes || [item.to];
-    return prefixes.some((prefix) => (
-      location.pathname === prefix || location.pathname.startsWith(`${prefix}/`)
-    ));
-  };
-
+  const isActive = (path: string) => location.pathname === path;
   const isAdmin = user && profile?.user_type === 'admin';
   const accountTarget = !user ? '/connexion?next=/compte' : isAdmin ? '/admin' : '/compte';
   const accountLabel = user ? 'Mon espace' : 'Se connecter';
-  const accountIcon = user
-    ? <LayoutDashboard className="h-4 w-4" />
-    : <LogIn className="h-4 w-4" />;
-
-  const cartBadge = itemCount > 0 && (
-    <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-black text-primary-foreground shadow-sm animate-scale-in">
-      {itemCount}
-    </span>
-  );
+  const accountIcon = user ? <LayoutDashboard className="w-4 h-4" /> : <LogIn className="w-4 h-4" />;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border-strong/50 bg-background/95 shadow-sm backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-primary/20 bg-white/95 shadow-[0_14px_40px_-34px_rgba(42,25,15,0.55)] backdrop-blur-2xl">
       <div className="madras-strip" />
 
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-        <div className="grid h-[72px] grid-cols-[44px_minmax(0,1fr)_44px] items-center xl:hidden">
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen((open) => !open)}
-            className="flex h-11 w-11 items-center justify-center rounded-xl text-foreground transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            aria-label={mobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
-            aria-expanded={mobileMenuOpen}
-            aria-controls="mobile-navigation"
-          >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-
-          <Link
-            to="/"
-            data-testid="header-brand-mobile"
-            className="flex min-w-0 items-center justify-self-center gap-1.5 rounded-xl px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            aria-label="Accueil DeliKreol"
-          >
+        <div className="flex h-[68px] min-w-0 items-center justify-between gap-1.5 sm:gap-2">
+          <Link to="/" className="group flex min-w-0 shrink-0 items-center gap-2" aria-label="DeliKreol accueil">
             <img
               src={`${import.meta.env.BASE_URL || '/'}branding/logo-mark.svg`}
-              alt=""
-              className="brand-logo-frame h-10 w-10 shrink-0 rounded-xl object-contain p-1"
+              alt="Logo DeliKreol"
+              className="brand-logo-frame h-10 w-10 shrink-0 rounded-2xl object-contain p-1.5 transition-transform group-hover:scale-105 sm:h-11 sm:w-11"
             />
-            <span className="whitespace-nowrap text-base font-black tracking-[-0.04em] text-foreground min-[360px]:text-lg">
-              DELI<span className="text-primary">KREOL</span>
-            </span>
-          </Link>
-
-          <Link
-            to="/panier"
-            className="relative flex h-11 w-11 items-center justify-center justify-self-end rounded-xl text-foreground transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            aria-label={`Panier, ${itemCount} article${itemCount > 1 ? 's' : ''}`}
-          >
-            <ShoppingCart className="h-5 w-5" />
-            {cartBadge}
-          </Link>
-        </div>
-
-        <div className="hidden h-[76px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 xl:grid">
-          <nav
-            className="flex min-w-0 items-center gap-1 justify-self-start rounded-2xl border border-border-strong/40 bg-card p-1 shadow-sm"
-            aria-label="Navigation principale"
-          >
-            {primaryNavItems.map((item) => {
-              const active = isActive(item);
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  aria-current={active ? 'page' : undefined}
-                  className={`flex min-h-10 items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                    active
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'text-foreground hover:bg-primary/10 hover:text-primary'
-                  }`}
-                >
-                  {item.icon}
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          <Link
-            to="/"
-            data-testid="header-brand-desktop"
-            className="flex items-center justify-self-center gap-2.5 rounded-xl px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            aria-label="Accueil DeliKreol"
-          >
-            <img
-              src={`${import.meta.env.BASE_URL || '/'}branding/logo-mark.svg`}
-              alt=""
-              className="brand-logo-frame h-11 w-11 rounded-xl object-contain p-1"
-            />
-            <span className="leading-none">
-              <span className="block whitespace-nowrap text-xl font-black tracking-[-0.04em] text-foreground">
-                DELI<span className="text-primary">KREOL</span>
+            <div className="hidden min-[430px]:block leading-tight">
+              <span className="block text-base font-black tracking-tight text-foreground sm:text-xl">
+                Deli<span className="text-primary">Kreol</span>
               </span>
-              <span className="mt-1 block text-center text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+              <span className="hidden text-[10px] font-bold uppercase tracking-[0.18em] text-primary sm:block">
                 Martinique
               </span>
-            </span>
+            </div>
           </Link>
 
-          <div className="flex min-w-0 items-center justify-self-end gap-2">
-            <LanguageSwitcher />
+          <nav className="hidden items-center gap-1 rounded-2xl border border-primary/20 bg-primary/[0.06] p-1 lg:flex">
+            {navItems.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-bold transition-all duration-200 ${
+                  isActive(item.to)
+                    ? 'bg-white text-primary shadow-sm'
+                    : 'text-foreground/70 hover:bg-white hover:text-foreground'
+                }`}
+              >
+                {item.icon}
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
+          <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-2">
+            <LanguageSwitcher />
             <Link
               to={accountTarget}
-              className="inline-flex h-11 min-w-11 items-center justify-center gap-2 rounded-xl bg-primary px-3 text-sm font-black text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="inline-flex h-10 min-w-10 items-center justify-center gap-1.5 rounded-xl bg-foreground px-2 text-xs font-black text-white shadow-sm transition-colors hover:bg-primary md:px-3 md:text-sm"
               aria-label={accountLabel}
               title={accountLabel}
             >
               {accountIcon}
-              <span className="hidden 2xl:inline">{accountLabel}</span>
+              <span className="hidden md:inline">{accountLabel}</span>
             </Link>
 
             <a
               href={WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-success transition-colors hover:bg-success/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              aria-label="Contacter DeliKreol sur WhatsApp"
-              title="WhatsApp"
+              className="hidden min-h-10 items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-bold text-accent transition-colors hover:bg-accent/10 sm:flex"
+              title="Contactez-nous sur WhatsApp"
             >
-              <MessageCircle className="h-5 w-5" />
+              <MessageCircle className="w-4 h-4" />
+              <span className="hidden xl:inline">WhatsApp</span>
             </a>
 
             <Link
               to="/panier"
-              className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl text-foreground transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              aria-label={`Panier, ${itemCount} article${itemCount > 1 ? 's' : ''}`}
+              className="relative inline-flex h-10 min-w-10 items-center justify-center rounded-xl text-foreground/70 transition-colors hover:bg-primary/10 hover:text-foreground"
+              aria-label={`Panier (${itemCount} articles)`}
             >
-              <ShoppingCart className="h-5 w-5" />
-              {cartBadge}
+              <ShoppingCart className="w-5 h-5" />
+              {itemCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white animate-scale-in">
+                  {itemCount}
+                </span>
+              )}
             </Link>
+
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-foreground/70 transition-colors hover:bg-primary/10 lg:hidden"
+              aria-label="Menu"
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
       </div>
 
       {mobileMenuOpen && (
-        <div
-          id="mobile-navigation"
-          className="animate-slide-up border-t border-border-strong/40 bg-background/[0.98] shadow-xl backdrop-blur-xl xl:hidden"
-        >
-          <nav className="mx-auto max-w-7xl space-y-2 px-4 py-4" aria-label="Navigation mobile">
+        <div className="animate-slide-up border-t border-border/40 bg-white/95 shadow-2xl backdrop-blur-xl lg:hidden">
+          <nav className="mx-auto max-w-7xl space-y-1 px-4 py-4">
             <Link
               to={accountTarget}
-              className="flex min-h-12 items-center gap-3 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex min-h-11 items-center gap-3 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-primary"
             >
               {accountIcon}
               {accountLabel}
             </Link>
 
-            <div className="flex min-h-12 items-center justify-between gap-3 rounded-xl border border-border-strong/40 bg-card px-3 py-2">
-              <span className="text-sm font-bold text-foreground">Langue du site</span>
-              <LanguageSwitcher />
-            </div>
-
-            <div className="space-y-1 pt-1">
-              {allMobileNavItems.map((item) => {
-                const active = isActive(item);
-                return (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    aria-current={active ? 'page' : undefined}
-                    className={`flex min-h-12 items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                      active
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-foreground hover:bg-primary/10 hover:text-primary'
-                    }`}
-                  >
-                    {item.icon}
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
+            {navItems.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex min-h-11 items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                  isActive(item.to)
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-foreground/70 hover:bg-muted'
+                }`}
+              >
+                {item.icon}
+                {item.label}
+              </Link>
+            ))}
 
             <a
               href={WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex min-h-12 items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-success transition-colors hover:bg-success/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex min-h-11 items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-accent transition-colors hover:bg-accent/10"
             >
-              <MessageCircle className="h-4 w-4" />
+              <MessageCircle className="w-4 h-4" />
               WhatsApp
             </a>
           </nav>

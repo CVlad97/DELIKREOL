@@ -46,10 +46,7 @@ export function ImageLightbox({ images, initialIndex = 0, onClose }: ImageLightb
 
   return (
     <div
-      className="fixed inset-0 z-[300] flex items-center justify-center bg-black/95"
-      role="dialog"
-      aria-modal="true"
-      aria-label={current.caption || current.alt}
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95"
       onClick={onClose}
     >
       {/* Top bar */}

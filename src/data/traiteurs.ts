@@ -63,22 +63,19 @@ function resolveHeroImage(name: string) {
     return cocoFoodAssets.hero;
   }
   if (name === "Saveurs d'Afrique") {
-    return assetFromPublic('vendors/saveurs-afrique/drive-import/drive-02.webp');
+    return assetFromPublic('vendors/saveurs-afrique/hero.jpg');
   }
   if (name.startsWith('Snack Savè Peyi')) {
-    return assetFromPublic('vendors/save-peyia/drive-import/drive-01.webp');
+    return assetFromPublic('vendors/save-peyia/hero.jpg');
   }
   if (name === 'Les Delices de Ninice') {
-    return assetFromPublic('vendors/ninice/drive-import/drive-01.webp');
+    return assetFromPublic('vendors/ninice/hero.jpg');
   }
   if (name === 'Sweet Family Traiteur Orianne') {
-    return assetFromPublic('vendors/sweet-family/drive-import/drive-02.webp');
+    return assetFromPublic('vendors/sweet-family/cocktails-mignardises-hero.webp');
   }
   if (name === 'Gouté Mwen') {
     return assetFromPublic('vendors/goute-mwen/hero.jpg');
-  }
-  if (name === 'Chef à Mada') {
-    return assetFromPublic('vendors/chef-a-mada/logo.jpg');
   }
   return mockProducts.find((product) => product.vendor === name && product.image)?.image ?? null;
 }
@@ -91,20 +88,8 @@ function resolveGalleryImages(name: string) {
     return cocoFoodAssets.gallery;
   }
   if (name === "Saveurs d'Afrique") {
-    // Photos WhatsApp Drive HD, sans cartes ni coordonnées privées.
+    // 8 photos validées — gallery-04 (amala mal identifié) et gallery-07 (empanadas) retirées
     return [
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-02.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-03.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-04.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-05.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-06.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-07.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-08.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-09.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-10.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-11.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-12.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-13.webp'),
       assetFromPublic('vendors/saveurs-afrique/gallery-01.jpg'),  // Ablo + poisson frit
       assetFromPublic('vendors/saveurs-afrique/gallery-02.jpg'),  // Jus de bissap
       assetFromPublic('vendors/saveurs-afrique/gallery-03.jpg'),  // Dokô (beignets)
@@ -116,57 +101,33 @@ function resolveGalleryImages(name: string) {
     ];
   }
   if (name === 'Les Delices de Ninice') {
-    // Photos Drive HD produits, cartes et affiches exclues.
+    // 10 vraies photos WhatsApp mai 2026 — optimisées et rehaussées
     return [
-      assetFromPublic('vendors/ninice/drive-import/drive-01.webp'),
-      assetFromPublic('vendors/ninice/drive-import/drive-02.webp'),
-      assetFromPublic('vendors/ninice/drive-import/drive-04.webp'),
-      assetFromPublic('vendors/ninice/drive-import/drive-05.webp'),
-      assetFromPublic('vendors/ninice/drive-import/drive-06.webp'),
-      assetFromPublic('vendors/ninice/drive-import/drive-07.webp'),
-      assetFromPublic('vendors/ninice/thumbs/ninice-01.webp'),  // Colombo
-      assetFromPublic('vendors/ninice/thumbs/ninice-02.webp'),  // Moksi Aleisi végétarien
-      assetFromPublic('vendors/ninice/thumbs/ninice-05.webp'),  // Bami des Îles
-      assetFromPublic('vendors/ninice/thumbs/ninice-06.webp'),  // Bara
-      assetFromPublic('vendors/ninice/thumbs/ninice-07.webp'),  // Gulab Jamun amande
-      assetFromPublic('vendors/ninice/thumbs/ninice-08.webp'),  // Gulab Jamun coco
-      assetFromPublic('vendors/ninice/thumbs/ninice-09.webp'),  // Brochettes Saoto
-      assetFromPublic('vendors/ninice/thumbs/ninice-10.webp'),  // Brochettes porc
-      assetFromPublic('vendors/ninice/thumbs/ninice-11.webp'),  // Brochettes bœuf
+      assetFromPublic('vendors/ninice/gallery-01.jpg'),  // Colombo — ragoût poulet épicé
+      assetFromPublic('vendors/ninice/gallery-02.jpg'),  // Bami des Îles — bowl nouilles complet
+      assetFromPublic('vendors/ninice/gallery-03.jpg'),  // Brochettes Saoto — présentation traiteur
+      assetFromPublic('vendors/ninice/gallery-04.jpg'),  // Bowl complet poulet grillé + plantain
+      assetFromPublic('vendors/ninice/gallery-05.jpg'),  // Gulab Jamun — douceurs sucrées
+      assetFromPublic('vendors/ninice/gallery-06.jpg'),  // Bara — beignets croustillants
+      assetFromPublic('vendors/ninice/gallery-07.jpg'),  // Packaging + logo Les Délices de Ninice
+      assetFromPublic('vendors/ninice/gallery-08.jpg'),  // Moksi Aleisi — riz sauté végétarien
+      assetFromPublic('vendors/ninice/gallery-09.jpg'),  // Bara version traiteur en boîte
+      assetFromPublic('vendors/ninice/gallery-10.jpg'),  // Condiment mariné fait maison
     ];
   }
-  if (name === 'Snack Savè Peyi\u2019A') {
-    return [
-      assetFromPublic('vendors/save-peyia/drive-import/drive-01.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-02.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-03.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-04.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-05.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-06.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-07.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-08.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-09.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-10.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-11.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-12.webp'),
-    ];
+    if (name === 'Snack Savè Peyi\u2019A') {
+    return [];
   }
   if (name === 'Sweet Family Traiteur Orianne') {
     return [
-      assetFromPublic('vendors/sweet-family/drive-import/drive-01.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-02.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-03.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-04.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-05.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-06.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-07.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-08.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-09.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-10.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-11.webp'),
+      assetFromPublic('vendors/sweet-family/cocktails-mignardises-hero.webp'),
+      assetFromPublic('vendors/sweet-family/cocktails-mignardises-menu.webp'),
+      assetFromPublic('vendors/sweet-family/bao-buns-menu.webp'),
+      assetFromPublic('vendors/sweet-family/commande-conditions.webp'),
       assetFromPublic('vendors/sweet-family/seafood-boil-1.webp'),
       assetFromPublic('vendors/sweet-family/seafood-boil-2.webp'),
       assetFromPublic('vendors/sweet-family/seafood-boil-3.webp'),
+      assetFromPublic('vendors/sweet-family/seafood-boil-4.webp'),
       assetFromPublic('vendors/sweet-family/seafood-boil-5.webp'),
     ];
   }
@@ -180,9 +141,6 @@ function resolveGalleryImages(name: string) {
       assetFromPublic('vendors/goute-mwen/kumquat.jpg'),        // Kumquat
       assetFromPublic('vendors/goute-mwen/abricot-pays.jpg'),   // Abricot Pays
     ];
-  }
-  if (name === 'Chef à Mada') {
-    return [assetFromPublic('vendors/chef-a-mada/logo.jpg')];
   }
   return [];
 }
@@ -226,26 +184,23 @@ function resolvePortraitImage(name: string) {
     return assetFromPublic('vendors/ninice/portrait.jpg');
   }
   if (name === 'An Tjè Coco') {
-    return assetFromPublic('vendors/an-tje-coco/clean/hero-clean.webp');
+    return assetFromPublic('vendors/an-tje-coco/portrait.jpg');
   }
   if (name === "Coco's Food") {
-    return assetFromPublic('vendors/coco/drive-import/drive-01.webp');
+    return assetFromPublic('vendors/coco/portrait.jpg');
   }
   if (name === "Saveurs d'Afrique") {
     return assetFromPublic('vendors/saveurs-afrique/portrait.jpg');
   }
   if (name === 'Snack Savè Peyi\u2019A') {
-    return assetFromPublic('vendors/save-peyia/drive-import/drive-01.webp');
+    return assetFromPublic('vendors/save-peyia/portrait.jpg');
   }
   if (name === 'Sweet Family Traiteur Orianne') {
-    return assetFromPublic('vendors/sweet-family/drive-import/drive-04.webp');
+    return assetFromPublic('vendors/sweet-family/portrait.jpg');
   }
 // Gouté Mwen: photo Stacy Vilocy
   if (name === 'Gouté Mwen') {
     return assetFromPublic('vendors/goute-mwen/portrait.jpg');
-  }
-  if (name === 'Chef à Mada') {
-    return assetFromPublic('vendors/chef-a-mada/logo.jpg');
   }
   return null;
 }
@@ -300,7 +255,7 @@ function buildSpace(profile: PartnerProfile, gradient: string, accent: string, s
 
 export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfiles) {
   return profiles
-    .filter((profile) => profile.type.toLowerCase().includes('traiteur'))
+    .filter((profile) => profile.type.toLowerCase() === 'traiteur')
     .map((profile) => {
       if (profile.name === 'Les Delices de Ninice') {
         return {
@@ -364,19 +319,9 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
         };
       }
 
-      if (profile.name === 'Chef à Mada') {
-        return {
-          ...buildSpace(profile, 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'public confirmé', 'à confirmer'),
-          horaires: { lun: { open: '09:00', close: '18:00' }, mar: { open: '09:00', close: '18:00' }, mer: { open: '09:00', close: '18:00' }, jeu: { open: '09:00', close: '18:00' }, ven: { open: '09:00', close: '18:00' } },
-          cutoff_time: '10:00',
-          prep_time: 45,
-          delivery_slots: ['11:30-12:30', '12:30-13:30', '18:00-19:00'],
-        };
-      }
-
       // Saveurs d'Afrique — public confirmé
       return {
-        ...buildSpace(profile, 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'public confirmé', 'confirmée'),
+        ...buildSpace(profile, 'from-[#0f766e] via-[#14b8a6] to-[#14532d]', '#ecfeff', 'public confirmé', 'confirmée'),
         horaires: { lun: { open: '09:00', close: '18:00' }, mar: { open: '09:00', close: '18:00' }, mer: { open: '09:00', close: '18:00' }, jeu: { open: '09:00', close: '18:00' }, ven: { open: '09:00', close: '18:00' }, sam: { open: '10:00', close: '16:00' } },
         cutoff_time: '10:00',
         prep_time: 35,

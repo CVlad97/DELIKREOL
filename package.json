@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/generate-spa-route-copies.mjs && echo \"delikreol.com\" > dist/CNAME && touch dist/.nojekyll",
+    "build": "vite build && echo \"delikreol.com\" > dist/CNAME && touch dist/.nojekyll",
     "lint": "eslint .",
     "preview": "npm run build && wrangler dev",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
@@ -20,8 +20,6 @@
     "audit:secrets": "node scripts/audit-secrets.mjs",
     "partners:sync:dry": "node scripts/partners-sync.mjs --dry-run",
     "partners:sync:apply": "node scripts/partners-sync.mjs --apply",
-    "partners:sql": "node scripts/partners-sync.mjs --sql",
-    "partners:sql:write": "node scripts/partners-sync.mjs --sql > supabase/seed.partners.sql",
     "test:supabase": "vitest run tests/supabase",
     "deploy": "npm run build && wrangler deploy",
     "prepare": "husky"

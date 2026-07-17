@@ -55,7 +55,6 @@ function normalize(value?: string | null): string {
 
 export function inferProductImageKind(input: Pick<ThumbnailInput, 'name' | 'vendor' | 'category'>): ImageKind {
   const value = normalize(`${input.name || ''} ${input.vendor || ''} ${input.category || ''}`);
-  const compactValue = value.replace(/[^a-z0-9]/g, '');
 
   if (
     value.includes('logo') ||
@@ -67,18 +66,11 @@ export function inferProductImageKind(input: Pick<ThumbnailInput, 'name' | 'vend
   if (
     value.includes('flyer') ||
     value.includes('menu') ||
-    value.includes('affiche')
+    value.includes('affiche') ||
+    value.includes('save peyi') ||
+    value.includes('save peyia')
   ) {
     return 'flyer';
-  }
-
-  /*
-   * Les visuels Save Peyi'A contiennent souvent une composition de marque,
-   * du texte et du packaging. Ils doivent rester entièrement visibles, même
-   * lorsque le nom du produit ressemble à un plat classique.
-   */
-  if (compactValue.includes('savepeyia')) {
-    return 'packaging';
   }
 
   if (

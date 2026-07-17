@@ -12,7 +12,6 @@ export default defineConfig(({ mode }) => {
   return {
     base,
     plugins: [react(), VitePWA({
-      mode: 'development',
       registerType: 'prompt',
       includeAssets: ['branding/*.svg', 'branding/*.png'],
       manifest: false,
