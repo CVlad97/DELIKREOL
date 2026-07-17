@@ -72,8 +72,8 @@ Full machine-readable manifest:
 | Sweet Family Traiteur Orianne | same | `public/vendors/sweet-family/portrait.jpg` | 1x1 | 87294 B | square | JPEG | legacy / incorrect | yes | Git history includes `67dde50`, `78b910a`, `856277d` | Keep poster/photo assets only |
 | Sweet Family Traiteur Orianne | legal / flyer views | `public/vendors/sweet-family/conditions.jpg` | 1x1 | 4034 B | square | JPEG | broken / placeholder | no clear proof | Exact hash duplicate of unrelated assets; not a valid public flyer | Replace from owner-provided original or remove any live reference |
 | Gouté Mwen | home hero / partner cards | `public/vendors/goute-mwen/hero.jpg` | 1x1 | 157651 B | square | JPEG | legacy / incorrect | yes | Git history includes `a6b4484`, `e91cb5f`, `0ed6276`, `856277d`; current preferred hero is `public/vendors/goute-mwen/product-glacee-groseille.jpg` | Keep product hero only; block poster file from live use |
-| Gouté Mwen | product / thumbnail candidate | `public/vendors/goute-mwen/cacahuete.jpg` | 305x414 | 326244 B | portrait | PNG | low-res for hero | no clear proof | No current proof of a better original in repo history | Ask owner for original HD file if this should be public-facing |
-| Gouté Mwen | product / thumbnail candidate | `public/vendors/goute-mwen/choco.jpg` | 601x408 | 575690 B | landscape | PNG | borderline / small | no clear proof | No current proof of a better original in repo history | Ask owner for original HD file if this should be public-facing |
+| Gouté Mwen | product / thumbnail candidate | `public/vendors/goute-mwen/cacahuete.jpg` | 305x414 | 326244 B | portrait | PNG | removed | no clear proof | Deleted from public assets because it was low-res and unreferenced in the app | Keep deleted unless the owner provides a verified HD original |
+| Gouté Mwen | product / thumbnail candidate | `public/vendors/goute-mwen/choco.jpg` | 601x408 | 575690 B | landscape | PNG | removed | no clear proof | Deleted from public assets because it was low-res and unreferenced in the app | Keep deleted unless the owner provides a verified HD original |
 | Chef à Mada | logo / profile | `public/vendors/chef-a-mada/logo.jpg` | 1080x2340 | 401244 B | portrait | JPEG | not ideal for logo | yes | Git history includes `5054cc4` and later photo cleanup commits | Prefer transparent SVG/PNG if a real logo exists; otherwise keep only as a temporary photo |
 
 ## Current Frontend Sources Confirmed
@@ -94,8 +94,6 @@ Full machine-readable manifest:
 
 - No image replacement has been committed in this audit phase yet.
 - Exact source proof still needed for:
-  - `public/vendors/goute-mwen/cacahuete.jpg`
-  - `public/vendors/goute-mwen/choco.jpg`
   - `public/vendors/sweet-family/conditions.jpg`
 - The exact duplicate groups in Ninice and Sweet Family need a manual decision before any cleanup removes or repoints them.
 - `Chef à Mada` still needs a proper logo asset if a transparent version exists outside the repo.
