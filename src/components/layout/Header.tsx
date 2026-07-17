@@ -203,7 +203,7 @@ export function Header() {
       {mobileMenuOpen && (
         <div
           id="mobile-navigation"
-          className="animate-slide-up border-t border-border-strong/40 bg-background/98 shadow-xl backdrop-blur-xl xl:hidden"
+          className="animate-slide-up border-t border-border-strong/40 bg-background/[0.98] shadow-xl backdrop-blur-xl xl:hidden"
         >
           <nav className="mx-auto max-w-7xl space-y-2 px-4 py-4" aria-label="Navigation mobile">
             <Link
