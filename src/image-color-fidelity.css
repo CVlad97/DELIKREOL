@@ -1,0 +1,71 @@
+/* Preserve the source pixels of public catalogue and partner images. */
+
+[data-thumbnail-source],
+[data-color-fidelity="original"],
+[data-smart-image-container="true"] {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+img[data-smart-image="true"],
+.product-photo-natural,
+.scroll-carousel-track img,
+[data-color-fidelity="original"] img {
+  filter: none !important;
+  mix-blend-mode: normal !important;
+  background: transparent !important;
+}
+
+img[src*="/vendors/save-peyia/hero."],
+img[src*="/vendors/save-peyia/portrait."],
+img[src*="/logo."],
+img[src*="/monogram."],
+img[src*="/wordmark."],
+img[src*="/menu."],
+img[src*="/affiche."],
+img[src*="/flyer."],
+img[src*="/poster."],
+img[src*="/conditions."] {
+  object-fit: contain !important;
+  object-position: center center;
+  background: transparent !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+}
+
+img[src*="/portrait."] {
+  object-fit: cover !important;
+  object-position: center top;
+  background: transparent !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+}
+
+/* Home hero: remove the pale opacity and both decorative colour veils. */
+img[src*="branding/hero-tropical"] {
+  opacity: 1 !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+}
+
+img[src*="branding/hero-tropical"] ~ div {
+  display: none !important;
+  background: none !important;
+}
+
+/* Partner hero: leave the photograph untouched and place information below. */
+main section.relative.overflow-hidden.bg-neutral-950.shadow-xl {
+  background: transparent !important;
+}
+
+main section.relative.overflow-hidden.bg-neutral-950.shadow-xl > [data-smart-image-container="true"] + div.absolute.inset-0 {
+  display: none !important;
+  background: none !important;
+}
+
+main section.relative.overflow-hidden.bg-neutral-950.shadow-xl > div.absolute.inset-x-0.bottom-0 {
+  position: static !important;
+  inset: auto !important;
+  background: #171717 !important;
+  color: #fff !important;
+}

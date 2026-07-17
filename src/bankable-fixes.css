@@ -71,7 +71,32 @@ img[src*="/vendors/save-peyia/portrait."] {
   object-fit: contain !important;
   object-position: center center;
   filter: none !important;
-  background: linear-gradient(135deg, #fff7ed 0%, #fff3e4 100%);
+  background-color: hsl(var(--card));
+}
+
+/* Logos and flyers must never be cropped like food photos. */
+img[src*="/logo."],
+img[src*="/monogram."],
+img[src*="/wordmark."],
+img[src*="/favicon."],
+img[src*="/menu."],
+img[src*="/affiche."],
+img[src*="/flyer."],
+img[src*="/poster."],
+img[src*="/conditions."],
+img[src*="/board."],
+img[src*="/capture."],
+img[src*="/screenshot."] {
+  object-fit: contain !important;
+  object-position: center center;
+  background-color: hsl(var(--card));
+}
+
+/* Portraits keep the face in frame instead of the center of the body or the crop. */
+img[src*="/portrait."] {
+  object-fit: cover !important;
+  object-position: center top;
+  background-color: hsl(var(--card));
 }
 
 /* Form boundaries must remain perceivable on white and warm backgrounds. */

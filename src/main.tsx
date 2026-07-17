@@ -4,6 +4,7 @@ import './services/i18n';
 import './leaflet.css';
 import './index.css';
 import './bankable-fixes.css';
+import './image-color-fidelity.css';
 import { AppRouter } from './router';
 import { installNativeImageFallbacks } from './services/nativeImageFallback';
 import { primePublicVendors } from './services/vendorsService';

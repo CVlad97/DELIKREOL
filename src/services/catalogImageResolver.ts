@@ -53,6 +53,51 @@ function normalize(value?: string | null): string {
     .toLowerCase();
 }
 
+export function inferImageKindFromPath(src?: string | null, name?: string | null): ImageKind {
+  const value = normalize(`${src || ''} ${name || ''}`);
+  const compactValue = value.replace(/[^a-z0-9]/g, '');
+
+  if (
+    value.includes('logo') ||
+    value.includes('monogram') ||
+    value.includes('wordmark') ||
+    value.includes('favicon')
+  ) {
+    return 'logo';
+  }
+
+  if (
+    value.includes('flyer') ||
+    value.includes('menu') ||
+    value.includes('affiche') ||
+    value.includes('poster') ||
+    value.includes('conditions') ||
+    value.includes('cocktails-mignardises') ||
+    value.includes('bao-buns-menu') ||
+    value.includes('commande-conditions') ||
+    value.includes('board') ||
+    value.includes('capture') ||
+    value.includes('screenshot') ||
+    value.includes('commande')
+  ) {
+    return 'flyer';
+  }
+
+  if (value.includes('portrait')) {
+    return 'portrait';
+  }
+
+  /*
+   * Les visuels Save Peyi'A et Gouté Mwen peuvent mélanger branding, texte
+   * et composition produit. Ils restent plus lisibles en mode contain.
+   */
+  if (compactValue.includes('savepeyia') || compactValue.includes('goutemwen')) {
+    return 'packaging';
+  }
+
+  return 'ambient';
+}
+
 export function inferProductImageKind(input: Pick<ThumbnailInput, 'name' | 'vendor' | 'category'>): ImageKind {
   const value = normalize(`${input.name || ''} ${input.vendor || ''} ${input.category || ''}`);
   const compactValue = value.replace(/[^a-z0-9]/g, '');
@@ -124,7 +169,7 @@ export function resolveProductThumbnail(input: ThumbnailInput): ResolvedThumbnai
   const src = productImage || partnerImage || placeholder;
   const fallbackSrc = productImage ? (partnerImage || placeholder) : placeholder;
   const kind = source === 'partner'
-    ? 'ambient'
+    ? inferImageKindFromPath(partnerImage, input.vendor || input.name)
     : source === 'placeholder'
       ? 'flyer'
       : inferProductImageKind(input);

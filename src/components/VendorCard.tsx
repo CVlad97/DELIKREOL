@@ -20,15 +20,15 @@ export function VendorCard({ vendor, onClick }: VendorCardProps) {
       onClick={onClick}
       className="group w-full overflow-hidden rounded-[2rem] border border-border bg-card text-left shadow-elegant transition-all duration-500 hover:-translate-y-1 hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
-      <div className="relative h-48 overflow-hidden bg-muted/50">
+      <div className="relative h-48 overflow-hidden bg-transparent" data-color-fidelity="original">
         {vendor.logo_url ? (
           <SmartImage
             src={vendor.logo_url}
             alt={`Logo de ${vendor.business_name}`}
             kind="logo"
             fit="contain"
-            containerClassName="w-full h-full"
-            imgClassName="p-5 transition-transform duration-500 group-hover:scale-[1.03]"
+            containerClassName="h-full w-full bg-transparent"
+            imgClassName="transition-transform duration-500 group-hover:scale-[1.03]"
             sizes="(max-width: 768px) 100vw, 33vw"
           />
         ) : (
