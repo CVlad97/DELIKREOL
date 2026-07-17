@@ -19,25 +19,10 @@ export default defineConfig(({ mode }) => {
         cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,svg,ico,json}'],
         runtimeCaching: [
-          {
-            // The former StaleWhileRevalidate strategy could display an old
-            // photograph on the first visit after a deployment. NetworkFirst
-            // keeps the original pixels current while retaining an offline copy.
-            urlPattern: /\.(?:png|jpg|jpeg|webp)(?:\?.*)?$/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'delikreol-images-v2',
-              networkTimeoutSeconds: 8,
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-              expiration: {
-                maxEntries: 120,
-                maxAgeSeconds: 86400,
-              },
-              purgeOnQuotaError: true,
-            },
-          },
+          // Product and partner photographs are intentionally not cached by the
+          // service worker. Stable file paths are frequently replaced with a
+          // verified original, so the network/browser cache must remain the
+          // source of truth after each deployment.
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
