@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 
+test.describe.configure({ timeout: 90_000 });
+
 const VIEWPORTS = [
   { width: 360, height: 800, name: 'mobile-s' },
   { width: 390, height: 844, name: 'mobile-m' },

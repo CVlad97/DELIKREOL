@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  inferImageKindFromPath,
   inferProductImageKind,
   resolveProductThumbnail,
-} from '../src/services/catalogImageResolver';
+} from './catalogImageResolver';
 
 describe('catalogImageResolver', () => {
   it('keeps Save Peyi branded artwork fully visible', () => {
@@ -32,5 +33,26 @@ describe('catalogImageResolver', () => {
 
     expect(inferProductImageKind(input)).toBe('food');
     expect(resolveProductThumbnail(input).fit).toBe('cover');
+  });
+
+  it('contains partner logos and flyers even when used as fallback thumbnails', () => {
+    const logoInput = {
+      partnerImage: '/vendors/chef-a-mada/logo.jpg',
+      name: 'Logo Chef a Mada',
+      vendor: 'Chef à Mada',
+      category: 'Traiteur',
+    };
+
+    const flyerInput = {
+      partnerImage: '/vendors/sweet-family/cocktails-mignardises-hero.jpg',
+      name: 'Cocktails et mignardises',
+      vendor: 'Sweet Family Traiteur Orianne',
+      category: 'Traiteur',
+    };
+
+    expect(inferImageKindFromPath(logoInput.partnerImage, logoInput.vendor)).toBe('logo');
+    expect(resolveProductThumbnail(logoInput).fit).toBe('contain');
+    expect(inferImageKindFromPath(flyerInput.partnerImage, flyerInput.vendor)).toBe('flyer');
+    expect(resolveProductThumbnail(flyerInput).fit).toBe('contain');
   });
 });

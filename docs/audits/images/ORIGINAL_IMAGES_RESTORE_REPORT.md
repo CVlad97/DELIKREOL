@@ -1,0 +1,123 @@
+# DeliKreol Image Audit - Initial Inventory
+
+Date: 2026-07-17  
+Branch: `fix/restore-original-images-20260717`  
+Status: inventory phase only, no image replacement applied yet.
+
+## Scope
+
+- Repository scanned: `public/` and `src/`
+- Files inventoried: `399` image files
+- Exact duplicate hash groups: `4`
+- Priority partners audited:
+  - Les Delices de Ninice
+  - An Tjè Coco
+  - Coco's Food
+  - Snack Savè Peyi’A
+  - Gouté Mwen
+  - Sweet Family Traiteur Orianne
+  - Saveurs d'Afrique
+  - Chef à Mada
+
+## Method
+
+- Scanned all image files with `find`.
+- Measured file type, dimensions, size, and SHA-256 hash.
+- Cross-checked current references in `src/` for hero, portrait, gallery, logo, poster, cover, thumbnail, and imageUrl fields.
+- Checked Git history for the main legacy assets that still exist in the repository.
+
+Full machine-readable manifest:
+
+- `/tmp/delikreol-image-inventory.json`
+
+## Inventory Snapshot
+
+| Partner | Files | Risk level | Notes |
+|---|---:|---|---|
+| An Tjè Coco | 13 | Medium | Clean assets exist in `public/vendors/an-tje-coco/clean/`; legacy `hero.jpg` and `portrait.jpg` are still present and are exact 1x1 JPEG placeholders. |
+| Coco's Food | 96 | Medium | Rich set of drive-import assets exists; legacy `hero.jpg` and `portrait.jpg` are exact 1x1 JPEG placeholders. |
+| Les Delices de Ninice | 84 | High | Drive-import assets exist and are used by the frontend; several legacy JPGs are exact 1x1 placeholders and there are duplicate hashes in the gallery set. |
+| Snack Savè Peyi’A | 48 | Medium | Drive-import assets exist and are used by the frontend; legacy `hero.jpg` and `portrait.jpg` are exact 1x1 JPEG placeholders. |
+| Gouté Mwen | 24 | High | Mixed quality assets; some PNGs are low-res and one legacy hero poster file remains in the tree but is no longer the preferred source. |
+| Sweet Family Traiteur Orianne | 69 | High | Valid poster/menu assets exist at 1600x1131, but legacy `hero.jpg`, `portrait.jpg`, and `conditions.jpg` are present as 1x1 placeholders. |
+| Saveurs d'Afrique | 52 | Medium | Drive-import assets are available and used; legacy `hero.jpg` and `portrait.jpg` remain as 1x1 placeholders. |
+| Chef à Mada | 1 | Medium | Logo exists as a JPEG screenshot-style image, not a transparent SVG/PNG. |
+
+## Exact Duplicate Groups
+
+1. `public/vendors/ninice/hero.jpg` and `public/vendors/ninice/portrait.jpg`
+2. `public/vendors/ninice/thumbs/ninice-03.webp` and `public/vendors/ninice/thumbs/ninice-04.webp`
+3. `public/vendors/ninice/thumbs/ninice-10.webp` and `public/vendors/ninice/thumbs/ninice-11.webp`
+4. `public/vendors/ninice/gallery-02.jpg` through `public/vendors/ninice/gallery-10.jpg` share the same hash as:
+   - `public/vendors/sweet-family/bao-buns.jpg`
+   - `public/vendors/sweet-family/cocktails-mignardises.jpg`
+   - `public/vendors/sweet-family/conditions.jpg`
+
+## Priority Partner Anomalies
+
+| Partner | Page / route | Current file | Dimensions | Weight | Ratio | Format | State | Original found | Source of original | Action proposed |
+|---|---|---|---|---:|---:|---|---|---|---|---|
+| Les Delices de Ninice | `/traiteur/ninice`, `/catalogue`, home cards | `public/vendors/ninice/hero.jpg` | 1x1 | 135005 B | square | JPEG | legacy / incorrect | yes | Git history shows legacy introduction in `bbff8dd`, `429068c`, `25df9a4`; current better assets are `public/vendors/ninice/drive-import/drive-01.webp` to `drive-13.webp` | Keep legacy file untouched; ensure no live reference remains; use drive-import assets only |
+| Les Delices de Ninice | same | `public/vendors/ninice/portrait.jpg` | 1x1 | 172146 B | square | JPEG | legacy / incorrect | yes | Git history as above; current better assets are drive-import files | Same as above |
+| Les Delices de Ninice | gallery / thumbnails | `public/vendors/ninice/gallery-02.jpg` ... `gallery-10.jpg` | 1x1 | mixed | square | JPEG | duplicated / incorrect | not yet proven | Exact hash duplicates with Sweet Family assets | Remove from public surface; keep only if a source can be proven later |
+| An Tjè Coco | `/traiteur/an-tje-coco`, cards | `public/vendors/an-tje-coco/hero.jpg` | 1x1 | 173011 B | square | JPEG | legacy / incorrect | yes | Git history shows `3ddab58`, `78b910a`, `856277d`; current clean asset is `public/vendors/an-tje-coco/clean/hero-clean.webp` | Keep clean asset only; block legacy file from live references |
+| An Tjè Coco | same | `public/vendors/an-tje-coco/portrait.jpg` | 1x1 | 97256 B | square | JPEG | legacy / incorrect | yes | Same history as above | Keep clean asset only; block legacy file from live references |
+| Coco's Food | `/traiteur/coco`, cards | `public/vendors/coco/hero.jpg` | 1x1 | 218338 B | square | JPEG | legacy / incorrect | yes | Git history includes `59fcfc1`, `78b910a`, `333acbc`; current better assets are `public/vendors/coco/drive-import/drive-01.webp` and `drive-09.webp` | Keep drive-import assets only |
+| Coco's Food | same | `public/vendors/coco/portrait.jpg` | 1x1 | 102290 B | square | JPEG | legacy / incorrect | yes | Same history as above | Keep drive-import assets only |
+| Snack Savè Peyi’A | `/traiteur/save-peyia`, cards | `public/vendors/save-peyia/hero.jpg` | 1x1 | 564227 B | square | JPEG | legacy / incorrect | yes | Git history includes `28f93fc`, `924c441`; current better assets are `public/vendors/save-peyia/drive-import/drive-01.webp` to `drive-12.webp` | Keep drive-import assets only |
+| Snack Savè Peyi’A | same | `public/vendors/save-peyia/portrait.jpg` | 1x1 | 174022 B | square | JPEG | legacy / incorrect | yes | Git history includes `e79ab70`, `3456237`, `856277d` | Keep drive-import assets only |
+| Saveurs d'Afrique | `/traiteur/saveurs-afrique`, cards | `public/vendors/saveurs-afrique/hero.jpg` | 1x1 | 197600 B | square | JPEG | legacy / incorrect | yes | Git history includes `d4aaddd`, `3456237`, `856277d`; current better assets are `public/vendors/saveurs-afrique/drive-import/drive-02.webp` and `drive-04.webp` | Keep drive-import assets only |
+| Saveurs d'Afrique | same | `public/vendors/saveurs-afrique/portrait.jpg` | 1x1 | 135465 B | square | JPEG | legacy / incorrect | yes | Same history as above | Keep drive-import assets only |
+| Sweet Family Traiteur Orianne | `/traiteur/sweet-family`, cards, legal views | `public/vendors/sweet-family/hero.jpg` | 1x1 | 175465 B | square | JPEG | legacy / incorrect | yes | Git history includes `d4aaddd`, `e79ab70`, `856277d`; current better assets include `public/vendors/sweet-family/drive-import/drive-02.webp` and valid poster assets `cocktails-mignardises-hero.*` | Keep poster assets for contain-based views only; block legacy hero |
+| Sweet Family Traiteur Orianne | same | `public/vendors/sweet-family/portrait.jpg` | 1x1 | 87294 B | square | JPEG | legacy / incorrect | yes | Git history includes `67dde50`, `78b910a`, `856277d` | Keep poster/photo assets only |
+| Sweet Family Traiteur Orianne | legal / flyer views | `public/vendors/sweet-family/conditions.jpg` | 1x1 | 4034 B | square | JPEG | broken / placeholder | no clear proof | Exact hash duplicate of unrelated assets; not a valid public flyer | Replace from owner-provided original or remove any live reference |
+| Gouté Mwen | home hero / partner cards | `public/vendors/goute-mwen/hero.jpg` | 1x1 | 157651 B | square | JPEG | legacy / incorrect | yes | Git history includes `a6b4484`, `e91cb5f`, `0ed6276`, `856277d`; current preferred hero is `public/vendors/goute-mwen/product-glacee-groseille.jpg` | Keep product hero only; block poster file from live use |
+| Gouté Mwen | product / thumbnail candidate | `public/vendors/goute-mwen/cacahuete.jpg` | 305x414 | 326244 B | portrait | PNG | low-res for hero | no clear proof | No current proof of a better original in repo history | Ask owner for original HD file if this should be public-facing |
+| Gouté Mwen | product / thumbnail candidate | `public/vendors/goute-mwen/choco.jpg` | 601x408 | 575690 B | landscape | PNG | borderline / small | no clear proof | No current proof of a better original in repo history | Ask owner for original HD file if this should be public-facing |
+| Chef à Mada | logo / profile | `public/vendors/chef-a-mada/logo.jpg` | 1080x2340 | 401244 B | portrait | JPEG | not ideal for logo | yes | Git history includes `5054cc4` and later photo cleanup commits | Prefer transparent SVG/PNG if a real logo exists; otherwise keep only as a temporary photo |
+
+## Current Frontend Sources Confirmed
+
+- Frontend hero and partner card sources are currently routed through:
+  - `src/data/traiteurs.ts`
+  - `src/data/mockCatalog.ts`
+  - `src/services/vendorsService.ts`
+  - `src/pages/new/HomePage.tsx`
+  - `src/pages/new/TraiteurDetailPage.tsx`
+  - `src/pages/new/ProductDetailPage.tsx`
+  - `src/services/catalogImageResolver.ts`
+- Current visual behavior on mobile:
+  - `Mon espace` is visible in the header.
+  - Home and catalogue currently avoid the obvious legacy `thumbs`, `portrait.jpg`, and `hero.jpg` references for the priority partners above.
+
+## Pending Or Unresolved
+
+- No image replacement has been committed in this audit phase yet.
+- Exact source proof still needed for:
+  - `public/vendors/goute-mwen/cacahuete.jpg`
+  - `public/vendors/goute-mwen/choco.jpg`
+  - `public/vendors/sweet-family/conditions.jpg`
+- The exact duplicate groups in Ninice and Sweet Family need a manual decision before any cleanup removes or repoints them.
+- `Chef à Mada` still needs a proper logo asset if a transparent version exists outside the repo.
+
+## Next Step
+
+1. Keep this report as the baseline.
+2. Replace only the files with verified originals.
+3. Record every replacement with before/after captures.
+4. Re-run desktop and mobile validation after each batch.
+
+## Final Validation Update
+
+Date: 2026-07-17
+
+- Code-level image handling was updated to prefer verified originals, preserve logos/posters with `contain`, and keep portrait/food crops stable.
+- No original image was deleted.
+- No new AI-generated or random internet image was introduced.
+- Validation passed:
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+  - `npm test`
+  - `npm run test:e2e`
+- Remaining image warnings during Playwright are mostly lazy-loaded/offscreen assets and OSM tiles on the interactive map; visible routes and functional checks completed successfully.

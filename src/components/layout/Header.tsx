@@ -80,7 +80,7 @@ export function Header() {
       <div className="madras-strip" />
 
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-        <div className="grid h-[72px] grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-1 xl:hidden">
+        <div className="relative flex h-[72px] items-center justify-between xl:hidden">
           <button
             type="button"
             onClick={() => setMobileMenuOpen((open) => !open)}
@@ -95,7 +95,7 @@ export function Header() {
           <Link
             to="/"
             data-testid="header-brand-mobile"
-            className="flex min-w-0 items-center justify-self-center gap-1.5 rounded-xl px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="absolute left-1/2 flex min-w-0 -translate-x-1/2 items-center gap-1.5 rounded-xl px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             aria-label="Accueil DeliKreol"
           >
             <img
@@ -108,7 +108,7 @@ export function Header() {
             </span>
           </Link>
 
-          <div className="flex items-center justify-self-end gap-1">
+          <div className="relative z-10 flex items-center gap-1">
             <Link
               to={accountTarget}
               className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl bg-primary px-2.5 text-xs font-black text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-[390px]:px-3"
