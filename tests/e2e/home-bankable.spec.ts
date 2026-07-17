@@ -33,21 +33,24 @@ for (const viewport of viewports) {
   });
 }
 
-test('Save Peyi branded visuals keep their full artwork and natural colours', async ({ page }) => {
+test('Save Peyi verified food photograph keeps natural colours and fills the card', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/', { waitUntil: 'networkidle' });
 
   const image = page.locator('img[src*="/vendors/save-peyia/"]').first();
   await expect(image).toBeVisible();
+  await expect(image).toHaveAttribute('src', /\?v=20260718-1$/);
 
   const style = await image.evaluate((element) => {
     const computed = window.getComputedStyle(element);
     return {
       objectFit: computed.objectFit,
       filter: computed.filter,
+      mixBlendMode: computed.mixBlendMode,
     };
   });
 
-  expect(style.objectFit).toBe('contain');
+  expect(style.objectFit).toBe('cover');
   expect(style.filter).toBe('none');
+  expect(style.mixBlendMode).toBe('normal');
 });
