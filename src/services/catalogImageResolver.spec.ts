@@ -6,7 +6,7 @@ import {
 } from './catalogImageResolver';
 
 describe('catalogImageResolver', () => {
-  it('keeps Save Peyi branded artwork fully visible', () => {
+  it('renders verified Save Peyi dishes as food photography', () => {
     const input = {
       src: '/vendors/save-peyia/drive-import/drive-01.webp',
       partnerImage: '/vendors/save-peyia/hero.jpg',
@@ -15,12 +15,24 @@ describe('catalogImageResolver', () => {
       category: 'Plats',
     };
 
-    expect(inferProductImageKind(input)).toBe('packaging');
+    expect(inferProductImageKind(input)).toBe('food');
     expect(resolveProductThumbnail(input)).toMatchObject({
       source: 'product',
-      kind: 'packaging',
-      fit: 'contain',
+      kind: 'food',
+      fit: 'cover',
     });
+  });
+
+  it('keeps explicit Save Peyi flyers fully visible', () => {
+    const input = {
+      src: '/vendors/save-peyia/flyer-menu.webp',
+      name: 'Flyer menu du week-end',
+      vendor: "Snack Savè Peyi'A",
+      category: 'Menu',
+    };
+
+    expect(inferProductImageKind(input)).toBe('flyer');
+    expect(resolveProductThumbnail(input).fit).toBe('contain');
   });
 
   it('keeps ordinary food photography edge-to-edge', () => {
