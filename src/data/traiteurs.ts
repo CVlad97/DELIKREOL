@@ -117,15 +117,12 @@ function resolveGalleryImages(name: string) {
       assetFromPublic('vendors/ninice/drive-import/drive-05.webp'),
       assetFromPublic('vendors/ninice/drive-import/drive-06.webp'),
       assetFromPublic('vendors/ninice/drive-import/drive-07.webp'),
-      assetFromPublic('vendors/ninice/thumbs/ninice-01.webp'),  // Colombo
-      assetFromPublic('vendors/ninice/thumbs/ninice-02.webp'),  // Moksi Aleisi végétarien
-      assetFromPublic('vendors/ninice/thumbs/ninice-05.webp'),  // Bami des Îles
-      assetFromPublic('vendors/ninice/thumbs/ninice-06.webp'),  // Bara
-      assetFromPublic('vendors/ninice/thumbs/ninice-07.webp'),  // Gulab Jamun amande
-      assetFromPublic('vendors/ninice/thumbs/ninice-08.webp'),  // Gulab Jamun coco
-      assetFromPublic('vendors/ninice/thumbs/ninice-09.webp'),  // Brochettes Saoto
-      assetFromPublic('vendors/ninice/thumbs/ninice-10.webp'),  // Brochettes porc
-      assetFromPublic('vendors/ninice/thumbs/ninice-11.webp'),  // Brochettes bœuf
+      assetFromPublic('vendors/ninice/drive-import/drive-08.webp'),
+      assetFromPublic('vendors/ninice/drive-import/drive-09.webp'),
+      assetFromPublic('vendors/ninice/drive-import/drive-10.webp'),
+      assetFromPublic('vendors/ninice/drive-import/drive-11.webp'),
+      assetFromPublic('vendors/ninice/drive-import/drive-12.webp'),
+      assetFromPublic('vendors/ninice/drive-import/drive-13.webp'),
     ];
   }
   if (name === 'Snack Savè Peyi\u2019A') {
@@ -216,7 +213,7 @@ export function formatEuro(value: number) {
 
 function resolvePortraitImage(name: string) {
   if (name === 'Les Delices de Ninice') {
-    return assetFromPublic('vendors/ninice/portrait.jpg');
+    return assetFromPublic('vendors/ninice/portrait-full.jpg');
   }
   if (name === 'An Tjè Coco') {
     return assetFromPublic('vendors/an-tje-coco/clean/hero-clean.webp');
@@ -235,7 +232,7 @@ function resolvePortraitImage(name: string) {
   }
 // Gouté Mwen: photo Stacy Vilocy
   if (name === 'Gouté Mwen') {
-    return assetFromPublic('vendors/goute-mwen/portrait.jpg');
+    return assetFromPublic('vendors/goute-mwen/product-glacee-groseille.jpg');
   }
   if (name === 'Chef à Mada') {
     return assetFromPublic('vendors/chef-a-mada/logo.jpg');

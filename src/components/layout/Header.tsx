@@ -80,7 +80,7 @@ export function Header() {
       <div className="madras-strip" />
 
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-        <div className="grid h-[72px] grid-cols-[44px_minmax(0,1fr)_44px] items-center xl:hidden">
+        <div className="grid h-[72px] grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-1 xl:hidden">
           <button
             type="button"
             onClick={() => setMobileMenuOpen((open) => !open)}
@@ -108,14 +108,26 @@ export function Header() {
             </span>
           </Link>
 
-          <Link
-            to="/panier"
-            className="relative flex h-11 w-11 items-center justify-center justify-self-end rounded-xl text-foreground transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            aria-label={`Panier, ${itemCount} article${itemCount > 1 ? 's' : ''}`}
-          >
-            <ShoppingCart className="h-5 w-5" />
-            {cartBadge}
-          </Link>
+          <div className="flex items-center justify-self-end gap-1">
+            <Link
+              to={accountTarget}
+              className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl bg-primary px-2.5 text-xs font-black text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-[390px]:px-3"
+              aria-label={user ? 'Mon espace' : 'Mon espace, connexion'}
+              title={user ? 'Mon espace' : 'Mon espace'}
+            >
+              {accountIcon}
+              <span>Mon espace</span>
+            </Link>
+
+            <Link
+              to="/panier"
+              className="relative flex h-11 w-11 items-center justify-center rounded-xl text-foreground transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              aria-label={`Panier, ${itemCount} article${itemCount > 1 ? 's' : ''}`}
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {cartBadge}
+            </Link>
+          </div>
         </div>
 
         <div className="hidden h-[76px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 xl:grid">

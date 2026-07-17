@@ -422,7 +422,7 @@ export default function HomePage() {
               <div className="overflow-hidden rounded-[2rem] bg-white">
                 <img
                   loading="lazy"
-                  src={`${import.meta.env.BASE_URL}vendors/ninice/ninice-01-showcase.jpg`}
+                  src={`${import.meta.env.BASE_URL}vendors/ninice/drive-import/drive-01.webp`}
                   alt="Plat local DeliKreol"
                   className="h-[420px] w-full object-cover"
                 />
@@ -557,7 +557,7 @@ export default function HomePage() {
                       <img loading="lazy"
                         src={traiteur.heroImage}
                         alt={traiteur.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="product-photo-natural w-full h-full object-cover"
                       />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
@@ -571,7 +571,7 @@ export default function HomePage() {
                     {traiteur.portraitImage && (
                       <div className="absolute -bottom-8 right-4">
                         <div className="w-16 h-16 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
-                          <img loading="lazy" src={traiteur.portraitImage} alt={traiteur.name} className="w-full h-full object-cover" />
+                          <img loading="lazy" src={traiteur.portraitImage} alt={traiteur.name} className="product-photo-natural w-full h-full object-cover" />
                         </div>
                       </div>
                     )}

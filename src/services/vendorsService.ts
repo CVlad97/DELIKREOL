@@ -69,6 +69,24 @@ function nonEmptyArray<T>(value: T[] | null | undefined): T[] | null {
   return Array.isArray(value) && value.length > 0 ? value : null;
 }
 
+function trustedPublicMedia(value: string | null | undefined): string | null {
+  const media = nonEmptyText(value);
+  if (!media) return null;
+
+  const normalized = media.toLowerCase();
+  const isKnownLegacyLocalMedia =
+    /(?:^|\/)vendors\/(?:an-tje-coco|coco|save-peyia|ninice|saveurs-afrique|sweet-family)\/(?:hero|portrait)\.(?:jpe?g|png|webp)(?:$|\?)/.test(normalized) ||
+    /(?:^|\/)vendors\/[^?#]*(?:card|menu|conditions|commande|board|flyer|capture|screenshot|whatsapp)[^?#]*\.(?:jpe?g|png|webp)(?:$|\?)/.test(normalized) ||
+    normalized.includes('vendors/sweet-family/cocktails-mignardises-hero.webp');
+
+  return isKnownLegacyLocalMedia ? null : media;
+}
+
+function trustedPublicMediaArray(value: string[] | null | undefined): string[] | null {
+  const trusted = (value || []).map((item) => trustedPublicMedia(item)).filter((item): item is string => Boolean(item));
+  return trusted.length > 0 ? trusted : null;
+}
+
 function resolveStaticVendor(vendor: VendorRaw): TraiteurSpace | undefined {
   const keys = new Set([
     normalizedKey(vendor.business_name),
@@ -130,13 +148,13 @@ export function mergeVendorWithStatic(
   const commune = nonEmptyText(vendor.commune) || fallback?.commune || (normalizedKey(zone) !== 'martinique' ? zone : '');
   const address = nonEmptyText(vendor.address) || fallback?.address;
 
-  const supabaseGallery = nonEmptyArray(vendor.gallery_images);
+  const supabaseGallery = trustedPublicMediaArray(vendor.gallery_images);
   const supabaseHighlights = nonEmptyArray(vendor.highlights);
-  const heroImage = nonEmptyText(vendor.hero_image) || fallback?.heroImage || null;
-  const portraitImage = nonEmptyText(vendor.portrait_image) || fallback?.portraitImage || null;
+  const heroImage = trustedPublicMedia(vendor.hero_image) || fallback?.heroImage || null;
+  const portraitImage = trustedPublicMedia(vendor.portrait_image) || fallback?.portraitImage || null;
   const galleryImages = supabaseGallery || fallback?.galleryImages || [];
   const highlights = supabaseHighlights || fallback?.highlights || [];
-  const hasSupabaseMedia = Boolean(nonEmptyText(vendor.hero_image) || nonEmptyText(vendor.portrait_image) || supabaseGallery);
+  const hasSupabaseMedia = Boolean(trustedPublicMedia(vendor.hero_image) || trustedPublicMedia(vendor.portrait_image) || supabaseGallery);
 
   const profileFallback = fallback?.profile;
   const profile: PartnerProfile = {
