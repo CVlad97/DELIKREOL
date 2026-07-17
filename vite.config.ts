@@ -20,14 +20,22 @@ export default defineConfig(({ mode }) => {
         globPatterns: ['**/*.{js,css,html,svg,ico,json}'],
         runtimeCaching: [
           {
-            urlPattern: /\.(?:png|jpg|jpeg|webp)$/i,
-            handler: 'StaleWhileRevalidate',
+            // The former StaleWhileRevalidate strategy could display an old
+            // photograph on the first visit after a deployment. NetworkFirst
+            // keeps the original pixels current while retaining an offline copy.
+            urlPattern: /\.(?:png|jpg|jpeg|webp)(?:\?.*)?$/i,
+            handler: 'NetworkFirst',
             options: {
-              cacheName: 'delikreol-images',
-              expiration: {
-                maxEntries: 80,
-                maxAgeSeconds: 604800,
+              cacheName: 'delikreol-images-v2',
+              networkTimeoutSeconds: 8,
+              cacheableResponse: {
+                statuses: [0, 200],
               },
+              expiration: {
+                maxEntries: 120,
+                maxAgeSeconds: 86400,
+              },
+              purgeOnQuotaError: true,
             },
           },
           {
