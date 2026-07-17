@@ -30,14 +30,14 @@ interface SmartImageProps {
 
 const KIND_DEFAULTS: Record<
   ImageKind,
-  { fit: ImageFit; position: ImagePosition; background?: string; padding?: number }
+  { fit: ImageFit; position: ImagePosition }
 > = {
   food: { fit: 'cover', position: '50% 50%' },
   ambient: { fit: 'cover', position: '50% 50%' },
-  packaging: { fit: 'contain', position: 'center', background: '#fffaf4', padding: 6 },
-  logo: { fit: 'contain', position: 'center', background: '#fffaf4', padding: 8 },
+  packaging: { fit: 'contain', position: 'center' },
+  logo: { fit: 'contain', position: 'center' },
   portrait: { fit: 'cover', position: '50% 25%' },
-  flyer: { fit: 'contain', position: 'center', background: '#ffffff', padding: 3 },
+  flyer: { fit: 'contain', position: 'center' },
 };
 
 const FALLBACK_IMG =
@@ -126,15 +126,19 @@ export function SmartImage({
         aspectRatio: aspectRatio || undefined,
         width: width || undefined,
         height: height || undefined,
-        backgroundColor: defaults.background || undefined,
+        backgroundColor: 'transparent',
       }}
       data-smart-image-container="true"
+      data-image-kind={kind}
+      data-image-fit={fit}
+      data-color-fidelity="original"
       data-fallback-level={fallbackLevel}
     >
       {!loaded && <div className="absolute inset-0 animate-pulse bg-muted" aria-hidden="true" />}
       <img
         ref={imageRef}
         data-smart-image="true"
+        data-color-fidelity="original"
         src={activeSrc}
         alt={effectiveAlt}
         aria-hidden={decorative || undefined}
@@ -158,8 +162,10 @@ export function SmartImage({
           objectPosition: position,
           opacity: loaded ? 1 : 0,
           transition: 'opacity 0.25s ease',
-          padding: defaults.padding ? `${defaults.padding}%` : undefined,
+          padding: 0,
           boxSizing: 'border-box',
+          filter: 'none',
+          mixBlendMode: 'normal',
         }}
         className={imgClassName}
       />
