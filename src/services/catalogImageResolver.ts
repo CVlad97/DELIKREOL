@@ -82,6 +82,13 @@ export function inferProductImageKind(input: Pick<ThumbnailInput, 'name' | 'vend
   }
 
   if (
+    compactValue.includes('saveursdafrique') &&
+    normalize(input.category).includes('plat')
+  ) {
+    return 'food';
+  }
+
+  if (
     value.includes('bouteille') ||
     value.includes('bocal') ||
     value.includes('pot ') ||

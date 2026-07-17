@@ -443,7 +443,7 @@ export default function HomePage() {
               <div className="absolute -left-8 top-10 overflow-hidden rounded-3xl border-4 border-white bg-white shadow-2xl">
                 <img
                   loading="lazy"
-                  src={`${import.meta.env.BASE_URL}vendors/saveurs-afrique/saveurs-afrique-board.jpg`}
+                  src={`${import.meta.env.BASE_URL}vendors/saveurs-afrique/drive-import/drive-13.webp`}
                   alt="Traiteur partenaire DeliKreol"
                   className="h-32 w-32 object-cover"
                 />

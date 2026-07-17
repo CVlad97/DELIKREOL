@@ -105,14 +105,7 @@ function resolveGalleryImages(name: string) {
       assetFromPublic('vendors/saveurs-afrique/drive-import/drive-11.webp'),
       assetFromPublic('vendors/saveurs-afrique/drive-import/drive-12.webp'),
       assetFromPublic('vendors/saveurs-afrique/drive-import/drive-13.webp'),
-      assetFromPublic('vendors/saveurs-afrique/gallery-01.jpg'),  // Ablo + poisson frit
-      assetFromPublic('vendors/saveurs-afrique/gallery-02.jpg'),  // Jus de bissap
-      assetFromPublic('vendors/saveurs-afrique/gallery-03.jpg'),  // Dokô (beignets)
-      assetFromPublic('vendors/saveurs-afrique/gallery-05.jpg'),  // Atassi (riz + haricots)
-      assetFromPublic('vendors/saveurs-afrique/gallery-06.jpg'),  // Fufu + sauce légume
-      assetFromPublic('vendors/saveurs-afrique/gallery-08.jpg'),  // Petits cailloux (chin chin)
-      assetFromPublic('vendors/saveurs-afrique/gallery-09.jpg'),  // Salade béninoise
-      assetFromPublic('vendors/saveurs-afrique/gallery-10.jpg'),  // Yaourt maison
+      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-14.webp'),
     ];
   }
   if (name === 'Les Delices de Ninice') {
@@ -232,7 +225,7 @@ function resolvePortraitImage(name: string) {
     return assetFromPublic('vendors/coco/drive-import/drive-01.webp');
   }
   if (name === "Saveurs d'Afrique") {
-    return assetFromPublic('vendors/saveurs-afrique/portrait.jpg');
+    return assetFromPublic('vendors/saveurs-afrique/drive-import/drive-04.webp');
   }
   if (name === 'Snack Savè Peyi\u2019A') {
     return assetFromPublic('vendors/save-peyia/drive-import/drive-01.webp');
