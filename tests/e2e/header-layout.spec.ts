@@ -49,11 +49,12 @@ test.describe('En-tête DeliKreol centré et accessible', () => {
     await expect(page.getByLabel('Choisir la langue')).toBeHidden();
     await page.getByRole('button', { name: 'Ouvrir le menu' }).click();
 
-    await expect(page.getByRole('navigation', { name: 'Navigation mobile' })).toBeVisible();
-    await expect(page.getByLabel('Choisir la langue')).toBeVisible();
-    await expect(page.getByRole('link', { name: /Se connecter|Mon espace/ })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Signaler un bug' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'WhatsApp' })).toBeVisible();
+    const mobileNavigation = page.getByRole('navigation', { name: 'Navigation mobile' });
+    await expect(mobileNavigation).toBeVisible();
+    await expect(mobileNavigation.getByLabel('Choisir la langue')).toBeVisible();
+    await expect(mobileNavigation.getByRole('link', { name: /Se connecter|Mon espace/ })).toBeVisible();
+    await expect(mobileNavigation.getByRole('link', { name: 'Signaler un bug' })).toBeVisible();
+    await expect(mobileNavigation.getByRole('link', { name: 'WhatsApp' })).toBeVisible();
   });
 
   test('marque centrée sur ordinateur avec navigation simplifiée', async ({ page }) => {
