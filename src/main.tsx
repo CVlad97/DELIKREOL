@@ -9,6 +9,26 @@ import { AppRouter } from './router';
 import { installNativeImageFallbacks } from './services/nativeImageFallback';
 import { primePublicVendors } from './services/vendorsService';
 
+const PRELOAD_RELOAD_KEY = 'delikreol-preload-reload-at';
+const PRELOAD_RETRY_WINDOW_MS = 60_000;
+
+window.addEventListener('vite:preloadError', (event) => {
+  event.preventDefault();
+
+  const now = Date.now();
+  const previousReloadAt = Number(sessionStorage.getItem(PRELOAD_RELOAD_KEY) || '0');
+  const retryAllowed = !Number.isFinite(previousReloadAt)
+    || now - previousReloadAt > PRELOAD_RETRY_WINDOW_MS;
+
+  if (retryAllowed) {
+    sessionStorage.setItem(PRELOAD_RELOAD_KEY, String(now));
+    window.location.reload();
+    return;
+  }
+
+  console.error('[bootstrap] A stale application chunk could not be loaded after retry.');
+});
+
 installNativeImageFallbacks();
 
 const Loader = () => (
@@ -37,6 +57,10 @@ async function bootstrap() {
       </Suspense>
     </StrictMode>,
   );
+
+  window.setTimeout(() => {
+    sessionStorage.removeItem(PRELOAD_RELOAD_KEY);
+  }, PRELOAD_RETRY_WINDOW_MS);
 }
 
 void bootstrap();
