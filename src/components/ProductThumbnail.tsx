@@ -90,9 +90,10 @@ export function ProductThumbnail({
 
   return (
     <div
-      className={`relative overflow-hidden bg-[#fff7ed] ${containerClassName}`}
+      className={`relative overflow-hidden bg-transparent ${containerClassName}`}
       data-thumbnail-source={runtimeSource}
       data-thumbnail-product={productName}
+      data-color-fidelity="original"
     >
       <SmartImage
         src={resolved.src}
@@ -104,7 +105,7 @@ export function ProductThumbnail({
         aspectRatio={aspectRatio}
         priority={priority}
         sizes={sizes}
-        containerClassName="h-full w-full"
+        containerClassName="h-full w-full bg-transparent"
         imgClassName={`product-photo-natural ${imgClassName}`.trim()}
         onFallbackLevelChange={handleFallbackLevel}
         onClick={onClick}
