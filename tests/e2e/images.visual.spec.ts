@@ -120,8 +120,8 @@ test.describe('Fidélité des couleurs originales', () => {
     const heroSection = page.locator('main section.relative.overflow-hidden.bg-neutral-950.shadow-xl').first();
     await expect(heroSection).toBeVisible();
 
-    const overlay = heroSection.locator('> [data-smart-image-container="true"] + div.absolute.inset-0');
-    const information = heroSection.locator('> div.absolute.inset-x-0.bottom-0');
+    const overlay = heroSection.locator(':scope > [data-smart-image-container="true"] + div.absolute.inset-0');
+    const information = heroSection.locator(':scope > div.absolute.inset-x-0.bottom-0');
 
     await expect(overlay).toHaveCSS('display', 'none');
     await expect(information).toHaveCSS('position', 'static');
