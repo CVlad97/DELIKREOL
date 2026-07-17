@@ -328,7 +328,7 @@ export default function HomePage() {
         <div className="absolute inset-0">
           <img
             loading="eager"
-            {...{ fetchpriority: 'high' }}
+            fetchPriority="high"
             decoding="async"
             src={`${import.meta.env.BASE_URL}branding/hero-tropical.png`}
             alt="Livraison DeliKreol en Martinique"
@@ -811,16 +811,16 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
             {([
-              { name: 'Ninice', slug: 'ninice', image: `${import.meta.env.BASE_URL}vendors/ninice/drive-import/drive-01.webp` },
-              { name: "Coco's Food", slug: 'coco', image: `${import.meta.env.BASE_URL}vendors/coco/drive-import/drive-09.webp` },
-              { name: "Saveurs d'Afrique", slug: 'saveurs-afrique', image: `${import.meta.env.BASE_URL}vendors/saveurs-afrique/drive-import/drive-02.webp` },
-              { name: 'An Tjè Coco', slug: 'an-tje-coco', image: `${import.meta.env.BASE_URL}vendors/an-tje-coco/clean/hero-clean.webp` },
-              { name: 'Snack Save Peyi\'A', slug: 'save-peyia', image: `${import.meta.env.BASE_URL}vendors/save-peyia/drive-import/drive-01.webp` },
+              { name: 'Ninice', slug: 'ninice', image: `${import.meta.env.BASE_URL}vendors/ninice/portrait.jpg` },
+              { name: "Coco's Food", slug: 'coco', image: `${import.meta.env.BASE_URL}vendors/coco/hero.jpg` },
+              { name: "Saveurs d'Afrique", slug: 'saveurs-afrique', image: `${import.meta.env.BASE_URL}vendors/saveurs-afrique/hero.jpg` },
+              { name: 'An Tjè Coco', slug: 'an-tje-coco', image: `${import.meta.env.BASE_URL}vendors/an-tje-coco/hero.jpg` },
+              { name: 'Snack Save Peyi\'A', slug: 'save-peyia', image: `${import.meta.env.BASE_URL}vendors/save-peyia/hero.jpg` },
             ] as const).map((caterer) => (
               <Link
                 key={caterer.slug}
                 to={`/traiteur/${caterer.slug}`}
-                className="group flex flex-col items-center gap-3 p-5 rounded-[1.75rem] bg-primary/[0.08] border border-primary/20 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg transition-all text-center"
+                className="group flex flex-col items-center gap-3 p-5 rounded-[1.75rem] bg-primary/[0.08]/70 border border-primary/20 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg transition-all text-center"
               >
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-primary/30 group-hover:border-primary transition-colors bg-white shadow-sm">
                                   <img loading="lazy"
@@ -902,7 +902,7 @@ export default function HomePage() {
             </div>
 
             {/* Carte 2 — Partenariat infirmier */}
-            <div className="p-6 bg-gradient-to-br from-success/10 to-accent/10 rounded-[2rem] border border-success/[0.35] hover:-translate-y-1 hover:shadow-lg transition-all">
+            <div className="p-6 bg-gradient-to-br from-success50 to-success/100/50 rounded-[2rem] border border-success/[0.35] hover:-translate-y-1 hover:shadow-lg transition-all">
               <div className="w-14 h-14 rounded-2xl bg-success text-white flex items-center justify-center text-2xl mb-4 shadow-md">
                 🩺
               </div>

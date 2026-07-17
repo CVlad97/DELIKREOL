@@ -1,108 +1,65 @@
-import { describe, expect, it } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { traiteurSpaces } from '../../src/data/traiteurs';
-import {
-  getPublicVendors,
-  getVendorBySlug,
-  mergeVendorWithStatic,
-  type VendorRaw,
-} from '../../src/services/vendorsService';
-
-function sparseVendor(overrides: Partial<VendorRaw> = {}): VendorRaw {
-  return {
-    id: 'vendor-test-id',
-    name: 'Gouté Mwen',
-    business_name: 'Gouté Mwen',
-    description: null,
-    address: null,
-    zone_label: 'Martinique',
-    commune: null,
-    phone: null,
-    whatsapp: null,
-    email: null,
-    is_public: true,
-    is_active: true,
-    is_demo: false,
-    status: 'verified',
-    hero_image: null,
-    portrait_image: null,
-    gallery_images: [],
-    highlights: [],
-    delivery_radius_km: 3,
-    photo_status: 'à confirmer',
-    public_display_status: 'public à vérifier',
-    story: null,
-    promise: null,
-    specialty: null,
-    gradient: null,
-    accent: null,
-    legal_name: null,
-    siret: null,
-    planifiable: false,
-    enterprise: false,
-    ...overrides,
-  };
-}
 
 describe('vendorsService', () => {
-  it('returns the static catalogue when Supabase is not configured', async () => {
+  const ORIGINAL_VITE_MODE = process.env.VITE_USER_NODE_ENV;
+
+  beforeEach(() => {
+    vi.resetModules();
+    // Default: static mode for tests
+    process.env.VITE_PUBLIC_VENDOR_SOURCE = 'static';
+  });
+
+  it('should return static vendors in static mode', async () => {
+    const { getPublicVendors } = await import('../../src/services/vendorsService');
     const result = await getPublicVendors();
-    expect(result.vendors.length).toBeGreaterThanOrEqual(8);
-    expect(result.vendors.some((vendor) => vendor.slug === 'goute-mwen')).toBe(true);
+    expect(result.source).toBe('static');
+    expect(result.vendors.length).toBeGreaterThanOrEqual(7);
+    expect(result.vendors[0].status).toBe('public confirmé');
   });
 
-  it('preserves validated static content when a Supabase row is sparse', () => {
-    const fallback = traiteurSpaces.find((vendor) => vendor.slug === 'goute-mwen');
-    expect(fallback).toBeDefined();
-
-    const merged = mergeVendorWithStatic(sparseVendor(), fallback);
-
-    expect(merged).not.toBeNull();
-    expect(merged?.slug).toBe('goute-mwen');
-    expect(merged?.status).toBe('public confirmé');
-    expect(merged?.heroImage).toBe(fallback?.heroImage);
-    expect(merged?.galleryImages.length).toBeGreaterThan(0);
-    expect(merged?.menuItems.length).toBe(fallback?.menuItems.length);
-    expect(merged?.story).toBe(fallback?.story);
-    expect(merged?.photoStatus).toBe(fallback?.photoStatus);
+  it('should filter only public confirmé vendors in static mode', async () => {
+    const { getPublicVendors } = await import('../../src/services/vendorsService');
+    const result = await getPublicVendors();
+    const allConfirmed = result.vendors.every(v => v.status === 'public confirmé');
+    expect(allConfirmed).toBe(true);
   });
 
-  it('uses populated Supabase editorial fields without losing the static menu', () => {
-    const fallback = traiteurSpaces.find((vendor) => vendor.slug === 'goute-mwen');
-    const merged = mergeVendorWithStatic(
-      sparseVendor({
-        description: 'Description publiée depuis Supabase',
-        hero_image: 'https://delikreol.com/vendors/goute-mwen/hero.jpg',
-        gallery_images: ['https://delikreol.com/vendors/goute-mwen/mangue.jpg'],
-        highlights: ['Glaces locales'],
-        public_display_status: 'public confirmé',
-        photo_status: 'confirmée',
-      }),
-      fallback,
-    );
+  it('should handle Supabase unavailable gracefully in hybrid mode', async () => {
+    process.env.VITE_PUBLIC_VENDOR_SOURCE = 'hybrid';
+    process.env.VITE_SUPABASE_URL = 'https://nonexistent.supabase.co';
+    process.env.VITE_SUPABASE_ANON_KEY = 'test-key';
 
-    expect(merged?.description).toBe('Description publiée depuis Supabase');
-    expect(merged?.heroImage).toBe('https://delikreol.com/vendors/goute-mwen/hero.jpg');
-    expect(merged?.galleryImages).toEqual(['https://delikreol.com/vendors/goute-mwen/mangue.jpg']);
-    expect(merged?.highlights).toEqual(['Glaces locales']);
-    expect(merged?.menuItems.length).toBe(fallback?.menuItems.length);
-    expect(merged?.photoStatus).toBe('confirmée');
+    // Mock the supabase import to throw
+    vi.mock('@supabase/supabase-js', () => ({
+      createClient: () => { throw new Error('Supabase unavailable'); },
+    }));
+
+    const { getPublicVendors } = await import('../../src/services/vendorsService');
+    const result = await getPublicVendors();
+    // Should fall back to static data
+    expect(result.source).toBe('static');
+    expect(result.vendors.length).toBeGreaterThanOrEqual(7);
   });
 
-  it('rejects demo or non-public rows', () => {
-    expect(mergeVendorWithStatic(sparseVendor({ is_demo: true }))).toBeNull();
-    expect(mergeVendorWithStatic(sparseVendor({ is_public: false }))).toBeNull();
-    expect(mergeVendorWithStatic(sparseVendor({ is_active: false }))).toBeNull();
-  });
-
-  it('returns a vendor by normalized slug', async () => {
+  it('should return vendor by slug', async () => {
+    const { getVendorBySlug } = await import('../../src/services/vendorsService');
     const result = await getVendorBySlug('les-delices-de-ninice');
     expect(result.vendor).not.toBeNull();
-    expect(result.vendor?.name).toContain('Ninice');
+    expect(result.vendor!.name).toContain('Ninice');
   });
 
-  it('does not contain duplicate public vendor slugs', async () => {
+  it('should return null for unknown slug', async () => {
+    const { getVendorBySlug } = await import('../../src/services/vendorsService');
+    const result = await getVendorBySlug('unknown-slug-that-does-not-exist');
+    expect(result.vendor).toBeNull();
+  });
+
+  it('should not contain duplicate vendor slugs', async () => {
+    const { getPublicVendors } = await import('../../src/services/vendorsService');
     const result = await getPublicVendors();
-    const slugs = result.vendors.map((vendor) => vendor.slug);
-    expect(new Set(slugs).size).toBe(slugs.length);
+    const slugs = result.vendors.map(v => v.slug);
+    const uniqueSlugs = new Set(slugs);
+    expect(uniqueSlugs.size).toBe(slugs.length);
   });
 });

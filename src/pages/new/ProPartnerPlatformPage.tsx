@@ -67,7 +67,7 @@ export function ProPartnerPlatformPage() {
               </thead>
               <tbody>
                 {PLATEFORMES.map((p, i) => (
-                  <tr key={i} className="border-t border-gray-50 hover:bg-primary/10">
+                  <tr key={i} className="border-t border-gray-50 hover:bg-primary/8/30">
                     <td className="p-3 font-medium">{p.name}</td>
                     <td className="p-3 text-muted-foreground">{p.type}</td>
                     <td className="p-3 text-muted-foreground">{p.area}</td>
@@ -93,7 +93,7 @@ export function ProPartnerPlatformPage() {
         </section>
 
         {/* HACCP */}
-        <section className="bg-secondary/10 rounded-3xl p-8 border border-secondary/20">
+        <section className="bg-secondary/10/50 rounded-3xl p-8 border border-secondary/20">
           <h2 className="text-2xl font-black text-foreground mb-2">🛡️ Licence HACCP — Obligation légale</h2>
           <p className="text-sm text-muted-foreground mb-6">
             Tout partenaire DELIKREOL manipulant des aliments doit être en règle avec la réglementation française.
@@ -134,21 +134,6 @@ export function ProPartnerPlatformPage() {
               {siretResult.commune && <p className="text-xs text-muted-foreground">{siretResult.commune}</p>}
             </div>
           )}
-        </section>
-
-        {/* CTA CONTACT */}
-        <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-8">
-          <h2 className="text-2xl font-black text-emerald-950 mb-2">📲 Terminal partenaire mobile</h2>
-          <p className="text-sm text-emerald-900 mb-5">
-            Encaissement comptoir via SumUp Tap to Pay ou lien de paiement, facture prête à envoyer par email/WhatsApp,
-            suivi commande et rapprochement Qonto. Aucune donnée carte n’est manipulée par DELIKREOL.
-          </p>
-          <a
-            href="/terminal-partenaire"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-2xl transition-all"
-          >
-            Ouvrir le terminal de test
-          </a>
         </section>
 
         {/* CTA CONTACT */}

@@ -37,7 +37,6 @@ const ContactPage = lazy(() => import('./pages/new/ContactPage'));
 const FeedbackPage = lazy(() => import('./pages/new/FeedbackPage'));
 const CatererSignupPage = lazy(() => import('./pages/new/CatererSignupPage'));
 const PartnerAccessPage = lazy(() => import('./pages/new/PartnerAccessPage'));
-const PartnerTerminalPage = lazy(() => import('./pages/new/PartnerTerminalPage'));
 const ReviewPage = lazy(() => import('./pages/new/ReviewPage'));
 
 const basePath = import.meta.env.VITE_BASE_PATH || import.meta.env.BASE_URL || '/';
@@ -123,7 +122,6 @@ export function AppRouter() {
                   <Route path="statut-commande" element={<OrderStatusPage />} />
                   <Route path="carte" element={<DiscoveryMapPage />} />
                   <Route path="partenaire" element={<PartnerAccessPage />} />
-                  <Route path="terminal-partenaire" element={<PartnerTerminalPage />} />
                   <Route path="avis" element={<ReviewPage />} />
                   <Route path="cgu" element={<TermsOfService />} />
                   <Route path="cgv" element={<CGVPage />} />
