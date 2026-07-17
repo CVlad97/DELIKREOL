@@ -43,10 +43,10 @@ const DELIVERY_MODES = [
     title: 'Livraison éloignée',
     description:
       'Livraison sur toute la Martinique, possible à partir de 40€ de commande, selon validation du prestataire et disponibilité DeliKreol.',
-    color: 'bg-primary/8 border-primary/30',
-    iconColor: 'bg-primary/80',
+    color: 'bg-primary/[0.08] border-primary/30',
+    iconColor: 'bg-primary/[0.08]0',
     badge: 'À partir de 40€',
-    badgeColor: 'bg-primary/15 text-primary',
+    badgeColor: 'bg-primary/[0.15] text-primary',
   },
 ];
 
@@ -79,9 +79,9 @@ export default function LivraisonPage() {
 
       {/* Important notices */}
       <div className="space-y-3 mb-8">
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex gap-3">
-          <AlertCircle size={18} className="text-amber-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-amber-900 leading-relaxed">
+        <div className="p-4 bg-secondary/10 border border-secondary/30 rounded-xl flex gap-3">
+          <AlertCircle size={18} className="text-secondary flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-secondary leading-relaxed">
             <strong>Livraison éloignée</strong> possible à partir de <strong>40€ de commande</strong>,
             selon validation du prestataire et disponibilité DeliKreol.
           </p>
@@ -188,7 +188,7 @@ export default function LivraisonPage() {
       </div>
 
       {/* Not sure? WhatsApp */}
-      <div className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl">
+      <div className="p-6 bg-gradient-to-r from-green-50 to-success/10 border border-green-200 rounded-2xl">
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <div className="flex-1 space-y-2">
             <h3 className="font-bold text-foreground">Pas sûr(e) de votre zone ?</h3>
@@ -211,7 +211,7 @@ export default function LivraisonPage() {
       <div className="mt-8 text-center">
         <Link
           to="/catalogue"
-          className="inline-flex items-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold text-sm transition-colors shadow-lg"
+          className="inline-flex items-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary text-primary-foreground rounded-xl font-bold text-sm transition-colors shadow-lg"
         >
           <ShoppingCart size={16} />
           Voir le catalogue

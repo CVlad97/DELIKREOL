@@ -56,29 +56,29 @@ export default function AdminDashboardPage() {
       {/* Audience & adhésions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="bg-white border rounded-xl p-4">
-          <p className="text-3xl font-black text-orange-600">{metrics.public_view}</p>
-          <p className="text-xs text-gray-500">Vues publiques</p>
+          <p className="text-3xl font-black text-primary">{metrics.public_view}</p>
+          <p className="text-xs text-muted-foreground">Vues publiques</p>
         </div>
         <div className="bg-white border rounded-xl p-4">
-          <p className="text-3xl font-black text-orange-600">{metrics.partner_lead_success}</p>
-          <p className="text-xs text-gray-500">Adhésions partenaires</p>
+          <p className="text-3xl font-black text-primary">{metrics.partner_lead_success}</p>
+          <p className="text-xs text-muted-foreground">Adhésions partenaires</p>
         </div>
         <div className="bg-white border rounded-xl p-4">
-          <p className="text-3xl font-black text-orange-600">{partnerAdhesions}</p>
-          <p className="text-xs text-gray-500">Candidatures admin</p>
+          <p className="text-3xl font-black text-primary">{partnerAdhesions}</p>
+          <p className="text-xs text-muted-foreground">Candidatures admin</p>
         </div>
         <div className="bg-white border rounded-xl p-4">
-          <p className="text-3xl font-black text-orange-600">{pendingMetricsCount}</p>
-          <p className="text-xs text-gray-500">Événements en file</p>
+          <p className="text-3xl font-black text-primary">{pendingMetricsCount}</p>
+          <p className="text-xs text-muted-foreground">Événements en file</p>
         </div>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white border rounded-xl p-4"><p className="text-3xl font-black text-orange-600">{events.length}</p><p className="text-xs text-gray-500">Visites partenaires</p></div>
-        <div className="bg-white border rounded-xl p-4"><p className="text-3xl font-black text-orange-600">{unreadMessages}</p><p className="text-xs text-gray-500">Messages non lus</p></div>
-        <div className="bg-white border rounded-xl p-4"><p className="text-3xl font-black text-orange-600">{newSubmissions}</p><p className="text-xs text-gray-500">Corrections reçues</p></div>
-        <div className="bg-white border rounded-xl p-4"><p className="text-3xl font-black text-orange-600">{partnersOpened.length}/3</p><p className="text-xs text-gray-500">Partenaires connectés</p></div>
+        <div className="bg-white border rounded-xl p-4"><p className="text-3xl font-black text-primary">{events.length}</p><p className="text-xs text-muted-foreground">Visites partenaires</p></div>
+        <div className="bg-white border rounded-xl p-4"><p className="text-3xl font-black text-primary">{unreadMessages}</p><p className="text-xs text-muted-foreground">Messages non lus</p></div>
+        <div className="bg-white border rounded-xl p-4"><p className="text-3xl font-black text-primary">{newSubmissions}</p><p className="text-xs text-muted-foreground">Corrections reçues</p></div>
+        <div className="bg-white border rounded-xl p-4"><p className="text-3xl font-black text-primary">{partnersOpened.length}/3</p><p className="text-xs text-muted-foreground">Partenaires connectés</p></div>
       </div>
 
       {/* Alertes */}
@@ -105,13 +105,13 @@ export default function AdminDashboardPage() {
           {partnerLinks.map(p => {
             const opened = partnersOpened.includes(p.code);
             return (
-              <div key={p.code} className="flex items-center justify-between text-sm p-2 bg-gray-50 rounded-lg">
+              <div key={p.code} className="flex items-center justify-between text-sm p-2 bg-muted rounded-lg">
                 <span className="font-semibold">{p.name}</span>
-                <span className={`px-2 py-0.5 rounded text-xs font-bold ${opened ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}>
+                <span className={`px-2 py-0.5 rounded text-xs font-bold ${opened ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-muted-foreground'}`}>
                   {opened ? '✅ Ouvert' : '⏳ Pas encore'}
                 </span>
-                <code className="text-xs text-gray-500 bg-white px-2 py-1 rounded border">{p.code}</code>
-                <button onClick={() => navigator.clipboard.writeText(`https://delikreol.com/partenaire?code=${p.code}`)} className="text-xs text-orange-600 hover:underline">Copier lien</button>
+                <code className="text-xs text-muted-foreground bg-white px-2 py-1 rounded border">{p.code}</code>
+                <button onClick={() => navigator.clipboard.writeText(`https://delikreol.com/partenaire?code=${p.code}`)} className="text-xs text-primary hover:underline">Copier lien</button>
               </div>
             );
           })}
@@ -124,9 +124,9 @@ export default function AdminDashboardPage() {
           <h2 className="font-bold mb-3">💬 Messages reçus</h2>
           <div className="space-y-2">
             {messages.slice(-5).reverse().map((m: any, i: number) => (
-              <div key={i} className="text-sm p-3 bg-gray-50 rounded-xl">
-                <p className="font-semibold">{m.nom || 'Anonyme'} <span className="text-gray-400 text-xs">{m.sujet}</span></p>
-                <p className="text-gray-600 text-xs">{m.message?.slice(0, 100)}</p>
+              <div key={i} className="text-sm p-3 bg-muted rounded-xl">
+                <p className="font-semibold">{m.nom || 'Anonyme'} <span className="text-muted-foreground text-xs">{m.sujet}</span></p>
+                <p className="text-muted-foreground text-xs">{m.message?.slice(0, 100)}</p>
               </div>
             ))}
           </div>
@@ -139,11 +139,11 @@ export default function AdminDashboardPage() {
           <h2 className="font-bold mb-3">📝 Corrections partenaires</h2>
           <div className="space-y-3">
             {submissions.slice(-5).reverse().map((s, i) => (
-              <div key={i} className="text-sm p-3 bg-gray-50 rounded-xl">
+              <div key={i} className="text-sm p-3 bg-muted rounded-xl">
                 <p className="font-semibold">{s.partnerName} <span className={`text-xs px-2 py-0.5 rounded-full ml-2 ${s.status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>{s.status}</span></p>
-                <p className="text-xs text-gray-500">{s.description?.slice(0, 80)}</p>
-                {s.remarques && <p className="text-xs text-orange-600 mt-1">📌 {s.remarques.slice(0, 80)}</p>}
-                <p className="text-xs text-gray-400 mt-1">{new Date(s.created_at).toLocaleString('fr-FR')}</p>
+                <p className="text-xs text-muted-foreground">{s.description?.slice(0, 80)}</p>
+                {s.remarques && <p className="text-xs text-primary mt-1">📌 {s.remarques.slice(0, 80)}</p>}
+                <p className="text-xs text-muted-foreground mt-1">{new Date(s.created_at).toLocaleString('fr-FR')}</p>
               </div>
             ))}
           </div>
@@ -155,9 +155,9 @@ export default function AdminDashboardPage() {
         <h2 className="font-bold mb-3">📤 Pack export</h2>
         <div className="space-y-2 text-sm">
           {partnerLinks.map(p => (
-            <div key={p.code} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+            <div key={p.code} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
               <span className="font-semibold w-44">{p.name}</span>
-              <button onClick={() => navigator.clipboard.writeText(`https://delikreol.com/partenaire?code=${p.code}`)} className="px-3 py-1 bg-orange-100 text-orange-700 rounded-lg text-xs font-bold hover:bg-orange-200">Copier lien</button>
+              <button onClick={() => navigator.clipboard.writeText(`https://delikreol.com/partenaire?code=${p.code}`)} className="px-3 py-1 bg-primary/[0.15] text-primary rounded-lg text-xs font-bold hover:bg-orange-200">Copier lien</button>
               <button onClick={() => navigator.clipboard.writeText(`Bonjour,\n\nVotre espace pilote DELIKREOL est prêt.\n\nLien :\nhttps://delikreol.com/partenaire?code=${p.code}\n\nCe lien vous permet d'envoyer vos corrections.\n\nVladimir — DELIKREOL`)} className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-bold hover:bg-green-200">Copier message WhatsApp</button>
             </div>
           ))}
@@ -170,7 +170,7 @@ export default function AdminDashboardPage() {
           <h2 className="font-bold mb-3">🕐 Activité récente</h2>
           <div className="space-y-1 text-xs">
             {events.slice(-10).reverse().map((e, i) => (
-              <p key={i} className="text-gray-500"><span className="text-gray-400">{new Date(e.time).toLocaleString('fr-FR')}</span> — {e.code} a ouvert son accès</p>
+              <p key={i} className="text-muted-foreground"><span className="text-muted-foreground">{new Date(e.time).toLocaleString('fr-FR')}</span> — {e.code} a ouvert son accès</p>
             ))}
           </div>
         </div>

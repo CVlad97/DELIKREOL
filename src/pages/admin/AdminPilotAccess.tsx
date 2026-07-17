@@ -39,9 +39,9 @@ export default function AdminPilotAccess() {
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-600">Pilote partenaires</p>
-        <h1 className="text-3xl font-black text-gray-900">Accès de test DELIKREOL</h1>
-        <p className="text-gray-600 mt-2 max-w-3xl">
+        <p className="text-xs font-black uppercase tracking-[0.2em] text-primary">Pilote partenaires</p>
+        <h1 className="text-3xl font-black text-foreground">Accès de test DELIKREOL</h1>
+        <p className="text-muted-foreground mt-2 max-w-3xl">
           Utilise ces liens pour un test réel limité. Ce ne sont pas des mots de passe : ce sont des accès pilotes pour corriger les fiches partenaires.
         </p>
       </div>
@@ -66,22 +66,22 @@ export default function AdminPilotAccess() {
           const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
 
           return (
-            <div key={partner.code} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <div key={partner.code} className="rounded-2xl border border-input bg-white p-5 shadow-sm">
               <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <h2 className="text-xl font-black text-gray-900">{partner.name}</h2>
-                  <p className="text-sm text-gray-500 mt-1">Code pilote : <span className="font-mono font-bold">{partner.code}</span></p>
-                  <a href={link} target="_blank" rel="noopener noreferrer" className="text-sm text-orange-600 hover:underline break-all mt-2 inline-flex items-center gap-1">
+                  <h2 className="text-xl font-black text-foreground">{partner.name}</h2>
+                  <p className="text-sm text-muted-foreground mt-1">Code pilote : <span className="font-mono font-bold">{partner.code}</span></p>
+                  <a href={link} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline break-all mt-2 inline-flex items-center gap-1">
                     {link}
                     <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
 
                 <div className="flex flex-wrap gap-2 shrink-0">
-                  <button onClick={() => copyText(partner.code, link)} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-sm font-bold hover:bg-gray-50">
+                  <button onClick={() => copyText(partner.code, link)} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-input text-sm font-bold hover:bg-muted">
                     <Copy className="w-4 h-4" /> Lien
                   </button>
-                  <button onClick={() => copyText(`${partner.code}-msg`, message)} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-sm font-bold hover:bg-gray-50">
+                  <button onClick={() => copyText(`${partner.code}-msg`, message)} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-input text-sm font-bold hover:bg-muted">
                     <Copy className="w-4 h-4" /> Message
                   </button>
                   <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-600 text-white text-sm font-bold hover:bg-green-700">
@@ -96,9 +96,9 @@ export default function AdminPilotAccess() {
 
       {copied && <div className="fixed bottom-5 right-5 rounded-xl bg-gray-900 text-white px-4 py-3 text-sm font-bold shadow-lg">Copié : {copied}</div>}
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-5">
-        <h2 className="font-black text-gray-900 mb-3">Checklist test réel</h2>
-        <ol className="list-decimal pl-5 text-sm text-gray-700 space-y-2">
+      <div className="rounded-2xl border border-input bg-white p-5">
+        <h2 className="font-black text-foreground mb-3">Checklist test réel</h2>
+        <ol className="list-decimal pl-5 text-sm text-foreground space-y-2">
           <li>Tester le lien en navigation privée sur téléphone.</li>
           <li>Vérifier que le nom partenaire s'affiche.</li>
           <li>Remplir responsable, téléphone, commune, modes, plats/prix.</li>

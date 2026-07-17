@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ScrollCarouselProps {
@@ -9,13 +9,6 @@ interface ScrollCarouselProps {
   subtitle?: string;
 }
 
-/**
- * Carrousel horizontal avec flèches de direction.
- * - Auto-rotation optionnelle (toutes les 5s par défaut)
- * - Flèches gauche/droite toujours visibles
- * - Pause au survol
- * - Swipe mobile natif
- */
 export function ScrollCarousel({
   children,
   autoPlay = false,
@@ -26,115 +19,112 @@ export function ScrollCarousel({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
   const updateScrollState = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 10);
-    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 10);
+    const element = scrollRef.current;
+    if (!element) return;
+    setCanScrollLeft(element.scrollLeft > 4);
+    setCanScrollRight(element.scrollLeft < element.scrollWidth - element.clientWidth - 4);
   }, []);
 
   const scrollBy = useCallback((direction: 'left' | 'right') => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const amount = el.clientWidth * 0.7;
-    el.scrollBy({ left: direction === 'right' ? amount : -amount, behavior: 'smooth' });
-    setTimeout(updateScrollState, 400);
+    const element = scrollRef.current;
+    if (!element) return;
+    const firstCard = element.firstElementChild as HTMLElement | null;
+    const amount = firstCard ? firstCard.getBoundingClientRect().width + 16 : element.clientWidth * 0.85;
+    element.scrollBy({ left: direction === 'right' ? amount : -amount, behavior: 'smooth' });
+    window.setTimeout(updateScrollState, 450);
   }, [updateScrollState]);
 
-  // Auto-play
   useEffect(() => {
-    if (!autoPlay || isPaused) return;
-    const timer = setInterval(() => {
-      const el = scrollRef.current;
-      if (!el) return;
-      if (el.scrollLeft >= el.scrollWidth - el.clientWidth - 10) {
-        el.scrollTo({ left: 0, behavior: 'smooth' });
-      } else {
-        scrollBy('right');
-      }
-    }, interval);
-    return () => clearInterval(timer);
-  }, [autoPlay, interval, isPaused, scrollBy]);
+    const element = scrollRef.current;
+    if (!element) return undefined;
 
-  useEffect(() => {
+    const resizeObserver = new ResizeObserver(updateScrollState);
+    resizeObserver.observe(element);
     updateScrollState();
-    const el = scrollRef.current;
-    if (el) el.addEventListener('scroll', updateScrollState, { passive: true });
-    return () => { if (el) el.removeEventListener('scroll', updateScrollState); };
+    element.addEventListener('scroll', updateScrollState, { passive: true });
+
+    return () => {
+      resizeObserver.disconnect();
+      element.removeEventListener('scroll', updateScrollState);
+    };
   }, [updateScrollState]);
+
+  useEffect(() => {
+    if (!autoPlay || isPaused || !canScrollRight) return undefined;
+    const timer = window.setInterval(() => scrollBy('right'), interval);
+    return () => window.clearInterval(timer);
+  }, [autoPlay, canScrollRight, interval, isPaused, scrollBy]);
 
   return (
-    <div
-      className="relative group"
+    <section
+      className="group relative w-full min-w-0 overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onFocusCapture={() => setIsPaused(true)}
+      onBlurCapture={() => setIsPaused(false)}
+      aria-label={title || 'Carrousel'}
     >
-      {/* Header */}
       {(title || subtitle) && (
-        <div className="flex items-end justify-between mb-4">
-          <div>
-            {title && <h2 className="text-2xl font-black text-gray-900">{title}</h2>}
-            {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
+          <div className="min-w-0">
+            {title && <h2 className="text-2xl font-black text-foreground">{title}</h2>}
+            {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
           </div>
-          <div className="flex gap-2">
+          <div className="flex shrink-0 gap-2">
             <button
+              type="button"
               onClick={() => scrollBy('left')}
               disabled={!canScrollLeft}
-              className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all ${
-                canScrollLeft
-                  ? 'border-gray-200 text-gray-600 hover:border-orange-300 hover:text-orange-500 hover:bg-orange-50'
-                  : 'border-gray-100 text-gray-200 cursor-not-allowed'
-              }`}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-foreground shadow-sm transition hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-35"
+              aria-label="Éléments précédents"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="h-5 w-5" />
             </button>
             <button
+              type="button"
               onClick={() => scrollBy('right')}
               disabled={!canScrollRight}
-              className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all ${
-                canScrollRight
-                  ? 'border-gray-200 text-gray-600 hover:border-orange-300 hover:text-orange-500 hover:bg-orange-50'
-                  : 'border-gray-100 text-gray-200 cursor-not-allowed'
-              }`}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-foreground shadow-sm transition hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-35"
+              aria-label="Éléments suivants"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="h-5 w-5" />
             </button>
           </div>
         </div>
       )}
 
-      {/* Scroll container */}
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-1 px-1"
+        className="scroll-carousel-track flex w-full min-w-0 gap-4 overflow-x-auto overscroll-x-contain scroll-smooth pb-4 snap-x snap-mandatory scrollbar-hide"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {children}
       </div>
 
-      {/* Overlay flèches latérales (visible quand pas de header) */}
-      {!title && (
-        <>
-          {canScrollLeft && (
-            <button
-              onClick={() => scrollBy('left')}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center text-gray-600 hover:text-orange-500 hover:border-orange-200 transition-all opacity-0 group-hover:opacity-100 z-10"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-          )}
-          {canScrollRight && (
-            <button
-              onClick={() => scrollBy('right')}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center text-gray-600 hover:text-orange-500 hover:border-orange-200 transition-all opacity-0 group-hover:opacity-100 z-10"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          )}
-        </>
+      {!title && canScrollLeft && (
+        <button
+          type="button"
+          onClick={() => scrollBy('left')}
+          className="absolute left-2 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white/95 text-foreground shadow-lg transition hover:text-primary md:flex"
+          aria-label="Éléments précédents"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
       )}
-    </div>
+
+      {!title && canScrollRight && (
+        <button
+          type="button"
+          onClick={() => scrollBy('right')}
+          className="absolute right-2 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white/95 text-foreground shadow-lg transition hover:text-primary md:flex"
+          aria-label="Éléments suivants"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      )}
+    </section>
   );
 }

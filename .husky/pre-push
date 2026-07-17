@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+
+echo "🔄 Pre-push: running typecheck, lint, build, test, audit:links..."
+
+echo "--- Typecheck ---"
+npm run typecheck || { echo "❌ Typecheck failed"; exit 1; }
+
+echo "--- Lint ---"
+npm run lint || { echo "❌ Lint failed"; exit 1; }
+
+echo "--- Build ---"
+npm run build || { echo "❌ Build failed"; exit 1; }
+
+echo "--- Test ---"
+npm run test || { echo "❌ Tests failed"; exit 1; }
+
+echo "--- Audit:links ---"
+npm run audit:links || { echo "⚠️  Audit:links completed with warnings"; }
+
+echo "✅ Pre-push validation passed!"

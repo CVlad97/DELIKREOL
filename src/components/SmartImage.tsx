@@ -18,11 +18,13 @@ interface SmartImageProps {
   loading?: 'lazy' | 'eager';
   priority?: boolean;
   fallbackSrc?: string;
+  finalFallbackSrc?: string;
   containerClassName?: string;
   imgClassName?: string;
   decorative?: boolean;
   onLoad?: () => void;
   onError?: () => void;
+  onFallbackLevelChange?: (level: number) => void;
   onClick?: () => void;
 }
 
@@ -55,22 +57,26 @@ export function SmartImage({
   loading: loadingProp,
   priority = false,
   fallbackSrc,
+  finalFallbackSrc,
   containerClassName = '',
   imgClassName = '',
   decorative = false,
   onLoad,
   onError,
+  onFallbackLevelChange,
   onClick,
 }: SmartImageProps) {
-  const [activeSrc, setActiveSrc] = useState(src);
+  const initialSrc = src || fallbackSrc || finalFallbackSrc || FALLBACK_IMG;
+  const [activeSrc, setActiveSrc] = useState(initialSrc);
   const [loaded, setLoaded] = useState(false);
   const [fallbackLevel, setFallbackLevel] = useState(0);
 
   useEffect(() => {
-    setActiveSrc(src);
+    setActiveSrc(src || fallbackSrc || finalFallbackSrc || FALLBACK_IMG);
     setLoaded(false);
     setFallbackLevel(0);
-  }, [src]);
+    onFallbackLevelChange?.(0);
+  }, [src, fallbackSrc, finalFallbackSrc, onFallbackLevelChange]);
 
   const defaults = KIND_DEFAULTS[kind];
   const fit = fitProp ?? defaults.fit;
@@ -79,18 +85,27 @@ export function SmartImage({
   const fetchPriority: 'high' | 'low' | 'auto' = priority ? 'high' : 'auto';
   const effectiveAlt = decorative ? '' : alt;
 
+  const switchFallback = (nextSrc: string, level: number) => {
+    setActiveSrc(nextSrc);
+    setFallbackLevel(level);
+    onFallbackLevelChange?.(level);
+  };
+
   const handleImageError = () => {
     setLoaded(false);
 
     if (fallbackLevel === 0 && fallbackSrc && fallbackSrc !== activeSrc) {
-      setActiveSrc(fallbackSrc);
-      setFallbackLevel(1);
+      switchFallback(fallbackSrc, 1);
+      return;
+    }
+
+    if (fallbackLevel <= 1 && finalFallbackSrc && finalFallbackSrc !== activeSrc) {
+      switchFallback(finalFallbackSrc, 2);
       return;
     }
 
     if (activeSrc !== FALLBACK_IMG) {
-      setActiveSrc(FALLBACK_IMG);
-      setFallbackLevel(2);
+      switchFallback(FALLBACK_IMG, 3);
       onError?.();
     }
   };
@@ -104,10 +119,10 @@ export function SmartImage({
         height: height || undefined,
         backgroundColor: defaults.background || undefined,
       }}
+      data-smart-image-container="true"
+      data-fallback-level={fallbackLevel}
     >
-      {!loaded && (
-        <div className="absolute inset-0 animate-pulse bg-muted" aria-hidden="true" />
-      )}
+      {!loaded && <div className="absolute inset-0 animate-pulse bg-muted" aria-hidden="true" />}
       <img
         data-smart-image="true"
         src={activeSrc}

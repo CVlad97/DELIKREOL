@@ -52,7 +52,7 @@ export default function AdminInvoices() {
                 <td>{inv.customer_name}</td>
                 <td>{inv.total_ttc} {inv.currency}</td>
                 <td>
-                  <span className={`px-2 py-0.5 text-xs rounded-full ${inv.status === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                  <span className={`px-2 py-0.5 text-xs rounded-full ${inv.status === 'paid' ? 'bg-success/[0.15] text-success' : 'bg-amber-100 text-amber-700'}`}>
                     {inv.status}
                   </span>
                 </td>

@@ -60,7 +60,7 @@ function formatDate(value?: string | null) {
 function statusClass(status?: string | null) {
   switch (status) {
     case 'paid':
-      return 'bg-emerald-100 text-emerald-700';
+      return 'bg-success/[0.15] text-success';
     case 'issued':
       return 'bg-blue-100 text-blue-700';
     case 'cancelled':
@@ -219,7 +219,7 @@ export function AdminFinance() {
           </button>
           <button
             onClick={handleCreateTestInvoice}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary/90 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary disabled:opacity-60"
             disabled={saving}
           >
             <PlusCircle className="w-4 h-4" />
@@ -249,7 +249,7 @@ export function AdminFinance() {
         </div>
         <div className="rounded-2xl border bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Total TTC</p>
-          <p className="mt-2 text-3xl font-black text-emerald-600">{formatMoney(stats.totalTtc)}</p>
+          <p className="mt-2 text-3xl font-black text-success">{formatMoney(stats.totalTtc)}</p>
         </div>
         <div className="rounded-2xl border bg-card p-5">
           <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Payées / attente</p>

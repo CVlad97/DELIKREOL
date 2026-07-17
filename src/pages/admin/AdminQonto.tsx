@@ -83,7 +83,7 @@ const statusLabel = (status: string): string => {
 
 const sideBadge = (side: string): string => {
   switch (side) {
-    case 'credit': return 'text-emerald-600 bg-emerald-50';
+    case 'credit': return 'text-success bg-success/10';
     case 'debit': return 'text-red-600 bg-red-50';
     case 'both': return 'text-blue-600 bg-blue-50';
     default: return '';
@@ -160,7 +160,7 @@ export function AdminQonto() {
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="btn btnPrimary inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary/90 transition-all disabled:opacity-50"
+            className="btn btnPrimary inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary transition-all disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             Actualiser
@@ -238,7 +238,7 @@ function OverviewTab() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: 'Comptes bancaires', value: DELIKREOL_BANK_ACCOUNTS.length, icon: Wallet, color: 'text-primary' },
-          { label: 'Catégories', value: DELIKREOL_CATEGORIES.length, icon: Tag, color: 'text-emerald-500' },
+          { label: 'Catégories', value: DELIKREOL_CATEGORIES.length, icon: Tag, color: 'text-success' },
           { label: 'Cartes', value: DELIKREOL_CARDS.length, icon: CreditCard, color: 'text-amber-500' },
           { label: 'Labels', value: DELIKREOL_LABELS.length, icon: Tag, color: 'text-violet-500' },
         ].map(stat => {
@@ -386,7 +386,7 @@ function CategoriesTab() {
 
       {/* Crédits */}
       <div>
-        <h3 className="font-bold text-emerald-600 mb-3 flex items-center gap-2">
+        <h3 className="font-bold text-success mb-3 flex items-center gap-2">
           <TrendingUp className="w-4 h-4" />
           Crédits (Revenus)
         </h3>
@@ -542,7 +542,7 @@ function WorkflowTab() {
             {/* Numéro d'étape */}
             <div className="flex flex-col items-center">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${
-                step.autoReconcile ? 'bg-emerald-500' : 'bg-amber-500'
+                step.autoReconcile ? 'bg-success' : 'bg-amber-500'
               }`}>
                 {step.step}
               </div>
@@ -560,7 +560,7 @@ function WorkflowTab() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium ${
-                    step.autoReconcile ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+                    step.autoReconcile ? 'bg-success/10 text-success' : 'bg-amber-50 text-amber-700'
                   }`}>
                     {step.autoReconcile ? (
                       <><CheckCircle2 className="w-3 h-3" /> Auto</>
@@ -592,7 +592,7 @@ function WorkflowTab() {
             </div>
           </div>
           <button
-            className="btn btnPrimary inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary/90 transition-all"
+            className="btn btnPrimary inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary transition-all"
             onClick={() => {
               const headers = 'Étape;Nom;Compte;Catégorie;Auto';
               const rows = DELIKREOL_RECONCILIATION_WORKFLOW.map(s =>
@@ -648,7 +648,7 @@ function PlanTab() {
 
               <div className="mb-4">
                 <span className={`text-xs font-bold uppercase tracking-wider ${
-                  plan.tier === 'solo' ? 'text-emerald-600' : 'text-violet-600'
+                  plan.tier === 'solo' ? 'text-success' : 'text-violet-600'
                 }`}>
                   {plan.tier === 'solo' ? 'Solo' : 'Team'}
                 </span>
@@ -676,7 +676,7 @@ function PlanTab() {
                 {plan.cashbackRate > 0 && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Cashback</span>
-                    <span className="text-emerald-600 font-bold">{plan.cashbackRate}%</span>
+                    <span className="text-success font-bold">{plan.cashbackRate}%</span>
                   </div>
                 )}
               </div>
@@ -684,7 +684,7 @@ function PlanTab() {
               <div className="space-y-1.5 mb-4">
                 {plan.features.slice(0, 5).map((feature, i) => (
                   <div key={i} className="flex items-start gap-2 text-xs">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0 mt-0.5" />
                     <span className="text-foreground">{feature}</span>
                   </div>
                 ))}
@@ -696,7 +696,7 @@ function PlanTab() {
                 rel="noopener noreferrer"
                 className={`block w-full text-center py-2.5 rounded-xl font-bold text-sm transition-all ${
                   isRecommended
-                    ? 'bg-primary text-white hover:bg-primary/90'
+                    ? 'bg-primary text-white hover:bg-primary'
                     : 'bg-muted/50 text-foreground hover:bg-muted/70 border border-border/30'
                 }`}
               >

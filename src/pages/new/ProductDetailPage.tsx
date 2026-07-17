@@ -1,29 +1,35 @@
-import { useParams, Link } from 'react-router-dom';
-import { ShoppingCart, ChefHat, MapPin, ArrowLeft, MessageCircle, AlertTriangle } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import {
+  AlertTriangle,
+  ChefHat,
+  MapPin,
+  MessageCircle,
+  Minus,
+  Plus,
+  ShoppingCart,
+} from 'lucide-react';
+import { Layout } from '../../components/layout/Layout';
+import { BackBar } from '../../components/BackBar';
+import { ProductThumbnail } from '../../components/ProductThumbnail';
 import { mockProducts } from '../../data/mockCatalog';
 import { traiteurSpaces } from '../../data/traiteurs';
 import { useCart } from '../../contexts/CartContext';
 import { useToast } from '../../contexts/ToastContext';
-import { useEffect, useMemo, useState } from 'react';
-import type { Product } from '../../types';
+import { resolveProductThumbnail } from '../../services/catalogImageResolver';
 import { trackPublicView } from '../../services/metricsService';
 import { setPageMeta } from '../../services/seo';
+import type { Product } from '../../types';
 
 const WHATSAPP_NUMBER = '596696653589';
 
-function localToProduct(p: any): Product {
-  return {
-    id: p.id,
-    vendor_id: p.vendor || '',
-    name: p.name,
-    description: p.description || null,
-    category: p.category || '',
-    price: p.price,
-    image_url: p.image || null,
-    is_available: true,
-    stock_quantity: null,
-    created_at: new Date().toISOString(),
-  };
+function slugify(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 export function ProductDetailPage() {
@@ -32,147 +38,220 @@ export function ProductDetailPage() {
   const { showSuccess } = useToast();
   const [quantity, setQuantity] = useState(1);
 
-  const product = useMemo(() => {
-    // Search in mock products
-    const mock = mockProducts.find(p => p.id === slug);
-    if (mock) return { ...mock, source: 'mock' as const };
-    // Search in traiteur menus
-    for (const t of traiteurSpaces) {
-      const item = t.menuItems?.find((m: any) => m.id === slug);
-      if (item) return { ...item, vendor: t.name, zone: t.commune || '', source: 'traiteur' as const };
+  const productData = useMemo(() => {
+    const mock = mockProducts.find((product) => product.id === slug);
+    if (mock) {
+      const vendorSpace = traiteurSpaces.find((space) => space.name === mock.vendor) || null;
+      return { product: mock, vendorSpace };
     }
+
+    for (const space of traiteurSpaces) {
+      const item = space.menuItems.find((menuItem) => (
+        `${space.slug}-${slugify(menuItem.name)}` === slug ||
+        (menuItem as { id?: string }).id === slug
+      ));
+
+      if (item) {
+        return {
+          product: {
+            id: `${space.slug}-${slugify(item.name)}`,
+            name: item.name,
+            vendor: space.name,
+            price: item.price,
+            category: item.category,
+            image: item.image ?? undefined,
+            description: item.description,
+            zone: space.commune || space.zone,
+            available: true,
+            featured: item.featured,
+          },
+          vendorSpace: space,
+        };
+      }
+    }
+
     return null;
   }, [slug]);
 
   useEffect(() => {
-    if (product) {
-      document.title = `${product.name} — DeliKreol`;
-      setPageMeta(`${product.name} — DeliKreol | ${product.vendor}`, `${product.name} chez ${product.vendor} — Commandez en ligne sur DeliKreol. Livraison Martinique.`);
+    if (productData) {
+      const { product } = productData;
+      setPageMeta(
+        `${product.name} — DeliKreol | ${product.vendor}`,
+        `${product.name} chez ${product.vendor}. Commandez en ligne sur DeliKreol en Martinique.`,
+      );
     } else {
-      document.title = 'Produit introuvable — DeliKreol';
-      setPageMeta('Produit introuvable — DeliKreol', 'Ce produit n\'est pas disponible sur DeliKreol.');
+      setPageMeta('Produit introuvable — DeliKreol', 'Ce produit n’est pas disponible sur DeliKreol.');
     }
     trackPublicView();
-  }, [product]);
+  }, [productData]);
 
-  if (!product) {
+  if (!productData) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center px-4">
-        <div className="text-center">
-          <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
-          <h1 className="text-xl font-bold mb-2">Produit introuvable</h1>
-          <p className="text-muted-foreground mb-6">Ce produit n'existe pas ou n'est plus disponible.</p>
-          <Link to="/catalogue" className="text-primary font-semibold hover:underline">← Retour au catalogue</Link>
-        </div>
-      </div>
+      <Layout>
+        <main className="flex min-h-[60vh] items-center justify-center px-4">
+          <div className="text-center">
+            <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-secondary" />
+            <h1 className="text-2xl font-black">Produit introuvable</h1>
+            <p className="mt-2 text-muted-foreground">Ce produit n’existe pas ou n’est plus disponible.</p>
+            <Link to="/catalogue" className="mt-6 inline-flex rounded-xl bg-primary px-5 py-3 font-bold text-primary-foreground">
+              Retour au catalogue
+            </Link>
+          </div>
+        </main>
+      </Layout>
     );
   }
 
-  const hasRealImage = product.image && !product.image.includes('photo-a-confirmer');
+  const { product, vendorSpace } = productData;
+  const partnerImage = vendorSpace?.heroImage || vendorSpace?.galleryImages?.[0] || vendorSpace?.portraitImage || null;
+  const thumbnail = resolveProductThumbnail({
+    src: product.image,
+    partnerImage,
+    name: product.name,
+    vendor: product.vendor,
+    category: product.category,
+  });
   const vendorName = product.vendor || 'Prestataire';
-  const zone = product.zone || 'Martinique';
-  const sides = (product as any).sides || [];
+  const zone = product.zone || vendorSpace?.commune || vendorSpace?.zone || 'Martinique';
   const description = product.description || 'Description à compléter avec le prestataire.';
+  const sides = (product as { sides?: string[] }).sides || [];
+
+  const cartProduct: Product = {
+    id: product.id,
+    vendor_id: vendorName,
+    name: product.name,
+    description: product.description || null,
+    category: product.category,
+    price: product.price,
+    image_url: thumbnail.src,
+    is_available: product.available !== false,
+    stock_quantity: null,
+    created_at: new Date().toISOString(),
+  };
 
   const handleAddToCart = () => {
-    const cartProduct = localToProduct(product);
-    for (let i = 0; i < quantity; i++) {
-      addItem(cartProduct);
-    }
+    for (let index = 0; index < quantity; index += 1) addItem(cartProduct);
     showSuccess(`${product.name} (x${quantity}) ajouté au panier`);
   };
 
   const whatsappMessage = encodeURIComponent(
     `Bonjour DeliKreol, je souhaite des informations sur :\n` +
     `Produit : ${product.name}\n` +
-    `Prix : ${product.price}€\n` +
+    `Prix : ${product.price} €\n` +
     `Traiteur : ${vendorName}\n` +
-    `Commune : ${zone}`
+    `Commune : ${zone}`,
   );
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <Link to="/catalogue" className="inline-flex items-center gap-2 text-primary hover:underline mb-6">
-        <ArrowLeft className="w-4 h-4" />
-        Retour au catalogue
-      </Link>
+    <Layout>
+      <BackBar label="Catalogue" backTo="/catalogue" />
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="grid gap-8 lg:grid-cols-[1.05fr_.95fr]">
+          <section className="overflow-hidden rounded-3xl border border-border bg-white shadow-sm">
+            <ProductThumbnail
+              src={product.image}
+              partnerImage={partnerImage}
+              productName={product.name}
+              vendorName={vendorName}
+              category={product.category}
+              aspectRatio="1 / 1"
+              priority
+              containerClassName="w-full"
+              imgClassName="product-photo-natural"
+              showBadge
+            />
+          </section>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        {/* Image */}
-        <div className="aspect-square rounded-2xl overflow-hidden bg-muted">
-          {hasRealImage && product.image ? (
-            <img loading="lazy" src={product.image} alt={product.name} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50 text-amber-600">
-              <ChefHat className="w-16 h-16 mb-3 opacity-40" />
-              <span className="text-sm font-medium">Photo à confirmer</span>
+          <section className="rounded-3xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <div className="flex flex-wrap gap-2">
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
+                {product.category || 'Produit local'}
+              </span>
+              <span className={`rounded-full px-3 py-1 text-xs font-bold ${
+                product.available !== false
+                  ? 'bg-success/10 text-success'
+                  : 'bg-secondary/15 text-secondary'
+              }`}>
+                {product.available !== false ? 'Disponible' : 'Sur confirmation'}
+              </span>
             </div>
-          )}
-        </div>
 
-        {/* Details */}
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full font-medium">{product.category || 'Plats'}</span>
-            <span className="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full">Disponible</span>
-          </div>
+            <h1 className="mt-4 text-3xl font-black tracking-tight text-foreground sm:text-4xl">{product.name}</h1>
+            <p className="mt-3 text-3xl font-black text-primary">{product.price.toFixed(2).replace('.', ',')} €</p>
 
-          <h1 className="text-3xl font-display font-bold text-foreground mb-2">{product.name}</h1>
-          <p className="text-2xl font-bold text-primary mb-4">{product.price} €</p>
+            <div className="mt-5 flex flex-wrap gap-4 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-2"><ChefHat className="h-4 w-4 text-primary" />{vendorName}</span>
+              <span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" />{zone}</span>
+            </div>
 
-          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-            <span className="inline-flex items-center gap-1"><ChefHat className="w-4 h-4" />{vendorName}</span>
-            <span className="inline-flex items-center gap-1"><MapPin className="w-4 h-4" />{zone}</span>
-          </div>
+            <div className="mt-6 border-t border-border pt-6">
+              <h2 className="font-black text-foreground">Description</h2>
+              <p className="mt-2 leading-relaxed text-muted-foreground">{description}</p>
+            </div>
 
-          <div className="border-t pt-4 mb-4">
-            <h3 className="font-semibold mb-2">Description</h3>
-            <p className="text-muted-foreground">{description}</p>
-          </div>
-
-          {sides.length > 0 && (
-            <div className="border-t pt-4 mb-4">
-              <h3 className="font-semibold mb-2">Accompagnements</h3>
-              <div className="flex flex-wrap gap-2">
-                {sides.map((s: string) => (
-                  <span key={s} className="text-xs px-3 py-1 bg-secondary/10 rounded-full">{s}</span>
-                ))}
+            {sides.length > 0 && (
+              <div className="mt-6 border-t border-border pt-6">
+                <h2 className="font-black text-foreground">Accompagnements</h2>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {sides.map((side) => (
+                    <span key={side} className="rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold text-foreground">
+                      {side}
+                    </span>
+                  ))}
+                </div>
               </div>
+            )}
+
+            {thumbnail.source !== 'product' && (
+              <div className="mt-6 rounded-2xl border border-secondary/30 bg-secondary/10 p-4 text-sm text-secondary">
+                <p className="font-bold">Photo produit en cours de validation</p>
+                <p className="mt-1">Le visuel affiché est identifié comme {thumbnail.source === 'partner' ? 'un visuel du partenaire' : 'une vignette temporaire'}.</p>
+              </div>
+            )}
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <div className="inline-flex min-h-12 items-center justify-center overflow-hidden rounded-xl border border-border bg-white">
+                <button
+                  type="button"
+                  onClick={() => setQuantity((value) => Math.max(1, value - 1))}
+                  className="inline-flex h-12 w-12 items-center justify-center hover:bg-muted"
+                  aria-label="Réduire la quantité"
+                >
+                  <Minus className="h-4 w-4" />
+                </button>
+                <span className="min-w-12 text-center font-black" aria-live="polite">{quantity}</span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity((value) => value + 1)}
+                  className="inline-flex h-12 w-12 items-center justify-center hover:bg-muted"
+                  aria-label="Augmenter la quantité"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-black text-primary-foreground transition hover:bg-primary"
+              >
+                <ShoppingCart className="h-5 w-5" /> Ajouter au panier
+              </button>
             </div>
-          )}
 
-          <div className="border-t pt-4 mb-4">
-            <p className="text-xs text-amber-600 flex items-center gap-1">
-              <AlertTriangle className="w-3 h-3" />
-              Allergènes à confirmer. Horaires, retrait et livraison à confirmer avec le prestataire.
-            </p>
-          </div>
-
-          {/* Quantity & Add to cart */}
-          <div className="flex items-center gap-4 mb-4">
-            <div className="flex items-center border rounded-xl overflow-hidden">
-              <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="px-3 py-2 hover:bg-muted transition-colors">−</button>
-              <span className="px-4 py-2 font-semibold">{quantity}</span>
-              <button onClick={() => setQuantity(q => q + 1)} className="px-3 py-2 hover:bg-muted transition-colors">+</button>
-            </div>
-            <button onClick={handleAddToCart} className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/90 transition-colors">
-              <ShoppingCart className="w-5 h-5" />
-              Ajouter au panier
-            </button>
-          </div>
-
-          <a
-            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMessage}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors"
-          >
-            <MessageCircle className="w-5 h-5" />
-            Poser une question via WhatsApp
-          </a>
+            <a
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMessage}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-success px-6 py-3 font-black text-success-foreground transition hover:brightness-95"
+            >
+              <MessageCircle className="h-5 w-5" /> Poser une question via WhatsApp
+            </a>
+          </section>
         </div>
-      </div>
-    </div>
+      </main>
+    </Layout>
   );
 }
 

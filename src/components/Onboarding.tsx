@@ -10,13 +10,13 @@ const slides = [
     icon: Store,
     title: 'Découvrez les saveurs de Martinique',
     description: 'Explorez des restaurants, producteurs locaux et commerçants près de chez vous',
-    color: 'from-emerald-400 to-teal-500',
+    color: 'from-success to-accent',
   },
   {
     icon: ShoppingBag,
     title: 'Commandez en quelques clics',
     description: 'Parcourez les menus, ajoutez vos produits préférés et passez commande facilement',
-    color: 'from-amber-400 to-orange-500',
+    color: 'from-secondary to-primary/80',
   },
   {
     icon: Truck,
@@ -53,7 +53,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   const Icon = slide.icon;
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-emerald-600 to-teal-700 dark:from-gray-900 dark:to-gray-800 z-50 flex flex-col">
+    <div className="fixed inset-0 bg-gradient-to-br from-success to-accent dark:from-gray-900 dark:to-gray-800 z-50 flex flex-col">
       <div className="flex justify-end p-6">
         <button
           onClick={handleSkip}
@@ -90,7 +90,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       <div className="p-6">
         <button
           onClick={handleNext}
-          className="w-full bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl transition-shadow flex items-center justify-center gap-2"
+          className="w-full bg-white dark:bg-gray-800 text-success dark:text-success py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl transition-shadow flex items-center justify-center gap-2"
         >
           {currentSlide < slides.length - 1 ? 'Suivant' : 'Commencer'}
           <ChevronRight size={24} />

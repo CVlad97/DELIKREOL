@@ -31,6 +31,12 @@ import {
   martiniqueCommunes,
   normalizeCommuneQuery,
 } from '../../data/martiniqueCommunes';
+import { OrderSummaryByPartner, groupItemsByPartner } from '../../components/OrderSummaryByPartner';
+import type { Product } from '../../lib/supabase';
+
+interface CartItem extends Product {
+  quantity: number;
+}
 
 const WHATSAPP_NUMBER = '596696653589';
 
@@ -56,6 +62,68 @@ function formatPhoneError(): string {
   return 'Merci d\'indiquer un numéro WhatsApp valide, par exemple 0696 XX XX XX ou +596 696 XX XX XX.';
 }
 
+/**
+ * Construit le message WhatsApp complet pour une commande.
+ * Inclut le n° de commande pour dédoublonnage côté partenaire.
+ */
+function buildWhatsAppOrderMessage(params: {
+  items: CartItem[];
+  total: number;
+  mode: 'retrait' | 'relais' | 'livraison';
+  commune: string;
+  creneauText: string;
+  notes: string;
+  traiteurs: string[];
+  phone: string;
+  orderId: string;
+}): string {
+  const { items, total, mode, commune, creneauText, notes, traiteurs, phone, orderId } = params;
+  const modeFee = DELIVERY_FEES[mode]?.fee || 0;
+  const partnerGroups = groupItemsByPartner(items);
+  const productList = partnerGroups
+    .map((group) => {
+      const lines = group.items
+        .map(
+          (item) =>
+            `  • ${item.name} x${item.quantity} — ${(item.price * item.quantity).toFixed(2)}€`
+        )
+        .join('\n');
+      const header = partnerGroups.length > 1
+        ? `🏪 ${group.name} (sous-total ${group.subtotal.toFixed(2)}€) :\n`
+        : '';
+      return `${header}${lines}`;
+    })
+    .join('\n\n');
+
+  const traiteurText = traiteurs.length > 0 ? traiteurs.join(', ') : 'Non précisé';
+
+  const lines = [
+    'Bonjour 👋 Nouvelle commande DeliKreol.',
+    `📋 Commande n° ${orderId}`,
+    '',
+    'Produits :',
+    productList,
+    '',
+    `Total : ${(total + modeFee).toFixed(2).replace('.', ',')} € (dont ${modeFee.toFixed(2).replace('.', ',')} € de ${mode === 'retrait' ? 'retrait' : mode === 'relais' ? 'point relais' : 'livraison'})`,
+    `Commune : ${commune || 'Non précisée'}`,
+    `Type : ${mode === 'retrait' ? 'Retrait' : mode === 'relais' ? 'Point relais' : 'Livraison'}`,
+    `Créneau(x) souhaité(s) : ${creneauText || 'Non précisé'}`,
+    `Traiteur : ${traiteurText}`,
+    phone ? `Téléphone : ${phone}` : '',
+    '',
+    mode === 'livraison'
+      ? `Livraison éloignée possible à partir de 40 € de commande, selon validation du prestataire et disponibilité DeliKreol.`
+      : '',
+    notes ? `\nMessage : ${notes}` : '',
+    '',
+    'Merci de confirmer la disponibilité avec le prestataire.',
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  return lines;
+}
+
 export default function CartPage() {
   const { items, updateQuantity, removeItem, clearCart, total, itemCount } = useCart();
   const { showSuccess, showError } = useToast();
@@ -74,6 +142,7 @@ export default function CartPage() {
   const [messageSent, setMessageSent] = useState(false);
   const [preparedMessage, setPreparedMessage] = useState('');
   const [orderNumber, setOrderNumber] = useState('');
+  const [whatsappShareUrl, setWhatsappShareUrl] = useState('');
   const [checkoutStatus, setCheckoutStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [savedField, setSavedField] = useState<string | null>(null);
   const panierRef = useRef<HTMLDivElement>(null);
@@ -159,47 +228,6 @@ export default function CartPage() {
 
   const hasMultipleVendors = traiteurs.length > 1;
 
-  // Build WhatsApp message
-  const whatsappMessage = useMemo(() => {
-    if (items.length === 0) return '';
-    const modeFee = DELIVERY_FEES[mode]?.fee || 0;
-
-    const productList = items
-      .map(
-        (item) =>
-          `• ${item.name} x${item.quantity} — ${(item.price * item.quantity).toFixed(2)}€`
-      )
-      .join('\n');
-
-    const traiteurText = traiteurs.length > 0 ? traiteurs.join(', ') : 'Non précisé';
-    const creneauText = getCreneauText();
-
-    const lines = [
-      'Bonjour 👋 Nouvelle commande DeliKreol.',
-      '',
-      `Produits :`,
-      productList,
-      '',
-      `Total : ${(total + modeFee).toFixed(2).replace('.', ',')} € (dont ${modeFee.toFixed(2).replace('.', ',')} € de ${mode === 'retrait' ? 'retrait' : mode === 'relais' ? 'point relais' : 'livraison'})`,
-      `Commune : ${commune || 'Non précisée'}`,
-      `Type : ${mode === 'retrait' ? 'Retrait' : mode === 'relais' ? 'Point relais' : 'Livraison'}`,
-      `Créneau(x) souhaité(s) : ${creneauText || 'Non précisé'}`,
-      `Traiteur : ${traiteurText}`,
-      phone ? `Téléphone : ${phone}` : '',
-      '',
-      mode === 'livraison' ? `Livraison éloignée possible à partir de 40 € de commande, selon validation du prestataire et disponibilité DeliKreol.` : '',
-      notes ? `\nMessage : ${notes}` : '',
-      '',
-      'Merci de confirmer la disponibilité avec le prestataire.',
-    ]
-      .filter(Boolean)
-      .join('\n');
-
-    return lines;
-  }, [items, total, commune, mode, getCreneauText, notes, traiteurs, phone]);
-
-  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMessage)}`;
-
   const handleWhatsAppClick = () => {
     // Panier vide
     if (items.length === 0) {
@@ -250,14 +278,37 @@ export default function CartPage() {
       created_at: new Date().toISOString(),
     };
 
-    // Sauvegarder en local (fallback)
-    try {
-      const localOrders = JSON.parse(localStorage.getItem('delikreol_local_orders_v1') || '[]');
-      localOrders.push(order);
-      localStorage.setItem('delikreol_local_orders_v1', JSON.stringify(localOrders));
-    } catch (e) {
-      console.warn('[DELIKREOL] Échec sauvegarde locale:', e);
+    // Construire le message WhatsApp groupé par partenaire (avec n° de commande)
+    const whatsappText = buildWhatsAppOrderMessage({
+      items,
+      total,
+      mode,
+      commune,
+      creneauText: getCreneauText(),
+      notes,
+      traiteurs,
+      phone,
+      orderId,
+    });
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappText)}`;
+    setWhatsappShareUrl(whatsappUrl);
+
+    // Ouvrir WhatsApp dans un nouvel onglet (dans le geste utilisateur)
+    const opened = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    if (!opened) {
+      // Si popup bloqué, le bouton « Renvoyer sur WhatsApp » sur la page de confirmation s'activera
     }
+
+    // Sauvegarder en local (fallback uniquement si Supabase échoue)
+    const saveLocal = () => {
+      try {
+        const localOrders = JSON.parse(localStorage.getItem('delikreol_local_orders_v1') || '[]');
+        localOrders.push(order);
+        localStorage.setItem('delikreol_local_orders_v1', JSON.stringify(localOrders));
+      } catch (e) {
+        console.warn('[DELIKREOL] Échec sauvegarde locale:', e);
+      }
+    };
 
     // Tenter Supabase si configuré
     import('../../lib/supabase').then(async ({ supabase }) => {
@@ -278,21 +329,22 @@ export default function CartPage() {
             notes,
             status: 'pending',
           });
-          // Order event logged in order_events table
         } catch (err) {
           console.warn('[DELIKREOL] Échec Supabase, fallback localStorage:', err);
+          saveLocal();
         }
+      } else {
+        saveLocal();
       }
     }).catch(() => {
       console.warn('[DELIKREOL] Supabase non disponible, fallback localStorage');
+      saveLocal();
     });
 
     setCheckoutStatus('success');
     setMessageSent(true);
     clearCart();
-    setPreparedMessage(
-      `Demande préparée — à confirmer sur WhatsApp.`
-    );
+    setPreparedMessage(`Demande préparée — à confirmer sur WhatsApp.`);
     showSuccess(`Commande enregistrée !`);
     setTimeout(() => navigate(`/statut-commande?order=${orderId}`), 1500);
   };
@@ -309,16 +361,16 @@ export default function CartPage() {
       <Layout>
         <div className="min-h-[60vh] flex items-center justify-center bg-[#FFFBF0]">
           <div className="text-center px-4 max-w-md mx-auto">
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-orange-100 mb-6">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary/[0.15] mb-6">
               <ShoppingCart className="w-10 h-10 text-primary/400" />
             </div>
-            <h1 className="text-2xl font-black text-gray-900 mb-3">Votre panier est vide</h1>
-            <p className="text-gray-500 mb-8 leading-relaxed">
+            <h1 className="text-2xl font-black text-foreground mb-3">Votre panier est vide</h1>
+            <p className="text-muted-foreground mb-8 leading-relaxed">
               Ajoutez un plat pour préparer une commande. Parcourez notre catalogue de traiteurs martiniquais.
             </p>
             <Link
               to="/catalogue"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-primary/200"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary hover:bg-primary text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-primary/200"
             >
               <ArrowLeft className="w-4 h-4" />
               Voir le catalogue
@@ -338,14 +390,14 @@ export default function CartPage() {
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-green-100 mb-6">
               <CheckCircle2 className="w-10 h-10 text-green-500" />
             </div>
-            <h1 className="text-2xl font-black text-gray-900 mb-3">Demande préparée ! 🎉</h1>
+            <h1 className="text-2xl font-black text-foreground mb-3">Demande préparée ! 🎉</h1>
             {orderNumber && (
               <p className="text-3xl font-black text-primary mb-2 font-mono">{orderNumber}</p>
             )}
-            <p className="text-gray-500 mb-4 leading-relaxed">
+            <p className="text-muted-foreground mb-4 leading-relaxed">
               {preparedMessage}
             </p>
-            <p className="text-sm text-gray-400 mb-8">
+            <p className="text-sm text-muted-foreground mb-8">
               Besoin d'aide ? Contactez-nous sur WhatsApp.
             </p>
             <div className="flex flex-col gap-3">
@@ -377,7 +429,7 @@ export default function CartPage() {
     <Layout>
       <div className="bg-[#FFFBF0] min-h-screen">
         {/* Header */}
-        <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white">
+        <div className="bg-gradient-to-r from-primary to-secondary text-white">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
             <div className="flex items-center gap-3">
               <ShoppingCart className="w-7 h-7" />
@@ -415,7 +467,7 @@ export default function CartPage() {
             {/* Cart items */}
             <div className="lg:col-span-2 space-y-4" ref={panierRef}>
               <div className="flex items-center justify-between mb-2">
-                <h2 className="text-lg font-bold text-gray-900">Articles</h2>
+                <h2 className="text-lg font-bold text-foreground">Articles</h2>
                 <button
                   onClick={handleClearCart}
                   className="text-sm text-red-500 hover:text-red-600 font-medium flex items-center gap-1"
@@ -431,7 +483,7 @@ export default function CartPage() {
                   className="bg-white rounded-2xl border border-primary/100 p-4 flex gap-4 group hover:border-primary/200 transition-all"
                 >
                   {/* Image */}
-                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden bg-primary/8 flex-shrink-0">
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden bg-primary/[0.08] flex-shrink-0">
                     {item.image_url ? (
                       <img loading="lazy"
                         src={item.image_url}
@@ -439,7 +491,7 @@ export default function CartPage() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                         <ChefHat className="w-8 h-8" />
                       </div>
                     )}
@@ -447,8 +499,8 @@ export default function CartPage() {
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-gray-900 text-base truncate">{item.name}</h3>
-                    <p className="text-sm text-gray-500">{item.vendor_id}</p>
+                    <h3 className="font-bold text-foreground text-base truncate">{item.name}</h3>
+                    <p className="text-sm text-muted-foreground">{item.vendor_id}</p>
                     <p className="text-lg font-black text-primary mt-1">
                       {item.price.toFixed(2)} €
                     </p>
@@ -461,27 +513,27 @@ export default function CartPage() {
                         removeItem(item.id);
                         showSuccess(`${item.name} retiré`);
                       }}
-                      className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                      className="p-1.5 text-muted-foreground hover:text-red-500 transition-colors"
                       title="Retirer"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
-                    <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-1 py-1">
+                    <div className="flex items-center gap-2 bg-muted rounded-xl px-1 py-1">
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:border-primary/300 transition-colors"
+                        className="w-8 h-8 rounded-lg bg-white border border-input flex items-center justify-center hover:border-primary/300 transition-colors"
                       >
                         <Minus className="w-3.5 h-3.5" />
                       </button>
                       <span className="w-8 text-center font-bold text-sm">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:border-primary/300 transition-colors"
+                        className="w-8 h-8 rounded-lg bg-white border border-input flex items-center justify-center hover:border-primary/300 transition-colors"
                       >
                         <Plus className="w-3.5 h-3.5" />
                       </button>
                     </div>
-                    <span className="text-sm font-bold text-gray-700">
+                    <span className="text-sm font-bold text-foreground">
                       {(item.price * item.quantity).toFixed(2)} €
                     </span>
                   </div>
@@ -501,41 +553,44 @@ export default function CartPage() {
             <div className="space-y-4">
               {/* Subtotal + Delivery */}
               <div className="bg-white rounded-2xl border border-primary/100 p-6">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">Résumé</h2>
+                <h2 className="text-lg font-bold text-foreground mb-4">Résumé</h2>
                 <div className="space-y-3 mb-4">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Sous-total ({itemCount} articles)</span>
-                    <span className="font-bold text-gray-900">{total.toFixed(2).replace('.', ',')} €</span>
+                    <span className="text-muted-foreground">Sous-total ({itemCount} articles)</span>
+                    <span className="font-bold text-foreground">{total.toFixed(2).replace('.', ',')} €</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">
+                    <span className="text-muted-foreground">
                       {mode === 'retrait' ? 'Frais retrait' : mode === 'relais' ? 'Frais point relais' : 'Frais livraison'}
                     </span>
-                    <span className="text-gray-400 text-xs">
+                    <span className="text-muted-foreground text-xs">
                       {mode === 'retrait' ? 'Gratuit' : `${(DELIVERY_FEES[mode]?.fee || 0).toFixed(2).replace('.', ',')} €`}
                     </span>
                   </div>
                   {mode === 'livraison' && total < 40 && (
-                    <div className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2">
+                    <div className="text-xs text-secondary bg-secondary/10 rounded-lg px-3 py-2">
                       Livraison éloignée possible à partir de 40 € de commande, sous réserve de validation.
                     </div>
                   )}
                   <hr className="border-primary/100" />
                   <div className="flex justify-between">
-                    <span className="font-bold text-gray-900">Total estimé</span>
+                    <span className="font-bold text-foreground">Total estimé</span>
                     <span className="text-2xl font-black text-primary">
                       {(total + (DELIVERY_FEES[mode]?.fee || 0)).toFixed(2).replace('.', ',')} €
                     </span>
                   </div>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-muted-foreground">
                     Total final confirmé après vérification par WhatsApp.
                   </p>
                 </div>
               </div>
 
+              {/* Récapitulatif par partenaire */}
+              <OrderSummaryByPartner items={items} />
+
               {/* Paiement info card */}
               <div className="bg-white rounded-2xl border border-primary/100 p-6">
-                <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <h3 className="text-sm font-bold text-foreground mb-2 flex items-center gap-2">
                   <CreditCard className="w-4 h-4" />
                   Paiement
                 </h3>
@@ -543,26 +598,26 @@ export default function CartPage() {
                   <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-semibold">
                     Confirmation sur le site
                   </span>
-                  <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full font-semibold">
+                  <span className="text-xs px-2 py-0.5 bg-secondary/15 text-secondary rounded-full font-semibold">
                     Paiement en ligne bientôt disponible
                   </span>
                 </div>
-                <p className="text-xs text-gray-500 leading-relaxed">
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   Le paiement en ligne n'est pas encore activé sur cette version test. Votre commande est confirmée sur le site et le support WhatsApp est disponible si besoin.
                 </p>
               </div>
 
               {/* Delivery info */}
               <div className="bg-white rounded-2xl border border-primary/100 p-6 space-y-4">
-                <h2 className="text-lg font-bold text-gray-900">Informations de commande</h2>
+                <h2 className="text-lg font-bold text-foreground">Informations de commande</h2>
 
                 {/* Multi-traiteur warning */}
                 {hasMultipleVendors && (
-                  <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
-                    <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-3 bg-secondary/10 border border-secondary/30 rounded-xl p-4">
+                    <AlertCircle className="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
                     <div className="text-sm">
-                      <p className="font-bold text-amber-800">Panier multi-partenaires</p>
-                      <p className="text-amber-700">
+                      <p className="font-bold text-secondary">Panier multi-partenaires</p>
+                      <p className="text-secondary">
                         Pour cette version test, merci de valider une commande par partenaire. Le panier multi-traiteur arrive bientôt.
                       </p>
                     </div>
@@ -571,7 +626,7 @@ export default function CartPage() {
 
                 {/* Téléphone */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                  <label className="block text-sm font-bold text-foreground mb-1.5">
                     <MessageCircle className="w-4 h-4 inline mr-1" />
                     Téléphone WhatsApp
                   </label>
@@ -587,7 +642,7 @@ export default function CartPage() {
                     className={`w-full px-3 py-2.5 rounded-xl border text-sm outline-none ${
                       phoneError
                         ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                        : 'border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-orange-100'
+                        : 'border-input focus:border-primary/400 focus:ring-2 focus:ring-ring/30'
                     }`}
                   />
                   {savedField === 'phone' && (
@@ -602,7 +657,7 @@ export default function CartPage() {
 
                 {/* Email */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                  <label className="block text-sm font-bold text-foreground mb-1.5">
                     Email
                   </label>
                   <input
@@ -611,7 +666,7 @@ export default function CartPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     onBlur={() => email.trim() && flashSaved('email')}
                     placeholder="nom@exemple.fr"
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-orange-100 text-sm outline-none"
+                    className="w-full px-3 py-2.5 rounded-xl border border-input focus:border-primary/400 focus:ring-2 focus:ring-ring/30 text-sm outline-none"
                   />
                   {savedField === 'email' && (
                     <span className="inline-flex items-center gap-1 text-xs text-success font-semibold mt-1 animate-pulse">
@@ -622,7 +677,7 @@ export default function CartPage() {
 
                 {/* Commune */}
                 <div className="relative">
-                  <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                  <label className="block text-sm font-bold text-foreground mb-1.5">
                     <MapPin className="w-4 h-4 inline mr-1" />
                     Votre commune
                   </label>
@@ -636,7 +691,7 @@ export default function CartPage() {
                       if (commune.trim()) flashSaved('commune');
                     }}
                     placeholder="Fort-de-France, Lamentin..."
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-orange-100 text-sm outline-none"
+                    className="w-full px-3 py-2.5 rounded-xl border border-input focus:border-primary/400 focus:ring-2 focus:ring-ring/30 text-sm outline-none"
                   />
                   {savedField === 'commune' && (
                     <span className="inline-flex items-center gap-1 text-xs text-success font-semibold mt-1 animate-pulse">
@@ -650,7 +705,7 @@ export default function CartPage() {
                           key={name}
                           type="button"
                           onMouseDown={() => selectCommune(name)}
-                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-primary/8 transition-colors first:rounded-t-xl last:rounded-b-xl"
+                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-primary/[0.08] transition-colors first:rounded-t-xl last:rounded-b-xl"
                         >
                           <MapPin className="w-3 h-3 inline mr-2 text-primary/400" />
                           {name}
@@ -662,14 +717,14 @@ export default function CartPage() {
 
                 {/* Mode */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1.5">Mode</label>
+                  <label className="block text-sm font-bold text-foreground mb-1.5">Mode</label>
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       onClick={() => setMode('retrait')}
                       className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
                         mode === 'retrait'
                           ? 'bg-primary text-white shadow-md'
-                          : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-primary/300'
+                          : 'bg-muted text-muted-foreground border border-input hover:border-primary/300'
                       }`}
                     >
                       <Store className="w-4 h-4" />
@@ -680,7 +735,7 @@ export default function CartPage() {
                       className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
                         mode === 'relais'
                           ? 'bg-primary text-white shadow-md'
-                          : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-primary/300'
+                          : 'bg-muted text-muted-foreground border border-input hover:border-primary/300'
                       }`}
                     >
                       <Store className="w-4 h-4" />
@@ -691,7 +746,7 @@ export default function CartPage() {
                       className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
                         mode === 'livraison'
                           ? 'bg-primary text-white shadow-md'
-                          : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-primary/300'
+                          : 'bg-muted text-muted-foreground border border-input hover:border-primary/300'
                       }`}
                     >
                       <Truck className="w-4 h-4" />
@@ -702,24 +757,24 @@ export default function CartPage() {
 
                 {/* Créneaux - checkboxes */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                  <label className="block text-sm font-bold text-foreground mb-1.5">
                     <Clock className="w-4 h-4 inline mr-1" />
                     Créneau(x) souhaité(s)
                   </label>
-                  <p className="text-xs text-gray-400 mb-2">
+                  <p className="text-xs text-muted-foreground mb-2">
                     Choisissez un ou plusieurs créneaux possibles :
                   </p>
                   <div className="space-y-2">
                     {CRENEAUX_OPTIONS.map((option) => (
                       <label
                         key={option.id}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-gray-200 hover:border-primary/300 cursor-pointer transition-all text-sm"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-input hover:border-primary/300 cursor-pointer transition-all text-sm"
                       >
                         <input
                           type="checkbox"
                           checked={selectedCreneaux.includes(option.id)}
                           onChange={() => toggleCreneau(option.id)}
-                          className="w-4 h-4 accent-orange-500"
+                          className="w-4 h-4 accent-primary"
                         />
                         {option.label}
                       </label>
@@ -738,7 +793,7 @@ export default function CartPage() {
 
                 {/* Notes */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                  <label className="block text-sm font-bold text-foreground mb-1.5">
                     <FileText className="w-4 h-4 inline mr-1" />
                     Notes (optionnel)
                   </label>
@@ -748,7 +803,7 @@ export default function CartPage() {
                     onBlur={() => notes.trim() && flashSaved('notes')}
                     placeholder="Allergies, préférences, instructions spéciales..."
                     rows={3}
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary/400 focus:ring-2 focus:ring-orange-100 text-sm outline-none resize-none"
+                    className="w-full px-3 py-2.5 rounded-xl border border-input focus:border-primary/400 focus:ring-2 focus:ring-ring/30 text-sm outline-none resize-none"
                   />
                   {savedField === 'notes' && (
                     <span className="inline-flex items-center gap-1 text-xs text-success font-semibold mt-1 animate-pulse">
@@ -760,19 +815,19 @@ export default function CartPage() {
 
               {/* Bouton principal — Supabase-first */}
               {checkoutStatus === 'processing' ? (
-                <div className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-orange-400 text-white font-bold rounded-2xl text-lg">
+                <div className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-primary text-white font-bold rounded-2xl text-lg">
                   Enregistrement en cours...
                 </div>
               ) : (
                 <button
                   onClick={handleWhatsAppClick}
-                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-2xl transition-all hover:scale-[1.02] shadow-lg shadow-primary/200 text-lg"
+                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-primary hover:bg-primary text-white font-bold rounded-2xl transition-all hover:scale-[1.02] shadow-lg shadow-primary/200 text-lg"
                 >
                   <ShoppingCart className="w-6 h-6" />
                   Confirmer ma commande sur WhatsApp
                 </button>
               )}
-              <p className="text-xs text-center text-gray-400">
+              <p className="text-xs text-center text-muted-foreground">
                 Paiement en ligne bientôt disponible. Pour l'instant, DeliKreol confirme les commandes par WhatsApp.
               </p>
             </div>

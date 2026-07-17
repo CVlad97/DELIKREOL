@@ -17,7 +17,7 @@ interface MapPartner {
 }
 
 const COLORS = {
-  traiteur: { marker: 'hsl(var(--primary))', bg: 'bg-orange-100', text: 'text-orange-700', icon: '🧑‍🍳' },
+  traiteur: { marker: 'hsl(var(--primary))', bg: 'bg-primary/[0.15]', text: 'text-primary', icon: '🧑‍🍳' },
   relais: { marker: '#3b82f6', bg: 'bg-blue-100', text: 'text-blue-700', icon: '📦' },
   livreur: { marker: '#22c55e', bg: 'bg-green-100', text: 'text-green-700', icon: '🛵' },
   client: { marker: '#8b5cf6', bg: 'bg-purple-100', text: 'text-purple-700', icon: '📍' },
@@ -156,19 +156,19 @@ export default function ExpandableGeoMap() {
   }, [expanded, partners, userPosition]);
 
   return (
-    <div className="bg-white rounded-2xl border border-orange-100 overflow-hidden shadow-sm transition-all duration-300">
+    <div className="bg-white rounded-2xl border border-primary/20 overflow-hidden shadow-sm transition-all duration-300">
       {/* Header toujours visible */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-orange-50 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:bg-primary/[0.08] transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
-            <MapPin className="w-5 h-5 text-orange-600" />
+          <div className="w-10 h-10 rounded-xl bg-primary/[0.15] flex items-center justify-center">
+            <MapPin className="w-5 h-5 text-primary" />
           </div>
           <div className="text-left">
-            <h3 className="font-bold text-gray-900">Géolocalisation</h3>
-            <p className="text-xs text-gray-500">
+            <h3 className="font-bold text-foreground">Géolocalisation</h3>
+            <p className="text-xs text-muted-foreground">
               {userPosition
                 ? `${partners.length} partenaires autour de vous`
                 : 'Activez votre position pour voir les traiteurs près de chez vous'}
@@ -179,31 +179,31 @@ export default function ExpandableGeoMap() {
           {!userPosition && !geoLoading && (
             <button
               onClick={(e) => { e.stopPropagation(); handleGeoRequest(); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary/90 text-white text-xs font-bold rounded-lg transition-colors"
             >
               <Locate className="w-3 h-3" />
               Me localiser
             </button>
           )}
           {geoLoading && (
-            <span className="text-xs text-gray-400 animate-pulse">Localisation...</span>
+            <span className="text-xs text-muted-foreground animate-pulse">Localisation...</span>
           )}
-          {expanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+          {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
         </div>
       </button>
 
       {/* Légende des couleurs */}
       {expanded && (
         <div className="px-4 pb-2 flex flex-wrap gap-3">
-          <span className="flex items-center gap-1 text-xs text-gray-500"><span className="w-3 h-3 rounded-full inline-block" style={{ backgroundColor: COLORS.traiteur.marker }} /> Traiteurs</span>
-          {userPosition && <span className="flex items-center gap-1 text-xs text-gray-500"><span className="w-3 h-3 rounded-full inline-block" style={{ backgroundColor: COLORS.client.marker }} /> Vous</span>}
-          <span className="text-xs text-gray-400 ml-auto">{partners.length} partenaires • {userPosition ? 'Triés par distance' : 'Tous les traiteurs'}</span>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground"><span className="w-3 h-3 rounded-full inline-block" style={{ backgroundColor: COLORS.traiteur.marker }} /> Traiteurs</span>
+          {userPosition && <span className="flex items-center gap-1 text-xs text-muted-foreground"><span className="w-3 h-3 rounded-full inline-block" style={{ backgroundColor: COLORS.client.marker }} /> Vous</span>}
+          <span className="text-xs text-muted-foreground ml-auto">{partners.length} partenaires • {userPosition ? 'Triés par distance' : 'Tous les traiteurs'}</span>
         </div>
       )}
 
       {/* Carte Leaflet */}
       {expanded && (
-        <div ref={mapRef} className="w-full h-[400px] md:h-[500px] bg-gray-100" />
+        <div ref={mapRef} className="w-full h-[400px] md:h-[500px] bg-muted" />
       )}
 
       {/* Liste des partenaires */}
@@ -216,20 +216,20 @@ export default function ExpandableGeoMap() {
               <div
                 key={p.id}
                 onClick={() => setSelectedPartner(p)}
-                className={`flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition-colors ${selectedPartner?.id === p.id ? 'bg-orange-50' : ''}`}
+                className={`flex items-center gap-3 p-3 hover:bg-muted cursor-pointer transition-colors ${selectedPartner?.id === p.id ? 'bg-primary/[0.08]' : ''}`}
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${color.bg}`}>
                   {color.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">{p.name}</p>
-                  <p className="text-xs text-gray-500">{p.commune}</p>
+                  <p className="text-sm font-semibold text-foreground truncate">{p.name}</p>
+                  <p className="text-xs text-muted-foreground">{p.commune}</p>
                 </div>
                 <div className="text-right">
                   {dist !== null ? (
-                    <span className="text-xs font-bold text-orange-600">{dist.toFixed(1)} km</span>
+                    <span className="text-xs font-bold text-primary">{dist.toFixed(1)} km</span>
                   ) : (
-                    <span className="text-xs text-gray-400">—</span>
+                    <span className="text-xs text-muted-foreground">—</span>
                   )}
                 </div>
                 <a

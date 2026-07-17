@@ -11,41 +11,39 @@ export default defineConfig(({ mode }) => {
 
   return {
     base,
-    plugins: [
-      react(),
-      VitePWA({
-        mode: mode === 'development' ? 'development' : 'production',
-        registerType: 'autoUpdate',
-        includeAssets: ['branding/*.svg', 'branding/*.png'],
-        manifest: false,
-        workbox: {
-          cleanupOutdatedCaches: true,
-          clientsClaim: true,
-          skipWaiting: true,
-          globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,webp,ico,json}'],
-          navigateFallback: 'index.html',
-          runtimeCaching: [
-            {
-              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'google-fonts-stylesheets',
-                expiration: { maxEntries: 4, maxAgeSeconds: 365 * 24 * 60 * 60 },
+    plugins: [react(), VitePWA({
+      registerType: 'prompt',
+      includeAssets: ['branding/*.svg', 'branding/*.png'],
+      manifest: false,
+      workbox: {
+        cleanupOutdatedCaches: true,
+        globPatterns: ['**/*.{js,css,html,svg,ico,json}'],
+        runtimeCaching: [
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|webp)$/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'delikreol-images',
+              expiration: {
+                maxEntries: 80,
+                maxAgeSeconds: 604800,
               },
             },
-            {
-              urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'google-fonts-webfonts',
-                expiration: { maxEntries: 8, maxAgeSeconds: 365 * 24 * 60 * 60 },
-                cacheableResponse: { statuses: [0, 200] },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts',
+              expiration: {
+                maxEntries: 4,
+                maxAgeSeconds: 31536000,
               },
             },
-          ],
-        },
-      }),
-    ],
+          },
+        ],
+      },
+    })],
     resolve: {
       alias: {
         '@': path.resolve(projectRoot, 'src'),
@@ -61,7 +59,6 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks: {
-            'react-vendor': ['react', 'react-dom'],
             'map-vendor': ['leaflet', 'react-leaflet'],
             'qr-vendor': ['html5-qrcode', 'qrcode.react'],
           },
@@ -74,8 +71,8 @@ export default defineConfig(({ mode }) => {
       globals: true,
       environment: 'jsdom',
       setupFiles: [],
-      include: ['src/**/*.{test,spec}.{ts,tsx}'],
-      exclude: ['node_modules', 'dist', 'tests/**'],
+      include: ['src/**/*.{test,spec}.{ts,tsx}', 'tests/supabase/**/*.{test,spec}.{ts,tsx}'],
+      exclude: ['node_modules', 'dist', 'tests/e2e/**'],
     },
   };
 });

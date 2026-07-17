@@ -2,55 +2,79 @@
 <html lang="fr-MQ">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="%BASE_URL%branding/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <link rel="manifest" href="%BASE_URL%manifest.json" />
 
-    <!-- SEO - Balises meta principales -->
-    <title>DELIKREOL — Traiteurs et plats créoles en Martinique | Livraison</title>
-    <meta name="description" content="Découvrez les meilleurs traiteurs de Martinique avec DELIKREOL. Plats créoles, cuisine antillaise, livraison ou à emporter. Commandez en ligne !" />
-    <meta name="keywords" content="traiteur martinique, plat créole, cuisine antillaise, livraison martinique, food martinique, delikreol" />
+    <title>DeliKreol — Commandez créole local en Martinique | Livraison & Traiteur</title>
+    <meta name="description" content="Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait. Commandez en ligne vos plats maison." />
+    <meta name="keywords" content="livraison repas Martinique, traiteur Martinique, plats créoles, DeliKreol, click and collect Martinique" />
+    <meta name="author" content="DELIKREOL" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://delikreol.com/" />
 
-    <!-- Open Graph -->
-    <meta property="og:title" content="DELIKREOL — Traiteurs et plats créoles en Martinique" />
-    <meta property="og:description" content="Découvrez les meilleurs traiteurs de Martinique. Plats créoles, cuisine antillaise, livraison à domicile." />
-    <meta property="og:url" content="https://delikreol.com/" />
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%branding/favicon.svg" />
+    <link rel="manifest" href="%BASE_URL%manifest.json" />
+    <link rel="apple-touch-icon" href="%BASE_URL%branding/app-icon.svg" />
+
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://delikreol.com/branding/og-image.jpg" />
-    <meta property="og:site_name" content="DELIKREOL" />
+    <meta property="og:title" content="DeliKreol — Commandez créole local en Martinique" />
+    <meta property="og:description" content="Plats créoles, traiteurs locaux, livraison et retrait partout en Martinique." />
+    <meta property="og:url" content="https://delikreol.com/" />
+    <meta property="og:image" content="https://delikreol.com/branding/hero-tropical.png" />
     <meta property="og:locale" content="fr_MQ" />
+    <meta property="og:site_name" content="DeliKreol" />
 
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="DELIKREOL — Traiteurs et plats créoles en Martinique" />
-    <meta name="twitter:description" content="Découvrez les meilleurs traiteurs de Martinique. Livraison de plats créoles chez vous !" />
-    <meta name="twitter:image" content="https://delikreol.com/branding/og-image.jpg" />
+    <meta name="twitter:title" content="DeliKreol — Commandez créole local en Martinique" />
+    <meta name="twitter:description" content="Plats créoles, traiteurs locaux, livraison et retrait partout en Martinique." />
+    <meta name="twitter:image" content="https://delikreol.com/branding/hero-tropical.png" />
 
-    <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FoodService",
-      "name": "DELIKREOL",
-      "url": "https://delikreol.com",
-      "description": "Plateforme de mise en relation clients / traiteurs en Martinique",
-      "areaServed": {
-        "@type": "City",
-        "name": "Martinique"
-      },
-      "address": {
-        "@type": "Country",
-        "name": "Martinique"
+      {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "DeliKreol",
+        "description": "Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait.",
+        "url": "https://delikreol.com/",
+        "telephone": "+596696653589",
+        "email": "contact@delikreol.com",
+        "areaServed": {
+          "@type": "AdministrativeArea",
+          "name": "Martinique"
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Fort-de-France",
+          "addressCountry": "MQ"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 14.616065,
+          "longitude": -61.058906
+        },
+        "sameAs": [
+          "https://wa.me/596696653589"
+        ]
       }
-    }
     </script>
 
-    <!-- Tracking optionnel: charge Meta/GA seulement si les variables Vite existent -->
+    <meta name="geo.region" content="MQ" />
+    <meta name="geo.placename" content="Fort-de-France" />
+    <meta name="geo.position" content="14.616065;-61.058906" />
+    <meta name="ICBM" content="14.616065, -61.058906" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700;800&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <meta name="theme-color" content="#b74406" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="DELIKREOL" />
+
+    <!-- Tracking optionnel : Meta et GA ne chargent que si les variables Vite existent. -->
     <script type="module">
       const isLocal = window.location.hostname === 'localhost';
       const metaPixelId = import.meta.env.VITE_FB_PIXEL_ID;
@@ -80,79 +104,6 @@
         window.gtag('config', googleAnalyticsId, { anonymize_ip: true });
       }
     </script>
-
-    <title>DeliKreol — Commandez créole local en Martinique | Livraison & Traiteur</title>
-    <meta name="description" content="Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait. Commandez en ligne vos plats maison." />
-    <meta name="keywords" content="livraison repas Martinique, traiteur Martinique, plats créoles, Delikreol, click and collect Martinique" />
-    <meta name="author" content="DELIKREOL" />
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://delikreol.com/" />
-
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="DeliKreol — Commandez créole local en Martinique | Livraison & Traiteur" />
-    <meta property="og:description" content="Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait. Commandez en ligne vos plats maison." />
-    <meta property="og:url" content="https://delikreol.com/" />
-    <meta property="og:image" content="https://delikreol.com/branding/favicon.svg" />
-    <meta property="og:locale" content="fr_MQ" />
-    <meta property="og:site_name" content="DeliKreol" />
-
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="DeliKreol — Commandez créole local en Martinique | Livraison & Traiteur" />
-    <meta name="twitter:description" content="Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait. Commandez en ligne vos plats maison." />
-    <meta name="twitter:image" content="https://delikreol.com/branding/favicon.svg" />
-
-    <script type="application/ld+json">
-        {
-          "@context": "https://schema.org",
-          "@type": "LocalBusiness",
-          "name": "Delikreol",
-          "description": "Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait. Commandez en ligne vos plats maison.",
-          "url": "https://delikreol.com/",
-          "telephone": "+596696653589",
-          "email": "contact@delikreol.com",
-          "areaServed": {
-            "@type": "Country",
-            "name": "Martinique",
-            "sameAs": "https://fr.wikipedia.org/wiki/Martinique"
-          },
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Martinique",
-            "addressCountry": "MQ"
-          },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": 14.6,
-            "longitude": -61.0
-          },
-          "sameAs": [
-            "https://wa.me/596696653589"
-          ],
-          "openingHoursSpecification": [
-            { "@type": "OpeningHoursSpecification", "dayOfWeek": "Monday", "opens": "08:00", "closes": "19:00" },
-            { "@type": "OpeningHoursSpecification", "dayOfWeek": "Tuesday", "opens": "08:00", "closes": "19:00" },
-            { "@type": "OpeningHoursSpecification", "dayOfWeek": "Wednesday", "opens": "08:00", "closes": "19:00" },
-            { "@type": "OpeningHoursSpecification", "dayOfWeek": "Thursday", "opens": "08:00", "closes": "19:00" },
-            { "@type": "OpeningHoursSpecification", "dayOfWeek": "Friday", "opens": "08:00", "closes": "19:00" },
-            { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "09:00", "closes": "16:00" }
-          ]
-                   }
-        </script>
-
-    <meta name="geo.region" content="MQ" />
-    <meta name="geo.placename" content="Fort-de-France" />
-    <meta name="geo.position" content="14.616065;-61.058906" />
-    <meta name="ICBM" content="14.616065, -61.058906" />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700;800&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
-    <meta name="theme-color" content="#f97316" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="DELIKREOL" />
-    <link rel="apple-touch-icon" href="%BASE_URL%branding/app-icon.svg" />
   </head>
   <body>
     <div id="root"></div>

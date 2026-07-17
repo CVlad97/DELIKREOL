@@ -1,4 +1,4 @@
-import { Store, MapPin, Clock, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Store, MapPin, Clock, ArrowRight, Star } from 'lucide-react';
 import { Vendor } from '../types';
 import { SmartImage } from './SmartImage';
 
@@ -14,73 +14,64 @@ const businessTypeLabels: Record<string, string> = {
 };
 
 export function VendorCard({ vendor, onClick }: VendorCardProps) {
-  const businessType = businessTypeLabels[vendor.business_type] ?? 'Partenaire local';
-
   return (
     <button
       type="button"
       onClick={onClick}
-      className="group flex h-full w-full flex-col overflow-hidden rounded-[2rem] border border-border bg-card text-left shadow-soft transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-elegant focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-      aria-label={`Découvrir ${vendor.business_name}`}
+      className="group w-full overflow-hidden rounded-[2rem] border border-border bg-card text-left shadow-elegant transition-all duration-500 hover:-translate-y-1 hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
-      <div className="relative h-48 w-full overflow-hidden bg-muted">
+      <div className="relative h-48 overflow-hidden bg-muted/50">
         {vendor.logo_url ? (
           <SmartImage
             src={vendor.logo_url}
             alt={`Logo de ${vendor.business_name}`}
             kind="logo"
-            containerClassName="h-full w-full"
-            imgClassName="transition-transform duration-500 group-hover:scale-[1.02]"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            fit="contain"
+            containerClassName="w-full h-full"
+            imgClassName="p-5 transition-transform duration-500 group-hover:scale-[1.03]"
+            sizes="(max-width: 768px) 100vw, 33vw"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-muted">
-            <Store size={48} className="text-muted-foreground/40" aria-hidden="true" />
+          <div className="w-full h-full bg-muted flex items-center justify-center">
+            <Store size={48} className="text-muted-foreground opacity-20" />
           </div>
         )}
-
-        <div className="absolute left-4 top-4">
-          <span className="rounded-full border border-white/70 bg-white/95 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-foreground shadow-sm backdrop-blur-md">
-            {businessType}
+        <div className="absolute top-4 left-4">
+          <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-foreground text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-sm">
+            {businessTypeLabels[vendor.business_type] ?? 'Partenaire local'}
           </span>
         </div>
-
-        {vendor.is_active && (
-          <div className="absolute right-4 top-4">
-            <span className="inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-black text-success shadow-sm">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              Partenaire actif
-            </span>
-          </div>
-        )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-4 p-6">
+      <div className="p-6 flex-1 flex flex-col space-y-4">
         <div className="flex-1 space-y-2">
-          <h3 className="text-xl font-black tracking-tight text-foreground transition-colors group-hover:text-primary">
-            {vendor.business_name}
-          </h3>
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="font-black text-xl text-foreground tracking-tight uppercase group-hover:text-primary transition-colors">
+              {vendor.business_name}
+            </h3>
+            <div className="flex items-center gap-1 text-primary" aria-label="Note 4,8 sur 5">
+              <Star className="w-4 h-4 fill-primary" />
+              <span className="text-sm font-black">4.8</span>
+            </div>
+          </div>
           {vendor.description && (
-            <p className="line-clamp-3 text-sm font-medium leading-6 text-muted-foreground">
-              {vendor.description}
-            </p>
+            <p className="text-sm text-muted-foreground font-medium line-clamp-2 leading-relaxed">{vendor.description}</p>
           )}
         </div>
 
-        <div className="space-y-3 border-t border-border pt-4">
-          <div className="flex items-start gap-2 text-xs font-bold text-muted-foreground">
-            <MapPin size={15} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
-            <span className="line-clamp-2">{vendor.address || 'Martinique'}</span>
+        <div className="space-y-3 pt-4 border-t border-border">
+          <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest">
+            <MapPin size={14} className="text-secondary" />
+            <span className="truncate">{vendor.address}</span>
           </div>
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
-              <Clock size={15} className="text-accent" aria-hidden="true" />
-              <span>Créneau confirmé sur demande</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest">
+              <Clock size={14} className="text-primary" />
+              <span>30-45 min</span>
             </div>
-            <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-primary">
-              Découvrir
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-            </span>
+            <div className="text-primary font-black uppercase tracking-widest text-[10px] group-hover:gap-2 flex items-center transition-all">
+              Visiter <ArrowRight className="w-3 h-3 ml-1" />
+            </div>
           </div>
         </div>
       </div>

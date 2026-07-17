@@ -225,26 +225,26 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
       return (
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Nom de votre entreprise *
             </label>
             <input
               type="text"
               value={vendorData.business_name}
               onChange={(e) => setVendorData({ ...vendorData, business_name: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Type d'activité *
             </label>
             <select
               value={vendorData.business_type}
               onChange={(e) => setVendorData({ ...vendorData, business_type: e.target.value as BusinessType })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               required
             >
               <option value="restaurant">Restaurant</option>
@@ -254,27 +254,27 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Numéro de téléphone *
             </label>
             <input
               type="tel"
               value={vendorData.phone}
               onChange={(e) => setVendorData({ ...vendorData, phone: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               placeholder="0696 XX XX XX"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Description de votre activité
             </label>
             <textarea
               value={vendorData.description}
               onChange={(e) => setVendorData({ ...vendorData, description: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               rows={3}
               placeholder="Décrivez votre spécialité, vos produits..."
             />
@@ -287,41 +287,41 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
       return (
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Adresse complète *
             </label>
             <input
               type="text"
               value={vendorData.address}
               onChange={(e) => setVendorData({ ...vendorData, address: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               placeholder="Adresse, Code postal, Ville"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Rayon de livraison (km)
             </label>
             <input
               type="number"
               value={vendorData.delivery_radius_km}
               onChange={(e) => setVendorData({ ...vendorData, delivery_radius_km: parseInt(e.target.value) })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               min="1"
               max="50"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Horaires d'ouverture (JSON)
             </label>
             <textarea
               value={vendorData.opening_hours}
               onChange={(e) => setVendorData({ ...vendorData, opening_hours: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent font-mono text-sm"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent font-mono text-sm"
               rows={4}
               placeholder='{"lundi": "9h-18h", "mardi": "9h-18h"}'
             />
@@ -334,14 +334,14 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
       return (
         <div className="space-y-6">
           <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-            <h3 className="font-bold text-gray-900 mb-2">Vos revenus</h3>
+            <h3 className="font-bold text-foreground mb-2">Vos revenus</h3>
             <div className="text-3xl font-bold text-green-600 mb-2">80%</div>
-            <p className="text-gray-700">de chaque vente vous revient</p>
-            <p className="text-sm text-gray-600 mt-2">Commission plateforme : 20%</p>
+            <p className="text-foreground">de chaque vente vous revient</p>
+            <p className="text-sm text-muted-foreground mt-2">Commission plateforme : 20%</p>
           </div>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-foreground">
               Les paiements seront effectués automatiquement sur votre compte bancaire après validation de votre inscription.
             </p>
           </div>
@@ -355,7 +355,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
       return (
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Nom du point relais *
             </label>
             <input
@@ -368,7 +368,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Adresse complète *
             </label>
             <input
@@ -383,7 +383,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Latitude
               </label>
               <input
@@ -395,7 +395,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Longitude
               </label>
               <input
@@ -409,7 +409,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Horaires d'ouverture (JSON)
             </label>
             <textarea
@@ -428,7 +428,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
       return (
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Types de stockage disponibles
             </label>
             <div className="space-y-2">
@@ -439,7 +439,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
                   onChange={(e) => setRelayData({ ...relayData, storage_cold: e.target.checked })}
                   className="rounded text-blue-600 mr-2"
                 />
-                <span className="text-gray-700">Réfrigéré (0-4°C)</span>
+                <span className="text-foreground">Réfrigéré (0-4°C)</span>
               </label>
               <label className="flex items-center">
                 <input
@@ -448,7 +448,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
                   onChange={(e) => setRelayData({ ...relayData, storage_hot: e.target.checked })}
                   className="rounded text-blue-600 mr-2"
                 />
-                <span className="text-gray-700">Maintien au chaud (60-65°C)</span>
+                <span className="text-foreground">Maintien au chaud (60-65°C)</span>
               </label>
               <label className="flex items-center">
                 <input
@@ -457,7 +457,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
                   onChange={(e) => setRelayData({ ...relayData, storage_dry: e.target.checked })}
                   className="rounded text-blue-600 mr-2"
                 />
-                <span className="text-gray-700">Sec (température ambiante)</span>
+                <span className="text-foreground">Sec (température ambiante)</span>
               </label>
               <label className="flex items-center">
                 <input
@@ -466,13 +466,13 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
                   onChange={(e) => setRelayData({ ...relayData, storage_frozen: e.target.checked })}
                   className="rounded text-blue-600 mr-2"
                 />
-                <span className="text-gray-700">Congelé (-18°C)</span>
+                <span className="text-foreground">Congelé (-18°C)</span>
               </label>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Notes sur la capacité
             </label>
             <textarea
@@ -492,7 +492,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
                 onChange={(e) => setRelayData({ ...relayData, parking_available: e.target.checked })}
                 className="rounded text-blue-600 mr-2"
               />
-              <span className="text-gray-700">Parking disponible</span>
+              <span className="text-foreground">Parking disponible</span>
             </label>
             <label className="flex items-center">
               <input
@@ -501,12 +501,12 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
                 onChange={(e) => setRelayData({ ...relayData, pmr_accessible: e.target.checked })}
                 className="rounded text-blue-600 mr-2"
               />
-              <span className="text-gray-700">Accessible PMR</span>
+              <span className="text-foreground">Accessible PMR</span>
             </label>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Notes de sécurité
             </label>
             <textarea
@@ -525,7 +525,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
       return (
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Type de rémunération
             </label>
             <select
@@ -539,7 +539,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Montant souhaité (€)
             </label>
             <input
@@ -554,10 +554,10 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
           </div>
 
           <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-            <h3 className="font-bold text-gray-900 mb-2">Vos revenus</h3>
+            <h3 className="font-bold text-foreground mb-2">Vos revenus</h3>
             <div className="text-3xl font-bold text-green-600 mb-2">2-5€</div>
-            <p className="text-gray-700">par colis stocké et récupéré</p>
-            <p className="text-sm text-gray-600 mt-2">Paiement mensuel sur votre compte</p>
+            <p className="text-foreground">par colis stocké et récupéré</p>
+            <p className="text-sm text-muted-foreground mt-2">Paiement mensuel sur votre compte</p>
           </div>
         </div>
       );
@@ -569,13 +569,13 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
       return (
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Type de véhicule *
             </label>
             <select
               value={driverData.vehicle_type}
               onChange={(e) => setDriverData({ ...driverData, vehicle_type: e.target.value as VehicleType })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               required
             >
               <option value="bike">Vélo</option>
@@ -585,14 +585,14 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Numéro de permis *
             </label>
             <input
               type="text"
               value={driverData.license_number}
               onChange={(e) => setDriverData({ ...driverData, license_number: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               required
             />
           </div>
@@ -604,32 +604,32 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
       return (
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Immatriculation du véhicule
             </label>
             <input
               type="text"
               value={driverData.vehicle_registration}
               onChange={(e) => setDriverData({ ...driverData, vehicle_registration: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               placeholder="XX-XXX-XX"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Numéro d'assurance
             </label>
             <input
               type="text"
               value={driverData.insurance_number}
               onChange={(e) => setDriverData({ ...driverData, insurance_number: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
             />
           </div>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-foreground">
               Vous devrez fournir une copie de votre carte grise et assurance lors de la validation.
             </p>
           </div>
@@ -641,36 +641,36 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
       return (
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               IBAN
             </label>
             <input
               type="text"
               value={driverData.bank_iban}
               onChange={(e) => setDriverData({ ...driverData, bank_iban: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               placeholder="FR76 XXXX XXXX XXXX XXXX XXXX XXX"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               BIC
             </label>
             <input
               type="text"
               value={driverData.bank_bic}
               onChange={(e) => setDriverData({ ...driverData, bank_bic: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               placeholder="XXXXXXXX"
             />
           </div>
 
           <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-            <h3 className="font-bold text-gray-900 mb-2">Vos revenus</h3>
+            <h3 className="font-bold text-foreground mb-2">Vos revenus</h3>
             <div className="text-3xl font-bold text-green-600 mb-2">70%</div>
-            <p className="text-gray-700">des frais de livraison (5-15€ par course)</p>
-            <p className="text-sm text-gray-600 mt-2">Paiement instantané après chaque livraison</p>
+            <p className="text-foreground">des frais de livraison (5-15€ par course)</p>
+            <p className="text-sm text-muted-foreground mt-2">Paiement instantané après chaque livraison</p>
           </div>
         </div>
       );
@@ -681,9 +681,9 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
         <div className={`sticky top-0 bg-gradient-to-r ${
-          roleType === 'vendor' ? 'from-green-500 to-emerald-600' :
+          roleType === 'vendor' ? 'from-green-500 to-success' :
           roleType === 'relay_host' ? 'from-blue-500 to-cyan-500' :
-          'from-teal-500 to-green-600'
+          'from-success to-accent'
         } text-white p-6 rounded-t-3xl z-10`}>
           <div className="flex justify-between items-start">
             <div>
@@ -713,7 +713,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
                   onClick={() => setCurrentTab(tab.id)}
                   className={`flex-1 px-4 py-3 rounded-lg font-medium transition-colors ${
                     currentTab === tab.id
-                      ? 'bg-white text-gray-900'
+                      ? 'bg-white text-foreground'
                       : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
                   }`}
                 >
@@ -741,7 +741,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
               <button
                 type="button"
                 onClick={() => setCurrentTab(currentTab - 1)}
-                className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium text-foreground hover:bg-muted transition-colors"
               >
                 Précédent
               </button>
@@ -754,7 +754,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
                 className={`flex-1 px-6 py-3 rounded-lg font-medium text-white transition-colors ${
                   roleType === 'vendor' ? 'bg-green-600 hover:bg-green-700' :
                   roleType === 'relay_host' ? 'bg-blue-600 hover:bg-blue-700' :
-                  'bg-teal-600 hover:bg-teal-700'
+                  'bg-accent hover:bg-accent/90'
                 }`}
               >
                 Suivant
@@ -766,7 +766,7 @@ export function OnboardingForm({ isOpen, onClose, roleType }: OnboardingFormProp
                 className={`flex-1 px-6 py-3 rounded-lg font-bold text-white transition-colors disabled:opacity-50 ${
                   roleType === 'vendor' ? 'bg-green-600 hover:bg-green-700' :
                   roleType === 'relay_host' ? 'bg-blue-600 hover:bg-blue-700' :
-                  'bg-teal-600 hover:bg-teal-700'
+                  'bg-accent hover:bg-accent/90'
                 }`}
               >
                 {loading ? 'Envoi en cours...' : 'Soumettre ma candidature'}

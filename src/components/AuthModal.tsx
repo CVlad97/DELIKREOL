@@ -170,7 +170,7 @@ export function AuthModal({ isOpen, onClose, onBack, initialMode = 'signin' }: A
         <button
           type="button"
           onClick={handleBack}
-          className="absolute top-4 left-4 text-gray-500 hover:text-gray-700 flex items-center gap-1 text-sm"
+          className="absolute top-4 left-4 text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm"
         >
           <ArrowLeft size={18} />
           <span>Retour</span>
@@ -219,7 +219,7 @@ export function AuthModal({ isOpen, onClose, onBack, initialMode = 'signin' }: A
           </button>
         </div>
 
-        <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-3">
+        <div className="mb-6 rounded-2xl border border-input bg-white p-3">
           {googleClientId ? (
             <div ref={googleButtonRef} className="flex justify-center" />
           ) : (
@@ -315,61 +315,61 @@ export function AuthModal({ isOpen, onClose, onBack, initialMode = 'signin' }: A
           </button>
         </form>
 
-        <div className="mt-6 border-t border-gray-200 pt-4">
-          <div className="mb-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
-            <p className="text-[11px] font-black uppercase tracking-[0.25em] text-emerald-600">Espace de test interne</p>
+        <div className="mt-6 border-t border-input pt-4">
+          <div className="mb-4 rounded-2xl border border-success/20 bg-success/5 p-4">
+            <p className="text-[11px] font-black uppercase tracking-[0.25em] text-success">Espace de test interne</p>
             <p className="mt-2 text-sm font-medium text-slate-700">
               Accès réservé aux vérifications fonctionnelles avant publication opérationnelle.
             </p>
           </div>
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
             Scénarios contrôlés
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <button
               type="button"
               onClick={() => handleDemoAccess('customer')}
-              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
+              className="px-3 py-2 rounded-lg border border-input hover:border-success hover:bg-success/10 text-sm font-medium text-foreground transition-colors"
             >
               Client
             </button>
             <button
               type="button"
               onClick={() => handleDemoAccess('vendor')}
-              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
+              className="px-3 py-2 rounded-lg border border-input hover:border-success hover:bg-success/10 text-sm font-medium text-foreground transition-colors"
             >
               Vendeur
             </button>
             <button
               type="button"
               onClick={() => handleDemoAccess('relay_host')}
-              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
+              className="px-3 py-2 rounded-lg border border-input hover:border-success hover:bg-success/10 text-sm font-medium text-foreground transition-colors"
             >
               Hôte relais
             </button>
             <button
               type="button"
               onClick={() => handleDemoAccess('driver')}
-              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
+              className="px-3 py-2 rounded-lg border border-input hover:border-success hover:bg-success/10 text-sm font-medium text-foreground transition-colors"
             >
               Livreur
             </button>
             <button
               type="button"
               onClick={() => handleDemoAccess('admin')}
-              className="px-3 py-2 rounded-lg border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm font-medium text-gray-700 transition-colors"
+              className="px-3 py-2 rounded-lg border border-input hover:border-success hover:bg-success/10 text-sm font-medium text-foreground transition-colors"
             >
               Admin
             </button>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-muted-foreground mt-2">
             Active un environnement local de vérification, sans modifier les données publiques.
           </p>
           {demoOverride && (
             <button
               type="button"
               onClick={handleExitDemo}
-              className="mt-3 text-xs text-gray-500 underline hover:text-gray-700"
+              className="mt-3 text-xs text-muted-foreground underline hover:text-foreground"
             >
               Quitter l’espace de test
             </button>

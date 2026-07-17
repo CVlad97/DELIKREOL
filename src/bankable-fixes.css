@@ -1,0 +1,137 @@
+/* Production hardening for the public storefront.
+   Loaded after index.css so legacy utility aliases and responsive safeguards
+   remain effective without changing the visual identity. */
+
+html,
+body,
+#root {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+@supports (overflow: clip) {
+  html,
+  body,
+  #root {
+    overflow-x: clip;
+  }
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Native images that fail outside SmartImage receive an honest branded vignette. */
+.native-image-fallback-host {
+  position: relative !important;
+  overflow: hidden;
+  background: #fffaf4;
+}
+
+.native-image-fallback-host::after {
+  content: attr(data-image-fallback-label);
+  position: absolute;
+  left: 0.5rem;
+  bottom: 0.5rem;
+  z-index: 3;
+  max-width: calc(100% - 1rem);
+  border-radius: 999px;
+  padding: 0.3rem 0.65rem;
+  background: rgb(0 0 0 / 0.78);
+  color: #fff;
+  font-size: 0.625rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* Product thumbnails use one stable 4:3 format on the public catalogue. */
+[data-catalogue-grid="true"] [data-thumbnail-source] [data-smart-image-container="true"] {
+  aspect-ratio: 4 / 3 !important;
+}
+
+/* Form boundaries must remain perceivable on white and warm backgrounds. */
+
+
+/* Responsive cards: 1 mobile, 2 tablet, 3 laptop, 4 desktop. */
+.scroll-carousel-track {
+  scroll-padding-inline: 0.25rem;
+}
+
+.scroll-carousel-track > * {
+  box-sizing: border-box;
+  flex: 0 0 calc(100% - 2rem) !important;
+  min-width: 0 !important;
+  width: auto !important;
+}
+
+@media (min-width: 640px) {
+  .scroll-carousel-track > * {
+    flex-basis: calc(50% - 0.5rem) !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .scroll-carousel-track > * {
+    flex-basis: calc(33.333% - 0.7rem) !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .scroll-carousel-track > * {
+    flex-basis: calc(25% - 0.75rem) !important;
+  }
+}
+
+/* Product-card footer: price and CTA stay readable without clipping. */
+.scroll-carousel-track > * > .p-5 > .flex.items-center.justify-between {
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.scroll-carousel-track > * > .p-5 > .flex.items-center.justify-between > button {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.scroll-carousel-track > * h3 {
+  overflow-wrap: anywhere;
+}
+
+/* Keep photographs faithful to their source. Do not apply global colour filters. */
+.product-photo-natural,
+.scroll-carousel-track img {
+  filter: none;
+}
+
+/* Save Peyi'a uses branded square/flyer visuals: keep the whole artwork visible. */
+img[src*="/vendors/save-peyia/"] {
+  object-fit: contain !important;
+  background: #fffaf4;
+  padding: 0.2rem;
+  filter: none;
+}
+
+img[src*="ninice-01-showcase"] {
+  object-position: center 46%;
+  filter: none;
+}
+
+img[src*="hero-tropical"] {
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-carousel-track {
+    scroll-behavior: auto;
+  }
+
+  .product-photo-natural,
+  .scroll-carousel-track img {
+    transition: none !important;
+  }
+}

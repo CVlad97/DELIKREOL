@@ -36,7 +36,7 @@ export function AdminOffres() {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="font-bold">{offre.name}</h3>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${offre.status === 'Actif' ? 'bg-green-100 text-green-700' : offre.status === 'Phase 2' ? 'bg-gray-100 text-gray-600' : 'bg-amber-100 text-amber-700'}`}>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${offre.status === 'Actif' ? 'bg-green-100 text-green-700' : offre.status === 'Phase 2' ? 'bg-muted text-muted-foreground' : 'bg-amber-100 text-amber-700'}`}>
                     {offre.status}
                   </span>
                   <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
@@ -53,7 +53,7 @@ export function AdminOffres() {
                 href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(`Offre: ${offre.name}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-emerald-600 hover:text-emerald-700 flex-shrink-0"
+                className="text-success hover:text-success flex-shrink-0"
               >
                 <MessageCircle className="w-5 h-5" />
               </a>

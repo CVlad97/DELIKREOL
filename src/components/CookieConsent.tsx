@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShieldCheck } from 'lucide-react';
-import {
-  loadCookiePrefs,
-  saveCookiePrefs,
-  type CookiePreferences,
-  DEFAULT_PREFS,
-} from '../services/privacy';
+import { CookiePreferences, DEFAULT_PREFS, loadCookiePrefs, saveCookiePrefs } from '../services/privacy';
 
 export function CookieConsent() {
   const [visible, setVisible] = useState(false);
@@ -20,13 +14,7 @@ export function CookieConsent() {
   }, []);
 
   const acceptAll = () => {
-    const all: CookiePreferences = {
-      necessary: true,
-      geolocation: true,
-      analytics: true,
-      marketing: true,
-      hasMadeChoice: true,
-    };
+    const all: CookiePreferences = { necessary: true, geolocation: true, analytics: true, marketing: true, hasMadeChoice: true };
     saveCookiePrefs(all);
     setPrefs(all);
     setVisible(false);
@@ -47,102 +35,57 @@ export function CookieConsent() {
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[100] p-3 sm:p-5">
-      <section
-        role="dialog"
-        aria-modal="false"
-        aria-labelledby="cookie-title"
-        aria-describedby="cookie-description"
-        className="mx-auto max-w-3xl rounded-3xl border border-border bg-white/98 p-4 shadow-2xl backdrop-blur-xl sm:p-5"
-      >
+    <aside className="fixed inset-x-0 bottom-0 z-[100] p-3 sm:p-4" aria-label="Préférences de confidentialité">
+      <div className="mx-auto max-w-2xl rounded-3xl border border-primary/20 bg-white p-4 shadow-2xl sm:p-5">
         <div className="flex items-start gap-3">
-          <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <ShieldCheck className="h-5 w-5" aria-hidden="true" />
-          </div>
+          <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-xl sm:flex" aria-hidden="true">🍪</div>
           <div className="min-w-0 flex-1">
-            <h2 id="cookie-title" className="text-base font-black text-foreground">
-              Vos préférences de confidentialité
-            </h2>
-            <p id="cookie-description" className="mt-1 text-sm leading-6 text-muted-foreground">
-              Les cookies nécessaires font fonctionner le panier. Avec votre accord, la géolocalisation et la mesure d’audience améliorent le service.
-              {' '}
-              <Link to="/confidentialite" className="font-bold text-primary underline underline-offset-2">
-                En savoir plus
-              </Link>
+            <h2 className="text-base font-black text-foreground">Vos préférences de confidentialité</h2>
+            <p className="mt-1 text-sm leading-5 text-muted-foreground">
+              Les cookies nécessaires font fonctionner le panier. La géolocalisation, les statistiques et le marketing restent optionnels.
             </p>
+            <Link to="/cookies" className="mt-1 inline-flex min-h-8 items-center text-xs font-bold text-primary underline-offset-2 hover:underline">
+              En savoir plus
+            </Link>
           </div>
         </div>
 
         {showDetails && (
-          <div className="mt-4 grid gap-2 rounded-2xl border border-border bg-muted/40 p-3 sm:grid-cols-2">
-            <label className="flex min-h-11 items-center gap-2 text-sm font-semibold text-foreground">
-              <input type="checkbox" checked disabled className="h-4 w-4 accent-primary" />
-              Nécessaires — toujours actifs
-            </label>
-            <label className="flex min-h-11 items-center gap-2 text-sm text-foreground">
-              <input
-                type="checkbox"
-                checked={prefs.geolocation}
-                onChange={(event) => setPrefs((current) => ({ ...current, geolocation: event.target.checked }))}
-                className="h-4 w-4 accent-primary"
-              />
+          <div className="mt-3 grid gap-2 rounded-2xl bg-muted/60 p-3 sm:grid-cols-2">
+            <label className="flex min-h-10 items-center gap-2 text-sm font-semibold text-foreground"><input type="checkbox" checked disabled className="h-5 w-5 accent-primary" /> Nécessaires</label>
+            <label className="flex min-h-10 items-center gap-2 text-sm text-foreground">
+              <input type="checkbox" checked={prefs.geolocation} onChange={event => setPrefs(current => ({ ...current, geolocation: event.target.checked }))} className="h-5 w-5 accent-primary" />
               Géolocalisation
             </label>
-            <label className="flex min-h-11 items-center gap-2 text-sm text-foreground">
-              <input
-                type="checkbox"
-                checked={prefs.analytics}
-                onChange={(event) => setPrefs((current) => ({ ...current, analytics: event.target.checked }))}
-                className="h-4 w-4 accent-primary"
-              />
-              Mesure d’audience
+            <label className="flex min-h-10 items-center gap-2 text-sm text-foreground">
+              <input type="checkbox" checked={prefs.analytics} onChange={event => setPrefs(current => ({ ...current, analytics: event.target.checked }))} className="h-5 w-5 accent-primary" />
+              Statistiques
             </label>
-            <label className="flex min-h-11 items-center gap-2 text-sm text-foreground">
-              <input
-                type="checkbox"
-                checked={prefs.marketing}
-                onChange={(event) => setPrefs((current) => ({ ...current, marketing: event.target.checked }))}
-                className="h-4 w-4 accent-primary"
-              />
-              Offres personnalisées
+            <label className="flex min-h-10 items-center gap-2 text-sm text-foreground">
+              <input type="checkbox" checked={prefs.marketing} onChange={event => setPrefs(current => ({ ...current, marketing: event.target.checked }))} className="h-5 w-5 accent-primary" />
+              Marketing
             </label>
           </div>
         )}
 
-        <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end">
-          <button
-            type="button"
-            onClick={() => setShowDetails((current) => !current)}
-            className="min-h-11 rounded-xl px-4 text-sm font-bold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            aria-expanded={showDetails}
-          >
-            {showDetails ? 'Masquer les réglages' : 'Personnaliser'}
+        <div className="mt-4 grid gap-2 sm:grid-cols-[auto_1fr_1fr]">
+          <button type="button" onClick={() => setShowDetails(value => !value)} className="min-h-11 rounded-xl px-3 text-sm font-bold text-primary hover:bg-primary/5">
+            {showDetails ? 'Masquer' : 'Personnaliser'}
           </button>
-          <button
-            type="button"
-            onClick={acceptNecessary}
-            className="min-h-11 rounded-xl border border-border bg-white px-4 text-sm font-black text-foreground transition-colors hover:border-primary/35"
-          >
-            Continuer sans optionnel
-          </button>
-          {showDetails && (
-            <button
-              type="button"
-              onClick={saveCustom}
-              className="min-h-11 rounded-xl bg-foreground px-4 text-sm font-black text-background transition-colors hover:bg-primary"
-            >
+          {showDetails ? (
+            <button type="button" onClick={saveCustom} className="min-h-11 rounded-xl border border-input bg-white px-4 text-sm font-bold text-foreground hover:bg-muted">
               Enregistrer mes choix
             </button>
+          ) : (
+            <button type="button" onClick={acceptNecessary} className="min-h-11 rounded-xl border border-input bg-white px-4 text-sm font-bold text-foreground hover:bg-muted">
+              Refuser les optionnels
+            </button>
           )}
-          <button
-            type="button"
-            onClick={acceptAll}
-            className="min-h-11 rounded-xl bg-primary px-5 text-sm font-black text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
-          >
+          <button type="button" onClick={acceptAll} className="min-h-11 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary">
             Tout accepter
           </button>
         </div>
-      </section>
-    </div>
+      </div>
+    </aside>
   );
 }

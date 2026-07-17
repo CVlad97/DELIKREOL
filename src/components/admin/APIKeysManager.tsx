@@ -143,11 +143,11 @@ export function APIKeysManager() {
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
               <Key className="text-orange-600" />
               Gestion des Clés API
             </h2>
-            <p className="text-gray-600 mt-1">
+            <p className="text-muted-foreground mt-1">
               Configuration sécurisée des intégrations tierces
             </p>
           </div>
@@ -162,24 +162,24 @@ export function APIKeysManager() {
 
         {loading ? (
           <div className="text-center py-12">
-            <p className="text-gray-600">Chargement...</p>
+            <p className="text-muted-foreground">Chargement...</p>
           </div>
         ) : apiKeys.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-lg">
-            <Key className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">Aucune clé API configurée</p>
+          <div className="text-center py-12 bg-muted rounded-lg">
+            <Key className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">Aucune clé API configurée</p>
           </div>
         ) : (
           <div className="space-y-4">
             {apiKeys.map((key) => (
               <div
                 key={key.id}
-                className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                className="border border-input rounded-lg p-4 hover:shadow-md transition-shadow"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="font-bold text-gray-900">{key.key_name}</span>
+                      <span className="font-bold text-foreground">{key.key_name}</span>
                       <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
                         {getServiceLabel(key.service)}
                       </span>
@@ -195,19 +195,19 @@ export function APIKeysManager() {
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                      <code className="bg-gray-100 px-3 py-1 rounded font-mono">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                      <code className="bg-muted px-3 py-1 rounded font-mono">
                         {visibleKeys.has(key.id) ? key.encrypted_key : maskKey(key.encrypted_key)}
                       </code>
                       <button
                         onClick={() => toggleKeyVisibility(key.id)}
-                        className="p-1 hover:bg-gray-100 rounded"
+                        className="p-1 hover:bg-muted rounded"
                         title={visibleKeys.has(key.id) ? 'Masquer' : 'Afficher'}
                       >
                         {visibleKeys.has(key.id) ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     </div>
-                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <TrendingUp size={14} />
                         {key.usage_count} utilisations
@@ -224,7 +224,7 @@ export function APIKeysManager() {
                       onClick={() => toggleKeyStatus(key.id, key.is_active)}
                       className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                         key.is_active
-                          ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-muted text-foreground hover:bg-gray-200'
                           : 'bg-green-100 text-green-700 hover:bg-green-200'
                       }`}
                     >
@@ -248,11 +248,11 @@ export function APIKeysManager() {
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Ajouter une clé API</h3>
+            <h3 className="text-xl font-bold text-foreground mb-4">Ajouter une clé API</h3>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Service
                 </label>
                 <select
@@ -269,7 +269,7 @@ export function APIKeysManager() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Nom de la clé
                 </label>
                 <input
@@ -282,7 +282,7 @@ export function APIKeysManager() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Clé API
                 </label>
                 <input
@@ -300,7 +300,7 @@ export function APIKeysManager() {
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setShowAddModal(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg font-medium text-foreground hover:bg-muted transition-colors"
               >
                 Annuler
               </button>

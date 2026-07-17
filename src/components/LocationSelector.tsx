@@ -56,8 +56,8 @@ export function LocationSelector({ onSelect, compact }: LocationSelectorProps) {
   };
 
   return (
-    <div className={`bg-white rounded-2xl border border-orange-100 ${compact ? 'p-3' : 'p-4 shadow-sm'}`}>
-      <p className="text-xs text-gray-500 mb-2 flex items-center gap-1">
+    <div className={`bg-white rounded-2xl border border-primary/20 ${compact ? 'p-3' : 'p-4 shadow-sm'}`}>
+      <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
         <MapPin className="w-3 h-3" />
         Nous utilisons votre position uniquement pour estimer les distances, délais et options disponibles.
       </p>
@@ -65,17 +65,17 @@ export function LocationSelector({ onSelect, compact }: LocationSelectorProps) {
       <div className="flex gap-2">
         {/* Sélecteur commune */}
         <div className="relative flex-1">
-          <div className="flex items-center bg-gray-50 rounded-xl border px-3 py-2">
-            <MapPin className="w-4 h-4 text-gray-400 mr-2" />
+          <div className="flex items-center bg-muted rounded-xl border px-3 py-2">
+            <MapPin className="w-4 h-4 text-muted-foreground mr-2" />
             <input
               value={showList ? search : selectedCommune}
               onChange={e => { setSearch(e.target.value); setShowList(true); }}
               onFocus={() => setShowList(true)}
               placeholder="Choisir une commune"
-              className="flex-1 bg-transparent text-sm outline-none text-gray-700 placeholder-gray-400"
+              className="flex-1 bg-transparent text-sm outline-none text-foreground placeholder-gray-400"
             />
             <button onClick={() => setShowList(!showList)}>
-              <ChevronDown className="w-4 h-4 text-gray-400" />
+              <ChevronDown className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>
           
@@ -83,18 +83,18 @@ export function LocationSelector({ onSelect, compact }: LocationSelectorProps) {
             <div className="absolute top-full left-0 right-0 z-20 mt-1 bg-white border rounded-xl shadow-lg max-h-48 overflow-y-auto">
               {filtered.slice(0, 34).map(c => (
                 <button key={c.name} onClick={() => handleSelect(c.name)}
-                  className={`w-full text-left px-3 py-2 text-sm hover:bg-orange-50 ${c.name === selectedCommune ? 'bg-orange-50 text-orange-600 font-semibold' : 'text-gray-700'}`}>
+                  className={`w-full text-left px-3 py-2 text-sm hover:bg-primary/[0.08] ${c.name === selectedCommune ? 'bg-primary/[0.08] text-primary font-semibold' : 'text-foreground'}`}>
                   {c.name}
                 </button>
               ))}
-              {filtered.length === 0 && <p className="px-3 py-2 text-sm text-gray-400">Aucune commune trouvée</p>}
+              {filtered.length === 0 && <p className="px-3 py-2 text-sm text-muted-foreground">Aucune commune trouvée</p>}
             </div>
           )}
         </div>
 
         {/* Bouton géolocalisation */}
         {!position && (
-          <button onClick={requestGeolocation} className="flex items-center gap-1 px-3 py-2 bg-orange-100 text-orange-700 rounded-xl text-xs font-bold hover:bg-orange-200">
+          <button onClick={requestGeolocation} className="flex items-center gap-1 px-3 py-2 bg-primary/[0.15] text-primary rounded-xl text-xs font-bold hover:bg-primary/20">
             <Locate className="w-3 h-3" />
             {compact ? '' : 'Ma position'}
           </button>
@@ -102,9 +102,9 @@ export function LocationSelector({ onSelect, compact }: LocationSelectorProps) {
       </div>
 
       {position && (
-        <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+        <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
           <span>📍 Position utilisée pour le classement</span>
-          <button onClick={() => { setPosition(null); }} className="text-orange-600 hover:underline">Réinitialiser</button>
+          <button onClick={() => { setPosition(null); }} className="text-primary hover:underline">Réinitialiser</button>
         </div>
       )}
     </div>

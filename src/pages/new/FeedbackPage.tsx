@@ -344,7 +344,7 @@ export function FeedbackPage() {
               )}
             </div>
             {attachmentWarning && (
-              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl p-3">{attachmentWarning}</p>
+              <p className="text-xs text-secondary bg-secondary/10 border border-secondary/30 rounded-xl p-3">{attachmentWarning}</p>
             )}
           </div>
 

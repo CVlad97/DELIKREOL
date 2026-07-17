@@ -11,7 +11,7 @@ export function NotFoundPage() {
           Cette page n'existe pas ou a été déplacée.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link to="/" className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/90 transition-colors">
+          <Link to="/" className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary transition-colors">
             <Home className="w-4 h-4" />
             Accueil
           </Link>

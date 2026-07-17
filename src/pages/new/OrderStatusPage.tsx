@@ -19,42 +19,42 @@ export default function OrderStatusPage() {
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
-      <Link to="/" className="flex items-center gap-1 text-sm text-gray-500 hover:text-orange-600 mb-6">
+      <Link to="/" className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary mb-6">
         <ArrowLeft className="w-4 h-4" /> Retour à l'accueil
       </Link>
 
       {orderId ? (
-        <div className="bg-white border border-orange-100 rounded-3xl p-6 shadow-sm">
+        <div className="bg-white border border-primary/20 rounded-3xl p-6 shadow-sm">
           <div className="text-center mb-6">
-            <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
-            <h1 className="text-xl font-black text-gray-900">Commande enregistrée</h1>
-            <p className="text-sm text-gray-500 mt-1">Référence : <span className="font-bold text-orange-600">{orderId}</span></p>
+            <CheckCircle2 className="w-12 h-12 text-success mx-auto mb-3" />
+            <h1 className="text-xl font-black text-foreground">Commande enregistrée</h1>
+            <p className="text-sm text-muted-foreground mt-1">Référence : <span className="font-bold text-primary">{orderId}</span></p>
           </div>
 
           {order && (
             <div className="space-y-3 text-sm mb-6">
               {order.items?.map((item: any, i: number) => (
-                <div key={i} className="flex justify-between p-3 bg-gray-50 rounded-xl">
+                <div key={i} className="flex justify-between p-3 bg-muted rounded-xl">
                   <span className="font-medium">{item.name}</span>
-                  <span className="text-gray-500">x{item.quantity}</span>
+                  <span className="text-muted-foreground">x{item.quantity}</span>
                 </div>
               ))}
               <div className="flex justify-between font-bold pt-2 border-t">
                 <span>Total estimé</span>
-                <span className="text-orange-600">{order.total?.toFixed(2).replace('.', ',')} €</span>
+                <span className="text-primary">{order.total?.toFixed(2).replace('.', ',')} €</span>
               </div>
             </div>
           )}
 
           <div className="space-y-2 mb-6">
-            {order?.commune && <p className="flex items-center gap-2 text-xs text-gray-500"><MapPin className="w-3 h-3" />{order.commune}</p>}
-            {order?.mode && <p className="flex items-center gap-2 text-xs text-gray-500"><Package className="w-3 h-3" />{order.mode === 'retrait' ? 'Retrait' : order.mode === 'relais' ? 'Point relais' : 'Livraison'}</p>}
-            {order?.creneaux && <p className="flex items-center gap-2 text-xs text-gray-500"><Clock className="w-3 h-3" />{order.creneaux}</p>}
+            {order?.commune && <p className="flex items-center gap-2 text-xs text-muted-foreground"><MapPin className="w-3 h-3" />{order.commune}</p>}
+            {order?.mode && <p className="flex items-center gap-2 text-xs text-muted-foreground"><Package className="w-3 h-3" />{order.mode === 'retrait' ? 'Retrait' : order.mode === 'relais' ? 'Point relais' : 'Livraison'}</p>}
+            {order?.creneaux && <p className="flex items-center gap-2 text-xs text-muted-foreground"><Clock className="w-3 h-3" />{order.creneaux}</p>}
           </div>
 
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6">
-            <p className="text-sm font-semibold text-amber-800 mb-1">En attente de confirmation</p>
-            <p className="text-xs text-amber-700">Nous vous contacterons par WhatsApp pour valider votre commande.</p>
+          <div className="bg-secondary/10 border border-secondary/30 rounded-2xl p-4 mb-6">
+            <p className="text-sm font-semibold text-secondary mb-1">En attente de confirmation</p>
+            <p className="text-xs text-secondary">Nous vous contacterons par WhatsApp pour valider votre commande.</p>
           </div>
 
           <a
@@ -67,10 +67,10 @@ export default function OrderStatusPage() {
         </div>
       ) : (
         <div className="text-center py-12">
-          <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h1 className="text-xl font-black text-gray-900 mb-2">Suivi de commande</h1>
-          <p className="text-sm text-gray-500 mb-4">Entrez votre numéro de commande pour suivre son statut.</p>
-          <Link to="/" className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 text-white font-bold rounded-2xl text-sm">
+          <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <h1 className="text-xl font-black text-foreground mb-2">Suivi de commande</h1>
+          <p className="text-sm text-muted-foreground mb-4">Entrez votre numéro de commande pour suivre son statut.</p>
+          <Link to="/" className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-2xl text-sm">
             Retour à l'accueil
           </Link>
         </div>

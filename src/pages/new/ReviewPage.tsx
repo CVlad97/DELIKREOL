@@ -68,13 +68,13 @@ function StarRating({ value, onChange, readonly = false }: { value: number; onCh
             className={`w-8 h-8 ${
               star <= (hover || value)
                 ? 'fill-yellow-400 text-yellow-400'
-                : 'text-gray-300'
+                : 'text-muted-foreground'
             } ${!readonly && star <= (hover || value) ? 'drop-shadow-sm' : ''}`}
           />
         </button>
       ))}
       {value > 0 && (
-        <span className="ml-2 text-sm font-semibold text-gray-500">{value}/5</span>
+        <span className="ml-2 text-sm font-semibold text-muted-foreground">{value}/5</span>
       )}
     </div>
   );
@@ -150,36 +150,36 @@ export default function ReviewPage() {
   if (submitted) {
     return (
       <Layout>
-        <section className="py-16 md:py-24 bg-gradient-to-b from-white to-orange-50/50">
+        <section className="py-16 md:py-24 bg-gradient-to-b from-white to-primary/5">
           <div className="max-w-lg mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div className="bg-white rounded-[2.5rem] border border-orange-100 p-8 md:p-12 shadow-soft">
+            <div className="bg-white rounded-[2.5rem] border border-primary/20 p-8 md:p-12 shadow-soft">
               <div className="mx-auto mb-6 w-16 h-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
-              <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-3">
+              <h2 className="text-2xl md:text-3xl font-black text-foreground mb-3">
                 Merci pour votre avis !
               </h2>
-              <p className="text-gray-500 text-base leading-relaxed mb-6">
+              <p className="text-muted-foreground text-base leading-relaxed mb-6">
                 Votre retour nous aide à améliorer DeliKreol et à mieux servir la Martinique.
               </p>
               <div className="flex items-center justify-center gap-1 mb-6">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
-                    className={`w-6 h-6 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`}
+                    className={`w-6 h-6 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}`}
                   />
                 ))}
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link
                   to="/"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl transition-all"
                 >
                   Retour à l'accueil
                 </Link>
                 <Link
                   to="/catalogue"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-orange-100 text-gray-700 font-bold rounded-xl hover:bg-orange-50 transition-all"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-primary/20 text-foreground font-bold rounded-xl hover:bg-primary/[0.08] transition-all"
                 >
                   <ChefHat className="w-4 h-4" />
                   Voir le catalogue
@@ -194,26 +194,26 @@ export default function ReviewPage() {
 
   return (
     <Layout>
-      <section className="py-16 md:py-24 bg-gradient-to-b from-white to-orange-50/50">
+      <section className="py-16 md:py-24 bg-gradient-to-b from-white to-primary/5">
         <div className="max-w-xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-orange-700">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/[0.15] px-3 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-primary">
               Avis client
             </div>
-            <h1 className="text-3xl md:text-4xl font-black tracking-tight text-gray-900 mb-2">
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground mb-2">
               Donnez votre avis
             </h1>
-            <p className="text-gray-500 text-base">
+            <p className="text-muted-foreground text-base">
               Votre expérience compte pour nous et pour la communauté DeliKreol
             </p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="bg-white rounded-[2.5rem] border border-orange-100 p-6 md:p-8 shadow-soft space-y-6">
+          <form onSubmit={handleSubmit} className="bg-white rounded-[2.5rem] border border-primary/20 p-6 md:p-8 shadow-soft space-y-6">
             {/* Rating */}
             <div>
-              <label className="block text-sm font-bold text-gray-800 mb-2">
+              <label className="block text-sm font-bold text-foreground mb-2">
                 Note <span className="text-red-500">*</span>
               </label>
               <StarRating value={rating} onChange={setRating} />
@@ -224,7 +224,7 @@ export default function ReviewPage() {
 
             {/* Comment */}
             <div>
-              <label className="block text-sm font-bold text-gray-800 mb-2">
+              <label className="block text-sm font-bold text-foreground mb-2">
                 Commentaire <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -233,7 +233,7 @@ export default function ReviewPage() {
                 placeholder="Partagez votre expérience… (minimum 10 caractères)"
                 rows={4}
                 maxLength={1000}
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none resize-y transition-all"
+                className="w-full rounded-xl border border-input px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30 outline-none resize-y transition-all"
               />
               <div className="flex items-center justify-between mt-1">
                 {comment.trim().length > 0 && comment.trim().length < 10 ? (
@@ -243,14 +243,14 @@ export default function ReviewPage() {
                 ) : (
                   <span />
                 )}
-                <span className="text-xs text-gray-400">{comment.length}/1000</span>
+                <span className="text-xs text-muted-foreground">{comment.length}/1000</span>
               </div>
             </div>
 
             {/* Name (optional) */}
             <div>
-              <label className="block text-sm font-bold text-gray-800 mb-2">
-                Nom <span className="text-gray-400 font-normal">(optionnel — Anonyme si vide)</span>
+              <label className="block text-sm font-bold text-foreground mb-2">
+                Nom <span className="text-muted-foreground font-normal">(optionnel — Anonyme si vide)</span>
               </label>
               <input
                 type="text"
@@ -258,14 +258,14 @@ export default function ReviewPage() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Votre prénom ou pseudo"
                 maxLength={60}
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all"
+                className="w-full rounded-xl border border-input px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30 outline-none transition-all"
               />
             </div>
 
             {/* Commune (optional) */}
             <div>
-              <label className="block text-sm font-bold text-gray-800 mb-2">
-                Commune <span className="text-gray-400 font-normal">(optionnel)</span>
+              <label className="block text-sm font-bold text-foreground mb-2">
+                Commune <span className="text-muted-foreground font-normal">(optionnel)</span>
               </label>
               <input
                 type="text"
@@ -273,20 +273,20 @@ export default function ReviewPage() {
                 onChange={(e) => setCommune(e.target.value)}
                 placeholder="Ex: Fort-de-France, Ducos…"
                 maxLength={60}
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all"
+                className="w-full rounded-xl border border-input px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30 outline-none transition-all"
               />
             </div>
 
             {/* Traiteur (optional) */}
             <div>
-              <label className="block text-sm font-bold text-gray-800 mb-2">
-                Traiteur commandé <span className="text-gray-400 font-normal">(optionnel)</span>
+              <label className="block text-sm font-bold text-foreground mb-2">
+                Traiteur commandé <span className="text-muted-foreground font-normal">(optionnel)</span>
               </label>
               <div className="relative">
                 <select
                   value={traiteur}
                   onChange={(e) => setTraiteur(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 appearance-none bg-white focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all"
+                  className="w-full rounded-xl border border-input px-4 py-3 text-sm text-foreground appearance-none bg-white focus:border-ring focus:ring-2 focus:ring-ring/30 outline-none transition-all"
                 >
                   {TRAITEURS_LIST.map((t) => (
                     <option key={t.value} value={t.value}>
@@ -295,7 +295,7 @@ export default function ReviewPage() {
                   ))}
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center">
-                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
@@ -308,8 +308,8 @@ export default function ReviewPage() {
               disabled={!isValid || submitting}
               className={`w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold text-base transition-all ${
                 isValid && !submitting
-                  ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-200 hover:-translate-y-0.5'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  ? 'bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 hover:-translate-y-0.5'
+                  : 'bg-muted text-muted-foreground cursor-not-allowed'
               }`}
             >
               {submitting ? (
@@ -325,7 +325,7 @@ export default function ReviewPage() {
               )}
             </button>
 
-            <p className="text-xs text-center text-gray-400">
+            <p className="text-xs text-center text-muted-foreground">
               Les champs marqués d'un <span className="text-red-500">*</span> sont obligatoires.
             </p>
           </form>

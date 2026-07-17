@@ -6,10 +6,10 @@
     <title>DeliKreol — Commandez créole local en Martinique</title>
     <meta name="description" content="Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait. Commandez en ligne vos plats maison." />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://cvlad97.github.io/DELIKREOL/" />
+    <link rel="canonical" href="https://delikreol.com/" />
     <meta property="og:title" content="DeliKreol — Commandez créole local en Martinique | Livraison & Traiteur" />
     <meta property="og:description" content="Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait. Commandez en ligne vos plats maison." />
-    <meta property="og:url" content="https://cvlad97.github.io/DELIKREOL/" />
+    <meta property="og:url" content="https://delikreol.com/" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <!--
@@ -18,18 +18,15 @@
       En attente du CI, cette version sert de fallback minimal avec redirection.
     -->
     <script>
-      // Redirection vers l'application via sessionStorage (GitHub Pages SPA workaround)
+      // Redirection SPA pour GitHub Pages — toutes les routes servent l'app
       (function() {
         var redirect = sessionStorage.getItem('redirect');
         if (redirect) {
           sessionStorage.removeItem('redirect');
-          var base = '/DELIKREOL/';
-          var path = redirect.replace(window.location.origin, '');
-          if (path.startsWith(base)) {
-            window.location.href = redirect;
-          } else {
-            window.location.href = base.replace(/\/+$/, '') + path;
-          }
+          window.location.replace(redirect);
+        } else {
+          // Pas de redirect en session → charger la page d'accueil
+          window.location.replace('/');
         }
       })();
     </script>
@@ -39,7 +36,7 @@
     <script>
       // Fallback: rediriger vers la racine de l'application
       sessionStorage.setItem('redirect', window.location.href);
-      window.location.href = '/DELIKREOL/';
+      window.location.href = '/';
     </script>
   </body>
 </html>

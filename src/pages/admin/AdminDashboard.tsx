@@ -27,27 +27,27 @@ function LatestApplications() {
   }, []);
 
   if (apps.length === 0) {
-    return <p className="text-sm text-gray-400 italic">Aucune candidature pour le moment</p>;
+    return <p className="text-sm text-muted-foreground italic">Aucune candidature pour le moment</p>;
   }
 
   return (
     <div className="space-y-3">
       {apps.map((app, i) => (
-        <div key={i} className="text-sm p-3 bg-gray-50 rounded-xl flex items-center justify-between gap-2">
+        <div key={i} className="text-sm p-3 bg-muted rounded-xl flex items-center justify-between gap-2">
           <div className="min-w-0 flex-1">
             <p className="font-semibold text-gray-800 truncate">{app.business_name || app.nomActivite || '—'}</p>
-            <p className="text-xs text-gray-500 truncate">
+            <p className="text-xs text-muted-foreground truncate">
               {app.name || app.nomResponsable || ''}{app.name || app.nomResponsable ? ' • ' : ''}{app.commune || ''}{app.phone ? ` • ${app.phone}` : ''}
             </p>
           </div>
-          <span className="text-[10px] text-gray-400 whitespace-nowrap shrink-0">
+          <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
             {new Date(app.createdAt || app.created_at || 0).toLocaleDateString('fr-FR')}
           </span>
         </div>
       ))}
       <Link
         to="/admin/applications"
-        className="mt-3 inline-block text-xs text-orange-600 font-semibold hover:underline"
+        className="mt-3 inline-block text-xs text-primary font-semibold hover:underline"
       >
         Voir toutes les candidatures →
       </Link>
@@ -91,8 +91,8 @@ export function AdminDashboard() {
   const cards = [
     { label: 'Commandes', value: stats.orders, icon: ShoppingCart, color: 'text-blue-600 bg-blue-50', link: '/admin/commandes' },
     { label: 'Devis traiteur', value: stats.cateringRequests, icon: FileText, color: 'text-purple-600 bg-purple-50', link: '/admin/devis' },
-    { label: 'Partenaires', value: stats.partnerApplications, icon: ChefHat, color: 'text-orange-600 bg-orange-50', link: '/admin/partenaires' },
-    { label: 'Candidatures livreurs', value: stats.driverApplications, icon: Truck, color: 'text-emerald-600 bg-emerald-50', link: '/admin/livreurs' },
+    { label: 'Partenaires', value: stats.partnerApplications, icon: ChefHat, color: 'text-primary bg-primary/[0.08]', link: '/admin/partenaires' },
+    { label: 'Candidatures livreurs', value: stats.driverApplications, icon: Truck, color: 'text-success bg-success/10', link: '/admin/livreurs' },
     { label: 'Candidatures relais', value: stats.relayApplications, icon: MapPin, color: 'text-amber-600 bg-amber-50', link: '/admin/points-relais' },
     { label: 'Leads', value: stats.leads, icon: Target, color: 'text-indigo-600 bg-indigo-50', link: '/admin/leads' },
   ];
@@ -100,8 +100,8 @@ export function AdminDashboard() {
   /* Cartes stats "live" (démo réalistes) */
   const quickCards = [
     { label: 'Commandes aujourd\'hui', value: DEMO_STATS.ordersToday, icon: CalendarDays, color: 'text-blue-600 bg-blue-50' },
-    { label: 'Revenus du mois', value: `${DEMO_STATS.revenueMonth.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €`, icon: DollarSign, color: 'text-emerald-600 bg-emerald-50' },
-    { label: 'Partenaires actifs', value: DEMO_STATS.activePartners, icon: Users, color: 'text-orange-600 bg-orange-50' },
+    { label: 'Revenus du mois', value: `${DEMO_STATS.revenueMonth.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €`, icon: DollarSign, color: 'text-success bg-success/10' },
+    { label: 'Partenaires actifs', value: DEMO_STATS.activePartners, icon: Users, color: 'text-primary bg-primary/[0.08]' },
     { label: 'Livraisons en cours', value: DEMO_STATS.ongoingDeliveries, icon: Bike, color: 'text-purple-600 bg-purple-50' },
   ];
 
@@ -146,38 +146,38 @@ export function AdminDashboard() {
         {/* Produits */}
         <div className="bg-white rounded-xl border p-5">
           <h2 className="font-semibold flex items-center gap-2 mb-3">
-            <Package className="w-5 h-5 text-orange-600" />
+            <Package className="w-5 h-5 text-primary" />
                          Produits au catalogue
           </h2>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between"><span>Total produits</span><span className="font-bold">{totalProduits}</span></div>
             <div className="flex justify-between text-amber-600"><span>⚠️ Descriptions à valider</span><span>{productsSansDescription}</span></div>
             <div className="flex justify-between text-red-600"><span>❌ Prix à confirmer</span><span>{productsSansPrix}</span></div>
-            <div className="flex justify-between text-emerald-600"><span>✅ Produits OK</span><span>{totalProduits - productsSansDescription}</span></div>
+            <div className="flex justify-between text-success"><span>✅ Produits OK</span><span>{totalProduits - productsSansDescription}</span></div>
           </div>
-          <Link to="/admin/catalogue" className="mt-3 inline-block text-xs text-orange-600 font-semibold hover:underline">Gérer le catalogue →</Link>
+          <Link to="/admin/catalogue" className="mt-3 inline-block text-xs text-primary font-semibold hover:underline">Gérer le catalogue →</Link>
         </div>
 
         {/* Partenaires */}
         <div className="bg-white rounded-xl border p-5">
           <h2 className="font-semibold flex items-center gap-2 mb-3">
-            <ChefHat className="w-5 h-5 text-orange-600" />
+            <ChefHat className="w-5 h-5 text-primary" />
             Partenaires
           </h2>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between"><span>Total partenaires</span><span className="font-bold">{traiteurSpaces.length}</span></div>
-            <div className="flex justify-between text-emerald-600"><span>✅ Publiés</span><span>{partenairesActifs}</span></div>
+            <div className="flex justify-between text-success"><span>✅ Publiés</span><span>{partenairesActifs}</span></div>
             <div className="flex justify-between text-amber-600"><span>⚠️ À vérifier</span><span>{partenairesAVerifier}</span></div>
             <div className="flex justify-between"><span>Forfaits disponibles</span><span className="font-bold">{PARTNER_PLANS.length}</span></div>
           </div>
-          <Link to="/admin/partenaires" className="mt-3 inline-block text-xs text-orange-600 font-semibold hover:underline">Voir les partenaires →</Link>
+          <Link to="/admin/partenaires" className="mt-3 inline-block text-xs text-primary font-semibold hover:underline">Voir les partenaires →</Link>
         </div>
       </div>
 
       {/* Dernières candidatures partenaires */}
       <div className="bg-white rounded-xl border p-5 mb-8">
         <h2 className="font-semibold flex items-center gap-2 mb-3">
-          <FileText className="w-5 h-5 text-orange-600" />
+          <FileText className="w-5 h-5 text-primary" />
           Dernières candidatures
         </h2>
         <LatestApplications />
@@ -199,7 +199,7 @@ export function AdminDashboard() {
           {partenairesAVerifier > 0 && (
             <li className="flex items-center gap-2"><ChefHat className="w-4 h-4" />{partenairesAVerifier} partenaire(s) à vérifier avant publication</li>
           )}
-          <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-600" />{partenairesActifs} partenaire(s) publié(s) et actif(s)</li>
+          <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-success" />{partenairesActifs} partenaire(s) publié(s) et actif(s)</li>
         </ul>
       </div>
     </div>

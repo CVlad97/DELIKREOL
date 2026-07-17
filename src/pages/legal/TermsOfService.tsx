@@ -6,15 +6,15 @@ export default function TermsOfService() {
   return (
     <Layout>
       <div className="min-h-screen bg-white">
-      <section className="relative bg-gradient-to-br from-emerald-50 to-teal-50 py-12 px-4">
+      <section className="relative bg-gradient-to-br from-success/8 to-accent/8 py-12 px-4">
         <div className="max-w-4xl mx-auto">
-          <Link to="/" className="text-emerald-600 hover:text-emerald-700 mb-4 inline-block">
+          <Link to="/" className="text-success hover:text-success mb-4 inline-block">
             ← Retour à l'accueil
           </Link>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground">
             Conditions Générales de Vente
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-muted-foreground mt-2">
             Dernière mise à jour : 22 mai 2026
           </p>
         </div>
@@ -127,7 +127,7 @@ export default function TermsOfService() {
           <h2>9. Protection des données</h2>
           <p>
             Les données personnelles collectées font l'objet d'un traitement conforme au RGPD. Pour plus d'informations, consultez notre{' '}
-            <Link to="/legal/privacy" className="text-emerald-600 hover:text-emerald-700">
+            <Link to="/legal/privacy" className="text-success hover:text-success">
               Politique de confidentialité
             </Link>.
           </p>
@@ -171,7 +171,7 @@ export default function TermsOfService() {
           <ul>
             <li>Email : {PUBLIC_CONTACT_EMAIL}</li>
             <li>Messages : relayés vers le compte Gmail de gestion</li>
-            <li>Formulaire de contact : <Link to="/contact" className="text-emerald-600 hover:text-emerald-700">cliquez ici</Link></li>
+            <li>Formulaire de contact : <Link to="/contact" className="text-success hover:text-success">cliquez ici</Link></li>
           </ul>
         </div>
       </section>

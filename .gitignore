@@ -54,3 +54,8 @@ blob-report/
 
 # Rapports audités
 reports/
+
+# Supabase audit scripts (contain service key patterns)
+scripts/audit-supabase-*.py
+scripts/audit-data.py
+scripts/audit-all-cols.py

@@ -125,7 +125,7 @@ export function ContactPage() {
                 setSubmitted(false);
                 setForm(initialFormData);
               }}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary text-primary-foreground rounded-xl font-bold transition-colors"
             >
               Nouveau message
             </button>
@@ -245,14 +245,14 @@ export function ContactPage() {
                 />
               </div>
 
-              <label className="flex items-start gap-2 text-xs text-gray-500 mb-4">
+              <label className="flex items-start gap-2 text-xs text-muted-foreground mb-4">
                 <input type="checkbox" required className="mt-0.5 w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary/30" />
                 <span>J'accepte que mes données soient collectées et traitées conformément à la <Link to="/confidentialite" className="text-primary hover:underline">Politique de Confidentialité</Link>. (RGPD art. 6)</span>
               </label>
 
               <button
                 type="submit"
-                className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold transition-colors"
+                className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary text-primary-foreground rounded-xl font-bold transition-colors"
               >
                 <Send size={18} />
                 Envoyer le message

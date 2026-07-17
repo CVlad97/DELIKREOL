@@ -138,7 +138,7 @@ export default function DevisPage() {
             </button>
             <Link
               to="/catalogue"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary text-primary-foreground rounded-xl font-bold transition-colors"
             >
               Voir le catalogue
             </Link>
@@ -360,7 +360,7 @@ export default function DevisPage() {
 
             <div className="space-y-1.5">
               <label htmlFor="allergies" className="block text-sm font-semibold text-foreground">
-                <AlertCircle size={14} className="inline mr-1 text-orange-500" />
+                <AlertCircle size={14} className="inline mr-1 text-primary" />
                 Allergies à signaler
               </label>
               <textarea
@@ -414,7 +414,7 @@ export default function DevisPage() {
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               type="submit"
-              className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold text-sm transition-colors shadow-lg"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary text-primary-foreground rounded-xl font-bold text-sm transition-colors shadow-lg"
             >
               <Send size={16} />
               Envoyer la demande

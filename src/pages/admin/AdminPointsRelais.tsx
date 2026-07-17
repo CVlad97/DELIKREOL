@@ -62,18 +62,18 @@ export function AdminPointsRelais() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-black">Points relais</h1>
-        <span className={`text-xs px-3 py-1 rounded-full font-semibold ${source === 'supabase' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+        <span className={`text-xs px-3 py-1 rounded-full font-semibold ${source === 'supabase' ? 'bg-success/[0.15] text-success' : 'bg-amber-100 text-amber-700'}`}>
           Source: {source}
         </span>
       </div>
       {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-      {loading ? <p className="text-gray-400">Chargement...</p> : items.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">Aucune candidature pour l’instant.</div>
+      {loading ? <p className="text-muted-foreground">Chargement...</p> : items.length === 0 ? (
+        <div className="text-center py-16 text-muted-foreground">Aucune candidature pour l’instant.</div>
       ) : (
         <div className="overflow-x-auto rounded-2xl border">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-gray-50 text-left">
+              <tr className="border-b bg-muted text-left">
                 <th className="p-3">Commerce</th>
                 <th className="p-3">Responsable</th>
                 <th className="p-3">Commune</th>
@@ -90,18 +90,18 @@ export function AdminPointsRelais() {
             </thead>
             <tbody>
               {items.map((r: any) => (
-                <tr key={r.id} className="border-b hover:bg-gray-50/50">
+                <tr key={r.id} className="border-b hover:bg-muted/50">
                   <td className="p-3 font-medium">{r.business_name}</td>
-                  <td className="p-3 text-gray-600">{r.manager_name || '—'}</td>
+                  <td className="p-3 text-muted-foreground">{r.manager_name || '—'}</td>
                   <td className="p-3">{r.commune}</td>
                   <td className="p-3">{r.phone || '—'}</td>
                   <td className="p-3">
                     {r.whatsapp || r.phone ? (
-                      <a href={`https://wa.me/${cleanPhone(r.whatsapp || r.phone)}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline text-xs">💬 WhatsApp</a>
+                      <a href={`https://wa.me/${cleanPhone(r.whatsapp || r.phone)}`} target="_blank" rel="noopener noreferrer" className="text-success hover:underline text-xs">💬 WhatsApp</a>
                     ) : '—'}
                   </td>
                   <td className="p-3 text-xs">{r.email ? <a href={`mailto:${r.email}`} className="text-blue-600 hover:underline">{r.email}</a> : '—'}</td>
-                  <td className="p-3 text-xs text-gray-500 max-w-[120px] truncate">{r.address || '—'}</td>
+                  <td className="p-3 text-xs text-muted-foreground max-w-[120px] truncate">{r.address || '—'}</td>
                   <td className="p-3 text-xs">{r.opening_hours || '—'}</td>
                   <td className="p-3 text-xs">{r.capacity || '—'}</td>
                   <td className="p-3">
@@ -110,7 +110,7 @@ export function AdminPointsRelais() {
                       {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </td>
-                  <td className="p-3 text-xs text-gray-400">{formatDate(r.created_at)}</td>
+                  <td className="p-3 text-xs text-muted-foreground">{formatDate(r.created_at)}</td>
                   <td className="p-3">
                     {(r.whatsapp || r.phone) && (
                       <a href={`https://wa.me/${cleanPhone(r.whatsapp || r.phone)}`} target="_blank" rel="noopener noreferrer"

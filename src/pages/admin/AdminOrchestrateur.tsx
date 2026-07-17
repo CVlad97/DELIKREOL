@@ -6,7 +6,7 @@ const projects = [
     name: 'DELIKREOL',
     priority: 'Priorité absolue',
     status: 'En cours',
-    color: 'bg-orange-500',
+    color: 'bg-primary',
     items: [
       'Catalogue & panier ✅',
       'WhatsApp commandes ✅',
@@ -29,7 +29,7 @@ const projects = [
     name: 'SOS GALÈRE',
     priority: 'Phase suivante',
     status: 'En attente',
-    color: 'bg-emerald-500',
+    color: 'bg-success',
     items: ['Entraide locale', 'Services & artisans', 'Réservation', 'Paiement', 'Géolocalisation', 'Emploi communautaire'],
   },
   {
@@ -59,7 +59,7 @@ export function AdminOrchestrateur() {
             </div>
             <div className="flex items-center gap-2 mb-4">
               <span className="text-xs px-2 py-1 bg-muted rounded-full">{project.priority}</span>
-              <span className={`text-xs px-2 py-1 rounded-full ${project.status === 'En cours' ? 'bg-green-100 text-green-700' : project.status === 'Actif' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
+              <span className={`text-xs px-2 py-1 rounded-full ${project.status === 'En cours' ? 'bg-green-100 text-green-700' : project.status === 'Actif' ? 'bg-blue-100 text-blue-700' : 'bg-muted text-muted-foreground'}`}>
                 {project.status}
               </span>
             </div>
@@ -67,7 +67,7 @@ export function AdminOrchestrateur() {
               {project.items.map((item, i) => (
                 <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
                   {item.includes('✅') ? (
-                    <CheckCircle className="w-3.5 h-3.5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="w-3.5 h-3.5 text-success mt-0.5 flex-shrink-0" />
                   ) : item.includes('à') ? (
                     <AlertTriangle className="w-3.5 h-3.5 text-amber-500 mt-0.5 flex-shrink-0" />
                   ) : (

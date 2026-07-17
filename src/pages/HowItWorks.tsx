@@ -58,7 +58,7 @@ export function HowItWorks() {
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 py-16 pt-20">
         <div className="text-center mb-20 space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/[0.08] border border-primary/15 rounded-full text-xs font-bold text-primary uppercase tracking-widest">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/[0.08] border border-primary/[0.15] rounded-full text-xs font-bold text-primary uppercase tracking-widest">
             <MapPin className="w-3.5 h-3.5" />
             Guide Complet
           </div>
