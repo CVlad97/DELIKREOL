@@ -13,6 +13,7 @@ interface CatalogProduct {
   description: string | null;
   category: string;
   price: number;
+  image_url: string | null;
   is_available: boolean;
   stock_quantity: number | null;
   created_at: string;
@@ -25,13 +26,14 @@ interface ProductForm {
   description: string;
   category: string;
   price: string;
+  image_url: string;
   stock_quantity: string;
   is_available: boolean;
 }
 
 const emptyForm: ProductForm = {
   vendor_id: '', name: '', description: '', category: '',
-  price: '', stock_quantity: '', is_available: true,
+  price: '', image_url: '', stock_quantity: '', is_available: true,
 };
 
 export default function AdminCatalog() {
@@ -88,6 +90,7 @@ export default function AdminCatalog() {
       description: p.description || '',
       category: p.category,
       price: p.price.toString(),
+      image_url: p.image_url || '',
       stock_quantity: p.stock_quantity?.toString() || '',
       is_available: p.is_available,
     });
@@ -107,6 +110,7 @@ export default function AdminCatalog() {
         description: form.description || null,
         category: form.category,
         price: parseFloat(form.price),
+        image_url: form.image_url.trim() || null,
         stock_quantity: form.stock_quantity ? parseInt(form.stock_quantity) : null,
         is_available: form.is_available,
       };
@@ -221,6 +225,7 @@ export default function AdminCatalog() {
                   <tr key={p.id} className="hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3">
                       <div className="font-bold text-foreground text-sm">{p.name}</div>
+                      {p.image_url && <div className="text-[11px] text-success line-clamp-1 mt-0.5">Photo: {p.image_url}</div>}
                       {p.description && <div className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{p.description}</div>}
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
@@ -303,6 +308,24 @@ export default function AdminCatalog() {
                   rows={2}
                   placeholder="Description du produit..."
                 />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Photo produit HD</label>
+                <input
+                  type="url"
+                  value={form.image_url}
+                  onChange={e => setForm(f => ({ ...f, image_url: e.target.value }))}
+                  className="w-full mt-1 px-4 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:ring-2 focus:ring-primary/30"
+                  placeholder="https://... ou /vendors/traiteur/photo.webp"
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Laisse vide si la photo n’est pas assez nette : le site affichera le visuel partenaire ou l’emplacement photo.
+                </p>
+                {form.image_url && (
+                  <div className="mt-3 overflow-hidden rounded-2xl border border-border bg-muted">
+                    <img src={form.image_url} alt="Aperçu photo produit" className="h-40 w-full object-cover" />
+                  </div>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
