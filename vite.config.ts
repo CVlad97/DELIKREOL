@@ -13,6 +13,8 @@ export default defineConfig(({ mode }) => {
     base,
     plugins: [react(), VitePWA({
       registerType: 'prompt',
+      minify: false,
+      disable: mode === 'production',
       includeAssets: ['branding/*.svg', 'branding/*.png'],
       manifest: false,
       workbox: {
