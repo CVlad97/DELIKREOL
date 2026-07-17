@@ -76,11 +76,11 @@ export function Header() {
   );
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border-strong/50 bg-background/95 shadow-sm backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-border-strong/50 bg-background shadow-sm">
       <div className="madras-strip" />
 
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-        <div className="relative flex h-[72px] items-center justify-between xl:hidden">
+        <div className="grid h-[72px] grid-cols-[44px_minmax(0,1fr)_44px] items-center xl:hidden">
           <button
             type="button"
             onClick={() => setMobileMenuOpen((open) => !open)}
@@ -95,7 +95,7 @@ export function Header() {
           <Link
             to="/"
             data-testid="header-brand-mobile"
-            className="absolute left-1/2 flex min-w-0 -translate-x-1/2 items-center gap-1.5 rounded-xl px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="flex min-w-0 items-center justify-self-center gap-1.5 rounded-xl px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             aria-label="Accueil DeliKreol"
           >
             <img
@@ -108,26 +108,14 @@ export function Header() {
             </span>
           </Link>
 
-          <div className="relative z-10 flex items-center gap-1">
-            <Link
-              to={accountTarget}
-              className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl bg-primary px-2.5 text-xs font-black text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-[390px]:px-3"
-              aria-label={user ? 'Mon espace' : 'Mon espace, connexion'}
-              title={user ? 'Mon espace' : 'Mon espace'}
-            >
-              {accountIcon}
-              <span>Mon espace</span>
-            </Link>
-
-            <Link
-              to="/panier"
-              className="relative flex h-11 w-11 items-center justify-center rounded-xl text-foreground transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              aria-label={`Panier, ${itemCount} article${itemCount > 1 ? 's' : ''}`}
-            >
-              <ShoppingCart className="h-5 w-5" />
-              {cartBadge}
-            </Link>
-          </div>
+          <Link
+            to="/panier"
+            className="relative flex h-11 w-11 items-center justify-center justify-self-end rounded-xl text-foreground transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label={`Panier, ${itemCount} article${itemCount > 1 ? 's' : ''}`}
+          >
+            <ShoppingCart className="h-5 w-5" />
+            {cartBadge}
+          </Link>
         </div>
 
         <div className="hidden h-[76px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 xl:grid">
@@ -215,7 +203,7 @@ export function Header() {
       {mobileMenuOpen && (
         <div
           id="mobile-navigation"
-          className="animate-slide-up border-t border-border-strong/40 bg-background/[0.98] shadow-xl backdrop-blur-xl xl:hidden"
+          className="animate-slide-up border-t border-border-strong/40 bg-background shadow-xl xl:hidden"
         >
           <nav className="mx-auto max-w-7xl space-y-2 px-4 py-4" aria-label="Navigation mobile">
             <Link
