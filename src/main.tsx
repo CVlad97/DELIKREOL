@@ -6,6 +6,7 @@ import './index.css';
 import './bankable-fixes.css';
 import './image-color-fidelity.css';
 import { AppRouter } from './router';
+import { clearLegacyImageCaches } from './services/cacheMaintenance';
 import { installNativeImageFallbacks } from './services/nativeImageFallback';
 import { primePublicVendors } from './services/vendorsService';
 
@@ -42,6 +43,10 @@ const root = createRoot(document.getElementById('root')!);
 root.render(<Loader />);
 
 async function bootstrap() {
+  // Clear the obsolete StaleWhileRevalidate image cache before public media
+  // begins loading. The active cache is preserved for offline use.
+  await clearLegacyImageCaches();
+
   try {
     await primePublicVendors();
   } catch (error) {

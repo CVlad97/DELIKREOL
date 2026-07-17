@@ -19,17 +19,10 @@ export default defineConfig(({ mode }) => {
         cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,svg,ico,json}'],
         runtimeCaching: [
-          {
-            urlPattern: /\.(?:png|jpg|jpeg|webp)$/i,
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'delikreol-images',
-              expiration: {
-                maxEntries: 80,
-                maxAgeSeconds: 604800,
-              },
-            },
-          },
+          // Product and partner photographs are intentionally not cached by the
+          // service worker. Stable file paths are frequently replaced with a
+          // verified original, so the network/browser cache must remain the
+          // source of truth after each deployment.
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
