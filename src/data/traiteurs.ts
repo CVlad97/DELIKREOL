@@ -75,7 +75,7 @@ function resolveHeroImage(name: string) {
     return assetFromPublic('vendors/sweet-family/drive-import/drive-02.webp');
   }
   if (name === 'Gouté Mwen') {
-    return assetFromPublic('vendors/goute-mwen/hero.jpg');
+    return assetFromPublic('vendors/goute-mwen/product-glacee-groseille.jpg');
   }
   if (name === 'Chef à Mada') {
     return assetFromPublic('vendors/chef-a-mada/logo.jpg');
@@ -162,7 +162,6 @@ function resolveGalleryImages(name: string) {
   }
   if (name === 'Gouté Mwen') {
     return [
-      assetFromPublic('vendors/goute-mwen/hero.jpg'),           // Affiche Tour des Yoles 2026
       assetFromPublic('vendors/goute-mwen/product-glacee-groseille.jpg'), // Glacé groseille/menthe
       assetFromPublic('vendors/goute-mwen/snow-boll.jpg'),      // Snow Boll
       assetFromPublic('vendors/goute-mwen/mangue.jpg'),         // Mangue
