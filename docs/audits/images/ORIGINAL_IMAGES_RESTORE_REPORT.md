@@ -91,11 +91,42 @@ Full machine-readable manifest:
 
 ## Pending Or Unresolved
 
-- No image replacement has been committed in this audit phase yet.
+- Batch 2 of verified reimports has now been applied from the owner-provided WhatsApp exports.
 - Exact source proof still needed for:
   - none in the currently removed blurry/placeholder set
 - The exact duplicate groups in Ninice and Sweet Family were reduced by removing the non-referenced public assets; remaining duplicates still need manual review if they become live.
 - `Chef à Mada` still needs a proper logo asset if a transparent version exists outside the repo.
+
+## Batch 2 Reimports
+
+Applied from the uploaded WhatsApp archives:
+
+- Sweet Family Traiteur Orianne
+  - Refreshed `public/vendors/sweet-family/bao-buns.jpg`
+  - Refreshed `public/vendors/sweet-family/landfood-solo.jpg`
+  - Refreshed `public/vendors/sweet-family/nems-poulet.jpg`
+  - Refreshed `public/vendors/sweet-family/manchon-poulet.jpg`
+  - Refreshed `public/vendors/sweet-family/ti-nain-morue.jpg`
+  - Refreshed `public/vendors/sweet-family/chicken-wrap.jpg`
+  - Refreshed `public/vendors/sweet-family/pizza-vege.jpg`
+  - Refreshed `public/vendors/sweet-family/bao-bun-poulet.jpg`
+  - Refreshed `public/vendors/sweet-family/drive-import/drive-01.webp` to `drive-11.webp`
+  - Removed obsolete `hero.jpg`, `portrait.jpg`, `conditions.jpg`, `conditions.webp`
+- Saveurs d'Afrique
+  - Refreshed `public/vendors/saveurs-afrique/drive-import/drive-01.webp` to `drive-14.webp`
+  - Kept hero/home-card positions on portrait food shots rather than menu-board/screenshot assets
+- Les Délices de Ninice
+  - Refreshed `public/vendors/ninice/drive-import/drive-01.webp` to `drive-13.webp`
+- Coco's Food
+  - Refreshed `public/vendors/coco/drive-import/drive-01.webp` to `drive-26.webp`
+- Snack Savè Peyi’A / Maria Traiteur
+  - Refreshed `public/vendors/save-peyia/drive-import/drive-01.webp` to `drive-12.webp`
+
+## Remaining Manual
+
+- `public/vendors/sweet-family/landfood-solo.jpg` and `public/vendors/sweet-family/nems-poulet.jpg` remain original-but-small source photos; they are not blurred, but a higher-definition owner original would be preferable.
+- `Chef à Mada` still uses a temporary logo photo.
+- If the owner provides higher-definition replacements for any of the remaining small originals, they should be swapped in without changing the current route structure.
 
 ## Next Step
 
