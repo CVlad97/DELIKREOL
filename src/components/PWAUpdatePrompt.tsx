@@ -1,4 +1,5 @@
 import { RefreshCw, X } from 'lucide-react';
+import { useEffect } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 
 /**
@@ -6,6 +7,17 @@ import { useRegisterSW } from 'virtual:pwa-register/react';
  * Elle utilise directement l'API React officielle de vite-plugin-pwa.
  */
 export function PWAUpdatePrompt() {
+  useEffect(() => {
+    if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return;
+
+    navigator.serviceWorker.getRegistration().then((registration) => {
+      if (registration) return;
+      navigator.serviceWorker.register('/sw.js').catch((error) => {
+        console.error('[PWA] Static service worker registration failed', error);
+      });
+    });
+  }, []);
+
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
