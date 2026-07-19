@@ -47,7 +47,7 @@ describe('catalogImageResolver', () => {
     expect(resolveProductThumbnail(input).fit).toBe('cover');
   });
 
-  it('contains partner logos and flyers even when used as fallback thumbnails', () => {
+  it('uses the honest placeholder instead of partner imagery when product photo is missing', () => {
     const logoInput = {
       partnerImage: '/vendors/chef-a-mada/logo.jpg',
       name: 'Logo Chef a Mada',
@@ -63,8 +63,8 @@ describe('catalogImageResolver', () => {
     };
 
     expect(inferImageKindFromPath(logoInput.partnerImage, logoInput.vendor)).toBe('logo');
-    expect(resolveProductThumbnail(logoInput).fit).toBe('contain');
+    expect(resolveProductThumbnail(logoInput)).toMatchObject({ source: 'placeholder', fit: 'contain' });
     expect(inferImageKindFromPath(flyerInput.partnerImage, flyerInput.vendor)).toBe('flyer');
-    expect(resolveProductThumbnail(flyerInput).fit).toBe('contain');
+    expect(resolveProductThumbnail(flyerInput)).toMatchObject({ source: 'placeholder', fit: 'contain' });
   });
 });

@@ -84,8 +84,9 @@ async function main() {
     'branding/hero-tropical.png',
     'vendors/ninice/drive-import/drive-01.webp',
     'vendors/coco/drive-import/drive-09.webp',
-    'vendors/saveurs-afrique/drive-import/drive-02.webp',
-    'vendors/save-peyia/drive-import/drive-01.webp',
+    'vendors/saveurs-afrique/saveurs-afrique-ablo.jpg',
+    'vendors/save-peyia/cote-porc-riz.jpg',
+    'vendors/_fallback/photo-a-confirmer.svg',
     'vendors/sweet-family/drive-import/drive-02.webp',
   ];
   for (const img of images) {

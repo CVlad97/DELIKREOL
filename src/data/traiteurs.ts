@@ -63,10 +63,10 @@ function resolveHeroImage(name: string) {
     return cocoFoodAssets.hero;
   }
   if (name === "Saveurs d'Afrique") {
-    return assetFromPublic('vendors/saveurs-afrique/drive-import/drive-02.webp');
+    return assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-ablo.jpg');
   }
   if (name.startsWith('Snack Savè Peyi')) {
-    return assetFromPublic('vendors/save-peyia/drive-import/drive-01.webp');
+    return assetFromPublic('vendors/save-peyia/cote-porc-riz.jpg');
   }
   if (name === 'Les Delices de Ninice') {
     return assetFromPublic('vendors/ninice/drive-import/drive-01.webp');
@@ -91,21 +91,19 @@ function resolveGalleryImages(name: string) {
     return cocoFoodAssets.gallery;
   }
   if (name === "Saveurs d'Afrique") {
-    // Photos WhatsApp Drive HD, sans cartes ni coordonnées privées.
+    // Photos produit originales sans cadres ni cartes.
     return [
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-02.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-03.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-04.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-05.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-06.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-07.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-08.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-09.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-10.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-11.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-12.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-13.webp'),
-      assetFromPublic('vendors/saveurs-afrique/drive-import/drive-14.webp'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-ablo.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-bissap.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-doko.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-foutou-banane.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-monyo.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-pate-legume.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-pate.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-petits-cailloux.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-salade-beninoise.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-salade.jpg'),
+      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-yaourt.jpg'),
     ];
   }
   if (name === 'Les Delices de Ninice') {
@@ -127,18 +125,15 @@ function resolveGalleryImages(name: string) {
   }
   if (name === 'Snack Savè Peyi\u2019A') {
     return [
-      assetFromPublic('vendors/save-peyia/drive-import/drive-01.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-02.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-03.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-04.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-05.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-06.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-07.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-08.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-09.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-10.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-11.webp'),
-      assetFromPublic('vendors/save-peyia/drive-import/drive-12.webp'),
+      assetFromPublic('vendors/save-peyia/cote-porc-riz.jpg'),
+      assetFromPublic('vendors/save-peyia/crevettes-riz.jpg'),
+      assetFromPublic('vendors/save-peyia/panini-saumon.jpg'),
+      assetFromPublic('vendors/save-peyia/cocktail-fruit.jpg'),
+      assetFromPublic('vendors/save-peyia/cocktail-ananas.jpg'),
+      assetFromPublic('vendors/save-peyia/salade-fruits-1.jpg'),
+      assetFromPublic('vendors/save-peyia/salade-fruits-rhum.jpg'),
+      assetFromPublic('vendors/save-peyia/viande-riz-1.jpg'),
+      assetFromPublic('vendors/save-peyia/viande-riz-2.jpg'),
     ];
   }
   if (name === 'Sweet Family Traiteur Orianne') {
@@ -215,16 +210,16 @@ function resolvePortraitImage(name: string) {
     return assetFromPublic('vendors/ninice/portrait-full.jpg');
   }
   if (name === 'An Tjè Coco') {
-    return assetFromPublic('vendors/an-tje-coco/clean/hero-clean.webp');
+    return assetFromPublic('vendors/an-tje-coco/gallery-05.jpg');
   }
   if (name === "Coco's Food") {
     return assetFromPublic('vendors/coco/drive-import/drive-01.webp');
   }
   if (name === "Saveurs d'Afrique") {
-    return assetFromPublic('vendors/saveurs-afrique/drive-import/drive-04.webp');
+    return assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-salade-beninoise.jpg');
   }
   if (name === 'Snack Savè Peyi\u2019A') {
-    return assetFromPublic('vendors/save-peyia/drive-import/drive-01.webp');
+    return assetFromPublic('vendors/save-peyia/cote-porc-riz.jpg');
   }
   if (name === 'Sweet Family Traiteur Orianne') {
     return assetFromPublic('vendors/sweet-family/drive-import/drive-04.webp');

@@ -4,13 +4,9 @@ function assetFromPublic(relativePath: string): string {
 }
 
 export const anTjeCocoAssets = {
-  hero: assetFromPublic('vendors/an-tje-coco/clean/hero-clean.webp'),
+  hero: assetFromPublic('vendors/an-tje-coco/gallery-05.jpg'),
   gallery: [
-    assetFromPublic('vendors/an-tje-coco/clean/gallery-01-clean.webp'),
-    assetFromPublic('vendors/an-tje-coco/clean/gallery-02-clean.webp'),
-    assetFromPublic('vendors/an-tje-coco/clean/gallery-03-clean.webp'),
-    assetFromPublic('vendors/an-tje-coco/clean/gallery-04-clean.webp'),
-    assetFromPublic('vendors/an-tje-coco/clean/gallery-05-clean.webp'),
+    assetFromPublic('vendors/an-tje-coco/gallery-05.jpg'),
   ],
   event: 'https://api.cloudly.space/resize/crop/1200/627/60/aHR0cDovL21lZGlhcy50b3VyaXNtLXN5c3RlbS5jb20vNy8yLzgwNDcxN180MjIxMDY0NDlfMzgyMzMzMzc0NDkzOTczXzM3OTE3NTkwNjM3OTIwNjc4MzFfbi5qcGVn/image.jpg',
 };

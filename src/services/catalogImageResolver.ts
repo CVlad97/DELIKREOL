@@ -142,18 +142,11 @@ export function inferProductImageKind(input: Pick<ThumbnailInput, 'name' | 'vend
 export function resolveProductThumbnail(input: ThumbnailInput): ResolvedThumbnail {
   const placeholder = getThumbnailPlaceholder();
   const productImage = isUsableThumbnail(input.src) ? input.src : null;
-  const partnerImage = isUsableThumbnail(input.partnerImage) ? input.partnerImage : null;
-  const source: ThumbnailSource = productImage
-    ? 'product'
-    : partnerImage
-      ? 'partner'
-      : 'placeholder';
+  const source: ThumbnailSource = productImage ? 'product' : 'placeholder';
 
-  const src = productImage || partnerImage || placeholder;
-  const fallbackSrc = productImage ? (partnerImage || placeholder) : placeholder;
-  const kind = source === 'partner'
-    ? inferImageKindFromPath(partnerImage, input.vendor || input.name)
-    : source === 'placeholder'
+  const src = productImage || placeholder;
+  const fallbackSrc = placeholder;
+  const kind = source === 'placeholder'
       ? 'flyer'
       : inferProductImageKind(input);
 
@@ -162,11 +155,7 @@ export function resolveProductThumbnail(input: ThumbnailInput): ResolvedThumbnai
     fallbackSrc,
     finalFallbackSrc: placeholder,
     source,
-    label: source === 'partner'
-      ? 'Visuel du partenaire'
-      : source === 'placeholder'
-        ? 'Photo à venir'
-        : null,
+    label: source === 'placeholder' ? 'Photo à venir' : null,
     kind,
     fit: kind === 'food' || kind === 'ambient' || kind === 'portrait' ? 'cover' : 'contain',
   };

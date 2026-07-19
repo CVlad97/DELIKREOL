@@ -13,7 +13,7 @@ const PILOT_PARTNERS = [
 
 function getBaseUrl() {
   if (typeof window === 'undefined') return 'https://delikreol.com';
-  const base = import.meta.env.VITE_BASE_PATH || import.meta.env.BASE_URL || '/DELIKREOL/';
+  const base = import.meta.env.VITE_BASE_PATH || import.meta.env.BASE_URL || '/';
   const cleanedBase = base.endsWith('/') ? base.slice(0, -1) : base;
   return `${window.location.origin}${cleanedBase}`;
 }
