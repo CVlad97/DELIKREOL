@@ -55,7 +55,6 @@ function normalize(value?: string | null): string {
 
 export function inferImageKindFromPath(src?: string | null, name?: string | null): ImageKind {
   const value = normalize(`${src || ''} ${name || ''}`);
-  const compactValue = value.replace(/[^a-z0-9]/g, '');
 
   if (
     value.includes('logo') ||
@@ -87,14 +86,6 @@ export function inferImageKindFromPath(src?: string | null, name?: string | null
     return 'portrait';
   }
 
-  /*
-   * Les visuels Save Peyi'A et Gouté Mwen peuvent mélanger branding, texte
-   * et composition produit. Ils restent plus lisibles en mode contain.
-   */
-  if (compactValue.includes('savepeyia') || compactValue.includes('goutemwen')) {
-    return 'packaging';
-  }
-
   return 'ambient';
 }
 
@@ -112,18 +103,10 @@ export function inferProductImageKind(input: Pick<ThumbnailInput, 'name' | 'vend
   if (
     value.includes('flyer') ||
     value.includes('menu') ||
-    value.includes('affiche')
+    value.includes('affiche') ||
+    value.includes('poster')
   ) {
     return 'flyer';
-  }
-
-  /*
-   * Les visuels Save Peyi'A contiennent souvent une composition de marque,
-   * du texte et du packaging. Ils doivent rester entièrement visibles, même
-   * lorsque le nom du produit ressemble à un plat classique.
-   */
-  if (compactValue.includes('savepeyia')) {
-    return 'packaging';
   }
 
   if (

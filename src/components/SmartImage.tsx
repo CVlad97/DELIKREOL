@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { reviseSrcSet, withPublicImageRevision } from '../services/publicImageRevision';
 
 export type ImageKind = 'food' | 'ambient' | 'packaging' | 'logo' | 'portrait' | 'flyer';
 type ImageFit = 'cover' | 'contain';
@@ -43,6 +44,10 @@ const KIND_DEFAULTS: Record<
 const FALLBACK_IMG =
   'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"%3E%3Crect width="800" height="600" fill="%23f5ece4"/%3E%3Cpath d="M280 360l80-90 55 62 45-50 90 108H250z" fill="%23c9b7a8"/%3E%3Ccircle cx="320" cy="220" r="34" fill="%23d8c8ba"/%3E%3Ctext x="400" y="455" text-anchor="middle" font-family="Arial,sans-serif" font-size="28" fill="%236b5b50"%3EPhoto prochainement%3C/text%3E%3C/svg%3E';
 
+function resolveSource(value?: string): string {
+  return withPublicImageRevision(value || FALLBACK_IMG);
+}
+
 export function SmartImage({
   src,
   alt,
@@ -66,18 +71,21 @@ export function SmartImage({
   onFallbackLevelChange,
   onClick,
 }: SmartImageProps) {
-  const initialSrc = src || fallbackSrc || finalFallbackSrc || FALLBACK_IMG;
+  const primarySrc = resolveSource(src || fallbackSrc || finalFallbackSrc);
+  const revisedFallbackSrc = fallbackSrc ? resolveSource(fallbackSrc) : undefined;
+  const revisedFinalFallbackSrc = finalFallbackSrc ? resolveSource(finalFallbackSrc) : undefined;
+  const revisedSrcSet = reviseSrcSet(srcSet);
   const imageRef = useRef<HTMLImageElement | null>(null);
-  const [activeSrc, setActiveSrc] = useState(initialSrc);
+  const [activeSrc, setActiveSrc] = useState(primarySrc);
   const [loaded, setLoaded] = useState(false);
   const [fallbackLevel, setFallbackLevel] = useState(0);
 
   useEffect(() => {
-    setActiveSrc(src || fallbackSrc || finalFallbackSrc || FALLBACK_IMG);
+    setActiveSrc(primarySrc);
     setLoaded(false);
     setFallbackLevel(0);
     onFallbackLevelChange?.(0);
-  }, [src, fallbackSrc, finalFallbackSrc, onFallbackLevelChange]);
+  }, [primarySrc, onFallbackLevelChange]);
 
   useEffect(() => {
     const imageElement = imageRef.current;
@@ -103,13 +111,17 @@ export function SmartImage({
   const handleImageError = () => {
     setLoaded(false);
 
-    if (fallbackLevel === 0 && fallbackSrc && fallbackSrc !== activeSrc) {
-      switchFallback(fallbackSrc, 1);
+    if (fallbackLevel === 0 && revisedFallbackSrc && revisedFallbackSrc !== activeSrc) {
+      switchFallback(revisedFallbackSrc, 1);
       return;
     }
 
-    if (fallbackLevel <= 1 && finalFallbackSrc && finalFallbackSrc !== activeSrc) {
-      switchFallback(finalFallbackSrc, 2);
+    if (
+      fallbackLevel <= 1
+      && revisedFinalFallbackSrc
+      && revisedFinalFallbackSrc !== activeSrc
+    ) {
+      switchFallback(revisedFinalFallbackSrc, 2);
       return;
     }
 
@@ -139,14 +151,15 @@ export function SmartImage({
         ref={imageRef}
         data-smart-image="true"
         data-color-fidelity="original"
+        data-original-src={src}
         src={activeSrc}
         alt={effectiveAlt}
         aria-hidden={decorative || undefined}
         loading={loading}
         {...fetchPriorityProps}
         decoding="async"
-        srcSet={srcSet}
-        sizes={srcSet ? sizes : undefined}
+        srcSet={revisedSrcSet}
+        sizes={revisedSrcSet ? sizes : undefined}
         width={width}
         height={height}
         draggable={false}
