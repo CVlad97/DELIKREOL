@@ -257,13 +257,14 @@ export default function CartPage() {
     setCheckoutStatus('processing');
 
     // Générer ID commande
-    const orderId = generateOrderId();
-    setOrderNumber(orderId);
+    const orderNumber = generateOrderId();
+    const orderUuid = crypto.randomUUID();
+    setOrderNumber(orderNumber);
 
     // Construire la commande
     const order = {
-      id: orderId,
-      order_number: orderId,
+      id: orderUuid,
+      order_number: orderNumber,
       customer_phone: phone,
       customer_email: email || null,
       items: items.map((item) => ({
@@ -299,7 +300,7 @@ export default function CartPage() {
       notes,
       traiteurs,
       phone,
-      orderId,
+      orderId: orderNumber,
     });
     const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappText)}`;
     setWhatsappShareUrl(whatsappUrl);
@@ -326,7 +327,7 @@ export default function CartPage() {
       if (supabase) {
         try {
           await supabase.from('orders').insert({
-            order_number: orderId,
+            order_number: orderNumber,
             customer_phone: phone || 'Non renseigné',
             commune,
             delivery_type: mode,
@@ -356,8 +357,8 @@ export default function CartPage() {
     setMessageSent(true);
     clearCart();
     setPreparedMessage(`Demande préparée — à confirmer sur WhatsApp.`);
-    showSuccess(`Commande enregistrée !`);
-    setTimeout(() => navigate(`/statut-commande?order=${orderId}`), 1500);
+    showSuccess('Demande préparée — à confirmer sur WhatsApp.');
+    setTimeout(() => navigate(`/statut-commande?order=${orderNumber}`), 1500);
   };
 
   useEffect(() => {
