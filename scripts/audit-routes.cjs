@@ -3,7 +3,7 @@
 // node scripts/audit-routes.cjs
 // Vérifie que les routes publiques répondent (OK/KO)
 
-const BASE = process.env.BASE_URL || 'https://cvlad97.github.io/DELIKREOL';
+const BASE = process.env.BASE_URL || 'https://delikreol.com';
 
 const ROUTES_200 = [
   '',
@@ -79,7 +79,15 @@ async function main() {
   }
 
   console.log('\n📸 Images :');
-  const images = ['branding/logo-mark.svg', 'assets/hero-food.svg', 'vendors/ninice/hero.jpg', 'vendors/coco/hero.jpg', 'vendors/saveurs-afrique/hero.jpg'];
+  const images = [
+    'branding/logo-mark.svg',
+    'branding/hero-tropical.png',
+    'vendors/ninice/drive-import/drive-01.webp',
+    'vendors/coco/drive-import/drive-09.webp',
+    'vendors/saveurs-afrique/drive-import/drive-02.webp',
+    'vendors/save-peyia/drive-import/drive-01.webp',
+    'vendors/sweet-family/drive-import/drive-02.webp',
+  ];
   for (const img of images) {
     const url = `${BASE}/${img}`;
     const r = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(8000) }).then(res => ({ status: res.status })).catch(() => ({ status: 0 }));

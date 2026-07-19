@@ -6,16 +6,22 @@ const https = require('https');
 const http = require('http');
 const fs = require('fs');
 
-const BASE = 'https://cvlad97.github.io/DELIKREOL';
+const BASE = process.env.BASE_URL || 'https://delikreol.com';
 const visited = new Set();
 const broken = [];
 const results = [];
 const SCREENSHOTS = [];
 
-function fetch(url) {
+function fetch(url, redirects = 0) {
   return new Promise((resolve) => {
     const client = url.startsWith('https') ? https : http;
     const req = client.get(url, { timeout: 10000, headers: { 'User-Agent': 'Hermes-Audit/1.0' } }, (res) => {
+      if ([301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location && redirects < 5) {
+        res.resume();
+        const next = new URL(res.headers.location, url).href;
+        fetch(next, redirects + 1).then(resolve);
+        return;
+      }
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => resolve({ status: res.statusCode, data: data.slice(0, 50000), headers: res.headers }));
@@ -70,10 +76,10 @@ function isSpaFallback(data) {
     { path: '/compte', name: 'Compte client' },
     { path: '/catalogue', name: 'Catalogue' },
     { path: '/traiteurs', name: 'Traiteurs' },
-    { path: '/traiteur/snack-save-peyia', name: 'Traiteur Save Peyia' },
+    { path: '/traiteur/snack-save-peyi-a', name: 'Traiteur Save Peyia' },
     { path: '/traiteur/les-delices-de-ninice', name: 'Traiteur Ninice' },
-    { path: '/traiteur/cocos-food', name: 'Traiteur Coco' },
-    { path: '/traiteur/saveurs-dafrique', name: 'Traiteur Saveurs Afrique' },
+    { path: '/traiteur/coco-s-food', name: 'Traiteur Coco' },
+    { path: '/traiteur/saveurs-d-afrique', name: 'Traiteur Saveurs Afrique' },
     { path: '/panier', name: 'Panier' },
     { path: '/statut-commande', name: 'Statut commande' },
     { path: '/feedback', name: 'Feedback' },
@@ -140,16 +146,18 @@ function isSpaFallback(data) {
   
   // Check 404
   const r404 = await fetch(`${BASE}/page-inexistante`);
-  console.log(`Page 404: ${r404.status} (attendue: 200 si SPA fallback)`);
+  console.log(`Page 404: ${r404.status} (${r404.status === 404 && isSpaFallback(r404.data) ? 'SPA fallback OK' : 'à vérifier'})`);
 
   // Check assets
   const assets = [
     '/branding/favicon.svg',
     '/branding/logo-mark.svg',
-    '/vendors/ninice/gallery-01.jpg',
-    '/vendors/coco/hero.jpg',
-    '/vendors/saveurs-afrique/hero.jpg',
-    '/vendors/save-peyia/hero.jpg',
+    '/branding/hero-tropical.png',
+    '/vendors/ninice/drive-import/drive-01.webp',
+    '/vendors/coco/drive-import/drive-09.webp',
+    '/vendors/saveurs-afrique/drive-import/drive-02.webp',
+    '/vendors/save-peyia/drive-import/drive-01.webp',
+    '/vendors/sweet-family/drive-import/drive-02.webp',
   ];
   for (const a of assets) {
     const r = await fetch(`${BASE}${a}`);
