@@ -21,6 +21,8 @@ import {
   Crosshair,
   Navigation,
   PenLine,
+  Share2,
+  ShieldCheck,
 } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
 import { mockProducts, type LocalProduct } from '../../data/mockCatalog';
@@ -164,6 +166,7 @@ function ReviewsSection() {
 export default function HomePage() {
   useEffect(() => { trackPublicView(); }, []);
   const [searchQuery, setSearchQuery] = useState('');
+  const [shareFeedback, setShareFeedback] = useState('');
   const navigate = useNavigate();
   const { addItem } = useCart();
   const { showSuccess } = useToast();
@@ -234,6 +237,27 @@ export default function HomePage() {
   const handleAddToCart = (product: LocalProduct) => {
     addItem(localProductToCartProduct(product));
     showSuccess(`${product.name} ajouté au panier`);
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: 'DeliKreol — plats créoles en Martinique',
+      text: 'Découvre DeliKreol : plats créoles, traiteurs locaux, retrait ou livraison en Martinique.',
+      url: 'https://delikreol.com/catalogue',
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        setShareFeedback('Partage ouvert');
+        return;
+      }
+      await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+      setShareFeedback('Lien copié');
+      showSuccess('Lien DeliKreol copié');
+    } catch {
+      setShareFeedback('');
+    }
   };
 
   const handleFindNearby = () => {
@@ -399,6 +423,15 @@ export default function HomePage() {
                 <MessageCircle className="h-4 w-4" />
                 WhatsApp rapide
               </a>
+              <button
+                type="button"
+                onClick={handleShare}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-secondary/30 bg-secondary/10 px-5 py-3 text-sm font-black text-secondary-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:bg-secondary/15"
+              >
+                <Share2 className="h-4 w-4" />
+                Partager
+                {shareFeedback && <span className="text-xs font-bold opacity-75">· {shareFeedback}</span>}
+              </button>
             </div>
 
             <div className="mt-9 grid max-w-2xl grid-cols-3 gap-3">
@@ -412,6 +445,18 @@ export default function HomePage() {
                   </div>
                 );
               })}
+            </div>
+            <div className="mt-5 grid max-w-2xl gap-2 text-sm font-bold text-foreground sm:grid-cols-3">
+              {[
+                'Commande préparée sur le site',
+                'Confirmation humaine WhatsApp',
+                'Aucun paiement public forcé',
+              ].map((item) => (
+                <div key={item} className="flex items-center gap-2 rounded-2xl border border-success/20 bg-white/90 px-3 py-2 shadow-sm">
+                  <ShieldCheck className="h-4 w-4 shrink-0 text-success" />
+                  <span>{item}</span>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -481,6 +526,39 @@ export default function HomePage() {
                 </Link>
               );
             })}
+          </div>
+
+          <div className="mt-8 overflow-hidden rounded-[2.25rem] border border-secondary/30 bg-gradient-to-r from-secondary/20 via-white to-success/15 p-5 shadow-soft md:p-6">
+            <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-primary">À partager aujourd’hui</p>
+                <h2 className="mt-1 text-2xl font-black text-foreground md:text-3xl">
+                  Fais découvrir DeliKreol à quelqu’un qui commande local
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+                  Le lien ouvre le catalogue directement. La commande reste simple : panier, téléphone, validation WhatsApp.
+                </p>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-foreground px-6 py-3 text-sm font-black text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-primary"
+                >
+                  <Share2 className="h-4 w-4" />
+                  Partager le catalogue
+                </button>
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent('Découvre DeliKreol : plats créoles et traiteurs locaux en Martinique 👉 https://delikreol.com/catalogue')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-success px-6 py-3 text-sm font-black text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-success/90"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  Envoyer sur WhatsApp
+                </a>
+              </div>
+            </div>
           </div>
 
           <div className="mt-8 rounded-[2.25rem] border border-primary/20 bg-white p-4 shadow-soft md:p-6">

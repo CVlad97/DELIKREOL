@@ -33,6 +33,8 @@ export interface MetaConfig {
  */
 export function setPageMeta(title: string, description: string, keywords?: string, robots?: 'index, follow' | 'noindex, follow'): void {
   document.title = title;
+  const canonicalUrl = 'https://delikreol.com/';
+  const shareImage = 'https://delikreol.com/branding/hero-tropical.png';
 
   /**
    * Helper interne : crée ou met à jour une balise meta.
@@ -54,10 +56,16 @@ export function setPageMeta(title: string, description: string, keywords?: strin
   // Open Graph
   upsertMeta('property', 'og:title', title);
   upsertMeta('property', 'og:description', description);
+  upsertMeta('property', 'og:type', 'website');
+  upsertMeta('property', 'og:url', canonicalUrl);
+  upsertMeta('property', 'og:image', shareImage);
+  upsertMeta('property', 'og:locale', 'fr_MQ');
 
   // Twitter Card
+  upsertMeta('name', 'twitter:card', 'summary_large_image');
   upsertMeta('name', 'twitter:title', title);
   upsertMeta('name', 'twitter:description', description);
+  upsertMeta('name', 'twitter:image', shareImage);
 
   // Meta description & keywords
   upsertMeta('name', 'description', description);
