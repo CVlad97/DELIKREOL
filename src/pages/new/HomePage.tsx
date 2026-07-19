@@ -362,21 +362,24 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/85" />
         </div>
 
-        <div className="relative mx-auto grid min-h-[720px] max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 md:py-20 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)] lg:px-8 lg:py-24">
+        <div className="relative mx-auto grid min-h-[calc(100svh-72px)] max-w-7xl items-center gap-10 px-4 py-10 sm:px-6 md:min-h-[720px] md:py-20 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)] lg:px-8 lg:py-24">
           <div className="max-w-3xl">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/[0.08] px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-primary/90 shadow-sm">
+            <div className="mb-4 inline-flex max-w-full items-center gap-2 rounded-full border border-primary/20 bg-white/70 px-4 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-primary/90 shadow-sm backdrop-blur md:mb-5 md:bg-primary/[0.08] md:text-xs md:tracking-[0.22em]">
               <Sparkles className="h-3.5 w-3.5" />
               Livraison & retrait en Martinique
             </div>
 
-            <h1 className="max-w-4xl text-5xl font-black leading-[0.95] tracking-tight text-accent sm:text-6xl lg:text-7xl">
-              Commandez <span className="text-primary">créole local</span> en Martinique
+            <h1 className="max-w-4xl text-[clamp(3rem,13vw,4.35rem)] font-black leading-[0.9] tracking-[-0.055em] text-accent sm:text-6xl lg:text-7xl">
+              Commandez <span className="text-primary">créole local</span>
+              <span className="mt-2 block text-[0.52em] leading-none tracking-[-0.035em] text-accent/90 sm:inline sm:text-inherit sm:text-accent">
+                {' '}en Martinique
+              </span>
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground md:text-xl">
+            <p className="mt-5 max-w-2xl rounded-2xl bg-white/70 px-4 py-3 text-lg leading-7 text-foreground/75 shadow-sm backdrop-blur md:mt-6 md:bg-transparent md:px-0 md:py-0 md:text-xl md:leading-8 md:text-muted-foreground md:shadow-none">
               Plats maison, traiteurs locaux — livraison ou retrait.
             </p>
 
-            <div className="mt-8 max-w-2xl rounded-[2rem] border border-primary/20 bg-white p-2 shadow-[0_22px_70px_-42px_rgba(42,25,15,0.65)]">
+            <div className="mt-6 max-w-2xl rounded-[2rem] border border-primary/20 bg-white p-2 shadow-[0_22px_70px_-42px_rgba(42,25,15,0.65)] md:mt-8">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <label className="flex min-h-[58px] flex-1 items-center gap-3 rounded-3xl bg-primary/[0.08] px-4 text-left">
                   <Search className="h-5 w-5 shrink-0 text-primary" />
