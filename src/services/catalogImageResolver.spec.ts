@@ -8,7 +8,7 @@ import {
 describe('catalogImageResolver', () => {
   it('renders verified Save Peyi dishes as food photography', () => {
     const input = {
-      src: '/vendors/save-peyia/drive-import/drive-01.webp',
+      src: '/vendors/save-peyia/drive-reimport/IMG-20260710-WA0005.jpg',
       partnerImage: '/vendors/save-peyia/hero.jpg',
       name: 'Côte de porc riz crudités',
       vendor: "Snack Savè Peyi'A",

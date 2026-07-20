@@ -3,6 +3,7 @@ import type { HealthTag } from './mockCatalog';
 import { anTjeCocoAssets, cocoFoodAssets } from './partnerAssets';
 import { partnerProfiles, type PartnerProfile } from './partnerProfiles';
 import { additionalPartnerProfiles } from './additionalPartnerProfiles';
+import { driveReimportGalleries, driveReimportPortraits } from './driveReimportAssets';
 
 export type TraiteurMenuItem = {
   name: string;
@@ -60,19 +61,19 @@ function resolveHeroImage(name: string) {
     return anTjeCocoAssets.hero;
   }
   if (name === "Coco's Food") {
-    return cocoFoodAssets.hero;
+    return driveReimportGalleries.coco[0] ?? cocoFoodAssets.hero;
   }
   if (name === "Saveurs d'Afrique") {
-    return assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-ablo.jpg');
+    return driveReimportGalleries.saveursAfrique[0] ?? null;
   }
   if (name.startsWith('Snack Savè Peyi')) {
-    return assetFromPublic('vendors/save-peyia/cote-porc-riz.jpg');
+    return driveReimportGalleries.savePeyia[0] ?? null;
   }
   if (name === 'Les Delices de Ninice') {
-    return assetFromPublic('vendors/ninice/drive-import/drive-01.webp');
+    return driveReimportGalleries.ninice[0] ?? null;
   }
   if (name === 'Sweet Family Traiteur Orianne') {
-    return assetFromPublic('vendors/sweet-family/drive-import/drive-02.webp');
+    return driveReimportGalleries.sweetFamily[0] ?? null;
   }
   if (name === 'Gouté Mwen') {
     return assetFromPublic('vendors/goute-mwen/product-glacee-groseille.jpg');
@@ -88,72 +89,19 @@ function resolveGalleryImages(name: string) {
     return anTjeCocoAssets.gallery;
   }
   if (name === "Coco's Food") {
-    return cocoFoodAssets.gallery;
+    return [...driveReimportGalleries.coco];
   }
   if (name === "Saveurs d'Afrique") {
-    // Photos produit originales sans cadres ni cartes.
-    return [
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-ablo.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-bissap.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-doko.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-foutou-banane.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-monyo.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-pate-legume.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-pate.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-petits-cailloux.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-salade-beninoise.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-salade.jpg'),
-      assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-yaourt.jpg'),
-    ];
+    return [...driveReimportGalleries.saveursAfrique];
   }
   if (name === 'Les Delices de Ninice') {
-    // Photos Drive HD produits, cartes et affiches exclues.
-    return [
-      assetFromPublic('vendors/ninice/drive-import/drive-01.webp'),
-      assetFromPublic('vendors/ninice/drive-import/drive-02.webp'),
-      assetFromPublic('vendors/ninice/drive-import/drive-04.webp'),
-      assetFromPublic('vendors/ninice/drive-import/drive-05.webp'),
-      assetFromPublic('vendors/ninice/drive-import/drive-06.webp'),
-      assetFromPublic('vendors/ninice/drive-import/drive-07.webp'),
-      assetFromPublic('vendors/ninice/drive-import/drive-08.webp'),
-      assetFromPublic('vendors/ninice/drive-import/drive-09.webp'),
-      assetFromPublic('vendors/ninice/drive-import/drive-10.webp'),
-      assetFromPublic('vendors/ninice/drive-import/drive-11.webp'),
-      assetFromPublic('vendors/ninice/drive-import/drive-12.webp'),
-      assetFromPublic('vendors/ninice/drive-import/drive-13.webp'),
-    ];
+    return [...driveReimportGalleries.ninice];
   }
   if (name === 'Snack Savè Peyi\u2019A') {
-    return [
-      assetFromPublic('vendors/save-peyia/cote-porc-riz.jpg'),
-      assetFromPublic('vendors/save-peyia/crevettes-riz.jpg'),
-      assetFromPublic('vendors/save-peyia/panini-saumon.jpg'),
-      assetFromPublic('vendors/save-peyia/cocktail-fruit.jpg'),
-      assetFromPublic('vendors/save-peyia/cocktail-ananas.jpg'),
-      assetFromPublic('vendors/save-peyia/salade-fruits-1.jpg'),
-      assetFromPublic('vendors/save-peyia/salade-fruits-rhum.jpg'),
-      assetFromPublic('vendors/save-peyia/viande-riz-1.jpg'),
-      assetFromPublic('vendors/save-peyia/viande-riz-2.jpg'),
-    ];
+    return [...driveReimportGalleries.savePeyia];
   }
   if (name === 'Sweet Family Traiteur Orianne') {
-    return [
-      assetFromPublic('vendors/sweet-family/drive-import/drive-01.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-02.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-03.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-04.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-05.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-06.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-07.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-08.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-09.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-10.webp'),
-      assetFromPublic('vendors/sweet-family/drive-import/drive-11.webp'),
-      assetFromPublic('vendors/sweet-family/seafood-boil-1.webp'),
-      assetFromPublic('vendors/sweet-family/seafood-boil-2.webp'),
-      assetFromPublic('vendors/sweet-family/seafood-boil-3.webp'),
-      assetFromPublic('vendors/sweet-family/seafood-boil-5.webp'),
-    ];
+    return [...driveReimportGalleries.sweetFamily];
   }
   if (name === 'Gouté Mwen') {
     return [
@@ -207,22 +155,22 @@ export function formatEuro(value: number) {
 
 function resolvePortraitImage(name: string) {
   if (name === 'Les Delices de Ninice') {
-    return assetFromPublic('vendors/ninice/portrait-full.jpg');
+    return driveReimportPortraits.ninice ?? assetFromPublic('vendors/ninice/portrait-full.jpg');
   }
   if (name === 'An Tjè Coco') {
     return assetFromPublic('vendors/an-tje-coco/gallery-05.jpg');
   }
   if (name === "Coco's Food") {
-    return assetFromPublic('vendors/coco/drive-import/drive-01.webp');
+    return driveReimportGalleries.coco[1] ?? null;
   }
   if (name === "Saveurs d'Afrique") {
-    return assetFromPublic('vendors/saveurs-afrique/saveurs-afrique-salade-beninoise.jpg');
+    return driveReimportGalleries.saveursAfrique[1] ?? null;
   }
   if (name === 'Snack Savè Peyi\u2019A') {
-    return assetFromPublic('vendors/save-peyia/cote-porc-riz.jpg');
+    return driveReimportGalleries.savePeyia[1] ?? null;
   }
   if (name === 'Sweet Family Traiteur Orianne') {
-    return assetFromPublic('vendors/sweet-family/drive-import/drive-04.webp');
+    return driveReimportGalleries.sweetFamily[1] ?? null;
   }
 // Gouté Mwen: photo Stacy Vilocy
   if (name === 'Gouté Mwen') {

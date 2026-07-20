@@ -7,8 +7,8 @@ import {
 
 describe('publicImageRevision', () => {
   it('adds a revision query to local public images', () => {
-    expect(withPublicImageRevision('/vendors/save-peyia/drive-import/drive-01.webp'))
-      .toBe(`/vendors/save-peyia/drive-import/drive-01.webp?v=${PUBLIC_IMAGE_REVISION}`);
+    expect(withPublicImageRevision('/vendors/save-peyia/drive-reimport/IMG-20260710-WA0005.jpg'))
+      .toBe(`/vendors/save-peyia/drive-reimport/IMG-20260710-WA0005.jpg?v=${PUBLIC_IMAGE_REVISION}`);
   });
 
   it('preserves existing queries and fragments', () => {

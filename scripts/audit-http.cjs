@@ -153,12 +153,12 @@ function isSpaFallback(data) {
     '/branding/favicon.svg',
     '/branding/logo-mark.svg',
     '/branding/hero-tropical.png',
-    '/vendors/ninice/drive-import/drive-01.webp',
-    '/vendors/coco/drive-import/drive-09.webp',
-    '/vendors/saveurs-afrique/saveurs-afrique-ablo.jpg',
-    '/vendors/save-peyia/cote-porc-riz.jpg',
+    '/vendors/ninice/drive-reimport/IMG-20260521-WA0070.jpg',
+    '/vendors/coco/drive-reimport/IMG-20260526-WA0064.jpg',
+    '/vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0156.jpg',
+    '/vendors/save-peyia/drive-reimport/IMG-20260710-WA0005.jpg',
     '/vendors/_fallback/photo-a-confirmer.svg',
-    '/vendors/sweet-family/drive-import/drive-02.webp',
+    '/vendors/sweet-family/drive-reimport/IMG-20260627-WA0003.jpg',
   ];
   for (const a of assets) {
     const r = await fetch(`${BASE}${a}`);

@@ -82,7 +82,11 @@ const frontendPartners = [
     highlights: ['Transformation fruits et légumes', 'Grillades & poissons', 'Rivière-Pilote — Pont de Fer', 'Livraison disponible'],
     hero_image: '/vendors/save-peyia/hero.jpg',
     portrait_image: '/vendors/save-peyia/portrait.jpg',
-    gallery_images: ['/vendors/save-peyia/cote-porc-riz.jpg', '/vendors/save-peyia/crevettes-riz.jpg', '/vendors/save-peyia/salade-fruits-1.jpg'],
+    gallery_images: [
+      '/vendors/save-peyia/drive-reimport/IMG-20260710-WA0005.jpg',
+      '/vendors/save-peyia/drive-reimport/IMG-20260710-WA0006.jpg',
+      '/vendors/save-peyia/drive-reimport/IMG-20260710-WA0012.jpg',
+    ],
   },
   {
     name: 'Gouté Mwen',

@@ -9,7 +9,7 @@ test.describe('Accueil — source image fraîche', () => {
 
     const image = carousel.locator('img[data-smart-image="true"]').first();
     await expect(image).toBeVisible();
-    await expect(image).toHaveAttribute('src', /drive-01\.webp\?v=20260718-1$/);
+    await expect(image).toHaveAttribute('src', /drive-reimport\/IMG-20260710-WA0005\.jpg\?v=20260718-1$/);
 
     const container = image.locator('..');
     await expect(container).toHaveAttribute('data-image-kind', 'food');

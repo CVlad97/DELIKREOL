@@ -470,7 +470,7 @@ export default function HomePage() {
               <div className="overflow-hidden rounded-[2rem] bg-white">
                 <img
                   loading="lazy"
-                  src={`${import.meta.env.BASE_URL}vendors/ninice/drive-import/drive-01.webp`}
+                  src={`${import.meta.env.BASE_URL}vendors/ninice/drive-reimport/IMG-20260521-WA0070.jpg`}
                   alt="Plat local DeliKreol"
                   className="h-[420px] w-full object-cover"
                 />
@@ -491,7 +491,7 @@ export default function HomePage() {
               <div className="absolute -left-8 top-10 overflow-hidden rounded-3xl border-4 border-white bg-white shadow-2xl">
                 <img
                   loading="lazy"
-                  src={`${import.meta.env.BASE_URL}vendors/saveurs-afrique/saveurs-afrique-ablo.jpg`}
+                  src={`${import.meta.env.BASE_URL}vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0156.jpg`}
                   alt="Traiteur partenaire DeliKreol"
                   className="h-32 w-32 object-cover"
                 />
@@ -892,11 +892,11 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
             {([
-              { name: 'Ninice', slug: 'ninice', image: `${import.meta.env.BASE_URL}vendors/ninice/drive-import/drive-01.webp` },
-              { name: "Coco's Food", slug: 'coco', image: `${import.meta.env.BASE_URL}vendors/coco/drive-import/drive-09.webp` },
-              { name: "Saveurs d'Afrique", slug: 'saveurs-afrique', image: `${import.meta.env.BASE_URL}vendors/saveurs-afrique/saveurs-afrique-ablo.jpg` },
+              { name: 'Ninice', slug: 'ninice', image: `${import.meta.env.BASE_URL}vendors/ninice/drive-reimport/IMG-20260521-WA0070.jpg` },
+              { name: "Coco's Food", slug: 'coco', image: `${import.meta.env.BASE_URL}vendors/coco/drive-reimport/IMG-20260526-WA0064.jpg` },
+              { name: "Saveurs d'Afrique", slug: 'saveurs-afrique', image: `${import.meta.env.BASE_URL}vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0156.jpg` },
               { name: 'An Tjè Coco', slug: 'an-tje-coco', image: `${import.meta.env.BASE_URL}vendors/an-tje-coco/gallery-05.jpg` },
-              { name: 'Snack Save Peyi\'A', slug: 'save-peyia', image: `${import.meta.env.BASE_URL}vendors/save-peyia/cote-porc-riz.jpg` },
+              { name: 'Snack Save Peyi\'A', slug: 'save-peyia', image: `${import.meta.env.BASE_URL}vendors/save-peyia/drive-reimport/IMG-20260710-WA0005.jpg` },
             ] as const).map((caterer) => (
               <Link
                 key={caterer.slug}
