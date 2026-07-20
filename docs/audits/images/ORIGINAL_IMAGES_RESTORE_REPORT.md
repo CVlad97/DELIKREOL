@@ -1,166 +1,106 @@
-# DeliKreol Image Audit - Initial Inventory
+# DELIKREOL — Rapport d'audit images originales
 
-Date: 2026-07-17  
-Branch: `fix/restore-original-images-20260717`  
-Status: inventory completed; unreferenced blurry/placeholder assets removed from the public tree.
+Date : 2026-07-20  
+Branche : `prep/an-tje-coco-import-20260720`  
+Base auditée : `5c1f248dde1886236ff4234546a5c66fbd4450f2`
 
-## Scope
+## Périmètre
 
-- Repository scanned: `public/` and `src/`
-- Files inventoried: `399` image files
-- Exact duplicate hash groups: `4`
-- Priority partners audited:
-  - Les Delices de Ninice
-  - An Tjè Coco
-  - Coco's Food
-  - Snack Savè Peyi’A
-  - Gouté Mwen
-  - Sweet Family Traiteur Orianne
-  - Saveurs d'Afrique
-  - Chef à Mada
+- Source de cadrage : Google Doc `OPENCLAW — Import An Tjè Coco dans DELIKREOL`.
+- Partenaires contrôlés en priorité : An Tjè Coco et Coco's Food.
+- Mode appliqué : audit avant modification, aucune génération IA, aucune photo Internet aléatoire, aucune écriture Supabase.
+- Dépôt local audité : `public/vendors/an-tje-coco`, `public/vendors/coco`, `src/data`, `src/services`, `src/pages`, `supabase`.
 
-## Method
+## Statut synthétique
 
-- Scanned all image files with `find`.
-- Measured file type, dimensions, size, and SHA-256 hash.
-- Cross-checked current references in `src/` for hero, portrait, gallery, logo, poster, cover, thumbnail, and imageUrl fields.
-- Checked Git history for the main legacy assets that still exist in the repository.
+| Contrôle | Statut | Résultat |
+|---|---:|---|
+| Branche dédiée créée | PASS | `prep/an-tje-coco-import-20260720` |
+| An Tjè Coco caché côté frontend public | PASS | `PUBLIC_HIDDEN_TRAITEURS` contient `An Tjè Coco` |
+| Produits An Tjè Coco cachés côté frontend public | PASS | `PUBLIC_HIDDEN_PRODUCT_TRAITEURS` contient `An Tjè Coco` |
+| Séparation An Tjè Coco / Coco's Food dans les données statiques | PASS | Vendors, slugs et images restent distincts |
+| Images locales An Tjè Coco prêtes HD | BLOCKED | uniquement 800×800 JPG et WebP 688×620/700×650 ; source droits/original non prouvée |
+| URLs Supabase An Tjè Coco valides | FAIL | `hero.jpg` et `portrait.jpg` renvoient 404 |
+| URLs Supabase Coco's Food valides | FAIL | `hero.jpg` et `portrait.jpg` renvoient 404 |
+| Produits Supabase An/Coco | PASS | aucun produit Supabase trouvé, pas de risque produit public depuis Supabase |
+| Media assets Supabase An/Coco | PASS | aucun `media_assets` trouvé |
+| Storage policies | BLOCKED | `product-photos` autorise un insert public anon/authenticated ; à durcir avant import public |
 
-Full machine-readable manifest:
+## Inventaire An Tjè Coco
 
-- `/tmp/delikreol-image-inventory.json`
+| Fichier actuel | Dimensions | Poids | Ratio | État | Original trouvé | Source | Action proposée |
+|---|---:|---:|---:|---|---|---|---|
+| `public/vendors/an-tje-coco/gallery-01.jpg` | 800×800 | 121256 B | 1:1 | insuffisant hero/card HD | non | dépôt actuel | garder caché, demander original partenaire |
+| `public/vendors/an-tje-coco/gallery-02.jpg` | 800×800 | 95577 B | 1:1 | insuffisant hero/card HD | non | dépôt actuel | garder caché, demander original partenaire |
+| `public/vendors/an-tje-coco/gallery-03.jpg` | 800×800 | 88135 B | 1:1 | insuffisant hero/card HD | non | dépôt actuel | garder caché, demander original partenaire |
+| `public/vendors/an-tje-coco/gallery-04.jpg` | 800×800 | 157177 B | 1:1 | insuffisant hero/card HD | non | dépôt actuel | garder caché, demander original partenaire |
+| `public/vendors/an-tje-coco/gallery-05.jpg` | 800×800 | 98388 B | 1:1 | insuffisant hero/card HD | non | dépôt actuel | garder caché, demander original partenaire |
+| `public/vendors/an-tje-coco/clean/hero-clean.webp` | 700×650 | 93124 B | 1.08:1 | trop petit pour hero | non | dépôt actuel | ne pas publier comme hero |
+| `public/vendors/an-tje-coco/clean/gallery-*.webp` | 688×620 | 38–78 KB | 1.11:1 | dérivé basse définition | non | dépôt actuel | ne pas utiliser comme source |
+| `public/vendors/an-tje-coco/hero.jpg` | absent | absent | absent | cassée | non | ancienne référence Git/Supabase | ne pas référencer |
+| `public/vendors/an-tje-coco/portrait.jpg` | absent | absent | absent | cassée | non | ancienne référence Git/Supabase | ne pas référencer |
 
-## Inventory Snapshot
+## Inventaire Coco's Food
 
-| Partner | Files | Risk level | Notes |
+| Fichier actuel | Dimensions | Poids | Ratio | État | Original trouvé | Source | Action proposée |
+|---|---:|---:|---:|---|---|---|---|
+| `public/vendors/coco/drive-reimport/IMG-20260526-WA0064.jpg` | 1600×873 | 191840 B | 1.83:1 | exploitable hero/gallery | oui | WhatsApp/Drive propriétaire | conserver |
+| `public/vendors/coco/drive-reimport/IMG-20260526-WA0068.jpg` | 3840×2160 | 927799 B | 16:9 | HD | oui | WhatsApp/Drive propriétaire | conserver |
+| `public/vendors/coco/drive-reimport/IMG-20260526-WA0072.jpg` | 3840×2160 | 819153 B | 16:9 | HD | oui | WhatsApp/Drive propriétaire | conserver |
+| `public/vendors/coco/drive-reimport/IMG-20260526-WA0074.jpg` | 2136×2577 | 427467 B | portrait | HD | oui | WhatsApp/Drive propriétaire | conserver |
+| `public/vendors/coco/drive-reimport/IMG-20260526-WA0077.jpg` | 3282×2053 | 543375 B | 1.60:1 | HD | oui | WhatsApp/Drive propriétaire | conserver |
+| `public/vendors/coco/drive-reimport/IMG-20260526-WA0080.jpg` | 3376×2013 | 447114 B | 1.68:1 | HD | oui | WhatsApp/Drive propriétaire | conserver |
+| `public/vendors/coco/drive-reimport/IMG-20260526-WA0081.jpg` | 3770×1981 | 537467 B | 1.90:1 | HD | oui | WhatsApp/Drive propriétaire | conserver |
+| `public/vendors/coco/drive-reimport/IMG-20260526-WA0082.jpg` | 3244×1894 | 519228 B | 1.71:1 | HD | oui | WhatsApp/Drive propriétaire | conserver |
+| `public/vendors/coco/hero.jpg` | absent local actuel / 404 prod | absent | absent | cassée si référencée | ancien Git seulement | ancienne référence | remplacer par `drive-reimport` ou supprimer référence |
+| `public/vendors/coco/portrait.jpg` | absent local actuel / 404 prod | absent | absent | cassée si référencée | ancien Git seulement | ancienne référence | remplacer par `drive-reimport` ou supprimer référence |
+
+## Anomalies de données
+
+| Zone | Fichier / source | Anomalie | Risque | Correction proposée |
+|---|---|---|---|---|
+| Frontend | `src/data/partnerAssets.ts` | An Tjè Coco utilise `gallery-05.jpg` comme hero et galerie unique | publication non HD si le hide est retiré | laisser caché jusqu'à original HD |
+| Frontend | `src/data/traiteurs.ts` | An Tjè Coco possède un profil buildable malgré le hide | OK tant que le hide reste actif | ne pas retirer du hide avant médias validés |
+| Frontend | `src/data/mockCatalog.ts` | Produits An Tjè Coco existent avec fallback `photo-a-confirmer.svg` | OK tant que produits cachés | garder caché, ne pas publier sans prix/allergènes/photos confirmés |
+| Supabase | `public.vendors` | An Tjè Coco `is_public=true` + `photo_status=confirmée` alors que hero/portrait cassés | exposition publique via service Supabase possible | passer An en non-public/draft avant import |
+| Supabase | `public.vendors` | Coco's Food `hero.jpg`/`portrait.jpg` cassés | fiche distante avec 404 si Supabase prioritaire | aligner vers `drive-reimport` ou retirer hero/portrait cassés |
+| Supabase | `storage.objects` policies | `product_photos_public_insert` autorise `anon` sur `product-photos` | upload public trop permissif | limiter aux admins/partenaires authentifiés propriétaires |
+| SQL repo | `supabase/seed.partners.sql` | An et Coco référencent `hero.jpg`/`portrait.jpg` inexistants | réintroduction de 404 lors d'une seed | corriger avant toute exécution |
+| SQL repo | `supabase/migrations/20260716000001_hydrate_public_vendor_profiles.sql` | An et Coco référencent `hero.jpg`/`portrait.jpg` inexistants | réintroduction de 404 lors d'une migration/rejeu | ajouter migration corrective idempotente |
+
+## Contrôles URL production
+
+| URL | HTTP | Type | Statut |
 |---|---:|---|---|
-| An Tjè Coco | 11 | Medium | Clean assets exist in `public/vendors/an-tje-coco/clean/`; legacy `hero.jpg` and `portrait.jpg` were exact 1x1 JPEG placeholders and have been removed. |
-| Coco's Food | 94 | Medium | Rich set of drive-import assets exists; legacy `hero.jpg` and `portrait.jpg` were exact 1x1 JPEG placeholders and have been removed. |
-| Les Delices de Ninice | 84 | High | Drive-import assets exist and are used by the frontend; several legacy JPGs were exact 1x1 placeholders and duplicate hashes existed in the gallery set. |
-| Snack Savè Peyi’A | 46 | Medium | Drive-import assets exist and are used by the frontend; legacy `hero.jpg` and `portrait.jpg` were exact 1x1 JPEG placeholders and have been removed. |
-| Gouté Mwen | 22 | High | Mixed quality assets; low-res PNGs were removed and the legacy hero poster file is no longer in the public tree. |
-| Sweet Family Traiteur Orianne | 67 | High | Valid poster/menu assets exist at 1600x1131; legacy `conditions.jpg` was removed and hero/portrait placeholders are no longer in the public tree. |
-| Saveurs d'Afrique | 50 | Medium | Drive-import assets are available and used; legacy `hero.jpg` and `portrait.jpg` were removed from the public tree. |
-| Chef à Mada | 1 | Medium | Logo exists as a JPEG screenshot-style image, not a transparent SVG/PNG. |
+| `https://delikreol.com/vendors/an-tje-coco/hero.jpg` | 404 | text/html | FAIL |
+| `https://delikreol.com/vendors/an-tje-coco/portrait.jpg` | 404 | text/html | FAIL |
+| `https://delikreol.com/vendors/an-tje-coco/gallery-01.jpg` | 200 | image/jpeg | PASS mais non HD |
+| `https://delikreol.com/vendors/an-tje-coco/gallery-05.jpg` | 200 | image/jpeg | PASS mais non HD |
+| `https://delikreol.com/vendors/coco/hero.jpg` | 404 | text/html | FAIL |
+| `https://delikreol.com/vendors/coco/portrait.jpg` | 404 | text/html | FAIL |
+| `https://delikreol.com/vendors/coco/gallery-01.jpg` | 200 | image/jpeg | PASS |
+| `https://delikreol.com/vendors/coco/drive-reimport/IMG-20260526-WA0064.jpg` | 200 | image/jpeg | PASS |
 
-## Exact Duplicate Groups
+## Décision avant modifications
 
-1. `public/vendors/ninice/thumbs/ninice-03.webp` and `public/vendors/ninice/thumbs/ninice-04.webp`
-2. `public/vendors/ninice/thumbs/ninice-10.webp` and `public/vendors/ninice/thumbs/ninice-11.webp`
-3. `public/vendors/ninice/gallery-02.jpg` through `public/vendors/ninice/gallery-10.jpg` previously shared the same hash as:
-   - `public/vendors/sweet-family/bao-buns.jpg`
-   - `public/vendors/sweet-family/cocktails-mignardises.jpg`
-   - `public/vendors/sweet-family/conditions.jpg`
+| Décision | Statut | Raison |
+|---|---:|---|
+| Publier An Tjè Coco maintenant | BLOCKED | aucune preuve d'original HD exploitable ; Supabase a des URLs cassées |
+| Réimporter An Tjè Coco depuis Facebook | BLOCKED_MEDIA_RIGHTS | URL publique exacte et droits non fournis |
+| Corriger Supabase An Tjè Coco en production | ACTION MANUELLE | recommandé, mais écriture prod interdite avant validation humaine |
+| Corriger Supabase Coco's Food hero/portrait | ACTION MANUELLE | recommandé, car les URLs 404 sont confirmées |
+| Modifier Coco's Food frontend | NON REQUIS | frontend actuel utilise `drive-reimport` HD et reste séparé |
 
-## Priority Partner Anomalies
+## Prochaine correction proposée
 
-| Partner | Page / route | Current file | Dimensions | Weight | Ratio | Format | State | Original found | Source of original | Action proposed |
-|---|---|---|---|---:|---:|---|---|---|---|---|
-| Les Delices de Ninice | `/traiteur/ninice`, `/catalogue`, home cards | `public/vendors/ninice/hero.jpg` | 1x1 | 135005 B | square | JPEG | removed | yes | Git history shows legacy introduction in `bbff8dd`, `429068c`, `25df9a4`; current better assets are `public/vendors/ninice/drive-import/drive-01.webp` to `drive-13.webp` | Removed from public tree; keep drive-import assets only |
-| Les Delices de Ninice | same | `public/vendors/ninice/portrait.jpg` | 1x1 | 172146 B | square | JPEG | removed | yes | Git history as above; current better assets are drive-import files | Removed from public tree; keep drive-import assets only |
-| Les Delices de Ninice | gallery / thumbnails | `public/vendors/ninice/gallery-02.jpg` ... `gallery-10.jpg` | 1x1 | mixed | square | JPEG | removed | not yet proven | Exact hash duplicates with Sweet Family assets | Removed from public tree; keep only if a source can be proven later |
-| An Tjè Coco | `/traiteur/an-tje-coco`, cards | `public/vendors/an-tje-coco/hero.jpg` | 1x1 | 173011 B | square | JPEG | removed | yes | Git history shows `3ddab58`, `78b910a`, `856277d`; current clean asset is `public/vendors/an-tje-coco/clean/hero-clean.webp` | Removed from public tree; keep clean asset only |
-| An Tjè Coco | same | `public/vendors/an-tje-coco/portrait.jpg` | 1x1 | 97256 B | square | JPEG | removed | yes | Same history as above | Removed from public tree; keep clean asset only |
-| Coco's Food | `/traiteur/coco`, cards | `public/vendors/coco/hero.jpg` | 1x1 | 218338 B | square | JPEG | removed | yes | Git history includes `59fcfc1`, `78b910a`, `333acbc`; current better assets are `public/vendors/coco/drive-import/drive-01.webp` and `drive-09.webp` | Removed from public tree; keep drive-import assets only |
-| Coco's Food | same | `public/vendors/coco/portrait.jpg` | 1x1 | 102290 B | square | JPEG | removed | yes | Same history as above | Removed from public tree; keep drive-import assets only |
-| Snack Savè Peyi’A | `/traiteur/save-peyia`, cards | `public/vendors/save-peyia/hero.jpg` | 1x1 | 564227 B | square | JPEG | removed | yes | Git history includes `28f93fc`, `924c441`; current better assets are `public/vendors/save-peyia/drive-import/drive-01.webp` to `drive-12.webp` | Removed from public tree; keep drive-import assets only |
-| Snack Savè Peyi’A | same | `public/vendors/save-peyia/portrait.jpg` | 1x1 | 174022 B | square | JPEG | removed | yes | Git history includes `e79ab70`, `3456237`, `856277d` | Removed from public tree; keep drive-import assets only |
-| Saveurs d'Afrique | `/traiteur/saveurs-afrique`, cards | `public/vendors/saveurs-afrique/hero.jpg` | 1x1 | 197600 B | square | JPEG | removed | yes | Git history includes `d4aaddd`, `3456237`, `856277d`; current better assets are `public/vendors/saveurs-afrique/drive-import/drive-02.webp` and `drive-04.webp` | Removed from public tree; keep drive-import assets only |
-| Saveurs d'Afrique | same | `public/vendors/saveurs-afrique/portrait.jpg` | 1x1 | 135465 B | square | JPEG | removed | yes | Same history as above | Removed from public tree; keep drive-import assets only |
-| Sweet Family Traiteur Orianne | `/traiteur/sweet-family`, cards, legal views | `public/vendors/sweet-family/hero.jpg` | 1x1 | 175465 B | square | JPEG | removed | yes | Git history includes `d4aaddd`, `e79ab70`, `856277d`; current better assets include `public/vendors/sweet-family/drive-import/drive-02.webp` and valid poster assets `cocktails-mignardises-hero.*` | Removed from public tree; keep poster assets for contain-based views only |
-| Sweet Family Traiteur Orianne | same | `public/vendors/sweet-family/portrait.jpg` | 1x1 | 87294 B | square | JPEG | removed | yes | Git history includes `67dde50`, `78b910a`, `856277d` | Removed from public tree; keep poster/photo assets only |
-| Sweet Family Traiteur Orianne | legal / flyer views | `public/vendors/sweet-family/conditions.jpg` | 1x1 | 4034 B | square | JPEG | removed | no clear proof | Exact hash duplicate of unrelated assets; not a valid public flyer | Removed from public tree; use owner-provided original if this content returns |
-| Gouté Mwen | home hero / partner cards | `public/vendors/goute-mwen/hero.jpg` | 1x1 | 157651 B | square | JPEG | removed | yes | Git history includes `a6b4484`, `e91cb5f`, `0ed6276`, `856277d`; current preferred hero is `public/vendors/goute-mwen/product-glacee-groseille.jpg` | Removed from public tree; keep product hero only |
-| Gouté Mwen | product / thumbnail candidate | `public/vendors/goute-mwen/cacahuete.jpg` | 305x414 | 326244 B | portrait | PNG | removed | no clear proof | Deleted from public assets because it was low-res and unreferenced in the app | Keep deleted unless the owner provides a verified HD original |
-| Gouté Mwen | product / thumbnail candidate | `public/vendors/goute-mwen/choco.jpg` | 601x408 | 575690 B | landscape | PNG | removed | no clear proof | Deleted from public assets because it was low-res and unreferenced in the app | Keep deleted unless the owner provides a verified HD original |
-| Chef à Mada | logo / profile | `public/vendors/chef-a-mada/logo.jpg` | 1080x2340 | 401244 B | portrait | JPEG | not ideal for logo | yes | Git history includes `5054cc4` and later photo cleanup commits | Prefer transparent SVG/PNG if a real logo exists; otherwise keep only as a temporary photo |
+1. Créer une migration idempotente qui met An Tjè Coco en non-public/draft dans Supabase tant que les médias HD ne sont pas validés.
+2. Corriger les références Supabase Coco's Food vers les fichiers `drive-reimport` valides ou vider les champs hero/portrait cassés.
+3. Corriger les seeds/migrations locales qui référencent encore `hero.jpg`/`portrait.jpg`.
+4. Ajouter un test anti-régression : aucune fiche publique ne doit référencer `vendors/an-tje-coco` tant que `PUBLIC_HIDDEN_TRAITEURS` contient An Tjè Coco.
+5. Ajouter un test Supabase/image URL : interdire les images 404 dans `vendors.hero_image`, `portrait_image` et `gallery_images`.
 
-## Current Frontend Sources Confirmed
+## Statut final
 
-- Frontend hero and partner card sources are currently routed through:
-  - `src/data/traiteurs.ts`
-  - `src/data/mockCatalog.ts`
-  - `src/services/vendorsService.ts`
-  - `src/pages/new/HomePage.tsx`
-  - `src/pages/new/TraiteurDetailPage.tsx`
-  - `src/pages/new/ProductDetailPage.tsx`
-  - `src/services/catalogImageResolver.ts`
-- Current visual behavior on mobile:
-  - `Mon espace` is visible in the header.
-  - Home and catalogue currently avoid the obvious legacy `thumbs`, `portrait.jpg`, and `hero.jpg` references for the priority partners above.
-
-## Pending Or Unresolved
-
-- Batch 2 of verified reimports has now been applied from the owner-provided WhatsApp exports.
-- Exact source proof still needed for:
-  - none in the currently removed blurry/placeholder set
-- The exact duplicate groups in Ninice and Sweet Family were reduced by removing the non-referenced public assets; remaining duplicates still need manual review if they become live.
-- `Chef à Mada` still needs a proper logo asset if a transparent version exists outside the repo.
-
-## Batch 2 Reimports
-
-Applied from the uploaded WhatsApp archives:
-
-- Sweet Family Traiteur Orianne
-  - Refreshed `public/vendors/sweet-family/bao-buns.jpg`
-  - Refreshed `public/vendors/sweet-family/landfood-solo.jpg`
-  - Refreshed `public/vendors/sweet-family/nems-poulet.jpg`
-  - Refreshed `public/vendors/sweet-family/manchon-poulet.jpg`
-  - Refreshed `public/vendors/sweet-family/ti-nain-morue.jpg`
-  - Refreshed `public/vendors/sweet-family/chicken-wrap.jpg`
-  - Refreshed `public/vendors/sweet-family/pizza-vege.jpg`
-  - Refreshed `public/vendors/sweet-family/bao-bun-poulet.jpg`
-  - Refreshed `public/vendors/sweet-family/drive-import/drive-01.webp` to `drive-11.webp`
-  - Removed obsolete `hero.jpg`, `portrait.jpg`, `conditions.jpg`, `conditions.webp`
-- Saveurs d'Afrique
-  - Refreshed `public/vendors/saveurs-afrique/drive-import/drive-01.webp` to `drive-14.webp`
-  - Kept hero/home-card positions on portrait food shots rather than menu-board/screenshot assets
-- Les Délices de Ninice
-  - Refreshed `public/vendors/ninice/drive-import/drive-01.webp` to `drive-13.webp`
-- Coco's Food
-  - Refreshed `public/vendors/coco/drive-import/drive-01.webp` to `drive-26.webp`
-- Snack Savè Peyi’A / Maria Traiteur
-  - Refreshed `public/vendors/save-peyia/drive-import/drive-01.webp` to `drive-12.webp`
-
-## Remaining Manual
-
-- `public/vendors/sweet-family/landfood-solo.jpg` and `public/vendors/sweet-family/nems-poulet.jpg` remain original-but-small source photos; they are not blurred, but a higher-definition owner original would be preferable.
-- `Chef à Mada` still uses a temporary logo photo.
-- If the owner provides higher-definition replacements for any of the remaining small originals, they should be swapped in without changing the current route structure.
-
-## Next Step
-
-1. Keep this report as the baseline.
-2. Replace only the files with verified originals.
-3. Record every replacement with before/after captures.
-4. Re-run desktop and mobile validation after each batch.
-
-## Final Validation Update
-
-Date: 2026-07-17
-
-- Code-level image handling was updated to prefer verified originals, preserve logos/posters with `contain`, and keep portrait/food crops stable.
-- No verified original image was deleted.
-- Removed unreferenced blurry/placeholder assets:
-  - `public/vendors/an-tje-coco/hero.jpg`
-  - `public/vendors/an-tje-coco/portrait.jpg`
-  - `public/vendors/coco/hero.jpg`
-  - `public/vendors/coco/portrait.jpg`
-  - `public/vendors/save-peyia/hero.jpg`
-  - `public/vendors/save-peyia/portrait.jpg`
-  - `public/vendors/saveurs-afrique/hero.jpg`
-  - `public/vendors/saveurs-afrique/portrait.jpg`
-  - `public/vendors/goute-mwen/hero.jpg`
-  - `public/vendors/goute-mwen/portrait.jpg`
-  - `public/vendors/ninice/hero.jpg`
-  - `public/vendors/ninice/portrait.jpg`
-  - `public/vendors/ninice/gallery-02.jpg` through `public/vendors/ninice/gallery-10.jpg`
-  - `public/vendors/sweet-family/conditions.jpg`
-- No new AI-generated or random internet image was introduced.
-- Validation passed:
-  - `npm run typecheck`
-  - `npm run lint`
-  - `npm run build`
-  - `npm test`
-  - `npm run test:e2e`
-- Remaining image warnings during Playwright are mostly lazy-loaded/offscreen assets and OSM tiles on the interactive map; visible routes and functional checks completed successfully.
+`BLOCKED` pour publication An Tjè Coco.  
+`ACTION MANUELLE` requise pour fournir les originaux HD ou une URL publique avec droits vérifiés.  
+`ACTION TECHNIQUE` recommandée pour corriger les références Supabase cassées avant toute réactivation publique.

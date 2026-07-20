@@ -7,7 +7,7 @@
  */
 import type { TraiteurSpace } from '../data/traiteurs';
 import type { PartnerProfile } from '../data/partnerProfiles';
-import { normalizeSpaceSlug, traiteurSpaces } from '../data/traiteurs';
+import { PUBLIC_HIDDEN_TRAITEURS, normalizeSpaceSlug, traiteurSpaces } from '../data/traiteurs';
 import { publicSupabase } from '../lib/publicSupabase';
 
 type SourceMode = 'supabase' | 'static' | 'hybrid';
@@ -58,6 +58,11 @@ function normalizedKey(value: string | null | undefined): string {
     .replace(/[’']/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '');
+}
+
+function isHiddenPublicVendor(vendor: VendorRaw): boolean {
+  const hiddenKeys = new Set(Array.from(PUBLIC_HIDDEN_TRAITEURS, normalizedKey));
+  return hiddenKeys.has(normalizedKey(vendor.business_name)) || hiddenKeys.has(normalizedKey(vendor.name));
 }
 
 function nonEmptyText(value: string | null | undefined): string | null {
@@ -131,7 +136,7 @@ export function mergeVendorWithStatic(
   vendor: VendorRaw,
   fallback: TraiteurSpace | undefined = resolveStaticVendor(vendor),
 ): TraiteurSpace | null {
-  if (!vendor.is_public || vendor.status !== 'verified' || !vendor.is_active || vendor.is_demo) {
+  if (isHiddenPublicVendor(vendor) || !vendor.is_public || vendor.status !== 'verified' || !vendor.is_active || vendor.is_demo) {
     return null;
   }
 

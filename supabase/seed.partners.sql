@@ -59,17 +59,17 @@ BEGIN
          story = 'An Tjè Coco réinvente la crêpe en pépites artisanales sucrées et salées avec des produits locaux.',
          promise = 'Pépites artisanales, produits locaux, précommande WhatsApp',
          specialty = 'Pépites façon gratin de banane jaune, coco-passion, rougail saucisses, poulet-curry-lait de coco',
-         hero_image = '/vendors/an-tje-coco/hero.jpg',
-         portrait_image = '/vendors/an-tje-coco/portrait.jpg',
+         hero_image = NULL,
+         portrait_image = NULL,
          gradient = 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]',
          accent = '#fff7ed',
          photo_status = 'à confirmer',
-         public_display_status = 'public confirmé',
-         is_public = true,
+         public_display_status = 'brouillon',
+         is_public = false,
          is_active = true,
          is_demo = false,
          highlights = '["Crêpes gastronomiques","Pépites salées & sucrées","Précommande WhatsApp","Produits locaux"]'::jsonb,
-         gallery_images = '["/vendors/an-tje-coco/gallery-01.jpg","/vendors/an-tje-coco/gallery-02.jpg","/vendors/an-tje-coco/gallery-03.jpg"]'::jsonb,
+         gallery_images = '[]'::jsonb,
          delivery_radius_km = 12,
          updated_at = now()
    WHERE lower(coalesce(business_name, name)) = lower('An Tjè Coco')
@@ -77,7 +77,7 @@ BEGIN
 
   IF NOT FOUND THEN
     INSERT INTO public.vendors (name, business_name, legal_name, status, zone_label, commune, phone, whatsapp, email, description, story, promise, specialty, hero_image, portrait_image, gradient, accent, photo_status, public_display_status, is_public, is_active, is_demo, highlights, gallery_images, delivery_radius_km, created_at, updated_at)
-    VALUES ('An Tjè Coco', 'An Tjè Coco', 'AN TJE COCO', 'verified', 'Fort-de-France', 'Fort-de-France', '0696 85 70 77', '0696 85 70 77', 'antjecoco@gmail.com', 'Crêpes gastronomiques, pépites salées et sucrées.', 'An Tjè Coco réinvente la crêpe en pépites artisanales sucrées et salées avec des produits locaux.', 'Pépites artisanales, produits locaux, précommande WhatsApp', 'Pépites façon gratin de banane jaune, coco-passion, rougail saucisses, poulet-curry-lait de coco', '/vendors/an-tje-coco/hero.jpg', '/vendors/an-tje-coco/portrait.jpg', 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'à confirmer', 'public confirmé', true, true, false, '["Crêpes gastronomiques","Pépites salées & sucrées","Précommande WhatsApp","Produits locaux"]'::jsonb, '["/vendors/an-tje-coco/gallery-01.jpg","/vendors/an-tje-coco/gallery-02.jpg","/vendors/an-tje-coco/gallery-03.jpg"]'::jsonb, 12, now(), now());
+    VALUES ('An Tjè Coco', 'An Tjè Coco', 'AN TJE COCO', 'verified', 'Fort-de-France', 'Fort-de-France', '0696 85 70 77', '0696 85 70 77', 'antjecoco@gmail.com', 'Crêpes gastronomiques, pépites salées et sucrées.', 'An Tjè Coco réinvente la crêpe en pépites artisanales sucrées et salées avec des produits locaux.', 'Pépites artisanales, produits locaux, précommande WhatsApp', 'Pépites façon gratin de banane jaune, coco-passion, rougail saucisses, poulet-curry-lait de coco', NULL, NULL, 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'à confirmer', 'brouillon', false, true, false, '["Crêpes gastronomiques","Pépites salées & sucrées","Précommande WhatsApp","Produits locaux"]'::jsonb, '[]'::jsonb, 12, now(), now());
   END IF;
 END $$;
 
@@ -97,8 +97,8 @@ BEGIN
          story = 'Cuisine du marché de Rivière-Pilote : plats complets faits maison, généreux et colorés.',
          promise = 'Cuisine de marché généreuse, variée, portions XXL',
          specialty = 'Plats du jour, paella fruits de mer, bowls, brochettes, poulet rôti',
-         hero_image = '/vendors/coco/hero.jpg',
-         portrait_image = '/vendors/coco/portrait.jpg',
+         hero_image = '/vendors/coco/drive-reimport/IMG-20260526-WA0064.jpg',
+         portrait_image = '/vendors/coco/drive-reimport/IMG-20260526-WA0065.jpg',
          gradient = 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]',
          accent = '#fff7ed',
          photo_status = 'à confirmer',
@@ -107,7 +107,7 @@ BEGIN
          is_active = true,
          is_demo = false,
          highlights = '["Cuisine de marché","Marché de Rivière-Pilote","Plats du jour variés","Paella aux fruits de mer"]'::jsonb,
-         gallery_images = '["/vendors/coco/gallery-01.jpg","/vendors/coco/gallery-02.jpg","/vendors/coco/gallery-03.jpg"]'::jsonb,
+         gallery_images = '["/vendors/coco/drive-reimport/IMG-20260526-WA0064.jpg","/vendors/coco/drive-reimport/IMG-20260526-WA0065.jpg","/vendors/coco/drive-reimport/IMG-20260526-WA0066.jpg","/vendors/coco/drive-reimport/IMG-20260526-WA0068.jpg","/vendors/coco/drive-reimport/IMG-20260526-WA0072.jpg","/vendors/coco/drive-reimport/IMG-20260526-WA0077.jpg","/vendors/coco/drive-reimport/IMG-20260526-WA0081.jpg"]'::jsonb,
          delivery_radius_km = 12,
          updated_at = now()
    WHERE lower(coalesce(business_name, name)) = lower('Coco''s Food')
@@ -115,7 +115,7 @@ BEGIN
 
   IF NOT FOUND THEN
     INSERT INTO public.vendors (name, business_name, legal_name, status, zone_label, commune, phone, whatsapp, email, description, story, promise, specialty, hero_image, portrait_image, gradient, accent, photo_status, public_display_status, is_public, is_active, is_demo, highlights, gallery_images, delivery_radius_km, created_at, updated_at)
-    VALUES ('Coco''s Food', 'Coco''s Food', 'COCO''S FOOD', 'verified', 'Rivière-Pilote — Marché', 'Rivière-Pilote', '+596 696 25 47 20', '+596 696 25 47 20', NULL, 'Cuisine de marché créole et caribéenne, plats complets, bowls, paella, brochettes.', 'Cuisine du marché de Rivière-Pilote : plats complets faits maison, généreux et colorés.', 'Cuisine de marché généreuse, variée, portions XXL', 'Plats du jour, paella fruits de mer, bowls, brochettes, poulet rôti', '/vendors/coco/hero.jpg', '/vendors/coco/portrait.jpg', 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'à confirmer', 'public confirmé', true, true, false, '["Cuisine de marché","Marché de Rivière-Pilote","Plats du jour variés","Paella aux fruits de mer"]'::jsonb, '["/vendors/coco/gallery-01.jpg","/vendors/coco/gallery-02.jpg","/vendors/coco/gallery-03.jpg"]'::jsonb, 12, now(), now());
+    VALUES ('Coco''s Food', 'Coco''s Food', 'COCO''S FOOD', 'verified', 'Rivière-Pilote — Marché', 'Rivière-Pilote', '+596 696 25 47 20', '+596 696 25 47 20', NULL, 'Cuisine de marché créole et caribéenne, plats complets, bowls, paella, brochettes.', 'Cuisine du marché de Rivière-Pilote : plats complets faits maison, généreux et colorés.', 'Cuisine de marché généreuse, variée, portions XXL', 'Plats du jour, paella fruits de mer, bowls, brochettes, poulet rôti', '/vendors/coco/drive-reimport/IMG-20260526-WA0064.jpg', '/vendors/coco/drive-reimport/IMG-20260526-WA0065.jpg', 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'à confirmer', 'public confirmé', true, true, false, '["Cuisine de marché","Marché de Rivière-Pilote","Plats du jour variés","Paella aux fruits de mer"]'::jsonb, '["/vendors/coco/drive-reimport/IMG-20260526-WA0064.jpg","/vendors/coco/drive-reimport/IMG-20260526-WA0065.jpg","/vendors/coco/drive-reimport/IMG-20260526-WA0066.jpg","/vendors/coco/drive-reimport/IMG-20260526-WA0068.jpg","/vendors/coco/drive-reimport/IMG-20260526-WA0072.jpg","/vendors/coco/drive-reimport/IMG-20260526-WA0077.jpg","/vendors/coco/drive-reimport/IMG-20260526-WA0081.jpg"]'::jsonb, 12, now(), now());
   END IF;
 END $$;
 
