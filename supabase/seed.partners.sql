@@ -21,8 +21,8 @@ BEGIN
          story = 'Cuisine de rue surinamo-caraïbe, épices du Suriname et générosité antillaise. Retrait au Barber Shop de Dillon, Fort-de-France.',
          promise = 'Cuisine maison, saveurs surinamiennes et caraïbes, retrait facile à Dillon',
          specialty = 'Colombo, moksi aleisi, bami, bara, gulab jamun et mini brochettes Saoto',
-         hero_image = '/vendors/ninice/hero.jpg',
-         portrait_image = '/vendors/ninice/portrait.jpg',
+         hero_image = '/vendors/ninice/drive-reimport/IMG-20260521-WA0070.jpg',
+         portrait_image = '/vendors/ninice/drive-reimport/IMG-20260528-WA0212.jpg',
          gradient = 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]',
          accent = '#fff7ed',
          photo_status = 'à confirmer',
@@ -31,7 +31,7 @@ BEGIN
          is_active = true,
          is_demo = false,
          highlights = '["Cuisine maison","Mélange Suriname / Caraïbes","Point relais Barber Shop de Dillon","Commande groupe"]'::jsonb,
-         gallery_images = '["/vendors/ninice/gallery-01.jpg","/vendors/ninice/gallery-02.jpg","/vendors/ninice/gallery-03.jpg"]'::jsonb,
+         gallery_images = '["/vendors/ninice/drive-reimport/IMG-20260521-WA0070.jpg","/vendors/ninice/drive-reimport/IMG-20260521-WA0071.jpg","/vendors/ninice/drive-reimport/IMG-20260521-WA0072.jpg","/vendors/ninice/drive-reimport/IMG-20260521-WA0073.jpg","/vendors/ninice/drive-reimport/IMG-20260521-WA0074.jpg"]'::jsonb,
          delivery_radius_km = 12,
          updated_at = now()
    WHERE lower(coalesce(business_name, name)) = lower('Les Delices de Ninice')
@@ -39,7 +39,7 @@ BEGIN
 
   IF NOT FOUND THEN
     INSERT INTO public.vendors (name, business_name, legal_name, status, zone_label, commune, phone, whatsapp, email, description, story, promise, specialty, hero_image, portrait_image, gradient, accent, photo_status, public_display_status, is_public, is_active, is_demo, highlights, gallery_images, delivery_radius_km, created_at, updated_at)
-    VALUES ('Les Delices de Ninice', 'Les Delices de Ninice', 'Les Delices de Ninice', 'verified', 'Secteur Dillon', 'Fort-de-France', '+596 696 01 93 21', '+596 696 01 93 21', 'jereniceeduards@gmail.com', 'Traiteur, boxes repas et snacking — cuisine de rue surinamo-caraïbe.', 'Cuisine de rue surinamo-caraïbe, épices du Suriname et générosité antillaise. Retrait au Barber Shop de Dillon, Fort-de-France.', 'Cuisine maison, saveurs surinamiennes et caraïbes, retrait facile à Dillon', 'Colombo, moksi aleisi, bami, bara, gulab jamun et mini brochettes Saoto', '/vendors/ninice/hero.jpg', '/vendors/ninice/portrait.jpg', 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'à confirmer', 'public confirmé', true, true, false, '["Cuisine maison","Mélange Suriname / Caraïbes","Point relais Barber Shop de Dillon","Commande groupe"]'::jsonb, '["/vendors/ninice/gallery-01.jpg","/vendors/ninice/gallery-02.jpg","/vendors/ninice/gallery-03.jpg"]'::jsonb, 12, now(), now());
+    VALUES ('Les Delices de Ninice', 'Les Delices de Ninice', 'Les Delices de Ninice', 'verified', 'Secteur Dillon', 'Fort-de-France', '+596 696 01 93 21', '+596 696 01 93 21', 'jereniceeduards@gmail.com', 'Traiteur, boxes repas et snacking — cuisine de rue surinamo-caraïbe.', 'Cuisine de rue surinamo-caraïbe, épices du Suriname et générosité antillaise. Retrait au Barber Shop de Dillon, Fort-de-France.', 'Cuisine maison, saveurs surinamiennes et caraïbes, retrait facile à Dillon', 'Colombo, moksi aleisi, bami, bara, gulab jamun et mini brochettes Saoto', '/vendors/ninice/drive-reimport/IMG-20260521-WA0070.jpg', '/vendors/ninice/drive-reimport/IMG-20260528-WA0212.jpg', 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'à confirmer', 'public confirmé', true, true, false, '["Cuisine maison","Mélange Suriname / Caraïbes","Point relais Barber Shop de Dillon","Commande groupe"]'::jsonb, '["/vendors/ninice/drive-reimport/IMG-20260521-WA0070.jpg","/vendors/ninice/drive-reimport/IMG-20260521-WA0071.jpg","/vendors/ninice/drive-reimport/IMG-20260521-WA0072.jpg","/vendors/ninice/drive-reimport/IMG-20260521-WA0073.jpg","/vendors/ninice/drive-reimport/IMG-20260521-WA0074.jpg"]'::jsonb, 12, now(), now());
   END IF;
 END $$;
 
@@ -135,8 +135,8 @@ BEGIN
          story = 'Snack Savè Peyi’A est le spot de Rivière-Pilote près du Pont de Fer : fruits frais, jus locaux, paninis, crêpes, plats cuisinés et grillades.',
          promise = 'Grillades maison, fruits frais, produits locaux — livraison sur Rivière-Pilote et environs',
          specialty = 'Côte de porc, entrecôte, cabri, saumon sauce blanche, dorade grillée, salades de fruits, smoothies',
-         hero_image = '/vendors/save-peyia/hero.jpg',
-         portrait_image = '/vendors/save-peyia/portrait.jpg',
+         hero_image = '/vendors/save-peyia/drive-reimport/IMG-20260710-WA0005.jpg',
+         portrait_image = '/vendors/save-peyia/drive-reimport/IMG-20260710-WA0006.jpg',
          gradient = 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]',
          accent = '#fff7ed',
          photo_status = 'à confirmer',
@@ -145,7 +145,7 @@ BEGIN
          is_active = true,
          is_demo = false,
          highlights = '["Transformation fruits et légumes","Grillades & poissons","Rivière-Pilote — Pont de Fer","Livraison disponible"]'::jsonb,
-         gallery_images = '["/vendors/save-peyia/cote-porc-riz.jpg","/vendors/save-peyia/crevettes-riz.jpg","/vendors/save-peyia/salade-fruits-1.jpg"]'::jsonb,
+         gallery_images = '["/vendors/save-peyia/drive-reimport/IMG-20260710-WA0005.jpg","/vendors/save-peyia/drive-reimport/IMG-20260710-WA0006.jpg","/vendors/save-peyia/drive-reimport/IMG-20260710-WA0007.jpg","/vendors/save-peyia/drive-reimport/IMG-20260710-WA0008.jpg","/vendors/save-peyia/drive-reimport/IMG-20260710-WA0009.jpg"]'::jsonb,
          delivery_radius_km = 12,
          updated_at = now()
    WHERE lower(coalesce(business_name, name)) = lower('Snack Savè Peyi’A')
@@ -153,7 +153,7 @@ BEGIN
 
   IF NOT FOUND THEN
     INSERT INTO public.vendors (name, business_name, legal_name, status, zone_label, commune, phone, whatsapp, email, description, story, promise, specialty, hero_image, portrait_image, gradient, accent, photo_status, public_display_status, is_public, is_active, is_demo, highlights, gallery_images, delivery_radius_km, created_at, updated_at)
-    VALUES ('Snack Savè Peyi’A', 'Snack Savè Peyi’A', 'Snack Savè Peyi’A', 'verified', 'Rivière-Pilote — Pont de Fer', 'Rivière-Pilote', '+596 696 00 27 64', '+596 696 00 27 64', 'marianelitta972@gmail.com', 'Transformation de fruits et légumes, jus locaux, grillades, plats cuisinés et snacks.', 'Snack Savè Peyi’A est le spot de Rivière-Pilote près du Pont de Fer : fruits frais, jus locaux, paninis, crêpes, plats cuisinés et grillades.', 'Grillades maison, fruits frais, produits locaux — livraison sur Rivière-Pilote et environs', 'Côte de porc, entrecôte, cabri, saumon sauce blanche, dorade grillée, salades de fruits, smoothies', '/vendors/save-peyia/hero.jpg', '/vendors/save-peyia/portrait.jpg', 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'à confirmer', 'public confirmé', true, true, false, '["Transformation fruits et légumes","Grillades & poissons","Rivière-Pilote — Pont de Fer","Livraison disponible"]'::jsonb, '["/vendors/save-peyia/cote-porc-riz.jpg","/vendors/save-peyia/crevettes-riz.jpg","/vendors/save-peyia/salade-fruits-1.jpg"]'::jsonb, 12, now(), now());
+    VALUES ('Snack Savè Peyi’A', 'Snack Savè Peyi’A', 'Snack Savè Peyi’A', 'verified', 'Rivière-Pilote — Pont de Fer', 'Rivière-Pilote', '+596 696 00 27 64', '+596 696 00 27 64', 'marianelitta972@gmail.com', 'Transformation de fruits et légumes, jus locaux, grillades, plats cuisinés et snacks.', 'Snack Savè Peyi’A est le spot de Rivière-Pilote près du Pont de Fer : fruits frais, jus locaux, paninis, crêpes, plats cuisinés et grillades.', 'Grillades maison, fruits frais, produits locaux — livraison sur Rivière-Pilote et environs', 'Côte de porc, entrecôte, cabri, saumon sauce blanche, dorade grillée, salades de fruits, smoothies', '/vendors/save-peyia/drive-reimport/IMG-20260710-WA0005.jpg', '/vendors/save-peyia/drive-reimport/IMG-20260710-WA0006.jpg', 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'à confirmer', 'public confirmé', true, true, false, '["Transformation fruits et légumes","Grillades & poissons","Rivière-Pilote — Pont de Fer","Livraison disponible"]'::jsonb, '["/vendors/save-peyia/drive-reimport/IMG-20260710-WA0005.jpg","/vendors/save-peyia/drive-reimport/IMG-20260710-WA0006.jpg","/vendors/save-peyia/drive-reimport/IMG-20260710-WA0007.jpg","/vendors/save-peyia/drive-reimport/IMG-20260710-WA0008.jpg","/vendors/save-peyia/drive-reimport/IMG-20260710-WA0009.jpg"]'::jsonb, 12, now(), now());
   END IF;
 END $$;
 
@@ -173,8 +173,8 @@ BEGIN
          story = 'Gouté Mwen valorise les saveurs des Antilles avec des glaces artisanales, des fruits locaux et des versions sans sucre ajouté.',
          promise = 'Glaces faites maison, fruits locaux, 2€ seulement — inclusion & patrimoine antillais',
          specialty = 'Glaces artisanales : abricot pays, mangue, maracuja, prune cythère, corossol, coco, snow-boll',
-         hero_image = '/vendors/goute-mwen/hero.jpg',
-         portrait_image = '/vendors/goute-mwen/portrait.jpg',
+         hero_image = NULL,
+         portrait_image = NULL,
          gradient = 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]',
          accent = '#fff7ed',
          photo_status = 'à confirmer',
@@ -183,7 +183,7 @@ BEGIN
          is_active = true,
          is_demo = false,
          highlights = '["18 parfums de glaces artisanales","2€ chaque","Sans sucre ajouté disponible","Fait maison"]'::jsonb,
-         gallery_images = '["/vendors/goute-mwen/product-glacee-groseille.jpg","/vendors/goute-mwen/snow-boll.jpg","/vendors/goute-mwen/mangue.jpg"]'::jsonb,
+         gallery_images = '[]'::jsonb,
          delivery_radius_km = 12,
          updated_at = now()
    WHERE lower(coalesce(business_name, name)) = lower('Gouté Mwen')
@@ -191,7 +191,7 @@ BEGIN
 
   IF NOT FOUND THEN
     INSERT INTO public.vendors (name, business_name, legal_name, status, zone_label, commune, phone, whatsapp, email, description, story, promise, specialty, hero_image, portrait_image, gradient, accent, photo_status, public_display_status, is_public, is_active, is_demo, highlights, gallery_images, delivery_radius_km, created_at, updated_at)
-    VALUES ('Gouté Mwen', 'Gouté Mwen', 'Gouté Mwen', 'verified', 'Martinique', 'Martinique', '+596 696 16 61 93', '+596 696 16 61 93', NULL, 'Glaces artisanales antillaises — pur fruit, fait maison, inclusif.', 'Gouté Mwen valorise les saveurs des Antilles avec des glaces artisanales, des fruits locaux et des versions sans sucre ajouté.', 'Glaces faites maison, fruits locaux, 2€ seulement — inclusion & patrimoine antillais', 'Glaces artisanales : abricot pays, mangue, maracuja, prune cythère, corossol, coco, snow-boll', '/vendors/goute-mwen/hero.jpg', '/vendors/goute-mwen/portrait.jpg', 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'à confirmer', 'public confirmé', true, true, false, '["18 parfums de glaces artisanales","2€ chaque","Sans sucre ajouté disponible","Fait maison"]'::jsonb, '["/vendors/goute-mwen/product-glacee-groseille.jpg","/vendors/goute-mwen/snow-boll.jpg","/vendors/goute-mwen/mangue.jpg"]'::jsonb, 12, now(), now());
+    VALUES ('Gouté Mwen', 'Gouté Mwen', 'Gouté Mwen', 'verified', 'Martinique', 'Martinique', '+596 696 16 61 93', '+596 696 16 61 93', NULL, 'Glaces artisanales antillaises — pur fruit, fait maison, inclusif.', 'Gouté Mwen valorise les saveurs des Antilles avec des glaces artisanales, des fruits locaux et des versions sans sucre ajouté.', 'Glaces faites maison, fruits locaux, 2€ seulement — inclusion & patrimoine antillais', 'Glaces artisanales : abricot pays, mangue, maracuja, prune cythère, corossol, coco, snow-boll', NULL, NULL, 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'à confirmer', 'public confirmé', true, true, false, '["18 parfums de glaces artisanales","2€ chaque","Sans sucre ajouté disponible","Fait maison"]'::jsonb, '[]'::jsonb, 12, now(), now());
   END IF;
 END $$;
 
@@ -212,7 +212,7 @@ BEGIN
          promise = 'Plats généreux et savoureux — Prestations sur mesure — Produits de saison',
          specialty = 'Seafood Boil, Landfood, Bao Buns, Nems, Mini Burgers, Pizzas, Verrines créoles, Desserts',
          hero_image = '/vendors/sweet-family/cocktails-mignardises-hero.webp',
-         portrait_image = '/vendors/sweet-family/portrait.jpg',
+         portrait_image = '/vendors/sweet-family/drive-reimport/IMG-20260627-WA0003.jpg',
          gradient = 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]',
          accent = '#fff7ed',
          photo_status = 'à confirmer',
@@ -229,7 +229,7 @@ BEGIN
 
   IF NOT FOUND THEN
     INSERT INTO public.vendors (name, business_name, legal_name, status, zone_label, commune, phone, whatsapp, email, description, story, promise, specialty, hero_image, portrait_image, gradient, accent, photo_status, public_display_status, is_public, is_active, is_demo, highlights, gallery_images, delivery_radius_km, created_at, updated_at)
-    VALUES ('Sweet Family Traiteur Orianne', 'Sweet Family Traiteur Orianne', 'Sweet Family Traiteur Orianne', 'verified', 'Martinique', 'Fort-de-France', '+596 696 88 75 28', '+596 696 88 75 28', NULL, 'Spécialiste Seafood Boil & Landfood, Bao Buns, Nems, Burgers, Verrines créoles, Desserts & Cocktails dînatoires.', 'Traiteur événementiel basé en Martinique, spécialisé Seafood Boils et cocktails dînatoires haut de gamme.', 'Plats généreux et savoureux — Prestations sur mesure — Produits de saison', 'Seafood Boil, Landfood, Bao Buns, Nems, Mini Burgers, Pizzas, Verrines créoles, Desserts', '/vendors/sweet-family/cocktails-mignardises-hero.webp', '/vendors/sweet-family/portrait.jpg', 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'à confirmer', 'public confirmé', true, true, false, '["Spécialiste Seafood Boil & Landfood","Prestations sur mesure","Grande capacité de service","Qualité et générosité"]'::jsonb, '["/vendors/sweet-family/cocktails-mignardises-menu.webp","/vendors/sweet-family/bao-buns-menu.webp","/vendors/sweet-family/seafood-boil-1.webp"]'::jsonb, 12, now(), now());
+    VALUES ('Sweet Family Traiteur Orianne', 'Sweet Family Traiteur Orianne', 'Sweet Family Traiteur Orianne', 'verified', 'Martinique', 'Fort-de-France', '+596 696 88 75 28', '+596 696 88 75 28', NULL, 'Spécialiste Seafood Boil & Landfood, Bao Buns, Nems, Burgers, Verrines créoles, Desserts & Cocktails dînatoires.', 'Traiteur événementiel basé en Martinique, spécialisé Seafood Boils et cocktails dînatoires haut de gamme.', 'Plats généreux et savoureux — Prestations sur mesure — Produits de saison', 'Seafood Boil, Landfood, Bao Buns, Nems, Mini Burgers, Pizzas, Verrines créoles, Desserts', '/vendors/sweet-family/cocktails-mignardises-hero.webp', '/vendors/sweet-family/drive-reimport/IMG-20260627-WA0003.jpg', 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'à confirmer', 'public confirmé', true, true, false, '["Spécialiste Seafood Boil & Landfood","Prestations sur mesure","Grande capacité de service","Qualité et générosité"]'::jsonb, '["/vendors/sweet-family/cocktails-mignardises-menu.webp","/vendors/sweet-family/bao-buns-menu.webp","/vendors/sweet-family/seafood-boil-1.webp"]'::jsonb, 12, now(), now());
   END IF;
 END $$;
 
@@ -249,8 +249,8 @@ BEGIN
          story = 'Saveurs d''Afrique propose des spécialités africaines et créoles. Fiche en cours de validation avec la partenaire.',
          promise = 'Cuisine maison, portions généreuses — fiche en cours de validation',
          specialty = 'Spécialités africaines et créoles',
-         hero_image = '/vendors/saveurs-afrique/hero.jpg',
-         portrait_image = '/vendors/saveurs-afrique/portrait.jpg',
+         hero_image = '/vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0155.jpg',
+         portrait_image = '/vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0156.jpg',
          gradient = 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]',
          accent = '#fff7ed',
          photo_status = 'à confirmer',
@@ -259,7 +259,7 @@ BEGIN
          is_active = true,
          is_demo = false,
          highlights = '["Cuisine africaine et créole","Commune : Cluny","Fiche en cours de validation","Photos et descriptions à valider"]'::jsonb,
-         gallery_images = '["/vendors/saveurs-afrique/gallery-01.jpg","/vendors/saveurs-afrique/gallery-02.jpg","/vendors/saveurs-afrique/gallery-03.jpg"]'::jsonb,
+         gallery_images = '["/vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0155.jpg","/vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0156.jpg","/vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0157.jpg","/vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0158.jpg","/vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0159.jpg"]'::jsonb,
          delivery_radius_km = 12,
          updated_at = now()
    WHERE lower(coalesce(business_name, name)) = lower('Saveurs d''Afrique')
@@ -267,7 +267,7 @@ BEGIN
 
   IF NOT FOUND THEN
     INSERT INTO public.vendors (name, business_name, legal_name, status, zone_label, commune, phone, whatsapp, email, description, story, promise, specialty, hero_image, portrait_image, gradient, accent, photo_status, public_display_status, is_public, is_active, is_demo, highlights, gallery_images, delivery_radius_km, created_at, updated_at)
-    VALUES ('Saveurs d''Afrique', 'Saveurs d''Afrique', 'SAVEURS D''AFRIQUE', 'verified', 'Cluny', 'Rivière-Salée', '0596 68 12 25', '0596 68 12 25', NULL, 'Cuisine africaine, buffet, traiteur et commandes groupe.', 'Saveurs d''Afrique propose des spécialités africaines et créoles. Fiche en cours de validation avec la partenaire.', 'Cuisine maison, portions généreuses — fiche en cours de validation', 'Spécialités africaines et créoles', '/vendors/saveurs-afrique/hero.jpg', '/vendors/saveurs-afrique/portrait.jpg', 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'à confirmer', 'public confirmé', true, true, false, '["Cuisine africaine et créole","Commune : Cluny","Fiche en cours de validation","Photos et descriptions à valider"]'::jsonb, '["/vendors/saveurs-afrique/gallery-01.jpg","/vendors/saveurs-afrique/gallery-02.jpg","/vendors/saveurs-afrique/gallery-03.jpg"]'::jsonb, 12, now(), now());
+    VALUES ('Saveurs d''Afrique', 'Saveurs d''Afrique', 'SAVEURS D''AFRIQUE', 'verified', 'Cluny', 'Rivière-Salée', '0596 68 12 25', '0596 68 12 25', NULL, 'Cuisine africaine, buffet, traiteur et commandes groupe.', 'Saveurs d''Afrique propose des spécialités africaines et créoles. Fiche en cours de validation avec la partenaire.', 'Cuisine maison, portions généreuses — fiche en cours de validation', 'Spécialités africaines et créoles', '/vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0155.jpg', '/vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0156.jpg', 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'à confirmer', 'public confirmé', true, true, false, '["Cuisine africaine et créole","Commune : Cluny","Fiche en cours de validation","Photos et descriptions à valider"]'::jsonb, '["/vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0155.jpg","/vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0156.jpg","/vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0157.jpg","/vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0158.jpg","/vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0159.jpg"]'::jsonb, 12, now(), now());
   END IF;
 END $$;
 
