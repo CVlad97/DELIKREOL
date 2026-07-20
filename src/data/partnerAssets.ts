@@ -8,7 +8,6 @@ export const anTjeCocoAssets = {
   gallery: [
     assetFromPublic('vendors/an-tje-coco/gallery-05.jpg'),
   ],
-  event: 'https://api.cloudly.space/resize/crop/1200/627/60/aHR0cDovL21lZGlhcy50b3VyaXNtLXN5c3RlbS5jb20vNy8yLzgwNDcxN180MjIxMDY0NDlfMzgyMzMzMzc0NDkzOTczXzM3OTE3NTkwNjM3OTIwNjc4MzFfbi5qcGVn/image.jpg',
 };
 
 export const cocoFoodAssets = {
