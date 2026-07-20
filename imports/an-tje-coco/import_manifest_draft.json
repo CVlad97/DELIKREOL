@@ -1,0 +1,24 @@
+{
+  "vendor": "An Tjè Coco",
+  "slug": "an-tje-coco",
+  "status": "bloque_avant_import",
+  "verified_from_supabase": {
+    "commune": "Fort-de-France",
+    "phone": "+596 696 85 70 77",
+    "email": "antjecoco@gmail.com",
+    "description": "Crêpes gastronomiques, pépites salées et sucrées à base de produits locaux.",
+    "specialty": "Pépites salées et sucrées, coco-passion, rougail saucisses et créations événementielles."
+  },
+  "existing_media": [
+    "public/vendors/an-tje-coco/gallery-05.jpg",
+    "Canva asset MAHP7ZiPuBg"
+  ],
+  "missing_before_publication": [
+    "URL exacte de la page Facebook An Tjè Coco",
+    "Autorisation d'utilisation des photos Facebook",
+    "Au moins 5 photos originales cohérentes",
+    "Menu, prix, compositions et allergènes confirmés",
+    "Horaires et modes de retrait/livraison confirmés"
+  ],
+  "hard_rule": "Ne jamais utiliser les photos Coco's Food pour An Tjè Coco."
+}
