@@ -100,11 +100,12 @@ for (const slug of ['snack-save-peyia', 'les-delices-de-ninice']) {
   });
 }
 
-test('goute mwen is not exposed publicly while product photos are unverified', async ({ page }) => {
+test('goute mwen keeps its profile without unverified product photos', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/traiteur/goute-mwen', { waitUntil: 'domcontentloaded' });
 
-  await expect(page.getByRole('heading', { name: 'Traiteur introuvable' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Gouté Mwen' })).toBeVisible();
   await expect(page.locator('[data-partner-catalogue="true"]')).toHaveCount(0);
+  await expect(page.getByText('Le catalogue est en cours de préparation.')).toBeVisible();
   await expect(page.getByText('Photo à venir')).toHaveCount(0);
 });

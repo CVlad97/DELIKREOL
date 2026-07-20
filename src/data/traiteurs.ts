@@ -273,7 +273,7 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
       // Gouté Mwen — glaces artisanales, public confirmé
       if (profile.name === 'Gouté Mwen') {
         return {
-          ...buildSpace(profile, 'from-[#eab308] via-[#f97316] to-[#dc2626]', '#fff7ed', 'public à vérifier', 'à confirmer'),
+          ...buildSpace(profile, 'from-[#eab308] via-[#f97316] to-[#dc2626]', '#fff7ed', 'public confirmé', 'à confirmer'),
           horaires: { lun: { open: '08:00', close: '18:00' }, mar: { open: '08:00', close: '18:00' }, mer: { open: '08:00', close: '18:00' }, jeu: { open: '08:00', close: '18:00' }, ven: { open: '08:00', close: '18:00' }, sam: { open: '09:00', close: '13:00' } },
           cutoff_time: '10:00',
           prep_time: 15,
