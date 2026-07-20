@@ -13,10 +13,10 @@ import { Layout } from '../../components/layout/Layout';
 import { BackBar } from '../../components/BackBar';
 import { ProductThumbnail } from '../../components/ProductThumbnail';
 import { mockProducts } from '../../data/mockCatalog';
-import { traiteurSpaces } from '../../data/traiteurs';
+import { PUBLIC_HIDDEN_PRODUCT_TRAITEURS, PUBLIC_HIDDEN_TRAITEURS, traiteurSpaces } from '../../data/traiteurs';
 import { useCart } from '../../contexts/CartContext';
 import { useToast } from '../../contexts/ToastContext';
-import { resolveProductThumbnail } from '../../services/catalogImageResolver';
+import { isUsableThumbnail, resolveProductThumbnail } from '../../services/catalogImageResolver';
 import { trackPublicView } from '../../services/metricsService';
 import { setPageMeta } from '../../services/seo';
 import type { Product } from '../../types';
@@ -41,17 +41,26 @@ export function ProductDetailPage() {
   const productData = useMemo(() => {
     const mock = mockProducts.find((product) => product.id === slug);
     if (mock) {
+      if (
+        PUBLIC_HIDDEN_TRAITEURS.has(mock.vendor) ||
+        PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(mock.vendor) ||
+        !isUsableThumbnail(mock.image)
+      ) {
+        return null;
+      }
       const vendorSpace = traiteurSpaces.find((space) => space.name === mock.vendor) || null;
       return { product: mock, vendorSpace };
     }
 
     for (const space of traiteurSpaces) {
+      if (PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(space.name)) continue;
       const item = space.menuItems.find((menuItem) => (
         `${space.slug}-${slugify(menuItem.name)}` === slug ||
         (menuItem as { id?: string }).id === slug
       ));
 
       if (item) {
+        if (!isUsableThumbnail(item.image)) return null;
         return {
           product: {
             id: `${space.slug}-${slugify(item.name)}`,

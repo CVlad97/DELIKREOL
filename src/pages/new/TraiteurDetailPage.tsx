@@ -11,18 +11,16 @@ import {
 } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
 import { BackBar } from '../../components/BackBar';
-import { ImageLightbox } from '../../components/ImageLightbox';
 import { ProductThumbnail } from '../../components/ProductThumbnail';
 import { SmartImage } from '../../components/SmartImage';
 import { ReviewSection } from '../../components/ReviewSection';
 import { useCart } from '../../contexts/CartContext';
 import { useToast } from '../../contexts/ToastContext';
-import { formatEuro, traiteurSpaces } from '../../data/traiteurs';
-import { getThumbnailPlaceholder, resolveProductThumbnail } from '../../services/catalogImageResolver';
+import { formatEuro, PUBLIC_HIDDEN_PRODUCT_TRAITEURS, traiteurSpaces } from '../../data/traiteurs';
+import { getThumbnailPlaceholder, isUsableThumbnail, resolveProductThumbnail } from '../../services/catalogImageResolver';
 import { trackPublicView } from '../../services/metricsService';
 import { setPageMeta } from '../../services/seo';
 import type { Product } from '../../types';
-import { useState } from 'react';
 
 const WHATSAPP_NUMBER = '596696653589';
 
@@ -43,7 +41,6 @@ export function TraiteurDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { addItem } = useCart();
   const { showSuccess } = useToast();
-  const [lightboxImages, setLightboxImages] = useState<Array<{ src: string; alt: string; caption?: string }> | null>(null);
 
   const traiteur = useMemo(
     () => traiteurSpaces.find((item) => item.slug === slug) || null,
@@ -83,9 +80,11 @@ export function TraiteurDetailPage() {
     );
   }
 
-  const menuItems = traiteur.menuItems || [];
+  const menuItems = PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(traiteur.name)
+    ? []
+    : (traiteur.menuItems || []).filter((item) => isUsableThumbnail(item.image));
   const isGouteMwen = traiteur.slug === 'goute-mwen';
-  const useContainedHero = isGouteMwen || traiteur.slug === 'an-tje-coco';
+  const useContainedHero = isGouteMwen;
   const firstProductImage = menuItems.find((item) => Boolean(item.image))?.image || null;
   const galleryImages = uniqueImages([
     traiteur.heroImage,
@@ -97,6 +96,9 @@ export function TraiteurDetailPage() {
     : traiteur.heroImage || firstProductImage || traiteur.galleryImages?.[0];
   const partnerFallback = heroImage || traiteur.galleryImages?.[0] || traiteur.portraitImage || getThumbnailPlaceholder();
   const isVerified = traiteur.status === 'public confirmé';
+  const visibleStartingAt = menuItems.length
+    ? menuItems.reduce((lowest, item) => Math.min(lowest, item.price), Number.POSITIVE_INFINITY)
+    : 0;
 
   const handleAddToCart = (item: (typeof menuItems)[number]) => {
     const thumbnail = resolveProductThumbnail({
@@ -135,18 +137,24 @@ export function TraiteurDetailPage() {
       <main className="pb-24 sm:pb-12">
         <div className="mx-auto max-w-6xl px-4 pt-6 sm:px-6 lg:px-8">
           <section className="relative overflow-hidden rounded-[2rem] bg-neutral-950 shadow-xl">
-            <SmartImage
-              src={heroImage || getThumbnailPlaceholder()}
-              fallbackSrc={partnerFallback}
-              finalFallbackSrc={getThumbnailPlaceholder()}
-              alt={`${traiteur.name} — visuel principal`}
-              kind={useContainedHero ? 'packaging' : 'ambient'}
-              fit={useContainedHero ? 'contain' : 'cover'}
-              aspectRatio="16 / 8"
-              priority
-              containerClassName="w-full min-h-[360px] sm:min-h-[430px]"
-              imgClassName="product-photo-natural"
-            />
+            {heroImage ? (
+              <SmartImage
+                src={heroImage}
+                fallbackSrc={partnerFallback}
+                finalFallbackSrc={getThumbnailPlaceholder()}
+                alt={`${traiteur.name} — visuel principal`}
+                kind={useContainedHero ? 'packaging' : 'ambient'}
+                fit={useContainedHero ? 'contain' : 'cover'}
+                aspectRatio="16 / 8"
+                priority
+                containerClassName="w-full min-h-[360px] sm:min-h-[430px]"
+                imgClassName="product-photo-natural"
+              />
+            ) : (
+              <div className="flex min-h-[360px] w-full items-center justify-center bg-gradient-to-br from-neutral-950 via-primary/30 to-neutral-900 sm:min-h-[430px]">
+                <ChefHat className="h-24 w-24 text-white/20" aria-hidden="true" />
+              </div>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-8 lg:p-10">
               <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -170,7 +178,7 @@ export function TraiteurDetailPage() {
                 <div className="shrink-0 rounded-2xl bg-white px-5 py-3 text-neutral-950 shadow-lg">
                   <p className="text-xs font-bold uppercase tracking-wide text-neutral-500">À partir de</p>
                   <p className="text-3xl font-black text-primary">
-                    {traiteur.startingAt > 0 ? formatEuro(traiteur.startingAt) : 'Sur devis'}
+                    {visibleStartingAt > 0 ? formatEuro(visibleStartingAt) : 'Sur devis'}
                   </p>
                 </div>
               </div>
@@ -184,7 +192,7 @@ export function TraiteurDetailPage() {
             </div>
             <div className="rounded-2xl border border-border bg-card p-4">
               <p className="text-2xl font-black text-foreground">
-                {traiteur.startingAt > 0 ? formatEuro(traiteur.startingAt) : 'Devis'}
+                {visibleStartingAt > 0 ? formatEuro(visibleStartingAt) : 'Devis'}
               </p>
               <p className="text-xs text-muted-foreground">prix de départ</p>
             </div>
@@ -242,38 +250,6 @@ export function TraiteurDetailPage() {
               </Link>
             </aside>
           </section>
-
-          {galleryImages.length > 0 && (
-            <section className="mt-10">
-              <div className="mb-4 flex items-end justify-between gap-4">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-primary">En images</p>
-                  <h2 className="text-2xl font-black sm:text-3xl">Photos du partenaire</h2>
-                </div>
-                <p className="text-sm text-muted-foreground">{galleryImages.length} visuels</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                {galleryImages.slice(0, 12).map((image, index) => (
-                  <SmartImage
-                    key={image}
-                    src={image}
-                    fallbackSrc={partnerFallback}
-                    finalFallbackSrc={getThumbnailPlaceholder()}
-                    alt={`${traiteur.name} — photo ${index + 1}`}
-                    kind={isGouteMwen ? 'packaging' : 'food'}
-                    fit={isGouteMwen ? 'contain' : 'cover'}
-                    aspectRatio="1 / 1"
-                    containerClassName={`w-full rounded-2xl border border-border bg-white ${index === 0 ? 'col-span-2 row-span-2' : ''}`}
-                    imgClassName="transition-transform duration-500 hover:scale-[1.03]"
-                    onClick={() => setLightboxImages([
-                      { src: image, alt: `${traiteur.name} — photo ${index + 1}`, caption: traiteur.name },
-                    ])}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
 
           <section className="mt-12 border-t border-border pt-10" id="catalogue">
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -354,9 +330,6 @@ export function TraiteurDetailPage() {
           </div>
         </div>
 
-        {lightboxImages && (
-          <ImageLightbox images={lightboxImages} onClose={() => setLightboxImages(null)} />
-        )}
       </main>
     </Layout>
   );

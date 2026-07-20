@@ -47,19 +47,7 @@ async function readAudit(thumbnails: Locator) {
   });
 }
 
-async function expectFallbackBadges(thumbnails: Locator) {
-  for (const source of ['partner', 'placeholder'] as const) {
-    const fallbackItems = thumbnails.locator(`[data-thumbnail-source="${source}"]`);
-    const count = await fallbackItems.count();
-    const expectedLabel = source === 'partner' ? 'Visuel du partenaire' : 'Photo à venir';
-
-    for (let index = 0; index < count; index += 1) {
-      await expect(fallbackItems.nth(index).getByText(expectedLabel)).toBeAttached();
-    }
-  }
-}
-
-test('catalogue integrates all missing thumbnails with honest fallbacks', async ({ page }) => {
+test('catalogue only displays products with verified usable thumbnails', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/catalogue', { waitUntil: 'domcontentloaded' });
 
@@ -77,7 +65,10 @@ test('catalogue integrates all missing thumbnails with honest fallbacks', async 
   await loadAndValidateThumbnails(page, thumbnails);
   const audit = await readAudit(thumbnails);
   console.log('THUMBNAIL_AUDIT_CATALOGUE', JSON.stringify({ totalCards, ...audit }));
-  await expectFallbackBadges(thumbnails);
+  expect(audit.placeholder || 0).toBe(0);
+  await expect(grid.getByText('Photo à venir')).toHaveCount(0);
+  await expect(grid.getByText('An Tjè Coco')).toHaveCount(0);
+  await expect(grid.getByText('Gouté Mwen')).toHaveCount(0);
 
   const overflow = await page.evaluate(() => (
     document.documentElement.scrollWidth > document.documentElement.clientWidth + 1
@@ -85,7 +76,7 @@ test('catalogue integrates all missing thumbnails with honest fallbacks', async 
   expect(overflow).toBe(false);
 });
 
-for (const slug of ['goute-mwen', 'snack-save-peyia', 'les-delices-de-ninice']) {
+for (const slug of ['snack-save-peyia', 'les-delices-de-ninice']) {
   test(`partner catalogue ${slug} has a thumbnail for every item`, async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`/traiteur/${slug}`, { waitUntil: 'domcontentloaded' });
@@ -104,6 +95,16 @@ for (const slug of ['goute-mwen', 'snack-save-peyia', 'les-delices-de-ninice']) 
     await loadAndValidateThumbnails(page, thumbnails);
     const audit = await readAudit(thumbnails);
     console.log('THUMBNAIL_AUDIT_PARTNER', JSON.stringify({ slug, totalCards, ...audit }));
-    await expectFallbackBadges(thumbnails);
+    expect(audit.placeholder || 0).toBe(0);
+    await expect(catalogue.getByText('Photo à venir')).toHaveCount(0);
   });
 }
+
+test('goute mwen is not exposed publicly while product photos are unverified', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/traiteur/goute-mwen', { waitUntil: 'domcontentloaded' });
+
+  await expect(page.getByRole('heading', { name: 'Traiteur introuvable' })).toBeVisible();
+  await expect(page.locator('[data-partner-catalogue="true"]')).toHaveCount(0);
+  await expect(page.getByText('Photo à venir')).toHaveCount(0);
+});

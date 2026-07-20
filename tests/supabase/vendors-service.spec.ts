@@ -46,8 +46,8 @@ function sparseVendor(overrides: Partial<VendorRaw> = {}): VendorRaw {
 describe('vendorsService', () => {
   it('returns the static catalogue when Supabase is not configured', async () => {
     const result = await getPublicVendors();
-    expect(result.vendors.length).toBeGreaterThanOrEqual(8);
-    expect(result.vendors.some((vendor) => vendor.slug === 'goute-mwen')).toBe(true);
+    expect(result.vendors.length).toBeGreaterThanOrEqual(6);
+    expect(result.vendors.some((vendor) => vendor.slug === 'goute-mwen')).toBe(false);
   });
 
   it('preserves validated static content when a Supabase row is sparse', () => {
@@ -58,9 +58,9 @@ describe('vendorsService', () => {
 
     expect(merged).not.toBeNull();
     expect(merged?.slug).toBe('goute-mwen');
-    expect(merged?.status).toBe('public confirmé');
+    expect(merged?.status).toBe('public à vérifier');
     expect(merged?.heroImage).toBe(fallback?.heroImage);
-    expect(merged?.galleryImages.length).toBeGreaterThan(0);
+    expect(merged?.galleryImages).toEqual([]);
     expect(merged?.menuItems.length).toBe(fallback?.menuItems.length);
     expect(merged?.story).toBe(fallback?.story);
     expect(merged?.photoStatus).toBe(fallback?.photoStatus);

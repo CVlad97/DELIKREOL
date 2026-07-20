@@ -26,10 +26,11 @@ import {
 } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
 import { mockProducts, type LocalProduct } from '../../data/mockCatalog';
-import { traiteurSpaces, formatEuro, type TraiteurSpace } from '../../data/traiteurs';
+import { PUBLIC_HIDDEN_PRODUCT_TRAITEURS, PUBLIC_HIDDEN_TRAITEURS, traiteurSpaces, formatEuro, type TraiteurSpace } from '../../data/traiteurs';
 import { useCart } from '../../contexts/CartContext';
 import { useToast } from '../../contexts/ToastContext';
 import type { Product } from '../../lib/supabase';
+import { isUsableThumbnail } from '../../services/catalogImageResolver';
 import { resolveTraiteurCoords } from '../../services/partnerGeo';
 import ExpandableGeoMap from '../../components/ExpandableGeoMap';
 import { HowItWorksCompact } from '../../components/HowItWorksCompact';
@@ -178,10 +179,15 @@ export default function HomePage() {
   const [selectedCommune, setSelectedCommune] = useState('');
   const [selectedMode, setSelectedMode] = useState('tous');
 
-  const featuredProducts = mockProducts.filter((p) => p.featured);
+  const featuredProducts = mockProducts.filter((p) => (
+    p.featured && !PUBLIC_HIDDEN_TRAITEURS.has(p.vendor) && isUsableThumbnail(p.image)
+    && !PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(p.vendor)
+  ));
   // Ajouter les produits phares des traiteurs (featured menu items)
   const featuredTraiteurItems = traiteurSpaces.flatMap(space =>
-    space.menuItems.filter(item => item.featured).map(item => ({
+    space.menuItems.filter(item => (
+      item.featured && !PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(space.name) && isUsableThumbnail(item.image)
+    )).map(item => ({
       ...item,
       vendor: space.name,
       zone: space.zone,
@@ -895,7 +901,6 @@ export default function HomePage() {
               { name: 'Ninice', slug: 'ninice', image: `${import.meta.env.BASE_URL}vendors/ninice/drive-reimport/IMG-20260521-WA0070.jpg` },
               { name: "Coco's Food", slug: 'coco', image: `${import.meta.env.BASE_URL}vendors/coco/drive-reimport/IMG-20260526-WA0064.jpg` },
               { name: "Saveurs d'Afrique", slug: 'saveurs-afrique', image: `${import.meta.env.BASE_URL}vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0156.jpg` },
-              { name: 'An Tjè Coco', slug: 'an-tje-coco', image: `${import.meta.env.BASE_URL}vendors/an-tje-coco/gallery-05.jpg` },
               { name: 'Snack Save Peyi\'A', slug: 'save-peyia', image: `${import.meta.env.BASE_URL}vendors/save-peyia/drive-reimport/IMG-20260710-WA0005.jpg` },
             ] as const).map((caterer) => (
               <Link

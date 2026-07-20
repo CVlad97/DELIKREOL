@@ -116,7 +116,7 @@ test.describe('Fidélité des couleurs originales', () => {
   });
 
   test('le voile noir du hero partenaire est supprimé et le texte est placé dessous', async ({ page }) => {
-    await page.goto('/traiteur/goute-mwen');
+    await page.goto('/traiteur/snack-save-peyia');
 
     const heroSection = page.locator('main section.relative.overflow-hidden.bg-neutral-950.shadow-xl').first();
     await expect(heroSection).toBeVisible();

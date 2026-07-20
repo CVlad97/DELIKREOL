@@ -56,6 +56,9 @@ export type TraiteurSpace = {
 
 const allPartnerProfiles: PartnerProfile[] = [...partnerProfiles, ...additionalPartnerProfiles];
 
+export const PUBLIC_HIDDEN_TRAITEURS = new Set(['An Tjè Coco']);
+export const PUBLIC_HIDDEN_PRODUCT_TRAITEURS = new Set(['An Tjè Coco', 'Gouté Mwen']);
+
 function resolveHeroImage(name: string) {
   if (name === 'An Tjè Coco') {
     return anTjeCocoAssets.hero;
@@ -76,7 +79,7 @@ function resolveHeroImage(name: string) {
     return driveReimportGalleries.sweetFamily[0] ?? null;
   }
   if (name === 'Gouté Mwen') {
-    return assetFromPublic('vendors/goute-mwen/product-glacee-groseille.jpg');
+    return null;
   }
   if (name === 'Chef à Mada') {
     return assetFromPublic('vendors/chef-a-mada/logo.jpg');
@@ -104,14 +107,7 @@ function resolveGalleryImages(name: string) {
     return [...driveReimportGalleries.sweetFamily];
   }
   if (name === 'Gouté Mwen') {
-    return [
-      assetFromPublic('vendors/goute-mwen/product-glacee-groseille.jpg'), // Glacé groseille/menthe
-      assetFromPublic('vendors/goute-mwen/snow-boll.jpg'),      // Snow Boll
-      assetFromPublic('vendors/goute-mwen/mangue.jpg'),         // Mangue
-      assetFromPublic('vendors/goute-mwen/prune-cythere.jpg'),  // Prune de Cythère
-      assetFromPublic('vendors/goute-mwen/kumquat.jpg'),        // Kumquat
-      assetFromPublic('vendors/goute-mwen/abricot-pays.jpg'),   // Abricot Pays
-    ];
+    return [];
   }
   if (name === 'Chef à Mada') {
     return [assetFromPublic('vendors/chef-a-mada/logo.jpg')];
@@ -172,9 +168,8 @@ function resolvePortraitImage(name: string) {
   if (name === 'Sweet Family Traiteur Orianne') {
     return driveReimportGalleries.sweetFamily[1] ?? null;
   }
-// Gouté Mwen: photo Stacy Vilocy
   if (name === 'Gouté Mwen') {
-    return assetFromPublic('vendors/goute-mwen/product-glacee-groseille.jpg');
+    return null;
   }
   if (name === 'Chef à Mada') {
     return assetFromPublic('vendors/chef-a-mada/logo.jpg');
@@ -233,6 +228,7 @@ function buildSpace(profile: PartnerProfile, gradient: string, accent: string, s
 export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfiles) {
   return profiles
     .filter((profile) => profile.type.toLowerCase().includes('traiteur'))
+    .filter((profile) => !PUBLIC_HIDDEN_TRAITEURS.has(profile.name))
     .map((profile) => {
       if (profile.name === 'Les Delices de Ninice') {
         return {
@@ -277,7 +273,7 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
       // Gouté Mwen — glaces artisanales, public confirmé
       if (profile.name === 'Gouté Mwen') {
         return {
-          ...buildSpace(profile, 'from-[#eab308] via-[#f97316] to-[#dc2626]', '#fff7ed', 'public confirmé', 'à confirmer'),
+          ...buildSpace(profile, 'from-[#eab308] via-[#f97316] to-[#dc2626]', '#fff7ed', 'public à vérifier', 'à confirmer'),
           horaires: { lun: { open: '08:00', close: '18:00' }, mar: { open: '08:00', close: '18:00' }, mer: { open: '08:00', close: '18:00' }, jeu: { open: '08:00', close: '18:00' }, ven: { open: '08:00', close: '18:00' }, sam: { open: '09:00', close: '13:00' } },
           cutoff_time: '10:00',
           prep_time: 15,

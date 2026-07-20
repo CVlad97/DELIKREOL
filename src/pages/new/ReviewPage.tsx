@@ -20,7 +20,6 @@ const TRAITEURS_LIST = [
   { value: "Les Delices de Ninice", label: "Les Délices de Ninice" },
   { value: "Coco's Food", label: "Coco's Food" },
   { value: "Saveurs d'Afrique", label: "Saveurs d'Afrique" },
-  { value: 'An Tjè Coco', label: 'An Tjè Coco' },
   { value: "Snack Savè Peyi'A", label: "Snack Savè Peyi'A" },
   { value: 'Gouté Mwen', label: 'Gouté Mwen' },
   { value: 'Sweet Family Traiteur Orianne', label: 'Sweet Family Traiteur Orianne' },

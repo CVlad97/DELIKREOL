@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { AlertCircle, ArrowRight, ChefHat, Euro, Locate, MapPin, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { formatEuro, traiteurSpaces } from '../../data/traiteurs';
+import { formatEuro, PUBLIC_HIDDEN_PRODUCT_TRAITEURS, traiteurSpaces } from '../../data/traiteurs';
 import { calculateDistanceKm } from '../../services/geolocation';
 import { resolveTraiteurCoords } from '../../services/partnerGeo';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
@@ -10,6 +10,7 @@ import { setPageMeta } from '../../services/seo';
 import { RatingBadge } from '../../components/ReviewSection';
 import { BackBar } from '../../components/BackBar';
 import { trackPublicView } from '../../services/metricsService';
+import { isUsableThumbnail } from '../../services/catalogImageResolver';
 
 export function TraiteursListPage() {
   const [userPosition, setUserPosition] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -51,13 +52,16 @@ export function TraiteursListPage() {
   };
 
   const getStartingPrice = (traiteur: any): string => {
+    if (PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(traiteur.name)) return 'Offre à valider';
     if (traiteur.priceRange) return `À partir de ${traiteur.priceRange}`;
     if (traiteur.price_level) return `À partir de ${traiteur.price_level}`;
-    if (traiteur.startingAt && traiteur.startingAt > 0) return `À partir de ${formatEuro(traiteur.startingAt)}`;
 
     const traiteurName = (traiteur.name || '').toLowerCase().trim();
-    const products = mockProducts.filter((product) => product.vendor?.toLowerCase().trim() === traiteurName);
+    const products = mockProducts.filter((product) => (
+      product.vendor?.toLowerCase().trim() === traiteurName && isUsableThumbnail(product.image)
+    ));
     if (products.length > 0) return `À partir de ${formatEuro(Math.min(...products.map((product) => product.price)))}`;
+    if (traiteur.startingAt && traiteur.startingAt > 0) return `À partir de ${formatEuro(traiteur.startingAt)}`;
     return 'Prix à confirmer';
   };
 
@@ -110,7 +114,9 @@ export function TraiteursListPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filtered.map((traiteur) => {
           const isVerified = traiteur.status === 'public confirmé';
-          const menuCount = traiteur.menuItems?.length || 0;
+          const menuCount = PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(traiteur.name)
+            ? 0
+            : (traiteur.menuItems || []).filter((item: any) => isUsableThumbnail(item.image)).length;
           const distance = distTo(traiteur);
 
           return (

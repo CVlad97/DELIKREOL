@@ -25,9 +25,10 @@ import {
   type LocalProduct,
 } from '../../data/mockCatalog';
 import { martiniqueCommunes, normalizeCommuneQuery } from '../../data/martiniqueCommunes';
-import { traiteurSpaces, type TraiteurSpace } from '../../data/traiteurs';
+import { PUBLIC_HIDDEN_PRODUCT_TRAITEURS, PUBLIC_HIDDEN_TRAITEURS, traiteurSpaces, type TraiteurSpace } from '../../data/traiteurs';
 import type { Product } from '../../lib/supabase';
 import { calculateDistanceKm } from '../../services/geolocation';
+import { isUsableThumbnail } from '../../services/catalogImageResolver';
 import { trackPublicView } from '../../services/metricsService';
 import { setPageMeta } from '../../services/seo';
 
@@ -136,11 +137,17 @@ export default function CataloguePage() {
   }, []);
 
   const allProducts = useMemo<LocalProduct[]>(() => {
-    const products: LocalProduct[] = [...mockProducts];
+    const products: LocalProduct[] = mockProducts.filter((product) => (
+      !PUBLIC_HIDDEN_TRAITEURS.has(product.vendor) &&
+      !PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(product.vendor) &&
+      isUsableThumbnail(product.image)
+    ));
     const ids = new Set(products.map((product) => product.id));
 
     for (const space of traiteurSpaces) {
       for (const item of space.menuItems) {
+        if (PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(space.name)) continue;
+        if (!isUsableThumbnail(item.image)) continue;
         const id = `${space.slug}-${slugify(item.name)}`;
         if (ids.has(id)) continue;
 
