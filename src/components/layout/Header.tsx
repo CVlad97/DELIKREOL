@@ -19,6 +19,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const WHATSAPP_NUMBER = '596696653589';
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
+const OWNER_EMAIL = 'vladimir.claveau@gmail.com';
 
 interface NavItem {
   label: string;
@@ -62,9 +63,10 @@ export function Header() {
     ));
   };
 
-  const isAdmin = user && profile?.user_type === 'admin';
-  const accountTarget = !user ? '/connexion?next=/compte' : isAdmin ? '/admin' : '/compte';
-  const accountLabel = user ? 'Mon espace' : 'Se connecter';
+  const userEmail = (user?.email || '').trim().toLowerCase();
+  const isAdmin = !!user && (profile?.user_type === 'admin' || userEmail === OWNER_EMAIL);
+  const accountTarget = !user ? '/pro' : isAdmin ? '/admin' : '/compte';
+  const accountLabel = 'Mon espace';
   const accountIcon = user
     ? <LayoutDashboard className="h-4 w-4" />
     : <LogIn className="h-4 w-4" />;
@@ -80,7 +82,7 @@ export function Header() {
       <div className="madras-strip" />
 
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-        <div className="grid h-[72px] grid-cols-[44px_minmax(0,1fr)_44px] items-center xl:hidden">
+        <div className="grid h-[72px] grid-cols-[44px_minmax(0,1fr)_44px_44px] items-center gap-1 xl:hidden">
           <button
             type="button"
             onClick={() => setMobileMenuOpen((open) => !open)}
@@ -106,6 +108,15 @@ export function Header() {
             <span className="whitespace-nowrap text-base font-black tracking-[-0.04em] text-foreground min-[360px]:text-lg">
               DELI<span className="text-primary">KREOL</span>
             </span>
+          </Link>
+
+          <Link
+            to={accountTarget}
+            className="flex h-11 w-11 items-center justify-center justify-self-end rounded-xl bg-primary text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label={accountLabel}
+            title={accountLabel}
+          >
+            {accountIcon}
           </Link>
 
           <Link

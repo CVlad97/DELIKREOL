@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Mail, ShieldCheck, Send } from 'lucide-react';
+import { KeyRound, Mail, ShieldCheck, Send, Users } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
 import { supabase, isDemoMode } from '../../lib/supabase';
 import { trackPublicView } from '../../services/metricsService';
@@ -62,6 +62,25 @@ export default function LoginPage() {
             </p>
           </div>
 
+          <div className="mt-5 grid gap-2 sm:grid-cols-2">
+            <Link
+              to="/connexion?next=/admin"
+              className={`flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-black transition ${
+                next.startsWith('/admin') ? 'border-primary bg-primary text-white' : 'border-input bg-white text-foreground hover:bg-muted'
+              }`}
+            >
+              <KeyRound className="h-4 w-4" />
+              Connexion admin
+            </Link>
+            <Link
+              to="/admin/acces-pilote"
+              className="flex items-center justify-center gap-2 rounded-2xl border border-input bg-white px-4 py-3 text-sm font-black text-foreground transition hover:bg-muted"
+            >
+              <Users className="h-4 w-4" />
+              Accès partenaires
+            </Link>
+          </div>
+
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <label className="block text-sm font-bold text-foreground" htmlFor="login-email">
               Email
@@ -114,7 +133,7 @@ export default function LoginPage() {
           )}
 
           <div className="mt-6 rounded-2xl bg-muted p-4 text-xs leading-5 text-muted-foreground">
-            Pour l’admin, ton email doit exister dans Supabase Auth et ton profil doit avoir le rôle admin.
+            Pour l’admin, connecte-toi avec l’email propriétaire. Ensuite ouvre Admin → Accès pilote pour copier les liens partenaires.
           </div>
 
           <div className="mt-5 flex justify-center gap-4 text-sm font-bold">

@@ -58,16 +58,16 @@ export function ProSpacePage() {
             </Link>
 
             <Link
-              to="/admin"
+              to="/connexion?next=/admin"
               className="rounded-[1.4rem] border border-orange-200 bg-white p-5 transition hover:-translate-y-0.5"
             >
               <div className="inline-flex rounded-xl bg-[#fff3e5] p-2 text-[hsl(var(--primary))]">
                 <ShieldCheck className="h-5 w-5" />
               </div>
               <h2 className="mt-3 text-xl font-black">Accès admin</h2>
-              <p className="mt-2 text-sm text-stone-600">Commandes, partenaires, accès pilotes, retours clients et supervision.</p>
+              <p className="mt-2 text-sm text-stone-600">Connexion propriétaire, commandes, accès pilotes partenaires et supervision.</p>
               <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-[#7c2d12]">
-                Ouvrir l’admin <ChevronRight className="h-4 w-4" />
+                Se connecter admin <ChevronRight className="h-4 w-4" />
               </span>
             </Link>
 
