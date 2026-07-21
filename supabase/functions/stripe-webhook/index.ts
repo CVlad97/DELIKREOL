@@ -2,27 +2,53 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import Stripe from 'https://esm.sh/stripe@14.21.0?target=deno'
 
-const stripeKey = Deno.env.get('STRIPE_SECRET_KEY') || ''
-const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET') || ''
-
-const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16', httpClient: Stripe.createFetchHttpClient() })
-
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || ''
-const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-
-// Set pour idempotence (évite de traiter 2x le même événement)
-const processedEvents = new Set<string>()
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-/**
- * Vérifie la signature du webhook Stripe à partir du header `stripe-signature`.
- * Renvoie l'événement Stripe parsé, ou une erreur si la signature est invalide.
- */
+// Idempotence mémoire : utile entre deux appels tant que l'edge runtime reste chaud.
+const processedEvents = new Set<string>()
+
+function getStripe(): Stripe {
+  const stripeKey = Deno.env.get('STRIPE_SECRET_KEY')
+  if (!stripeKey) {
+    throw new Error('Missing STRIPE_SECRET_KEY')
+  }
+
+  return new Stripe(stripeKey, {
+    apiVersion: '2023-10-16',
+    httpClient: Stripe.createFetchHttpClient(),
+  })
+}
+
+function getWebhookSecret(): string {
+  const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')
+  if (!webhookSecret) {
+    throw new Error('Missing STRIPE_WEBHOOK_SECRET')
+  }
+
+  return webhookSecret
+}
+
+function getAdminClient() {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
+  if (!supabaseUrl) throw new Error('Missing SUPABASE_URL')
+  if (!serviceRoleKey) throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY')
+
+  return createClient(supabaseUrl, serviceRoleKey)
+}
+
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    status,
+  })
+}
+
 async function verifyWebhook(req: Request): Promise<Stripe.Event> {
   const signature = req.headers.get('stripe-signature')
   if (!signature) {
@@ -30,20 +56,50 @@ async function verifyWebhook(req: Request): Promise<Stripe.Event> {
   }
 
   const rawBody = await req.text()
-
-  const event = await stripe.webhooks.constructEventAsync(
+  return await getStripe().webhooks.constructEventAsync(
     rawBody,
     signature,
-    webhookSecret,
+    getWebhookSecret(),
   )
-
-  return event
 }
 
-/**
- * Gère l'événement payment_intent.succeeded :
- * Marque la commande comme payée dans Supabase et crée un order_event.
- */
+async function insertEventIfNew(
+  supabase: ReturnType<typeof createClient>,
+  event: Stripe.Event,
+): Promise<boolean> {
+  if (processedEvents.has(event.id)) {
+    console.log(`[stripe] Événement ${event.id} déjà traité en mémoire — ignoré`)
+    return false
+  }
+
+  const { data: existingEvent, error: lookupError } = await supabase
+    .from('stripe_webhook_events')
+    .select('id')
+    .eq('id', event.id)
+    .maybeSingle()
+
+  if (lookupError) {
+    console.warn('[stripe] Vérification idempotence DB impossible:', lookupError.message)
+  }
+
+  if (existingEvent) {
+    console.log(`[stripe] Événement ${event.id} déjà en base — ignoré`)
+    processedEvents.add(event.id)
+    return false
+  }
+
+  const { error: insertError } = await supabase
+    .from('stripe_webhook_events')
+    .insert({ id: event.id, type: event.type })
+
+  if (insertError) {
+    console.warn('[stripe] Échec enregistrement événement webhook:', insertError.message)
+  }
+
+  processedEvents.add(event.id)
+  return true
+}
+
 async function handlePaymentIntentSucceeded(
   supabase: ReturnType<typeof createClient>,
   paymentIntent: Stripe.PaymentIntent,
@@ -58,11 +114,10 @@ async function handlePaymentIntentSucceeded(
     return
   }
 
-  // Mettre à jour le statut de la commande
   const { error: orderError } = await supabase
     .from('orders')
     .update({
-      status: 'payée',
+      payment_status: 'paid',
       payment_intent_id: paymentIntent.id,
       payment_method: 'card',
       paid_at: new Date().toISOString(),
@@ -70,11 +125,10 @@ async function handlePaymentIntentSucceeded(
     .eq('id', orderId)
 
   if (orderError) {
-    console.error('[stripe] Erreur mise à jour commande :', orderError.message)
+    console.error('[stripe] Erreur mise à jour commande payée:', orderError.message)
     throw orderError
   }
 
-  // Créer un événement de traçabilité
   const { error: eventError } = await supabase
     .from('order_events')
     .insert({
@@ -89,17 +143,82 @@ async function handlePaymentIntentSucceeded(
     })
 
   if (eventError) {
-    console.warn('[stripe] Erreur création order_event :', eventError.message)
+    console.warn('[stripe] Erreur création order_event payment_succeeded:', eventError.message)
   }
 
   console.log(`[stripe] Commande ${orderId} marquée comme payée`)
 }
 
-/**
- * Gère l'événement account.updated :
- * Met à jour le statut du compte partenaire/livreur dans Supabase
- * en fonction du statut Stripe (charges_enabled, payouts_enabled).
- */
+async function handlePaymentIntentFailed(
+  supabase: ReturnType<typeof createClient>,
+  paymentIntent: Stripe.PaymentIntent,
+): Promise<void> {
+  const orderId = paymentIntent.metadata?.orderId
+  console.log(`[stripe] payment_intent.payment_failed — PI: ${paymentIntent.id}, orderId: ${orderId}`)
+
+  if (!orderId) return
+
+  const { error } = await supabase
+    .from('orders')
+    .update({
+      payment_status: 'failed',
+      payment_error: paymentIntent.last_payment_error?.message || 'Erreur de paiement',
+    })
+    .eq('id', orderId)
+
+  if (error) {
+    console.error('[stripe] Erreur mise à jour paiement échoué:', error.message)
+    throw error
+  }
+}
+
+async function handleChargeRefunded(
+  supabase: ReturnType<typeof createClient>,
+  charge: Stripe.Charge,
+): Promise<void> {
+  const piId = typeof charge.payment_intent === 'string' ? charge.payment_intent : ''
+  let orderId: string | null = charge.metadata?.orderId || null
+
+  console.log(`[stripe] charge.refunded — charge: ${charge.id}, PI: ${piId}, orderId: ${orderId}`)
+
+  if (!orderId && piId) {
+    try {
+      const pi = await getStripe().paymentIntents.retrieve(piId)
+      orderId = pi.metadata?.orderId || null
+    } catch (error) {
+      console.warn('[stripe] Impossible de retrouver le PaymentIntent pour charge.refunded:', error)
+    }
+  }
+
+  if (!orderId) return
+
+  const { error: refundError } = await supabase
+    .from('orders')
+    .update({
+      payment_status: 'refunded',
+      refunded_at: new Date().toISOString(),
+      payment_intent_id: piId || null,
+    })
+    .eq('id', orderId)
+
+  if (refundError) {
+    console.error('[stripe] Erreur mise à jour commande remboursée:', refundError.message)
+    throw refundError
+  }
+
+  const { error: eventError } = await supabase
+    .from('order_events')
+    .insert({
+      order_id: orderId,
+      event_type: 'payment_refunded',
+      payload: { charge_id: charge.id, amount: charge.amount_refunded || charge.amount },
+    })
+
+  if (eventError) {
+    console.warn('[stripe] Erreur création order_event refund:', eventError.message)
+  }
+}
+
 async function handleAccountUpdated(
   supabase: ReturnType<typeof createClient>,
   account: Stripe.Account,
@@ -108,10 +227,7 @@ async function handleAccountUpdated(
   const onboardType = account.metadata?.onboard_type || ''
   const onboardName = account.metadata?.onboard_name || ''
 
-  console.log(`[stripe] account.updated — ${accountId}, charges: ${account.charges_enabled}, payouts: ${account.payouts_enabled}`)
-
-  // Déterminer le statut basé sur l'état du compte Stripe
-  let status: string
+  let status = 'onboarding'
   let onboardingCompleted = false
   if (account.charges_enabled && account.payouts_enabled) {
     status = 'actif'
@@ -120,77 +236,43 @@ async function handleAccountUpdated(
     status = 'payments_ready'
   } else if (account.details_submitted) {
     status = 'details_submitted'
-  } else {
-    status = 'onboarding'
   }
 
-  if (onboardType === 'partner') {
+  const payload = {
+    stripe_status: status,
+    charges_enabled: account.charges_enabled,
+    payouts_enabled: account.payouts_enabled,
+    onboarding_completed: onboardingCompleted,
+    updated_at: new Date().toISOString(),
+  }
+
+  const tables = onboardType === 'partner'
+    ? ['partners']
+    : onboardType === 'driver'
+      ? ['drivers']
+      : ['partners', 'drivers']
+
+  for (const table of tables) {
     const { error } = await supabase
-      .from('partners')
-      .update({
-        stripe_status: status,
-        charges_enabled: account.charges_enabled,
-        payouts_enabled: account.payouts_enabled,
-        onboarding_completed: onboardingCompleted,
-        updated_at: new Date().toISOString(),
-      })
+      .from(table)
+      .update(payload)
       .eq('stripe_account_id', accountId)
 
-    if (error) {
-      console.warn('[stripe] Erreur mise à jour partners :', error.message)
-    } else {
-      console.log(`[stripe] Compte partenaire ${onboardName || accountId} → ${status} (onboarding: ${onboardingCompleted})`)
+    if (!error) {
+      console.log(`[stripe] Compte ${table} ${onboardName || accountId} → ${status}`)
+      return
     }
-  } else if (onboardType === 'driver') {
-    const { error } = await supabase
-      .from('drivers')
-      .update({
-        stripe_status: status,
-        charges_enabled: account.charges_enabled,
-        payouts_enabled: account.payouts_enabled,
-        onboarding_completed: onboardingCompleted,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('stripe_account_id', accountId)
 
-    if (error) {
-      console.warn('[stripe] Erreur mise à jour drivers :', error.message)
-    } else {
-      console.log(`[stripe] Compte livreur ${onboardName || accountId} → ${status}`)
-    }
-  } else {
-    // Si le type n'est pas défini dans les metadata, essayer les deux tables
-    for (const table of ['partners', 'drivers'] as const) {
-      const { error } = await supabase
-        .from(table)
-        .update({
-          stripe_status: status,
-          charges_enabled: account.charges_enabled,
-          payouts_enabled: account.payouts_enabled,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('stripe_account_id', accountId)
-
-      if (!error) {
-        console.log(`[stripe] Compte ${table} ${accountId} → ${status}`)
-        break
-      }
-    }
+    console.warn(`[stripe] Erreur mise à jour ${table}:`, error.message)
   }
 }
 
-/**
- * Gère l'événement transfer.created :
- * Logge le transfert Stripe dans la table payouts (si existante)
- * ou simplement en console.
- */
 async function handleTransferCreated(
   supabase: ReturnType<typeof createClient>,
   transfer: Stripe.Transfer,
 ): Promise<void> {
   console.log(`[stripe] transfer.created — ${transfer.id}, montant: ${transfer.amount}, destination: ${transfer.destination}`)
 
-  // Tentative d'insertion dans la table payouts (créée par migration)
   const { error } = await supabase
     .from('payouts')
     .insert({
@@ -204,183 +286,63 @@ async function handleTransferCreated(
     })
 
   if (error) {
-    // La table payouts peut ne pas exister — simple log
-    console.log('[stripe] Log transfert (table payouts non disponible ou erreur) :', error.message)
-    console.log('[stripe] Détails transfert :', {
-      id: transfer.id,
-      amount: transfer.amount / 100,
-      currency: transfer.currency,
-      destination: transfer.destination,
-    })
-  } else {
-    console.log(`[stripe] Transfert ${transfer.id} enregistré dans payouts`)
+    console.log('[stripe] Log transfert uniquement — table payouts indisponible ou erreur:', error.message)
   }
 }
 
-/**
- * Webhook Stripe — endpoint sécurisé pour recevoir les événements Stripe.
- *
- * POST /stripe-webhook
- * Vérifie la signature du webhook avant de traiter les événements.
- *
- * Événements gérés :
- * - payment_intent.succeeded → marque la commande payée
- * - account.updated → met à jour le statut du compte Connect
- * - transfer.created → log du transfert
- */
 serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  if (req.method !== 'POST') {
+    return json({ error: 'Method not allowed' }, 405)
+  }
 
   try {
-    // --- Vérification de la signature webhook ---
     const event = await verifyWebhook(req)
+    console.log(`[stripe] Webhook reçu : ${event.type} (${event.id})`)
 
-    console.log(`[stripe] Webhook reçu : ${event.type} (id: ${event.id})`)
-
-    // --- Idempotence : mémoire + base de données ---
-    if (processedEvents.has(event.id)) {
-      console.log(`[stripe] Événement ${event.id} déjà traité en mémoire — ignoré`)
-      return new Response(JSON.stringify({ received: true, idempotent: true }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      })
+    const supabase = getAdminClient()
+    const shouldProcess = await insertEventIfNew(supabase, event)
+    if (!shouldProcess) {
+      return json({ received: true, idempotent: true })
     }
 
-    processedEvents.add(event.id)
-
-    // --- Initialisation Supabase (service role) ---
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-
-    // --- Vérifier aussi en base (si le serveur a redémarré) ---
-    const { data: existingEvent } = await supabase
-      .from('stripe_webhook_events')
-      .select('id')
-      .eq('id', event.id)
-      .maybeSingle()
-
-    if (existingEvent) {
-      console.log(`[stripe] Événement ${event.id} déjà en base — ignoré (idempotence DB)`)
-      return new Response(JSON.stringify({ received: true, idempotent: true }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      })
-    }
-
-    // Enregistrer l'événement en base (idempotence)
-    await supabase.from('stripe_webhook_events').insert({
-      id: event.id,
-      type: event.type,
-    }).catch((e: unknown) => console.warn('[stripe] Échec enregistrement événement webhook:', (e as Error).message))
-
-    processedEvents.add(event.id)
-
-    // --- Initialisation Supabase (service role) ---
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-
-    // --- Routage des événements ---
     switch (event.type) {
-      case 'payment_intent.succeeded': {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent
-        await handlePaymentIntentSucceeded(supabase, paymentIntent)
+      case 'payment_intent.succeeded':
+        await handlePaymentIntentSucceeded(supabase, event.data.object as Stripe.PaymentIntent)
         break
-      }
 
-      case 'payment_intent.payment_failed': {
-        const failedPI = event.data.object as Stripe.PaymentIntent
-        const failedOrderId = failedPI.metadata?.orderId
-        console.log(`[stripe] payment_intent.payment_failed — PI: ${failedPI.id}, orderId: ${failedOrderId}, error: ${failedPI.last_payment_error?.message || 'inconnu'}`)
-
-        if (failedOrderId) {
-          const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-          await supabase
-            .from('orders')
-            .update({ status: 'payment_failed', payment_error: failedPI.last_payment_error?.message || 'Erreur de paiement' })
-            .eq('id', failedOrderId)
-        }
+      case 'payment_intent.payment_failed':
+        await handlePaymentIntentFailed(supabase, event.data.object as Stripe.PaymentIntent)
         break
-      }
 
-      case 'account.updated': {
-        const account = event.data.object as Stripe.Account
-        await handleAccountUpdated(supabase, account)
+      case 'charge.refunded':
+        await handleChargeRefunded(supabase, event.data.object as Stripe.Charge)
         break
-      }
 
-      case 'transfer.created': {
-        const transfer = event.data.object as Stripe.Transfer
-        await handleTransferCreated(supabase, transfer)
+      case 'account.updated':
+        await handleAccountUpdated(supabase, event.data.object as Stripe.Account)
         break
-      }
 
-      case 'charge.refunded': {
-        const charge = event.data.object as Stripe.Charge
-        const refundedOrderId = charge.metadata?.orderId || (charge.payment_intent ? null : null)
-        const piId = charge.payment_intent as string || ''
-
-        console.log(`[stripe] charge.refunded — charge: ${charge.id}, PI: ${piId}, orderId: ${refundedOrderId}`)
-
-        // Récupérer le PaymentIntent pour trouver l'orderId dans les metadata
-        let orderId = refundedOrderId
-        if (!orderId && piId) {
-          try {
-            const pi = await stripe.paymentIntents.retrieve(piId)
-            orderId = pi.metadata?.orderId
-            console.log(`[stripe] charge.refunded — orderId trouvé via PI metadata: ${orderId}`)
-          } catch (e) {
-            console.warn('[stripe] Impossible de retrouver le PI pour charge.refunded:', e)
-          }
-        }
-
-        if (orderId) {
-          const { error: refundError } = await supabase
-            .from('orders')
-            .update({
-              status: 'refunded',
-              refunded_at: new Date().toISOString(),
-              payment_intent_id: piId || null,
-            })
-            .eq('id', orderId)
-
-          if (refundError) {
-            console.error('[stripe] Erreur mise à jour commande refund:', refundError.message)
-          } else {
-            console.log(`[stripe] Commande ${orderId} marquée comme remboursée`)
-          }
-
-          // Créer un order_event
-          await supabase.from('order_events').insert({
-            order_id: orderId,
-            event_type: 'payment_refunded',
-            payload: { charge_id: charge.id, amount: charge.amount / 100 },
-          }).catch((e: unknown) => console.warn('[stripe] Erreur order_event refund:', (e as Error).message))
-        }
+      case 'transfer.created':
+        await handleTransferCreated(supabase, event.data.object as Stripe.Transfer)
         break
-      }
 
       default:
         console.log(`[stripe] Événement non géré : ${event.type}`)
     }
 
-    // Stripe attend un 200 OK pour accuser réception
-    return new Response(JSON.stringify({ received: true }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    })
+    return json({ received: true })
   } catch (err) {
-    const message = (err as Error).message
-    console.error('[stripe] Erreur webhook :', message)
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[stripe] Erreur webhook:', message)
 
-    // Signature invalide → 401
-    if (message.includes('signature') || message.includes('webhook')) {
-      return new Response(JSON.stringify({ error: 'Signature webhook invalide' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 401,
-      })
+    if (message.includes('Signature') || message.includes('signature') || message.includes('webhook')) {
+      return json({ error: message }, 401)
     }
 
-    return new Response(JSON.stringify({ error: message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    })
+    return json({ error: message }, 500)
   }
 })
