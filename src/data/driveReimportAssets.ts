@@ -70,11 +70,10 @@ export const driveReimportGalleries = {
     assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0159.jpg'),
     assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0160.jpg'),
     assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0161.jpg'),
-    assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0162.jpg'),
     assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0163.jpg'),
+    assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0164.jpg'),
     assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260612-WA0141.jpg'),
     assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260612-WA0142.jpg'),
-    assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260612-WA0203.jpg'),
     assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260612-WA0205.jpg'),
   ],
   sweetFamily: [

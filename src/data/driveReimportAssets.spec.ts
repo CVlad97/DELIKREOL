@@ -7,7 +7,7 @@ const expectedDrivePreimportCounts = {
   coco: 27,
   ninice: 11,
   savePeyia: 12,
-  saveursAfrique: 13,
+  saveursAfrique: 12,
   sweetFamily: 11,
 } as const;
 
