@@ -12,6 +12,21 @@ import { BackBar } from '../../components/BackBar';
 import { trackPublicView } from '../../services/metricsService';
 import { isUsableThumbnail } from '../../services/catalogImageResolver';
 
+const MADA_BADGE_TRAITEURS = new Set([
+  "Saveurs d'Afrique",
+  'Les Delices de Ninice',
+  'Sweet Family Traiteur Orianne',
+]);
+
+function hasMadaBadge(name: string) {
+  return MADA_BADGE_TRAITEURS.has(name);
+}
+
+function getLogoForTraiteur(slug: string) {
+  if (slug === 'chef-a-mada') return `${import.meta.env.BASE_URL}vendors/chef-a-mada/logo.jpg`;
+  return `${import.meta.env.BASE_URL}branding/logo-mark.svg`;
+}
+
 export function TraiteursListPage() {
   const [userPosition, setUserPosition] = useState<{ latitude: number; longitude: number } | null>(null);
   const [selectedCommune, setSelectedCommune] = useState('');
@@ -52,6 +67,7 @@ export function TraiteursListPage() {
   };
 
   const getStartingPrice = (traiteur: any): string => {
+    if (traiteur.slug === 'chef-a-mada') return 'Sur devis';
     if (PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(traiteur.name)) return 'Offre à valider';
     if (traiteur.priceRange) return `À partir de ${traiteur.priceRange}`;
     if (traiteur.price_level) return `À partir de ${traiteur.price_level}`;
@@ -116,8 +132,11 @@ export function TraiteursListPage() {
           const isVerified = traiteur.status === 'public confirmé';
           const menuCount = PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(traiteur.name)
             ? 0
-            : (traiteur.menuItems || []).filter((item: any) => isUsableThumbnail(item.image)).length;
+            : traiteur.slug === 'chef-a-mada'
+              ? (traiteur.menuItems || []).length
+              : (traiteur.menuItems || []).filter((item: any) => isUsableThumbnail(item.image)).length;
           const distance = distTo(traiteur);
+          const visibleMenuItems = (traiteur.menuItems || []).slice(0, 4);
 
           return (
             <Link
@@ -139,6 +158,27 @@ export function TraiteursListPage() {
                   </div>
                 )}
 
+                <div className="absolute left-4 top-4 flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border-2 border-white bg-white p-1.5 shadow-lg">
+                  <img
+                    loading="lazy"
+                    src={getLogoForTraiteur(traiteur.slug)}
+                    alt={`Logo ${traiteur.name}`}
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+
+                {hasMadaBadge(traiteur.name) && (
+                  <div className="absolute right-3 top-3 flex max-w-[70%] items-center gap-1.5 rounded-full border border-white/80 bg-white/95 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-primary shadow-sm">
+                    <img
+                      loading="lazy"
+                      src={`${import.meta.env.BASE_URL}vendors/chef-a-mada/logo.jpg`}
+                      alt="Écusson Chef à Mada"
+                      className="h-5 w-5 rounded-full object-contain"
+                    />
+                    Chef à Mada
+                  </div>
+                )}
+
                 {traiteur.portraitImage && (
                   <div className="absolute bottom-0 left-4 translate-y-1/3">
                     <div className="h-16 w-16 overflow-hidden rounded-full border-4 border-white bg-white shadow-lg md:h-20 md:w-20">
@@ -152,7 +192,7 @@ export function TraiteursListPage() {
                     <AlertCircle className="h-3 w-3" /> À vérifier
                   </div>
                 )}
-                {isVerified && (
+                {isVerified && !hasMadaBadge(traiteur.name) && (
                   <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-success/10 px-2 py-1 text-xs font-bold text-success">
                     <Star className="h-3 w-3" /> Partenaire
                   </div>
@@ -193,6 +233,18 @@ export function TraiteursListPage() {
                 <p className="mb-4 mt-3 line-clamp-2 text-sm text-muted-foreground">
                   {traiteur.description || traiteur.offer || 'Découvrez les spécialités de ce prestataire.'}
                 </p>
+                {visibleMenuItems.length > 0 && (
+                  <div className="mb-4 rounded-2xl border border-primary/10 bg-primary/[0.04] p-3">
+                    <p className="mb-2 text-[10px] font-black uppercase tracking-[0.16em] text-primary">
+                      Plats visibles
+                    </p>
+                    <ul className="space-y-1 text-xs font-semibold leading-5 text-foreground/75">
+                      {visibleMenuItems.map((item: any) => (
+                        <li key={item.name} className="line-clamp-1">• {item.name.replace(/\s+—.+$/, '')}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-sm text-muted-foreground">
                     {menuCount > 0 ? `${menuCount} plat${menuCount > 1 ? 's' : ''}` : 'Menu à confirmer'}

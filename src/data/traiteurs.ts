@@ -120,6 +120,22 @@ function normalizeVendorName(v: string) {
 }
 
 function resolveMenuItems(name: string): TraiteurMenuItem[] {
+  if (name === 'Chef à Mada') {
+    const sharedVendors = new Set(["Saveurs d'Afrique", 'Les Delices de Ninice', 'Sweet Family Traiteur Orianne']);
+    return mockProducts
+      .filter((product) => sharedVendors.has(product.vendor) && product.image)
+      .filter((product) => product.image !== undefined && !product.image.includes('photo-a-confirmer'))
+      .slice(0, 12)
+      .map((product) => ({
+        name: `${product.name} — ${product.vendor}`,
+        description: `Sélection mutualisée ${product.vendor}. Disponible uniquement en livraison planifiée sur devis via Chef à Mada.`,
+        price: 0,
+        category: 'Livraison planifiée sur devis',
+        featured: product.featured,
+        image: product.image ?? null,
+      }));
+  }
+
   const normalized = normalizeVendorName(name);
   return mockProducts
     .filter((product) => normalizeVendorName(product.vendor) === normalized)

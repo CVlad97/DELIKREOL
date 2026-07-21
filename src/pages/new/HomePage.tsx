@@ -12,7 +12,6 @@ import {
   MapPin,
   ArrowRight,
   Utensils,
-  Plus,
   Sparkles,
   Star,
   Users,
@@ -25,11 +24,9 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
-import { mockProducts, type LocalProduct } from '../../data/mockCatalog';
+import { mockProducts } from '../../data/mockCatalog';
 import { PUBLIC_HIDDEN_PRODUCT_TRAITEURS, PUBLIC_HIDDEN_TRAITEURS, traiteurSpaces, formatEuro, type TraiteurSpace } from '../../data/traiteurs';
-import { useCart } from '../../contexts/CartContext';
 import { useToast } from '../../contexts/ToastContext';
-import type { Product } from '../../lib/supabase';
 import { isUsableThumbnail } from '../../services/catalogImageResolver';
 import { resolveTraiteurCoords } from '../../services/partnerGeo';
 import ExpandableGeoMap from '../../components/ExpandableGeoMap';
@@ -45,6 +42,15 @@ import { loadLocalReviews } from './ReviewPage';
 import type { ReviewItem } from './ReviewPage';
 
 const WHATSAPP_NUMBER = '596696653589';
+const MADA_BADGE_TRAITEURS = new Set([
+  "Saveurs d'Afrique",
+  'Les Delices de Ninice',
+  'Sweet Family Traiteur Orianne',
+]);
+
+function hasMadaBadge(traiteurName: string) {
+  return MADA_BADGE_TRAITEURS.has(traiteurName);
+}
 
 const ALL_CATEGORIES = [
   { id: 'tous', name: 'Tous' },
@@ -57,21 +63,6 @@ const ALL_CATEGORIES = [
   { id: 'traiteur-evenementiel', name: 'Traiteur événementiel' },
   { id: 'commandes-entreprise', name: 'Commandes entreprise' },
 ];
-
-function localProductToCartProduct(p: LocalProduct): Product {
-  return {
-    id: p.id,
-    vendor_id: p.vendor,
-    name: p.name,
-    description: p.description ?? null,
-    category: p.category,
-    price: p.price,
-    image_url: p.image ?? null,
-    is_available: p.available !== false,
-    stock_quantity: null,
-    created_at: new Date().toISOString(),
-  };
-}
 
 // Demo fallback reviews — used until real approved reviews arrive from localStorage
 const DEMO_REVIEWS: Array<{ initial: string; name: string; comment: string }> = [
@@ -169,7 +160,6 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [shareFeedback, setShareFeedback] = useState('');
   const navigate = useNavigate();
-  const { addItem } = useCart();
   const { showSuccess } = useToast();
 
   const [geoStatus, setGeoStatus] = useState<'idle' | 'loading' | 'success' | 'denied'>('idle');
@@ -238,11 +228,6 @@ export default function HomePage() {
     } else {
       navigate('/catalogue');
     }
-  };
-
-  const handleAddToCart = (product: LocalProduct) => {
-    addItem(localProductToCartProduct(product));
-    showSuccess(`${product.name} ajouté au panier`);
   };
 
   const handleShare = async () => {
@@ -573,8 +558,8 @@ export default function HomePage() {
           <div className="mt-8 rounded-[2.25rem] border border-primary/20 bg-white p-4 shadow-soft md:p-6">
             <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
               <div>
-                <h2 className="text-3xl font-black tracking-tight text-foreground md:text-4xl">À commander maintenant</h2>
-                <p className="mt-2 text-muted-foreground">Entrées, plats et desserts — les préférés de nos clients</p>
+                <h2 className="text-3xl font-black tracking-tight text-foreground md:text-4xl">Meilleures ventes</h2>
+                <p className="mt-2 text-muted-foreground">Les plats les plus attractifs, visibles dès le haut de page</p>
               </div>
               <Link
                 to="/catalogue"
@@ -584,7 +569,7 @@ export default function HomePage() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
-            <AutoCarousel items={featuredProducts.slice(0, 12)} />
+            <AutoCarousel items={allFeatured.slice(0, 12)} />
           </div>
         </div>
       </section>
@@ -607,9 +592,6 @@ export default function HomePage() {
           <ExpandableGeoMap />
         </div>
       </section>
-
-      {/* Comment ça marche — version compacte */}
-      <HowItWorksCompact />
 
       {/* Featured Traiteurs */}
       {featuredTraiteurs.length > 0 && (
@@ -647,6 +629,17 @@ export default function HomePage() {
                         className="product-photo-natural w-full h-full object-cover"
                       />
                     )}
+                    {hasMadaBadge(traiteur.name) && (
+                      <div className="absolute left-3 top-3 flex items-center gap-2 rounded-full border border-white/70 bg-white/95 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-primary shadow-lg">
+                        <img
+                          loading="lazy"
+                          src={`${import.meta.env.BASE_URL}vendors/chef-a-mada/logo.jpg`}
+                          alt="Écusson Chef à Mada"
+                          className="h-6 w-6 rounded-full object-contain"
+                        />
+                        Écusson Chef à Mada
+                      </div>
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
                     <div className="absolute inset-0 flex items-end p-4">
                       <div className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold text-foreground flex items-center gap-1">
@@ -667,7 +660,12 @@ export default function HomePage() {
                     <h3 className="text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
                       {traiteur.name}
                     </h3>
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{traiteur.offer}</p>
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{traiteur.description || traiteur.offer}</p>
+                    {traiteur.menuItems.length > 0 && (
+                      <p className="mb-3 line-clamp-1 text-xs font-semibold text-foreground/70">
+                        {traiteur.menuItems.slice(0, 3).map((item) => item.name.replace(/\s+—.+$/, '')).join(' · ')}
+                      </p>
+                    )}
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       {traiteur.startingAt > 0 && (
                         <span className="font-semibold text-primary">
@@ -692,95 +690,6 @@ export default function HomePage() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-          </div>
-        </section>
-      )}
-
-      {/* Featured Products — Carrousel */}
-      {allFeatured.length > 0 && (
-        <section className="py-16 md:py-24 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-end justify-between mb-10">
-              <div>
-                <h2 className="text-3xl md:text-5xl font-black tracking-tight text-foreground mb-2">
-                  Meilleures ventes
-                </h2>
-                <p className="text-muted-foreground text-lg">
-                  Les produits phares de nos traiteurs
-                </p>
-              </div>
-              <Link
-                to="/catalogue"
-                className="hidden md:flex items-center gap-2 text-primary font-bold hover:text-primary/90 transition-colors"
-              >
-                Voir le catalogue
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-            <ScrollCarousel>
-              {allFeatured.map((product: any) => (
-                <div
-                  key={product.id}
-                  className="snap-start flex-shrink-0 w-[280px] sm:w-[310px] group bg-white rounded-[2rem] border border-primary/20 hover:border-primary/40 overflow-hidden shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all"
-                >
-                  <div className="relative aspect-[3/2] overflow-hidden bg-primary/[0.08]">
-                    {product.image ? (
-                      <img loading="lazy"
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                        <ChefHat className="w-12 h-12" />
-                      </div>
-                    )}
-                    <div className="absolute top-3 right-3">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                        product.available !== false
-                          ? 'bg-success/[0.15] text-success'
-                          : 'bg-secondary/15 text-secondary'
-                      }`}>
-                        {product.available !== false ? 'Disponible' : 'Sur confirmation'}
-                      </span>
-                    </div>
-                    {!product.image && (
-                      <div className="absolute bottom-3 left-3">
-                        <span className="px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium">
-                          Photo à confirmer
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-5">
-                    <div className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">
-                      {product.category}
-                    </div>
-                    <h3 className="text-lg font-bold text-foreground mb-1">{product.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-1">{product.vendor}</p>
-                    {product.zone && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-1 mb-3">
-                        <MapPin className="w-3 h-3" />
-                        {product.zone}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl font-black text-foreground">
-                        {product.price.toFixed(2).replace('.', ',')} €
-                      </span>
-                      <span className="text-[10px] text-muted-foreground block -mt-1">Prix DELIKREOL</span>
-                      <button
-                        onClick={() => handleAddToCart(product)}
-                        className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary text-white font-bold rounded-xl text-sm transition-all hover:scale-105"
-                      >
-                        <Plus className="w-4 h-4" />
-                        Ajouter
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </ScrollCarousel>
           </div>
         </section>
       )}
@@ -1041,6 +950,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Comment ça marche — placé en bas pour garder les ventes en haut */}
+      <HowItWorksCompact />
 
       {/* CTA Final */}
       <section className="py-16 md:py-24 bg-gradient-to-b from-white to-background">

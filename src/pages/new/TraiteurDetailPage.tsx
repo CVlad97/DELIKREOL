@@ -23,6 +23,11 @@ import { setPageMeta } from '../../services/seo';
 import type { Product } from '../../types';
 
 const WHATSAPP_NUMBER = '596696653589';
+const MADA_BADGE_TRAITEURS = new Set([
+  "Saveurs d'Afrique",
+  'Les Delices de Ninice',
+  'Sweet Family Traiteur Orianne',
+]);
 
 function slugify(value: string): string {
   return value
@@ -83,6 +88,8 @@ export function TraiteurDetailPage() {
   const menuItems = PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(traiteur.name)
     ? []
     : (traiteur.menuItems || []).filter((item) => isUsableThumbnail(item.image));
+  const isChefMada = traiteur.slug === 'chef-a-mada';
+  const showMadaBadge = MADA_BADGE_TRAITEURS.has(traiteur.name);
   const isGouteMwen = traiteur.slug === 'goute-mwen';
   const useContainedHero = isGouteMwen;
   const firstProductImage = menuItems.find((item) => Boolean(item.image))?.image || null;
@@ -167,6 +174,22 @@ export function TraiteurDetailPage() {
                 <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-bold backdrop-blur">
                   {traiteur.photoStatus === 'confirmée' ? 'Photos validées' : 'Visuels en validation'}
                 </span>
+                {showMadaBadge && (
+                  <span className="inline-flex items-center gap-2 rounded-full bg-white/95 px-3 py-1 text-xs font-black text-primary shadow-sm">
+                    <img
+                      loading="lazy"
+                      src={`${import.meta.env.BASE_URL}vendors/chef-a-mada/logo.jpg`}
+                      alt="Écusson Chef à Mada"
+                      className="h-5 w-5 rounded-full object-contain"
+                    />
+                    Écusson Chef à Mada
+                  </span>
+                )}
+                {isChefMada && (
+                  <span className="rounded-full bg-secondary px-3 py-1 text-xs font-black text-secondary-foreground">
+                    Livraison planifiée uniquement sur devis
+                  </span>
+                )}
               </div>
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -233,7 +256,9 @@ export function TraiteurDetailPage() {
               <p className="text-xs font-black uppercase tracking-[0.2em] text-secondary">Commander</p>
               <h2 className="mt-2 text-2xl font-black">Envie de goûter ?</h2>
               <p className="mt-2 text-sm text-white/70">
-                Ajoutez les produits au panier ou vérifiez les disponibilités avec DeliKreol.
+                {isChefMada
+                  ? 'Cette vitrine regroupe des plats partenaires. Les commandes passent uniquement par devis et créneau planifié.'
+                  : 'Ajoutez les produits au panier ou vérifiez les disponibilités avec DeliKreol.'}
               </p>
               <a
                 href={`https://wa.me/${WHATSAPP_NUMBER}?text=${devisMessage}`}
@@ -243,12 +268,14 @@ export function TraiteurDetailPage() {
               >
                 <MessageCircle className="h-5 w-5" /> Vérifier les disponibilités
               </a>
-              <Link
-                to="/panier"
-                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-neutral-950"
-              >
-                <ShoppingCart className="h-5 w-5" /> Voir mon panier
-              </Link>
+              {!isChefMada && (
+                <Link
+                  to="/panier"
+                  className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-neutral-950"
+                >
+                  <ShoppingCart className="h-5 w-5" /> Voir mon panier
+                </Link>
+              )}
             </aside>
           </section>
 
@@ -258,7 +285,11 @@ export function TraiteurDetailPage() {
                 <p className="text-xs font-black uppercase tracking-[0.2em] text-primary">Catalogue</p>
                 <h2 className="text-3xl font-black">{isGouteMwen ? 'Les parfums' : 'Les produits'}</h2>
               </div>
-              <p className="text-sm text-muted-foreground">Prix et disponibilité confirmés au moment de la commande.</p>
+              <p className="text-sm text-muted-foreground">
+                {isChefMada
+                  ? 'Sélection mutualisée disponible uniquement en livraison planifiée sur devis.'
+                  : 'Prix et disponibilité confirmés au moment de la commande.'}
+              </p>
             </div>
 
             {menuItems.length > 0 ? (
@@ -291,13 +322,22 @@ export function TraiteurDetailPage() {
                       <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
                         {item.description || 'Description à confirmer avec le prestataire.'}
                       </p>
-                      <button
-                        type="button"
-                        onClick={() => handleAddToCart(item)}
-                        className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2.5 text-sm font-black text-primary-foreground transition hover:bg-primary"
-                      >
-                        <ShoppingCart className="h-4 w-4" /> Ajouter
-                      </button>
+                      {isChefMada ? (
+                        <Link
+                          to="/devis"
+                          className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2.5 text-sm font-black text-primary-foreground transition hover:bg-primary"
+                        >
+                          Demander un devis
+                        </Link>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleAddToCart(item)}
+                          className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2.5 text-sm font-black text-primary-foreground transition hover:bg-primary"
+                        >
+                          <ShoppingCart className="h-4 w-4" /> Ajouter
+                        </button>
+                      )}
                     </div>
                   </article>
                 ))}
@@ -317,9 +357,11 @@ export function TraiteurDetailPage() {
 
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white/95 p-3 backdrop-blur sm:hidden">
           <div className="mx-auto flex max-w-md gap-2">
-            <Link to="/panier" className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-black text-primary-foreground">
-              <ShoppingCart className="h-4 w-4" /> Panier
-            </Link>
+            {!isChefMada && (
+              <Link to="/panier" className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-black text-primary-foreground">
+                <ShoppingCart className="h-4 w-4" /> Panier
+              </Link>
+            )}
             <a
               href={`https://wa.me/${WHATSAPP_NUMBER}?text=${devisMessage}`}
               target="_blank"
