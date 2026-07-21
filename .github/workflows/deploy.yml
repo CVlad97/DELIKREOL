@@ -46,6 +46,7 @@ jobs:
           VITE_PUBLIC_VENDOR_SOURCE: hybrid
           VITE_DEMO_MODE: "false"
           VITE_STRIPE_PUBLISHABLE_KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
+          VITE_ENABLE_STRIPE_PUBLIC: ${{ secrets.VITE_ENABLE_STRIPE_PUBLIC }}
         run: npm run build
 
       - name: Add SPA fallback and nojekyll marker
