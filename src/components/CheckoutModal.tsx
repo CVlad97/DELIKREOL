@@ -47,9 +47,10 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
   const [fallbackWhatsappUrl, setFallbackWhatsappUrl] = useState('');
   const [success, setSuccess] = useState<SuccessState | null>(null);
 
-  // The publishable key is used as an explicit public activation switch.
-  // The actual charge is created securely by the Supabase Edge Function.
-  const stripeAvailable = Boolean(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+  // Stripe public reste désactivé tant que le go-live n'est pas validé explicitement.
+  const stripeAvailable =
+    import.meta.env.VITE_ENABLE_STRIPE_PUBLIC === 'true' &&
+    Boolean(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
   const deliveryFee = deliveryType === 'home_delivery' ? 5 : 0;
   const finalTotal = total + deliveryFee;
   const commissionDelikreol = total * 0.2;

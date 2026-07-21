@@ -1287,7 +1287,6 @@ export function PublicHomePage() {
     setCheckoutStatus({ kind: 'saving', message: 'Création de la commande...' });
 
     const orderPayload = {
-      id: checkoutOrderId,
       order_number: checkoutOrderNumber,
       customer_name: customerName.trim(),
       customer_phone: customerPhone.trim(),
@@ -1313,7 +1312,11 @@ export function PublicHomePage() {
     };
 
     try {
-      const { error: orderError } = await publicSupabase.from('orders').insert(orderPayload);
+      const { data: createdOrder, error: orderError } = await publicSupabase
+        .from('orders')
+        .insert(orderPayload)
+        .select('id')
+        .single();
       if (orderError) {
         if (isSupabasePausedError(orderError) || isSupabaseUnavailableError(orderError)) {
           await fallbackToSheets('Supabase indisponible. Bascule sur enregistrement Sheets.');
@@ -1323,7 +1326,11 @@ export function PublicHomePage() {
         return;
       }
 
-      const { error: itemsError } = await publicSupabase.from('order_items').insert(orderItemsPayload);
+      const supabaseOrderItemsPayload = orderItemsPayload.map((item) => ({
+        ...item,
+        order_id: createdOrder.id,
+      }));
+      const { error: itemsError } = await publicSupabase.from('order_items').insert(supabaseOrderItemsPayload);
       if (itemsError) {
         if (isSupabasePausedError(itemsError) || isSupabaseUnavailableError(itemsError)) {
           await fallbackToSheets('Supabase indisponible. Bascule sur enregistrement Sheets.');

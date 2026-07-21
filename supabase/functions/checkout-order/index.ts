@@ -34,8 +34,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({ existing: true, order: existing }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    // Générer order_id et order_number
-    const orderId = crypto.randomUUID()
+    // Générer uniquement le numéro métier. orders.id reste généré par Postgres (UUID).
     const now = new Date()
     const datePart = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`
     const random = Array.from(crypto.getRandomValues(new Uint8Array(6)))
@@ -46,7 +45,6 @@ serve(async (req) => {
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
-        id: orderId,
         order_number: orderNumber,
         idempotency_key,
         customer_phone: phone || '',
@@ -64,6 +62,7 @@ serve(async (req) => {
       .single()
 
     if (orderError) throw orderError
+    const orderId = order.id
 
     // Créer order_items
     if (items?.length) {

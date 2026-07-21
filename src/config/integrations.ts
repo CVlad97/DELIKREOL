@@ -22,12 +22,12 @@ export interface IntegrationsConfig {
 
 export const integrations: IntegrationsConfig = {
   stripe: {
-    // Stripe activé — paiement par carte bancaire
-    enabled: true,
+    // Stripe public reste désactivé tant que le go-live n'est pas validé.
+    enabled: import.meta.env.VITE_ENABLE_STRIPE_PUBLIC === 'true',
     label: 'Stripe (carte bancaire)',
     description: 'Paiement sécurisé par carte bancaire via Stripe',
     publicKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
-    status: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY && import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY !== 'pk_test_xxxxxxxxxxxxxxxxxxxx' ? 'configured' : 'pending',
+    status: import.meta.env.VITE_ENABLE_STRIPE_PUBLIC === 'true' && import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY && import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY !== 'pk_test_xxxxxxxxxxxxxxxxxxxx' ? 'configured' : 'pending',
   },
   qonto: {
     enabled: true,

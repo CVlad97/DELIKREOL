@@ -462,11 +462,11 @@ export default function CartPage() {
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                 <div>
-                                  <p className="font-bold text-green-800 text-sm">
-                                    Demande préparée — à confirmer sur WhatsApp.
-                                  </p>
-                                  <p className="text-green-700 text-sm">
-                    Commande enregistrée, félicitations ! Le support WhatsApp est disponible si besoin.
+                  <p className="font-bold text-green-800 text-sm">
+                    Demande préparée — à confirmer sur WhatsApp.
+                  </p>
+                  <p className="text-green-700 text-sm">
+                    La demande est prête. Elle reste à confirmer sur WhatsApp avant préparation.
                   </p>
                 </div>
               </div>

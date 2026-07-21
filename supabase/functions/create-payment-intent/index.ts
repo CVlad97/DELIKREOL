@@ -1,9 +1,9 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import Stripe from 'https://esm.sh/stripe@14.21.0?target=deno'
+import "jsr:@supabase/functions-js/edge-runtime.d.ts"
+import { createClient } from 'npm:@supabase/supabase-js@2.57.4'
+import Stripe from 'npm:stripe@19.3.1'
 
 const stripeKey = Deno.env.get('STRIPE_SECRET_KEY') || ''
-const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16', httpClient: Stripe.createFetchHttpClient() })
+const stripe = new Stripe(stripeKey, { apiVersion: '2026-02-25.clover' })
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,7 +19,8 @@ serve(async (req) => {
 
   try {
     const body = await req.json()
-    const { amount, currency = 'eur', orderId, vendorStripeAccountId, vendorId, customerId, deliveryId } = body
+    const { amount, currency = 'eur', orderId, vendorId, customerId, deliveryId } = body
+    const vendorStripeAccountId = body.vendorStripeAccountId || body.vendorAccountId
 
     // --- Validation — orderId obligatoire ---
     if (!orderId) {
@@ -37,15 +38,15 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    // --- Recalcul serveur du montant depuis la commande (sécurité) ---
-    let serverAmountInCents = Math.round(amount * 100)
+    // amount est attendu en centimes côté frontend ; le serveur privilégie toujours la base.
+    let serverAmountInCents = Math.round(amount)
     // Idempotency key STABLE basée sur orderId (évite les doublons Stripe)
     const idempotencyKey = `delikreol_pi_${orderId}`
 
     console.log(`[stripe] Vérification commande ${orderId} en base...`)
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .select('total, delivery_fee, sub_total, payment_intent_id')
+      .select('total_amount, total_cents, delivery_fee, delivery_fee_cents, subtotal, sub_total_cents, payment_intent_id')
       .eq('id', orderId)
       .single()
 
@@ -61,16 +62,18 @@ serve(async (req) => {
     if (orderError) {
       console.warn('[stripe] Commande non trouvée en base, utilisation du montant frontend')
     } else {
-      const subTotal = order.sub_total || 0
-      const deliveryFee = order.delivery_fee || 0
-      const calculatedTotal = subTotal + deliveryFee
+      const storedTotalCents = Number(order.total_cents || 0)
+      const totalAmount = Number(order.total_amount || 0)
+      const subtotalCents = Number(order.sub_total_cents || 0) || Math.round(Number(order.subtotal || 0) * 100)
+      const deliveryFeeCents = Number(order.delivery_fee_cents || 0) || Math.round(Number(order.delivery_fee || 0) * 100)
+      const calculatedTotalCents = storedTotalCents || Math.round(totalAmount * 100) || subtotalCents + deliveryFeeCents
 
-      if (calculatedTotal > 0) {
-        serverAmountInCents = Math.round(calculatedTotal * 100)
-        console.log(`[stripe] Montant recalculé depuis la base : ${subTotal} + ${deliveryFee} = ${calculatedTotal}€ (${serverAmountInCents} centimes)`)
+      if (calculatedTotalCents > 0) {
+        serverAmountInCents = Math.round(calculatedTotalCents)
+        console.log(`[stripe] Montant recalculé depuis la base : ${serverAmountInCents} centimes`)
       }
 
-      const frontendAmountCents = Math.round(amount * 100)
+      const frontendAmountCents = Math.round(amount)
       if (Math.abs(serverAmountInCents - frontendAmountCents) > 1) {
         console.warn(`[stripe] ⚠️ Différence de montant : frontend=${frontendAmountCents}, serveur=${serverAmountInCents} — utilisation valeur serveur`)
       }

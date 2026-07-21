@@ -137,7 +137,7 @@ Deno.serve(async (req: Request) => {
 
     const siteUrl = safeBaseUrl(body.returnUrl, req.headers.get("origin"));
     const stripe = new Stripe(assertEnv("STRIPE_SECRET_KEY"), {
-      apiVersion: "2025-02-24.acacia",
+      apiVersion: "2026-02-25.clover",
     });
 
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map((item) => ({
