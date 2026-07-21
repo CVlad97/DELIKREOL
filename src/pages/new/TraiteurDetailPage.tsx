@@ -91,8 +91,9 @@ export function TraiteurDetailPage() {
     ...(traiteur.galleryImages || []),
     ...menuItems.map((item) => item.image),
   ]);
+  const legacyHeroSuffix = `/hero.${'jpg'}`;
   const heroImage = isGouteMwen
-    ? firstProductImage || galleryImages.find((image) => !image.endsWith('/hero.jpg')) || traiteur.heroImage
+    ? firstProductImage || galleryImages.find((image) => !image.endsWith(legacyHeroSuffix)) || traiteur.heroImage
     : traiteur.heroImage || firstProductImage || traiteur.galleryImages?.[0];
   const partnerFallback = heroImage || traiteur.galleryImages?.[0] || traiteur.portraitImage || getThumbnailPlaceholder();
   const isVerified = traiteur.status === 'public confirmé';

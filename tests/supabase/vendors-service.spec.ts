@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { traiteurSpaces } from '../../src/data/traiteurs';
 import {
   getPublicVendors,
@@ -92,6 +94,40 @@ describe('vendorsService', () => {
     expect(mergeVendorWithStatic(sparseVendor({ is_demo: true }))).toBeNull();
     expect(mergeVendorWithStatic(sparseVendor({ is_public: false }))).toBeNull();
     expect(mergeVendorWithStatic(sparseVendor({ is_active: false }))).toBeNull();
+  });
+
+  it('keeps locally hidden partners unpublished even when Supabase marks them public', () => {
+    const merged = mergeVendorWithStatic(
+      sparseVendor({
+        name: 'An Tjè Coco',
+        business_name: 'An Tjè Coco',
+        is_public: true,
+        status: 'verified',
+        hero_image: 'https://delikreol.com/vendors/an-tje-coco/gallery-05.jpg',
+        gallery_images: ['https://delikreol.com/vendors/an-tje-coco/gallery-01.jpg'],
+      }),
+    );
+
+    expect(merged).toBeNull();
+  });
+
+  it('keeps An Tjè Coco draft and Coco media URLs valid in corrective SQL', () => {
+    const migration = readFileSync(
+      resolve(process.cwd(), 'supabase/migrations/20260720000001_fix_partner_media_publication.sql'),
+      'utf8',
+    );
+    const seed = readFileSync(resolve(process.cwd(), 'supabase/seed.partners.sql'), 'utf8');
+
+    expect(migration).toContain("lower('An Tjè Coco')");
+    expect(migration).toContain('is_public = false');
+    expect(migration).not.toContain('vendors/an-tje-coco/hero.jpg');
+    expect(migration).not.toContain('vendors/an-tje-coco/portrait.jpg');
+    expect(migration).toContain('vendors/coco/drive-reimport/IMG-20260526-WA0064.jpg');
+    expect(migration).toContain('drop policy if exists "product_photos_public_insert" on storage.objects');
+    expect(seed).not.toContain("'/vendors/coco/hero.jpg'");
+    expect(seed).not.toContain("'/vendors/coco/portrait.jpg'");
+    expect(seed).not.toContain("'/vendors/an-tje-coco/hero.jpg'");
+    expect(seed).not.toContain("'/vendors/an-tje-coco/portrait.jpg'");
   });
 
   it('returns a vendor by normalized slug', async () => {

@@ -1,8 +1,26 @@
 # Réimport Drive des photos partenaires — 2026-07-20
 ## Source
 - Drive source : https://drive.google.com/drive/folders/1jCKzWuQJKMtBwDAaOiqhyOq0VDI_ngHy
+- Recontrôle Drive demandé : https://drive.google.com/drive/folders/15qGKtEsSG2DO1Y_duJCXMafj7o7rxtrR
 - Fichiers ZIP traités : exports WhatsApp transmis par le propriétaire et présents dans le dossier Drive.
 - Règle : aucune image IA, aucune image Internet, aucun original supprimé.
+
+## Recontrôle du dossier Drive `15qGKtEsSG2DO1Y_duJCXMafj7o7rxtrR`
+- Le dossier contient 8 Google Docs de préimport, pas de fichiers image directs téléchargeables comme médias bruts.
+- Les Docs listent 73 images publiables attendues : Coco's Food 26, Les Délices de Ninice 11, Snack Savè Peyi’A 12, Saveurs d’Afrique 13, Sweet Family 11.
+- Les 73 fichiers listés sont déjà présents dans `public/vendors/*/drive-reimport/`.
+- Aucune image An Tjè Coco n’est publiable depuis ce dossier : le Doc indique `BLOQUÉ AVANT IMPORT PUBLIC`.
+- Gouté Mwen n’est pas présent dans ce dossier : aucune photo Gouté Mwen n’a été réimportée.
+
+| Partenaire | Doc Drive contrôlé | Images attendues | Fichiers présents | Statut |
+|---|---:|---:|---:|---|
+| Coco's Food | oui | 26 | 26 | OK |
+| Les Délices de Ninice | oui | 11 | 11 | OK |
+| Snack Savè Peyi’A | oui | 12 | 12 | OK |
+| Saveurs d'Afrique | oui | 13 | 13 | OK |
+| Sweet Family Traiteur Orianne | oui | 11 | 11 | OK |
+| An Tjè Coco | oui | 0 publiable | 0 réimporté | BLOQUÉ |
+| Gouté Mwen | non | 0 | 0 | À FOURNIR |
 ## Bilan import
 - Images extraites : 110
 - Images archivées dans `public/vendors/*/drive-reimport/` : 98
@@ -65,3 +83,5 @@
 - Les galeries publiques doivent pointer vers `src/data/driveReimportAssets.ts`.
 - Les originaux Drive sont conservés sans conversion automatique.
 - Les images non vendables restent disponibles pour contrôle manuel, mais ne sont pas utilisées dans les cartes.
+- Test anti-régression ajouté : `src/data/driveReimportAssets.spec.ts` vérifie les comptes Drive validés et l’existence locale de chaque asset publié.
+- Référence externe non prouvée retirée de `src/data/partnerAssets.ts` pour respecter la règle “aucune photo Internet aléatoire”.
