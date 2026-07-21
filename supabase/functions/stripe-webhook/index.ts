@@ -46,10 +46,17 @@ async function insertWebhookEvent(
 ) {
   const { error } = await supabase.from("stripe_webhook_events").insert({
     id: event.id,
+    event_type: event.type,
     type: event.type,
     processing_status: "processing",
     received_at: new Date().toISOString(),
     payload_hash: payloadHash,
+    payload: {
+      id: event.id,
+      type: event.type,
+      object: event.object,
+      api_version: event.api_version,
+    },
   });
 
   if (!error) return { inserted: true };

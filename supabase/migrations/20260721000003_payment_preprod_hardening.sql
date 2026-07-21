@@ -55,23 +55,37 @@ alter table if exists public.order_items add column if not exists subtotal numer
 
 create table if not exists public.stripe_webhook_events (
   id text primary key,
+  event_type text not null,
   type text,
   processing_status text default 'processing',
-  order_id text null,
+  order_id uuid null,
   payment_intent_id text null,
   received_at timestamptz default now(),
   processed_at timestamptz null,
   last_error text null,
-  payload_hash text null
+  payload_hash text null,
+  payload jsonb not null default '{}'::jsonb
 );
 
+alter table if exists public.stripe_webhook_events add column if not exists event_type text;
+alter table if exists public.stripe_webhook_events add column if not exists type text;
 alter table if exists public.stripe_webhook_events add column if not exists processing_status text default 'processing';
-alter table if exists public.stripe_webhook_events add column if not exists order_id text null;
+alter table if exists public.stripe_webhook_events add column if not exists order_id uuid null;
 alter table if exists public.stripe_webhook_events add column if not exists payment_intent_id text null;
 alter table if exists public.stripe_webhook_events add column if not exists received_at timestamptz default now();
 alter table if exists public.stripe_webhook_events add column if not exists processed_at timestamptz null;
 alter table if exists public.stripe_webhook_events add column if not exists last_error text null;
 alter table if exists public.stripe_webhook_events add column if not exists payload_hash text null;
+alter table if exists public.stripe_webhook_events add column if not exists payload jsonb not null default '{}'::jsonb;
+alter table if exists public.stripe_webhook_events alter column processed_at drop not null;
+
+update public.stripe_webhook_events
+set type = coalesce(type, event_type),
+    event_type = coalesce(event_type, type)
+where type is null
+   or event_type is null;
+
+alter table if exists public.stripe_webhook_events alter column event_type set not null;
 
 do $$
 begin
