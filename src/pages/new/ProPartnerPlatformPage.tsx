@@ -140,8 +140,8 @@ export function ProPartnerPlatformPage() {
         <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-8">
           <h2 className="text-2xl font-black text-emerald-950 mb-2">📲 Terminal partenaire mobile</h2>
           <p className="text-sm text-emerald-900 mb-5">
-            Encaissement comptoir via SumUp Tap to Pay ou lien de paiement, facture prête à envoyer par email/WhatsApp,
-            suivi commande et rapprochement Qonto. Aucune donnée carte n’est manipulée par DELIKREOL.
+            Encaissement SumUp manuel ou lien de paiement à générer dans l’app SumUp, facture prête à envoyer par email/WhatsApp,
+            suivi commande et rapprochement Qonto manuel. Aucune donnée carte n’est manipulée par DELIKREOL.
           </p>
           <a
             href="/terminal-partenaire"

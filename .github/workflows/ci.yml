@@ -30,7 +30,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit --fund=false
+        run: npm ci --legacy-peer-deps --prefer-offline --no-audit --fund=false
 
       - name: Typecheck
         shell: bash
@@ -48,6 +48,12 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+      - name: Tests
+        run: npm run test --if-present
+
+      - name: Secret audit
+        run: npm run audit:secrets --if-present
 
       - name: Build
         run: npm run build

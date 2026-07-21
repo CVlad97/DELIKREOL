@@ -21,7 +21,7 @@ import type { LucideIcon } from 'lucide-react';
 const WHATSAPP_NUMBER = '596696653589';
 const DEFAULT_PARTNERS = ["Snack Savè Peyi'A", 'Sweet Family Traiteur', 'Les Délices de Ninice', "Saveurs d'Afrique", "Coco's Food"];
 const SECURITY_STEPS: Array<{ title: string; text: string; Icon: LucideIcon }> = [
-  { title: 'Encaissement', text: 'SumUp Tap to Pay / Payment Link', Icon: WalletCards },
+  { title: 'Encaissement', text: 'Encaissement SumUp manuel ou lien généré dans SumUp', Icon: WalletCards },
   { title: 'Facture', text: 'Brouillon prêt à envoyer email + WhatsApp', Icon: ReceiptText },
   { title: 'Qonto', text: 'Rapprochement à partir du libellé commande', Icon: Banknote },
   { title: '2FA', text: 'Obligatoire sur PSP, Qonto et admin', Icon: LockKeyhole },
@@ -38,7 +38,9 @@ type TerminalDraft = {
   items: Array<{ name: string; quantity: number; unit_price: number }>;
   total_amount: number;
   payment_status: PaymentStatus;
-  payment_provider: 'sumup_tap_to_pay' | 'sumup_payment_link' | 'manual';
+  payment_provider: 'manual' | 'sumup_manual' | 'sumup_payment_link' | 'stripe_test';
+  external_payment_reference: string;
+  payment_note: string;
   invoice_status: 'draft' | 'ready_to_send';
   qonto_status: 'pending_reconciliation';
   source: 'partner_terminal_mvp';
@@ -85,7 +87,9 @@ export default function PartnerTerminalPage() {
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [rawItems, setRawItems] = useState('Plat du jour;1;12\nBoisson;1;2.50');
-  const [paymentProvider, setPaymentProvider] = useState<TerminalDraft['payment_provider']>('sumup_tap_to_pay');
+  const [paymentProvider, setPaymentProvider] = useState<TerminalDraft['payment_provider']>('sumup_manual');
+  const [externalPaymentReference, setExternalPaymentReference] = useState('');
+  const [paymentNote, setPaymentNote] = useState('');
   const [createdOrder, setCreatedOrder] = useState<TerminalDraft | null>(null);
 
   const items = useMemo(() => parseItems(rawItems), [rawItems]);
@@ -103,6 +107,8 @@ export default function PartnerTerminalPage() {
       total_amount: total,
       payment_status: paymentProvider === 'manual' ? 'draft' : 'awaiting_payment',
       payment_provider: paymentProvider,
+      external_payment_reference: externalPaymentReference,
+      payment_note: paymentNote || 'Statut payé à confirmer manuellement.',
       invoice_status: 'ready_to_send',
       qonto_status: 'pending_reconciliation',
       source: 'partner_terminal_mvp',
@@ -117,7 +123,9 @@ export default function PartnerTerminalPage() {
     `Partenaire : ${createdOrder.partner_name}`,
     `Client : ${createdOrder.customer_name}`,
     `Total : ${money(createdOrder.total_amount)}`,
-    `Paiement : ${createdOrder.payment_provider === 'sumup_tap_to_pay' ? 'SumUp Tap to Pay / TPE mobile' : createdOrder.payment_provider === 'sumup_payment_link' ? 'Lien SumUp' : 'Manuel'}`,
+    `Paiement : ${createdOrder.payment_provider === 'sumup_manual' ? 'Encaissement SumUp manuel' : createdOrder.payment_provider === 'sumup_payment_link' ? 'Lien de paiement SumUp à générer dans l’app SumUp' : createdOrder.payment_provider === 'stripe_test' ? 'Stripe test' : 'Manuel'}`,
+    createdOrder.external_payment_reference ? `Référence externe : ${createdOrder.external_payment_reference}` : '',
+    `Note paiement : ${createdOrder.payment_note}`,
     `Suivi : ${window.location.origin}/statut-commande?order=${createdOrder.order_number}`,
   ].join('\n') : '';
 
@@ -138,8 +146,8 @@ export default function PartnerTerminalPage() {
               <div>
                 <h1 className="text-3xl font-black tracking-tight sm:text-5xl">Terminal partenaire mobile</h1>
                 <p className="mt-4 max-w-3xl text-sm leading-7 text-orange-50/85">
-                  Le téléphone devient le point d'encaissement via un PSP certifié. DELIKREOL ne lit jamais les cartes :
-                  le paiement passe par SumUp Tap to Pay ou un lien de paiement, puis la facture et le suivi sont générés.
+                  DELIKREOL ne lit jamais les cartes. Pour SumUp, le partenaire encaisse manuellement dans l’app SumUp
+                  ou génère un lien SumUp ; l’intégration automatique arrive plus tard.
                 </p>
               </div>
               <div className="rounded-3xl border border-white/10 bg-white/10 p-4">
@@ -157,13 +165,16 @@ export default function PartnerTerminalPage() {
                 <label className="block"><span className="text-sm font-black">Client</span><input value={customerName} onChange={(event) => setCustomerName(event.target.value)} placeholder="Client comptoir" className="mt-2 w-full rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 text-sm" /></label>
                 <label className="block"><span className="text-sm font-black">Téléphone WhatsApp</span><input value={customerPhone} onChange={(event) => setCustomerPhone(event.target.value)} placeholder="0696 XX XX XX" className="mt-2 w-full rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 text-sm" /></label>
                 <label className="block"><span className="text-sm font-black">Email facture</span><input value={customerEmail} onChange={(event) => setCustomerEmail(event.target.value)} placeholder="client@email.com" className="mt-2 w-full rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 text-sm" /></label>
+                <label className="block"><span className="text-sm font-black">Référence paiement externe</span><input value={externalPaymentReference} onChange={(event) => setExternalPaymentReference(event.target.value)} placeholder="Réf. SumUp / virement / espèces" className="mt-2 w-full rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 text-sm" /></label>
               </div>
               <label className="mt-4 block"><span className="text-sm font-black">Articles — format : nom; quantité; prix</span><textarea value={rawItems} onChange={(event) => setRawItems(event.target.value)} rows={5} className="mt-2 w-full rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 font-mono text-sm" /></label>
+              <label className="mt-4 block"><span className="text-sm font-black">Note paiement</span><textarea value={paymentNote} onChange={(event) => setPaymentNote(event.target.value)} rows={2} placeholder="Statut payé à confirmer manuellement." className="mt-2 w-full rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 text-sm" /></label>
 
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <div className="mt-5 grid gap-3 sm:grid-cols-4">
                 {[
-                  { id: 'sumup_tap_to_pay', label: 'Tap to Pay', icon: Smartphone, text: 'TPE mobile natif' },
-                  { id: 'sumup_payment_link', label: 'Lien SumUp', icon: CreditCard, text: 'Lien sécurisé' },
+                  { id: 'sumup_manual', label: 'SumUp manuel', icon: Smartphone, text: 'À valider dans SumUp' },
+                  { id: 'sumup_payment_link', label: 'Lien SumUp', icon: CreditCard, text: 'À générer dans SumUp' },
+                  { id: 'stripe_test', label: 'Stripe test', icon: WalletCards, text: 'Pré-prod uniquement' },
                   { id: 'manual', label: 'Manuel', icon: Banknote, text: 'Espèces/virement' },
                 ].map((option) => {
                   const Icon = option.icon;
@@ -176,7 +187,7 @@ export default function PartnerTerminalPage() {
                 <span className="text-3xl font-black">{money(total)}</span>
               </div>
               <button type="button" disabled={items.length === 0 || total <= 0} onClick={createDraft} className="mt-5 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-orange-600 px-5 py-4 font-black text-white disabled:bg-slate-300">
-                Générer paiement + facture <ArrowRight size={18} />
+                Générer facture + suivi <ArrowRight size={18} />
               </button>
             </section>
 
@@ -192,12 +203,13 @@ export default function PartnerTerminalPage() {
                 <div className="rounded-[2rem] border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
                   <div className="flex items-center gap-3"><CheckCircle2 className="text-emerald-700" /><h2 className="text-xl font-black text-emerald-950">Vente créée</h2></div>
                   <p className="mt-3 font-mono text-lg font-black">{createdOrder.order_number}</p>
-                  <p className="mt-1 text-sm text-emerald-900">Suivi, facture et rapprochement Qonto prêts.</p>
+                  <p className="mt-1 text-sm text-emerald-900">Suivi et facture prêts. Statut payé à confirmer manuellement.</p>
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     <Link to={`/statut-commande?order=${createdOrder.order_number}`} className="rounded-2xl bg-[#24140d] px-4 py-3 text-center text-sm font-black text-white">Tester le suivi</Link>
                     <a href={whatsappInvoiceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 py-3 text-sm font-black text-white"><MessageCircle size={16} /> WhatsApp</a>
                     <a href={mailInvoiceUrl} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-300 px-4 py-3 text-sm font-black text-emerald-900"><Mail size={16} /> Email</a>
                     <button type="button" onClick={() => navigator.clipboard?.writeText(invoiceText)} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-300 px-4 py-3 text-sm font-black text-emerald-900"><FileText size={16} /> Copier facture</button>
+                    <button type="button" onClick={() => setCreatedOrder({ ...createdOrder, payment_status: 'paid_external', payment_note: 'Marqué comme payé manuellement.' })} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-300 px-4 py-3 text-sm font-black text-emerald-900"><CheckCircle2 size={16} /> Marquer comme payé manuellement</button>
                   </div>
                 </div>
               )}

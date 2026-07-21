@@ -20,14 +20,23 @@ export interface IntegrationsConfig {
   };
 }
 
+export function isStripeTestPublicEnabled(flag: unknown, publicKey: unknown): boolean {
+  return flag === 'true' && typeof publicKey === 'string' && publicKey.startsWith('pk_test_');
+}
+
+const stripePublicEnabled = isStripeTestPublicEnabled(
+  import.meta.env.VITE_ENABLE_STRIPE_PUBLIC,
+  import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
+);
+
 export const integrations: IntegrationsConfig = {
   stripe: {
-    // Stripe public reste désactivé tant que le go-live n'est pas validé.
-    enabled: import.meta.env.VITE_ENABLE_STRIPE_PUBLIC === 'true',
+    // Stripe public reste en mode test uniquement tant que le go-live n'est pas validé.
+    enabled: stripePublicEnabled,
     label: 'Stripe (carte bancaire)',
-    description: 'Paiement sécurisé par carte bancaire via Stripe',
-    publicKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
-    status: import.meta.env.VITE_ENABLE_STRIPE_PUBLIC === 'true' && import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY && import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY !== 'pk_test_xxxxxxxxxxxxxxxxxxxx' ? 'configured' : 'pending',
+    description: 'Paiement sécurisé Stripe en mode test uniquement',
+    publicKey: stripePublicEnabled ? import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY : undefined,
+    status: stripePublicEnabled ? 'configured' : 'pending',
   },
   qonto: {
     enabled: true,

@@ -84,13 +84,22 @@ Deno.serve(async (req: Request) => {
 
     const { data: order, error: orderError } = await admin
       .from("orders")
-      .select("id, order_number, customer_id, delivery_fee, total_amount, payment_status")
+      .select("id, order_number, customer_id, delivery_fee, total_amount, payment_status, stripe_checkout_session_id")
       .eq("id", orderId)
       .single();
 
     if (orderError || !order) return json(req, { error: "Order not found" }, 404);
     if (order.customer_id !== authData.user.id) return json(req, { error: "Forbidden" }, 403);
     if (order.payment_status === "paid") return json(req, { error: "Order already paid" }, 409);
+    if (order.stripe_checkout_session_id) {
+      const stripe = new Stripe(assertEnv("STRIPE_SECRET_KEY"), {
+        apiVersion: "2026-02-25.clover",
+      });
+      const existingSession = await stripe.checkout.sessions.retrieve(order.stripe_checkout_session_id);
+      if (existingSession.url) {
+        return json(req, { url: existingSession.url, sessionId: existingSession.id, existing: true });
+      }
+    }
 
     const { data: rawItems, error: itemsError } = await admin
       .from("order_items")
@@ -195,7 +204,13 @@ Deno.serve(async (req: Request) => {
 
     await admin
       .from("orders")
-      .update({ payment_status: "processing", updated_at: new Date().toISOString() })
+      .update({
+        payment_status: "processing",
+        payment_provider: "stripe_test",
+        payment_method: "card",
+        stripe_checkout_session_id: session.id,
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", order.id);
 
     await admin.from("order_events").insert({

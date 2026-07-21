@@ -199,7 +199,7 @@ export function PartnerDashboardPage() {
               <div>
                 <h2 className="font-black text-emerald-950">Terminal mobile de test</h2>
                 <p className="mt-1 text-sm leading-6 text-emerald-900">
-                  Créez une vente comptoir, préparez le paiement SumUp, la facture email/WhatsApp et le suivi commande.
+                  Créez une vente comptoir, préparez un encaissement SumUp manuel ou un lien à générer dans SumUp, la facture email/WhatsApp et le suivi commande.
                 </p>
               </div>
             </div>

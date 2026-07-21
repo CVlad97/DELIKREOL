@@ -27,12 +27,15 @@ import {
 import { Layout } from '../../components/layout/Layout';
 import { useCart } from '../../contexts/CartContext';
 import { useToast } from '../../contexts/ToastContext';
+import { integrations } from '../../config/integrations';
 import {
   martiniqueCommunes,
   normalizeCommuneQuery,
 } from '../../data/martiniqueCommunes';
 import { OrderSummaryByPartner, groupItemsByPartner } from '../../components/OrderSummaryByPartner';
+import { isSupabaseConfigured, supabase } from '../../lib/supabase';
 import type { Product } from '../../lib/supabase';
+import { createStripeCheckoutSession } from '../../utils/stripe';
 
 interface CartItem extends Product {
   quantity: number;
@@ -144,8 +147,13 @@ export default function CartPage() {
   const [orderNumber, setOrderNumber] = useState('');
   const [whatsappShareUrl, setWhatsappShareUrl] = useState('');
   const [checkoutStatus, setCheckoutStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
+  const [stripeStatus, setStripeStatus] = useState<'idle' | 'processing' | 'error'>('idle');
   const [savedField, setSavedField] = useState<string | null>(null);
   const panierRef = useRef<HTMLDivElement>(null);
+  const stripeTestCheckoutEnabled =
+    integrations.stripe.enabled &&
+    !!integrations.stripe.publicKey?.startsWith('pk_test_') &&
+    isSupabaseConfigured;
 
   useEffect(() => {
     if (panierRef.current) {
@@ -228,41 +236,84 @@ export default function CartPage() {
 
   const hasMultipleVendors = traiteurs.length > 1;
 
-  const handleWhatsAppClick = () => {
+  const createPublicOrder = async (paymentProvider: 'manual' | 'stripe_test') => {
+    const deliveryFee = DELIVERY_FEES[mode]?.fee || 0;
+    const idempotencyKey = `public_${paymentProvider}_${Date.now()}_${crypto.randomUUID()}`;
+    const { data, error } = await supabase.functions.invoke('checkout-order', {
+      body: {
+        idempotency_key: idempotencyKey,
+        items: items.map((item) => ({
+          id: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          vendor_id: item.vendor_id,
+          vendor: item.vendor?.business_name || item.vendor_id || '',
+        })),
+        total,
+        total_amount: total + deliveryFee,
+        delivery_fee: deliveryFee,
+        commune,
+        mode,
+        phone,
+        email,
+        notes,
+        creneaux: getCreneauText(),
+        payment_provider: paymentProvider,
+      },
+    });
+
+    if (error) throw error;
+    if (!data?.order?.id || !data?.order?.order_number) {
+      throw new Error(data?.error || 'Commande non créée');
+    }
+    return data.order as { id: string; order_number: string; tracking_token?: string };
+  };
+
+  const validateOrderForm = () => {
     // Panier vide
     if (items.length === 0) {
       showError('Votre panier est vide. Ajoutez un plat avant de préparer une demande.');
-      return;
+      return false;
     }
     // Anti-double-click
-    if (checkoutStatus === 'processing' || messageSent) {
-      return;
+    if (checkoutStatus === 'processing' || stripeStatus === 'processing' || messageSent) {
+      return false;
     }
     // Validate phone — obligatoire
     if (!phone || !validateMartiniquePhone(phone)) {
       setPhoneError("Merci d'indiquer un numéro WhatsApp valide, ex : 0696 XX XX XX");
-      return;
+      return false;
     }
     // Email valide si fourni
     if (email && !validateEmail(email)) {
       showError("Merci d'indiquer une adresse email valide.");
-      return;
+      return false;
     }
     // Block multi-traiteur
     if (hasMultipleVendors) {
       showError('Pour cette version test, merci de passer une commande par partenaire. Le panier multi-traiteur arrive bientôt.');
-      return;
+      return false;
     }
     setPhoneError('');
+    return true;
+  };
+
+  const handleWhatsAppClick = async () => {
+    if (!validateOrderForm()) return;
     setCheckoutStatus('processing');
 
     // Générer ID commande
-    const orderNumber = generateOrderId();
+    let orderNumber = generateOrderId();
     const orderUuid = crypto.randomUUID();
-    setOrderNumber(orderNumber);
+    const deliveryFee = DELIVERY_FEES[mode]?.fee || 0;
 
     // Construire la commande
-    const order = {
+    const order: {
+      id: string;
+      order_number: string;
+      [key: string]: unknown;
+    } = {
       id: orderUuid,
       order_number: orderNumber,
       customer_phone: phone,
@@ -275,8 +326,8 @@ export default function CartPage() {
         vendor_name: item.vendor?.business_name || item.vendor_id || null,
       })),
       subtotal: total,
-      total_amount: total + (DELIVERY_FEES[mode]?.fee || 0),
-      delivery_fee: DELIVERY_FEES[mode]?.fee || 0,
+      total_amount: total + deliveryFee,
+      delivery_fee: deliveryFee,
       delivery_type: mode,
       commune,
       creneaux: getCreneauText(),
@@ -290,27 +341,6 @@ export default function CartPage() {
       created_at: new Date().toISOString(),
     };
 
-    // Construire le message WhatsApp groupé par partenaire (avec n° de commande)
-    const whatsappText = buildWhatsAppOrderMessage({
-      items,
-      total,
-      mode,
-      commune,
-      creneauText: getCreneauText(),
-      notes,
-      traiteurs,
-      phone,
-      orderId: orderNumber,
-    });
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappText)}`;
-    setWhatsappShareUrl(whatsappUrl);
-
-    // Ouvrir WhatsApp dans un nouvel onglet (dans le geste utilisateur)
-    const opened = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-    if (!opened) {
-      // Si popup bloqué, le bouton « Renvoyer sur WhatsApp » sur la page de confirmation s'activera
-    }
-
     // Sauvegarder en local (fallback uniquement si Supabase échoue)
     const saveLocal = () => {
       try {
@@ -322,36 +352,35 @@ export default function CartPage() {
       }
     };
 
-    // Tenter Supabase si configuré
-    import('../../lib/supabase').then(async ({ supabase }) => {
-      if (supabase) {
-        try {
-          await supabase.from('orders').insert({
-            order_number: orderNumber,
-            customer_phone: phone || 'Non renseigné',
-            commune,
-            delivery_type: mode,
-            subtotal: total,
-            total_amount: total + (DELIVERY_FEES[mode]?.fee || 0),
-            delivery_fee: DELIVERY_FEES[mode]?.fee || 0,
-            source: 'public_checkout',
-            payment_status: 'pending',
-            delivery_status: 'pending',
-            creneaux: getCreneauText(),
-            notes,
-            status: 'pending',
-          });
-        } catch (err) {
-          console.warn('[DELIKREOL] Échec Supabase, fallback localStorage:', err);
-          saveLocal();
-        }
+    try {
+      if (isSupabaseConfigured) {
+        const createdOrder = await createPublicOrder('manual');
+        orderNumber = createdOrder.order_number;
+        order.order_number = orderNumber;
+        order.id = createdOrder.id;
       } else {
         saveLocal();
       }
-    }).catch(() => {
-      console.warn('[DELIKREOL] Supabase non disponible, fallback localStorage');
+    } catch (err) {
+      console.warn('[DELIKREOL] Échec Supabase, fallback localStorage:', err);
       saveLocal();
+    }
+
+    const confirmedWhatsappText = buildWhatsAppOrderMessage({
+      items,
+      total,
+      mode,
+      commune,
+      creneauText: getCreneauText(),
+      notes,
+      traiteurs,
+      phone,
+      orderId: orderNumber,
     });
+    const confirmedWhatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(confirmedWhatsappText)}`;
+    setOrderNumber(orderNumber);
+    setWhatsappShareUrl(confirmedWhatsappUrl);
+    window.open(confirmedWhatsappUrl, '_blank', 'noopener,noreferrer');
 
     setCheckoutStatus('success');
     setMessageSent(true);
@@ -359,6 +388,33 @@ export default function CartPage() {
     setPreparedMessage(`Demande préparée — à confirmer sur WhatsApp.`);
     showSuccess('Demande préparée — à confirmer sur WhatsApp.');
     setTimeout(() => navigate(`/statut-commande?order=${orderNumber}`), 1500);
+  };
+
+  const handleStripeCheckoutClick = async () => {
+    if (!validateOrderForm()) return;
+    if (!stripeTestCheckoutEnabled) {
+      showError('Paiement test indisponible : configuration Stripe test incomplète.');
+      return;
+    }
+
+    setStripeStatus('processing');
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) {
+        showError('Connectez-vous à Mon espace pour tester le paiement CB sécurisé.');
+        setStripeStatus('idle');
+        navigate('/connexion?next=/panier');
+        return;
+      }
+
+      const createdOrder = await createPublicOrder('stripe_test');
+      const checkoutUrl = await createStripeCheckoutSession(createdOrder.id, window.location.origin);
+      window.location.href = checkoutUrl;
+    } catch (err) {
+      console.error('[DELIKREOL] Stripe checkout indisponible:', err);
+      showError('Paiement test indisponible. Utilisez WhatsApp pour confirmer la demande.');
+      setStripeStatus('error');
+    }
   };
 
   useEffect(() => {
@@ -608,14 +664,16 @@ export default function CartPage() {
                 </h3>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-semibold">
-                    Confirmation sur le site
+                    WhatsApp-first
                   </span>
-                  <span className="text-xs px-2 py-0.5 bg-secondary/15 text-secondary rounded-full font-semibold">
-                    Paiement en ligne bientôt disponible
-                  </span>
+                  {stripeTestCheckoutEnabled && (
+                    <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full font-semibold">
+                      Mode test Stripe — aucun vrai paiement
+                    </span>
+                  )}
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Le paiement en ligne n'est pas encore activé sur cette version test. Votre commande est confirmée sur le site et le support WhatsApp est disponible si besoin.
+                  WhatsApp reste le canal principal de confirmation. Le paiement CB est disponible uniquement en test sécurisé quand vous êtes connecté.
                 </p>
               </div>
 
@@ -825,7 +883,7 @@ export default function CartPage() {
                 </div>
               </div>
 
-              {/* Bouton principal — Supabase-first */}
+              {/* Boutons de commande */}
               {checkoutStatus === 'processing' ? (
                 <div className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-primary text-white font-bold rounded-2xl text-lg">
                   Enregistrement en cours...
@@ -835,12 +893,22 @@ export default function CartPage() {
                   onClick={handleWhatsAppClick}
                   className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-primary hover:bg-primary text-white font-bold rounded-2xl transition-all hover:scale-[1.02] shadow-lg shadow-primary/200 text-lg"
                 >
-                  <ShoppingCart className="w-6 h-6" />
-                  Confirmer ma commande sur WhatsApp
+                  <MessageCircle className="w-6 h-6" />
+                  Commander sur WhatsApp
+                </button>
+              )}
+              {stripeTestCheckoutEnabled && (
+                <button
+                  onClick={handleStripeCheckoutClick}
+                  disabled={stripeStatus === 'processing' || checkoutStatus === 'processing'}
+                  className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white hover:bg-amber-50 text-foreground font-bold rounded-2xl border-2 border-amber-300 transition-all disabled:opacity-60"
+                >
+                  <CreditCard className="w-5 h-5" />
+                  {stripeStatus === 'processing' ? 'Préparation Stripe test...' : 'Tester le paiement CB sécurisé'}
                 </button>
               )}
               <p className="text-xs text-center text-muted-foreground">
-                Paiement en ligne bientôt disponible. Pour l'instant, DeliKreol confirme les commandes par WhatsApp.
+                Demande à confirmer : aucun paiement réel n’est activé tant que le go-live Stripe live n’est pas validé.
               </p>
             </div>
           </div>

@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { driveReimportGalleries, driveReimportPortraits } from './driveReimportAssets';
 
 const expectedDrivePreimportCounts = {
-  coco: 26,
+  coco: 27,
   ninice: 11,
   savePeyia: 12,
   saveursAfrique: 13,
