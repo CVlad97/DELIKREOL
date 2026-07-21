@@ -3,9 +3,12 @@ function assetFromPublic(relativePath: string): string {
   return `${import.meta.env.BASE_URL}${clean}`;
 }
 
+const cocoProfile = assetFromPublic('vendors/coco/profile.svg');
+
 export const driveReimportGalleries = {
   coco: [
     assetFromPublic('vendors/coco/drive-reimport/IMG-20260526-WA0064.jpg'),
+    cocoProfile,
     assetFromPublic('vendors/coco/drive-reimport/IMG-20260526-WA0065.jpg'),
     assetFromPublic('vendors/coco/drive-reimport/IMG-20260526-WA0066.jpg'),
     assetFromPublic('vendors/coco/drive-reimport/IMG-20260526-WA0067.jpg'),
@@ -90,11 +93,12 @@ export const driveReimportGalleries = {
 } as const;
 
 export const driveReimportPortraits = {
+  coco: cocoProfile,
   ninice: assetFromPublic('vendors/ninice/drive-reimport/IMG-20260528-WA0212.jpg'),
 } as const;
 
 export const driveReimportArchiveCounts = {
-  coco: 29,
+  coco: 30,
   ninice: 16,
   savePeyia: 17,
   saveursAfrique: 18,
