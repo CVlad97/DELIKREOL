@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { CookiePreferences, DEFAULT_PREFS, loadCookiePrefs, saveCookiePrefs } from '../services/privacy';
 
 export function CookieConsent() {
+  const location = useLocation();
   const [visible, setVisible] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [prefs, setPrefs] = useState<CookiePreferences>(DEFAULT_PREFS);
+  const isAccessRoute = ['/connexion', '/pro', '/partenaire'].some((path) => location.pathname.startsWith(path));
 
   useEffect(() => {
     const saved = loadCookiePrefs();
@@ -33,6 +35,37 @@ export function CookieConsent() {
   };
 
   if (!visible) return null;
+
+  if (isAccessRoute && !showDetails) {
+    return (
+      <aside className="fixed inset-x-2 bottom-2 z-[100] sm:inset-x-auto sm:right-3" aria-label="Préférences de confidentialité">
+        <div className="mx-auto max-w-md rounded-2xl border border-primary/20 bg-white/95 p-3 shadow-2xl backdrop-blur">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="text-sm font-black text-foreground">Confidentialité</h2>
+              <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
+                Cookies nécessaires au panier. Options au choix.
+              </p>
+            </div>
+            <Link to="/cookies" className="shrink-0 text-xs font-bold text-primary underline-offset-2 hover:underline">
+              Infos
+            </Link>
+          </div>
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            <button type="button" onClick={() => setShowDetails(true)} className="min-h-9 rounded-xl px-2 text-xs font-bold text-primary hover:bg-primary/5">
+              Options
+            </button>
+            <button type="button" onClick={acceptNecessary} className="min-h-9 rounded-xl border border-input bg-white px-2 text-xs font-bold text-foreground hover:bg-muted">
+              Refuser
+            </button>
+            <button type="button" onClick={acceptAll} className="min-h-9 rounded-xl bg-primary px-2 text-xs font-bold text-primary-foreground hover:bg-primary">
+              Accepter
+            </button>
+          </div>
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <aside className="fixed inset-x-0 bottom-0 z-[100] p-2 sm:p-3" aria-label="Préférences de confidentialité">
