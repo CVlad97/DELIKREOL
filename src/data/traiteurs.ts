@@ -185,7 +185,7 @@ function resolvePortraitImage(name: string) {
     return driveReimportGalleries.sweetFamily[1] ?? null;
   }
   if (name === 'Gouté Mwen') {
-    return null;
+    return driveReimportPortraits.gouteMwen;
   }
   if (name === 'Chef à Mada') {
     return assetFromPublic('vendors/chef-a-mada/logo.jpg');

@@ -9,7 +9,7 @@ const expectedDrivePreimportCounts = {
   savePeyia: 12,
   saveursAfrique: 12,
   sweetFamily: 11,
-  gouteMwen: 19,
+  gouteMwen: 26,
 } as const;
 
 function publicPathFromAsset(asset: string) {
@@ -35,6 +35,7 @@ describe('driveReimportAssets', () => {
       ...driveReimportGalleries.sweetFamily,
       ...driveReimportGalleries.gouteMwen,
       driveReimportPortraits.ninice,
+      driveReimportPortraits.gouteMwen,
     ];
 
     const missingAssets = publishedAssets.filter((asset) => {
