@@ -70,9 +70,9 @@ export const additionalPartnerProfiles: PartnerProfile[] = [
       'Je suis Vilocy Stacy, Martiniquaise, maman et fondatrice de Gouté Mwen. C\'est un produit par nous et pour nous, spécialisé dans la glace aux saveurs des Antilles.\n\nInvestie dans ma communauté, aspirant à la voir évoluer, j\'ai créé ce produit afin que petits et grands puissent se retrouver. L\'emballage innovant permet de manger à son rythme. Partisane de l\'inclusion totale, j\'ai opté pour des versions sans sucre ajouté ou avec une réduction de sucre.\n\nÀ travers Gouté Mwen, je prône les valeurs du patrimoine en liant la fraîcheur, l\'authenticité et le plaisir.',
     promise: 'Glaces faites maison, fruits locaux, 2€ seulement — inclusion & patrimoine antillais',
     eta: 'À confirmer avec le prestataire',
-    specialty: 'Glaces artisanales : abricot pays, mangue, maracuja, prune cythere, corossol, coco, snow-boll, cocktail — 18 parfums à 2€, sans sucre ajouté dispo',
+    specialty: 'Glaces artisanales : abricot pays, mangue, maracuja, prune cythere, corossol, coco, snow-boll, cocktail — 19 parfums à 2€, sans sucre ajouté dispo',
     highlights: [
-      '18 parfums de glaces artisanales',
+      '19 parfums de glaces artisanales',
       '2€ chaque — prix imbattable',
       'Sans sucre ajouté : Au Nanan de Coco, Canne, Pastèque, Ananas',
       'Emballage innovant — manger à son rythme',

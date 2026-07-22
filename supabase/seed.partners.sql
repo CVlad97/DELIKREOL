@@ -173,8 +173,8 @@ BEGIN
          story = 'Gouté Mwen valorise les saveurs des Antilles avec des glaces artisanales, des fruits locaux et des versions sans sucre ajouté.',
          promise = 'Glaces faites maison, fruits locaux, 2€ seulement — inclusion & patrimoine antillais',
          specialty = 'Glaces artisanales : abricot pays, mangue, maracuja, prune cythère, corossol, coco, snow-boll',
-         hero_image = NULL,
-         portrait_image = NULL,
+         hero_image = '/vendors/goute-mwen/import-20260722/goute-mwen-abricot-pays.jpg',
+         portrait_image = '/vendors/goute-mwen/import-20260722/goute-mwen-super-coco.jpg',
          gradient = 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]',
          accent = '#fff7ed',
          photo_status = 'à confirmer',
@@ -182,8 +182,8 @@ BEGIN
          is_public = true,
          is_active = true,
          is_demo = false,
-         highlights = '["18 parfums de glaces artisanales","2€ chaque","Sans sucre ajouté disponible","Fait maison"]'::jsonb,
-         gallery_images = '[]'::jsonb,
+         highlights = '["19 parfums de glaces artisanales","2€ chaque","Sans sucre ajouté disponible","Fait maison"]'::jsonb,
+         gallery_images = '["/vendors/goute-mwen/import-20260722/goute-mwen-abricot-pays.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-super-coco.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-api.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-mangue.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-canne.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-pasteque.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-pomme-liane.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-citronade.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-ananas.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-prune-de-cythere.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-snow-ball.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-kumquat.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-maracuja.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-prune-maracuja.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-avocat-basilic.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-corossol.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-mandarine.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-cocktail.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-clitoria-corossol.jpg"]'::jsonb,
          delivery_radius_km = 12,
          updated_at = now()
    WHERE lower(coalesce(business_name, name)) = lower('Gouté Mwen')
@@ -191,7 +191,7 @@ BEGIN
 
   IF NOT FOUND THEN
     INSERT INTO public.vendors (name, business_name, legal_name, status, zone_label, commune, phone, whatsapp, email, description, story, promise, specialty, hero_image, portrait_image, gradient, accent, photo_status, public_display_status, is_public, is_active, is_demo, highlights, gallery_images, delivery_radius_km, created_at, updated_at)
-    VALUES ('Gouté Mwen', 'Gouté Mwen', 'Gouté Mwen', 'verified', 'Martinique', 'Martinique', '+596 696 16 61 93', '+596 696 16 61 93', NULL, 'Glaces artisanales antillaises — pur fruit, fait maison, inclusif.', 'Gouté Mwen valorise les saveurs des Antilles avec des glaces artisanales, des fruits locaux et des versions sans sucre ajouté.', 'Glaces faites maison, fruits locaux, 2€ seulement — inclusion & patrimoine antillais', 'Glaces artisanales : abricot pays, mangue, maracuja, prune cythère, corossol, coco, snow-boll', NULL, NULL, 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'à confirmer', 'public confirmé', true, true, false, '["18 parfums de glaces artisanales","2€ chaque","Sans sucre ajouté disponible","Fait maison"]'::jsonb, '[]'::jsonb, 12, now(), now());
+    VALUES ('Gouté Mwen', 'Gouté Mwen', 'Gouté Mwen', 'verified', 'Martinique', 'Martinique', '+596 696 16 61 93', '+596 696 16 61 93', NULL, 'Glaces artisanales antillaises — pur fruit, fait maison, inclusif.', 'Gouté Mwen valorise les saveurs des Antilles avec des glaces artisanales, des fruits locaux et des versions sans sucre ajouté.', 'Glaces faites maison, fruits locaux, 2€ seulement — inclusion & patrimoine antillais', 'Glaces artisanales : abricot pays, mangue, maracuja, prune cythère, corossol, coco, snow-boll', '/vendors/goute-mwen/import-20260722/goute-mwen-abricot-pays.jpg', '/vendors/goute-mwen/import-20260722/goute-mwen-super-coco.jpg', 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'à confirmer', 'public confirmé', true, true, false, '["19 parfums de glaces artisanales","2€ chaque","Sans sucre ajouté disponible","Fait maison"]'::jsonb, '["/vendors/goute-mwen/import-20260722/goute-mwen-abricot-pays.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-super-coco.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-api.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-mangue.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-canne.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-pasteque.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-pomme-liane.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-citronade.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-ananas.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-prune-de-cythere.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-snow-ball.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-kumquat.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-maracuja.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-prune-maracuja.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-avocat-basilic.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-corossol.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-mandarine.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-cocktail.jpg","/vendors/goute-mwen/import-20260722/goute-mwen-clitoria-corossol.jpg"]'::jsonb, 12, now(), now());
   END IF;
 END $$;
 

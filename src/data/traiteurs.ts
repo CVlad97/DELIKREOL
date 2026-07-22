@@ -57,7 +57,7 @@ export type TraiteurSpace = {
 const allPartnerProfiles: PartnerProfile[] = [...partnerProfiles, ...additionalPartnerProfiles];
 
 export const PUBLIC_HIDDEN_TRAITEURS = new Set(['An Tjè Coco']);
-export const PUBLIC_HIDDEN_PRODUCT_TRAITEURS = new Set(['An Tjè Coco', 'Gouté Mwen']);
+export const PUBLIC_HIDDEN_PRODUCT_TRAITEURS = new Set(['An Tjè Coco']);
 
 function resolveHeroImage(name: string) {
   if (name === 'An Tjè Coco') {
@@ -79,7 +79,7 @@ function resolveHeroImage(name: string) {
     return driveReimportGalleries.sweetFamily[0] ?? null;
   }
   if (name === 'Gouté Mwen') {
-    return null;
+    return driveReimportGalleries.gouteMwen[0] ?? null;
   }
   if (name === 'Chef à Mada') {
     return assetFromPublic('vendors/chef-a-mada/logo.jpg');
@@ -107,7 +107,7 @@ function resolveGalleryImages(name: string) {
     return [...driveReimportGalleries.sweetFamily];
   }
   if (name === 'Gouté Mwen') {
-    return [];
+    return [...driveReimportGalleries.gouteMwen];
   }
   if (name === 'Chef à Mada') {
     return [assetFromPublic('vendors/chef-a-mada/logo.jpg')];

@@ -89,6 +89,27 @@ export const driveReimportGalleries = {
     assetFromPublic('vendors/sweet-family/drive-reimport/IMG-20260710-WA0035.jpg'),
     assetFromPublic('vendors/sweet-family/drive-reimport/IMG-20260710-WA0036.jpg'),
   ],
+  gouteMwen: [
+    assetFromPublic('vendors/goute-mwen/import-20260722/goute-mwen-abricot-pays.jpg'),
+    assetFromPublic('vendors/goute-mwen/import-20260722/goute-mwen-super-coco.jpg'),
+    assetFromPublic('vendors/goute-mwen/import-20260722/goute-mwen-api.jpg'),
+    assetFromPublic('vendors/goute-mwen/import-20260722/goute-mwen-mangue.jpg'),
+    assetFromPublic('vendors/goute-mwen/import-20260722/goute-mwen-canne.jpg'),
+    assetFromPublic('vendors/goute-mwen/import-20260722/goute-mwen-pasteque.jpg'),
+    assetFromPublic('vendors/goute-mwen/import-20260722/goute-mwen-pomme-liane.jpg'),
+    assetFromPublic('vendors/goute-mwen/import-20260722/goute-mwen-citronade.jpg'),
+    assetFromPublic('vendors/goute-mwen/import-20260722/goute-mwen-ananas.jpg'),
+    assetFromPublic('vendors/goute-mwen/import-20260722/goute-mwen-prune-de-cythere.jpg'),
+    assetFromPublic('vendors/goute-mwen/import-20260722/goute-mwen-snow-ball.jpg'),
+    assetFromPublic('vendors/goute-mwen/import-20260722/goute-mwen-kumquat.jpg'),
+    assetFromPublic('vendors/goute-mwen/import-20260722/goute-mwen-maracuja.jpg'),
+    assetFromPublic('vendors/goute-mwen/import-20260722/goute-mwen-prune-maracuja.jpg'),
+    assetFromPublic('vendors/goute-mwen/import-20260722/goute-mwen-avocat-basilic.jpg'),
+    assetFromPublic('vendors/goute-mwen/import-20260722/goute-mwen-corossol.jpg'),
+    assetFromPublic('vendors/goute-mwen/import-20260722/goute-mwen-mandarine.jpg'),
+    assetFromPublic('vendors/goute-mwen/import-20260722/goute-mwen-cocktail.jpg'),
+    assetFromPublic('vendors/goute-mwen/import-20260722/goute-mwen-clitoria-corossol.jpg'),
+  ],
 } as const;
 
 export const driveReimportPortraits = {

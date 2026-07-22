@@ -62,7 +62,7 @@ describe('vendorsService', () => {
     expect(merged?.slug).toBe('goute-mwen');
     expect(merged?.status).toBe('public confirmé');
     expect(merged?.heroImage).toBe(fallback?.heroImage);
-    expect(merged?.galleryImages).toEqual([]);
+    expect(merged?.galleryImages).toEqual(fallback?.galleryImages);
     expect(merged?.menuItems.length).toBe(fallback?.menuItems.length);
     expect(merged?.story).toBe(fallback?.story);
     expect(merged?.photoStatus).toBe(fallback?.photoStatus);

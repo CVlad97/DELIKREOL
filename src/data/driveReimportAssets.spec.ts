@@ -9,6 +9,7 @@ const expectedDrivePreimportCounts = {
   savePeyia: 12,
   saveursAfrique: 12,
   sweetFamily: 11,
+  gouteMwen: 19,
 } as const;
 
 function publicPathFromAsset(asset: string) {
@@ -22,6 +23,7 @@ describe('driveReimportAssets', () => {
     expect(driveReimportGalleries.savePeyia).toHaveLength(expectedDrivePreimportCounts.savePeyia);
     expect(driveReimportGalleries.saveursAfrique).toHaveLength(expectedDrivePreimportCounts.saveursAfrique);
     expect(driveReimportGalleries.sweetFamily).toHaveLength(expectedDrivePreimportCounts.sweetFamily);
+    expect(driveReimportGalleries.gouteMwen).toHaveLength(expectedDrivePreimportCounts.gouteMwen);
   });
 
   it('points every published Drive preimport asset to an existing local file', () => {
@@ -31,6 +33,7 @@ describe('driveReimportAssets', () => {
       ...driveReimportGalleries.savePeyia,
       ...driveReimportGalleries.saveursAfrique,
       ...driveReimportGalleries.sweetFamily,
+      ...driveReimportGalleries.gouteMwen,
       driveReimportPortraits.ninice,
     ];
 
