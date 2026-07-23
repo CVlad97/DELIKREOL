@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { PWAUpdatePrompt } from './components/PWAUpdatePrompt';
 import { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
+import { ProtectedPartnerRoute } from './components/ProtectedPartnerRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { ToastProvider } from './contexts/ToastContext';
@@ -39,6 +40,10 @@ const CatererSignupPage = lazy(() => import('./pages/new/CatererSignupPage'));
 const PartnerAccessPage = lazy(() => import('./pages/new/PartnerAccessPage'));
 const PartnerTerminalPage = lazy(() => import('./pages/new/PartnerTerminalPage'));
 const ReviewPage = lazy(() => import('./pages/new/ReviewPage'));
+const PartnerDashboardPage = lazy(async () => {
+  const module = await import('./pages/PartnerDashboardPage');
+  return { default: module.PartnerDashboardPage };
+});
 
 const basePath = import.meta.env.VITE_BASE_PATH || import.meta.env.BASE_URL || '/';
 const routerBaseName = basePath === '/' ? undefined : basePath.replace(/\/$/, '');
@@ -87,6 +92,10 @@ function AdminWrapper() {
   return <ProtectedAdminRoute><Suspense fallback={<PageLoader />}><AdminLayout /></Suspense></ProtectedAdminRoute>;
 }
 
+function PartnerWrapper() {
+  return <ProtectedPartnerRoute><Suspense fallback={<PageLoader />}><PartnerDashboardPage /></Suspense></ProtectedPartnerRoute>;
+}
+
 export function AppRouter() {
   return (
     <ErrorBoundary>
@@ -123,6 +132,9 @@ export function AppRouter() {
                   <Route path="statut-commande" element={<OrderStatusPage />} />
                   <Route path="carte" element={<DiscoveryMapPage />} />
                   <Route path="partenaire" element={<PartnerAccessPage />} />
+                  <Route path="espace-partenaire" element={<PartnerWrapper />} />
+                  <Route path="espace-livreur" element={<PartnerWrapper />} />
+                  <Route path="partner-documents" element={<PartnerWrapper />} />
                   <Route path="terminal-partenaire" element={<PartnerTerminalPage />} />
                   <Route path="avis" element={<ReviewPage />} />
                   <Route path="cgu" element={<TermsOfService />} />

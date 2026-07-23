@@ -19,7 +19,15 @@ import { generateOrderId } from '../../utils/orderId';
 import type { LucideIcon } from 'lucide-react';
 
 const WHATSAPP_NUMBER = '596696653589';
-const DEFAULT_PARTNERS = ["Snack Savè Peyi'A", 'Sweet Family Traiteur', 'Les Délices de Ninice', "Saveurs d'Afrique", "Coco's Food"];
+const DEFAULT_PARTNERS = [
+  "Snack Savè Peyi'A",
+  'Sweet Family Traiteur Orianne',
+  'Les Délices de Ninice',
+  "Saveurs d'Afrique",
+  "Coco's Food",
+  'Gouté Mwen',
+  'Traiteurs de Mada',
+];
 const SECURITY_STEPS: Array<{ title: string; text: string; Icon: LucideIcon }> = [
   { title: 'Encaissement', text: 'Encaissement SumUp manuel ou lien généré dans SumUp', Icon: WalletCards },
   { title: 'Facture', text: 'Brouillon prêt à envoyer email + WhatsApp', Icon: ReceiptText },

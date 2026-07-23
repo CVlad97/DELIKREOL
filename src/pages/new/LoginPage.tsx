@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { KeyRound, Mail, ShieldCheck, Send, Users } from 'lucide-react';
+import { KeyRound, Mail, ShieldCheck, Send, Truck, Users } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
 import { supabase, isDemoMode } from '../../lib/supabase';
 import { trackPublicView } from '../../services/metricsService';
@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [message, setMessage] = useState('');
   const [params] = useSearchParams();
   const navigate = useNavigate();
-  const next = params.get('next') || params.get('redirect') || '/admin';
+  const next = params.get('next') || params.get('redirect') || '/espace-partenaire';
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -32,14 +32,14 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOtp({
       email: cleanEmail,
       options: {
-        shouldCreateUser: false,
+        shouldCreateUser: true,
         emailRedirectTo: redirectTo,
       },
     });
 
     if (error) {
       setStatus('error');
-      setMessage(error.message || 'Impossible d’envoyer le lien. Vérifie que ton compte existe.');
+      setMessage(error.message || 'Impossible d’envoyer le lien. Vérifie l’email ou réessaie dans quelques minutes.');
       return;
     }
 
@@ -73,11 +73,22 @@ export default function LoginPage() {
               Connexion admin
             </Link>
             <Link
-              to="/admin/acces-pilote"
-              className="flex items-center justify-center gap-2 rounded-2xl border border-input bg-white px-4 py-3 text-sm font-black text-foreground transition hover:bg-muted"
+              to="/connexion?next=/espace-partenaire"
+              className={`flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-black transition ${
+                next.startsWith('/espace-partenaire') || next.startsWith('/partner-documents') ? 'border-primary bg-primary text-white' : 'border-input bg-white text-foreground hover:bg-muted'
+              }`}
             >
               <Users className="h-4 w-4" />
-              Accès partenaires
+              Traiteur
+            </Link>
+            <Link
+              to="/connexion?next=/espace-livreur"
+              className={`flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-black transition ${
+                next.startsWith('/espace-livreur') ? 'border-primary bg-primary text-white' : 'border-input bg-white text-foreground hover:bg-muted'
+              }`}
+            >
+              <Truck className="h-4 w-4" />
+              Livreur
             </Link>
           </div>
 
@@ -133,7 +144,7 @@ export default function LoginPage() {
           )}
 
           <div className="mt-6 rounded-2xl bg-muted p-4 text-xs leading-5 text-muted-foreground">
-            Pour l’admin, connecte-toi avec l’email propriétaire. Ensuite ouvre Admin → Accès pilote pour copier les liens partenaires.
+            Traiteurs et livreurs peuvent créer leur accès par email. Si le portail indique “accès à activer”, l’admin doit valider le rôle du compte.
           </div>
 
           <div className="mt-5 flex justify-center gap-4 text-sm font-bold">

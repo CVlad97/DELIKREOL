@@ -44,16 +44,16 @@ export function ProSpacePage() {
             </Link>
 
             <Link
-              to="/partenaire"
+              to="/connexion?next=/espace-partenaire"
               className="rounded-[1.4rem] border border-orange-200 bg-white p-5 transition hover:-translate-y-0.5"
             >
               <div className="inline-flex rounded-xl bg-[#fff3e5] p-2 text-[hsl(var(--primary))]">
                 <Building2 className="h-5 w-5" />
               </div>
               <h2 className="mt-3 text-xl font-black">Accès partenaire</h2>
-              <p className="mt-2 text-sm text-stone-600">Tester le lien pilote reçu et corriger sa fiche partenaire.</p>
+              <p className="mt-2 text-sm text-stone-600">Connexion traiteur, documents, terminal mobile et demandes de correction.</p>
               <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-[#7c2d12]">
-                Ouvrir le portail <ChevronRight className="h-4 w-4" />
+                Se connecter partenaire <ChevronRight className="h-4 w-4" />
               </span>
             </Link>
 
@@ -72,16 +72,16 @@ export function ProSpacePage() {
             </Link>
 
             <Link
-              to="/"
+              to="/connexion?next=/espace-livreur"
               className="rounded-[1.4rem] border border-orange-200 bg-white p-5 transition hover:-translate-y-0.5"
             >
               <div className="inline-flex rounded-xl bg-[#fff3e5] p-2 text-[hsl(var(--primary))]">
                 <Truck className="h-5 w-5" />
               </div>
-              <h2 className="mt-3 text-xl font-black">Retour accueil</h2>
-              <p className="mt-2 text-sm text-stone-600">Catalogue, panier, commande et suivi client.</p>
+              <h2 className="mt-3 text-xl font-black">Accès livreur</h2>
+              <p className="mt-2 text-sm text-stone-600">Dossier livreur, conformité, terminal et suivi des pièces.</p>
               <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-[#7c2d12]">
-                Revenir au site <ChevronRight className="h-4 w-4" />
+                Se connecter livreur <ChevronRight className="h-4 w-4" />
               </span>
             </Link>
           </div>

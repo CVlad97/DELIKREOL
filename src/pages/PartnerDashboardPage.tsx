@@ -1,7 +1,8 @@
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import { AlertCircle, Calendar, CheckCircle2, Clock, CreditCard, FileText, ShieldCheck, Upload, XCircle } from 'lucide-react';
+import { AlertCircle, Calendar, CheckCircle2, Clock, CreditCard, FileText, ShieldCheck, Send, Upload, XCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { supabase, isDemoMode } from '../lib/supabase';
 import {
   buildCompliance,
   getRoleRequirements,
@@ -59,6 +60,8 @@ export function PartnerDashboardPage() {
   const [uploadingType, setUploadingType] = useState<PartnerDocumentType | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<Partial<Record<PartnerDocumentType, File>>>({});
   const [expiresAt, setExpiresAt] = useState<Partial<Record<PartnerDocumentType, string>>>({});
+  const [correctionText, setCorrectionText] = useState('');
+  const [sendingCorrection, setSendingCorrection] = useState(false);
 
   const role = isPartnerRole(profile?.user_type) ? profile.user_type : null;
   const requirements = useMemo(() => getRoleRequirements(role), [role]);
@@ -141,6 +144,42 @@ export function PartnerDashboardPage() {
     }
   };
 
+  const handleCorrectionSubmit = async () => {
+    if (!user || !profile || correctionText.trim().length < 8) {
+      showError('Décrivez précisément la modification demandée.');
+      return;
+    }
+
+    try {
+      setSendingCorrection(true);
+      const payload = {
+        partner_id: `account:${user.id}`,
+        responsable: profile.full_name || user.email || 'Partenaire connecté',
+        email: profile.email || profile.contact_email || user.email || null,
+        telephone: profile.phone,
+        remarques: correctionText.trim(),
+        status: 'pending',
+      };
+
+      if (isDemoMode) {
+        const current = JSON.parse(localStorage.getItem('delikreol_partner_corrections_v1') || '[]');
+        current.push({ ...payload, id: `demo_${Date.now()}`, created_at: new Date().toISOString() });
+        localStorage.setItem('delikreol_partner_corrections_v1', JSON.stringify(current));
+      } else {
+        const { error } = await supabase.from('partner_corrections').insert(payload);
+        if (error) throw error;
+      }
+
+      setCorrectionText('');
+      showSuccess('Demande de modification envoyée à l’admin.');
+    } catch (error) {
+      console.error('Error submitting partner correction:', error);
+      showError('Impossible d’envoyer la modification. Réessayez ou utilisez WhatsApp.');
+    } finally {
+      setSendingCorrection(false);
+    }
+  };
+
   if (!user || !role) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-950 p-4 text-slate-50">
@@ -207,6 +246,37 @@ export function PartnerDashboardPage() {
               Ouvrir le terminal
             </a>
           </div>
+        </section>
+
+        <section className="mt-6 rounded-3xl border border-orange-100 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <h2 className="text-xl font-black">Demander une modification</h2>
+              <p className="mt-1 text-sm leading-6 text-[#6f5b4b]">
+                Envoyez ici les corrections de fiche, photos, prix, horaires, disponibilités ou informations de livraison.
+                L’admin valide avant publication.
+              </p>
+            </div>
+            <span className="rounded-full bg-orange-50 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-orange-700">
+              Validation admin
+            </span>
+          </div>
+          <textarea
+            value={correctionText}
+            onChange={(event) => setCorrectionText(event.target.value)}
+            rows={4}
+            placeholder="Exemple : remplacer la photo du plat X, mettre le prix à 12 €, horaires vendredi/samedi, livraison uniquement planifiée..."
+            className="mt-4 w-full rounded-2xl border border-orange-100 bg-[#fffaf3] px-4 py-3 text-sm outline-none focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+          />
+          <button
+            type="button"
+            disabled={sendingCorrection || correctionText.trim().length < 8}
+            onClick={handleCorrectionSubmit}
+            className="mt-4 inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-orange-600 px-5 py-3 text-sm font-black text-white disabled:bg-slate-300"
+          >
+            <Send className="h-4 w-4" />
+            {sendingCorrection ? 'Envoi...' : 'Envoyer la modification'}
+          </button>
         </section>
 
         {compliance && compliance.missing.length > 0 && (

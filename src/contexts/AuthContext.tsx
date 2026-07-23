@@ -2,16 +2,26 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase, Profile, isDemoMode } from '../lib/supabase';
 
-const allowedGoogleEmails = new Set(
-  (import.meta.env.VITE_GOOGLE_ALLOWED_EMAILS || 'vladimir.claveau@gmail.com')
-    .split(',')
-    .map((email: string) => email.trim().toLowerCase())
-    .filter(Boolean)
-);
-
 const normalizeEmail = (email?: string | null) => email?.trim().toLowerCase() || '';
-const isAllowedGoogleEmail = (email?: string | null) => allowedGoogleEmails.has(normalizeEmail(email));
-const googleAccessError = new Error('Cette connexion Google n\'est pas encore autorisée.');
+
+function buildProfileFromUser(user: User): Omit<Profile, 'created_at'> {
+  const email = normalizeEmail(user.email);
+  const fullName =
+    (user.user_metadata?.full_name as string | undefined) ||
+    (user.user_metadata?.name as string | undefined) ||
+    email.split('@')[0] ||
+    'Utilisateur DeliKreol';
+
+  return {
+    id: user.id,
+    full_name: fullName,
+    phone: null,
+    user_type: 'customer',
+    avatar_url: (user.user_metadata?.avatar_url as string | null | undefined) || null,
+    email,
+    contact_email: email,
+  };
+}
 
 interface AuthContextType {
   user: User | null;
@@ -33,12 +43,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (authUser: User) => {
     if (isDemoMode) {
       try {
         const raw = localStorage.getItem('delikreol_demo_profiles');
         const profiles: Profile[] = raw ? JSON.parse(raw) : [];
-        const p = profiles.find((x) => x.id === userId) ?? null;
+        const p = profiles.find((x) => x.id === authUser.id) ?? null;
         setProfile(p);
       } catch (err) {
         console.error('Error fetching demo profile:', err);
@@ -50,13 +60,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('id', authUser.id)
         .maybeSingle();
 
       if (!error && data) {
         setProfile(data);
       } else if (error) {
         console.error('Error fetching profile:', error);
+      } else {
+        const fallbackProfile = buildProfileFromUser(authUser);
+        const { data: createdProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert(fallbackProfile)
+          .select('*')
+          .maybeSingle();
+
+        if (!createError && createdProfile) {
+          setProfile(createdProfile);
+        } else {
+          const { data: minimalProfile, error: minimalError } = await supabase
+            .from('profiles')
+            .insert({
+              id: fallbackProfile.id,
+              full_name: fallbackProfile.full_name,
+              phone: fallbackProfile.phone,
+              user_type: fallbackProfile.user_type,
+              avatar_url: fallbackProfile.avatar_url,
+            })
+            .select('*')
+            .maybeSingle();
+
+          if (!minimalError && minimalProfile) {
+            setProfile(minimalProfile);
+          } else {
+            console.error('Error creating fallback profile:', createError || minimalError);
+            setProfile({
+              ...fallbackProfile,
+              created_at: new Date().toISOString(),
+            });
+          }
+        }
       }
     } catch (err) {
       console.error('Unexpected error fetching profile:', err);
@@ -65,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshProfile = async () => {
     if (user) {
-      await fetchProfile(user.id);
+      await fetchProfile(user);
     }
   };
 
@@ -78,7 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const sess = JSON.parse(sessRaw) as { userId: string; email?: string };
           const userObj = { id: sess.userId, email: sess.email } as unknown as User;
           setUser(userObj);
-          fetchProfile(sess.userId).finally(() => setLoading(false));
+          fetchProfile(userObj).finally(() => setLoading(false));
         } catch {
           setLoading(false);
         }
@@ -94,7 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchProfile(session.user.id).finally(() => setLoading(false));
+        fetchProfile(session.user).finally(() => setLoading(false));
       } else {
         setLoading(false);
       }
@@ -105,7 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          fetchProfile(session.user.id);
+          fetchProfile(session.user);
         } else {
           setProfile(null);
         }
@@ -165,7 +208,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return { error: profileError as any };
         }
 
-        await fetchProfile(data.user.id);
+        await fetchProfile(data.user);
       }
 
       return { error: null };
@@ -250,20 +293,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const signedInUser = data.user ?? data.session?.user ?? null;
-      const signedInEmail = normalizeEmail(signedInUser?.email ?? null);
-
-      if (!isAllowedGoogleEmail(signedInEmail)) {
-        await supabase.auth.signOut();
-        setUser(null);
-        setSession(null);
-        setProfile(null);
-        return { error: googleAccessError };
-      }
-
       setSession(data.session ?? null);
       setUser(signedInUser);
-      if (signedInUser?.id) {
-        await fetchProfile(signedInUser.id);
+      if (signedInUser) {
+        await fetchProfile(signedInUser);
       }
 
       return { error: null };
