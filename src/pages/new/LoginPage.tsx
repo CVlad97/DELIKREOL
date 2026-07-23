@@ -2,18 +2,28 @@ import { FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { KeyRound, Mail, ShieldCheck, Send, Truck, Users } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
+import { useAuth } from '../../contexts/AuthContext';
 import { supabase, isDemoMode } from '../../lib/supabase';
 import { trackPublicView } from '../../services/metricsService';
 import { setPageMeta } from '../../services/seo';
+import { getAuthCallbackUrl, rememberAuthNext, sanitizeAuthNext } from '../../utils/authRedirect';
 
 export default function LoginPage() {
   useEffect(() => { trackPublicView(); setPageMeta('Connexion — DeliKreol | Espace partenaire', 'Connectez-vous à votre espace DeliKreol. Accès traiteurs, livreurs et administration.'); }, []);
   const [email, setEmail] = useState('');
+  const [otpCode, setOtpCode] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const [params] = useSearchParams();
   const navigate = useNavigate();
-  const next = params.get('next') || params.get('redirect') || '/espace-partenaire';
+  const { user, loading } = useAuth();
+  const next = sanitizeAuthNext(params.get('next') || params.get('redirect'));
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate(next, { replace: true });
+    }
+  }, [loading, user, next, navigate]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -27,13 +37,13 @@ export default function LoginPage() {
     }
 
     const cleanEmail = email.trim().toLowerCase();
-    const redirectTo = `${window.location.origin}${import.meta.env.BASE_URL || '/'}${next.replace(/^\//, '')}`;
+    rememberAuthNext(next);
 
     const { error } = await supabase.auth.signInWithOtp({
       email: cleanEmail,
       options: {
         shouldCreateUser: true,
-        emailRedirectTo: redirectTo,
+        emailRedirectTo: getAuthCallbackUrl(),
       },
     });
 
@@ -44,7 +54,36 @@ export default function LoginPage() {
     }
 
     setStatus('sent');
-    setMessage('Lien envoyé. Ouvre ta boîte mail puis clique sur le lien pour accéder à ton espace.');
+    setMessage('Lien envoyé. Ouvre ta boîte mail puis clique sur le lien. Si tu vois un code à 6 chiffres, saisis-le ici.');
+  }
+
+  async function handleVerifyOtp() {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanToken = otpCode.replace(/\D/g, '');
+
+    if (!cleanEmail || cleanToken.length !== 6) {
+      setStatus('error');
+      setMessage('Entre ton email et le code à 6 chiffres reçu par mail.');
+      return;
+    }
+
+    setStatus('loading');
+    setMessage('');
+    rememberAuthNext(next);
+
+    const { error } = await supabase.auth.verifyOtp({
+      email: cleanEmail,
+      token: cleanToken,
+      type: 'email',
+    });
+
+    if (error) {
+      setStatus('error');
+      setMessage(error.message || 'Code invalide ou expiré. Renvoie un lien puis réessaie.');
+      return;
+    }
+
+    navigate(next, { replace: true });
   }
 
   return (
@@ -119,6 +158,32 @@ export default function LoginPage() {
             </button>
           </form>
 
+          {status === 'sent' && (
+            <div className="mt-5 rounded-2xl border border-input bg-muted p-4">
+              <label className="block text-sm font-bold text-foreground" htmlFor="login-otp">
+                Code reçu par email
+              </label>
+              <div className="mt-3 flex gap-2">
+                <input
+                  id="login-otp"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={otpCode}
+                  onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="123456"
+                  className="min-w-0 flex-1 rounded-2xl border border-input px-4 py-3 text-center text-lg font-black tracking-[0.25em] outline-none focus:border-ring focus:ring-4 focus:ring-ring/30"
+                />
+                <button
+                  type="button"
+                  onClick={handleVerifyOtp}
+                  className="rounded-2xl bg-foreground px-4 py-3 text-sm font-black text-white transition hover:bg-foreground/90"
+                >
+                  Valider
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-input" /></div>
             <div className="relative flex justify-center"><span className="bg-white px-3 text-xs text-muted-foreground">ou</span></div>
@@ -126,9 +191,25 @@ export default function LoginPage() {
 
           <button
             type="button"
-            onClick={() => {
+            onClick={async () => {
               if (isDemoMode) { setStatus('error'); setMessage('Connexion Google indisponible sans Supabase.'); return; }
-              supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}${import.meta.env.BASE_URL || '/'}${next.replace(/^\//, '')}` } });
+              setStatus('loading');
+              setMessage('');
+              rememberAuthNext(next);
+              const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                  redirectTo: getAuthCallbackUrl(),
+                  queryParams: {
+                    prompt: 'select_account',
+                  },
+                },
+              });
+
+              if (error) {
+                setStatus('error');
+                setMessage(error.message || 'Connexion Google indisponible. Essaie avec le lien email.');
+              }
             }}
             disabled={status === 'loading'}
             className="flex w-full items-center justify-center gap-3 rounded-2xl border border-gray-300 bg-white px-5 py-3 font-bold text-foreground shadow-sm transition hover:bg-muted disabled:opacity-60"

@@ -21,7 +21,15 @@ export const isDemoMode =
 let client: SupabaseClient;
 
 if (isSupabaseConfigured) {
-  client = createClient(supabaseUrl!, supabaseAnonKey!);
+  client = createClient(supabaseUrl!, supabaseAnonKey!, {
+    auth: {
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce',
+      persistSession: true,
+      storageKey: 'delikreol-auth-session',
+    },
+  });
 } else {
   console.warn(
     '[DELIKREOL] Supabase non configuré. Définissez VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY pour activer les données.'
