@@ -97,6 +97,10 @@ function PartnerWrapper() {
   return <ProtectedPartnerRoute><Suspense fallback={<PageLoader />}><PartnerDashboardPage /></Suspense></ProtectedPartnerRoute>;
 }
 
+function PartnerTerminalWrapper() {
+  return <ProtectedPartnerRoute><Suspense fallback={<PageLoader />}><PartnerTerminalPage /></Suspense></ProtectedPartnerRoute>;
+}
+
 export function AppRouter() {
   return (
     <ErrorBoundary>
@@ -137,7 +141,7 @@ export function AppRouter() {
                   <Route path="espace-partenaire" element={<PartnerWrapper />} />
                   <Route path="espace-livreur" element={<PartnerWrapper />} />
                   <Route path="partner-documents" element={<PartnerWrapper />} />
-                  <Route path="terminal-partenaire" element={<PartnerTerminalPage />} />
+                  <Route path="terminal-partenaire" element={<PartnerTerminalWrapper />} />
                   <Route path="avis" element={<ReviewPage />} />
                   <Route path="cgu" element={<TermsOfService />} />
                   <Route path="cgv" element={<CGVPage />} />
