@@ -53,9 +53,18 @@ export default defineConfig(({ mode }) => {
       cssMinify: true,
       rollupOptions: {
         output: {
-          manualChunks: {
-            'map-vendor': ['leaflet', 'react-leaflet'],
-            'qr-vendor': ['html5-qrcode', 'qrcode.react'],
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return undefined;
+            if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/react-router') || id.includes('/@supabase/')) {
+              return 'app-vendor';
+            }
+            if (id.includes('/leaflet/') || id.includes('/react-leaflet/')) {
+              return 'map-vendor';
+            }
+            if (id.includes('/html5-qrcode/') || id.includes('/qrcode.react/')) {
+              return 'qr-vendor';
+            }
+            return undefined;
           },
         },
       },

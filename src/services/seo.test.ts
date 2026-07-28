@@ -22,4 +22,17 @@ describe('seo service', () => {
     const ogTitle = document.querySelector('meta[property="og:title"]');
     expect(ogTitle?.getAttribute('content')).toBe('Updated');
   });
+
+  it('should update canonical and social URL from current route', () => {
+    window.history.replaceState({}, '', '/catalogue?q=colombo');
+
+    setPageMeta('Catalogue', 'Catalogue desc');
+
+    const canonical = document.querySelector('link[rel="canonical"]');
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    const twitterUrl = document.querySelector('meta[name="twitter:url"]');
+    expect(canonical?.getAttribute('href')).toBe('https://delikreol.com/catalogue');
+    expect(ogUrl?.getAttribute('content')).toBe('https://delikreol.com/catalogue');
+    expect(twitterUrl?.getAttribute('content')).toBe('https://delikreol.com/catalogue');
+  });
 });

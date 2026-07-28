@@ -4,12 +4,12 @@ import { describe, expect, it } from 'vitest';
 import { driveReimportGalleries, driveReimportPortraits } from './driveReimportAssets';
 
 const expectedDrivePreimportCounts = {
-  coco: 30,
-  ninice: 16,
-  savePeyia: 17,
-  saveursAfrique: 18,
+  coco: 27,
+  ninice: 12,
+  savePeyia: 10,
+  saveursAfrique: 13,
   sweetFamily: 18,
-  gouteMwen: 26,
+  gouteMwen: 20,
 } as const;
 
 function publicPathFromAsset(asset: string) {
@@ -17,7 +17,7 @@ function publicPathFromAsset(asset: string) {
 }
 
 describe('driveReimportAssets', () => {
-  it('matches the validated Drive preimport counts', () => {
+  it('matches the curated bankable Drive preimport counts', () => {
     expect(driveReimportGalleries.coco).toHaveLength(expectedDrivePreimportCounts.coco);
     expect(driveReimportGalleries.ninice).toHaveLength(expectedDrivePreimportCounts.ninice);
     expect(driveReimportGalleries.savePeyia).toHaveLength(expectedDrivePreimportCounts.savePeyia);

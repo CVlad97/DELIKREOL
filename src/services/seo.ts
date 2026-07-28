@@ -16,6 +16,27 @@ export interface MetaConfig {
   robots?: 'index, follow' | 'noindex, follow';
 }
 
+const SITE_ORIGIN = 'https://delikreol.com';
+const DEFAULT_SHARE_IMAGE = `${SITE_ORIGIN}/branding/hero-tropical.png`;
+
+function getCanonicalUrl(): string {
+  if (typeof window === 'undefined') return `${SITE_ORIGIN}/`;
+
+  const path = window.location.pathname || '/';
+  const normalizedPath = path === '/' ? '/' : path.replace(/\/+$/, '');
+  return `${SITE_ORIGIN}${normalizedPath}`;
+}
+
+function upsertCanonical(href: string): void {
+  let el = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+  if (!el) {
+    el = document.createElement('link');
+    el.setAttribute('rel', 'canonical');
+    document.head.appendChild(el);
+  }
+  el.setAttribute('href', href);
+}
+
 /**
  * Réinitialise ou crée les balises meta OG, Twitter, description et keywords dans le <head>.
  * Remplace les contenus existants pour les balises ciblées.
@@ -33,8 +54,9 @@ export interface MetaConfig {
  */
 export function setPageMeta(title: string, description: string, keywords?: string, robots?: 'index, follow' | 'noindex, follow'): void {
   document.title = title;
-  const canonicalUrl = 'https://delikreol.com/';
-  const shareImage = 'https://delikreol.com/branding/hero-tropical.png';
+  const canonicalUrl = getCanonicalUrl();
+  const shareImage = DEFAULT_SHARE_IMAGE;
+  upsertCanonical(canonicalUrl);
 
   /**
    * Helper interne : crée ou met à jour une balise meta.
@@ -60,12 +82,14 @@ export function setPageMeta(title: string, description: string, keywords?: strin
   upsertMeta('property', 'og:url', canonicalUrl);
   upsertMeta('property', 'og:image', shareImage);
   upsertMeta('property', 'og:locale', 'fr_MQ');
+  upsertMeta('property', 'og:site_name', 'DeliKreol');
 
   // Twitter Card
   upsertMeta('name', 'twitter:card', 'summary_large_image');
   upsertMeta('name', 'twitter:title', title);
   upsertMeta('name', 'twitter:description', description);
   upsertMeta('name', 'twitter:image', shareImage);
+  upsertMeta('name', 'twitter:url', canonicalUrl);
 
   // Meta description & keywords
   upsertMeta('name', 'description', description);

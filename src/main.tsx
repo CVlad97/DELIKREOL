@@ -42,19 +42,7 @@ const root = createRoot(document.getElementById('root')!);
 
 root.render(<Loader />);
 
-async function bootstrap() {
-  // Clear the obsolete StaleWhileRevalidate image cache before public media
-  // begins loading. The active cache is preserved for offline use.
-  await clearLegacyImageCaches();
-
-  try {
-    await primePublicVendors();
-  } catch (error) {
-    if (import.meta.env.DEV) {
-      console.warn('[bootstrap] Partner hydration failed; static catalogue retained', error);
-    }
-  }
-
+function renderApp() {
   root.render(
     <StrictMode>
       <Suspense fallback={<Loader />}>
@@ -66,6 +54,21 @@ async function bootstrap() {
   window.setTimeout(() => {
     sessionStorage.removeItem(PRELOAD_RELOAD_KEY);
   }, PRELOAD_RETRY_WINDOW_MS);
+}
+
+async function bootstrap() {
+  renderApp();
+
+  void clearLegacyImageCaches();
+
+  try {
+    await primePublicVendors();
+    renderApp();
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.warn('[bootstrap] Partner hydration failed; static catalogue retained', error);
+    }
+  }
 }
 
 void bootstrap();

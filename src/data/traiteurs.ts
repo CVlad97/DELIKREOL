@@ -170,7 +170,7 @@ function resolvePortraitImage(name: string) {
     return driveReimportPortraits.ninice ?? assetFromPublic('vendors/ninice/portrait-full.jpg');
   }
   if (name === 'An Tjè Coco') {
-    return assetFromPublic('vendors/an-tje-coco/gallery-05.jpg');
+    return null;
   }
   if (name === "Coco's Food") {
     return driveReimportGalleries.coco[1] ?? null;

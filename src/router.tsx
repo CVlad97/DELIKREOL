@@ -8,12 +8,24 @@ import { ProtectedPartnerRoute } from './components/ProtectedPartnerRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { ToastProvider } from './contexts/ToastContext';
-import { ProSpacePage } from './pages/ProSpacePage';
-import { ProPartnerPlatformPage } from './pages/new/ProPartnerPlatformPage';
-import { OrderStatusPage } from './pages/OrderStatusPage';
-import { DiscoveryMapPage } from './pages/DiscoveryMapPage';
 
 const HomePage = lazy(() => import('./pages/new/HomePage'));
+const ProSpacePage = lazy(async () => {
+  const module = await import('./pages/ProSpacePage');
+  return { default: module.ProSpacePage };
+});
+const ProPartnerPlatformPage = lazy(async () => {
+  const module = await import('./pages/new/ProPartnerPlatformPage');
+  return { default: module.ProPartnerPlatformPage };
+});
+const OrderStatusPage = lazy(async () => {
+  const module = await import('./pages/OrderStatusPage');
+  return { default: module.OrderStatusPage };
+});
+const DiscoveryMapPage = lazy(async () => {
+  const module = await import('./pages/DiscoveryMapPage');
+  return { default: module.DiscoveryMapPage };
+});
 const LoginPage = lazy(() => import('./pages/new/LoginPage'));
 const CataloguePage = lazy(() => import('./pages/new/CataloguePage'));
 const ProductDetailPage = lazy(() => import('./pages/new/ProductDetailPage'));

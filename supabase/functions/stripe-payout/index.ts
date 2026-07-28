@@ -1,182 +1,174 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import Stripe from 'https://esm.sh/stripe@14.21.0?target=deno'
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "npm:@supabase/supabase-js@2.57.4";
+import Stripe from "npm:stripe@19.3.1";
 
-const stripeKey = Deno.env.get('STRIPE_SECRET_KEY') || ''
-const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16', httpClient: Stripe.createFetchHttpClient() })
+const allowedOrigins = new Set([
+  "https://delikreol.com",
+  "https://www.delikreol.com",
+  "https://cvlad97.github.io",
+  "http://localhost:5173",
+]);
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || ''
-const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+function corsHeaders(req: Request) {
+  const origin = req.headers.get("origin") || "";
+  return {
+    "Access-Control-Allow-Origin": allowedOrigins.has(origin) ? origin : "https://delikreol.com",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+  };
 }
 
-/** Corps de la requête attendue */
-interface PayoutRequest {
-  /** Stripe Connect account ID du livreur */
-  driverStripeAccountId: string
-  /** Montant en EUR (ex: 15.00) */
-  amount: number
-  /** Identifiant de la mission/livraison concernée */
-  orderId: string
+function json(req: Request, body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders(req), "Content-Type": "application/json" },
+  });
 }
 
-/**
- * Vérifie que le header Authorization contient un token JWT valide
- * avec le rôle 'admin' (service_role).
- */
-async function verifyAdminAuth(
-  supabase: ReturnType<typeof createClient>,
-  req: Request,
-): Promise<boolean> {
-  const authHeader = req.headers.get('Authorization') || req.headers.get('authorization')
-  if (!authHeader) return false
+function assertEnv(name: string) {
+  const value = Deno.env.get(name);
+  if (!value) throw new Error(`Missing environment variable: ${name}`);
+  return value;
+}
 
-  const token = authHeader.replace(/^Bearer\s+/i, '')
+function toCents(value: unknown) {
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? Math.round(parsed * 100) : 0;
+}
+
+Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders(req) });
+  if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
 
   try {
-    const { data: { user }, error } = await supabase.auth.getUser(token)
-    if (error || !user) return false
+    const authHeader = req.headers.get("authorization") || "";
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    if (!token) return json(req, { error: "Authentication required" }, 401);
 
-    // Vérifier que l'utilisateur a le rôle admin via la table profiles
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
+    const admin = createClient(assertEnv("SUPABASE_URL"), assertEnv("SUPABASE_SERVICE_ROLE_KEY"));
+    const { data: authData, error: authError } = await admin.auth.getUser(token);
+    if (authError || !authData.user) return json(req, { error: "Invalid session" }, 401);
 
-    return profile?.role === 'admin'
-  } catch {
-    console.warn('[stripe] Auth admin échouée — token JWT invalide')
-    return false
-  }
-}
+    const { data: profile } = await admin
+      .from("profiles")
+      .select("role")
+      .eq("id", authData.user.id)
+      .single();
+    if (profile?.role !== "admin") return json(req, { error: "Admin role required" }, 403);
 
-/**
- * Crée un transfert Stripe vers le compte Connect d'un livreur.
- *
- * POST /stripe-payout
- * Body: { driverStripeAccountId, amount, orderId }
- * Auth: admin (Authorization: Bearer <service_role_key or JWT>)
- *
- * @returns { transfer: Transfer } L'objet transfert Stripe créé
- */
-serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+    const body = await req.json();
+    const orderId = typeof body.orderId === "string" ? body.orderId : "";
+    if (!orderId) return json(req, { error: "orderId is required" }, 400);
 
-  try {
-    // --- Vérification admin ---
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-    const isAdmin = await verifyAdminAuth(supabase, req)
+    const { data: order, error: orderError } = await admin
+      .from("orders")
+      .select("id, order_number, payment_status, status")
+      .eq("id", orderId)
+      .single();
+    if (orderError || !order) return json(req, { error: "Order not found" }, 404);
+    if (order.payment_status !== "paid") return json(req, { error: "Order not paid" }, 409);
+    if (["cancelled"].includes(order.status)) return json(req, { error: "Order cancelled" }, 409);
 
-    if (!isAdmin) {
-      console.warn('[stripe] Tentative de payout non autorisée')
-      return new Response(JSON.stringify({ error: 'Accès non autorisé — rôle admin requis' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 401,
-      })
+    const { data: existingPayout } = await admin
+      .from("payouts")
+      .select("id, status, stripe_transfer_id")
+      .eq("order_id", orderId)
+      .in("status", ["pending", "processing", "paid"])
+      .maybeSingle();
+    if (existingPayout) {
+      return json(req, {
+        error: "Payout already exists",
+        payout: existingPayout,
+      }, 409);
     }
 
-    // --- Validation du body ---
-    const body: PayoutRequest = await req.json()
-    const { driverStripeAccountId, amount, orderId } = body
+    const { data: items, error: itemsError } = await admin
+      .from("order_items")
+      .select("vendor_id, subtotal, vendor_commission")
+      .eq("order_id", orderId);
+    if (itemsError) throw itemsError;
+    if (!items || items.length === 0) return json(req, { error: "Order has no items" }, 400);
 
-    if (!driverStripeAccountId) {
-      throw new Error('Champ obligatoire : driverStripeAccountId')
-    }
-    if (!amount || amount <= 0) {
-      throw new Error('Montant invalide (doit être > 0)')
-    }
-    if (!orderId) {
-      throw new Error('Champ obligatoire : orderId')
-    }
+    const vendorIds = Array.from(new Set(items.map((item) => item.vendor_id).filter(Boolean))) as string[];
+    if (vendorIds.length !== 1) return json(req, { error: "Payout multi-vendeur non supporté" }, 409);
 
-    const amountInCents = Math.round(amount * 100)
-    console.log(`[stripe] Création transfert — ${amount} EUR vers ${driverStripeAccountId} (commande: ${orderId})`)
-
-    // --- Vérification que la commande existe et est payée ---
-    const { data: order, error: orderCheckError } = await supabase
-      .from('orders')
-      .select('id, status, payment_status')
-      .eq('id', orderId)
-      .single()
-
-    if (orderCheckError || !order) {
-      throw new Error(`Commande ${orderId} introuvable`)
-    }
-    if (order.payment_status !== 'paid' && order.status !== 'payée') {
-      throw new Error(`Commande ${orderId} non payée (status: ${order.payment_status || order.status}) — payout impossible`)
+    const { data: vendor, error: vendorError } = await admin
+      .from("vendors")
+      .select("stripe_connect_account_id, stripe_charges_enabled, stripe_payouts_enabled")
+      .eq("id", vendorIds[0])
+      .single();
+    if (vendorError || !vendor) return json(req, { error: "Vendor not found" }, 404);
+    if (!vendor.stripe_charges_enabled || !vendor.stripe_payouts_enabled || !vendor.stripe_connect_account_id?.startsWith("acct_")) {
+      return json(req, { error: "Compte Stripe Connect vendeur incomplet" }, 409);
     }
 
-    // --- Vérification que le livreur a les droits Stripe ---
-    const { data: driver } = await supabase
-      .from('drivers')
-      .select('stripe_payouts_enabled, stripe_status')
-      .eq('stripe_connect_account_id', driverStripeAccountId)
-      .single()
+    const eligibleCents = items.reduce((sum, item) => {
+      const subtotalCents = toCents(item.subtotal);
+      const commissionCents = toCents(item.vendor_commission);
+      return sum + Math.max(subtotalCents - commissionCents, 0);
+    }, 0);
+    if (eligibleCents <= 0) return json(req, { error: "No eligible payout amount" }, 400);
 
-    if (!driver) {
-      console.warn('[stripe] Livreur non trouvé dans drivers, transfert quand même...')
-    } else if (!driver.stripe_payouts_enabled) {
-      throw new Error(`Le livreur n'a pas les paiements activés (stripe_payouts_enabled=${driver.stripe_payouts_enabled})`)
+    const stripe = new Stripe(assertEnv("STRIPE_SECRET_KEY"), {
+      apiVersion: "2026-02-25.clover",
+    });
+    const account = await stripe.accounts.retrieve(vendor.stripe_connect_account_id);
+    if (!account.charges_enabled || !account.payouts_enabled) {
+      return json(req, { error: "Stripe Connect account not ready" }, 409);
     }
 
-    // Génération d'une clé d'idempotence pour éviter les doublons Stripe
-    const idempotencyKey = `payout_${orderId}_${Date.now()}`
-
-    // --- Création du transfert Stripe ---
-    const transfer = await stripe.transfers.create({
-      amount: amountInCents,
-      currency: 'eur',
-      destination: driverStripeAccountId,
-      description: `Paiement livreur — Commande ${orderId}`,
-      metadata: {
-        orderId,
+    const transfer = await stripe.transfers.create(
+      {
+        amount: eligibleCents,
+        currency: "eur",
+        destination: vendor.stripe_connect_account_id,
+        description: `Reversement vendeur DELIKREOL ${order.order_number || orderId}`,
+        metadata: {
+          order_id: orderId,
+          order_number: order.order_number || "",
+          vendor_id: vendorIds[0],
+        },
       },
-    }, {
-      idempotencyKey,
-    })
+      { idempotencyKey: `delikreol_payout_${orderId}` },
+    );
 
-    console.log(`[stripe] Transfert créé : ${transfer.id}`)
+    const { error: payoutError } = await admin.from("payouts").insert({
+      order_id: orderId,
+      amount: eligibleCents / 100,
+      currency: "eur",
+      stripe_transfer_id: transfer.id,
+      status: "paid",
+      requested_by: authData.user.id,
+      metadata: {
+        stripe_account_id: vendor.stripe_connect_account_id,
+        vendor_id: vendorIds[0],
+        eligible_cents: eligibleCents,
+      },
+    });
+    if (payoutError) throw payoutError;
 
-    // --- Enregistrement dans la table payouts ---
-    const { error: payoutError } = await supabase
-      .from('payouts')
-      .insert({
-        stripe_transfer_id: transfer.id,
-        stripe_account_id: driverStripeAccountId,
-        order_id: orderId,
-        amount,
-        currency: 'eur',
-        status: 'completed',
-        description: `Paiement livreur — Commande ${orderId}`,
-      })
+    await admin.from("order_events").insert({
+      order_id: orderId,
+      event_type: "seller_payout_paid",
+      payload: {
+        transfer_id: transfer.id,
+        amount_cents: eligibleCents,
+        vendor_id: vendorIds[0],
+      },
+    });
 
-    if (payoutError) {
-      console.warn('[stripe] Erreur enregistrement payout dans Supabase :', payoutError.message)
-    }
-
-    return new Response(JSON.stringify({
+    return json(req, {
       success: true,
       transfer: {
         id: transfer.id,
-        amount,
-        currency: 'eur',
-        destination: driverStripeAccountId,
-        status: 'completed',
+        amount_cents: eligibleCents,
+        currency: "eur",
+        destination: vendor.stripe_connect_account_id,
       },
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    })
-  } catch (err) {
-    console.error('[stripe] Erreur stripe-payout :', (err as Error).message)
-    return new Response(JSON.stringify({ error: (err as Error).message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400,
-    })
+    });
+  } catch (error) {
+    console.error("[stripe] payout error", error instanceof Error ? error.message : String(error));
+    return json(req, { error: "Unable to create payout" }, 500);
   }
-})
+});

@@ -3,9 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
 
     <title>DeliKreol — Commandez créole local en Martinique | Livraison & Traiteur</title>
     <meta name="description" content="Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait. Commandez en ligne vos plats maison." />
@@ -17,6 +14,7 @@
     <link rel="icon" type="image/svg+xml" href="%BASE_URL%branding/favicon.svg" />
     <link rel="manifest" href="%BASE_URL%manifest.json" />
     <link rel="apple-touch-icon" href="%BASE_URL%branding/app-icon.svg" />
+    <link rel="preload" as="image" href="%BASE_URL%branding/hero-tropical-714.webp" type="image/webp" fetchpriority="high" />
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content="DeliKreol — Commandez créole local en Martinique" />
@@ -34,7 +32,7 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "LocalBusiness",
+        "@type": ["LocalBusiness", "FoodEstablishment"],
         "name": "DeliKreol",
         "description": "Commande de plats créoles en Martinique. Traiteurs locaux, livraison et retrait.",
         "url": "https://delikreol.com/",
@@ -57,6 +55,19 @@
         "sameAs": [
           "https://wa.me/596696653589"
         ]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "DeliKreol",
+        "url": "https://delikreol.com/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://delikreol.com/catalogue?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
       }
     </script>
 

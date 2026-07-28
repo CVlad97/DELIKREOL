@@ -4,10 +4,8 @@ function assetFromPublic(relativePath: string): string {
 }
 
 export const anTjeCocoAssets = {
-  hero: assetFromPublic('vendors/an-tje-coco/gallery-05.jpg'),
-  gallery: [
-    assetFromPublic('vendors/an-tje-coco/gallery-05.jpg'),
-  ],
+  hero: null,
+  gallery: [],
 };
 
 export const cocoFoodAssets = {

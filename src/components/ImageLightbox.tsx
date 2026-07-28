@@ -71,6 +71,7 @@ export function ImageLightbox({ images, initialIndex = 0, onClose }: ImageLightb
             onClick={(e) => { e.stopPropagation(); setZoomed(!zoomed); }}
             className="p-2.5 rounded-full bg-white/10 text-white hover:bg-white/25 transition-all backdrop-blur-sm"
             title={zoomed ? 'Dézoomer' : 'Zoomer (clic sur l\'image)'}
+            aria-label={zoomed ? 'Dézoomer la photo' : 'Zoomer la photo'}
           >
             {zoomed ? <ZoomOut className="w-5 h-5" /> : <ZoomIn className="w-5 h-5" />}
           </button>
@@ -78,6 +79,7 @@ export function ImageLightbox({ images, initialIndex = 0, onClose }: ImageLightb
             onClick={(e) => { e.stopPropagation(); setFullscreen(!fullscreen); }}
             className="p-2.5 rounded-full bg-white/10 text-white hover:bg-white/25 transition-all backdrop-blur-sm"
             title="Plein écran (F)"
+            aria-label="Afficher la photo en plein écran"
           >
             <Maximize2 className="w-5 h-5" />
           </button>
@@ -85,6 +87,7 @@ export function ImageLightbox({ images, initialIndex = 0, onClose }: ImageLightb
             onClick={onClose}
             className="p-2.5 rounded-full bg-white/10 text-white hover:bg-white/25 transition-all backdrop-blur-sm"
             title="Fermer (Échap)"
+            aria-label="Fermer la photo en gros plan"
           >
             <X className="w-5 h-5" />
           </button>
@@ -97,12 +100,14 @@ export function ImageLightbox({ images, initialIndex = 0, onClose }: ImageLightb
           <button
             onClick={(e) => { e.stopPropagation(); goPrev(); }}
             className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-white/10 text-white hover:bg-white/25 transition-all backdrop-blur-sm opacity-60 hover:opacity-100"
+            aria-label="Photo précédente"
           >
             <ChevronLeft className="w-8 h-8" />
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); goNext(); }}
             className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-white/10 text-white hover:bg-white/25 transition-all backdrop-blur-sm opacity-60 hover:opacity-100"
+            aria-label="Photo suivante"
           >
             <ChevronRight className="w-8 h-8" />
           </button>

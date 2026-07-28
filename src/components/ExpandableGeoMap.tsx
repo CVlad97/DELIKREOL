@@ -158,11 +158,14 @@ export default function ExpandableGeoMap() {
   return (
     <div className="bg-white rounded-2xl border border-primary/20 overflow-hidden shadow-sm transition-all duration-300">
       {/* Header toujours visible */}
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-primary/[0.08] transition-colors"
-      >
-        <div className="flex items-center gap-3">
+      <div className="flex w-full items-center justify-between gap-3 p-4 hover:bg-primary/[0.08] transition-colors">
+        <button
+          type="button"
+          onClick={() => setExpanded(!expanded)}
+          aria-expanded={expanded}
+          aria-controls="home-geo-map-panel"
+          className="flex min-w-0 flex-1 items-center gap-3 rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
           <div className="w-10 h-10 rounded-xl bg-primary/[0.15] flex items-center justify-center">
             <MapPin className="w-5 h-5 text-primary" />
           </div>
@@ -174,12 +177,13 @@ export default function ExpandableGeoMap() {
                 : 'Activez votre position pour voir les traiteurs près de chez vous'}
             </p>
           </div>
-        </div>
+        </button>
         <div className="flex items-center gap-2">
           {!userPosition && !geoLoading && (
             <button
-              onClick={(e) => { e.stopPropagation(); handleGeoRequest(); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary/90 text-white text-xs font-bold rounded-lg transition-colors"
+              type="button"
+              onClick={handleGeoRequest}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary/90 text-white text-xs font-bold rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <Locate className="w-3 h-3" />
               Me localiser
@@ -190,7 +194,7 @@ export default function ExpandableGeoMap() {
           )}
           {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
         </div>
-      </button>
+      </div>
 
       {/* Légende des couleurs */}
       {expanded && (
@@ -203,7 +207,7 @@ export default function ExpandableGeoMap() {
 
       {/* Carte Leaflet */}
       {expanded && (
-        <div ref={mapRef} className="w-full h-[400px] md:h-[500px] bg-muted" />
+        <div id="home-geo-map-panel" ref={mapRef} className="w-full h-[400px] md:h-[500px] bg-muted" />
       )}
 
       {/* Liste des partenaires */}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Search,
@@ -29,7 +29,6 @@ import { PUBLIC_HIDDEN_PRODUCT_TRAITEURS, PUBLIC_HIDDEN_TRAITEURS, traiteurSpace
 import { useToast } from '../../contexts/ToastContext';
 import { isUsableThumbnail } from '../../services/catalogImageResolver';
 import { resolveTraiteurCoords } from '../../services/partnerGeo';
-import ExpandableGeoMap from '../../components/ExpandableGeoMap';
 import { HowItWorksCompact } from '../../components/HowItWorksCompact';
 import { AutoCarousel } from '../../components/AutoCarousel';
 import { ScrollCarousel } from '../../components/ScrollCarousel';
@@ -40,6 +39,8 @@ import { setPageMeta } from '../../services/seo';
 import { trackPublicView } from '../../services/metricsService';
 import { loadLocalReviews } from './ReviewPage';
 import type { ReviewItem } from './ReviewPage';
+
+const ExpandableGeoMap = lazy(() => import('../../components/ExpandableGeoMap'));
 
 const WHATSAPP_NUMBER = '596696653589';
 const MADA_BADGE_TRAITEURS = new Set([
@@ -341,14 +342,22 @@ export default function HomePage() {
       {/* Hero Section — concept moderne orienté conversion */}
       <section className="relative isolate overflow-hidden bg-background text-foreground">
         <div className="absolute inset-0">
-          <img
-            loading="eager"
-            {...{ fetchpriority: 'high' }}
-            decoding="async"
-            src={`${import.meta.env.BASE_URL}branding/hero-tropical.png`}
-            alt="Livraison DeliKreol en Martinique"
-            className="h-full w-full object-cover object-center opacity-[0.32] lg:opacity-55"
-          />
+          <picture>
+            <source
+              srcSet={`${import.meta.env.BASE_URL}branding/hero-tropical-714.webp`}
+              type="image/webp"
+            />
+            <img
+              loading="eager"
+              {...{ fetchpriority: 'high' }}
+              decoding="async"
+              src={`${import.meta.env.BASE_URL}branding/hero-tropical.png`}
+              alt="Livraison DeliKreol en Martinique"
+              className="h-full w-full object-cover object-center opacity-[0.32] lg:opacity-55"
+              width={714}
+              height={720}
+            />
+          </picture>
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(251,146,60,0.14),transparent_28%),radial-gradient(circle_at_86%_20%,rgba(16,185,129,0.1),transparent_24%),linear-gradient(90deg,rgba(255,253,248,0.98)_0%,rgba(255,249,239,0.94)_48%,rgba(255,253,248,0.38)_100%)]" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/85" />
         </div>
@@ -589,7 +598,16 @@ export default function HomePage() {
               Active la géolocalisation pour voir les partenaires autour de toi sur la carte
             </p>
           </div>
-          <ExpandableGeoMap />
+          <Suspense
+            fallback={
+              <div className="rounded-2xl border border-primary/20 bg-white p-5 shadow-sm">
+                <div className="h-5 w-48 rounded-full animate-shimmer" />
+                <div className="mt-4 h-[320px] rounded-2xl animate-shimmer md:h-[420px]" />
+              </div>
+            }
+          >
+            <ExpandableGeoMap />
+          </Suspense>
         </div>
       </section>
 
@@ -810,7 +828,7 @@ export default function HomePage() {
               { name: 'Ninice', slug: 'ninice', image: `${import.meta.env.BASE_URL}vendors/ninice/drive-reimport/IMG-20260521-WA0070.jpg` },
               { name: "Coco's Food", slug: 'coco', image: `${import.meta.env.BASE_URL}vendors/coco/drive-reimport/IMG-20260526-WA0064.jpg` },
               { name: "Saveurs d'Afrique", slug: 'saveurs-afrique', image: `${import.meta.env.BASE_URL}vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0156.jpg` },
-              { name: 'Snack Save Peyi\'A', slug: 'save-peyia', image: `${import.meta.env.BASE_URL}vendors/save-peyia/drive-reimport/IMG-20260710-WA0005.jpg` },
+              { name: 'Snack Save Peyi\'A', slug: 'save-peyia', image: `${import.meta.env.BASE_URL}vendors/save-peyia/drive-reimport/IMG-20260710-WA0008.jpg` },
             ] as const).map((caterer) => (
               <Link
                 key={caterer.slug}

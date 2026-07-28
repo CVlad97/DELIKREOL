@@ -70,9 +70,9 @@ export async function askAdminCopilot(
   question: string,
   context: AdminContext
 ): Promise<string> {
-  const hasOpenAI = import.meta.env.VITE_OPENAI_API_KEY;
+  const hasCopilotProxy = import.meta.env.VITE_COPILOT_PROXY_ENABLED === 'true';
 
-  if (!hasOpenAI) {
+  if (!hasCopilotProxy) {
     return `📊 **Mode Démo - IA non activée**
 
 Voici les données brutes disponibles :
@@ -89,10 +89,10 @@ Voici les données brutes disponibles :
 
 💡 **Votre question :** "${question}"
 
-*Pour activer l'IA Copilot, configurez VITE_OPENAI_API_KEY dans votre environnement.*`;
+*Pour activer l'IA Copilot, il faut une Edge Function serveur avec secret OpenAI côté Supabase, jamais une clé dans le frontend.*`;
   }
 
-  return 'IA Copilot activée - TODO: Implémenter l\'appel à OpenAI/Claude via Edge Function';
+  return 'IA Copilot activée - TODO: appeler uniquement une Edge Function serveur sans exposer de clé dans le frontend.';
 }
 
 export function generateInsights(context: AdminContext): CopilotSummary {

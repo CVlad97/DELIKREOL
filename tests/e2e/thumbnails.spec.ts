@@ -68,7 +68,7 @@ test('catalogue only displays products with verified usable thumbnails', async (
   expect(audit.placeholder || 0).toBe(0);
   await expect(grid.getByText('Photo à venir')).toHaveCount(0);
   await expect(grid.getByText('An Tjè Coco')).toHaveCount(0);
-  await expect(grid.getByText('Gouté Mwen')).toHaveCount(0);
+  expect(await grid.getByText('Gouté Mwen').count()).toBeGreaterThan(0);
 
   const overflow = await page.evaluate(() => (
     document.documentElement.scrollWidth > document.documentElement.clientWidth + 1
@@ -100,12 +100,31 @@ for (const slug of ['snack-save-peyia', 'les-delices-de-ninice']) {
   });
 }
 
-test('goute mwen keeps its profile without unverified product photos', async ({ page }) => {
+test('goute mwen displays imported usable product photos', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/traiteur/goute-mwen', { waitUntil: 'domcontentloaded' });
 
   await expect(page.getByRole('heading', { name: 'Gouté Mwen' })).toBeVisible();
-  await expect(page.locator('[data-partner-catalogue="true"]')).toHaveCount(0);
-  await expect(page.getByText('Le catalogue est en cours de préparation.')).toBeVisible();
+  const catalogue = page.locator('[data-partner-catalogue="true"]');
+  await expect(catalogue).toBeVisible();
+  const thumbnails = catalogue.locator('[data-thumbnail-source]');
+  expect(await thumbnails.count()).toBeGreaterThan(0);
+  await loadAndValidateThumbnails(page, thumbnails);
   await expect(page.getByText('Photo à venir')).toHaveCount(0);
+});
+
+test('catalogue product photo opens in large preview and closes', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/catalogue', { waitUntil: 'domcontentloaded' });
+
+  const previewButton = page.getByRole('button', { name: /Voir .* en gros plan/i }).first();
+  await expect(previewButton).toBeVisible({ timeout: 15_000 });
+  await previewButton.click();
+
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator('img').first()).toBeVisible();
+
+  await page.getByRole('button', { name: 'Fermer la photo en gros plan' }).click();
+  await expect(dialog).toHaveCount(0);
 });

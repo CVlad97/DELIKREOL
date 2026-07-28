@@ -79,12 +79,20 @@ function trustedPublicMedia(value: string | null | undefined): string | null {
   if (!media) return null;
 
   const normalized = media.toLowerCase();
+  const isRejectedByEditorialTriage =
+    normalized.includes('vendors/an-tje-coco/') ||
+    normalized.includes('vendors/goute-mwen/import-20260722/') ||
+    /vendors\/goute-mwen\/supplied-ai-20260722\/goute-mwen-(?:assortiment-(?:nappe|serviette|sable)|glaciere-(?:nappe|sable)|kit-bio)/.test(normalized) ||
+    /vendors\/coco\/drive-reimport\/(?:img-20260521-wa009[12]|img-20260601-wa0244)\.jpg/.test(normalized) ||
+    /vendors\/ninice\/drive-reimport\/(?:img-20260521-wa009[12]|img-20260521-wa0238|img-20260526-wa0069)\.jpg/.test(normalized) ||
+    /vendors\/save-peyia\/drive-reimport\/(?:img-20260710-wa000[567]|img-20260521-wa009[12]|img-20260710-wa004[01])\.jpg/.test(normalized) ||
+    /vendors\/saveurs-afrique\/drive-reimport\/(?:img-20260525-wa0106|img-20260525-wa0181|img-20260612-wa020[123])\.jpg/.test(normalized);
   const isKnownLegacyLocalMedia =
     /(?:^|\/)vendors\/(?:an-tje-coco|coco|save-peyia|ninice|saveurs-afrique|sweet-family)\/(?:hero|portrait)\.(?:jpe?g|png|webp)(?:$|\?)/.test(normalized) ||
     /(?:^|\/)vendors\/[^?#]*(?:card|menu|conditions|commande|board|flyer|capture|screenshot|whatsapp)[^?#]*\.(?:jpe?g|png|webp)(?:$|\?)/.test(normalized) ||
     normalized.includes('vendors/sweet-family/cocktails-mignardises-hero.webp');
 
-  return isKnownLegacyLocalMedia ? null : media;
+  return isRejectedByEditorialTriage || isKnownLegacyLocalMedia ? null : media;
 }
 
 function trustedPublicMediaArray(value: string[] | null | undefined): string[] | null {

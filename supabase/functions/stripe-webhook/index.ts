@@ -79,6 +79,14 @@ async function updateWebhookEvent(
   if (error) console.warn("[stripe] webhook event update failed", error.message);
 }
 
+async function incrementWebhookAttempt(
+  supabase: ReturnType<typeof createClient>,
+  eventId: string,
+) {
+  const { error } = await supabase.rpc("increment_stripe_webhook_attempt", { target_event_id: eventId });
+  if (error) console.warn("[stripe] webhook attempt update failed", error.message);
+}
+
 async function addOrderEvent(
   supabase: ReturnType<typeof createClient>,
   orderId: string,
@@ -92,6 +100,54 @@ async function addOrderEvent(
   });
 
   if (error) console.warn("[stripe] order_event insert failed", error.message);
+}
+
+async function upsertPaymentTrace(
+  supabase: ReturnType<typeof createClient>,
+  orderId: string,
+  patch: {
+    status: "pending" | "processing" | "completed" | "failed" | "refunded";
+    totalAmount?: number;
+    paymentIntentId?: string | null;
+    chargeId?: string | null;
+    transferId?: string | null;
+    applicationFeeAmount?: number | null;
+    vendorAccountId?: string | null;
+    metadata?: Record<string, unknown>;
+  },
+) {
+  const paymentPatch = {
+    status: patch.status,
+    stripe_payment_intent_id: patch.paymentIntentId || null,
+    stripe_charge_id: patch.chargeId || null,
+    stripe_transfer_id: patch.transferId || null,
+    stripe_application_fee_amount: patch.applicationFeeAmount ? patch.applicationFeeAmount / 100 : 0,
+    stripe_vendor_account_id: patch.vendorAccountId || null,
+    metadata: patch.metadata || {},
+    paid_at: patch.status === "completed" ? new Date().toISOString() : null,
+  };
+
+  const { data: existing, error: selectError } = await supabase
+    .from("payments")
+    .select("id")
+    .eq("order_id", orderId)
+    .maybeSingle();
+
+  if (selectError) {
+    console.warn("[stripe] payment trace select failed", selectError.message);
+    return;
+  }
+
+  const { error } = existing?.id
+    ? await supabase.from("payments").update(paymentPatch).eq("id", existing.id)
+    : await supabase.from("payments").insert({
+        order_id: orderId,
+        total_amount: patch.totalAmount ? patch.totalAmount / 100 : 0,
+        platform_commission: patch.applicationFeeAmount ? patch.applicationFeeAmount / 100 : 0,
+        ...paymentPatch,
+      });
+
+  if (error) console.warn("[stripe] payment trace write failed", error.message);
 }
 
 async function markOrderPaid(
@@ -130,6 +186,12 @@ async function handleCheckoutCompleted(
 
   if (session.payment_status === "paid") {
     await markOrderPaid(supabase, orderId, patch);
+    await upsertPaymentTrace(supabase, orderId, {
+      status: "completed",
+      totalAmount: session.amount_total || undefined,
+      paymentIntentId,
+      metadata: { checkout_session_id: session.id, stripe_event: "checkout.session.completed" },
+    });
   } else {
     const { error } = await supabase
       .from("orders")
@@ -152,6 +214,44 @@ async function handleCheckoutCompleted(
   return { orderId, paymentIntentId };
 }
 
+async function handleCheckoutAsyncFailed(
+  supabase: ReturnType<typeof createClient>,
+  session: Stripe.Checkout.Session,
+) {
+  const orderId = session.metadata?.orderId || session.client_reference_id || "";
+  const paymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : null;
+
+  console.log(`[stripe] checkout.session.async_payment_failed order=${orderId || "missing"} session=${session.id}`);
+  if (!orderId) return { orderId: null, paymentIntentId };
+
+  const { error } = await supabase
+    .from("orders")
+    .update({
+      stripe_checkout_session_id: session.id,
+      payment_intent_id: paymentIntentId,
+      payment_status: "failed",
+      payment_provider: "stripe_test",
+      payment_method: "card",
+      payment_error: "Paiement asynchrone échoué",
+    })
+    .eq("id", orderId);
+
+  if (error) throw error;
+  await upsertPaymentTrace(supabase, orderId, {
+    status: "failed",
+    totalAmount: session.amount_total || undefined,
+    paymentIntentId,
+    metadata: { checkout_session_id: session.id, stripe_event: "checkout.session.async_payment_failed" },
+  });
+  await addOrderEvent(supabase, orderId, "payment_failed", {
+    checkout_session_id: session.id,
+    payment_intent_id: paymentIntentId,
+    reason: "async_payment_failed",
+  });
+
+  return { orderId, paymentIntentId };
+}
+
 async function handlePaymentIntentSucceeded(
   supabase: ReturnType<typeof createClient>,
   paymentIntent: Stripe.PaymentIntent,
@@ -162,6 +262,17 @@ async function handlePaymentIntentSucceeded(
 
   await markOrderPaid(supabase, orderId, {
     payment_intent_id: paymentIntent.id,
+  });
+  const transferDestination = typeof (paymentIntent as Stripe.PaymentIntent & { transfer_data?: { destination?: string } }).transfer_data?.destination === "string"
+    ? (paymentIntent as Stripe.PaymentIntent & { transfer_data?: { destination?: string } }).transfer_data?.destination || null
+    : null;
+  await upsertPaymentTrace(supabase, orderId, {
+    status: "completed",
+    totalAmount: paymentIntent.amount,
+    paymentIntentId: paymentIntent.id,
+    applicationFeeAmount: typeof paymentIntent.application_fee_amount === "number" ? paymentIntent.application_fee_amount : null,
+    vendorAccountId: transferDestination,
+    metadata: { stripe_event: "payment_intent.succeeded" },
   });
 
   await addOrderEvent(supabase, orderId, "payment_succeeded", {
@@ -191,6 +302,15 @@ async function handlePaymentIntentFailed(
     .eq("id", orderId);
 
   if (error) throw error;
+  await upsertPaymentTrace(supabase, orderId, {
+    status: "failed",
+    totalAmount: paymentIntent.amount,
+    paymentIntentId: paymentIntent.id,
+    metadata: {
+      stripe_event: "payment_intent.payment_failed",
+      failure_code: paymentIntent.last_payment_error?.code || null,
+    },
+  });
   await addOrderEvent(supabase, orderId, "payment_failed", {
     payment_intent_id: paymentIntent.id,
     failure_code: paymentIntent.last_payment_error?.code || null,
@@ -225,6 +345,13 @@ async function handleChargeRefunded(
     .eq("id", orderId);
 
   if (error) throw error;
+  await upsertPaymentTrace(supabase, orderId, {
+    status: "refunded",
+    totalAmount: charge.amount,
+    paymentIntentId: paymentIntentId || null,
+    chargeId: charge.id,
+    metadata: { stripe_event: "charge.refunded", amount_refunded: charge.amount_refunded || charge.amount },
+  });
   await addOrderEvent(supabase, orderId, "payment_refunded", {
     charge_id: charge.id,
     amount_refunded: charge.amount_refunded || charge.amount,
@@ -232,6 +359,38 @@ async function handleChargeRefunded(
   });
 
   return { orderId, paymentIntentId };
+}
+
+async function handleDisputeCreated(
+  supabase: ReturnType<typeof createClient>,
+  stripe: Stripe,
+  dispute: Stripe.Dispute,
+) {
+  const chargeId = typeof dispute.charge === "string" ? dispute.charge : "";
+  let orderId = "";
+  let paymentIntentId = "";
+
+  if (chargeId) {
+    const charge = await stripe.charges.retrieve(chargeId);
+    paymentIntentId = typeof charge.payment_intent === "string" ? charge.payment_intent : "";
+    if (paymentIntentId) {
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      orderId = paymentIntent.metadata?.orderId || "";
+    }
+  }
+
+  console.log(`[stripe] charge.dispute.created order=${orderId || "missing"} dispute=${dispute.id}`);
+  if (orderId) {
+    await addOrderEvent(supabase, orderId, "payment_dispute_created", {
+      dispute_id: dispute.id,
+      charge_id: chargeId,
+      amount: dispute.amount,
+      reason: dispute.reason,
+      status: dispute.status,
+    });
+  }
+
+  return { orderId: orderId || null, paymentIntentId: paymentIntentId || null };
 }
 
 async function handleAccountUpdated(
@@ -268,12 +427,14 @@ async function handleTransferCreated(
 ) {
   const { error } = await supabase.from("payouts").insert({
     stripe_transfer_id: transfer.id,
-    stripe_account_id: typeof transfer.destination === "string" ? transfer.destination : "",
     amount: transfer.amount / 100,
     currency: transfer.currency,
-    status: "completed",
-    description: transfer.description || "Transfert Stripe vers compte Connect",
-    metadata: transfer.metadata || {},
+    status: "paid",
+    metadata: {
+      stripe_account_id: typeof transfer.destination === "string" ? transfer.destination : "",
+      description: transfer.description || "Transfert Stripe vers compte Connect",
+      stripe_metadata: transfer.metadata || {},
+    },
   });
 
   if (error) console.warn("[stripe] payout log skipped", error.message);
@@ -313,6 +474,12 @@ Deno.serve(async (req: Request) => {
       case "checkout.session.completed":
         result = await handleCheckoutCompleted(supabase, event.data.object as Stripe.Checkout.Session);
         break;
+      case "checkout.session.async_payment_succeeded":
+        result = await handleCheckoutCompleted(supabase, event.data.object as Stripe.Checkout.Session);
+        break;
+      case "checkout.session.async_payment_failed":
+        result = await handleCheckoutAsyncFailed(supabase, event.data.object as Stripe.Checkout.Session);
+        break;
       case "payment_intent.succeeded":
         result = await handlePaymentIntentSucceeded(supabase, event.data.object as Stripe.PaymentIntent);
         break;
@@ -322,8 +489,15 @@ Deno.serve(async (req: Request) => {
       case "charge.refunded":
         result = await handleChargeRefunded(supabase, stripe, event.data.object as Stripe.Charge);
         break;
+      case "charge.dispute.created":
+        result = await handleDisputeCreated(supabase, stripe, event.data.object as Stripe.Dispute);
+        break;
       case "account.updated":
         result = await handleAccountUpdated(supabase, event.data.object as Stripe.Account);
+        break;
+      case "payout.paid":
+      case "payout.failed":
+        console.log(`[stripe] payout event=${event.type} id=${(event.data.object as Stripe.Payout).id}`);
         break;
       case "transfer.created":
         result = await handleTransferCreated(supabase, event.data.object as Stripe.Transfer);
@@ -346,9 +520,11 @@ Deno.serve(async (req: Request) => {
     console.error("[stripe] webhook error", message);
 
     if (event && supabase) {
+      await incrementWebhookAttempt(supabase, event.id);
       await updateWebhookEvent(supabase, event.id, {
         processing_status: "failed",
         last_error: message.slice(0, 500),
+        error_message: message.slice(0, 500),
       });
     }
 
