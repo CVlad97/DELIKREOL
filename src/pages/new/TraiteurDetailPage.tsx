@@ -5,6 +5,8 @@ import {
   CheckCircle2,
   ChefHat,
   Clock,
+  ExternalLink,
+  Instagram,
   MapPin,
   MessageCircle,
   ShoppingCart,
@@ -20,6 +22,7 @@ import { formatEuro, PUBLIC_HIDDEN_PRODUCT_TRAITEURS, traiteurSpaces } from '../
 import { getThumbnailPlaceholder, isUsableThumbnail, resolveProductThumbnail } from '../../services/catalogImageResolver';
 import { trackPublicView } from '../../services/metricsService';
 import { setPageMeta } from '../../services/seo';
+import { socialLabel, type SocialLinkSet } from '../../utils/socialLinks';
 import type { Product } from '../../types';
 
 const WHATSAPP_NUMBER = '596696653589';
@@ -40,6 +43,33 @@ function slugify(value: string): string {
 
 function uniqueImages(images: Array<string | null | undefined>): string[] {
   return Array.from(new Set(images.filter((image): image is string => Boolean(image))));
+}
+
+function SocialLinks({ links }: { links: SocialLinkSet }) {
+  const items = [
+    links.instagram ? { kind: 'instagram' as const, href: links.instagram, icon: <Instagram className="h-4 w-4" /> } : null,
+    links.facebook ? { kind: 'facebook' as const, href: links.facebook, icon: <ExternalLink className="h-4 w-4" /> } : null,
+    links.website ? { kind: 'website' as const, href: links.website, icon: <ExternalLink className="h-4 w-4" /> } : null,
+  ].filter((item): item is NonNullable<typeof item> => Boolean(item));
+
+  if (items.length === 0) return null;
+
+  return (
+    <div className="mt-5 flex flex-wrap gap-2" aria-label="Liens sociaux du partenaire">
+      {items.map((item) => (
+        <a
+          key={item.href}
+          href={item.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs font-black text-white transition hover:bg-white/20"
+        >
+          {item.icon}
+          {socialLabel(item.kind, item.href)}
+        </a>
+      ))}
+    </div>
+  );
 }
 
 export function TraiteurDetailPage() {
@@ -260,6 +290,7 @@ export function TraiteurDetailPage() {
                   ? 'Cette vitrine regroupe des plats partenaires. Les commandes passent uniquement par devis et créneau planifié.'
                   : 'Ajoutez les produits au panier ou vérifiez les disponibilités avec DeliKreol.'}
               </p>
+              <SocialLinks links={traiteur.socialLinks} />
               <a
                 href={`https://wa.me/${WHATSAPP_NUMBER}?text=${devisMessage}`}
                 target="_blank"

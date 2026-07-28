@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { ArrowRight, ChefHat, Clock3, Sparkles, Star, UtensilsCrossed } from 'lucide-react';
+import { ArrowRight, ChefHat, Clock3, ExternalLink, Instagram, Sparkles, Star, UtensilsCrossed } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +16,7 @@ import {
   traiteurSpaces,
 } from '@/data/traiteurs';
 import { loadTraiteurProfiles } from '@/services/traiteurProfileService';
+import { socialLabel, type SocialLinkSet } from '@/utils/socialLinks';
 
 type DemoAccessConfig = {
   id: string;
@@ -23,6 +24,37 @@ type DemoAccessConfig = {
   email: string;
   phone: string;
 };
+
+function SocialLinks({ links, dark = false }: { links: SocialLinkSet; dark?: boolean }) {
+  const items = [
+    links.instagram ? { kind: 'instagram' as const, href: links.instagram, icon: <Instagram className="h-4 w-4" /> } : null,
+    links.facebook ? { kind: 'facebook' as const, href: links.facebook, icon: <ExternalLink className="h-4 w-4" /> } : null,
+    links.website ? { kind: 'website' as const, href: links.website, icon: <ExternalLink className="h-4 w-4" /> } : null,
+  ].filter((item): item is NonNullable<typeof item> => Boolean(item));
+
+  if (items.length === 0) return null;
+
+  return (
+    <div className="flex flex-wrap gap-2" aria-label="Liens sociaux du traiteur">
+      {items.map((item) => (
+        <a
+          key={item.href}
+          href={item.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={
+            dark
+              ? 'inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs font-black text-white hover:bg-white/20'
+              : 'inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white px-3 py-2 text-xs font-black text-[#7c2d12] hover:bg-[#fff8ef]'
+          }
+        >
+          {item.icon}
+          {socialLabel(item.kind, item.href)}
+        </a>
+      ))}
+    </div>
+  );
+}
 
 const demoAccessBySlug: Record<string, DemoAccessConfig> = {
   [normalizeSpaceSlug("Saveurs d'Afrique")]: {
@@ -217,6 +249,9 @@ export function TraiteursPage() {
                           <a href={buildTraiteurSpaceLink(baseUrl, activeSpace.slug)}>Ouvrir la vitrine</a>
                         </Button>
                       </div>
+                      <div className="mt-3">
+                        <SocialLinks links={activeSpace.socialLinks} dark />
+                      </div>
 
                       {demoAccess && (
                         <div className="mt-5 rounded-[1.4rem] border border-white/15 bg-white/10 p-4 backdrop-blur">
@@ -406,6 +441,7 @@ export function TraiteursPage() {
                           )}
                         </div>
                       </div>
+                      <SocialLinks links={space.socialLinks} />
 
                       <div className="flex flex-wrap gap-2">
                         {space.highlights.slice(0, 5).map((item) => (

@@ -9,6 +9,7 @@ import type { TraiteurSpace } from '../data/traiteurs';
 import type { PartnerProfile } from '../data/partnerProfiles';
 import { PUBLIC_HIDDEN_TRAITEURS, normalizeSpaceSlug, traiteurSpaces } from '../data/traiteurs';
 import { publicSupabase } from '../lib/publicSupabase';
+import { sanitizeSocialLinks, type SocialLinkSet } from '../utils/socialLinks';
 
 type SourceMode = 'supabase' | 'static' | 'hybrid';
 
@@ -49,6 +50,10 @@ export type VendorRaw = {
   siret: string | null;
   planifiable: boolean | null;
   enterprise: boolean | null;
+  instagram_url?: string | null;
+  facebook_url?: string | null;
+  website_url?: string | null;
+  social_links?: Partial<SocialLinkSet> | null;
 };
 
 function normalizedKey(value: string | null | undefined): string {
@@ -168,6 +173,11 @@ export function mergeVendorWithStatic(
   const galleryImages = supabaseGallery || fallback?.galleryImages || [];
   const highlights = supabaseHighlights || fallback?.highlights || [];
   const hasSupabaseMedia = Boolean(trustedPublicMedia(vendor.hero_image) || trustedPublicMedia(vendor.portrait_image) || supabaseGallery);
+  const socialLinks = sanitizeSocialLinks({
+    instagram: vendor.instagram_url || vendor.social_links?.instagram || fallback?.profile.instagram?.url,
+    facebook: vendor.facebook_url || vendor.social_links?.facebook || fallback?.profile.facebook?.url,
+    website: vendor.website_url || vendor.social_links?.website || fallback?.profile.website?.url,
+  });
 
   const profileFallback = fallback?.profile;
   const profile: PartnerProfile = {
@@ -186,6 +196,15 @@ export function mergeVendorWithStatic(
     highlights,
     contactPhone: nonEmptyText(vendor.phone) || profileFallback?.contactPhone,
     contactEmail: nonEmptyText(vendor.email) || profileFallback?.contactEmail,
+    instagram: socialLinks.instagram
+      ? { label: profileFallback?.instagram?.label || 'Instagram', handle: profileFallback?.instagram?.handle, url: socialLinks.instagram }
+      : profileFallback?.instagram,
+    facebook: socialLinks.facebook
+      ? { label: profileFallback?.facebook?.label || 'Facebook', url: socialLinks.facebook }
+      : profileFallback?.facebook,
+    website: socialLinks.website
+      ? { label: profileFallback?.website?.label || 'Site web', url: socialLinks.website }
+      : profileFallback?.website,
     planifiable: fallback ? profileFallback?.planifiable ?? false : vendor.planifiable ?? false,
     enterprise: fallback ? profileFallback?.enterprise ?? false : vendor.enterprise ?? false,
   };
@@ -213,6 +232,7 @@ export function mergeVendorWithStatic(
     averageTicket: fallback?.averageTicket || 0,
     turnaround: fallback?.turnaround || profile.eta || '30-45 min',
     galleryImages,
+    socialLinks,
     profile,
     menuItems: fallback?.menuItems || [],
     status: fallback?.status || resolveDisplayStatus(vendor),

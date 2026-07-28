@@ -4,6 +4,7 @@ import { anTjeCocoAssets, cocoFoodAssets } from './partnerAssets';
 import { partnerProfiles, type PartnerProfile } from './partnerProfiles';
 import { additionalPartnerProfiles } from './additionalPartnerProfiles';
 import { driveReimportGalleries, driveReimportPortraits } from './driveReimportAssets';
+import { sanitizeSocialLinks, type SocialLinkSet } from '../utils/socialLinks';
 
 export type TraiteurMenuItem = {
   name: string;
@@ -38,6 +39,7 @@ export type TraiteurSpace = {
   averageTicket: number;
   turnaround: string;
   galleryImages: string[];
+  socialLinks: SocialLinkSet;
   profile: PartnerProfile;
   menuItems: TraiteurMenuItem[];
   status: 'public confirmé' | 'public à vérifier' | 'brouillon';
@@ -230,6 +232,11 @@ function buildSpace(profile: PartnerProfile, gradient: string, accent: string, s
     averageTicket,
     turnaround: profile.eta,
     galleryImages: resolveGalleryImages(profile.name),
+    socialLinks: sanitizeSocialLinks({
+      instagram: profile.instagram?.url,
+      facebook: profile.facebook?.url,
+      website: profile.website?.url,
+    }),
     profile,
     menuItems,
     status,

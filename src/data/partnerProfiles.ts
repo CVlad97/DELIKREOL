@@ -18,6 +18,14 @@ export type PartnerProfile = {
     handle?: string;
     url?: string;
   };
+  facebook?: {
+    label: string;
+    url?: string;
+  };
+  website?: {
+    label: string;
+    url?: string;
+  };
   deliveryContact?: {
     label: string;
     phone?: string;

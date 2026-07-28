@@ -1,5 +1,7 @@
 import { publicSupabase, isPublicSupabaseConfigured } from '../lib/publicSupabase';
 import { partnerProfiles, type PartnerProfile } from '../data/partnerProfiles';
+import { additionalPartnerProfiles } from '../data/additionalPartnerProfiles';
+import { sanitizeSocialLinks } from '../utils/socialLinks';
 
 type PublicVendorRow = {
   id: string;
@@ -16,6 +18,14 @@ type PublicVendorRow = {
   is_demo?: boolean | string | null;
   is_active?: boolean | string | null;
   created_at?: string | null;
+  instagram_url?: string | null;
+  facebook_url?: string | null;
+  website_url?: string | null;
+  social_links?: {
+    instagram?: string | null;
+    facebook?: string | null;
+    website?: string | null;
+  } | null;
 };
 
 type PublicTraiteurProfile = PartnerProfile & {
@@ -33,6 +43,7 @@ const normalize = (value: string) =>
     .replace(/\s+/g, ' ');
 
 const truthy = (value: unknown) => value === true || String(value ?? '').toLowerCase() === 'true';
+const allPartnerProfiles = [...partnerProfiles, ...additionalPartnerProfiles];
 
 function vendorLooksPublic(row: PublicVendorRow) {
   return truthy(row.is_public) && !truthy(row.is_demo) && row.is_active !== false && String(row.status ?? '').toLowerCase() !== 'draft';
@@ -57,6 +68,11 @@ function mergeProfile(profile: PartnerProfile, row?: PublicVendorRow): PublicTra
   const address = row.address ?? row.zone_label ?? row.service_zone ?? profile.address ?? profile.zone;
   const story = row.description ?? profile.story;
   const phone = row.phone ?? profile.contactPhone;
+  const socialLinks = sanitizeSocialLinks({
+    instagram: row.instagram_url || row.social_links?.instagram || profile.instagram?.url,
+    facebook: row.facebook_url || row.social_links?.facebook || profile.facebook?.url,
+    website: row.website_url || row.social_links?.website || profile.website?.url,
+  });
 
   return {
     ...profile,
@@ -65,31 +81,40 @@ function mergeProfile(profile: PartnerProfile, row?: PublicVendorRow): PublicTra
     zone: row.zone_label ?? row.service_zone ?? profile.zone,
     story,
     contactPhone: phone ?? profile.contactPhone,
+    instagram: socialLinks.instagram
+      ? { label: profile.instagram?.label || 'Instagram', handle: profile.instagram?.handle, url: socialLinks.instagram }
+      : profile.instagram,
+    facebook: socialLinks.facebook
+      ? { label: profile.facebook?.label || 'Facebook', url: socialLinks.facebook }
+      : profile.facebook,
+    website: socialLinks.website
+      ? { label: profile.website?.label || 'Site web', url: socialLinks.website }
+      : profile.website,
     source: 'backend',
   };
 }
 
 export async function loadTraiteurProfiles() {
   if (!isPublicSupabaseConfigured || !publicSupabase) {
-    return partnerProfiles.map((profile) => ({ ...profile, source: 'local' as const }));
+    return allPartnerProfiles.map((profile) => ({ ...profile, source: 'local' as const }));
   }
 
   try {
     const { data, error } = await publicSupabase
       .from('vendors')
-      .select('id,business_name,name,description,address,phone,zone_label,service_zone,business_type,status,is_public,is_demo,is_active,created_at')
+      .select('id,business_name,name,description,address,phone,zone_label,service_zone,business_type,status,is_public,is_demo,is_active,created_at,instagram_url,facebook_url,website_url,social_links')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
 
     const rows = ((data ?? []) as PublicVendorRow[]).filter(vendorLooksPublic);
 
-    return partnerProfiles.map((profile) => {
+    return allPartnerProfiles.map((profile) => {
       const remote = rows.find((row) => matchProfile(profile, row));
       return mergeProfile(profile, remote);
     });
   } catch {
-    return partnerProfiles.map((profile) => ({ ...profile, source: 'local' as const }));
+    return allPartnerProfiles.map((profile) => ({ ...profile, source: 'local' as const }));
   }
 }
 
