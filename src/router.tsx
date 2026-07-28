@@ -27,6 +27,7 @@ const DiscoveryMapPage = lazy(async () => {
   return { default: module.DiscoveryMapPage };
 });
 const LoginPage = lazy(() => import('./pages/new/LoginPage'));
+const AuthCallbackPage = lazy(() => import('./pages/new/AuthCallbackPage'));
 const CataloguePage = lazy(() => import('./pages/new/CataloguePage'));
 const ProductDetailPage = lazy(() => import('./pages/new/ProductDetailPage'));
 const TraiteursListPage = lazy(() => import('./pages/new/TraiteursListPage'));
@@ -144,6 +145,7 @@ export function AppRouter() {
                   <Route path="contact" element={<ContactPage />} />
                   <Route path="feedback" element={<FeedbackPage />} />
                   <Route path="connexion" element={<LoginPage />} />
+                  <Route path="auth/callback" element={<AuthCallbackPage />} />
                   <Route path="inscription-traiteur" element={<CatererSignupPage />} />
                   <Route path="pro" element={<ProSpacePage />} />
                   <Route path="partenaires-plateforme" element={<ProPartnerPlatformPage />} />

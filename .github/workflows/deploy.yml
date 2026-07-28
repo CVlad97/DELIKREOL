@@ -51,6 +51,7 @@ jobs:
           VITE_SUPABASE_ANON_KEY: sb_publishable_LE_NgMgaOlJEhkJlVF_zow_4NNOtTHX
           VITE_PUBLIC_VENDOR_SOURCE: hybrid
           VITE_DEMO_MODE: "false"
+          VITE_ENABLE_GOOGLE_AUTH: ${{ secrets.VITE_ENABLE_GOOGLE_AUTH }}
           VITE_STRIPE_PUBLISHABLE_KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
           VITE_ENABLE_STRIPE_PUBLIC: ${{ secrets.VITE_ENABLE_STRIPE_PUBLIC }}
         run: npm run build

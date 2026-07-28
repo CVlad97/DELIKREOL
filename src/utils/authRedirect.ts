@@ -29,7 +29,8 @@ export function sanitizeAuthNext(next?: string | null): string {
 
 export function getAuthCallbackUrl(): string {
   if (typeof window === 'undefined') return '/';
-  return `${window.location.origin}${import.meta.env.BASE_URL || '/'}`;
+  const basePath = import.meta.env.BASE_URL || '/';
+  return new URL(`${basePath.replace(/\/$/, '')}/auth/callback`, window.location.origin).toString();
 }
 
 export function rememberAuthNext(next: string): void {
