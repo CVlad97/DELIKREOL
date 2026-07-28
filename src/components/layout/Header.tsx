@@ -82,7 +82,7 @@ export function Header() {
       <div className="madras-strip" />
 
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-        <div className="grid h-[72px] grid-cols-[44px_minmax(0,1fr)_44px_44px] items-center gap-1 xl:hidden">
+        <div className="relative grid h-[72px] grid-cols-[44px_minmax(0,1fr)_88px] items-center gap-1 xl:hidden">
           <button
             type="button"
             onClick={() => setMobileMenuOpen((open) => !open)}
@@ -97,36 +97,38 @@ export function Header() {
           <Link
             to="/"
             data-testid="header-brand-mobile"
-            className="flex min-w-0 items-center justify-self-center gap-1.5 rounded-xl px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 rounded-xl px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-[360px]:gap-1.5"
             aria-label="Accueil DeliKreol"
           >
             <img
               src={`${import.meta.env.BASE_URL || '/'}branding/logo-mark.svg`}
               alt=""
-              className="brand-logo-frame h-10 w-10 shrink-0 rounded-xl object-contain p-1"
+              className="brand-logo-frame h-8 w-8 shrink-0 rounded-lg object-contain p-1 min-[360px]:h-10 min-[360px]:w-10 min-[360px]:rounded-xl"
             />
-            <span className="whitespace-nowrap text-base font-black tracking-[-0.04em] text-foreground min-[360px]:text-lg">
+            <span className="whitespace-nowrap text-sm font-black tracking-[-0.04em] text-foreground min-[360px]:text-lg">
               DELI<span className="text-primary">KREOL</span>
             </span>
           </Link>
 
-          <Link
-            to={accountTarget}
-            className="flex h-11 w-11 items-center justify-center justify-self-end rounded-xl bg-primary text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            aria-label={accountLabel}
-            title={accountLabel}
-          >
-            {accountIcon}
-          </Link>
+          <div className="col-start-3 flex items-center justify-end gap-1">
+            <Link
+              to={accountTarget}
+              className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              aria-label={accountLabel}
+              title={accountLabel}
+            >
+              {accountIcon}
+            </Link>
 
-          <Link
-            to="/panier"
-            className="relative flex h-11 w-11 items-center justify-center justify-self-end rounded-xl text-foreground transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            aria-label={`Panier, ${itemCount} article${itemCount > 1 ? 's' : ''}`}
-          >
-            <ShoppingCart className="h-5 w-5" />
-            {cartBadge}
-          </Link>
+            <Link
+              to="/panier"
+              className="relative flex h-11 w-11 items-center justify-center rounded-xl text-foreground transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              aria-label={`Panier, ${itemCount} article${itemCount > 1 ? 's' : ''}`}
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {cartBadge}
+            </Link>
+          </div>
         </div>
 
         <div className="hidden h-[76px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 xl:grid">
