@@ -36,6 +36,13 @@ import { OrderSummaryByPartner, groupItemsByPartner } from '../../components/Ord
 import { isSupabaseConfigured, supabase } from '../../lib/supabase';
 import type { Product } from '../../lib/supabase';
 import { createStripeCheckoutSession } from '../../utils/stripe';
+import {
+  createWhatsAppIdempotencyKey,
+  readPreparedWhatsAppOrder,
+  releaseWhatsAppOrderLock,
+  tryAcquireWhatsAppOrderLock,
+  writePreparedWhatsAppOrder,
+} from '../../utils/whatsappOrderIdempotency';
 
 interface CartItem extends Product {
   quantity: number;
@@ -150,6 +157,7 @@ export default function CartPage() {
   const [stripeStatus, setStripeStatus] = useState<'idle' | 'processing' | 'error'>('idle');
   const [savedField, setSavedField] = useState<string | null>(null);
   const panierRef = useRef<HTMLDivElement>(null);
+  const checkoutInFlightRef = useRef(false);
   const stripeTestCheckoutEnabled =
     integrations.stripe.enabled &&
     !!integrations.stripe.publicKey?.startsWith('pk_test_') &&
@@ -236,9 +244,8 @@ export default function CartPage() {
 
   const hasMultipleVendors = traiteurs.length > 1;
 
-  const createPublicOrder = async (paymentProvider: 'manual' | 'stripe_test') => {
+  const createPublicOrder = async (paymentProvider: 'manual' | 'stripe_test', idempotencyKey: string) => {
     const deliveryFee = DELIVERY_FEES[mode]?.fee || 0;
-    const idempotencyKey = `public_${paymentProvider}_${Date.now()}_${crypto.randomUUID()}`;
     const { data, error } = await supabase.functions.invoke('checkout-order', {
       body: {
         idempotency_key: idempotencyKey,
@@ -277,7 +284,7 @@ export default function CartPage() {
       return false;
     }
     // Anti-double-click
-    if (checkoutStatus === 'processing' || stripeStatus === 'processing' || messageSent) {
+    if (checkoutInFlightRef.current || checkoutStatus === 'processing' || stripeStatus === 'processing' || messageSent) {
       return false;
     }
     // Validate phone — obligatoire
@@ -301,7 +308,10 @@ export default function CartPage() {
 
   const handleWhatsAppClick = async () => {
     if (!validateOrderForm()) return;
+    checkoutInFlightRef.current = true;
     setCheckoutStatus('processing');
+    let lockOwner: string | null = null;
+    let orderPersistedInSupabase = false;
 
     // Générer ID commande
     let orderNumber = generateOrderId();
@@ -341,24 +351,56 @@ export default function CartPage() {
       created_at: new Date().toISOString(),
     };
 
+    const idempotencyKey = await createWhatsAppIdempotencyKey({
+      items,
+      mode,
+      commune,
+      creneauText: getCreneauText(),
+      notes,
+      phone,
+      email,
+    });
+    order.idempotency_key = idempotencyKey;
+    const existingPreparedOrder = readPreparedWhatsAppOrder(idempotencyKey);
+
     // Sauvegarder en local (fallback uniquement si Supabase échoue)
     const saveLocal = () => {
       try {
         const localOrders = JSON.parse(localStorage.getItem('delikreol_local_orders_v1') || '[]');
-        localOrders.push(order);
-        localStorage.setItem('delikreol_local_orders_v1', JSON.stringify(localOrders));
+        const nextOrders = localOrders.filter(
+          (localOrder: { idempotency_key?: string; order_number?: string }) =>
+            localOrder.idempotency_key !== idempotencyKey && localOrder.order_number !== order.order_number,
+        );
+        nextOrders.push(order);
+        localStorage.setItem('delikreol_local_orders_v1', JSON.stringify(nextOrders));
       } catch (e) {
         console.warn('[DELIKREOL] Échec sauvegarde locale:', e);
       }
     };
 
     try {
+      lockOwner = tryAcquireWhatsAppOrderLock(idempotencyKey);
+      if (!lockOwner) {
+        showError('Demande déjà en préparation dans un autre onglet. Réessayez dans quelques secondes.');
+        setCheckoutStatus('idle');
+        checkoutInFlightRef.current = false;
+        return;
+      }
+
+      if (existingPreparedOrder?.persistedInSupabase || (!isSupabaseConfigured && existingPreparedOrder)) {
+        orderNumber = existingPreparedOrder.orderNumber;
+        order.order_number = orderNumber;
+        order.id = existingPreparedOrder.orderId;
+        orderPersistedInSupabase = existingPreparedOrder.persistedInSupabase;
+      }
+
       if (isSupabaseConfigured) {
-        const createdOrder = await createPublicOrder('manual');
+        const createdOrder = await createPublicOrder('manual', idempotencyKey);
         orderNumber = createdOrder.order_number;
         order.order_number = orderNumber;
         order.id = createdOrder.id;
-      } else {
+        orderPersistedInSupabase = true;
+      } else if (!existingPreparedOrder) {
         saveLocal();
       }
     } catch (err) {
@@ -380,7 +422,18 @@ export default function CartPage() {
     const confirmedWhatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(confirmedWhatsappText)}`;
     setOrderNumber(orderNumber);
     setWhatsappShareUrl(confirmedWhatsappUrl);
-    window.open(confirmedWhatsappUrl, '_blank', 'noopener,noreferrer');
+    writePreparedWhatsAppOrder({
+      idempotencyKey,
+      orderId: String(order.id),
+      orderNumber,
+      whatsappUrl: confirmedWhatsappUrl,
+      persistedInSupabase: orderPersistedInSupabase,
+      createdAt: new Date().toISOString(),
+    });
+    const opened = window.open(confirmedWhatsappUrl, '_blank', 'noopener,noreferrer');
+    if (!opened) {
+      showError('Popup WhatsApp bloquée : utilisez le bouton “Ouvrir WhatsApp” sur l’écran suivant.');
+    }
 
     setCheckoutStatus('success');
     setMessageSent(true);
@@ -388,6 +441,8 @@ export default function CartPage() {
     setPreparedMessage(`Demande préparée — à confirmer sur WhatsApp.`);
     showSuccess('Demande préparée — à confirmer sur WhatsApp.');
     setTimeout(() => navigate(`/statut-commande?order=${orderNumber}`), 1500);
+    releaseWhatsAppOrderLock(idempotencyKey, lockOwner);
+    checkoutInFlightRef.current = false;
   };
 
   const handleStripeCheckoutClick = async () => {
@@ -407,7 +462,8 @@ export default function CartPage() {
         return;
       }
 
-      const createdOrder = await createPublicOrder('stripe_test');
+      const idempotencyKey = `public_stripe_test_${crypto.randomUUID()}`;
+      const createdOrder = await createPublicOrder('stripe_test', idempotencyKey);
       const checkoutUrl = await createStripeCheckoutSession(createdOrder.id, window.location.origin);
       window.location.href = checkoutUrl;
     } catch (err) {
@@ -468,7 +524,18 @@ export default function CartPage() {
             <p className="text-sm text-muted-foreground mb-8">
               Besoin d'aide ? Contactez-nous sur WhatsApp.
             </p>
-            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3">
+              {whatsappShareUrl && (
+                <a
+                  href={whatsappShareUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-green-500 hover:bg-green-600 text-white font-bold rounded-2xl transition-all hover:scale-105"
+                >
+                  <MessageCircle className="w-5 h-5" fill="white" />
+                  Ouvrir WhatsApp
+                </a>
+              )}
               <a
                 href={`https://wa.me/596696653589?text=${encodeURIComponent(`Bonjour, j'ai besoin d'aide pour ma commande ${orderNumber}.`)}`}
                 target="_blank"
