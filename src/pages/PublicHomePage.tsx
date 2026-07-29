@@ -1,3417 +1,3388 @@
-import { FormEvent, Fragment, ReactNode, useEffect, useMemo, useState, type ComponentType, type MouseEvent } from 'react';
-import { Circle, CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet';
+import { FormEvent, Fragment, ReactNode, useEffect, useMemo, useState, type ComponentType, type MouseEvent } from'react';
+import { Circle, CircleMarker, MapContainer, Popup, TileLayer } from'react-leaflet';
 import {
-  ArrowRight,
-  BadgeCheck,
-  BarChart3,
-  Bell,
-  Briefcase,
-  ChevronRight,
-  Download,
-  Filter,
-  Home,
-  Mail,
-  MapPin,
-  MessageCircle,
-  Package,
-  Search,
-  ShieldCheck,
-  ShoppingBag,
-  Sparkles,
-  Store,
-  Truck,
-  Star,
-  Utensils,
-} from 'lucide-react';
-import { loadPublicCatalog, PublicCatalogProduct, PublicCatalogVendor } from '../services/publicCatalogService';
-import { calculateOrderEconomics } from '../services/orderEconomics';
-import { distanceKm, getMartiniqueServiceZones, vendorServesPoint } from '../services/serviceZones';
-import { submitPartnerLead, submitPartnerProduct, uploadPartnerProductPhoto } from '../services/partnerPortalService';
-import { createBusinessRequest } from '../services/liteOrdersService';
-import { getOrderFallbackEndpoint, saveFallbackOrderToSheet } from '../services/orderFallbackService';
-import { buildPartnerDispatchMessage, downloadOrderPdf } from '../utils/orderPdf';
-import { publicSupabase } from '../lib/publicSupabase';
-import { mockProducts } from '../data/mockCatalog';
-import { partnerProfiles } from '../data/partnerProfiles';
-import { pointsRelais } from '../pointsRelais';
-import { getWhatsAppBusinessLink } from '../utils/whatsapp';
-import { ORDER_FORM_URL, PUBLIC_OPERATIONS_EMAIL, SHEETS_FIRST_MODE } from '../config/publicRuntime';
+ ArrowRight,
+ BadgeCheck,
+ BarChart3,
+ Bell,
+ Briefcase,
+ ChevronRight,
+ Download,
+ Filter,
+ Home,
+ Mail,
+ MapPin,
+ MessageCircle,
+ Package,
+ Search,
+ ShieldCheck,
+ ShoppingBag,
+ Sparkles,
+ Store,
+ Truck,
+ Star,
+ Utensils,
+} from'lucide-react';
+import { loadPublicCatalog, PublicCatalogProduct, PublicCatalogVendor } from'../services/publicCatalogService';
+import { calculateOrderEconomics } from'../services/orderEconomics';
+import { distanceKm, getMartiniqueServiceZones, vendorServesPoint } from'../services/serviceZones';
+import { submitPartnerLead, submitPartnerProduct, uploadPartnerProductPhoto } from'../services/partnerPortalService';
+import { createBusinessRequest } from'../services/liteOrdersService';
+import { getOrderFallbackEndpoint, saveFallbackOrderToSheet } from'../services/orderFallbackService';
+import { buildPartnerDispatchMessage, downloadOrderPdf } from'../utils/orderPdf';
+import { publicSupabase } from'../lib/publicSupabase';
+import { mockProducts } from'../data/mockCatalog';
+import { partnerProfiles } from'../data/partnerProfiles';
+import { pointsRelais } from'../pointsRelais';
+import { getWhatsAppBusinessLink } from'../utils/whatsapp';
+import { ORDER_FORM_URL, PUBLIC_OPERATIONS_EMAIL, SHEETS_FIRST_MODE } from'../config/publicRuntime';
 import {
-  buildCustomerSpaceLink,
-  buildTraiteurSpaceLink,
-  featuredTraiteurSpaces,
-  formatEuro,
-  getTraiteurSpaceBySlug,
-  normalizeSpaceSlug,
-} from '../data/traiteurs';
+ buildCustomerSpaceLink,
+ buildTraiteurSpaceLink,
+ featuredTraiteurSpaces,
+ formatEuro,
+ getTraiteurSpaceBySlug,
+ normalizeSpaceSlug,
+} from'../data/traiteurs';
 import {
-  trackBusinessRequestSuccess,
-  trackCheckoutSuccess,
-  trackPartnerLeadSuccess,
-  trackProductSubmissionSuccess,
-  trackPublicView,
-} from '../services/metricsService';
-import { useToast } from '../contexts/ToastContext';
+ trackBusinessRequestSuccess,
+ trackCheckoutSuccess,
+ trackPartnerLeadSuccess,
+ trackProductSubmissionSuccess,
+ trackPublicView,
+} from'../services/metricsService';
+import { useToast } from'../contexts/ToastContext';
 
 type CatalogState = {
-  configured: boolean;
-  vendors: PublicCatalogVendor[];
-  products: PublicCatalogProduct[];
+ configured: boolean;
+ vendors: PublicCatalogVendor[];
+ products: PublicCatalogProduct[];
 };
 
 type PartnerLeadForm = {
-  business_name: string;
-  contact_name: string;
-  phone: string;
-  whatsapp: string;
-  email: string;
-  commune: string;
-  zone_label: string;
-  activity_type: string;
-  delivery_radius_km: string;
-  opening_hours: string;
-  description: string;
+ business_name: string;
+ contact_name: string;
+ phone: string;
+ whatsapp: string;
+ email: string;
+ commune: string;
+ zone_label: string;
+ activity_type: string;
+ delivery_radius_km: string;
+ opening_hours: string;
+ description: string;
 };
 
 type ProductSubmissionForm = {
-  business_name: string;
-  product_name: string;
-  category: string;
-  price: string;
-  description: string;
+ business_name: string;
+ product_name: string;
+ category: string;
+ price: string;
+ description: string;
 };
 
 type BusinessRequestForm = {
-  company_name: string;
-  contact: string;
-  people_count: string;
-  requested_date: string;
-  requested_time: string;
-  location: string;
-  budget: string;
-  frequency: string;
-  details: string;
+ company_name: string;
+ contact: string;
+ people_count: string;
+ requested_date: string;
+ requested_time: string;
+ location: string;
+ budget: string;
+ frequency: string;
+ details: string;
 };
 
 type SubmitStatus = {
-  kind: 'idle' | 'saving' | 'success' | 'error';
-  message?: string;
+ kind:'idle' |'saving' |'success' |'error';
+ message?: string;
 };
 
 type CheckoutStatus = SubmitStatus & {
-  orderNumber?: string;
+ orderNumber?: string;
 };
 
 function isSupabasePausedError(error: unknown) {
-  if (!error || typeof error !== 'object') return false;
-  const anyError = error as Record<string, unknown>;
-  const status = Number(anyError.status ?? anyError.statusCode ?? anyError.status_code ?? NaN);
-  if (status === 402 || status === 540) return true;
-  const msg = String(anyError.message ?? anyError.error_description ?? anyError.details ?? anyError.hint ?? '').toLowerCase();
-  return (
-    msg.includes('paused') ||
-    msg.includes('project paused') ||
-    msg.includes('payment required') ||
-    msg.includes('overdue_payment') ||
-    msg.includes('billing') ||
-    msg.includes('subscription') ||
-    msg.includes('invoice') ||
-    msg.includes('402') ||
-    msg.includes('540')
-  );
+ if (!error || typeof error !=='object') return false;
+ const anyError = error as Record<string, unknown>;
+ const status = Number(anyError.status ?? anyError.statusCode ?? anyError.status_code ?? NaN);
+ if (status === 402 || status === 540) return true;
+ const msg = String(anyError.message ?? anyError.error_description ?? anyError.details ?? anyError.hint ??'').toLowerCase();
+ return (
+ msg.includes('paused') ||
+ msg.includes('project paused') ||
+ msg.includes('payment required') ||
+ msg.includes('overdue_payment') ||
+ msg.includes('billing') ||
+ msg.includes('subscription') ||
+ msg.includes('invoice') ||
+ msg.includes('402') ||
+ msg.includes('540')
+ );
 }
 
 function isSupabaseUnavailableError(error: unknown) {
-  if (!error) return false;
-  if (typeof error === 'string') {
-    const msg = error.toLowerCase();
-    return msg.includes('failed to fetch') || msg.includes('network') || msg.includes('timeout') || msg.includes('dns');
-  }
-  if (typeof error !== 'object') return false;
-  const anyError = error as Record<string, unknown>;
-  const msg = String(anyError.message ?? anyError.error_description ?? anyError.details ?? anyError.hint ?? '').toLowerCase();
-  return (
-    msg.includes('failed to fetch') ||
-    msg.includes('networkerror') ||
-    msg.includes('network request failed') ||
-    msg.includes('fetch failed') ||
-    msg.includes('timeout') ||
-    msg.includes('timed out') ||
-    msg.includes('dns') ||
-    msg.includes('connection refused') ||
-    msg.includes('service unavailable')
-  );
+ if (!error) return false;
+ if (typeof error ==='string') {
+ const msg = error.toLowerCase();
+ return msg.includes('failed to fetch') || msg.includes('network') || msg.includes('timeout') || msg.includes('dns');
+ }
+ if (typeof error !=='object') return false;
+ const anyError = error as Record<string, unknown>;
+ const msg = String(anyError.message ?? anyError.error_description ?? anyError.details ?? anyError.hint ??'').toLowerCase();
+ return (
+ msg.includes('failed to fetch') ||
+ msg.includes('networkerror') ||
+ msg.includes('network request failed') ||
+ msg.includes('fetch failed') ||
+ msg.includes('timeout') ||
+ msg.includes('timed out') ||
+ msg.includes('dns') ||
+ msg.includes('connection refused') ||
+ msg.includes('service unavailable')
+ );
 }
 
 type NotificationPreferences = {
-  commande: boolean;
-  partenaire: boolean;
-  livreur: boolean;
-  promos: boolean;
+ commande: boolean;
+ partenaire: boolean;
+ livreur: boolean;
+ promos: boolean;
 };
 
 type CustomerLocation = {
-  lat: number;
-  lng: number;
-  accuracy?: number;
-  mapsUrl: string;
+ lat: number;
+ lng: number;
+ accuracy?: number;
+ mapsUrl: string;
 };
 
 type MapVendor = {
-  id: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-  deliveryRadiusKm: number;
-  status: 'in_zone' | 'out_zone' | 'unknown';
+ id: string;
+ name: string;
+ latitude: number;
+ longitude: number;
+ deliveryRadiusKm: number;
+ status:'in_zone' |'out_zone' |'unknown';
 };
 
-type GeoStatus = 'idle' | 'loading' | 'success' | 'error' | 'unsupported';
-type GeoConsentState = 'idle' | 'ask' | 'declined' | 'granted';
-type DeliveryCoverageStatus = 'unknown' | 'in_zone' | 'out_zone';
-type MarketplaceTab = 'browse' | 'traiteurs';
+type GeoStatus ='idle' |'loading' |'success' |'error' |'unsupported';
+type GeoConsentState ='idle' |'ask' |'declined' |'granted';
+type DeliveryCoverageStatus ='unknown' |'in_zone' |'out_zone';
+type MarketplaceTab ='browse' |'traiteurs';
 
-const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
+const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER ||'596696653589';
 const whatsappBase = `https://wa.me/${whatsappNumber}`;
-const featuredCategories = ['plats créoles', 'traiteurs', 'box / plateaux', 'desserts', 'boissons', 'commande entreprise'];
-const budgetRanges = ['Tous', '≤ 15 €', '15 € - 30 €', '30 € et plus'];
-const publicSiteUrl = 'https://delikreol.com/';
+const featuredCategories = ['plats créoles','traiteurs','box / plateaux','desserts','boissons','commande entreprise'];
+const budgetRanges = ['Tous','≤ 15 €','15 € - 30 €','30 € et plus'];
+const publicSiteUrl ='https://delikreol.com/';
 const defaultMapCenter: [number, number] = [14.6104, -61.0733];
 
 const zoneCenterByLabel: Record<string, [number, number]> = {
-  dillon: [14.6038, -61.0603],
-  'fort-de-france': [14.6104, -61.0733],
-  lamentin: [14.6109, -60.9976],
-  schoelcher: [14.624, -61.1045],
-  robert: [14.6764, -60.9394],
-  'riviere-salee': [14.5353, -60.9731],
-  'rivière-salée': [14.5353, -60.9731],
-  ducos: [14.595, -60.9702],
-  'trois-ilets': [14.5419, -61.0362],
-  'trois-îlets': [14.5419, -61.0362],
+ dillon: [14.6038, -61.0603],'fort-de-france': [14.6104, -61.0733],
+ lamentin: [14.6109, -60.9976],
+ schoelcher: [14.624, -61.1045],
+ robert: [14.6764, -60.9394],'riviere-salee': [14.5353, -60.9731],'rivière-salée': [14.5353, -60.9731],
+ ducos: [14.595, -60.9702],'trois-ilets': [14.5419, -61.0362],'trois-îlets': [14.5419, -61.0362],
 };
 
 const pilotDrivers: Array<{ id: string; name: string; latitude: number; longitude: number }> = [];
 
 function formatWhatsAppLabel(value: string) {
-  const digits = value.replace(/\D/g, '');
-  return digits.startsWith('596') ? `+${digits}` : value;
+ const digits = value.replace(/\D/g,'');
+ return digits.startsWith('596') ? `+${digits}` : value;
 }
 
 function normalizeLabel(value: string) {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
+ return value
+ .normalize('NFD')
+ .replace(/[\u0300-\u036f]/g,'')
+ .toLowerCase()
+ .trim();
 }
 
 function getZoneFallbackCoordinates(zoneLabel?: string | null): [number, number] {
-  if (!zoneLabel) return defaultMapCenter;
-  return zoneCenterByLabel[normalizeLabel(zoneLabel)] ?? defaultMapCenter;
+ if (!zoneLabel) return defaultMapCenter;
+ return zoneCenterByLabel[normalizeLabel(zoneLabel)] ?? defaultMapCenter;
 }
 
 function buildDemoCatalog(): CatalogState {
-  const vendorNames = Array.from(new Set(mockProducts.map((product) => product.vendor)));
-  const demoZones = ['Fort-de-France', 'Lamentin', 'Schoelcher'];
-  const vendors = vendorNames.map((name, index) => {
-    const profile = partnerProfiles.find((item) => item.name === name);
-    const space = getTraiteurSpaceBySlug(normalizeSpaceSlug(name));
-    const fallbackZone = demoZones[index % demoZones.length];
-    const zoneLabel = profile?.zone ? profile.zone.replace(/^Secteur\s+/i, '') : fallbackZone;
+ const vendorNames = Array.from(new Set(mockProducts.map((product) => product.vendor)));
+ const demoZones = ['Fort-de-France','Lamentin','Schoelcher'];
+ const vendors = vendorNames.map((name, index) => {
+ const profile = partnerProfiles.find((item) => item.name === name);
+ const space = getTraiteurSpaceBySlug(normalizeSpaceSlug(name));
+ const fallbackZone = demoZones[index % demoZones.length];
+ const zoneLabel = profile?.zone ? profile.zone.replace(/^Secteur\s+/i,'') : fallbackZone;
 
-    return {
-      id: `demo-vendor-${index + 1}`,
-      business_name: name,
-      business_type: profile?.type ?? 'Partenaire local',
-      description: space?.description ?? profile?.story ?? 'Partenaire de démonstration DELIKREOL.',
-      logo_url: null,
-      address: profile?.zone ?? fallbackZone,
-      phone: profile?.contactPhone ?? '',
-      latitude: null,
-      longitude: null,
-      commission_rate: 0.15,
-      delivery_radius_km: 3,
-      zone_label: zoneLabel,
-    };
-  });
-  const vendorMap = new Map(vendors.map((vendor) => [vendor.business_name, vendor]));
-  const products = mockProducts.map((product, index) => {
-    const vendor = vendorMap.get(product.vendor) ?? vendors[index % vendors.length];
-    return {
-      id: `demo-${product.id}`,
-      vendor_id: vendor.id,
-      vendor_name: vendor.business_name,
-      vendor_latitude: vendor.latitude,
-      vendor_longitude: vendor.longitude,
-      vendor_delivery_radius_km: vendor.delivery_radius_km,
-      name: product.name,
-      description: product.description ?? 'Produit de démonstration DELIKREOL.',
-      category: product.category,
-      price: product.price,
-      image_url: product.image ?? null,
-      stock_quantity: 10,
-      zone_label: vendor.zone_label,
-      available: product.available !== false,
-    };
-  });
+ return {
+ id: `demo-vendor-${index + 1}`,
+ business_name: name,
+ business_type: profile?.type ??'Partenaire local',
+ description: space?.description ?? profile?.story ??'Partenaire de démonstration DELIKREOL.',
+ logo_url: null,
+ address: profile?.zone ?? fallbackZone,
+ phone: profile?.contactPhone ??'',
+ latitude: null,
+ longitude: null,
+ commission_rate: 0.15,
+ delivery_radius_km: 3,
+ zone_label: zoneLabel,
+ };
+ });
+ const vendorMap = new Map(vendors.map((vendor) => [vendor.business_name, vendor]));
+ const products = mockProducts.map((product, index) => {
+ const vendor = vendorMap.get(product.vendor) ?? vendors[index % vendors.length];
+ return {
+ id: `demo-${product.id}`,
+ vendor_id: vendor.id,
+ vendor_name: vendor.business_name,
+ vendor_latitude: vendor.latitude,
+ vendor_longitude: vendor.longitude,
+ vendor_delivery_radius_km: vendor.delivery_radius_km,
+ name: product.name,
+ description: product.description ??'Produit de démonstration DELIKREOL.',
+ category: product.category,
+ price: product.price,
+ image_url: product.image ?? null,
+ stock_quantity: 10,
+ zone_label: vendor.zone_label,
+ available: product.available !== false,
+ };
+ });
 
-  return { configured: false, vendors, products };
+ return { configured: false, vendors, products };
 }
 
-const trustPills = [
-  'partenaires choisis',
-  'retrait ou livraison',
-  'réponse rapide',
-  'pensé pour la Martinique',
+const trustPills = ['partenaires choisis','retrait ou livraison','réponse rapide','pensé pour la Martinique',
 ];
 
 const howItWorks = [
-  {
-    title: 'Je cherche',
-    text: 'Adresse, commune ou produit: je trouve vite les offres disponibles près de moi.',
-  },
-  {
-    title: 'J’ajoute',
-    text: 'Je choisis un produit clair avec photo, prix, zone et disponibilité.',
-  },
-  {
-    title: 'Je confirme / je paie',
-    text: 'Je valide retrait ou livraison, puis PayPal, carte via lien sécurisé ou assistance WhatsApp.',
-  },
-  {
-    title: 'Je suis ma commande',
-    text: 'Je reçois une confirmation simple et les informations utiles pour récupérer ou recevoir ma commande.',
-  },
+ {
+ title:'Je cherche',
+ text:'Adresse, commune ou produit: je trouve vite les offres disponibles près de moi.',
+ },
+ {
+ title:'J’ajoute',
+ text:'Je choisis un produit clair avec photo, prix, zone et disponibilité.',
+ },
+ {
+ title:'Je confirme / je paie',
+ text:'Je valide retrait ou livraison, puis PayPal, carte via lien sécurisé ou assistance WhatsApp.',
+ },
+ {
+ title:'Je suis ma commande',
+ text:'Je reçois une confirmation simple et les informations utiles pour récupérer ou recevoir ma commande.',
+ },
 ];
 
 const reassurance = [
-  {
-    title: 'Local et crédible',
-    text: 'Partenaires visibles, communes servies, contact direct et infos utiles dès le premier écran.',
-    icon: ShieldCheck,
-  },
-  {
-    title: 'Simple et rapide',
-    text: 'Un seul chemin principal sur mobile: voir les offres, ajouter, confirmer ou parler à DELIKREOL.',
-    icon: Sparkles,
-  },
-  {
-    title: 'Pensé pour la Martinique',
-    text: 'Rayon réel, fallback commune si la géoloc manque et commandes entreprises adaptées aux usages locaux.',
-    icon: MapPin,
-  },
+ {
+ title:'Local et crédible',
+ text:'Partenaires visibles, communes servies, contact direct et infos utiles dès le premier écran.',
+ icon: ShieldCheck,
+ },
+ {
+ title:'Simple et rapide',
+ text:'Un seul chemin principal sur mobile: voir les offres, ajouter, confirmer ou parler à DELIKREOL.',
+ icon: Sparkles,
+ },
+ {
+ title:'Pensé pour la Martinique',
+ text:'Rayon réel, fallback commune si la géoloc manque et commandes entreprises adaptées aux usages locaux.',
+ icon: MapPin,
+ },
 ];
 
 const roleCards = [
-  {
-    title: 'Vendeur',
-    text: 'Publiez vos plats, produits ou menus locaux.',
-    cta: 'Devenir vendeur',
-    href: '#partenaires',
-    icon: Store,
-  },
-  {
-    title: 'Livreur',
-    text: 'Choisissez votre zone, vos créneaux et votre rayon.',
-    cta: 'Devenir livreur',
-    href: '#livreur',
-    icon: Truck,
-  },
-  {
-    title: 'Point relais',
-    text: 'Accueillez des retraits clients dans votre commerce.',
-    cta: 'Proposer un relais',
-    href: '#partenaires',
-    icon: Home,
-  },
-  {
-    title: 'Entreprise',
-    text: 'Commandes groupées, repas d’équipe et récurrence.',
-    cta: 'Demander un devis',
-    href: '#entreprises',
-    icon: Briefcase,
-  },
+ {
+ title:'Vendeur',
+ text:'Publiez vos plats, produits ou menus locaux.',
+ cta:'Devenir vendeur',
+ href:'#partenaires',
+ icon: Store,
+ },
+ {
+ title:'Livreur',
+ text:'Choisissez votre zone, vos créneaux et votre rayon.',
+ cta:'Devenir livreur',
+ href:'#livreur',
+ icon: Truck,
+ },
+ {
+ title:'Point relais',
+ text:'Accueillez des retraits clients dans votre commerce.',
+ cta:'Proposer un relais',
+ href:'#partenaires',
+ icon: Home,
+ },
+ {
+ title:'Entreprise',
+ text:'Commandes groupées, repas d’équipe et récurrence.',
+ cta:'Demander un devis',
+ href:'#entreprises',
+ icon: Briefcase,
+ },
 ];
 
 const driverHighlights = [
-  ['Gains estimés', 'À valider selon course'],
-  ['Zone', 'Commune + secteur'],
-  ['Rayon', '5 à 12 km conseillé'],
-  ['Disponibilité', 'Créneaux libres'],
-  ['Véhicule', 'Scooter, voiture ou vélo'],
+ ['Gains estimés','À valider selon course'],
+ ['Zone','Commune + secteur'],
+ ['Rayon','5 à 12 km conseillé'],
+ ['Disponibilité','Créneaux libres'],
+ ['Véhicule','Scooter, voiture ou vélo'],
 ];
 
 const simulationScenarios = [
-  ['Client commande', 'Produit ajouté, mode livraison ou retrait choisi, confirmation prête avec PDF.'],
-  ['Vendeur reçoit', 'Détails produits, quantités, créneau, total et statut paiement lisibles.'],
-  ['Livreur voit sa mission', 'Zone, rayon, mode de retrait et rémunération estimée visibles.'],
-  ['Partenaire voit son gain', 'Sous-total, frais, commission estimée et montant à préparer.'],
-  ['Entreprise envoie une demande', 'Nombre de personnes, date, lieu, budget et fréquence structurés.'],
+ ['Client commande','Produit ajouté, mode livraison ou retrait choisi, confirmation prête avec PDF.'],
+ ['Vendeur reçoit','Détails produits, quantités, créneau, total et statut paiement lisibles.'],
+ ['Livreur voit sa mission','Zone, rayon, mode de retrait et rémunération estimée visibles.'],
+ ['Partenaire voit son gain','Sous-total, frais, commission estimée et montant à préparer.'],
+ ['Entreprise envoie une demande','Nombre de personnes, date, lieu, budget et fréquence structurés.'],
 ];
 
 const faqItems = [
-  {
-    question: 'DELIKREOL est-il un simple traiteur ?',
-    answer: 'Non. DELIKREOL est une plateforme locale multi-partenaire qui relie clients, vendeurs, livraison et demandes entreprises.',
-  },
-  {
-    question: 'Comment savoir si un partenaire est actif ?',
-    answer: 'Les fiches affichent la visibilité, la commune, la zone, les horaires et l’état disponible ou à confirmer.',
-  },
-  {
-    question: 'Peut-on commander pour une entreprise ?',
-    answer: 'Oui. Le bloc Entreprises & commandes groupées permet de demander un devis, un repas d’équipe ou une récurrence.',
-  },
-  {
-    question: 'Quels modes de paiement sont disponibles ?',
-    answer: 'Les modes proposés sont affichés au niveau du panier : PayPal, carte via lien sécurisé ou assistance WhatsApp.',
-  },
-  {
-    question: 'Comment rejoindre la plateforme ?',
-    answer: 'Les vendeurs, traiteurs et prestataires peuvent remplir le formulaire partenaire pour être examinés puis intégrés.',
-  },
+ {
+ question:'DELIKREOL est-il un simple traiteur ?',
+ answer:'Non. DELIKREOL est une plateforme locale multi-partenaire qui relie clients, vendeurs, livraison et demandes entreprises.',
+ },
+ {
+ question:'Comment savoir si un partenaire est actif ?',
+ answer:'Les fiches affichent la visibilité, la commune, la zone, les horaires et l’état disponible ou à confirmer.',
+ },
+ {
+ question:'Peut-on commander pour une entreprise ?',
+ answer:'Oui. Le bloc Entreprises & commandes groupées permet de demander un devis, un repas d’équipe ou une récurrence.',
+ },
+ {
+ question:'Quels modes de paiement sont disponibles ?',
+ answer:'Les modes proposés sont affichés au niveau du panier : PayPal, carte via lien sécurisé ou assistance WhatsApp.',
+ },
+ {
+ question:'Comment rejoindre la plateforme ?',
+ answer:'Les vendeurs, traiteurs et prestataires peuvent remplir le formulaire partenaire pour être examinés puis intégrés.',
+ },
 ];
 
 const defaultPartnerLeadForm: PartnerLeadForm = {
-  business_name: '',
-  contact_name: '',
-  phone: '',
-  whatsapp: '',
-  email: '',
-  commune: '',
-  zone_label: '',
-  activity_type: 'restaurant',
-  delivery_radius_km: '3',
-  opening_hours: '',
-  description: '',
+ business_name:'',
+ contact_name:'',
+ phone:'',
+ whatsapp:'',
+ email:'',
+ commune:'',
+ zone_label:'',
+ activity_type:'restaurant',
+ delivery_radius_km:'3',
+ opening_hours:'',
+ description:'',
 };
 
 const defaultProductSubmissionForm: ProductSubmissionForm = {
-  business_name: '',
-  product_name: '',
-  category: 'plats créoles',
-  price: '',
-  description: '',
+ business_name:'',
+ product_name:'',
+ category:'plats créoles',
+ price:'',
+ description:'',
 };
 
 const defaultBusinessRequestForm: BusinessRequestForm = {
-  company_name: '',
-  contact: '',
-  people_count: '',
-  requested_date: '',
-  requested_time: '',
-  location: '',
-  budget: '',
-  frequency: '',
-  details: '',
+ company_name:'',
+ contact:'',
+ people_count:'',
+ requested_date:'',
+ requested_time:'',
+ location:'',
+ budget:'',
+ frequency:'',
+ details:'',
 };
 
 export function PublicHomePage() {
-  const baseUrl = import.meta.env.BASE_URL || '/';
-  const customerPath = `${baseUrl}?view=customer`;
-  const proSpaceUrl = `${baseUrl}?view=pro`;
-  const orderStatusBaseUrl = `${baseUrl}?view=order-status`;
-  const orderFormUrl = ORDER_FORM_URL;
-  const sheetsFirstMode = SHEETS_FIRST_MODE;
-  const operationsEmail = PUBLIC_OPERATIONS_EMAIL;
-  const gotoCustomer = (mode?: 'simulation') => {
-    if (mode === 'simulation') localStorage.setItem('delikreol_demo_override', 'true');
-    const target = document.getElementById('commande') || document.getElementById('catalogue');
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      return;
-    }
-    window.location.assign(mode === 'simulation' ? `${customerPath}&mode=simulation` : `${baseUrl}#catalogue`);
-  };
-  const [catalog, setCatalog] = useState<CatalogState>({ configured: false, vendors: [], products: [] });
-  const [query, setQuery] = useState('');
-  const [communeFilter, setCommuneFilter] = useState('Tous');
-  const [categoryFilter, setCategoryFilter] = useState('Tous');
-  const [budgetFilter, setBudgetFilter] = useState('Tous');
-  const [marketplaceTab, setMarketplaceTab] = useState<MarketplaceTab>('browse');
-  const [selectedProducts, setSelectedProducts] = useState<PublicCatalogProduct[]>([]);
-  const [fulfillmentMode, setFulfillmentMode] = useState<'delivery' | 'pickup'>('delivery');
-  const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [deliveryAddress, setDeliveryAddress] = useState('');
-  const [deliveryNotes, setDeliveryNotes] = useState('');
-  const [deliverySlot, setDeliverySlot] = useState('');
-  const [customerLocation, setCustomerLocation] = useState<CustomerLocation | null>(null);
-  const [pendingCustomerLocation, setPendingCustomerLocation] = useState<CustomerLocation | null>(null);
-  const [geoStatus, setGeoStatus] = useState<GeoStatus>('idle');
-  const [geoConsentState, setGeoConsentState] = useState<GeoConsentState>('idle');
-  const [geoError, setGeoError] = useState('');
-  const [vendorAvailabilityStatus, setVendorAvailabilityStatus] = useState('À confirmer par DELIKREOL');
-  const [copyStatus, setCopyStatus] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('Carte via lien sécurisé');
-  const [orderConfirmed, setOrderConfirmed] = useState(false);
-  const [checkoutStatus, setCheckoutStatus] = useState<CheckoutStatus>({ kind: 'idle' });
-  const [activeScenario, setActiveScenario] = useState(0);
-  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | 'unsupported'>(
-    typeof window === 'undefined' || !('Notification' in window) ? 'unsupported' : Notification.permission,
-  );
-  const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreferences>({
-    commande: true,
-    partenaire: true,
-    livreur: true,
-    promos: false,
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [partnerLeadForm, setPartnerLeadForm] = useState<PartnerLeadForm>(defaultPartnerLeadForm);
-  const [productSubmissionForm, setProductSubmissionForm] = useState<ProductSubmissionForm>(defaultProductSubmissionForm);
-  const [businessRequestForm, setBusinessRequestForm] = useState<BusinessRequestForm>(defaultBusinessRequestForm);
-  const [partnerStatus, setPartnerStatus] = useState<SubmitStatus>({ kind: 'idle' });
-  const [productStatus, setProductStatus] = useState<SubmitStatus>({ kind: 'idle' });
-  const [businessStatus, setBusinessStatus] = useState<SubmitStatus>({ kind: 'idle' });
-  const [productPhoto, setProductPhoto] = useState<File | null>(null);
-  const [supabasePaused, setSupabasePaused] = useState(false);
-  const [supabasePausedHint, setSupabasePausedHint] = useState<string | null>(null);
-  const { showSuccess } = useToast();
-
-  useEffect(() => {
-    document.title = 'DELIKREOL Martinique | Plats créoles, traiteurs, produits locaux et entreprises';
-    upsertMeta('description', 'DELIKREOL est la plateforme locale premium pour commander des plats créoles, des produits locaux et des demandes entreprises en Martinique.');
-    upsertMeta('og:title', 'DELIKREOL Martinique | Plateforme locale premium');
-    upsertMeta('og:description', 'Commandez des plats créoles et produits locaux en Martinique, avec retrait ou livraison selon votre commune.');
-    trackPublicView();
-  }, []);
-
-  useEffect(() => {
-    if (window.location.pathname.endsWith('/customer') || new URL(window.location.href).searchParams.get('view') === 'customer' || window.location.hash === '#catalogue') {
-      const timer = window.setTimeout(() => {
-        const target = document.getElementById('catalogue');
-        target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 50);
-      return () => window.clearTimeout(timer);
-    }
-    return undefined;
-  }, []);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tab = params.get('tab');
-    if (tab === 'traiteurs' || tab === 'browse') {
-      setMarketplaceTab(tab);
-    }
-    if (window.location.hash === '#traiteurs') {
-      setMarketplaceTab('traiteurs');
-    }
-  }, []);
-
-  useEffect(() => {
-    const vendorSlug = new URLSearchParams(window.location.search).get('vendor');
-    const vendorSpace = vendorSlug ? getTraiteurSpaceBySlug(vendorSlug) : null;
-    if (!vendorSpace) return;
-    setQuery((current) => current || vendorSpace.name);
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-    loadPublicCatalog()
-      .then((result) => {
-        if (!active) return;
-        setCatalog(result);
-        setError(null);
-      })
-      .catch(() => {
-        if (!active) return;
-        setCatalog(buildDemoCatalog());
-        setError(null);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!publicSupabase) {
-      setSupabasePaused(true);
-      setSupabasePausedHint('Backend Supabase indisponible (pause ou configuration). Bascule sur enregistrement Sheets (si configuré), WhatsApp en support.');
-      return;
-    }
-    let mounted = true;
-    (async () => {
-      try {
-        const { error: pingError } = await publicSupabase.from('vendors').select('id').limit(1);
-        if (!mounted) return;
-        if (pingError && isSupabasePausedError(pingError)) {
-          setSupabasePaused(true);
-          setSupabasePausedHint('Supabase est en pause (facturation). Bascule sur enregistrement Sheets (si configuré), WhatsApp en support.');
-        }
-      } catch {
-        // Ignore ping failures; the UI will handle on-demand fallbacks.
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const serviceZones = useMemo(() => {
-    const vendorZones = catalog.vendors.map((vendor) => vendor.zone_label).filter(Boolean);
-    return getMartiniqueServiceZones(vendorZones);
-  }, [catalog.vendors]);
-
-  const categoryOptions = useMemo(() => {
-    const fromCatalog = catalog.products.map((product) => product.category || 'plats créoles');
-    return ['Tous', ...Array.from(new Set([...featuredCategories, ...fromCatalog]))];
-  }, [catalog.products]);
-
-  const filteredProducts = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    const customerPoint = customerLocation ? { latitude: customerLocation.lat, longitude: customerLocation.lng } : null;
-
-    return catalog.products
-      .map((product) => {
-        const hasVendorGeo = product.vendor_latitude != null && product.vendor_longitude != null;
-        const distanceToCustomerKm =
-          customerPoint && hasVendorGeo
-            ? distanceKm(customerPoint, { latitude: product.vendor_latitude!, longitude: product.vendor_longitude! })
-            : null;
-        return { product, distanceToCustomerKm };
-      })
-      .filter(({ product }) => {
-        const zone = product.zone_label || '';
-      const matchQuery =
-        !needle ||
-        `${product.name} ${product.vendor_name} ${product.category} ${product.description} ${zone}`
-          .toLowerCase()
-          .includes(needle);
-      const matchCategory = categoryFilter === 'Tous' || product.category === categoryFilter;
-        const matchCoverage =
-          communeFilter === 'Tous'
-            ? true
-            : customerPoint
-              ? vendorServesPoint(
-                  {
-                    id: product.vendor_id,
-                    latitude: product.vendor_latitude,
-                    longitude: product.vendor_longitude,
-                    delivery_radius_km: product.vendor_delivery_radius_km,
-                    zone_label: product.zone_label,
-                },
-                customerPoint,
-                communeFilter,
-              )
-            : zone.toLowerCase().includes(communeFilter.toLowerCase());
-      const price = product.price ?? Number.POSITIVE_INFINITY;
-      const matchBudget =
-        budgetFilter === 'Tous' ||
-        (budgetFilter === '≤ 15 €' && price <= 15) ||
-        (budgetFilter === '15 € - 30 €' && price > 15 && price <= 30) ||
-        (budgetFilter === '30 € et plus' && price > 30);
-        return matchQuery && matchCategory && matchCoverage && matchBudget;
-      })
-      .sort((a, b) => {
-        if (a.distanceToCustomerKm == null && b.distanceToCustomerKm == null) return 0;
-        if (a.distanceToCustomerKm == null) return 1;
-        if (b.distanceToCustomerKm == null) return -1;
-        return a.distanceToCustomerKm - b.distanceToCustomerKm;
-      })
-      .map(({ product }) => product);
-  }, [catalog.products, categoryFilter, communeFilter, budgetFilter, query, customerLocation]);
-
-  const filteredProductsUniqueImages = useMemo(() => {
-    const seenImage = new Set<string>();
-    return filteredProducts.map((product) => {
-      const imageKey = (product.image_url || '').trim().toLowerCase();
-      if (!imageKey) return product;
-      if (seenImage.has(imageKey)) {
-        return { ...product, image_url: null };
-      }
-      seenImage.add(imageKey);
-      return product;
-    });
-  }, [filteredProducts]);
-
-  const zoneHighlights = useMemo(() => {
-    const counts = filteredProductsUniqueImages.reduce<Record<string, number>>((acc, product) => {
-      const zone = product.zone_label || 'Martinique';
-      acc[zone] = (acc[zone] || 0) + 1;
-      return acc;
-    }, {});
-
-    return Object.entries(counts)
-      .map(([zone, count]) => ({ zone, count }))
-      .sort((left, right) => right.count - left.count)
-      .slice(0, 4);
-  }, [filteredProductsUniqueImages]);
-
-  const nearbyProducts = useMemo(() => filteredProductsUniqueImages.slice(0, 6), [filteredProductsUniqueImages]);
-
-  const storyTraiteurs = useMemo(
-    () => partnerProfiles.filter((profile) => profile.type === 'Traiteur').slice(0, 4),
-    [],
-  );
-
-  const featuredProducts = useMemo(() => filteredProductsUniqueImages.slice(0, 3), [filteredProductsUniqueImages]);
-  const standardProducts = useMemo(() => {
-    const remaining = filteredProductsUniqueImages.filter((product) => !featuredProducts.some((item) => item.id === product.id));
-    return remaining.length > 0 ? remaining : filteredProductsUniqueImages;
-  }, [featuredProducts, filteredProductsUniqueImages]);
-  const heroProduct = featuredProducts[0] ?? filteredProductsUniqueImages[0] ?? catalog.products[0] ?? null;
-  const highlightedVendors = useMemo(() => catalog.vendors.slice(0, 6), [catalog.vendors]);
-
-  const customerPoint = customerLocation ? { latitude: customerLocation.lat, longitude: customerLocation.lng } : null;
-
-  const mapVendors = useMemo<MapVendor[]>(
-    () =>
-      highlightedVendors.map((vendor) => {
-        const [fallbackLat, fallbackLng] = getZoneFallbackCoordinates(vendor.zone_label);
-        const latitude = vendor.latitude ?? fallbackLat;
-        const longitude = vendor.longitude ?? fallbackLng;
-        const deliveryRadiusKm = Number(vendor.delivery_radius_km || 3);
-        const status: MapVendor['status'] = customerPoint
-          ? distanceKm(customerPoint, { latitude, longitude }) <= deliveryRadiusKm
-            ? 'in_zone'
-            : 'out_zone'
-          : 'unknown';
-        return {
-          id: vendor.id,
-          name: vendor.business_name,
-          latitude,
-          longitude,
-          deliveryRadiusKm,
-          status,
-        };
-      }),
-    [customerPoint, highlightedVendors],
-  );
-
-  const selectionEconomics = useMemo(
-    () =>
-      calculateOrderEconomics({
-        items: selectedProducts.map((product) => ({ price: product.price ?? 0, commissionRate: 0.15 })),
-        deliveryFee: fulfillmentMode === 'delivery' && selectedProducts.length > 0 ? 3.5 : 0,
-        serviceFee: selectedProducts.length > 0 ? 1 : 0,
-      }),
-    [fulfillmentMode, selectedProducts],
-  );
-
-  const deliveryCoverage = useMemo(() => {
-    if (fulfillmentMode !== 'delivery' || selectedProducts.length === 0) {
-      return {
-        status: 'unknown' as DeliveryCoverageStatus,
-        message: '',
-      };
-    }
-
-    const fallbackZone =
-      communeFilter !== 'Tous'
-        ? communeFilter
-        : deliveryAddress.trim()
-            ? deliveryAddress.trim().split(',')[0]
-            : '';
-
-    const customerPoint = customerLocation ? { latitude: customerLocation.lat, longitude: customerLocation.lng } : null;
-    const failures: string[] = [];
-
-    for (const product of selectedProducts) {
-      const vendor = {
-        id: product.vendor_id,
-        latitude: product.vendor_latitude,
-        longitude: product.vendor_longitude,
-        delivery_radius_km: product.vendor_delivery_radius_km,
-        zone_label: product.zone_label,
-      };
-      const covered = customerPoint
-        ? vendorServesPoint(vendor, customerPoint, fallbackZone || undefined)
-        : fallbackZone
-          ? (product.zone_label || '').toLowerCase().includes(fallbackZone.toLowerCase())
-          : false;
-      if (!covered) failures.push(product.vendor_name);
-    }
-
-    if (failures.length > 0) {
-      return {
-        status: 'out_zone' as DeliveryCoverageStatus,
-        message: customerPoint
-          ? `Livraison impossible pour votre position actuelle avec: ${Array.from(new Set(failures)).join(', ')}. Choisissez retrait ou une autre adresse.`
-          : `Zone non couverte pour certains vendeurs (${Array.from(new Set(failures)).join(', ')}). Renseignez une adresse plus précise ou passez en retrait.`,
-      };
-    }
-
-    if (!customerPoint && !fallbackZone) {
-      return {
-        status: 'unknown' as DeliveryCoverageStatus,
-        message: 'Ajoutez votre adresse ou validez votre position pour confirmer la zone de livraison.',
-      };
-    }
-
-    return {
-      status: 'in_zone' as DeliveryCoverageStatus,
-      message: 'Votre commande est dans la zone de livraison.',
-    };
-  }, [communeFilter, customerLocation, deliveryAddress, fulfillmentMode, selectedProducts]);
-
-  const orderNumber = useMemo(() => `DK-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${String(selectedProducts.length || 1).padStart(2, '0')}`, [selectedProducts.length]);
-
-  const deliveryLabel = fulfillmentMode === 'delivery' ? 'Livraison' : 'Retrait';
-  const deliverySlotLabel = deliverySlot || 'Créneau à confirmer';
-  const customerMapsLabel = customerLocation?.mapsUrl || 'Position GPS non fournie — confirmer adresse manuellement';
-  const customerMapPreviewLocation = pendingCustomerLocation ?? customerLocation;
-  const productLines = useMemo(
-    () =>
-      selectedProducts.length
-        ? selectedProducts.map((product) => `- ${product.name} x1 — ${product.vendor_name} — ${formatPrice(product.price)}`)
-        : ['- Disponibilités du moment à proposer'],
-    [selectedProducts],
-  );
-
-  const vendorMessage = useMemo(
-    () =>
-      [
-        '📩 DEMANDE DISPONIBILITE VENDEUR',
-        `Commande : ${orderNumber}`,
-        'Produits à préparer :',
-        ...productLines,
-        `Créneau client : ${deliverySlotLabel}`,
-        `Mode : ${deliveryLabel}`,
-        `Adresse ou zone client : ${deliveryAddress || 'Adresse non fournie'}`,
-        `Position Maps : ${customerMapsLabel}`,
-        `Total : ${formatPrice(selectionEconomics.total_client)}`,
-        `Statut disponibilité : ${vendorAvailabilityStatus}`,
-        '',
-        'Merci de répondre :',
-        'OK disponible + délai préparation',
-        'ou',
-        'KO indisponible / alternative possible',
-      ].join('\n'),
-    [
-      customerMapsLabel,
-      deliveryAddress,
-      deliveryLabel,
-      deliverySlotLabel,
-      orderNumber,
-      productLines,
-      selectionEconomics.total_client,
-      vendorAvailabilityStatus,
-    ],
-  );
-
-  const driverMessage = useMemo(
-    () =>
-      [
-        '🚚 MISSION LIVRAISON DELIKREOL',
-        `Commande : ${orderNumber}`,
-        `Pickup : ${selectedProducts[0]?.vendor_name || 'Vendeur à confirmer'} / adresse vendeur si disponible`,
-        `Drop client : ${deliveryAddress || 'Adresse client non fournie'}`,
-        `Position client : ${customerMapsLabel}`,
-        `Créneau : ${deliverySlotLabel}`,
-        `Instructions : ${deliveryNotes || 'Aucune instruction'}`,
-        `Montant commande : ${formatPrice(selectionEconomics.total_client)}`,
-        'Statut : attendre confirmation vendeur avant départ',
-      ].join('\n'),
-    [customerMapsLabel, deliveryAddress, deliveryNotes, deliverySlotLabel, orderNumber, selectedProducts, selectionEconomics.total_client],
-  );
-
-  const partnerDispatchTarget = useMemo(() => {
-    const partnerName = selectedProducts[0]?.vendor_name || 'Partenaire à confirmer';
-    const partnerLocality = selectedProducts[0]?.zone_label || 'Localité partenaire non fournie';
-    const customerLocality = deliveryAddress.trim()
-      ? deliveryAddress.trim().split(',')[0]?.trim() || 'Localité client non fournie'
-      : 'Localité client non fournie';
-
-    return {
-      partnerName,
-      partnerLocality,
-      customerLocality,
-    };
-  }, [deliveryAddress, selectedProducts]);
-
-  const partnerDispatchMessage = useMemo(
-    () =>
-      buildPartnerDispatchMessage({
-        orderNumber,
-        products: selectedProducts,
-        deliveryMode: deliveryLabel,
-        deliveryFee: selectionEconomics.frais_livraison,
-        serviceFee: selectionEconomics.frais_service,
-        total: selectionEconomics.total_client,
-        paymentStatus: paymentMethod,
-        slot: deliverySlotLabel,
-        customerName,
-        customerPhone,
-        deliveryAddress,
-        customerLocality: partnerDispatchTarget.customerLocality,
-        deliveryNotes,
-        customerMapsUrl: customerLocation?.mapsUrl,
-        customerLat: customerLocation?.lat,
-        customerLng: customerLocation?.lng,
-        customerAccuracy: customerLocation?.accuracy,
-        partnerName: partnerDispatchTarget.partnerName,
-        partnerLocality: partnerDispatchTarget.partnerLocality,
-      }),
-    [
-      customerLocation,
-      customerName,
-      customerPhone,
-      deliveryAddress,
-      deliveryLabel,
-      deliveryNotes,
-      deliverySlotLabel,
-      orderNumber,
-      paymentMethod,
-      selectedProducts,
-      selectionEconomics,
-      partnerDispatchTarget,
-    ],
-  );
-
-  const supportLink = useMemo(
-    () =>
-      `${whatsappBase}?text=${encodeURIComponent(
-        `Bonjour DELIKREOL, j’ai besoin d’aide pour finaliser ma commande ${orderNumber}.`,
-      )}`,
-    [orderNumber],
-  );
-
-  const partnerDispatchLink = useMemo(() => {
-    const subject = `Commande DELIKREOL ${orderNumber}`;
-    return `mailto:${operationsEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(partnerDispatchMessage)}`;
-  }, [operationsEmail, orderNumber, partnerDispatchMessage]);
-
-  const driverMissionLink = useMemo(() => `${whatsappBase}?text=${encodeURIComponent(driverMessage)}`, [driverMessage]);
-
-  const partnerLink = `${baseUrl}?view=launch-network`;
-
-  const businessLink = useMemo(() => {
-    const body = [
-      'Bonjour DELIKREOL, je souhaite une demande entreprise.',
-      businessRequestForm.company_name && `Entreprise : ${businessRequestForm.company_name}`,
-      businessRequestForm.contact && `Contact : ${businessRequestForm.contact}`,
-      businessRequestForm.people_count && `Nombre de personnes : ${businessRequestForm.people_count}`,
-      businessRequestForm.requested_date && `Date : ${businessRequestForm.requested_date}`,
-      businessRequestForm.requested_time && `Heure : ${businessRequestForm.requested_time}`,
-      businessRequestForm.location && `Lieu : ${businessRequestForm.location}`,
-      businessRequestForm.budget && `Budget : ${businessRequestForm.budget}`,
-      businessRequestForm.frequency && `Fréquence : ${businessRequestForm.frequency}`,
-      businessRequestForm.details && `Détails : ${businessRequestForm.details}`,
-    ]
-      .filter(Boolean)
-      .join('\n');
-
-    return `${whatsappBase}?text=${encodeURIComponent(body || 'Bonjour DELIKREOL, je souhaite une demande entreprise.')}`;
-  }, [businessRequestForm]);
-
-  async function handlePartnerLeadSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPartnerStatus({ kind: 'saving', message: 'Envoi de la demande partenaire...' });
-
-    try {
-      await submitPartnerLead({
-        business_name: partnerLeadForm.business_name,
-        contact_name: partnerLeadForm.contact_name,
-        phone: partnerLeadForm.phone,
-        whatsapp: partnerLeadForm.whatsapp || partnerLeadForm.phone,
-        email: partnerLeadForm.email || undefined,
-        commune: partnerLeadForm.commune || undefined,
-        zone_label: partnerLeadForm.zone_label || partnerLeadForm.commune || undefined,
-        activity_type: partnerLeadForm.activity_type || undefined,
-        delivery_radius_km: Number(partnerLeadForm.delivery_radius_km || '8'),
-        opening_hours: partnerLeadForm.opening_hours || undefined,
-      });
-      setPartnerStatus({ kind: 'success', message: 'Demande envoyée. Votre dossier sera examiné rapidement.' });
-      trackPartnerLeadSuccess({
-        activity_type: partnerLeadForm.activity_type || null,
-        commune: partnerLeadForm.commune || null,
-      });
-      setPartnerLeadForm(defaultPartnerLeadForm);
-    } catch (submitError) {
-      setPartnerStatus({ kind: 'error', message: getErrorMessage(submitError, 'Impossible d’envoyer la demande pour le moment.') });
-    }
-  }
-
-  async function handleProductSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setProductStatus({ kind: 'saving', message: 'Envoi de la proposition...' });
-
-    try {
-      let imageUrl: string | null = null;
-      if (productPhoto) {
-        const uploaded = await uploadPartnerProductPhoto(productPhoto);
-        imageUrl = uploaded.publicUrl;
-      }
-
-      await submitPartnerProduct({
-        business_name: productSubmissionForm.business_name,
-        product_name: productSubmissionForm.product_name,
-        description: productSubmissionForm.description || undefined,
-        category: productSubmissionForm.category || undefined,
-        price: Number(productSubmissionForm.price || '0'),
-        is_available: true,
-        image_url: imageUrl,
-      });
-
-      setProductStatus({ kind: 'success', message: 'Proposition envoyée. Elle sera vérifiée avant affichage.' });
-      trackProductSubmissionSuccess({
-        category: productSubmissionForm.category || null,
-        has_photo: Boolean(productPhoto),
-      });
-      setProductSubmissionForm(defaultProductSubmissionForm);
-      setProductPhoto(null);
-    } catch (submitError) {
-      setProductStatus({ kind: 'error', message: getErrorMessage(submitError, 'Impossible d’envoyer la proposition pour le moment.') });
-    }
-  }
-
-  async function handleBusinessRequestSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setBusinessStatus({ kind: 'saving', message: 'Envoi de la demande entreprise...' });
-
-    try {
-      await createBusinessRequest({
-        company_name: businessRequestForm.company_name,
-        contact: businessRequestForm.contact,
-        people_count: businessRequestForm.people_count ? Number(businessRequestForm.people_count) : null,
-        requested_date: businessRequestForm.requested_date || null,
-        requested_time: businessRequestForm.requested_time || null,
-        location: businessRequestForm.location || null,
-        budget: businessRequestForm.budget || null,
-        frequency: businessRequestForm.frequency || null,
-      });
-      setBusinessStatus({ kind: 'success', message: 'Demande entreprise envoyée. Un retour rapide est attendu.' });
-      trackBusinessRequestSuccess({
-        company_name: businessRequestForm.company_name || null,
-        people_count: businessRequestForm.people_count ? Number(businessRequestForm.people_count) : null,
-      });
-      setBusinessRequestForm(defaultBusinessRequestForm);
-    } catch (submitError) {
-      setBusinessStatus({ kind: 'error', message: getErrorMessage(submitError, 'Impossible d’envoyer la demande entreprise pour le moment.') });
-    }
-  }
-
-  function addToSelection(product: PublicCatalogProduct) {
-    if (product.price == null) {
-      setCheckoutStatus({ kind: 'error', message: 'Prix à confirmer pour ce produit.' });
-      return;
-    }
-    setSelectedProducts((current) => [...current, product]);
-    setOrderConfirmed(false);
-    setCheckoutStatus({ kind: 'idle' });
-    showSuccess('Ajouté au panier');
-  }
-
-  function removeFromSelection(index: number) {
-    setSelectedProducts((current) => current.filter((_, currentIndex) => currentIndex !== index));
-    setOrderConfirmed(false);
-    setCheckoutStatus({ kind: 'idle' });
-  }
-
-  function clearSelection() {
-    setSelectedProducts([]);
-    setOrderConfirmed(false);
-    setCheckoutStatus({ kind: 'idle' });
-  }
-
-  function buildOrderSummary(orderNumberValue: string) {
-    const lines = selectedProducts.map((product) => `- ${product.name} (${formatPrice(product.price)}) — ${product.vendor_name}`).join('\n');
-    const total = formatPrice(selectionEconomics.total_client);
-    const delivery = fulfillmentMode === 'delivery' ? `Livraison: ${deliveryAddress.trim() || '(adresse à confirmer)'}` : 'Retrait';
-    const slot = deliverySlot.trim() ? `Créneau: ${deliverySlot.trim()}` : '';
-    const notes = deliveryNotes.trim() ? `Notes: ${deliveryNotes.trim()}` : '';
-    const who = `Client: ${customerName.trim() || '(nom)'} | ${customerPhone.trim() || '(téléphone)'}`;
-
-    return [
-      `Commande: ${orderNumberValue}`,
-      who,
-      delivery,
-      slot,
-      notes,
-      '',
-      'Panier:',
-      lines,
-      '',
-      `Total estimé: ${total}`,
-      `Paiement souhaité: ${paymentMethod}`,
-      `Statut vendeur: ${vendorAvailabilityStatus}`,
-    ]
-      .filter(Boolean)
-      .join('\n');
-  }
-
-  function buildWhatsAppFallbackOrderMessage() {
-    return [
-      'Bonjour DELIKREOL, je souhaite commander.',
-      buildOrderSummary(orderNumber),
-      '',
-      'Contexte: Supabase en pause, mode secours activé.',
-    ]
-      .filter(Boolean)
-      .join('\n');
-  }
-
-  function saveOrderLocally(params: {
-    orderId: string;
-    orderNumber: string;
-    source: string;
-    items: Array<{
-      product_id: string;
-      vendor_id: string;
-      product_name: string;
-      vendor_name: string;
-      quantity: number;
-      unit_price: number;
-    }>;
-  }) {
-    try {
-      const key = 'delikreol_local_orders_v1';
-      const raw = localStorage.getItem(key);
-      const parsed = raw ? JSON.parse(raw) : [];
-      const archive = Array.isArray(parsed) ? parsed : [];
-      const record = {
-        id: params.orderId,
-        order_number: params.orderNumber,
-        created_at: new Date().toISOString(),
-        customer_name: customerName.trim(),
-        customer_phone: customerPhone.trim(),
-        fulfillment_mode: fulfillmentMode,
-        delivery_address: deliveryAddress.trim() || null,
-        delivery_slot: deliverySlot.trim() || null,
-        payment_method: paymentMethod,
-        vendor_availability_status: vendorAvailabilityStatus,
-        total_amount: selectionEconomics.total_client,
-        source: params.source,
-        items: params.items,
-      };
-      const next = [record, ...archive].slice(0, 200);
-      localStorage.setItem(key, JSON.stringify(next));
-      return { saved: true as const };
-    } catch (error) {
-      return {
-        saved: false as const,
-        error: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
-
-  function handleWhatsAppCheckoutFallback() {
-    const message = buildWhatsAppFallbackOrderMessage();
-    const link = getWhatsAppBusinessLink(whatsappNumber, message);
-    // Aggressive fallback: always copy message, then attempt to open WhatsApp.
-    void copyOperationalMessage(message, 'Message WhatsApp prêt. Collez-le si WhatsApp ne s’ouvre pas automatiquement.');
-    window.location.href = link;
-  }
-
-  async function handleCheckout() {
-    if (selectedProducts.length === 0) {
-      setCheckoutStatus({ kind: 'error', message: 'Ajoutez au moins un produit au panier.' });
-      return;
-    }
-
-    if (!customerName.trim() || !customerPhone.trim()) {
-      setCheckoutStatus({ kind: 'error', message: 'Nom et téléphone sont obligatoires pour confirmer la commande.' });
-      return;
-    }
-
-    if (fulfillmentMode === 'delivery' && !deliveryAddress.trim()) {
-      setCheckoutStatus({ kind: 'error', message: 'Adresse obligatoire pour une livraison.' });
-      return;
-    }
-
-    if (fulfillmentMode === 'delivery' && deliveryCoverage.status === 'out_zone') {
-      setCheckoutStatus({
-        kind: 'error',
-        message: deliveryCoverage.message || 'Livraison impossible pour cette adresse/position. Passez en retrait ou changez d’adresse.',
-      });
-      return;
-    }
-
-    const checkoutOrderId = crypto.randomUUID();
-    const checkoutOrderNumber = `DK-${Date.now().toString(36).toUpperCase()}`;
-    const hasSheetsEndpoint = Boolean(getOrderFallbackEndpoint());
-    const hasOrderFormFallback = Boolean(orderFormUrl);
-    const orderItemsPayload = selectedProducts.map((product) => ({
-      order_id: checkoutOrderId,
-      product_id: product.id,
-      vendor_id: product.vendor_id,
-      product_name: product.name,
-      vendor_name: product.vendor_name,
-      quantity: 1,
-      unit_price: product.price ?? 0,
-      vendor_commission: Number(((product.price ?? 0) * 0.15).toFixed(2)),
-    }));
-
-    const fallbackToOrderForm = async (reason: string) => {
-      if (!hasOrderFormFallback) return false;
-      setSupabasePaused(true);
-      setSupabasePausedHint(reason);
-
-      const formSummary = [
-        'Finalisez la commande via formulaire.',
-        '',
-        buildOrderSummary(checkoutOrderNumber),
-      ].join('\n');
-
-      await copyOperationalMessage(formSummary, 'Récapitulatif commande');
-      const opened = window.open(orderFormUrl, '_blank', 'noopener,noreferrer');
-      if (!opened) window.location.assign(orderFormUrl);
-
-      setOrderConfirmed(true);
-      setCheckoutStatus({
-        kind: 'success',
-        orderNumber: checkoutOrderNumber,
-        message: `Commande ${checkoutOrderNumber} préparée. Finalisez via le formulaire sécurisé.`,
-      });
-      trackCheckoutSuccess({
-        order_number: checkoutOrderNumber,
-        items_count: selectedProducts.length,
-        total_amount: selectionEconomics.total_client,
-        mode: `${fulfillmentMode}_form`,
-      });
-      return true;
-    };
-
-    const fallbackToLocal = async (reason: string) => {
-      setSupabasePaused(true);
-      setSupabasePausedHint(reason);
-      const localSave = saveOrderLocally({
-        orderId: checkoutOrderId,
-        orderNumber: checkoutOrderNumber,
-        source: sheetsFirstMode ? 'public_checkout_local_sheets_first' : 'public_checkout_local_fallback',
-        items: orderItemsPayload.map((item) => ({
-          product_id: item.product_id,
-          vendor_id: item.vendor_id,
-          product_name: item.product_name,
-          vendor_name: item.vendor_name,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-        })),
-      });
-
-      const localSummary = [
-        'Commande enregistrée localement (mode secours).',
-        '',
-        buildOrderSummary(checkoutOrderNumber),
-      ].join('\n');
-      await copyOperationalMessage(localSummary, 'Récapitulatif commande');
-
-      setOrderConfirmed(true);
-      setCheckoutStatus({
-        kind: 'success',
-        orderNumber: checkoutOrderNumber,
-        message: localSave.saved
-          ? `Commande ${checkoutOrderNumber} enregistrée localement. Finalisation opérateur en cours.`
-          : `Commande ${checkoutOrderNumber} préparée. Sauvegarde locale partielle (${localSave.error || 'erreur locale'}).`,
-      });
-      trackCheckoutSuccess({
-        order_number: checkoutOrderNumber,
-        items_count: selectedProducts.length,
-        total_amount: selectionEconomics.total_client,
-        mode: `${fulfillmentMode}_local_backup`,
-      });
-      return true;
-    };
-
-    const fallbackToSheets = async (reason: string) => {
-      setSupabasePaused(true);
-      setSupabasePausedHint(reason);
-      if (!hasSheetsEndpoint) {
-        if (await fallbackToOrderForm(`${reason} Endpoint Sheets non configuré.`)) {
-          return true;
-        }
-        await fallbackToLocal(
-          `${reason} Aucun endpoint Sheets/Form configuré. Sauvegarde locale activée, WhatsApp reste en support manuel.`,
-        );
-        return true;
-      }
-
-      const saved = await saveFallbackOrderToSheet({
-        order_id: checkoutOrderId,
-        order_number: checkoutOrderNumber,
-        customer_name: customerName.trim(),
-        customer_phone: customerPhone.trim(),
-        fulfillment_mode: fulfillmentMode,
-        delivery_address: deliveryAddress.trim() || null,
-        delivery_slot: deliverySlot.trim() || null,
-        payment_method: paymentMethod,
-        vendor_availability_status: vendorAvailabilityStatus,
-        total_amount: selectionEconomics.total_client,
-        source: sheetsFirstMode ? 'public_checkout_sheets_first' : 'public_checkout_fallback',
-        items: orderItemsPayload.map((item) => ({
-          product_id: item.product_id,
-          vendor_id: item.vendor_id,
-          product_name: item.product_name,
-          vendor_name: item.vendor_name,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-        })),
-      });
-
-      if (!saved.saved) {
-        if (await fallbackToOrderForm(`${reason} ${saved.error || 'Erreur endpoint Sheets.'}`)) {
-          return true;
-        }
-        await fallbackToLocal(
-          `${reason} Endpoint Sheets indisponible (${saved.error || 'endpoint secours absent'}). Sauvegarde locale activée.`,
-        );
-        return true;
-      }
-
-      setOrderConfirmed(true);
-      setCheckoutStatus({
-        kind: 'success',
-        orderNumber: checkoutOrderNumber,
-        message: `Commande ${checkoutOrderNumber} enregistrée en mode Sheets. Paiement : pending.`,
-      });
-      trackCheckoutSuccess({
-        order_number: checkoutOrderNumber,
-        items_count: selectedProducts.length,
-        total_amount: selectionEconomics.total_client,
-        mode: sheetsFirstMode ? `${fulfillmentMode}_sheets_first` : `${fulfillmentMode}_fallback`,
-      });
-      return true;
-    };
-
-    if (sheetsFirstMode) {
-      setCheckoutStatus({ kind: 'saving', message: 'Enregistrement de la commande (mode gratuit)...' });
-      await fallbackToSheets('Mode gratuit actif. Enregistrement prioritaire sur Sheets.');
-      return;
-    }
-
-    if (!publicSupabase || supabasePaused) {
-      await fallbackToSheets(
-        !publicSupabase
-          ? 'Backend Supabase indisponible (configuration). Bascule sur enregistrement Sheets.'
-          : 'Supabase est en pause. Bascule sur enregistrement Sheets.',
-      );
-      return;
-    }
-
-    setCheckoutStatus({ kind: 'saving', message: 'Création de la commande...' });
-
-    const orderPayload = {
-      order_number: checkoutOrderNumber,
-      customer_name: customerName.trim(),
-      customer_phone: customerPhone.trim(),
-      status: 'pending',
-      payment_status: 'pending',
-      delivery_status: 'pending',
-      delivery_type: fulfillmentMode === 'delivery' ? 'home_delivery' : 'pickup',
-      delivery_address: deliveryAddress.trim() || null,
-      delivery_latitude: customerLocation?.lat ?? null,
-      delivery_longitude: customerLocation?.lng ?? null,
-      scheduled_time: deliverySlot.trim() || null,
-      delivery_fee: selectionEconomics.frais_livraison,
-      total_amount: selectionEconomics.total_client,
-      source: 'public_checkout',
-      notes: [
-        deliveryNotes && `Instructions: ${deliveryNotes}`,
-        customerLocation?.mapsUrl && `Maps: ${customerLocation.mapsUrl}`,
-        `Paiement souhaité: ${paymentMethod}`,
-        `Statut vendeur: ${vendorAvailabilityStatus}`,
-      ]
-        .filter(Boolean)
-        .join('\n') || null,
-    };
-
-    try {
-      const { data: createdOrder, error: orderError } = await publicSupabase
-        .from('orders')
-        .insert(orderPayload)
-        .select('id')
-        .single();
-      if (orderError) {
-        if (isSupabasePausedError(orderError) || isSupabaseUnavailableError(orderError)) {
-          await fallbackToSheets('Supabase indisponible. Bascule sur enregistrement Sheets.');
-          return;
-        }
-        setCheckoutStatus({ kind: 'error', message: `Commande non créée : ${orderError.message}` });
-        return;
-      }
-
-      const supabaseOrderItemsPayload = orderItemsPayload.map((item) => ({
-        ...item,
-        order_id: createdOrder.id,
-      }));
-      const { error: itemsError } = await publicSupabase.from('order_items').insert(supabaseOrderItemsPayload);
-      if (itemsError) {
-        if (isSupabasePausedError(itemsError) || isSupabaseUnavailableError(itemsError)) {
-          await fallbackToSheets('Supabase indisponible. Bascule sur enregistrement Sheets.');
-          return;
-        }
-        setCheckoutStatus({ kind: 'error', message: `Produits non enregistrés : ${itemsError.message}` });
-        return;
-      }
-    } catch (unexpectedError) {
-      if (isSupabasePausedError(unexpectedError) || isSupabaseUnavailableError(unexpectedError)) {
-        await fallbackToSheets('Supabase indisponible. Bascule sur enregistrement Sheets.');
-        return;
-      }
-      setCheckoutStatus({
-        kind: 'error',
-        message: `Erreur checkout : ${String((unexpectedError as any)?.message ?? unexpectedError)}`,
-      });
-      return;
-    }
-
-    setOrderConfirmed(true);
-    setCheckoutStatus({
-      kind: 'success',
-      orderNumber: checkoutOrderNumber,
-      message: `Commande ${checkoutOrderNumber} enregistrée. Statut : pending. Paiement : pending.`,
-    });
-    trackCheckoutSuccess({
-      order_number: checkoutOrderNumber,
-      items_count: selectedProducts.length,
-      total_amount: selectionEconomics.total_client,
-      mode: fulfillmentMode,
-    });
-  }
-
-  async function requestNotifications() {
-    if (!('Notification' in window)) {
-      setNotificationPermission('unsupported');
-      return;
-    }
-    const permission = await Notification.requestPermission();
-    setNotificationPermission(permission);
-  }
-
-  function askCustomerPosition() {
-    if (geoStatus === 'loading') return;
-    setGeoError('');
-    setGeoConsentState('ask');
-  }
-
-  function cancelCustomerPositionConsent() {
-    setGeoConsentState('declined');
-    setGeoError('');
-  }
-
-  function useCustomerPosition() {
-    if (!('geolocation' in navigator)) {
-      setGeoStatus('unsupported');
-      setGeoConsentState('declined');
-      setGeoError('Géolocalisation non supportée par ce navigateur. Saisissez l’adresse manuellement.');
-      return;
-    }
-
-    setGeoStatus('loading');
-    setGeoConsentState('ask');
-    setGeoError('');
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setPendingCustomerLocation({
-          lat: coords.latitude,
-          lng: coords.longitude,
-          accuracy: coords.accuracy,
-          mapsUrl: `https://www.google.com/maps?q=${coords.latitude},${coords.longitude}`,
-        });
-        setGeoStatus('success');
-        setGeoConsentState('granted');
-      },
-      (positionError) => {
-        setGeoStatus('error');
-        setGeoConsentState('declined');
-        setGeoError(
-          positionError.code === positionError.PERMISSION_DENIED
-            ? 'Permission refusée. Saisissez l’adresse manuellement.'
-            : 'Position indisponible. Saisissez l’adresse manuellement.',
-        );
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
-    );
-  }
-
-  function confirmPendingCustomerPosition() {
-    if (!pendingCustomerLocation) {
-      setGeoError('Aucune position détectée à valider.');
-      return;
-    }
-    setCustomerLocation(pendingCustomerLocation);
-    setPendingCustomerLocation(null);
-    setGeoConsentState('granted');
-    setGeoError('');
-    showSuccess('Position validée.');
-  }
-
-  function rejectPendingCustomerPosition() {
-    setPendingCustomerLocation(null);
-    setGeoConsentState('declined');
-    if (!customerLocation) setGeoStatus('idle');
-  }
-
-  async function copyOperationalMessage(message: string, label: string) {
-    try {
-      if ('clipboard' in navigator && navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(message);
-      } else {
-        const textarea = document.createElement('textarea');
-        textarea.value = message;
-        textarea.setAttribute('readonly', '');
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-      }
-      setCopyStatus(`${label} copié. Validez humainement avant envoi.`);
-    } catch {
-      setCopyStatus(`Copie impossible pour ${label}. Utilisez le bouton WhatsApp ou email.`);
-    }
-  }
-
-  function handleDownloadOrderPdf() {
-    downloadOrderPdf({
-      orderNumber,
-      products: selectedProducts,
-      deliveryMode: deliveryLabel,
-      deliveryFee: selectionEconomics.frais_livraison,
-      serviceFee: selectionEconomics.frais_service,
-      total: selectionEconomics.total_client,
-      paymentStatus: paymentMethod,
-      slot: deliverySlotLabel,
-      customerName,
-      customerPhone,
-      deliveryAddress,
-      deliveryNotes,
-      customerMapsUrl: customerLocation?.mapsUrl,
-      customerLat: customerLocation?.lat,
-      customerLng: customerLocation?.lng,
-      customerAccuracy: customerLocation?.accuracy,
-    });
-  }
-
-  function confirmOrderLocally() {
-    setOrderConfirmed(true);
-  }
-
-  function scrollToCheckoutPanel() {
-    const target = document.getElementById('commande') || document.querySelector('[data-testid="cart-panel"]');
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      return;
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  return (
-    <div className="min-h-screen bg-[#fbf4ea] text-[#2a190f]">
-      <header className="sticky top-0 z-50 border-b border-white/80 bg-[#fff8ec]/92 backdrop-blur-xl">
-        <div className="relative mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-3">
-          <div className="hidden items-center gap-2 sm:flex">
-            <span className="rounded-xl border border-orange-200 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-[#7c2d12] shadow-sm">
-              Martinique
-            </span>
-          </div>
-
-          <a href="#accueil" className="brand-logo-frame flex items-center gap-3 rounded-2xl px-3 py-2" aria-label="DELIKREOL accueil">
-            <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-12 w-12 rounded-2xl bg-white p-1.5 shadow-lg sm:h-14 sm:w-14" />
-            <div className="leading-none">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[hsl(var(--primary))]">Local premium</p>
-              <p className="text-lg font-black tracking-tight text-[#2a190f] sm:text-xl">DELIKREOL</p>
-            </div>
-          </a>
-
-          <nav className="absolute left-1/2 top-full hidden -translate-x-1/2 items-center gap-2 rounded-b-[1.5rem] border border-t-0 border-orange-100 bg-[#fff8ec]/95 px-4 py-2 shadow-soft backdrop-blur lg:flex">
-            <NavLink href="#catalogue">Catalogue</NavLink>
-            <NavLink href="#traiteurs">Traiteurs</NavLink>
-            <NavLink href="#commande">Commander</NavLink>
-            <NavLink href={proSpaceUrl}>Espace pro</NavLink>
-            <NavLink href="#contact">Contact</NavLink>
-          </nav>
-
-          <div className="hidden items-end gap-3 xl:flex">
-            <div className="text-right leading-tight">
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[hsl(var(--primary))]">Contact dédié</p>
-              <a href={`https://wa.me/${whatsappNumber}`} className="text-sm font-black text-[#2a190f] hover:text-[hsl(var(--primary))]">
-                WhatsApp {formatWhatsAppLabel(whatsappNumber)}
-              </a>
-              <a href={publicSiteUrl} className="block text-[11px] font-semibold text-stone-500 hover:text-[#7c2d12]" target="_blank" rel="noreferrer">
-                {publicSiteUrl.replace('https://', '')}
-              </a>
-            </div>
-            <a
-              href={customerPath}
-              onClick={(event) => {
-                event.preventDefault();
-                gotoCustomer();
-              }}
-              className="inline-flex rounded-full bg-[hsl(var(--primary))] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/25 transition hover:-translate-y-0.5"
-            >
-              Commander
-            </a>
-          </div>
-        </div>
-      </header>
-
-      <main id="accueil">
-        <section className="island-hero-surface relative overflow-hidden border-b border-orange-100">
-          <div className="madras-strip" />
-          <div className="pointer-events-none absolute -left-24 top-24 h-72 w-72 rounded-full bg-orange-300/25 blur-3xl" />
-          <div className="pointer-events-none absolute -right-24 bottom-10 h-80 w-80 rounded-full bg-emerald-500/15 blur-3xl" />
-          <div className="mx-auto grid max-w-7xl gap-7 px-4 py-8 sm:py-12 lg:grid-cols-[0.95fr_1.05fr] lg:py-16">
-            <div className="brand-hero-glow flex flex-col justify-center">
-              <div className="mx-auto flex w-fit flex-col items-center text-center lg:mx-0 lg:items-start lg:text-left">
-                <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-20 w-20 rounded-[1.6rem] bg-white p-2 shadow-2xl shadow-orange-900/10 sm:h-24 sm:w-24" />
-                <BadgeRow />
-              </div>
-              <h1 className="mt-5 max-w-4xl text-center font-display text-4xl font-black leading-[0.94] tracking-tight text-[#2a190f] sm:text-6xl lg:text-left lg:text-7xl">
-                Le réflexe local qui donne envie de commander.
-              </h1>
-              <p className="mx-auto mt-4 max-w-xl text-center text-base leading-7 text-[#5a4334] sm:text-lg lg:mx-0 lg:text-left">
-                Plats créoles et produits locaux en Martinique. Choisissez, ajoutez au panier, confirmez en moins de 2 minutes.
-              </p>
-
-              <div className="mt-7 rounded-[2rem] border border-white/80 bg-white/88 p-3 shadow-2xl shadow-orange-900/10 backdrop-blur">
-                <div className="grid gap-3 lg:grid-cols-[1fr_210px]">
-                  <label className="relative block">
-                    <Search className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-[hsl(var(--primary))]" />
-                    <input
-                      value={query}
-                      onChange={(event) => setQuery(event.target.value)}
-                      placeholder="Adresse, commune ou produit"
-                      className="h-16 w-full rounded-[1.35rem] border border-orange-100 bg-[#fffaf4] pl-14 pr-4 text-base font-black text-[#2a190f] outline-none ring-orange-200 placeholder:text-stone-400 focus:ring-4"
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => gotoCustomer()}
-                    className="inline-flex h-16 items-center justify-center gap-2 rounded-[1.35rem] bg-[hsl(var(--primary))] px-5 text-sm font-black uppercase tracking-[0.12em] text-white shadow-xl shadow-orange-500/25 transition hover:-translate-y-0.5"
-                  >
-                    Commander maintenant <ArrowRight className="h-5 w-5" />
-                  </button>
-                </div>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-black uppercase tracking-[0.16em] text-stone-400">Communes partenaires</span>
-                  {serviceZones.slice(0, 4).map((zone) => (
-                    <span key={zone} className="rounded-xl border border-orange-100 bg-[#fff8ef] px-3 py-1.5 text-xs font-black text-[#7c2d12]">
-                      {zone}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                <button
-                  type="button"
-                  onClick={() => gotoCustomer()}
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2a190f] px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-stone-900/15 transition hover:-translate-y-0.5"
-                >
-                  Commander maintenant <ShoppingBag className="h-4 w-4" />
-                </button>
-                <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Bonjour DELIKREOL, je veux être orienté vers l’offre la plus adaptée.')}`} className="inline-flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-white/80 px-6 py-4 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5">
-                  Besoin d’aide <MessageCircle className="h-4 w-4" />
-                </a>
-              </div>
-            </div>
-
-            <div className="premium-card relative rounded-[2.4rem] border border-white/80 bg-white/75 p-3 shadow-elegant backdrop-blur">
-              {heroProduct ? (
-                <div className="overflow-hidden rounded-[2rem] bg-[#20150f] text-white shadow-2xl">
-                  <div className="relative aspect-[4/4] sm:aspect-[16/13] lg:aspect-[4/3]">
-                    {heroProduct.image_url ? (
-                      <img src={heroProduct.image_url} alt={heroProduct.name} className="h-full w-full object-cover brightness-110 contrast-110 saturate-110" />
-                    ) : (
-                      <HeroFallback name={heroProduct.name} />
-                    )}
-                    <div className="absolute left-4 top-4 rounded-full bg-white/92 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#7c2d12] shadow-lg">
-                      Ambiance Martinique
-                    </div>
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/88 via-black/48 to-transparent p-5 sm:p-7">
-                      <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-200">Produit phare</p>
-                      <h2 className="mt-2 max-w-md text-3xl font-black sm:text-4xl">{heroProduct.name}</h2>
-                      <div className="mt-2 flex flex-wrap gap-2 text-xs font-black uppercase tracking-[0.16em]">
-                        <span className="rounded-full bg-white/10 px-3 py-1">{heroProduct.vendor_name}</span>
-                        <span className="rounded-full bg-white/10 px-3 py-1">Rayon {heroProduct.vendor_delivery_radius_km} km</span>
-                      </div>
-                      <div className="mt-4 flex items-end justify-between gap-3">
-                        <strong className="text-3xl font-black text-orange-200">{formatPrice(heroProduct.price)}</strong>
-                        <span className="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-emerald-200">
-                          Disponible
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <HeroFallback name="DELIKREOL" loading={loading} configured={catalog.configured} />
-              )}
-
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                {trustPills.map((pill) => (
-                  <TrustCard key={pill} label={pill} />
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="explorer" className="mx-auto max-w-7xl px-4 py-10">
-          <div className="rounded-[2rem] border border-orange-100 bg-white p-5 shadow-soft lg:p-7">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <SectionTitle
-                eyebrow="Découverte locale"
-                title="Mode Uber Eats, mais pensé par zone de livraison."
-                text="La géolocalisation limite l’affichage aux offres proches de votre position. Un onglet séparé présente les traiteurs et leur histoire."
-              />
-              <div className="inline-flex rounded-full border border-orange-100 bg-[#fff7ef] p-1">
-                <button
-                  type="button"
-                  onClick={() => setMarketplaceTab('browse')}
-                  className={`rounded-full px-4 py-2 text-sm font-black transition ${
-                    marketplaceTab === 'browse' ? 'bg-[hsl(var(--primary))] text-white shadow-lg shadow-orange-500/20' : 'text-[#7c2d12]'
-                  }`}
-                >
-                  Commander près de moi
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMarketplaceTab('traiteurs')}
-                  className={`rounded-full px-4 py-2 text-sm font-black transition ${
-                    marketplaceTab === 'traiteurs' ? 'bg-[#24170f] text-white shadow-lg shadow-stone-900/10' : 'text-[#7c2d12]'
-                  }`}
-                >
-                  Traiteurs & storytelling
-                </button>
-              </div>
-            </div>
-
-            {marketplaceTab === 'browse' ? (
-              <div className="mt-7 grid gap-6 lg:grid-cols-[1fr_340px]">
-                <div>
-                  <div className="flex flex-wrap gap-2">
-                    {zoneHighlights.length > 0 ? (
-                      zoneHighlights.map((item) => (
-                        <span key={item.zone} className="rounded-full border border-orange-200 bg-[#fff8ef] px-3 py-1.5 text-xs font-black text-[#7c2d12]">
-                          {item.zone} · {item.count} offre(s)
-                        </span>
-                      ))
-                    ) : (
-                      <span className="rounded-full border border-dashed border-orange-200 bg-white px-3 py-1.5 text-xs font-black text-stone-500">
-                        Activez une position pour voir les zones proches
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="mt-5 rounded-[1.75rem] border border-orange-100 bg-[#fffaf4] p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Proche de vous</p>
-                        <h3 className="mt-1 text-xl font-black text-[#2a190f]">Les premières offres qui comptent</h3>
-                      </div>
-                      <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">
-                        {customerLocation ? 'Tri géolocalisé' : 'Tri par zone'}
-                      </span>
-                    </div>
-                    <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                      {nearbyProducts.map((product) => (
-                        <ProductCard key={`nearby-${product.id}`} product={product} onAdd={() => addToSelection(product)} compact />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <aside className="rounded-[1.75rem] border border-orange-100 bg-[#24170f] p-5 text-white">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-200">Filtre local</p>
-                  <h3 className="mt-2 text-2xl font-black">Catégories et rayon</h3>
-                  <p className="mt-3 text-sm leading-6 text-stone-300">
-                    Les produits affichés ici sont déjà triés selon la catégorie, le budget et la zone de livraison. Quand la position est validée, on ne pousse que les offres compatibles.
-                  </p>
-                  <div className="mt-4 space-y-3">
-                    <div className="rounded-2xl bg-white/8 p-4">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-orange-200">Catégorie active</p>
-                      <p className="mt-2 text-lg font-black">{categoryFilter}</p>
-                    </div>
-                    <div className="rounded-2xl bg-white/8 p-4">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-orange-200">Géolocalisation</p>
-                      <p className="mt-2 text-sm leading-6 text-stone-300">
-                        {customerLocation
-                          ? `Position validée avec précision ${customerLocation.accuracy ? `${Math.round(customerLocation.accuracy)} m` : 'non fournie'}`
-                          : 'Géolocalisez-vous pour voir uniquement les offres à proximité.'}
-                      </p>
-                    </div>
-                    <div className="rounded-2xl bg-white/8 p-4">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-orange-200">Zone de livraison</p>
-                      <p className="mt-2 text-sm leading-6 text-stone-300">
-                        La commune reste un fallback; la carte et le rayon vendeur restent prioritaires.
-                      </p>
-                    </div>
-                  </div>
-                </aside>
-              </div>
-            ) : (
-              <div className="mt-7 grid gap-6 lg:grid-cols-2">
-                {storyTraiteurs.map((profile) => {
-                  const space = featuredTraiteurSpaces.find((item) => item.name === profile.name);
-                  return (
-                    <article key={profile.name} className="overflow-hidden rounded-[1.75rem] border border-orange-100 bg-[#fffaf4] shadow-soft">
-                      <div className={`bg-gradient-to-br ${space?.gradient ?? 'from-[#7c3aed] via-[#ec4899] to-[hsl(var(--primary))]'} p-5 text-white`}>
-                        <p className="text-xs font-black uppercase tracking-[0.22em] text-white/75">Storytelling traiteur</p>
-                        <h3 className="mt-2 text-3xl font-black">{profile.name}</h3>
-                        <p className="mt-3 text-sm leading-6 text-white/90">{profile.story}</p>
-                      </div>
-                      <div className="p-5">
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          <div className="rounded-2xl border border-orange-100 bg-white p-4">
-                            <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Promesse</p>
-                            <p className="mt-2 text-sm leading-6 text-stone-600">{profile.promise}</p>
-                          </div>
-                          <div className="rounded-2xl border border-orange-100 bg-white p-4">
-                            <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Signature</p>
-                            <p className="mt-2 text-sm leading-6 text-stone-600">{profile.specialty}</p>
-                          </div>
-                        </div>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          {profile.highlights.slice(0, 4).map((item) => (
-                            <span key={item} className="rounded-full border border-orange-200 bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">
-                              {item}
-                            </span>
-                          ))}
-                        </div>
-                        <div className="mt-5 flex flex-wrap gap-3">
-                          <a
-                            href={buildTraiteurSpaceLink(baseUrl, normalizeSpaceSlug(profile.name))}
-                            className="inline-flex items-center justify-center gap-2 rounded-full bg-[hsl(var(--primary))] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/20 transition hover:-translate-y-0.5"
-                          >
-                            Voir la vitrine
-                          </a>
-                          <a
-                            href={`#traiteurs`}
-                            onClick={(event) => {
-                              event.preventDefault();
-                              document.getElementById('traiteurs')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }}
-                            className="inline-flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-white px-4 py-2 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5"
-                          >
-                            Ouvrir la section
-                          </a>
-                        </div>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 py-10">
-          <SectionTitle
-            eyebrow="Comment ça marche"
-            title="Chercher, ajouter, confirmer, suivre."
-            text="Un parcours court, lisible sur mobile."
-          />
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {howItWorks.slice(0, 3).map((step, index) => (
-              <StepCard key={step.title} index={index + 1} title={step.title} text={step.text} />
-            ))}
-          </div>
-        </section>
-
-        <section id="traiteurs" className="mx-auto max-w-7xl px-4 py-10">
-          <div className="rounded-[2rem] border border-orange-100 bg-white p-5 shadow-soft lg:p-7">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <SectionTitle
-                eyebrow="Traiteurs"
-                title="Chaque traiteur a son espace."
-                text="Descriptions, prix et accès direct à la vitrine dédiée pour commander sans friction."
-              />
-              <div className="grid gap-3 sm:grid-cols-3">
-                <StatChip label="Espaces" value={`${featuredTraiteurSpaces.length}`} />
-                <StatChip label="Références" value={`${featuredTraiteurSpaces.reduce((sum, space) => sum + space.menuItems.length, 0)}`} />
-                <StatChip label="Prix dès" value={formatEuro(Math.min(...featuredTraiteurSpaces.flatMap((space) => space.menuItems.map((item) => item.price))))} />
-              </div>
-            </div>
-
-            <div className="mt-7 grid gap-4 lg:grid-cols-2">
-              {featuredTraiteurSpaces.map((space) => (
-                <article key={space.slug} className="overflow-hidden rounded-[1.75rem] border border-orange-100 bg-[#fffaf4] shadow-soft">
-                  <div className={`bg-gradient-to-br ${space.gradient} p-5 text-white`}>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-[0.16em]">
-                        {space.offer}
-                      </span>
-                      <span className="rounded-full border border-white/25 px-3 py-1 text-xs font-black uppercase tracking-[0.16em]">
-                        {space.zone}
-                      </span>
-                    </div>
-                    <div className="mt-5 grid gap-5 md:grid-cols-[1fr_180px]">
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-[0.22em] text-white/75">Espace dédié</p>
-                        <h3 className="mt-2 text-3xl font-black tracking-tight">{space.name}</h3>
-                        <p className="mt-3 text-sm leading-6 text-white/90">{space.description}</p>
-                      </div>
-                      <div className="overflow-hidden rounded-[1.4rem] border border-white/15 bg-white/10 p-2">
-                        {space.heroImage ? (
-                          <img src={space.heroImage} alt={space.name} className="h-full min-h-[170px] w-full rounded-[1rem] object-cover" />
-                        ) : (
-                          <div className="flex min-h-[170px] items-center justify-center rounded-[1rem] bg-white/10">
-                            <Sparkles className="h-10 w-10 text-white" />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-5">
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <StatChip label="À partir de" value={formatEuro(space.startingAt)} />
-                      <StatChip label="Panier moyen" value={formatEuro(space.averageTicket)} />
-                    </div>
-
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {space.highlights.slice(0, 4).map((item) => (
-                        <span key={item} className="rounded-full border border-orange-200 bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="mt-5 space-y-2">
-                      {space.menuItems.slice(0, 3).map((item) => (
-                        <div key={item.name} className="overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-sm">
-                          <div className="flex gap-3 p-3">
-                            {item.image ? (
-                              <img
-                                src={item.image}
-                                alt={item.name}
-                                className="h-20 w-20 shrink-0 rounded-2xl object-cover"
-                                loading="lazy"
-                              />
-                            ) : (
-                              <div className="h-20 w-20 shrink-0 rounded-2xl bg-[#fff3e5]" />
-                            )}
-                            <div className="min-w-0 flex-1">
-                              <p className="font-black text-[#2a190f]">{item.name}</p>
-                              <p className="mt-1 text-sm text-stone-600">{item.description}</p>
-                              <div className="mt-2 flex flex-wrap items-center gap-2">
-                                <span className="rounded-full border border-orange-200 bg-[#fffaf3] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#7c2d12]">
-                                  {item.category}
-                                </span>
-                                {item.featured && (
-                                  <span className="rounded-full bg-[#ecfeff] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#0f766e]">
-                                    Signature
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <strong className="shrink-0 text-lg font-black text-[hsl(var(--primary))]">{formatEuro(item.price)}</strong>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="mt-5 flex flex-wrap gap-3">
-                      <a
-                        href={buildTraiteurSpaceLink(baseUrl, space.slug)}
-                        className="inline-flex items-center justify-center gap-2 rounded-full bg-[hsl(var(--primary))] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/20 transition hover:-translate-y-0.5"
-                      >
-                        Ouvrir la vitrine <ArrowRight className="h-4 w-4" />
-                      </a>
-                      <a
-                        href={buildCustomerSpaceLink(baseUrl, space.slug)}
-                        className="inline-flex items-center justify-center gap-2 rounded-full border border-orange-200 bg-white px-4 py-2 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5"
-                      >
-                        Commander
-                      </a>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="catalogue" className="bg-[#fffdf8] py-14">
-          <div className="mx-auto max-w-7xl px-4">
-            <div className="flex flex-col gap-5 rounded-[2.25rem] border border-orange-100 bg-white p-5 shadow-soft lg:flex-row lg:items-end lg:justify-between lg:p-7">
-              <SectionTitle
-                eyebrow="Catalogue"
-                title="Choisir vite, commander clair."
-                text="Parcours client prioritaire: produits visibles, ajout au panier, validation."
-              />
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={() => gotoCustomer()}
-                  className="inline-flex w-fit items-center gap-2 rounded-full bg-[hsl(var(--primary))] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25"
-                >
-                  Commander maintenant <ShoppingBag className="h-5 w-5" />
-                </button>
-                <a
-                  href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Bonjour DELIKREOL, j’ai besoin d’aide pour choisir une offre.')}`}
-                  className="inline-flex w-fit items-center gap-2 rounded-full border border-orange-200 bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-[#7c2d12] shadow-sm"
-                >
-                  Besoin d’aide
-                </a>
-              </div>
-            </div>
-
-            <div className="mt-8 grid gap-4 rounded-[2rem] border border-orange-100 bg-[#24170f] p-4 shadow-elegant lg:grid-cols-[1fr_220px_220px_220px]">
-              <label className="relative block">
-                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[hsl(var(--primary))]" />
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Rechercher un plat, un traiteur, un produit ou une commune"
-                  className="w-full rounded-2xl border border-white/10 bg-white py-4 pl-12 pr-4 text-sm font-black text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
-                />
-              </label>
-              <Select value={communeFilter} onChange={setCommuneFilter}>
-                <option value="Tous">Selon votre adresse / position</option>
-                {serviceZones.map((zone) => (
-                  <option key={zone} value={zone}>
-                    Fallback commune : {zone}
-                  </option>
-                ))}
-              </Select>
-              <Select value={budgetFilter} onChange={setBudgetFilter}>
-                {budgetRanges.map((range) => (
-                  <option key={range} value={range}>
-                    {range}
-                  </option>
-                ))}
-              </Select>
-              <button
-                type="button"
-                onClick={askCustomerPosition}
-                disabled={geoStatus === 'loading'}
-                className="rounded-2xl border border-white/10 bg-white px-4 py-3 text-sm font-black text-[#2a190f] transition hover:-translate-y-0.5 disabled:opacity-60"
-              >
-                {customerLocation ? 'Position validée' : pendingCustomerLocation ? 'Valider position' : geoStatus === 'loading' ? 'Localisation...' : 'Me géolocaliser'}
-              </button>
-            </div>
-            <p className="mt-3 text-sm font-semibold text-stone-600">
-              La livraison est calculée autour de chaque partenaire avec son rayon réel. La commune sert seulement de fallback si la position manque.
-            </p>
-            {geoConsentState === 'ask' && (
-              <div className="mt-4 rounded-2xl border border-orange-200 bg-[#fff8ef] p-4">
-                <p className="text-sm font-black text-[#7c2d12]">Souhaitez-vous être géolocalisé et affiché sur la carte ?</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={useCustomerPosition}
-                    disabled={geoStatus === 'loading'}
-                    className="rounded-xl bg-[hsl(var(--primary))] px-4 py-2 text-sm font-black text-white disabled:opacity-60"
-                  >
-                    Oui, autoriser
-                  </button>
-                  <button
-                    type="button"
-                    onClick={cancelCustomerPositionConsent}
-                    className="rounded-xl border border-orange-200 bg-white px-4 py-2 text-sm font-black text-[#7c2d12]"
-                  >
-                    Non, merci
-                  </button>
-                </div>
-              </div>
-            )}
-            {customerMapPreviewLocation && (
-              <div className="mt-4 overflow-hidden rounded-2xl border border-orange-100">
-                <MapContainer center={[customerMapPreviewLocation.lat, customerMapPreviewLocation.lng]} zoom={16} scrollWheelZoom={false} className="h-52 w-full">
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  <CircleMarker
-                    center={[customerMapPreviewLocation.lat, customerMapPreviewLocation.lng]}
-                    radius={8}
-                    pathOptions={{ color: 'hsl(var(--primary))', fillColor: 'hsl(var(--primary))', fillOpacity: 0.9 }}
-                  >
-                    <Popup>Votre position</Popup>
-                  </CircleMarker>
-                </MapContainer>
-                {pendingCustomerLocation && (
-                  <div className="grid grid-cols-1 gap-2 border-t border-orange-100 bg-orange-50 p-3 sm:grid-cols-2">
-                    <button
-                      type="button"
-                      onClick={confirmPendingCustomerPosition}
-                      className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-black text-white"
-                    >
-                      Valider ma position
-                    </button>
-                    <button
-                      type="button"
-                      onClick={rejectPendingCustomerPosition}
-                      className="rounded-xl border border-emerald-300 bg-white px-4 py-2 text-sm font-black text-emerald-800"
-                    >
-                      Rejeter
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              {categoryOptions.slice(0, 12).map((category) => {
-                const active = categoryFilter === category;
-                return (
-                  <button
-                    key={category}
-                    onClick={() => setCategoryFilter(category)}
-                    className={`shrink-0 rounded-xl border px-4 py-2 text-sm font-black transition ${
-                      active
-                        ? 'border-transparent bg-[hsl(var(--primary))] text-white shadow-lg shadow-orange-500/20'
-                        : 'border-orange-200 bg-white text-[#7c2d12] hover:-translate-y-0.5'
-                    }`}
-                  >
-                    {category}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-              <div>
-                {loading && <EmptyState title="Catalogue en chargement" text="Les offres apparaîtront dès que les partenaires publiés sont récupérés." />}
-                {error && <EmptyState title="Catalogue indisponible" text={error} />}
-                {!loading && !error && filteredProductsUniqueImages.length === 0 && (
-                  <EmptyState
-                    title="Aucune offre visible avec ces filtres"
-                    text="Affinez la commune, la catégorie ou le budget. Vous pouvez aussi demander une orientation immédiate."
-                    action={supportLink}
-                  />
-                )}
-
-                {filteredProductsUniqueImages.length > 0 && (
-                  <>
-                    <div className="mb-4 flex items-center justify-between gap-3">
-                      <p className="text-sm font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Sélection en vedette</p>
-                      <span className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">{featuredProducts.length} cartes</span>
-                    </div>
-                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                      {featuredProducts.map((product) => (
-                        <ProductCard key={`featured-${product.id}`} product={product} onAdd={() => addToSelection(product)} compact />
-                      ))}
-                    </div>
-
-                    <div id="commande" className="mt-8 scroll-mt-28 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-                      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                        {standardProducts.map((product) => (
-                          <ProductCard key={product.id} product={product} onAdd={() => addToSelection(product)} />
-                        ))}
-                      </div>
-                      <SelectionPanel
-                        products={selectedProducts}
-                        summary={selectionEconomics}
-                        supportLink={supportLink}
-                        partnerDispatchLink={partnerDispatchLink}
-                        driverMissionLink={driverMissionLink}
-                        vendorMessage={vendorMessage}
-                        driverMessage={driverMessage}
-                        copyStatus={copyStatus}
-                        customerName={customerName}
-                        customerPhone={customerPhone}
-                        deliveryAddress={deliveryAddress}
-                        deliveryNotes={deliveryNotes}
-                        deliverySlot={deliverySlot}
-                        customerLocation={customerLocation}
-                        geoStatus={geoStatus}
-                        geoConsentState={geoConsentState}
-                        geoError={geoError}
-                        pendingCustomerLocation={pendingCustomerLocation}
-                        fulfillmentMode={fulfillmentMode}
-                        paymentMethod={paymentMethod}
-                        vendorAvailabilityStatus={vendorAvailabilityStatus}
-                        notificationPermission={notificationPermission}
-                        notificationPrefs={notificationPrefs}
-                        orderConfirmed={orderConfirmed}
-                        checkoutStatus={checkoutStatus}
-                        supabasePaused={supabasePaused}
-                        supabasePausedHint={supabasePausedHint}
-                        onCustomerNameChange={setCustomerName}
-                        onCustomerPhoneChange={setCustomerPhone}
-                        onDeliveryAddressChange={setDeliveryAddress}
-                        onDeliveryNotesChange={setDeliveryNotes}
-                        onDeliverySlotChange={setDeliverySlot}
-                        onCustomerPositionRequest={askCustomerPosition}
-                        onConfirmCustomerPosition={useCustomerPosition}
-                        onCancelCustomerPosition={cancelCustomerPositionConsent}
-                        onValidatePendingCustomerPosition={confirmPendingCustomerPosition}
-                        onRejectPendingCustomerPosition={rejectPendingCustomerPosition}
-                        onFulfillmentModeChange={setFulfillmentMode}
-                        onPaymentMethodChange={setPaymentMethod}
-                        onVendorAvailabilityStatusChange={setVendorAvailabilityStatus}
-                        onCopyVendorMessage={() => copyOperationalMessage(vendorMessage, 'Message vendeur')}
-                        onCopyDriverMessage={() => copyOperationalMessage(driverMessage, 'Mission livreur')}
-                        onNotificationPreferenceChange={(key, value) => setNotificationPrefs((current) => ({ ...current, [key]: value }))}
-                        onRequestNotifications={requestNotifications}
-                        onDownloadPdf={handleDownloadOrderPdf}
-                        onConfirmOrder={handleCheckout}
-                        onWhatsAppFallback={handleWhatsAppCheckoutFallback}
-                        onRemove={removeFromSelection}
-                        onClear={clearSelection}
-                        deliveryCoverageStatus={deliveryCoverage.status}
-                        deliveryCoverageMessage={deliveryCoverage.message}
-                        orderTrackingUrl={
-                          checkoutStatus.orderNumber
-                            ? `${orderStatusBaseUrl}&order=${encodeURIComponent(checkoutStatus.orderNumber)}`
-                            : orderStatusBaseUrl
-                        }
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <aside className="rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
-                <p className="text-xs font-black uppercase tracking-[0.22em] text-[hsl(var(--primary))]">Fiche produit</p>
-                <h3 className="mt-2 text-2xl font-black text-[#2a190f]">Lecture rapide</h3>
-                <p className="mt-2 text-sm leading-6 text-stone-600">
-                  Chaque fiche montre l’essentiel: nom du plat, prix, vendeur, rayon de livraison et bouton direct pour commander.
-                </p>
-                {heroProduct ? (
-                  <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-orange-100">
-                    <div className="aspect-[4/3] bg-[#fff2e6]">
-                      {heroProduct.image_url ? (
-                        <img src={heroProduct.image_url} alt={heroProduct.name} className="h-full w-full object-cover brightness-110 contrast-110 saturate-110" />
-                      ) : (
-                        <HeroFallback name={heroProduct.name} />
-                      )}
-                    </div>
-                    <div className="space-y-3 p-4">
-                      <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">
-                        <BadgeCheck className="h-4 w-4" />
-                        partenaire visible
-                      </div>
-                      <h4 className="text-xl font-black text-[#2a190f]">{heroProduct.name}</h4>
-                      <p className="text-sm text-stone-600">{heroProduct.vendor_name}</p>
-                      <div className="grid gap-2 text-sm text-stone-600">
-                        <InfoLine label="Couverture" value={`Livraison autour du partenaire - ${heroProduct.vendor_delivery_radius_km} km`} />
-                        <InfoLine label="Prix" value={formatPrice(heroProduct.price)} />
-                        <InfoLine label="Service" value="Retrait / livraison selon adresse client" />
-                        <InfoLine label="Disponibilité" value={heroProduct.available ? 'Disponible' : 'À confirmer'} />
-                      </div>
-                      <button type="button" onClick={() => addToSelection(heroProduct)} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[hsl(var(--primary))] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white">
-                        Ajouter et commander
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="mt-5 rounded-[1.5rem] border border-dashed border-orange-200 bg-orange-50/60 p-6 text-sm text-stone-600">
-                    Aucune fiche produit active pour le moment. Les prochaines offres publiées apparaîtront ici.
-                  </div>
-                )}
-              </aside>
-            </div>
-          </div>
-        </section>
-
-        <section id="zones" className="mx-auto max-w-7xl px-4 py-10">
-          <details className="rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
-            <summary className="cursor-pointer text-sm font-black uppercase tracking-[0.16em] text-[#7c2d12]">
-              Voir les zones, la carte et les partenaires pilotes
-            </summary>
-            <div className="mt-6 island-map-surface rounded-[2rem] border border-orange-100 p-5 lg:p-8">
-              <SectionTitle
-                eyebrow="Zones desservies"
-                title="Une carte locale claire."
-                text="La couverture se base sur la position de chaque partenaire et son rayon de livraison. La commune reste un repère de secours."
-              />
-              <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                {serviceZones.slice(0, 8).map((zone) => (
-                  <ZoneCard key={zone} zone={zone} />
-                ))}
-              </div>
-              <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {highlightedVendors.map((vendor) => (
-                  <VendorCard key={vendor.id} vendor={vendor} />
-                ))}
-              </div>
-              <div className="mt-8 overflow-hidden rounded-[1.5rem] border border-orange-100 bg-white">
-                <div className="border-b border-orange-100 bg-[#fff8ef] p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Carte interactive</p>
-                  <p className="mt-1 text-sm text-stone-600">
-                    Bleu: vendeur (rayon 3 km). Vert: client en zone. Rouge: client hors zone. Violet: livreur pilote. Orange: point relais.
-                  </p>
-                </div>
-                <MapContainer
-                  center={
-                    customerLocation
-                      ? [customerLocation.lat, customerLocation.lng]
-                      : [mapVendors[0]?.latitude ?? defaultMapCenter[0], mapVendors[0]?.longitude ?? defaultMapCenter[1]]
-                  }
-                  zoom={13}
-                  scrollWheelZoom={false}
-                  className="h-[420px] w-full"
-                >
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-
-                  {mapVendors.map((vendor) => (
-                    <Fragment key={vendor.id}>
-                      <Circle
-                        center={[vendor.latitude, vendor.longitude]}
-                        radius={vendor.deliveryRadiusKm * 1000}
-                        pathOptions={{ color: '#1d4ed8', fillColor: '#60a5fa', fillOpacity: 0.1, weight: 2 }}
-                      />
-                      <CircleMarker
-                        center={[vendor.latitude, vendor.longitude]}
-                        radius={8}
-                        pathOptions={{ color: '#1d4ed8', fillColor: '#1d4ed8', fillOpacity: 0.95 }}
-                      >
-                        <Popup>
-                          <strong>{vendor.name}</strong>
-                          <br />
-                          Rayon: {vendor.deliveryRadiusKm} km
-                          <br />
-                        {vendor.status === 'in_zone' ? 'Client dans la zone' : vendor.status === 'out_zone' ? 'Client hors zone' : 'Position client non confirmée'}
-                        </Popup>
-                      </CircleMarker>
-                    </Fragment>
-                  ))}
-
-                  {pointsRelais.slice(0, 6).map((relay) => (
-                    <CircleMarker
-                      key={`relay-${relay.id}`}
-                      center={[relay.lat, relay.lng]}
-                      radius={7}
-                      pathOptions={{ color: '#ea580c', fillColor: 'hsl(var(--primary))', fillOpacity: 0.9 }}
-                    >
-                      <Popup>
-                        <strong>{relay.name}</strong>
-                        <br />
-                        Point relais
-                        <br />
-                        {relay.adresse}
-                      </Popup>
-                    </CircleMarker>
-                  ))}
-
-                  {pilotDrivers.map((driver) => (
-                    <CircleMarker
-                      key={driver.id}
-                      center={[driver.latitude, driver.longitude]}
-                      radius={7}
-                      pathOptions={{ color: '#7c3aed', fillColor: '#8b5cf6', fillOpacity: 0.95 }}
-                    >
-                      <Popup>
-                        <strong>{driver.name}</strong>
-                        <br />
-                        Livreur pilote
-                      </Popup>
-                    </CircleMarker>
-                  ))}
-
-                  {customerLocation && (
-                    <CircleMarker
-                      center={[customerLocation.lat, customerLocation.lng]}
-                      radius={9}
-                      pathOptions={{
-                        color: mapVendors.some((vendor) => vendor.status === 'in_zone') ? '#059669' : '#dc2626',
-                        fillColor: mapVendors.some((vendor) => vendor.status === 'in_zone') ? '#10b981' : '#ef4444',
-                        fillOpacity: 1,
-                      }}
-                    >
-                      <Popup>
-                        <strong>Votre position</strong>
-                        <br />
-                        {mapVendors.some((vendor) => vendor.status === 'in_zone')
-                          ? 'Vous êtes dans au moins une zone de livraison'
-                          : 'Hors zone actuelle des vendeurs'}
-                      </Popup>
-                    </CircleMarker>
-                  )}
-                </MapContainer>
-              </div>
-            </div>
-          </details>
-        </section>
-
-        <section id="pro" className="mx-auto max-w-7xl px-4 pb-10">
-          <div className="rounded-[1.75rem] border border-orange-100 bg-white p-5 shadow-soft">
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#7c2d12]">Accès séparé</p>
-            <h3 className="mt-2 text-2xl font-black text-[#2a190f]">Espace pro DELIKREOL</h3>
-            <p className="mt-2 text-sm text-stone-600">
-              Le portail partenaire et opérationnel est séparé de l’espace client. Aucun contenu admin n’est affiché ici.
-            </p>
-            <div className="mt-4 flex flex-wrap gap-3">
-              <a
-                href={proSpaceUrl}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[hsl(var(--primary))] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white"
-              >
-                Ouvrir espace pro <ChevronRight className="h-4 w-4" />
-              </a>
-              <a
-                href={partnerLink}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-white px-5 py-3 text-sm font-black text-[#7c2d12]"
-              >
-                Inscription partenaire
-              </a>
-            </div>
-          </div>
-        </section>
-
-        <section id="faq" className="bg-white py-10">
-          <div className="mx-auto max-w-7xl px-4">
-            <details className="rounded-[1.75rem] border border-orange-100 bg-[#fff8ef] p-5 shadow-soft">
-              <summary className="cursor-pointer text-sm font-black uppercase tracking-[0.16em] text-[#7c2d12]">
-                Questions fréquentes (ouvrir)
-              </summary>
-              <div className="mt-5">
-                <SectionTitle
-                  eyebrow="FAQ"
-                  title="Les questions qui déclenchent la conversion."
-                  text="Chaque réponse lève une objection simple: confiance, zone, disponibilité et commande."
-                />
-                <div className="mt-6 grid gap-4 lg:grid-cols-2">
-                  {faqItems.map((item) => (
-                    <FaqItem key={item.question} {...item} />
-                  ))}
-                </div>
-              </div>
-            </details>
-          </div>
-        </section>
-
-        <section id="contact" className="mx-auto max-w-7xl px-4 py-14">
-          <div className="grid gap-4 rounded-[1.75rem] border border-orange-100 bg-[linear-gradient(135deg,_#24170f_0%,_#392115_52%,_hsl(var(--primary))_180%)] p-6 text-white lg:grid-cols-[1.1fr_0.9fr] lg:p-8">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-200">Contact / WhatsApp</p>
-              <h2 className="mt-3 text-3xl font-black sm:text-5xl">Une réponse rapide, directe, locale.</h2>
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-200 sm:text-base sm:leading-7">
-                En cas de doute, l’utilisateur peut joindre DELIKREOL immédiatement. La commande principale reste enregistrée dans l’application.
-              </p>
-            </div>
-            <div className="grid gap-3">
-              <a href={supportLink} className="rounded-2xl bg-white px-5 py-4 text-center font-black text-[#24170f]">
-                Besoin d’aide
-              </a>
-              <a href="#pro" className="rounded-2xl border border-white/20 px-5 py-4 text-center font-black text-white">
-                Accès partenaires & entreprises
-              </a>
-              <div className="rounded-2xl bg-white/10 px-5 py-4 text-sm leading-6 text-stone-100">
-                Email: <span className="font-bold">{operationsEmail}</span>
-                <br />
-                Frais de livraison: <span className="font-bold">selon distance et rayon partenaire</span>
-                <br />
-                Minimum de commande: <span className="font-bold">confirmé avant paiement</span>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer className="border-t border-orange-100 bg-[#fff9f3]">
-        <div className="mx-auto grid max-w-7xl gap-6 px-4 py-10 lg:grid-cols-[1.1fr_0.9fr_0.9fr]">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-10 w-10 rounded-2xl bg-white p-1.5 shadow-sm" />
-              <div>
-                <p className="font-black text-[#2a190f]">DELIKREOL</p>
-                <p className="text-sm text-stone-500">Plateforme locale premium en Martinique</p>
-              </div>
-            </div>
-            <p className="max-w-xl text-sm leading-6 text-stone-600">
-              DELIKREOL est prioritairement une plateforme de commande locale: catalogue visuel, panier simple et confirmation rapide sur mobile.
-            </p>
-          </div>
-          <FooterBlock title="Couverture partenaires">
-            {serviceZones.slice(0, 6).map((zone) => (
-              <FooterLink key={zone} label={zone} />
-            ))}
-            <FooterLink label="Rayon réel par partenaire" />
-            <FooterLink label="Fallback commune si géoloc absente" />
-            <FooterLink label="Entreprise / devis" />
-          </FooterBlock>
-          <FooterBlock title="Liens utiles">
-            <FooterLink label="CGV" />
-            <FooterLink label="Mentions légales" />
-            <FooterLink label="Confidentialité" />
-            <a href={proSpaceUrl} className="block text-sm font-bold text-[#7c2d12]">
-              Espace pro DELIKREOL
-            </a>
-            <a href={whatsappBase} className="inline-flex items-center gap-2 text-sm font-bold text-[#7c2d12]">
-              WhatsApp <MessageCircle className="h-4 w-4" />
-            </a>
-          </FooterBlock>
-        </div>
-      </footer>
-
-      <div data-testid="mobile-cart-bar" className="fixed inset-x-4 bottom-4 z-50 md:hidden">
-        <div className="rounded-[1.5rem] border border-orange-100 bg-white p-3 shadow-2xl shadow-orange-900/20">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#fff3e5] text-[hsl(var(--primary))]">
-              <ShoppingBag className="h-6 w-6" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">
-                {selectedProducts.length > 0 ? `${selectedProducts.length} article(s)` : 'Panier vide'}
-              </p>
-              <p className="truncate text-sm font-bold text-[#2a190f]">
-                {selectedProducts.length > 0
-                  ? `${formatPrice(selectionEconomics.subtotal_produits)} hors livraison`
-                  : 'Ajoute un produit pour activer la commande'}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={selectedProducts.length > 0 ? scrollToCheckoutPanel : () => gotoCustomer()}
-              className="inline-flex items-center justify-center rounded-2xl bg-[hsl(var(--primary))] px-4 py-3 text-sm font-black text-white"
-            >
-              {selectedProducts.length > 0 ? 'Voir panier' : 'Commander'}
-            </button>
-          </div>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => gotoCustomer()}
-              className="inline-flex items-center justify-center rounded-2xl border border-orange-200 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]"
-            >
-              Catalogue
-            </button>
-            <a href={supportLink} className="inline-flex items-center justify-center rounded-2xl border border-orange-200 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]">
-              Aide
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <a
-        href={whatsappBase}
-        className="fixed bottom-5 right-5 z-50 hidden items-center gap-2 rounded-full bg-[#25D366] px-4 py-3 text-sm font-black text-white shadow-2xl shadow-green-500/30 md:inline-flex"
-      >
-        WhatsApp <MessageCircle className="h-5 w-5" />
-      </a>
-    </div>
-  );
+ const baseUrl = import.meta.env.BASE_URL ||'/';
+ const customerPath = `${baseUrl}?view=customer`;
+ const proSpaceUrl = `${baseUrl}?view=pro`;
+ const orderStatusBaseUrl = `${baseUrl}?view=order-status`;
+ const orderFormUrl = ORDER_FORM_URL;
+ const sheetsFirstMode = SHEETS_FIRST_MODE;
+ const operationsEmail = PUBLIC_OPERATIONS_EMAIL;
+ const gotoCustomer = (mode?:'simulation') => {
+ if (mode ==='simulation') localStorage.setItem('delikreol_demo_override','true');
+ const target = document.getElementById('commande') || document.getElementById('catalogue');
+ if (target) {
+ target.scrollIntoView({ behavior:'smooth', block:'start' });
+ return;
+ }
+ window.location.assign(mode ==='simulation' ? `${customerPath}&mode=simulation` : `${baseUrl}#catalogue`);
+ };
+ const [catalog, setCatalog] = useState<CatalogState>({ configured: false, vendors: [], products: [] });
+ const [query, setQuery] = useState('');
+ const [communeFilter, setCommuneFilter] = useState('Tous');
+ const [categoryFilter, setCategoryFilter] = useState('Tous');
+ const [budgetFilter, setBudgetFilter] = useState('Tous');
+ const [marketplaceTab, setMarketplaceTab] = useState<MarketplaceTab>('browse');
+ const [selectedProducts, setSelectedProducts] = useState<PublicCatalogProduct[]>([]);
+ const [fulfillmentMode, setFulfillmentMode] = useState<'delivery' |'pickup'>('delivery');
+ const [customerName, setCustomerName] = useState('');
+ const [customerPhone, setCustomerPhone] = useState('');
+ const [deliveryAddress, setDeliveryAddress] = useState('');
+ const [deliveryNotes, setDeliveryNotes] = useState('');
+ const [deliverySlot, setDeliverySlot] = useState('');
+ const [customerLocation, setCustomerLocation] = useState<CustomerLocation | null>(null);
+ const [pendingCustomerLocation, setPendingCustomerLocation] = useState<CustomerLocation | null>(null);
+ const [geoStatus, setGeoStatus] = useState<GeoStatus>('idle');
+ const [geoConsentState, setGeoConsentState] = useState<GeoConsentState>('idle');
+ const [geoError, setGeoError] = useState('');
+ const [vendorAvailabilityStatus, setVendorAvailabilityStatus] = useState('À confirmer par DELIKREOL');
+ const [copyStatus, setCopyStatus] = useState('');
+ const [paymentMethod, setPaymentMethod] = useState('Carte via lien sécurisé');
+ const [orderConfirmed, setOrderConfirmed] = useState(false);
+ const [checkoutStatus, setCheckoutStatus] = useState<CheckoutStatus>({ kind:'idle' });
+ const [activeScenario, setActiveScenario] = useState(0);
+ const [notificationPermission, setNotificationPermission] = useState<NotificationPermission |'unsupported'>(
+ typeof window ==='undefined' || !('Notification' in window) ?'unsupported' : Notification.permission,
+ );
+ const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreferences>({
+ commande: true,
+ partenaire: true,
+ livreur: true,
+ promos: false,
+ });
+ const [loading, setLoading] = useState(true);
+ const [error, setError] = useState<string | null>(null);
+ const [partnerLeadForm, setPartnerLeadForm] = useState<PartnerLeadForm>(defaultPartnerLeadForm);
+ const [productSubmissionForm, setProductSubmissionForm] = useState<ProductSubmissionForm>(defaultProductSubmissionForm);
+ const [businessRequestForm, setBusinessRequestForm] = useState<BusinessRequestForm>(defaultBusinessRequestForm);
+ const [partnerStatus, setPartnerStatus] = useState<SubmitStatus>({ kind:'idle' });
+ const [productStatus, setProductStatus] = useState<SubmitStatus>({ kind:'idle' });
+ const [businessStatus, setBusinessStatus] = useState<SubmitStatus>({ kind:'idle' });
+ const [productPhoto, setProductPhoto] = useState<File | null>(null);
+ const [supabasePaused, setSupabasePaused] = useState(false);
+ const [supabasePausedHint, setSupabasePausedHint] = useState<string | null>(null);
+ const { showSuccess } = useToast();
+
+ useEffect(() => {
+ document.title ='DELIKREOL Martinique | Plats créoles, traiteurs, produits locaux et entreprises';
+ upsertMeta('description','DELIKREOL est la plateforme locale premium pour commander des plats créoles, des produits locaux et des demandes entreprises en Martinique.');
+ upsertMeta('og:title','DELIKREOL Martinique | Plateforme locale premium');
+ upsertMeta('og:description','Commandez des plats créoles et produits locaux en Martinique, avec retrait ou livraison selon votre commune.');
+ trackPublicView();
+ }, []);
+
+ useEffect(() => {
+ if (window.location.pathname.endsWith('/customer') || new URL(window.location.href).searchParams.get('view') ==='customer' || window.location.hash ==='#catalogue') {
+ const timer = window.setTimeout(() => {
+ const target = document.getElementById('catalogue');
+ target?.scrollIntoView({ behavior:'smooth', block:'start' });
+ }, 50);
+ return () => window.clearTimeout(timer);
+ }
+ return undefined;
+ }, []);
+
+ useEffect(() => {
+ const params = new URLSearchParams(window.location.search);
+ const tab = params.get('tab');
+ if (tab ==='traiteurs' || tab ==='browse') {
+ setMarketplaceTab(tab);
+ }
+ if (window.location.hash ==='#traiteurs') {
+ setMarketplaceTab('traiteurs');
+ }
+ }, []);
+
+ useEffect(() => {
+ const vendorSlug = new URLSearchParams(window.location.search).get('vendor');
+ const vendorSpace = vendorSlug ? getTraiteurSpaceBySlug(vendorSlug) : null;
+ if (!vendorSpace) return;
+ setQuery((current) => current || vendorSpace.name);
+ }, []);
+
+ useEffect(() => {
+ let active = true;
+ loadPublicCatalog()
+ .then((result) => {
+ if (!active) return;
+ setCatalog(result);
+ setError(null);
+ })
+ .catch(() => {
+ if (!active) return;
+ setCatalog(buildDemoCatalog());
+ setError(null);
+ })
+ .finally(() => {
+ if (active) setLoading(false);
+ });
+
+ return () => {
+ active = false;
+ };
+ }, []);
+
+ useEffect(() => {
+ if (!publicSupabase) {
+ setSupabasePaused(true);
+ setSupabasePausedHint('Backend Supabase indisponible (pause ou configuration). Bascule sur enregistrement Sheets (si configuré), WhatsApp en support.');
+ return;
+ }
+ let mounted = true;
+ (async () => {
+ try {
+ const { error: pingError } = await publicSupabase.from('vendors').select('id').limit(1);
+ if (!mounted) return;
+ if (pingError && isSupabasePausedError(pingError)) {
+ setSupabasePaused(true);
+ setSupabasePausedHint('Supabase est en pause (facturation). Bascule sur enregistrement Sheets (si configuré), WhatsApp en support.');
+ }
+ } catch {
+ // Ignore ping failures; the UI will handle on-demand fallbacks.
+ }
+ })();
+ return () => {
+ mounted = false;
+ };
+ }, []);
+
+ const serviceZones = useMemo(() => {
+ const vendorZones = catalog.vendors.map((vendor) => vendor.zone_label).filter(Boolean);
+ return getMartiniqueServiceZones(vendorZones);
+ }, [catalog.vendors]);
+
+ const categoryOptions = useMemo(() => {
+ const fromCatalog = catalog.products.map((product) => product.category ||'plats créoles');
+ return ['Tous', ...Array.from(new Set([...featuredCategories, ...fromCatalog]))];
+ }, [catalog.products]);
+
+ const filteredProducts = useMemo(() => {
+ const needle = query.trim().toLowerCase();
+ const customerPoint = customerLocation ? { latitude: customerLocation.lat, longitude: customerLocation.lng } : null;
+
+ return catalog.products
+ .map((product) => {
+ const hasVendorGeo = product.vendor_latitude != null && product.vendor_longitude != null;
+ const distanceToCustomerKm =
+ customerPoint && hasVendorGeo
+ ? distanceKm(customerPoint, { latitude: product.vendor_latitude!, longitude: product.vendor_longitude! })
+ : null;
+ return { product, distanceToCustomerKm };
+ })
+ .filter(({ product }) => {
+ const zone = product.zone_label ||'';
+ const matchQuery =
+ !needle ||
+ `${product.name} ${product.vendor_name} ${product.category} ${product.description} ${zone}`
+ .toLowerCase()
+ .includes(needle);
+ const matchCategory = categoryFilter ==='Tous' || product.category === categoryFilter;
+ const matchCoverage =
+ communeFilter ==='Tous'
+ ? true
+ : customerPoint
+ ? vendorServesPoint(
+ {
+ id: product.vendor_id,
+ latitude: product.vendor_latitude,
+ longitude: product.vendor_longitude,
+ delivery_radius_km: product.vendor_delivery_radius_km,
+ zone_label: product.zone_label,
+ },
+ customerPoint,
+ communeFilter,
+ )
+ : zone.toLowerCase().includes(communeFilter.toLowerCase());
+ const price = product.price ?? Number.POSITIVE_INFINITY;
+ const matchBudget =
+ budgetFilter ==='Tous' ||
+ (budgetFilter ==='≤ 15 €' && price <= 15) ||
+ (budgetFilter ==='15 € - 30 €' && price > 15 && price <= 30) ||
+ (budgetFilter ==='30 € et plus' && price > 30);
+ return matchQuery && matchCategory && matchCoverage && matchBudget;
+ })
+ .sort((a, b) => {
+ if (a.distanceToCustomerKm == null && b.distanceToCustomerKm == null) return 0;
+ if (a.distanceToCustomerKm == null) return 1;
+ if (b.distanceToCustomerKm == null) return -1;
+ return a.distanceToCustomerKm - b.distanceToCustomerKm;
+ })
+ .map(({ product }) => product);
+ }, [catalog.products, categoryFilter, communeFilter, budgetFilter, query, customerLocation]);
+
+ const filteredProductsUniqueImages = useMemo(() => {
+ const seenImage = new Set<string>();
+ return filteredProducts.map((product) => {
+ const imageKey = (product.image_url ||'').trim().toLowerCase();
+ if (!imageKey) return product;
+ if (seenImage.has(imageKey)) {
+ return { ...product, image_url: null };
+ }
+ seenImage.add(imageKey);
+ return product;
+ });
+ }, [filteredProducts]);
+
+ const zoneHighlights = useMemo(() => {
+ const counts = filteredProductsUniqueImages.reduce<Record<string, number>>((acc, product) => {
+ const zone = product.zone_label ||'Martinique';
+ acc[zone] = (acc[zone] || 0) + 1;
+ return acc;
+ }, {});
+
+ return Object.entries(counts)
+ .map(([zone, count]) => ({ zone, count }))
+ .sort((left, right) => right.count - left.count)
+ .slice(0, 4);
+ }, [filteredProductsUniqueImages]);
+
+ const nearbyProducts = useMemo(() => filteredProductsUniqueImages.slice(0, 6), [filteredProductsUniqueImages]);
+
+ const storyTraiteurs = useMemo(
+ () => partnerProfiles.filter((profile) => profile.type ==='Traiteur').slice(0, 4),
+ [],
+ );
+
+ const featuredProducts = useMemo(() => filteredProductsUniqueImages.slice(0, 3), [filteredProductsUniqueImages]);
+ const standardProducts = useMemo(() => {
+ const remaining = filteredProductsUniqueImages.filter((product) => !featuredProducts.some((item) => item.id === product.id));
+ return remaining.length > 0 ? remaining : filteredProductsUniqueImages;
+ }, [featuredProducts, filteredProductsUniqueImages]);
+ const heroProduct = featuredProducts[0] ?? filteredProductsUniqueImages[0] ?? catalog.products[0] ?? null;
+ const highlightedVendors = useMemo(() => catalog.vendors.slice(0, 6), [catalog.vendors]);
+
+ const customerPoint = customerLocation ? { latitude: customerLocation.lat, longitude: customerLocation.lng } : null;
+
+ const mapVendors = useMemo<MapVendor[]>(
+ () =>
+ highlightedVendors.map((vendor) => {
+ const [fallbackLat, fallbackLng] = getZoneFallbackCoordinates(vendor.zone_label);
+ const latitude = vendor.latitude ?? fallbackLat;
+ const longitude = vendor.longitude ?? fallbackLng;
+ const deliveryRadiusKm = Number(vendor.delivery_radius_km || 3);
+ const status: MapVendor['status'] = customerPoint
+ ? distanceKm(customerPoint, { latitude, longitude }) <= deliveryRadiusKm
+ ?'in_zone'
+ :'out_zone'
+ :'unknown';
+ return {
+ id: vendor.id,
+ name: vendor.business_name,
+ latitude,
+ longitude,
+ deliveryRadiusKm,
+ status,
+ };
+ }),
+ [customerPoint, highlightedVendors],
+ );
+
+ const selectionEconomics = useMemo(
+ () =>
+ calculateOrderEconomics({
+ items: selectedProducts.map((product) => ({ price: product.price ?? 0, commissionRate: 0.15 })),
+ deliveryFee: fulfillmentMode ==='delivery' && selectedProducts.length > 0 ? 3.5 : 0,
+ serviceFee: selectedProducts.length > 0 ? 1 : 0,
+ }),
+ [fulfillmentMode, selectedProducts],
+ );
+
+ const deliveryCoverage = useMemo(() => {
+ if (fulfillmentMode !=='delivery' || selectedProducts.length === 0) {
+ return {
+ status:'unknown' as DeliveryCoverageStatus,
+ message:'',
+ };
+ }
+
+ const fallbackZone =
+ communeFilter !=='Tous'
+ ? communeFilter
+ : deliveryAddress.trim()
+ ? deliveryAddress.trim().split(',')[0]
+ :'';
+
+ const customerPoint = customerLocation ? { latitude: customerLocation.lat, longitude: customerLocation.lng } : null;
+ const failures: string[] = [];
+
+ for (const product of selectedProducts) {
+ const vendor = {
+ id: product.vendor_id,
+ latitude: product.vendor_latitude,
+ longitude: product.vendor_longitude,
+ delivery_radius_km: product.vendor_delivery_radius_km,
+ zone_label: product.zone_label,
+ };
+ const covered = customerPoint
+ ? vendorServesPoint(vendor, customerPoint, fallbackZone || undefined)
+ : fallbackZone
+ ? (product.zone_label ||'').toLowerCase().includes(fallbackZone.toLowerCase())
+ : false;
+ if (!covered) failures.push(product.vendor_name);
+ }
+
+ if (failures.length > 0) {
+ return {
+ status:'out_zone' as DeliveryCoverageStatus,
+ message: customerPoint
+ ? `Livraison impossible pour votre position actuelle avec: ${Array.from(new Set(failures)).join(',')}. Choisissez retrait ou une autre adresse.`
+ : `Zone non couverte pour certains vendeurs (${Array.from(new Set(failures)).join(',')}). Renseignez une adresse plus précise ou passez en retrait.`,
+ };
+ }
+
+ if (!customerPoint && !fallbackZone) {
+ return {
+ status:'unknown' as DeliveryCoverageStatus,
+ message:'Ajoutez votre adresse ou validez votre position pour confirmer la zone de livraison.',
+ };
+ }
+
+ return {
+ status:'in_zone' as DeliveryCoverageStatus,
+ message:'Votre commande est dans la zone de livraison.',
+ };
+ }, [communeFilter, customerLocation, deliveryAddress, fulfillmentMode, selectedProducts]);
+
+ const orderNumber = useMemo(() => `DK-${new Date().toISOString().slice(0, 10).replace(/-/g,'')}-${String(selectedProducts.length || 1).padStart(2,'0')}`, [selectedProducts.length]);
+
+ const deliveryLabel = fulfillmentMode ==='delivery' ?'Livraison' :'Retrait';
+ const deliverySlotLabel = deliverySlot ||'Créneau à confirmer';
+ const customerMapsLabel = customerLocation?.mapsUrl ||'Position GPS non fournie — confirmer adresse manuellement';
+ const customerMapPreviewLocation = pendingCustomerLocation ?? customerLocation;
+ const productLines = useMemo(
+ () =>
+ selectedProducts.length
+ ? selectedProducts.map((product) => `- ${product.name} x1 — ${product.vendor_name} — ${formatPrice(product.price)}`)
+ : ['- Disponibilités du moment à proposer'],
+ [selectedProducts],
+ );
+
+ const vendorMessage = useMemo(
+ () =>
+ ['📩 DEMANDE DISPONIBILITE VENDEUR',
+ `Commande : ${orderNumber}`,'Produits à préparer :',
+ ...productLines,
+ `Créneau client : ${deliverySlotLabel}`,
+ `Mode : ${deliveryLabel}`,
+ `Adresse ou zone client : ${deliveryAddress ||'Adresse non fournie'}`,
+ `Position Maps : ${customerMapsLabel}`,
+ `Total : ${formatPrice(selectionEconomics.total_client)}`,
+ `Statut disponibilité : ${vendorAvailabilityStatus}`,'','Merci de répondre :','OK disponible + délai préparation','ou','KO indisponible / alternative possible',
+ ].join('\n'),
+ [
+ customerMapsLabel,
+ deliveryAddress,
+ deliveryLabel,
+ deliverySlotLabel,
+ orderNumber,
+ productLines,
+ selectionEconomics.total_client,
+ vendorAvailabilityStatus,
+ ],
+ );
+
+ const driverMessage = useMemo(
+ () =>
+ ['🚚 MISSION LIVRAISON DELIKREOL',
+ `Commande : ${orderNumber}`,
+ `Pickup : ${selectedProducts[0]?.vendor_name ||'Vendeur à confirmer'} / adresse vendeur si disponible`,
+ `Drop client : ${deliveryAddress ||'Adresse client non fournie'}`,
+ `Position client : ${customerMapsLabel}`,
+ `Créneau : ${deliverySlotLabel}`,
+ `Instructions : ${deliveryNotes ||'Aucune instruction'}`,
+ `Montant commande : ${formatPrice(selectionEconomics.total_client)}`,'Statut : attendre confirmation vendeur avant départ',
+ ].join('\n'),
+ [customerMapsLabel, deliveryAddress, deliveryNotes, deliverySlotLabel, orderNumber, selectedProducts, selectionEconomics.total_client],
+ );
+
+ const partnerDispatchTarget = useMemo(() => {
+ const partnerName = selectedProducts[0]?.vendor_name ||'Partenaire à confirmer';
+ const partnerLocality = selectedProducts[0]?.zone_label ||'Localité partenaire non fournie';
+ const customerLocality = deliveryAddress.trim()
+ ? deliveryAddress.trim().split(',')[0]?.trim() ||'Localité client non fournie'
+ :'Localité client non fournie';
+
+ return {
+ partnerName,
+ partnerLocality,
+ customerLocality,
+ };
+ }, [deliveryAddress, selectedProducts]);
+
+ const partnerDispatchMessage = useMemo(
+ () =>
+ buildPartnerDispatchMessage({
+ orderNumber,
+ products: selectedProducts,
+ deliveryMode: deliveryLabel,
+ deliveryFee: selectionEconomics.frais_livraison,
+ serviceFee: selectionEconomics.frais_service,
+ total: selectionEconomics.total_client,
+ paymentStatus: paymentMethod,
+ slot: deliverySlotLabel,
+ customerName,
+ customerPhone,
+ deliveryAddress,
+ customerLocality: partnerDispatchTarget.customerLocality,
+ deliveryNotes,
+ customerMapsUrl: customerLocation?.mapsUrl,
+ customerLat: customerLocation?.lat,
+ customerLng: customerLocation?.lng,
+ customerAccuracy: customerLocation?.accuracy,
+ partnerName: partnerDispatchTarget.partnerName,
+ partnerLocality: partnerDispatchTarget.partnerLocality,
+ }),
+ [
+ customerLocation,
+ customerName,
+ customerPhone,
+ deliveryAddress,
+ deliveryLabel,
+ deliveryNotes,
+ deliverySlotLabel,
+ orderNumber,
+ paymentMethod,
+ selectedProducts,
+ selectionEconomics,
+ partnerDispatchTarget,
+ ],
+ );
+
+ const supportLink = useMemo(
+ () =>
+ `${whatsappBase}?text=${encodeURIComponent(
+ `Bonjour DELIKREOL, j’ai besoin d’aide pour finaliser ma commande ${orderNumber}.`,
+ )}`,
+ [orderNumber],
+ );
+
+ const partnerDispatchLink = useMemo(() => {
+ const subject = `Commande DELIKREOL ${orderNumber}`;
+ return `mailto:${operationsEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(partnerDispatchMessage)}`;
+ }, [operationsEmail, orderNumber, partnerDispatchMessage]);
+
+ const driverMissionLink = useMemo(() => `${whatsappBase}?text=${encodeURIComponent(driverMessage)}`, [driverMessage]);
+
+ const partnerLink = `${baseUrl}?view=launch-network`;
+
+ const businessLink = useMemo(() => {
+ const body = ['Bonjour DELIKREOL, je souhaite une demande entreprise.',
+ businessRequestForm.company_name && `Entreprise : ${businessRequestForm.company_name}`,
+ businessRequestForm.contact && `Contact : ${businessRequestForm.contact}`,
+ businessRequestForm.people_count && `Nombre de personnes : ${businessRequestForm.people_count}`,
+ businessRequestForm.requested_date && `Date : ${businessRequestForm.requested_date}`,
+ businessRequestForm.requested_time && `Heure : ${businessRequestForm.requested_time}`,
+ businessRequestForm.location && `Lieu : ${businessRequestForm.location}`,
+ businessRequestForm.budget && `Budget : ${businessRequestForm.budget}`,
+ businessRequestForm.frequency && `Fréquence : ${businessRequestForm.frequency}`,
+ businessRequestForm.details && `Détails : ${businessRequestForm.details}`,
+ ]
+ .filter(Boolean)
+ .join('\n');
+
+ return `${whatsappBase}?text=${encodeURIComponent(body ||'Bonjour DELIKREOL, je souhaite une demande entreprise.')}`;
+ }, [businessRequestForm]);
+
+ async function handlePartnerLeadSubmit(event: FormEvent<HTMLFormElement>) {
+ event.preventDefault();
+ setPartnerStatus({ kind:'saving', message:'Envoi de la demande partenaire...' });
+
+ try {
+ await submitPartnerLead({
+ business_name: partnerLeadForm.business_name,
+ contact_name: partnerLeadForm.contact_name,
+ phone: partnerLeadForm.phone,
+ whatsapp: partnerLeadForm.whatsapp || partnerLeadForm.phone,
+ email: partnerLeadForm.email || undefined,
+ commune: partnerLeadForm.commune || undefined,
+ zone_label: partnerLeadForm.zone_label || partnerLeadForm.commune || undefined,
+ activity_type: partnerLeadForm.activity_type || undefined,
+ delivery_radius_km: Number(partnerLeadForm.delivery_radius_km ||'8'),
+ opening_hours: partnerLeadForm.opening_hours || undefined,
+ });
+ setPartnerStatus({ kind:'success', message:'Demande envoyée. Votre dossier sera examiné rapidement.' });
+ trackPartnerLeadSuccess({
+ activity_type: partnerLeadForm.activity_type || null,
+ commune: partnerLeadForm.commune || null,
+ });
+ setPartnerLeadForm(defaultPartnerLeadForm);
+ } catch (submitError) {
+ setPartnerStatus({ kind:'error', message: getErrorMessage(submitError,'Impossible d’envoyer la demande pour le moment.') });
+ }
+ }
+
+ async function handleProductSubmit(event: FormEvent<HTMLFormElement>) {
+ event.preventDefault();
+ setProductStatus({ kind:'saving', message:'Envoi de la proposition...' });
+
+ try {
+ let imageUrl: string | null = null;
+ if (productPhoto) {
+ const uploaded = await uploadPartnerProductPhoto(productPhoto);
+ imageUrl = uploaded.publicUrl;
+ }
+
+ await submitPartnerProduct({
+ business_name: productSubmissionForm.business_name,
+ product_name: productSubmissionForm.product_name,
+ description: productSubmissionForm.description || undefined,
+ category: productSubmissionForm.category || undefined,
+ price: Number(productSubmissionForm.price ||'0'),
+ is_available: true,
+ image_url: imageUrl,
+ });
+
+ setProductStatus({ kind:'success', message:'Proposition envoyée. Elle sera vérifiée avant affichage.' });
+ trackProductSubmissionSuccess({
+ category: productSubmissionForm.category || null,
+ has_photo: Boolean(productPhoto),
+ });
+ setProductSubmissionForm(defaultProductSubmissionForm);
+ setProductPhoto(null);
+ } catch (submitError) {
+ setProductStatus({ kind:'error', message: getErrorMessage(submitError,'Impossible d’envoyer la proposition pour le moment.') });
+ }
+ }
+
+ async function handleBusinessRequestSubmit(event: FormEvent<HTMLFormElement>) {
+ event.preventDefault();
+ setBusinessStatus({ kind:'saving', message:'Envoi de la demande entreprise...' });
+
+ try {
+ await createBusinessRequest({
+ company_name: businessRequestForm.company_name,
+ contact: businessRequestForm.contact,
+ people_count: businessRequestForm.people_count ? Number(businessRequestForm.people_count) : null,
+ requested_date: businessRequestForm.requested_date || null,
+ requested_time: businessRequestForm.requested_time || null,
+ location: businessRequestForm.location || null,
+ budget: businessRequestForm.budget || null,
+ frequency: businessRequestForm.frequency || null,
+ });
+ setBusinessStatus({ kind:'success', message:'Demande entreprise envoyée. Un retour rapide est attendu.' });
+ trackBusinessRequestSuccess({
+ company_name: businessRequestForm.company_name || null,
+ people_count: businessRequestForm.people_count ? Number(businessRequestForm.people_count) : null,
+ });
+ setBusinessRequestForm(defaultBusinessRequestForm);
+ } catch (submitError) {
+ setBusinessStatus({ kind:'error', message: getErrorMessage(submitError,'Impossible d’envoyer la demande entreprise pour le moment.') });
+ }
+ }
+
+ function addToSelection(product: PublicCatalogProduct) {
+ if (product.price == null) {
+ setCheckoutStatus({ kind:'error', message:'Prix à confirmer pour ce produit.' });
+ return;
+ }
+ setSelectedProducts((current) => [...current, product]);
+ setOrderConfirmed(false);
+ setCheckoutStatus({ kind:'idle' });
+ showSuccess('Ajouté au panier');
+ }
+
+ function removeFromSelection(index: number) {
+ setSelectedProducts((current) => current.filter((_, currentIndex) => currentIndex !== index));
+ setOrderConfirmed(false);
+ setCheckoutStatus({ kind:'idle' });
+ }
+
+ function clearSelection() {
+ setSelectedProducts([]);
+ setOrderConfirmed(false);
+ setCheckoutStatus({ kind:'idle' });
+ }
+
+ function buildOrderSummary(orderNumberValue: string) {
+ const lines = selectedProducts.map((product) => `- ${product.name} (${formatPrice(product.price)}) — ${product.vendor_name}`).join('\n');
+ const total = formatPrice(selectionEconomics.total_client);
+ const delivery = fulfillmentMode ==='delivery' ? `Livraison: ${deliveryAddress.trim() ||'(adresse à confirmer)'}` :'Retrait';
+ const slot = deliverySlot.trim() ? `Créneau: ${deliverySlot.trim()}` :'';
+ const notes = deliveryNotes.trim() ? `Notes: ${deliveryNotes.trim()}` :'';
+ const who = `Client: ${customerName.trim() ||'(nom)'} | ${customerPhone.trim() ||'(téléphone)'}`;
+
+ return [
+ `Commande: ${orderNumberValue}`,
+ who,
+ delivery,
+ slot,
+ notes,'','Panier:',
+ lines,'',
+ `Total estimé: ${total}`,
+ `Paiement souhaité: ${paymentMethod}`,
+ `Statut vendeur: ${vendorAvailabilityStatus}`,
+ ]
+ .filter(Boolean)
+ .join('\n');
+ }
+
+ function buildWhatsAppFallbackOrderMessage() {
+ return ['Bonjour DELIKREOL, je souhaite commander.',
+ buildOrderSummary(orderNumber),'','Contexte: Supabase en pause, mode secours activé.',
+ ]
+ .filter(Boolean)
+ .join('\n');
+ }
+
+ function saveOrderLocally(params: {
+ orderId: string;
+ orderNumber: string;
+ source: string;
+ items: Array<{
+ product_id: string;
+ vendor_id: string;
+ product_name: string;
+ vendor_name: string;
+ quantity: number;
+ unit_price: number;
+ }>;
+ }) {
+ try {
+ const key ='delikreol_local_orders_v1';
+ const raw = localStorage.getItem(key);
+ const parsed = raw ? JSON.parse(raw) : [];
+ const archive = Array.isArray(parsed) ? parsed : [];
+ const record = {
+ id: params.orderId,
+ order_number: params.orderNumber,
+ created_at: new Date().toISOString(),
+ customer_name: customerName.trim(),
+ customer_phone: customerPhone.trim(),
+ fulfillment_mode: fulfillmentMode,
+ delivery_address: deliveryAddress.trim() || null,
+ delivery_slot: deliverySlot.trim() || null,
+ payment_method: paymentMethod,
+ vendor_availability_status: vendorAvailabilityStatus,
+ total_amount: selectionEconomics.total_client,
+ source: params.source,
+ items: params.items,
+ };
+ const next = [record, ...archive].slice(0, 200);
+ localStorage.setItem(key, JSON.stringify(next));
+ return { saved: true as const };
+ } catch (error) {
+ return {
+ saved: false as const,
+ error: error instanceof Error ? error.message : String(error),
+ };
+ }
+ }
+
+ function handleWhatsAppCheckoutFallback() {
+ const message = buildWhatsAppFallbackOrderMessage();
+ const link = getWhatsAppBusinessLink(whatsappNumber, message);
+ // Aggressive fallback: always copy message, then attempt to open WhatsApp.
+ void copyOperationalMessage(message,'Message WhatsApp prêt. Collez-le si WhatsApp ne s’ouvre pas automatiquement.');
+ window.location.href = link;
+ }
+
+ async function handleCheckout() {
+ if (selectedProducts.length === 0) {
+ setCheckoutStatus({ kind:'error', message:'Ajoutez au moins un produit au panier.' });
+ return;
+ }
+
+ if (!customerName.trim() || !customerPhone.trim()) {
+ setCheckoutStatus({ kind:'error', message:'Nom et téléphone sont obligatoires pour confirmer la commande.' });
+ return;
+ }
+
+ if (fulfillmentMode ==='delivery' && !deliveryAddress.trim()) {
+ setCheckoutStatus({ kind:'error', message:'Adresse obligatoire pour une livraison.' });
+ return;
+ }
+
+ if (fulfillmentMode ==='delivery' && deliveryCoverage.status ==='out_zone') {
+ setCheckoutStatus({
+ kind:'error',
+ message: deliveryCoverage.message ||'Livraison impossible pour cette adresse/position. Passez en retrait ou changez d’adresse.',
+ });
+ return;
+ }
+
+ const checkoutOrderId = crypto.randomUUID();
+ const checkoutOrderNumber = `DK-${Date.now().toString(36).toUpperCase()}`;
+ const hasSheetsEndpoint = Boolean(getOrderFallbackEndpoint());
+ const hasOrderFormFallback = Boolean(orderFormUrl);
+ const orderItemsPayload = selectedProducts.map((product) => ({
+ order_id: checkoutOrderId,
+ product_id: product.id,
+ vendor_id: product.vendor_id,
+ product_name: product.name,
+ vendor_name: product.vendor_name,
+ quantity: 1,
+ unit_price: product.price ?? 0,
+ vendor_commission: Number(((product.price ?? 0) * 0.15).toFixed(2)),
+ }));
+
+ const fallbackToOrderForm = async (reason: string) => {
+ if (!hasOrderFormFallback) return false;
+ setSupabasePaused(true);
+ setSupabasePausedHint(reason);
+
+ const formSummary = ['Finalisez la commande via formulaire.','',
+ buildOrderSummary(checkoutOrderNumber),
+ ].join('\n');
+
+ await copyOperationalMessage(formSummary,'Récapitulatif commande');
+ const opened = window.open(orderFormUrl,'_blank','noopener,noreferrer');
+ if (!opened) window.location.assign(orderFormUrl);
+
+ setOrderConfirmed(true);
+ setCheckoutStatus({
+ kind:'success',
+ orderNumber: checkoutOrderNumber,
+ message: `Commande ${checkoutOrderNumber} préparée. Finalisez via le formulaire sécurisé.`,
+ });
+ trackCheckoutSuccess({
+ order_number: checkoutOrderNumber,
+ items_count: selectedProducts.length,
+ total_amount: selectionEconomics.total_client,
+ mode: `${fulfillmentMode}_form`,
+ });
+ return true;
+ };
+
+ const fallbackToLocal = async (reason: string) => {
+ setSupabasePaused(true);
+ setSupabasePausedHint(reason);
+ const localSave = saveOrderLocally({
+ orderId: checkoutOrderId,
+ orderNumber: checkoutOrderNumber,
+ source: sheetsFirstMode ?'public_checkout_local_sheets_first' :'public_checkout_local_fallback',
+ items: orderItemsPayload.map((item) => ({
+ product_id: item.product_id,
+ vendor_id: item.vendor_id,
+ product_name: item.product_name,
+ vendor_name: item.vendor_name,
+ quantity: item.quantity,
+ unit_price: item.unit_price,
+ })),
+ });
+
+ const localSummary = ['Commande enregistrée localement (mode secours).','',
+ buildOrderSummary(checkoutOrderNumber),
+ ].join('\n');
+ await copyOperationalMessage(localSummary,'Récapitulatif commande');
+
+ setOrderConfirmed(true);
+ setCheckoutStatus({
+ kind:'success',
+ orderNumber: checkoutOrderNumber,
+ message: localSave.saved
+ ? `Commande ${checkoutOrderNumber} enregistrée localement. Finalisation opérateur en cours.`
+ : `Commande ${checkoutOrderNumber} préparée. Sauvegarde locale partielle (${localSave.error ||'erreur locale'}).`,
+ });
+ trackCheckoutSuccess({
+ order_number: checkoutOrderNumber,
+ items_count: selectedProducts.length,
+ total_amount: selectionEconomics.total_client,
+ mode: `${fulfillmentMode}_local_backup`,
+ });
+ return true;
+ };
+
+ const fallbackToSheets = async (reason: string) => {
+ setSupabasePaused(true);
+ setSupabasePausedHint(reason);
+ if (!hasSheetsEndpoint) {
+ if (await fallbackToOrderForm(`${reason} Endpoint Sheets non configuré.`)) {
+ return true;
+ }
+ await fallbackToLocal(
+ `${reason} Aucun endpoint Sheets/Form configuré. Sauvegarde locale activée, WhatsApp reste en support manuel.`,
+ );
+ return true;
+ }
+
+ const saved = await saveFallbackOrderToSheet({
+ order_id: checkoutOrderId,
+ order_number: checkoutOrderNumber,
+ customer_name: customerName.trim(),
+ customer_phone: customerPhone.trim(),
+ fulfillment_mode: fulfillmentMode,
+ delivery_address: deliveryAddress.trim() || null,
+ delivery_slot: deliverySlot.trim() || null,
+ payment_method: paymentMethod,
+ vendor_availability_status: vendorAvailabilityStatus,
+ total_amount: selectionEconomics.total_client,
+ source: sheetsFirstMode ?'public_checkout_sheets_first' :'public_checkout_fallback',
+ items: orderItemsPayload.map((item) => ({
+ product_id: item.product_id,
+ vendor_id: item.vendor_id,
+ product_name: item.product_name,
+ vendor_name: item.vendor_name,
+ quantity: item.quantity,
+ unit_price: item.unit_price,
+ })),
+ });
+
+ if (!saved.saved) {
+ if (await fallbackToOrderForm(`${reason} ${saved.error ||'Erreur endpoint Sheets.'}`)) {
+ return true;
+ }
+ await fallbackToLocal(
+ `${reason} Endpoint Sheets indisponible (${saved.error ||'endpoint secours absent'}). Sauvegarde locale activée.`,
+ );
+ return true;
+ }
+
+ setOrderConfirmed(true);
+ setCheckoutStatus({
+ kind:'success',
+ orderNumber: checkoutOrderNumber,
+ message: `Commande ${checkoutOrderNumber} enregistrée en mode Sheets. Paiement : pending.`,
+ });
+ trackCheckoutSuccess({
+ order_number: checkoutOrderNumber,
+ items_count: selectedProducts.length,
+ total_amount: selectionEconomics.total_client,
+ mode: sheetsFirstMode ? `${fulfillmentMode}_sheets_first` : `${fulfillmentMode}_fallback`,
+ });
+ return true;
+ };
+
+ if (sheetsFirstMode) {
+ setCheckoutStatus({ kind:'saving', message:'Enregistrement de la commande (mode gratuit)...' });
+ await fallbackToSheets('Mode gratuit actif. Enregistrement prioritaire sur Sheets.');
+ return;
+ }
+
+ if (!publicSupabase || supabasePaused) {
+ await fallbackToSheets(
+ !publicSupabase
+ ?'Backend Supabase indisponible (configuration). Bascule sur enregistrement Sheets.'
+ :'Supabase est en pause. Bascule sur enregistrement Sheets.',
+ );
+ return;
+ }
+
+ setCheckoutStatus({ kind:'saving', message:'Création de la commande...' });
+
+ const orderPayload = {
+ order_number: checkoutOrderNumber,
+ customer_name: customerName.trim(),
+ customer_phone: customerPhone.trim(),
+ status:'pending',
+ payment_status:'pending',
+ delivery_status:'pending',
+ delivery_type: fulfillmentMode ==='delivery' ?'home_delivery' :'pickup',
+ delivery_address: deliveryAddress.trim() || null,
+ delivery_latitude: customerLocation?.lat ?? null,
+ delivery_longitude: customerLocation?.lng ?? null,
+ scheduled_time: deliverySlot.trim() || null,
+ delivery_fee: selectionEconomics.frais_livraison,
+ total_amount: selectionEconomics.total_client,
+ source:'public_checkout',
+ notes: [
+ deliveryNotes && `Instructions: ${deliveryNotes}`,
+ customerLocation?.mapsUrl && `Maps: ${customerLocation.mapsUrl}`,
+ `Paiement souhaité: ${paymentMethod}`,
+ `Statut vendeur: ${vendorAvailabilityStatus}`,
+ ]
+ .filter(Boolean)
+ .join('\n') || null,
+ };
+
+ try {
+ const { data: createdOrder, error: orderError } = await publicSupabase
+ .from('orders')
+ .insert(orderPayload)
+ .select('id')
+ .single();
+ if (orderError) {
+ if (isSupabasePausedError(orderError) || isSupabaseUnavailableError(orderError)) {
+ await fallbackToSheets('Supabase indisponible. Bascule sur enregistrement Sheets.');
+ return;
+ }
+ setCheckoutStatus({ kind:'error', message: `Commande non créée : ${orderError.message}` });
+ return;
+ }
+
+ const supabaseOrderItemsPayload = orderItemsPayload.map((item) => ({
+ ...item,
+ order_id: createdOrder.id,
+ }));
+ const { error: itemsError } = await publicSupabase.from('order_items').insert(supabaseOrderItemsPayload);
+ if (itemsError) {
+ if (isSupabasePausedError(itemsError) || isSupabaseUnavailableError(itemsError)) {
+ await fallbackToSheets('Supabase indisponible. Bascule sur enregistrement Sheets.');
+ return;
+ }
+ setCheckoutStatus({ kind:'error', message: `Produits non enregistrés : ${itemsError.message}` });
+ return;
+ }
+ } catch (unexpectedError) {
+ if (isSupabasePausedError(unexpectedError) || isSupabaseUnavailableError(unexpectedError)) {
+ await fallbackToSheets('Supabase indisponible. Bascule sur enregistrement Sheets.');
+ return;
+ }
+ setCheckoutStatus({
+ kind:'error',
+ message: `Erreur checkout : ${String((unexpectedError as any)?.message ?? unexpectedError)}`,
+ });
+ return;
+ }
+
+ setOrderConfirmed(true);
+ setCheckoutStatus({
+ kind:'success',
+ orderNumber: checkoutOrderNumber,
+ message: `Commande ${checkoutOrderNumber} enregistrée. Statut : pending. Paiement : pending.`,
+ });
+ trackCheckoutSuccess({
+ order_number: checkoutOrderNumber,
+ items_count: selectedProducts.length,
+ total_amount: selectionEconomics.total_client,
+ mode: fulfillmentMode,
+ });
+ }
+
+ async function requestNotifications() {
+ if (!('Notification' in window)) {
+ setNotificationPermission('unsupported');
+ return;
+ }
+ const permission = await Notification.requestPermission();
+ setNotificationPermission(permission);
+ }
+
+ function askCustomerPosition() {
+ if (geoStatus ==='loading') return;
+ setGeoError('');
+ setGeoConsentState('ask');
+ }
+
+ function cancelCustomerPositionConsent() {
+ setGeoConsentState('declined');
+ setGeoError('');
+ }
+
+ function useCustomerPosition() {
+ if (!('geolocation' in navigator)) {
+ setGeoStatus('unsupported');
+ setGeoConsentState('declined');
+ setGeoError('Géolocalisation non supportée par ce navigateur. Saisissez l’adresse manuellement.');
+ return;
+ }
+
+ setGeoStatus('loading');
+ setGeoConsentState('ask');
+ setGeoError('');
+ navigator.geolocation.getCurrentPosition(
+ ({ coords }) => {
+ setPendingCustomerLocation({
+ lat: coords.latitude,
+ lng: coords.longitude,
+ accuracy: coords.accuracy,
+ mapsUrl: `https://www.google.com/maps?q=${coords.latitude},${coords.longitude}`,
+ });
+ setGeoStatus('success');
+ setGeoConsentState('granted');
+ },
+ (positionError) => {
+ setGeoStatus('error');
+ setGeoConsentState('declined');
+ setGeoError(
+ positionError.code === positionError.PERMISSION_DENIED
+ ?'Permission refusée. Saisissez l’adresse manuellement.'
+ :'Position indisponible. Saisissez l’adresse manuellement.',
+ );
+ },
+ { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
+ );
+ }
+
+ function confirmPendingCustomerPosition() {
+ if (!pendingCustomerLocation) {
+ setGeoError('Aucune position détectée à valider.');
+ return;
+ }
+ setCustomerLocation(pendingCustomerLocation);
+ setPendingCustomerLocation(null);
+ setGeoConsentState('granted');
+ setGeoError('');
+ showSuccess('Position validée.');
+ }
+
+ function rejectPendingCustomerPosition() {
+ setPendingCustomerLocation(null);
+ setGeoConsentState('declined');
+ if (!customerLocation) setGeoStatus('idle');
+ }
+
+ async function copyOperationalMessage(message: string, label: string) {
+ try {
+ if ('clipboard' in navigator && navigator.clipboard?.writeText) {
+ await navigator.clipboard.writeText(message);
+ } else {
+ const textarea = document.createElement('textarea');
+ textarea.value = message;
+ textarea.setAttribute('readonly','');
+ textarea.style.position ='fixed';
+ textarea.style.opacity ='0';
+ document.body.appendChild(textarea);
+ textarea.select();
+ document.execCommand('copy');
+ document.body.removeChild(textarea);
+ }
+ setCopyStatus(`${label} copié. Validez humainement avant envoi.`);
+ } catch {
+ setCopyStatus(`Copie impossible pour ${label}. Utilisez le bouton WhatsApp ou email.`);
+ }
+ }
+
+ function handleDownloadOrderPdf() {
+ downloadOrderPdf({
+ orderNumber,
+ products: selectedProducts,
+ deliveryMode: deliveryLabel,
+ deliveryFee: selectionEconomics.frais_livraison,
+ serviceFee: selectionEconomics.frais_service,
+ total: selectionEconomics.total_client,
+ paymentStatus: paymentMethod,
+ slot: deliverySlotLabel,
+ customerName,
+ customerPhone,
+ deliveryAddress,
+ deliveryNotes,
+ customerMapsUrl: customerLocation?.mapsUrl,
+ customerLat: customerLocation?.lat,
+ customerLng: customerLocation?.lng,
+ customerAccuracy: customerLocation?.accuracy,
+ });
+ }
+
+ function confirmOrderLocally() {
+ setOrderConfirmed(true);
+ }
+
+ function scrollToCheckoutPanel() {
+ const target = document.getElementById('commande') || document.querySelector('[data-testid="cart-panel"]');
+ if (target) {
+ target.scrollIntoView({ behavior:'smooth', block:'start' });
+ return;
+ }
+ window.scrollTo({ top: 0, behavior:'smooth' });
+ }
+
+ return (
+ <div className="min-h-screen bg-[#fbf4ea] text-[#2a190f]">
+ <header className="sticky top-0 z-50 border-b border-white/80 bg-[#fff8ec]/92 backdrop-blur-xl">
+ <div className="relative mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-3">
+ <div className="hidden items-center gap-2 sm:flex">
+ <span className="rounded-xl border border-primary/20 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-[#7c2d12] shadow-sm">
+ Martinique
+ </span>
+ </div>
+
+ <a href="#accueil" className="brand-logo-frame flex items-center gap-3 rounded-2xl px-3 py-2" aria-label="DELIKREOL accueil">
+ <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-12 w-12 rounded-2xl bg-white p-1.5 shadow-lg sm:h-14 sm:w-14" />
+ <div className="leading-none">
+ <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[hsl(var(--primary))]">Local premium</p>
+ <p className="text-lg font-black tracking-tight text-[#2a190f] sm:text-xl">DELIKREOL</p>
+ </div>
+ </a>
+
+ <nav className="absolute left-1/2 top-full hidden -translate-x-1/2 items-center gap-2 rounded-b-[1.5rem] border border-t-0 border-primary/20 bg-[#fff8ec]/95 px-4 py-2 shadow-soft backdrop-blur lg:flex">
+ <NavLink href="#catalogue">Catalogue</NavLink>
+ <NavLink href="#traiteurs">Traiteurs</NavLink>
+ <NavLink href="#commande">Commander</NavLink>
+ <NavLink href={proSpaceUrl}>Espace pro</NavLink>
+ <NavLink href="#contact">Contact</NavLink>
+ </nav>
+
+ <div className="hidden items-end gap-3 xl:flex">
+ <div className="text-right leading-tight">
+ <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[hsl(var(--primary))]">Contact dédié</p>
+ <a href={`https://wa.me/${whatsappNumber}`} className="text-sm font-black text-[#2a190f] hover:text-[hsl(var(--primary))]">
+ WhatsApp {formatWhatsAppLabel(whatsappNumber)}
+ </a>
+ <a href={publicSiteUrl} className="block text-[11px] font-semibold text-stone-500 hover:text-[#7c2d12]" target="_blank" rel="noreferrer">
+ {publicSiteUrl.replace('https://','')}
+ </a>
+ </div>
+ <a
+ href={customerPath}
+ onClick={(event) => {
+ event.preventDefault();
+ gotoCustomer();
+ }}
+ className="inline-flex rounded-full bg-[hsl(var(--primary))] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/25 transition hover:-translate-y-0.5"
+ >
+ Commander
+ </a>
+ </div>
+ </div>
+ </header>
+
+ <main id="accueil">
+ <section className="island-hero-surface relative overflow-hidden border-b border-primary/20">
+ <div className="madras-strip" />
+ <div className="pointer-events-none absolute -left-24 top-24 h-72 w-72 rounded-full bg-orange-300/25 blur-3xl" />
+ <div className="pointer-events-none absolute -right-24 bottom-10 h-80 w-80 rounded-full bg-success/[0.15]0/15 blur-3xl" />
+ <div className="mx-auto grid max-w-7xl gap-7 px-4 py-8 sm:py-12 lg:grid-cols-[0.95fr_1.05fr] lg:py-16">
+ <div className="brand-hero-glow flex flex-col justify-center">
+ <div className="mx-auto flex w-fit flex-col items-center text-center lg:mx-0 lg:items-start lg:text-left">
+ <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-20 w-20 rounded-[1.6rem] bg-white p-2 shadow-2xl shadow-orange-900/10 sm:h-24 sm:w-24" />
+ <BadgeRow />
+ </div>
+ <h1 className="mt-5 max-w-4xl text-center font-display text-4xl font-black leading-[0.94] tracking-tight text-[#2a190f] sm:text-6xl lg:text-left lg:text-7xl">
+ Le réflexe local qui donne envie de commander.
+ </h1>
+ <p className="mx-auto mt-4 max-w-xl text-center text-base leading-7 text-[#5a4334] sm:text-lg lg:mx-0 lg:text-left">
+ Plats créoles et produits locaux en Martinique. Choisissez, ajoutez au panier, confirmez en moins de 2 minutes.
+ </p>
+
+ <div className="mt-7 rounded-[2rem] border border-white/80 bg-white/88 p-3 shadow-2xl shadow-orange-900/10 backdrop-blur">
+ <div className="grid gap-3 lg:grid-cols-[1fr_210px]">
+ <label className="relative block">
+ <Search className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-[hsl(var(--primary))]" />
+ <input
+ value={query}
+ onChange={(event) => setQuery(event.target.value)}
+ placeholder="Adresse, commune ou produit"
+ className="h-16 w-full rounded-[1.35rem] border border-primary/20 bg-[#fffaf4] pl-14 pr-4 text-base font-black text-[#2a190f] outline-none ring-orange-200 placeholder:text-stone-400 focus:ring-4"
+ />
+ </label>
+ <button
+ type="button"
+ onClick={() => gotoCustomer()}
+ className="inline-flex h-16 items-center justify-center gap-2 rounded-[1.35rem] bg-[hsl(var(--primary))] px-5 text-sm font-black uppercase tracking-[0.12em] text-white shadow-xl shadow-orange-500/25 transition hover:-translate-y-0.5"
+ >
+ Commander maintenant <ArrowRight className="h-5 w-5" />
+ </button>
+ </div>
+ <div className="mt-3 flex flex-wrap items-center gap-2">
+ <span className="text-xs font-black uppercase tracking-[0.16em] text-stone-400">Communes partenaires</span>
+ {serviceZones.slice(0, 4).map((zone) => (
+ <span key={zone} className="rounded-xl border border-primary/20 bg-[#fff8ef] px-3 py-1.5 text-xs font-black text-[#7c2d12]">
+ {zone}
+ </span>
+ ))}
+ </div>
+ </div>
+
+ <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+ <button
+ type="button"
+ onClick={() => gotoCustomer()}
+ className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2a190f] px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-stone-900/15 transition hover:-translate-y-0.5"
+ >
+ Commander maintenant <ShoppingBag className="h-4 w-4" />
+ </button>
+ <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Bonjour DELIKREOL, je veux être orienté vers l’offre la plus adaptée.')}`} className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/20 bg-white/80 px-6 py-4 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5">
+ Besoin d’aide <MessageCircle className="h-4 w-4" />
+ </a>
+ </div>
+ </div>
+
+ <div className="premium-card relative rounded-[2.4rem] border border-white/80 bg-white/75 p-3 shadow-elegant backdrop-blur">
+ {heroProduct ? (
+ <div className="overflow-hidden rounded-[2rem] bg-[#20150f] text-white shadow-2xl">
+ <div className="relative aspect-[4/4] sm:aspect-[16/13] lg:aspect-[4/3]">
+ {heroProduct.image_url ? (
+ <img src={heroProduct.image_url} alt={heroProduct.name} className="h-full w-full object-cover brightness-110 contrast-110 saturate-110" />
+ ) : (
+ <HeroFallback name={heroProduct.name} />
+ )}
+ <div className="absolute left-4 top-4 rounded-full bg-white/92 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#7c2d12] shadow-lg">
+ Ambiance Martinique
+ </div>
+ <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/88 via-black/48 to-transparent p-5 sm:p-7">
+ <p className="text-xs font-black uppercase tracking-[0.24em] text-primary/60">Produit phare</p>
+ <h2 className="mt-2 max-w-md text-3xl font-black sm:text-4xl">{heroProduct.name}</h2>
+ <div className="mt-2 flex flex-wrap gap-2 text-xs font-black uppercase tracking-[0.16em]">
+ <span className="rounded-full bg-white/10 px-3 py-1">{heroProduct.vendor_name}</span>
+ <span className="rounded-full bg-white/10 px-3 py-1">Rayon {heroProduct.vendor_delivery_radius_km} km</span>
+ </div>
+ <div className="mt-4 flex items-end justify-between gap-3">
+ <strong className="text-3xl font-black text-primary/60">{formatPrice(heroProduct.price)}</strong>
+ <span className="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-emerald-200">
+ Disponible
+ </span>
+ </div>
+ </div>
+ </div>
+ </div>
+ ) : (
+ <HeroFallback name="DELIKREOL" loading={loading} configured={catalog.configured} />
+ )}
+
+ <div className="mt-3 grid gap-3 sm:grid-cols-2">
+ {trustPills.map((pill) => (
+ <TrustCard key={pill} label={pill} />
+ ))}
+ </div>
+ </div>
+ </div>
+ </section>
+
+ <section id="explorer" className="mx-auto max-w-7xl px-4 py-10">
+ <div className="rounded-[2rem] border border-primary/20 bg-white p-5 shadow-soft lg:p-7">
+ <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+ <SectionTitle
+ eyebrow="Découverte locale"
+ title="Mode Uber Eats, mais pensé par zone de livraison."
+ text="La géolocalisation limite l’affichage aux offres proches de votre position. Un onglet séparé présente les traiteurs et leur histoire."
+ />
+ <div className="inline-flex rounded-full border border-primary/20 bg-[#fff7ef] p-1">
+ <button
+ type="button"
+ onClick={() => setMarketplaceTab('browse')}
+ className={`rounded-full px-4 py-2 text-sm font-black transition ${
+ marketplaceTab ==='browse' ?'bg-[hsl(var(--primary))] text-white shadow-lg shadow-orange-500/20' :'text-[#7c2d12]'
+ }`}
+ >
+ Commander près de moi
+ </button>
+ <button
+ type="button"
+ onClick={() => setMarketplaceTab('traiteurs')}
+ className={`rounded-full px-4 py-2 text-sm font-black transition ${
+ marketplaceTab ==='traiteurs' ?'bg-[#24170f] text-white shadow-lg shadow-stone-900/10' :'text-[#7c2d12]'
+ }`}
+ >
+ Traiteurs & storytelling
+ </button>
+ </div>
+ </div>
+
+ {marketplaceTab ==='browse' ? (
+ <div className="mt-7 grid gap-6 lg:grid-cols-[1fr_340px]">
+ <div>
+ <div className="flex flex-wrap gap-2">
+ {zoneHighlights.length > 0 ? (
+ zoneHighlights.map((item) => (
+ <span key={item.zone} className="rounded-full border border-primary/20 bg-[#fff8ef] px-3 py-1.5 text-xs font-black text-[#7c2d12]">
+ {item.zone} · {item.count} offre(s)
+ </span>
+ ))
+ ) : (
+ <span className="rounded-full border border-dashed border-primary/20 bg-white px-3 py-1.5 text-xs font-black text-stone-500">
+ Activez une position pour voir les zones proches
+ </span>
+ )}
+ </div>
+
+ <div className="mt-5 rounded-[1.75rem] border border-primary/20 bg-[#fffaf4] p-4">
+ <div className="flex flex-wrap items-center justify-between gap-3">
+ <div>
+ <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Proche de vous</p>
+ <h3 className="mt-1 text-xl font-black text-[#2a190f]">Les premières offres qui comptent</h3>
+ </div>
+ <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">
+ {customerLocation ?'Tri géolocalisé' :'Tri par zone'}
+ </span>
+ </div>
+ <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+ {nearbyProducts.map((product) => (
+ <ProductCard key={`nearby-${product.id}`} product={product} onAdd={() => addToSelection(product)} compact />
+ ))}
+ </div>
+ </div>
+ </div>
+
+ <aside className="rounded-[1.75rem] border border-primary/20 bg-[#24170f] p-5 text-white">
+ <p className="text-xs font-black uppercase tracking-[0.18em] text-primary/60">Filtre local</p>
+ <h3 className="mt-2 text-2xl font-black">Catégories et rayon</h3>
+ <p className="mt-3 text-sm leading-6 text-stone-300">
+ Les produits affichés ici sont déjà triés selon la catégorie, le budget et la zone de livraison. Quand la position est validée, on ne pousse que les offres compatibles.
+ </p>
+ <div className="mt-4 space-y-3">
+ <div className="rounded-2xl bg-white/8 p-4">
+ <p className="text-xs font-black uppercase tracking-[0.16em] text-primary/60">Catégorie active</p>
+ <p className="mt-2 text-lg font-black">{categoryFilter}</p>
+ </div>
+ <div className="rounded-2xl bg-white/8 p-4">
+ <p className="text-xs font-black uppercase tracking-[0.16em] text-primary/60">Géolocalisation</p>
+ <p className="mt-2 text-sm leading-6 text-stone-300">
+ {customerLocation
+ ? `Position validée avec précision ${customerLocation.accuracy ? `${Math.round(customerLocation.accuracy)} m` :'non fournie'}`
+ :'Géolocalisez-vous pour voir uniquement les offres à proximité.'}
+ </p>
+ </div>
+ <div className="rounded-2xl bg-white/8 p-4">
+ <p className="text-xs font-black uppercase tracking-[0.16em] text-primary/60">Zone de livraison</p>
+ <p className="mt-2 text-sm leading-6 text-stone-300">
+ La commune reste un fallback; la carte et le rayon vendeur restent prioritaires.
+ </p>
+ </div>
+ </div>
+ </aside>
+ </div>
+ ) : (
+ <div className="mt-7 grid gap-6 lg:grid-cols-2">
+ {storyTraiteurs.map((profile) => {
+ const space = featuredTraiteurSpaces.find((item) => item.name === profile.name);
+ return (
+ <article key={profile.name} className="overflow-hidden rounded-[1.75rem] border border-primary/20 bg-[#fffaf4] shadow-soft">
+ <div className={`bg-gradient-to-br ${space?.gradient ??'from-[#7c3aed] via-[#ec4899] to-[hsl(var(--primary))]'} p-5 text-white`}>
+ <p className="text-xs font-black uppercase tracking-[0.22em] text-white/75">Storytelling traiteur</p>
+ <h3 className="mt-2 text-3xl font-black">{profile.name}</h3>
+ <p className="mt-3 text-sm leading-6 text-white/90">{profile.story}</p>
+ </div>
+ <div className="p-5">
+ <div className="grid gap-3 sm:grid-cols-2">
+ <div className="rounded-2xl border border-primary/20 bg-white p-4">
+ <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Promesse</p>
+ <p className="mt-2 text-sm leading-6 text-stone-600">{profile.promise}</p>
+ </div>
+ <div className="rounded-2xl border border-primary/20 bg-white p-4">
+ <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Signature</p>
+ <p className="mt-2 text-sm leading-6 text-stone-600">{profile.specialty}</p>
+ </div>
+ </div>
+ <div className="mt-4 flex flex-wrap gap-2">
+ {profile.highlights.slice(0, 4).map((item) => (
+ <span key={item} className="rounded-full border border-primary/20 bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">
+ {item}
+ </span>
+ ))}
+ </div>
+ <div className="mt-5 flex flex-wrap gap-3">
+ <a
+ href={buildTraiteurSpaceLink(baseUrl, normalizeSpaceSlug(profile.name))}
+ className="inline-flex items-center justify-center gap-2 rounded-full bg-[hsl(var(--primary))] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/20 transition hover:-translate-y-0.5"
+ >
+ Voir la vitrine
+ </a>
+ <a
+ href={`#traiteurs`}
+ onClick={(event) => {
+ event.preventDefault();
+ document.getElementById('traiteurs')?.scrollIntoView({ behavior:'smooth', block:'start' });
+ }}
+ className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/20 bg-white px-4 py-2 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5"
+ >
+ Ouvrir la section
+ </a>
+ </div>
+ </div>
+ </article>
+ );
+ })}
+ </div>
+ )}
+ </div>
+ </section>
+
+ <section className="mx-auto max-w-7xl px-4 py-10">
+ <SectionTitle
+ eyebrow="Comment ça marche"
+ title="Chercher, ajouter, confirmer, suivre."
+ text="Un parcours court, lisible sur mobile."
+ />
+ <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+ {howItWorks.slice(0, 3).map((step, index) => (
+ <StepCard key={step.title} index={index + 1} title={step.title} text={step.text} />
+ ))}
+ </div>
+ </section>
+
+ <section id="traiteurs" className="mx-auto max-w-7xl px-4 py-10">
+ <div className="rounded-[2rem] border border-primary/20 bg-white p-5 shadow-soft lg:p-7">
+ <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+ <SectionTitle
+ eyebrow="Traiteurs"
+ title="Chaque traiteur a son espace."
+ text="Descriptions, prix et accès direct à la vitrine dédiée pour commander sans friction."
+ />
+ <div className="grid gap-3 sm:grid-cols-3">
+ <StatChip label="Espaces" value={`${featuredTraiteurSpaces.length}`} />
+ <StatChip label="Références" value={`${featuredTraiteurSpaces.reduce((sum, space) => sum + space.menuItems.length, 0)}`} />
+ <StatChip label="Prix dès" value={formatEuro(Math.min(...featuredTraiteurSpaces.flatMap((space) => space.menuItems.map((item) => item.price))))} />
+ </div>
+ </div>
+
+ <div className="mt-7 grid gap-4 lg:grid-cols-2">
+ {featuredTraiteurSpaces.map((space) => (
+ <article key={space.slug} className="overflow-hidden rounded-[1.75rem] border border-primary/20 bg-[#fffaf4] shadow-soft">
+ <div className={`bg-gradient-to-br ${space.gradient} p-5 text-white`}>
+ <div className="flex flex-wrap gap-2">
+ <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-[0.16em]">
+ {space.offer}
+ </span>
+ <span className="rounded-full border border-white/25 px-3 py-1 text-xs font-black uppercase tracking-[0.16em]">
+ {space.zone}
+ </span>
+ </div>
+ <div className="mt-5 grid gap-5 md:grid-cols-[1fr_180px]">
+ <div>
+ <p className="text-xs font-black uppercase tracking-[0.22em] text-white/75">Espace dédié</p>
+ <h3 className="mt-2 text-3xl font-black tracking-tight">{space.name}</h3>
+ <p className="mt-3 text-sm leading-6 text-white/90">{space.description}</p>
+ </div>
+ <div className="overflow-hidden rounded-[1.4rem] border border-white/15 bg-white/10 p-2">
+ {space.heroImage ? (
+ <img src={space.heroImage} alt={space.name} className="h-full min-h-[170px] w-full rounded-[1rem] object-cover" />
+ ) : (
+ <div className="flex min-h-[170px] items-center justify-center rounded-[1rem] bg-white/10">
+ <Sparkles className="h-10 w-10 text-white" />
+ </div>
+ )}
+ </div>
+ </div>
+ </div>
+
+ <div className="p-5">
+ <div className="grid gap-3 sm:grid-cols-2">
+ <StatChip label="À partir de" value={formatEuro(space.startingAt)} />
+ <StatChip label="Panier moyen" value={formatEuro(space.averageTicket)} />
+ </div>
+
+ <div className="mt-4 flex flex-wrap gap-2">
+ {space.highlights.slice(0, 4).map((item) => (
+ <span key={item} className="rounded-full border border-primary/20 bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">
+ {item}
+ </span>
+ ))}
+ </div>
+
+ <div className="mt-5 space-y-2">
+ {space.menuItems.slice(0, 3).map((item) => (
+ <div key={item.name} className="overflow-hidden rounded-2xl border border-primary/20 bg-white shadow-sm">
+ <div className="flex gap-3 p-3">
+ {item.image ? (
+ <img
+ src={item.image}
+ alt={item.name}
+ className="h-20 w-20 shrink-0 rounded-2xl object-cover"
+ loading="lazy"
+ />
+ ) : (
+ <div className="h-20 w-20 shrink-0 rounded-2xl bg-[#fff3e5]" />
+ )}
+ <div className="min-w-0 flex-1">
+ <p className="font-black text-[#2a190f]">{item.name}</p>
+ <p className="mt-1 text-sm text-stone-600">{item.description}</p>
+ <div className="mt-2 flex flex-wrap items-center gap-2">
+ <span className="rounded-full border border-primary/20 bg-[#fffaf3] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#7c2d12]">
+ {item.category}
+ </span>
+ {item.featured && (
+ <span className="rounded-full bg-[#ecfeff] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#0f766e]">
+ Signature
+ </span>
+ )}
+ </div>
+ </div>
+ <strong className="shrink-0 text-lg font-black text-[hsl(var(--primary))]">{formatEuro(item.price)}</strong>
+ </div>
+ </div>
+ ))}
+ </div>
+
+ <div className="mt-5 flex flex-wrap gap-3">
+ <a
+ href={buildTraiteurSpaceLink(baseUrl, space.slug)}
+ className="inline-flex items-center justify-center gap-2 rounded-full bg-[hsl(var(--primary))] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/20 transition hover:-translate-y-0.5"
+ >
+ Ouvrir la vitrine <ArrowRight className="h-4 w-4" />
+ </a>
+ <a
+ href={buildCustomerSpaceLink(baseUrl, space.slug)}
+ className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/20 bg-white px-4 py-2 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5"
+ >
+ Commander
+ </a>
+ </div>
+ </div>
+ </article>
+ ))}
+ </div>
+ </div>
+ </section>
+
+ <section id="catalogue" className="bg-[#fffdf8] py-14">
+ <div className="mx-auto max-w-7xl px-4">
+ <div className="flex flex-col gap-5 rounded-[2.25rem] border border-primary/20 bg-white p-5 shadow-soft lg:flex-row lg:items-end lg:justify-between lg:p-7">
+ <SectionTitle
+ eyebrow="Catalogue"
+ title="Choisir vite, commander clair."
+ text="Parcours client prioritaire: produits visibles, ajout au panier, validation."
+ />
+ <div className="flex flex-wrap gap-3">
+ <button
+ type="button"
+ onClick={() => gotoCustomer()}
+ className="inline-flex w-fit items-center gap-2 rounded-full bg-[hsl(var(--primary))] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-orange-500/25"
+ >
+ Commander maintenant <ShoppingBag className="h-5 w-5" />
+ </button>
+ <a
+ href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Bonjour DELIKREOL, j’ai besoin d’aide pour choisir une offre.')}`}
+ className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-[#7c2d12] shadow-sm"
+ >
+ Besoin d’aide
+ </a>
+ </div>
+ </div>
+
+ <div className="mt-8 grid gap-4 rounded-[2rem] border border-primary/20 bg-[#24170f] p-4 shadow-elegant lg:grid-cols-[1fr_220px_220px_220px]">
+ <label className="relative block">
+ <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[hsl(var(--primary))]" />
+ <input
+ value={query}
+ onChange={(event) => setQuery(event.target.value)}
+ placeholder="Rechercher un plat, un traiteur, un produit ou une commune"
+ className="w-full rounded-2xl border border-white/10 bg-white py-4 pl-12 pr-4 text-sm font-black text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
+ />
+ </label>
+ <Select value={communeFilter} onChange={setCommuneFilter}>
+ <option value="Tous">Selon votre adresse / position</option>
+ {serviceZones.map((zone) => (
+ <option key={zone} value={zone}>
+ Fallback commune : {zone}
+ </option>
+ ))}
+ </Select>
+ <Select value={budgetFilter} onChange={setBudgetFilter}>
+ {budgetRanges.map((range) => (
+ <option key={range} value={range}>
+ {range}
+ </option>
+ ))}
+ </Select>
+ <button
+ type="button"
+ onClick={askCustomerPosition}
+ disabled={geoStatus ==='loading'}
+ className="rounded-2xl border border-white/10 bg-white px-4 py-3 text-sm font-black text-[#2a190f] transition hover:-translate-y-0.5 disabled:opacity-60"
+ >
+ {customerLocation ?'Position validée' : pendingCustomerLocation ?'Valider position' : geoStatus ==='loading' ?'Localisation...' :'Me géolocaliser'}
+ </button>
+ </div>
+ <p className="mt-3 text-sm font-semibold text-stone-600">
+ La livraison est calculée autour de chaque partenaire avec son rayon réel. La commune sert seulement de fallback si la position manque.
+ </p>
+ {geoConsentState ==='ask' && (
+ <div className="mt-4 rounded-2xl border border-primary/20 bg-[#fff8ef] p-4">
+ <p className="text-sm font-black text-[#7c2d12]">Souhaitez-vous être géolocalisé et affiché sur la carte ?</p>
+ <div className="mt-3 flex flex-wrap gap-2">
+ <button
+ type="button"
+ onClick={useCustomerPosition}
+ disabled={geoStatus ==='loading'}
+ className="rounded-xl bg-[hsl(var(--primary))] px-4 py-2 text-sm font-black text-white disabled:opacity-60"
+ >
+ Oui, autoriser
+ </button>
+ <button
+ type="button"
+ onClick={cancelCustomerPositionConsent}
+ className="rounded-xl border border-primary/20 bg-white px-4 py-2 text-sm font-black text-[#7c2d12]"
+ >
+ Non, merci
+ </button>
+ </div>
+ </div>
+ )}
+ {customerMapPreviewLocation && (
+ <div className="mt-4 overflow-hidden rounded-2xl border border-primary/20">
+ <MapContainer center={[customerMapPreviewLocation.lat, customerMapPreviewLocation.lng]} zoom={16} scrollWheelZoom={false} className="h-52 w-full">
+ <TileLayer
+ attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+ url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+ />
+ <CircleMarker
+ center={[customerMapPreviewLocation.lat, customerMapPreviewLocation.lng]}
+ radius={8}
+ pathOptions={{ color:'hsl(var(--primary))', fillColor:'hsl(var(--primary))', fillOpacity: 0.9 }}
+ >
+ <Popup>Votre position</Popup>
+ </CircleMarker>
+ </MapContainer>
+ {pendingCustomerLocation && (
+ <div className="grid grid-cols-1 gap-2 border-t border-primary/20 bg-primary/[0.05] p-3 sm:grid-cols-2">
+ <button
+ type="button"
+ onClick={confirmPendingCustomerPosition}
+ className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-black text-white"
+ >
+ Valider ma position
+ </button>
+ <button
+ type="button"
+ onClick={rejectPendingCustomerPosition}
+ className="rounded-xl border border-success/30 bg-white px-4 py-2 text-sm font-black text-success"
+ >
+ Rejeter
+ </button>
+ </div>
+ )}
+ </div>
+ )}
+
+ <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+ {categoryOptions.slice(0, 12).map((category) => {
+ const active = categoryFilter === category;
+ return (
+ <button
+ key={category}
+ onClick={() => setCategoryFilter(category)}
+ className={`shrink-0 rounded-xl border px-4 py-2 text-sm font-black transition ${
+ active
+ ?'border-transparent bg-[hsl(var(--primary))] text-white shadow-lg shadow-orange-500/20'
+ :'border-primary/20 bg-white text-[#7c2d12] hover:-translate-y-0.5'
+ }`}
+ >
+ {category}
+ </button>
+ );
+ })}
+ </div>
+
+ <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+ <div>
+ {loading && <EmptyState title="Catalogue en chargement" text="Les offres apparaîtront dès que les partenaires publiés sont récupérés." />}
+ {error && <EmptyState title="Catalogue indisponible" text={error} />}
+ {!loading && !error && filteredProductsUniqueImages.length === 0 && (
+ <EmptyState
+ title="Aucune offre visible avec ces filtres"
+ text="Affinez la commune, la catégorie ou le budget. Vous pouvez aussi demander une orientation immédiate."
+ action={supportLink}
+ />
+ )}
+
+ {filteredProductsUniqueImages.length > 0 && (
+ <>
+ <div className="mb-4 flex items-center justify-between gap-3">
+ <p className="text-sm font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Sélection en vedette</p>
+ <span className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">{featuredProducts.length} cartes</span>
+ </div>
+ <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+ {featuredProducts.map((product) => (
+ <ProductCard key={`featured-${product.id}`} product={product} onAdd={() => addToSelection(product)} compact />
+ ))}
+ </div>
+
+ <div id="commande" className="mt-8 scroll-mt-28 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+ <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+ {standardProducts.map((product) => (
+ <ProductCard key={product.id} product={product} onAdd={() => addToSelection(product)} />
+ ))}
+ </div>
+ <SelectionPanel
+ products={selectedProducts}
+ summary={selectionEconomics}
+ supportLink={supportLink}
+ partnerDispatchLink={partnerDispatchLink}
+ driverMissionLink={driverMissionLink}
+ vendorMessage={vendorMessage}
+ driverMessage={driverMessage}
+ copyStatus={copyStatus}
+ customerName={customerName}
+ customerPhone={customerPhone}
+ deliveryAddress={deliveryAddress}
+ deliveryNotes={deliveryNotes}
+ deliverySlot={deliverySlot}
+ customerLocation={customerLocation}
+ geoStatus={geoStatus}
+ geoConsentState={geoConsentState}
+ geoError={geoError}
+ pendingCustomerLocation={pendingCustomerLocation}
+ fulfillmentMode={fulfillmentMode}
+ paymentMethod={paymentMethod}
+ vendorAvailabilityStatus={vendorAvailabilityStatus}
+ notificationPermission={notificationPermission}
+ notificationPrefs={notificationPrefs}
+ orderConfirmed={orderConfirmed}
+ checkoutStatus={checkoutStatus}
+ supabasePaused={supabasePaused}
+ supabasePausedHint={supabasePausedHint}
+ onCustomerNameChange={setCustomerName}
+ onCustomerPhoneChange={setCustomerPhone}
+ onDeliveryAddressChange={setDeliveryAddress}
+ onDeliveryNotesChange={setDeliveryNotes}
+ onDeliverySlotChange={setDeliverySlot}
+ onCustomerPositionRequest={askCustomerPosition}
+ onConfirmCustomerPosition={useCustomerPosition}
+ onCancelCustomerPosition={cancelCustomerPositionConsent}
+ onValidatePendingCustomerPosition={confirmPendingCustomerPosition}
+ onRejectPendingCustomerPosition={rejectPendingCustomerPosition}
+ onFulfillmentModeChange={setFulfillmentMode}
+ onPaymentMethodChange={setPaymentMethod}
+ onVendorAvailabilityStatusChange={setVendorAvailabilityStatus}
+ onCopyVendorMessage={() => copyOperationalMessage(vendorMessage,'Message vendeur')}
+ onCopyDriverMessage={() => copyOperationalMessage(driverMessage,'Mission livreur')}
+ onNotificationPreferenceChange={(key, value) => setNotificationPrefs((current) => ({ ...current, [key]: value }))}
+ onRequestNotifications={requestNotifications}
+ onDownloadPdf={handleDownloadOrderPdf}
+ onConfirmOrder={handleCheckout}
+ onWhatsAppFallback={handleWhatsAppCheckoutFallback}
+ onRemove={removeFromSelection}
+ onClear={clearSelection}
+ deliveryCoverageStatus={deliveryCoverage.status}
+ deliveryCoverageMessage={deliveryCoverage.message}
+ orderTrackingUrl={
+ checkoutStatus.orderNumber
+ ? `${orderStatusBaseUrl}&order=${encodeURIComponent(checkoutStatus.orderNumber)}`
+ : orderStatusBaseUrl
+ }
+ />
+ </div>
+ </>
+ )}
+ </div>
+
+ <aside className="rounded-[1.75rem] border border-primary/20 bg-white p-5 shadow-soft">
+ <p className="text-xs font-black uppercase tracking-[0.22em] text-[hsl(var(--primary))]">Fiche produit</p>
+ <h3 className="mt-2 text-2xl font-black text-[#2a190f]">Lecture rapide</h3>
+ <p className="mt-2 text-sm leading-6 text-stone-600">
+ Chaque fiche montre l’essentiel: nom du plat, prix, vendeur, rayon de livraison et bouton direct pour commander.
+ </p>
+ {heroProduct ? (
+ <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-primary/20">
+ <div className="aspect-[4/3] bg-[#fff2e6]">
+ {heroProduct.image_url ? (
+ <img src={heroProduct.image_url} alt={heroProduct.name} className="h-full w-full object-cover brightness-110 contrast-110 saturate-110" />
+ ) : (
+ <HeroFallback name={heroProduct.name} />
+ )}
+ </div>
+ <div className="space-y-3 p-4">
+ <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">
+ <BadgeCheck className="h-4 w-4" />
+ partenaire visible
+ </div>
+ <h4 className="text-xl font-black text-[#2a190f]">{heroProduct.name}</h4>
+ <p className="text-sm text-stone-600">{heroProduct.vendor_name}</p>
+ <div className="grid gap-2 text-sm text-stone-600">
+ <InfoLine label="Couverture" value={`Livraison autour du partenaire - ${heroProduct.vendor_delivery_radius_km} km`} />
+ <InfoLine label="Prix" value={formatPrice(heroProduct.price)} />
+ <InfoLine label="Service" value="Retrait / livraison selon adresse client" />
+ <InfoLine label="Disponibilité" value={heroProduct.available ?'Disponible' :'À confirmer'} />
+ </div>
+ <button type="button" onClick={() => addToSelection(heroProduct)} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[hsl(var(--primary))] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white">
+ Ajouter et commander
+ </button>
+ </div>
+ </div>
+ ) : (
+ <div className="mt-5 rounded-[1.5rem] border border-dashed border-primary/20 bg-primary/[0.05]/60 p-6 text-sm text-stone-600">
+ Aucune fiche produit active pour le moment. Les prochaines offres publiées apparaîtront ici.
+ </div>
+ )}
+ </aside>
+ </div>
+ </div>
+ </section>
+
+ <section id="zones" className="mx-auto max-w-7xl px-4 py-10">
+ <details className="rounded-[1.75rem] border border-primary/20 bg-white p-5 shadow-soft">
+ <summary className="cursor-pointer text-sm font-black uppercase tracking-[0.16em] text-[#7c2d12]">
+ Voir les zones, la carte et les partenaires pilotes
+ </summary>
+ <div className="mt-6 island-map-surface rounded-[2rem] border border-primary/20 p-5 lg:p-8">
+ <SectionTitle
+ eyebrow="Zones desservies"
+ title="Une carte locale claire."
+ text="La couverture se base sur la position de chaque partenaire et son rayon de livraison. La commune reste un repère de secours."
+ />
+ <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+ {serviceZones.slice(0, 8).map((zone) => (
+ <ZoneCard key={zone} zone={zone} />
+ ))}
+ </div>
+ <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+ {highlightedVendors.map((vendor) => (
+ <VendorCard key={vendor.id} vendor={vendor} />
+ ))}
+ </div>
+ <div className="mt-8 overflow-hidden rounded-[1.5rem] border border-primary/20 bg-white">
+ <div className="border-b border-primary/20 bg-[#fff8ef] p-4">
+ <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Carte interactive</p>
+ <p className="mt-1 text-sm text-stone-600">
+ Bleu: vendeur (rayon 3 km). Vert: client en zone. Rouge: client hors zone. Violet: livreur pilote. Orange: point relais.
+ </p>
+ </div>
+ <MapContainer
+ center={
+ customerLocation
+ ? [customerLocation.lat, customerLocation.lng]
+ : [mapVendors[0]?.latitude ?? defaultMapCenter[0], mapVendors[0]?.longitude ?? defaultMapCenter[1]]
+ }
+ zoom={13}
+ scrollWheelZoom={false}
+ className="h-[420px] w-full"
+ >
+ <TileLayer
+ attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+ url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+ />
+
+ {mapVendors.map((vendor) => (
+ <Fragment key={vendor.id}>
+ <Circle
+ center={[vendor.latitude, vendor.longitude]}
+ radius={vendor.deliveryRadiusKm * 1000}
+ pathOptions={{ color:'#1d4ed8', fillColor:'#60a5fa', fillOpacity: 0.1, weight: 2 }}
+ />
+ <CircleMarker
+ center={[vendor.latitude, vendor.longitude]}
+ radius={8}
+ pathOptions={{ color:'#1d4ed8', fillColor:'#1d4ed8', fillOpacity: 0.95 }}
+ >
+ <Popup>
+ <strong>{vendor.name}</strong>
+ <br />
+ Rayon: {vendor.deliveryRadiusKm} km
+ <br />
+ {vendor.status ==='in_zone' ?'Client dans la zone' : vendor.status ==='out_zone' ?'Client hors zone' :'Position client non confirmée'}
+ </Popup>
+ </CircleMarker>
+ </Fragment>
+ ))}
+
+ {pointsRelais.slice(0, 6).map((relay) => (
+ <CircleMarker
+ key={`relay-${relay.id}`}
+ center={[relay.lat, relay.lng]}
+ radius={7}
+ pathOptions={{ color:'#ea580c', fillColor:'hsl(var(--primary))', fillOpacity: 0.9 }}
+ >
+ <Popup>
+ <strong>{relay.name}</strong>
+ <br />
+ Point relais
+ <br />
+ {relay.adresse}
+ </Popup>
+ </CircleMarker>
+ ))}
+
+ {pilotDrivers.map((driver) => (
+ <CircleMarker
+ key={driver.id}
+ center={[driver.latitude, driver.longitude]}
+ radius={7}
+ pathOptions={{ color:'#7c3aed', fillColor:'#8b5cf6', fillOpacity: 0.95 }}
+ >
+ <Popup>
+ <strong>{driver.name}</strong>
+ <br />
+ Livreur pilote
+ </Popup>
+ </CircleMarker>
+ ))}
+
+ {customerLocation && (
+ <CircleMarker
+ center={[customerLocation.lat, customerLocation.lng]}
+ radius={9}
+ pathOptions={{
+ color: mapVendors.some((vendor) => vendor.status ==='in_zone') ?'#059669' :'#dc2626',
+ fillColor: mapVendors.some((vendor) => vendor.status ==='in_zone') ?'#10b981' :'#ef4444',
+ fillOpacity: 1,
+ }}
+ >
+ <Popup>
+ <strong>Votre position</strong>
+ <br />
+ {mapVendors.some((vendor) => vendor.status ==='in_zone')
+ ?'Vous êtes dans au moins une zone de livraison'
+ :'Hors zone actuelle des vendeurs'}
+ </Popup>
+ </CircleMarker>
+ )}
+ </MapContainer>
+ </div>
+ </div>
+ </details>
+ </section>
+
+ <section id="pro" className="mx-auto max-w-7xl px-4 pb-10">
+ <div className="rounded-[1.75rem] border border-primary/20 bg-white p-5 shadow-soft">
+ <p className="text-xs font-black uppercase tracking-[0.16em] text-[#7c2d12]">Accès séparé</p>
+ <h3 className="mt-2 text-2xl font-black text-[#2a190f]">Espace pro DELIKREOL</h3>
+ <p className="mt-2 text-sm text-stone-600">
+ Le portail partenaire et opérationnel est séparé de l’espace client. Aucun contenu admin n’est affiché ici.
+ </p>
+ <div className="mt-4 flex flex-wrap gap-3">
+ <a
+ href={proSpaceUrl}
+ className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[hsl(var(--primary))] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white"
+ >
+ Ouvrir espace pro <ChevronRight className="h-4 w-4" />
+ </a>
+ <a
+ href={partnerLink}
+ className="inline-flex items-center justify-center gap-2 rounded-2xl border border-primary/20 bg-white px-5 py-3 text-sm font-black text-[#7c2d12]"
+ >
+ Inscription partenaire
+ </a>
+ </div>
+ </div>
+ </section>
+
+ <section id="faq" className="bg-white py-10">
+ <div className="mx-auto max-w-7xl px-4">
+ <details className="rounded-[1.75rem] border border-primary/20 bg-[#fff8ef] p-5 shadow-soft">
+ <summary className="cursor-pointer text-sm font-black uppercase tracking-[0.16em] text-[#7c2d12]">
+ Questions fréquentes (ouvrir)
+ </summary>
+ <div className="mt-5">
+ <SectionTitle
+ eyebrow="FAQ"
+ title="Les questions qui déclenchent la conversion."
+ text="Chaque réponse lève une objection simple: confiance, zone, disponibilité et commande."
+ />
+ <div className="mt-6 grid gap-4 lg:grid-cols-2">
+ {faqItems.map((item) => (
+ <FaqItem key={item.question} {...item} />
+ ))}
+ </div>
+ </div>
+ </details>
+ </div>
+ </section>
+
+ <section id="contact" className="mx-auto max-w-7xl px-4 py-14">
+ <div className="grid gap-4 rounded-[1.75rem] border border-primary/20 bg-[linear-gradient(135deg,_#24170f_0%,_#392115_52%,_hsl(var(--primary))_180%)] p-6 text-white lg:grid-cols-[1.1fr_0.9fr] lg:p-8">
+ <div>
+ <p className="text-xs font-black uppercase tracking-[0.24em] text-primary/60">Contact / WhatsApp</p>
+ <h2 className="mt-3 text-3xl font-black sm:text-5xl">Une réponse rapide, directe, locale.</h2>
+ <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-200 sm:text-base sm:leading-7">
+ En cas de doute, l’utilisateur peut joindre DELIKREOL immédiatement. La commande principale reste enregistrée dans l’application.
+ </p>
+ </div>
+ <div className="grid gap-3">
+ <a href={supportLink} className="rounded-2xl bg-white px-5 py-4 text-center font-black text-[#24170f]">
+ Besoin d’aide
+ </a>
+ <a href="#pro" className="rounded-2xl border border-white/20 px-5 py-4 text-center font-black text-white">
+ Accès partenaires & entreprises
+ </a>
+ <div className="rounded-2xl bg-white/10 px-5 py-4 text-sm leading-6 text-stone-100">
+ Email: <span className="font-bold">{operationsEmail}</span>
+ <br />
+ Frais de livraison: <span className="font-bold">selon distance et rayon partenaire</span>
+ <br />
+ Minimum de commande: <span className="font-bold">confirmé avant paiement</span>
+ </div>
+ </div>
+ </div>
+ </section>
+ </main>
+
+ <footer className="border-t border-primary/20 bg-[#fff9f3]">
+ <div className="mx-auto grid max-w-7xl gap-6 px-4 py-10 lg:grid-cols-[1.1fr_0.9fr_0.9fr]">
+ <div className="space-y-4">
+ <div className="flex items-center gap-3">
+ <img src={`${baseUrl}branding/logo-mark.svg`} alt="DELIKREOL" className="h-10 w-10 rounded-2xl bg-white p-1.5 shadow-sm" />
+ <div>
+ <p className="font-black text-[#2a190f]">DELIKREOL</p>
+ <p className="text-sm text-stone-500">Plateforme locale premium en Martinique</p>
+ </div>
+ </div>
+ <p className="max-w-xl text-sm leading-6 text-stone-600">
+ DELIKREOL est prioritairement une plateforme de commande locale: catalogue visuel, panier simple et confirmation rapide sur mobile.
+ </p>
+ </div>
+ <FooterBlock title="Couverture partenaires">
+ {serviceZones.slice(0, 6).map((zone) => (
+ <FooterLink key={zone} label={zone} />
+ ))}
+ <FooterLink label="Rayon réel par partenaire" />
+ <FooterLink label="Fallback commune si géoloc absente" />
+ <FooterLink label="Entreprise / devis" />
+ </FooterBlock>
+ <FooterBlock title="Liens utiles">
+ <FooterLink label="CGV" />
+ <FooterLink label="Mentions légales" />
+ <FooterLink label="Confidentialité" />
+ <a href={proSpaceUrl} className="block text-sm font-bold text-[#7c2d12]">
+ Espace pro DELIKREOL
+ </a>
+ <a href={whatsappBase} className="inline-flex items-center gap-2 text-sm font-bold text-[#7c2d12]">
+ WhatsApp <MessageCircle className="h-4 w-4" />
+ </a>
+ </FooterBlock>
+ </div>
+ </footer>
+
+ <div data-testid="mobile-cart-bar" className="fixed inset-x-4 bottom-4 z-50 md:hidden">
+ <div className="rounded-[1.5rem] border border-primary/20 bg-white p-3 shadow-2xl shadow-orange-900/20">
+ <div className="flex items-center gap-3">
+ <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#fff3e5] text-[hsl(var(--primary))]">
+ <ShoppingBag className="h-6 w-6" />
+ </div>
+ <div className="min-w-0 flex-1">
+ <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">
+ {selectedProducts.length > 0 ? `${selectedProducts.length} article(s)` :'Panier vide'}
+ </p>
+ <p className="truncate text-sm font-bold text-[#2a190f]">
+ {selectedProducts.length > 0
+ ? `${formatPrice(selectionEconomics.subtotal_produits)} hors livraison`
+ :'Ajoute un produit pour activer la commande'}
+ </p>
+ </div>
+ <button
+ type="button"
+ onClick={selectedProducts.length > 0 ? scrollToCheckoutPanel : () => gotoCustomer()}
+ className="inline-flex items-center justify-center rounded-2xl bg-[hsl(var(--primary))] px-4 py-3 text-sm font-black text-white"
+ >
+ {selectedProducts.length > 0 ?'Voir panier' :'Commander'}
+ </button>
+ </div>
+ <div className="mt-3 grid grid-cols-2 gap-2">
+ <button
+ type="button"
+ onClick={() => gotoCustomer()}
+ className="inline-flex items-center justify-center rounded-2xl border border-primary/20 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]"
+ >
+ Catalogue
+ </button>
+ <a href={supportLink} className="inline-flex items-center justify-center rounded-2xl border border-primary/20 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]">
+ Aide
+ </a>
+ </div>
+ </div>
+ </div>
+
+ <a
+ href={whatsappBase}
+ className="fixed bottom-5 right-5 z-50 hidden items-center gap-2 rounded-full bg-[#25D366] px-4 py-3 text-sm font-black text-white shadow-2xl shadow-green-500/30 md:inline-flex"
+ >
+ WhatsApp <MessageCircle className="h-5 w-5" />
+ </a>
+ </div>
+ );
 }
 
 function BadgeRow() {
-  return (
-    <div className="flex flex-wrap gap-2">
-      <span className="rounded-lg border border-orange-200 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))] shadow-sm">
-        plateforme locale premium
-      </span>
-      <span className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-800">
-        pensée pour la Martinique
-      </span>
-    </div>
-  );
+ return (
+ <div className="flex flex-wrap gap-2">
+ <span className="rounded-lg border border-primary/20 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))] shadow-sm">
+ plateforme locale premium
+ </span>
+ <span className="rounded-lg border border-success/20 bg-success/[0.15] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-success">
+ pensée pour la Martinique
+ </span>
+ </div>
+ );
 }
 
 function InfoLine({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-start justify-between gap-4 rounded-2xl bg-white px-4 py-3">
-      <span className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">{label}</span>
-      <span className="text-right text-sm font-semibold text-[#2a190f]">{value}</span>
-    </div>
-  );
+ return (
+ <div className="flex items-start justify-between gap-4 rounded-2xl bg-white px-4 py-3">
+ <span className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">{label}</span>
+ <span className="text-right text-sm font-semibold text-[#2a190f]">{value}</span>
+ </div>
+ );
 }
 
 function TrustCard({ label }: { label: string }) {
-  return (
-    <div className="rounded-[1.4rem] border border-white/20 bg-white/92 px-4 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-[#7c2d12] shadow-soft backdrop-blur">
-      {label}
-    </div>
-  );
+ return (
+ <div className="rounded-[1.4rem] border border-white/20 bg-white/92 px-4 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-[#7c2d12] shadow-soft backdrop-blur">
+ {label}
+ </div>
+ );
 }
 
 function GapMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-[1.35rem] border border-orange-100 bg-[#fffaf4] p-4">
-      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">{label}</p>
-      <p className="mt-2 text-lg font-black text-[#2a190f]">{value}</p>
-    </div>
-  );
+ return (
+ <div className="rounded-[1.35rem] border border-primary/20 bg-[#fffaf4] p-4">
+ <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">{label}</p>
+ <p className="mt-2 text-lg font-black text-[#2a190f]">{value}</p>
+ </div>
+ );
 }
 
 function ZoneCard({ zone }: { zone: string }) {
-  return (
-    <div className="rounded-[1.6rem] border border-white/70 bg-white/88 px-4 py-4 shadow-soft backdrop-blur">
-      <div className="flex items-center gap-2">
-        <span className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--primary))] shadow-[0_0_0_5px_rgba(217,95,45,0.12)]" />
-        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">commune</p>
-      </div>
-      <p className="mt-3 text-base font-black text-[#2a190f]">{zone}</p>
-      <p className="mt-1 text-xs leading-5 text-stone-500">Fallback commune si aucune position client n’est disponible.</p>
-    </div>
-  );
+ return (
+ <div className="rounded-[1.6rem] border border-white/70 bg-white/88 px-4 py-4 shadow-soft backdrop-blur">
+ <div className="flex items-center gap-2">
+ <span className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--primary))] shadow-[0_0_0_5px_rgba(217,95,45,0.12)]" />
+ <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-400">commune</p>
+ </div>
+ <p className="mt-3 text-base font-black text-[#2a190f]">{zone}</p>
+ <p className="mt-1 text-xs leading-5 text-stone-500">Fallback commune si aucune position client n’est disponible.</p>
+ </div>
+ );
 }
 
 function ValueCard({ title, text, icon: Icon }: { title: string; text: string; icon: ComponentType<{ className?: string }> }) {
-  return (
-    <div className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-soft">
-      <div className="inline-flex rounded-2xl bg-[#fff3e5] p-3 text-[hsl(var(--primary))]">
-        <Icon className="h-5 w-5" />
-      </div>
-      <h3 className="mt-4 text-xl font-black text-[#2a190f]">{title}</h3>
-      <p className="mt-2 text-sm leading-6 text-stone-600">{text}</p>
-    </div>
-  );
+ return (
+ <div className="rounded-[1.75rem] border border-primary/20 bg-white p-6 shadow-soft">
+ <div className="inline-flex rounded-2xl bg-[#fff3e5] p-3 text-[hsl(var(--primary))]">
+ <Icon className="h-5 w-5" />
+ </div>
+ <h3 className="mt-4 text-xl font-black text-[#2a190f]">{title}</h3>
+ <p className="mt-2 text-sm leading-6 text-stone-600">{text}</p>
+ </div>
+ );
 }
 
 function RoleCard({
-  title,
-  text,
-  cta,
-  href,
-  icon: Icon,
+ title,
+ text,
+ cta,
+ href,
+ icon: Icon,
 }: {
-  title: string;
-  text: string;
-  cta: string;
-  href: string;
-  icon: ComponentType<{ className?: string }>;
+ title: string;
+ text: string;
+ cta: string;
+ href: string;
+ icon: ComponentType<{ className?: string }>;
 }) {
-  return (
-    <article className="rounded-[1.9rem] border border-orange-100 bg-[#fffaf4] p-5 shadow-soft transition hover:-translate-y-1 hover:bg-white hover:shadow-elegant">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h3 className="text-xl font-black text-[#2a190f]">{title}</h3>
-          <p className="mt-2 text-sm leading-6 text-stone-600">{text}</p>
-        </div>
-        <span className="rounded-2xl bg-[#fff3e5] p-3 text-[hsl(var(--primary))]">
-          <Icon className="h-5 w-5" />
-        </span>
-      </div>
-      <a href={href} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]">
-        {cta} <ChevronRight className="h-4 w-4" />
-      </a>
-    </article>
-  );
+ return (
+ <article className="rounded-[1.9rem] border border-primary/20 bg-[#fffaf4] p-5 shadow-soft transition hover:-translate-y-1 hover:bg-white hover:shadow-elegant">
+ <div className="flex items-start justify-between gap-3">
+ <div>
+ <h3 className="text-xl font-black text-[#2a190f]">{title}</h3>
+ <p className="mt-2 text-sm leading-6 text-stone-600">{text}</p>
+ </div>
+ <span className="rounded-2xl bg-[#fff3e5] p-3 text-[hsl(var(--primary))]">
+ <Icon className="h-5 w-5" />
+ </span>
+ </div>
+ <a href={href} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-primary/20 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]">
+ {cta} <ChevronRight className="h-4 w-4" />
+ </a>
+ </article>
+ );
 }
 
 function StepCard({ index, title, text }: { index: number; title: string; text: string }) {
-  return (
-    <div className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-soft">
-      <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[hsl(var(--primary))] text-sm font-black text-white">{index}</div>
-      <h3 className="mt-4 text-xl font-black text-[#2a190f]">{title}</h3>
-      <p className="mt-2 text-sm leading-6 text-stone-600">{text}</p>
-    </div>
-  );
+ return (
+ <div className="rounded-[1.75rem] border border-primary/20 bg-white p-6 shadow-soft">
+ <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[hsl(var(--primary))] text-sm font-black text-white">{index}</div>
+ <h3 className="mt-4 text-xl font-black text-[#2a190f]">{title}</h3>
+ <p className="mt-2 text-sm leading-6 text-stone-600">{text}</p>
+ </div>
+ );
 }
 
 function ProductCard({
-  product,
-  onAdd,
-  compact = false,
+ product,
+ onAdd,
+ compact = false,
 }: {
-  product: PublicCatalogProduct;
-  onAdd: () => void;
-  compact?: boolean;
+ product: PublicCatalogProduct;
+ onAdd: () => void;
+ compact?: boolean;
 }) {
-  return (
-    <article className="premium-card group overflow-hidden rounded-[2rem] border border-orange-100 bg-white shadow-soft transition hover:-translate-y-1 hover:shadow-2xl">
-      <div className={`${compact ? 'aspect-[16/11]' : 'aspect-[4/3]'} relative bg-[#fff4e7]`}>
-        {product.image_url ? (
-          <img
-            src={product.image_url}
-            alt={product.name}
-            className="h-full w-full object-cover brightness-110 contrast-110 saturate-110 transition duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <HeroFallback name={product.name} />
-        )}
-        <div className="absolute left-3 top-3 rounded-full bg-white/92 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-emerald-700 shadow-lg">
-          {product.available ? 'Disponible' : 'À confirmer'}
-        </div>
-      </div>
-      <div className="space-y-4 p-4 sm:p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h3 className={`${compact ? 'text-lg' : 'text-xl'} font-black text-[#2a190f]`}>{product.name}</h3>
-            <p className="mt-1 text-sm font-semibold text-stone-500">{product.vendor_name}</p>
-          </div>
-          <strong className={`${compact ? 'text-xl' : 'text-2xl'} whitespace-nowrap font-black text-[#2a190f]`}>{formatPrice(product.price)}</strong>
-        </div>
-        <div className="grid grid-cols-2 gap-2 text-xs font-black uppercase tracking-[0.14em]">
-          <span className="rounded-2xl bg-[#fff4e7] px-3 py-2 text-[#7c2d12]">Rayon {product.vendor_delivery_radius_km} km</span>
-          <span className="rounded-2xl bg-emerald-50 px-3 py-2 text-emerald-700">Selon position</span>
-        </div>
-        <button
-          data-testid="add-to-cart"
-          type="button"
-          onClick={onAdd}
-          disabled={product.price == null}
-          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[hsl(var(--primary))] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-orange-500/20 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {product.price == null ? 'Prix à confirmer' : 'Ajouter au panier'}
-          <ArrowRight className="h-4 w-4" />
-        </button>
-      </div>
-    </article>
-  );
+ return (
+ <article className="premium-card group overflow-hidden rounded-[2rem] border border-primary/20 bg-white shadow-soft transition hover:-translate-y-1 hover:shadow-2xl">
+ <div className={`${compact ?'aspect-[16/11]' :'aspect-[4/3]'} relative bg-[#fff4e7]`}>
+ {product.image_url ? (
+ <img
+ src={product.image_url}
+ alt={product.name}
+ className="h-full w-full object-cover brightness-110 contrast-110 saturate-110 transition duration-500 group-hover:scale-105"
+ />
+ ) : (
+ <HeroFallback name={product.name} />
+ )}
+ <div className="absolute left-3 top-3 rounded-full bg-white/92 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-success shadow-lg">
+ {product.available ?'Disponible' :'À confirmer'}
+ </div>
+ </div>
+ <div className="space-y-4 p-4 sm:p-5">
+ <div className="flex items-start justify-between gap-3">
+ <div>
+ <h3 className={`${compact ?'text-lg' :'text-xl'} font-black text-[#2a190f]`}>{product.name}</h3>
+ <p className="mt-1 text-sm font-semibold text-stone-500">{product.vendor_name}</p>
+ </div>
+ <strong className={`${compact ?'text-xl' :'text-2xl'} whitespace-nowrap font-black text-[#2a190f]`}>{formatPrice(product.price)}</strong>
+ </div>
+ <div className="grid grid-cols-2 gap-2 text-xs font-black uppercase tracking-[0.14em]">
+ <span className="rounded-2xl bg-[#fff4e7] px-3 py-2 text-[#7c2d12]">Rayon {product.vendor_delivery_radius_km} km</span>
+ <span className="rounded-2xl bg-success/[0.15] px-3 py-2 text-success">Selon position</span>
+ </div>
+ <button
+ data-testid="add-to-cart"
+ type="button"
+ onClick={onAdd}
+ disabled={product.price == null}
+ className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[hsl(var(--primary))] px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-orange-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+ >
+ {product.price == null ?'Prix à confirmer' :'Ajouter au panier'}
+ <ArrowRight className="h-4 w-4" />
+ </button>
+ </div>
+ </article>
+ );
 }
 
 function VendorCard({ vendor }: { vendor: PublicCatalogVendor }) {
-  const profile = partnerProfiles.find((partner) => normalizeLabel(partner.name) === normalizeLabel(vendor.business_name));
-  const contactPhone = profile?.contactPhone;
-  const contactEmail = profile?.contactEmail;
-  const instagramValue = profile?.instagram?.handle ?? profile?.instagram?.label;
-  const deliveryValue = profile?.deliveryContact?.phone
-    ? `${profile.deliveryContact.label} - ${formatWhatsAppLabel(profile.deliveryContact.phone)}`
-    : profile?.deliveryContact?.note;
+ const profile = partnerProfiles.find((partner) => normalizeLabel(partner.name) === normalizeLabel(vendor.business_name));
+ const contactPhone = profile?.contactPhone;
+ const contactEmail = profile?.contactEmail;
+ const instagramValue = profile?.instagram?.handle ?? profile?.instagram?.label;
+ const deliveryValue = profile?.deliveryContact?.phone
+ ? `${profile.deliveryContact.label} - ${formatWhatsAppLabel(profile.deliveryContact.phone)}`
+ : profile?.deliveryContact?.note;
 
-  return (
-    <article className="rounded-[1.9rem] border border-white/80 bg-white/90 p-5 shadow-soft backdrop-blur">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">{vendor.business_type}</p>
-          <h3 className="mt-2 text-2xl font-black text-[#2a190f]">{vendor.business_name}</h3>
-        </div>
-        <BadgeCheck className="h-7 w-7 text-emerald-600" />
-      </div>
-      <p className="mt-3 text-sm leading-6 text-stone-600">{vendor.description}</p>
-      <div className="mt-4 grid gap-2 text-sm">
-        <InfoLine label="Couverture" value="Livraison autour de ce partenaire" />
-        <InfoLine label="Rayon" value={`${vendor.delivery_radius_km} km`} />
-        <InfoLine label="Position" value={vendor.latitude != null && vendor.longitude != null ? 'Géolocalisée' : 'Fallback commune'} />
-        <InfoLine label="Adresse" value={vendor.address || 'Adresse confirmée à la commande'} />
-        {contactPhone ? <InfoLine label="Contact" value={formatWhatsAppLabel(contactPhone)} /> : null}
-        {contactEmail ? <InfoLine label="Email" value={contactEmail} /> : null}
-        {instagramValue ? <InfoLine label="Instagram" value={instagramValue} /> : null}
-        {deliveryValue ? <InfoLine label="Livreur" value={deliveryValue} /> : null}
-      </div>
-      {profile?.events?.length ? (
-        <div className="mt-4 rounded-[1.5rem] border border-emerald-100 bg-emerald-50/80 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-800">Ateliers culinaires</p>
-          <div className="mt-3 grid gap-3">
-            {profile.events.map((event) => (
-              <div key={`${vendor.id}-${event.title}`} className="rounded-2xl bg-white p-4 shadow-sm">
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <h4 className="text-sm font-black text-[#2a190f]">{event.title}</h4>
-                  <span className="rounded-full bg-[#fff4e7] px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[hsl(var(--primary))]">
-                    {event.status}
-                  </span>
-                </div>
-                <p className="mt-2 text-sm leading-6 text-stone-600">{event.description}</p>
-                <div className="mt-3 grid gap-2 text-xs font-bold text-stone-500">
-                  <span>{event.location}</span>
-                  <span>{event.schedule}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
-    </article>
-  );
+ return (
+ <article className="rounded-[1.9rem] border border-white/80 bg-white/90 p-5 shadow-soft backdrop-blur">
+ <div className="flex items-start justify-between gap-4">
+ <div>
+ <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">{vendor.business_type}</p>
+ <h3 className="mt-2 text-2xl font-black text-[#2a190f]">{vendor.business_name}</h3>
+ </div>
+ <BadgeCheck className="h-7 w-7 text-success" />
+ </div>
+ <p className="mt-3 text-sm leading-6 text-stone-600">{vendor.description}</p>
+ <div className="mt-4 grid gap-2 text-sm">
+ <InfoLine label="Couverture" value="Livraison autour de ce partenaire" />
+ <InfoLine label="Rayon" value={`${vendor.delivery_radius_km} km`} />
+ <InfoLine label="Position" value={vendor.latitude != null && vendor.longitude != null ?'Géolocalisée' :'Fallback commune'} />
+ <InfoLine label="Adresse" value={vendor.address ||'Adresse confirmée à la commande'} />
+ {contactPhone ? <InfoLine label="Contact" value={formatWhatsAppLabel(contactPhone)} /> : null}
+ {contactEmail ? <InfoLine label="Email" value={contactEmail} /> : null}
+ {instagramValue ? <InfoLine label="Instagram" value={instagramValue} /> : null}
+ {deliveryValue ? <InfoLine label="Livreur" value={deliveryValue} /> : null}
+ </div>
+ {profile?.events?.length ? (
+ <div className="mt-4 rounded-[1.5rem] border border-emerald-100 bg-success/[0.15]/80 p-4">
+ <p className="text-xs font-black uppercase tracking-[0.18em] text-success">Ateliers culinaires</p>
+ <div className="mt-3 grid gap-3">
+ {profile.events.map((event) => (
+ <div key={`${vendor.id}-${event.title}`} className="rounded-2xl bg-white p-4 shadow-sm">
+ <div className="flex flex-wrap items-start justify-between gap-2">
+ <h4 className="text-sm font-black text-[#2a190f]">{event.title}</h4>
+ <span className="rounded-full bg-[#fff4e7] px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[hsl(var(--primary))]">
+ {event.status}
+ </span>
+ </div>
+ <p className="mt-2 text-sm leading-6 text-stone-600">{event.description}</p>
+ <div className="mt-3 grid gap-2 text-xs font-bold text-stone-500">
+ <span>{event.location}</span>
+ <span>{event.schedule}</span>
+ </div>
+ </div>
+ ))}
+ </div>
+ </div>
+ ) : null}
+ </article>
+ );
 }
 
 function SelectionPanel({
-  products,
-  summary,
-  supportLink,
-  partnerDispatchLink,
-  driverMissionLink,
-  vendorMessage,
-  driverMessage,
-  copyStatus,
-  customerName,
-  customerPhone,
-  deliveryAddress,
-  deliveryNotes,
-  deliverySlot,
-  customerLocation,
-  geoStatus,
-  geoConsentState,
-  geoError,
-  pendingCustomerLocation,
-  fulfillmentMode,
-  paymentMethod,
-  vendorAvailabilityStatus,
-  notificationPermission,
-  notificationPrefs,
-  orderConfirmed,
-  checkoutStatus,
-  supabasePaused,
-  supabasePausedHint,
-  onCustomerNameChange,
-  onCustomerPhoneChange,
-  onDeliveryAddressChange,
-  onDeliveryNotesChange,
-  onDeliverySlotChange,
-  onCustomerPositionRequest,
-  onConfirmCustomerPosition,
-  onCancelCustomerPosition,
-  onValidatePendingCustomerPosition,
-  onRejectPendingCustomerPosition,
-  onFulfillmentModeChange,
-  onPaymentMethodChange,
-  onVendorAvailabilityStatusChange,
-  onCopyVendorMessage,
-  onCopyDriverMessage,
-  onNotificationPreferenceChange,
-  onRequestNotifications,
-  onDownloadPdf,
-  onConfirmOrder,
-  onWhatsAppFallback,
-  onRemove,
-  onClear,
-  deliveryCoverageStatus,
-  deliveryCoverageMessage,
-  orderTrackingUrl,
+ products,
+ summary,
+ supportLink,
+ partnerDispatchLink,
+ driverMissionLink,
+ vendorMessage,
+ driverMessage,
+ copyStatus,
+ customerName,
+ customerPhone,
+ deliveryAddress,
+ deliveryNotes,
+ deliverySlot,
+ customerLocation,
+ geoStatus,
+ geoConsentState,
+ geoError,
+ pendingCustomerLocation,
+ fulfillmentMode,
+ paymentMethod,
+ vendorAvailabilityStatus,
+ notificationPermission,
+ notificationPrefs,
+ orderConfirmed,
+ checkoutStatus,
+ supabasePaused,
+ supabasePausedHint,
+ onCustomerNameChange,
+ onCustomerPhoneChange,
+ onDeliveryAddressChange,
+ onDeliveryNotesChange,
+ onDeliverySlotChange,
+ onCustomerPositionRequest,
+ onConfirmCustomerPosition,
+ onCancelCustomerPosition,
+ onValidatePendingCustomerPosition,
+ onRejectPendingCustomerPosition,
+ onFulfillmentModeChange,
+ onPaymentMethodChange,
+ onVendorAvailabilityStatusChange,
+ onCopyVendorMessage,
+ onCopyDriverMessage,
+ onNotificationPreferenceChange,
+ onRequestNotifications,
+ onDownloadPdf,
+ onConfirmOrder,
+ onWhatsAppFallback,
+ onRemove,
+ onClear,
+ deliveryCoverageStatus,
+ deliveryCoverageMessage,
+ orderTrackingUrl,
 }: {
-  products: PublicCatalogProduct[];
-  summary: ReturnType<typeof calculateOrderEconomics>;
-  supportLink: string;
-  partnerDispatchLink: string;
-  driverMissionLink: string;
-  vendorMessage: string;
-  driverMessage: string;
-  copyStatus: string;
-  customerName: string;
-  customerPhone: string;
-  deliveryAddress: string;
-  deliveryNotes: string;
-  deliverySlot: string;
-  customerLocation: CustomerLocation | null;
-  geoStatus: GeoStatus;
-  geoConsentState: GeoConsentState;
-  geoError: string;
-  pendingCustomerLocation: CustomerLocation | null;
-  fulfillmentMode: 'delivery' | 'pickup';
-  paymentMethod: string;
-  vendorAvailabilityStatus: string;
-  notificationPermission: NotificationPermission | 'unsupported';
-  notificationPrefs: NotificationPreferences;
-  orderConfirmed: boolean;
-  checkoutStatus: CheckoutStatus;
-  supabasePaused: boolean;
-  supabasePausedHint: string | null;
-  onCustomerNameChange: (value: string) => void;
-  onCustomerPhoneChange: (value: string) => void;
-  onDeliveryAddressChange: (value: string) => void;
-  onDeliveryNotesChange: (value: string) => void;
-  onDeliverySlotChange: (value: string) => void;
-  onCustomerPositionRequest: () => void;
-  onConfirmCustomerPosition: () => void;
-  onCancelCustomerPosition: () => void;
-  onValidatePendingCustomerPosition: () => void;
-  onRejectPendingCustomerPosition: () => void;
-  onFulfillmentModeChange: (mode: 'delivery' | 'pickup') => void;
-  onPaymentMethodChange: (value: string) => void;
-  onVendorAvailabilityStatusChange: (value: string) => void;
-  onCopyVendorMessage: () => void;
-  onCopyDriverMessage: () => void;
-  onNotificationPreferenceChange: (key: keyof NotificationPreferences, value: boolean) => void;
-  onRequestNotifications: () => void;
-  onDownloadPdf: () => void;
-  onConfirmOrder: () => void;
-  onWhatsAppFallback: () => void;
-  onRemove: (index: number) => void;
-  onClear: () => void;
-  deliveryCoverageStatus: DeliveryCoverageStatus;
-  deliveryCoverageMessage: string;
-  orderTrackingUrl: string;
+ products: PublicCatalogProduct[];
+ summary: ReturnType<typeof calculateOrderEconomics>;
+ supportLink: string;
+ partnerDispatchLink: string;
+ driverMissionLink: string;
+ vendorMessage: string;
+ driverMessage: string;
+ copyStatus: string;
+ customerName: string;
+ customerPhone: string;
+ deliveryAddress: string;
+ deliveryNotes: string;
+ deliverySlot: string;
+ customerLocation: CustomerLocation | null;
+ geoStatus: GeoStatus;
+ geoConsentState: GeoConsentState;
+ geoError: string;
+ pendingCustomerLocation: CustomerLocation | null;
+ fulfillmentMode:'delivery' |'pickup';
+ paymentMethod: string;
+ vendorAvailabilityStatus: string;
+ notificationPermission: NotificationPermission |'unsupported';
+ notificationPrefs: NotificationPreferences;
+ orderConfirmed: boolean;
+ checkoutStatus: CheckoutStatus;
+ supabasePaused: boolean;
+ supabasePausedHint: string | null;
+ onCustomerNameChange: (value: string) => void;
+ onCustomerPhoneChange: (value: string) => void;
+ onDeliveryAddressChange: (value: string) => void;
+ onDeliveryNotesChange: (value: string) => void;
+ onDeliverySlotChange: (value: string) => void;
+ onCustomerPositionRequest: () => void;
+ onConfirmCustomerPosition: () => void;
+ onCancelCustomerPosition: () => void;
+ onValidatePendingCustomerPosition: () => void;
+ onRejectPendingCustomerPosition: () => void;
+ onFulfillmentModeChange: (mode:'delivery' |'pickup') => void;
+ onPaymentMethodChange: (value: string) => void;
+ onVendorAvailabilityStatusChange: (value: string) => void;
+ onCopyVendorMessage: () => void;
+ onCopyDriverMessage: () => void;
+ onNotificationPreferenceChange: (key: keyof NotificationPreferences, value: boolean) => void;
+ onRequestNotifications: () => void;
+ onDownloadPdf: () => void;
+ onConfirmOrder: () => void;
+ onWhatsAppFallback: () => void;
+ onRemove: (index: number) => void;
+ onClear: () => void;
+ deliveryCoverageStatus: DeliveryCoverageStatus;
+ deliveryCoverageMessage: string;
+ orderTrackingUrl: string;
 }) {
-  const mapPreviewLocation = pendingCustomerLocation ?? customerLocation;
+ const mapPreviewLocation = pendingCustomerLocation ?? customerLocation;
 
-  return (
-    <aside data-testid="cart-panel" className="h-fit rounded-[2rem] border border-orange-100 bg-white p-5 shadow-elegant lg:sticky lg:top-28">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <span className="rounded-2xl bg-[#fff3e5] p-3 text-[hsl(var(--primary))]">
-            <ShoppingBag className="h-5 w-5" />
-          </span>
-          <div>
-            <h3 className="text-lg font-black text-[#2a190f]">Panier sécurisé</h3>
-            <p className="text-xs font-semibold text-stone-500">Validation humaine avant préparation.</p>
-          </div>
-        </div>
-        <span data-testid="cart-badge" className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">{products.length} article(s)</span>
-      </div>
+ return (
+ <aside data-testid="cart-panel" className="h-fit rounded-[2rem] border border-primary/20 bg-white p-5 shadow-elegant lg:sticky lg:top-28">
+ <div className="flex items-center justify-between gap-3">
+ <div className="flex items-center gap-3">
+ <span className="rounded-2xl bg-[#fff3e5] p-3 text-[hsl(var(--primary))]">
+ <ShoppingBag className="h-5 w-5" />
+ </span>
+ <div>
+ <h3 className="text-lg font-black text-[#2a190f]">Panier sécurisé</h3>
+ <p className="text-xs font-semibold text-stone-500">Validation humaine avant préparation.</p>
+ </div>
+ </div>
+ <span data-testid="cart-badge" className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">{products.length} article(s)</span>
+ </div>
 
-      {supabasePaused && (
-        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs font-bold text-amber-900">
-          {supabasePausedHint ?? 'Commande applicative temporairement indisponible. Bascule Sheets/Formulaire activée, WhatsApp reste en support.'}
-        </div>
-      )}
+ {supabasePaused && (
+ <div className="mt-4 rounded-2xl border border-input bg-muted p-4 text-xs font-bold text-amber-900">
+ {supabasePausedHint ??'Commande applicative temporairement indisponible. Bascule Sheets/Formulaire activée, WhatsApp reste en support.'}
+ </div>
+ )}
 
-      {products.length === 0 ? (
-        <p className="mt-4 text-sm leading-6 text-stone-600">Ajoutez une offre pour préparer votre commande. Le montant final sera confirmé avant validation.</p>
-      ) : (
-        <div className="mt-4 space-y-3">
-          {products.map((product, index) => (
-            <div key={`${product.id}-${index}`} className="rounded-2xl bg-white p-3 shadow-sm">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-black text-[#2a190f]">{product.name}</p>
-                  <p className="text-xs text-stone-500">{product.vendor_name}</p>
-                </div>
-                <button onClick={() => onRemove(index)} className="text-xs font-bold text-stone-400">
-                  Retirer
-                </button>
-              </div>
-            </div>
-          ))}
+ {products.length === 0 ? (
+ <p className="mt-4 text-sm leading-6 text-stone-600">Ajoutez une offre pour préparer votre commande. Le montant final sera confirmé avant validation.</p>
+ ) : (
+ <div className="mt-4 space-y-3">
+ {products.map((product, index) => (
+ <div key={`${product.id}-${index}`} className="rounded-2xl bg-white p-3 shadow-sm">
+ <div className="flex items-start justify-between gap-3">
+ <div>
+ <p className="text-sm font-black text-[#2a190f]">{product.name}</p>
+ <p className="text-xs text-stone-500">{product.vendor_name}</p>
+ </div>
+ <button onClick={() => onRemove(index)} className="text-xs font-bold text-stone-400">
+ Retirer
+ </button>
+ </div>
+ </div>
+ ))}
 
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              ['delivery', 'Livraison'],
-              ['pickup', 'Retrait'],
-            ].map(([mode, label]) => {
-              const active = fulfillmentMode === mode;
-              return (
-                <button
-                  key={mode}
-                  onClick={() => onFulfillmentModeChange(mode as 'delivery' | 'pickup')}
-                  className={`rounded-2xl border px-3 py-3 text-sm font-black ${
-                    active ? 'border-[hsl(var(--primary))] bg-[#fff3e5] text-[#7c2d12]' : 'border-orange-100 bg-white text-stone-500'
-                  }`}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
+ <div className="grid grid-cols-2 gap-2">
+ {[
+ ['delivery','Livraison'],
+ ['pickup','Retrait'],
+ ].map(([mode, label]) => {
+ const active = fulfillmentMode === mode;
+ return (
+ <button
+ key={mode}
+ onClick={() => onFulfillmentModeChange(mode as'delivery' |'pickup')}
+ className={`rounded-2xl border px-3 py-3 text-sm font-black ${
+ active ?'border-[hsl(var(--primary))] bg-[#fff3e5] text-[#7c2d12]' :'border-primary/20 bg-white text-stone-500'
+ }`}
+ >
+ {label}
+ </button>
+ );
+ })}
+ </div>
 
-          <div className="rounded-2xl border border-orange-100 bg-[#fff8ef] p-3 text-xs font-bold text-[#7c2d12]">
-            <p>Résumé commande: {products.length} article(s) • {formatPrice(summary.total_client)} estimé</p>
-            <p className="mt-1">Identification client obligatoire: nom + téléphone.</p>
-          </div>
+ <div className="rounded-2xl border border-primary/20 bg-[#fff8ef] p-3 text-xs font-bold text-[#7c2d12]">
+ <p>Résumé commande: {products.length} article(s) • {formatPrice(summary.total_client)} estimé</p>
+ <p className="mt-1">Identification client obligatoire: nom + téléphone.</p>
+ </div>
 
-          <div className="grid gap-2">
-            <input
-              value={customerName}
-              onChange={(event) => onCustomerNameChange(event.target.value)}
-              placeholder="Nom"
-              className="rounded-2xl border border-orange-100 bg-white px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
-            />
-            <input
-              value={customerPhone}
-              onChange={(event) => onCustomerPhoneChange(event.target.value)}
-              placeholder="Téléphone"
-              inputMode="tel"
-              className="rounded-2xl border border-orange-100 bg-white px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
-            />
-            <input
-              value={deliveryAddress}
-              onChange={(event) => onDeliveryAddressChange(event.target.value)}
-              placeholder={fulfillmentMode === 'delivery' ? 'Adresse complète / repère' : 'Commune de retrait'}
-              className="rounded-2xl border border-orange-100 bg-white px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
-            />
-            <textarea
-              value={deliveryNotes}
-              onChange={(event) => onDeliveryNotesChange(event.target.value)}
-              placeholder="Instructions livraison: bâtiment, portail, repère, appel avant arrivée..."
-              rows={3}
-              className="rounded-2xl border border-orange-100 bg-white px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
-            />
-            <input
-              value={deliverySlot}
-              onChange={(event) => onDeliverySlotChange(event.target.value)}
-              placeholder="Créneau souhaité: aujourd’hui 12h30, demain matin..."
-              className="rounded-2xl border border-orange-100 bg-white px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
-            />
-          </div>
+ <div className="grid gap-2">
+ <input
+ value={customerName}
+ onChange={(event) => onCustomerNameChange(event.target.value)}
+ placeholder="Nom"
+ className="rounded-2xl border border-primary/20 bg-white px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
+ />
+ <input
+ value={customerPhone}
+ onChange={(event) => onCustomerPhoneChange(event.target.value)}
+ placeholder="Téléphone"
+ inputMode="tel"
+ className="rounded-2xl border border-primary/20 bg-white px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
+ />
+ <input
+ value={deliveryAddress}
+ onChange={(event) => onDeliveryAddressChange(event.target.value)}
+ placeholder={fulfillmentMode ==='delivery' ?'Adresse complète / repère' :'Commune de retrait'}
+ className="rounded-2xl border border-primary/20 bg-white px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
+ />
+ <textarea
+ value={deliveryNotes}
+ onChange={(event) => onDeliveryNotesChange(event.target.value)}
+ placeholder="Instructions livraison: bâtiment, portail, repère, appel avant arrivée..."
+ rows={3}
+ className="rounded-2xl border border-primary/20 bg-white px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
+ />
+ <input
+ value={deliverySlot}
+ onChange={(event) => onDeliverySlotChange(event.target.value)}
+ placeholder="Créneau souhaité: aujourd’hui 12h30, demain matin..."
+ className="rounded-2xl border border-primary/20 bg-white px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
+ />
+ </div>
 
-          <div className="rounded-2xl border border-orange-100 bg-white p-4 text-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">Position client</p>
-                <p className="mt-1 text-xs leading-5 text-stone-500">
-                  Votre position sert uniquement à estimer la livraison et faciliter le retrait/livraison. Vous pouvez aussi saisir votre adresse manuellement.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={onCustomerPositionRequest}
-                disabled={geoStatus === 'loading'}
-                className="shrink-0 rounded-xl bg-[#2a190f] px-3 py-2 text-xs font-black text-white disabled:opacity-60"
-              >
-                {geoStatus === 'loading' ? 'Localisation...' : 'Me géolocaliser'}
-              </button>
-            </div>
-            {geoConsentState === 'ask' && (
-              <div className="mt-3 rounded-xl border border-orange-200 bg-[#fff8ef] p-3">
-                <p className="text-xs font-black text-[#7c2d12]">
-                  Souhaitez-vous être géolocalisé pour afficher votre position sur la carte ?
-                </p>
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={onConfirmCustomerPosition}
-                    disabled={geoStatus === 'loading'}
-                    className="rounded-xl bg-[hsl(var(--primary))] px-3 py-2 text-xs font-black text-white disabled:opacity-60"
-                  >
-                    Oui, autoriser
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onCancelCustomerPosition}
-                    className="rounded-xl border border-orange-200 bg-white px-3 py-2 text-xs font-black text-[#7c2d12]"
-                  >
-                    Non, merci
-                  </button>
-                </div>
-              </div>
-            )}
-            {mapPreviewLocation && (
-              <div className="mt-3 overflow-hidden rounded-xl border border-orange-100">
-                <MapContainer
-                  center={[mapPreviewLocation.lat, mapPreviewLocation.lng]}
-                  zoom={16}
-                  scrollWheelZoom={false}
-                  className="h-44 w-full"
-                >
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  <CircleMarker
-                    center={[mapPreviewLocation.lat, mapPreviewLocation.lng]}
-                    radius={8}
-                    pathOptions={{ color: 'hsl(var(--primary))', fillColor: 'hsl(var(--primary))', fillOpacity: 0.9 }}
-                  >
-                    <Popup>Votre position</Popup>
-                  </CircleMarker>
-                </MapContainer>
-              </div>
-            )}
-            {pendingCustomerLocation && (
-              <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3">
-                <p className="text-xs font-bold text-emerald-900">
-                  Position détectée : {pendingCustomerLocation.lat.toFixed(6)}, {pendingCustomerLocation.lng.toFixed(6)}
-                </p>
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={onValidatePendingCustomerPosition}
-                    className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white"
-                  >
-                    Valider ma position
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onRejectPendingCustomerPosition}
-                    className="rounded-xl border border-emerald-300 bg-white px-3 py-2 text-xs font-black text-emerald-800"
-                  >
-                    Rejeter
-                  </button>
-                </div>
-              </div>
-            )}
-            {fulfillmentMode === 'delivery' && (
-              <div className="mt-3 grid gap-1 rounded-xl bg-[#fff8ef] p-3 text-xs font-bold text-[#7c2d12]">
-                <span>Adresse obligatoire</span>
-                <span>Position GPS recommandée</span>
-                {customerLocation ? (
-                  <a href={customerLocation.mapsUrl} target="_blank" rel="noreferrer" className="text-[#0f766e] underline">
-                    Lien Maps généré - précision {customerLocation.accuracy ? `${Math.round(customerLocation.accuracy)} m` : 'non fournie'}
-                  </a>
-                ) : (
-                  <span>Position GPS non fournie — confirmer adresse manuellement.</span>
-                )}
-              </div>
-            )}
-            {geoError && <p className="mt-2 text-xs font-bold text-red-700">{geoError}</p>}
-          </div>
+ <div className="rounded-2xl border border-primary/20 bg-white p-4 text-sm">
+ <div className="flex items-start justify-between gap-3">
+ <div>
+ <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">Position client</p>
+ <p className="mt-1 text-xs leading-5 text-stone-500">
+ Votre position sert uniquement à estimer la livraison et faciliter le retrait/livraison. Vous pouvez aussi saisir votre adresse manuellement.
+ </p>
+ </div>
+ <button
+ type="button"
+ onClick={onCustomerPositionRequest}
+ disabled={geoStatus ==='loading'}
+ className="shrink-0 rounded-xl bg-[#2a190f] px-3 py-2 text-xs font-black text-white disabled:opacity-60"
+ >
+ {geoStatus ==='loading' ?'Localisation...' :'Me géolocaliser'}
+ </button>
+ </div>
+ {geoConsentState ==='ask' && (
+ <div className="mt-3 rounded-xl border border-primary/20 bg-[#fff8ef] p-3">
+ <p className="text-xs font-black text-[#7c2d12]">
+ Souhaitez-vous être géolocalisé pour afficher votre position sur la carte ?
+ </p>
+ <div className="mt-3 grid grid-cols-2 gap-2">
+ <button
+ type="button"
+ onClick={onConfirmCustomerPosition}
+ disabled={geoStatus ==='loading'}
+ className="rounded-xl bg-[hsl(var(--primary))] px-3 py-2 text-xs font-black text-white disabled:opacity-60"
+ >
+ Oui, autoriser
+ </button>
+ <button
+ type="button"
+ onClick={onCancelCustomerPosition}
+ className="rounded-xl border border-primary/20 bg-white px-3 py-2 text-xs font-black text-[#7c2d12]"
+ >
+ Non, merci
+ </button>
+ </div>
+ </div>
+ )}
+ {mapPreviewLocation && (
+ <div className="mt-3 overflow-hidden rounded-xl border border-primary/20">
+ <MapContainer
+ center={[mapPreviewLocation.lat, mapPreviewLocation.lng]}
+ zoom={16}
+ scrollWheelZoom={false}
+ className="h-44 w-full"
+ >
+ <TileLayer
+ attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+ url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+ />
+ <CircleMarker
+ center={[mapPreviewLocation.lat, mapPreviewLocation.lng]}
+ radius={8}
+ pathOptions={{ color:'hsl(var(--primary))', fillColor:'hsl(var(--primary))', fillOpacity: 0.9 }}
+ >
+ <Popup>Votre position</Popup>
+ </CircleMarker>
+ </MapContainer>
+ </div>
+ )}
+ {pendingCustomerLocation && (
+ <div className="mt-3 rounded-xl border border-success/20 bg-success/[0.15] p-3">
+ <p className="text-xs font-bold text-success">
+ Position détectée : {pendingCustomerLocation.lat.toFixed(6)}, {pendingCustomerLocation.lng.toFixed(6)}
+ </p>
+ <div className="mt-3 grid grid-cols-2 gap-2">
+ <button
+ type="button"
+ onClick={onValidatePendingCustomerPosition}
+ className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white"
+ >
+ Valider ma position
+ </button>
+ <button
+ type="button"
+ onClick={onRejectPendingCustomerPosition}
+ className="rounded-xl border border-success/30 bg-white px-3 py-2 text-xs font-black text-success"
+ >
+ Rejeter
+ </button>
+ </div>
+ </div>
+ )}
+ {fulfillmentMode ==='delivery' && (
+ <div className="mt-3 grid gap-1 rounded-xl bg-[#fff8ef] p-3 text-xs font-bold text-[#7c2d12]">
+ <span>Adresse obligatoire</span>
+ <span>Position GPS recommandée</span>
+ {customerLocation ? (
+ <a href={customerLocation.mapsUrl} target="_blank" rel="noreferrer" className="text-[#0f766e] underline">
+ Lien Maps généré - précision {customerLocation.accuracy ? `${Math.round(customerLocation.accuracy)} m` :'non fournie'}
+ </a>
+ ) : (
+ <span>Position GPS non fournie — confirmer adresse manuellement.</span>
+ )}
+ </div>
+ )}
+ {geoError && <p className="mt-2 text-xs font-bold text-red-700">{geoError}</p>}
+ </div>
 
-          {fulfillmentMode === 'delivery' && deliveryCoverageStatus !== 'unknown' && (
-            <div
-              className={`rounded-2xl border p-3 text-sm font-bold ${
-                deliveryCoverageStatus === 'in_zone'
-                  ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
-                  : 'border-red-200 bg-red-50 text-red-900'
-              }`}
-            >
-              {deliveryCoverageMessage}
-            </div>
-          )}
-          {fulfillmentMode === 'delivery' && deliveryCoverageStatus === 'unknown' && deliveryCoverageMessage && (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-bold text-amber-900">
-              {deliveryCoverageMessage}
-            </div>
-          )}
+ {fulfillmentMode ==='delivery' && deliveryCoverageStatus !=='unknown' && (
+ <div
+ className={`rounded-2xl border p-3 text-sm font-bold ${
+ deliveryCoverageStatus ==='in_zone'
+ ?'border-success/20 bg-success/[0.15] text-success'
+ :'border-red-200 bg-red-50 text-red-900'
+ }`}
+ >
+ {deliveryCoverageMessage}
+ </div>
+ )}
+ {fulfillmentMode ==='delivery' && deliveryCoverageStatus ==='unknown' && deliveryCoverageMessage && (
+ <div className="rounded-2xl border border-input bg-muted p-3 text-sm font-bold text-amber-900">
+ {deliveryCoverageMessage}
+ </div>
+ )}
 
-          <div className="rounded-2xl border border-orange-100 bg-white p-4 text-sm">
-            <PriceLine label="Sous-total" value={formatPrice(summary.subtotal_produits)} />
-            <PriceLine label={fulfillmentMode === 'delivery' ? 'Livraison' : 'Retrait'} value={formatPrice(summary.frais_livraison)} />
-            <PriceLine label="Frais service" value={formatPrice(summary.frais_service)} />
-            <div className="mt-3 rounded-2xl bg-[#2a190f] px-4 py-3 text-white">
-              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-orange-200">Total estimé</p>
-              <p className="mt-1 text-3xl font-black">{formatPrice(summary.total_client)}</p>
-            </div>
-          </div>
+ <div className="rounded-2xl border border-primary/20 bg-white p-4 text-sm">
+ <PriceLine label="Sous-total" value={formatPrice(summary.subtotal_produits)} />
+ <PriceLine label={fulfillmentMode ==='delivery' ?'Livraison' :'Retrait'} value={formatPrice(summary.frais_livraison)} />
+ <PriceLine label="Frais service" value={formatPrice(summary.frais_service)} />
+ <div className="mt-3 rounded-2xl bg-[#2a190f] px-4 py-3 text-white">
+ <p className="text-[11px] font-black uppercase tracking-[0.18em] text-primary/60">Total estimé</p>
+ <p className="mt-1 text-3xl font-black">{formatPrice(summary.total_client)}</p>
+ </div>
+ </div>
 
-          <div className="rounded-2xl border border-orange-100 bg-white p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">Paiement</p>
-            <div className="mt-3 grid gap-2 text-sm font-bold text-[#2a190f]">
-              {['PayPal', 'Carte via lien sécurisé', 'Assistance WhatsApp'].map((method) => (
-                <button
-                  key={method}
-                  type="button"
-                  onClick={() => onPaymentMethodChange(method)}
-                  className={`rounded-xl px-3 py-2 text-left ${paymentMethod === method ? 'bg-[#2a190f] text-white' : 'bg-[#fff8ef] text-[#2a190f]'}`}
-                >
-                  {method}
-                </button>
-              ))}
-            </div>
-          </div>
+ <div className="rounded-2xl border border-primary/20 bg-white p-4">
+ <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">Paiement</p>
+ <div className="mt-3 grid gap-2 text-sm font-bold text-[#2a190f]">
+ {['PayPal','Carte via lien sécurisé','Assistance WhatsApp'].map((method) => (
+ <button
+ key={method}
+ type="button"
+ onClick={() => onPaymentMethodChange(method)}
+ className={`rounded-xl px-3 py-2 text-left ${paymentMethod === method ?'bg-[#2a190f] text-white' :'bg-[#fff8ef] text-[#2a190f]'}`}
+ >
+ {method}
+ </button>
+ ))}
+ </div>
+ </div>
 
-          <div className="rounded-2xl border border-orange-100 bg-white p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">Commande client</p>
-            <div className="mt-3 grid gap-2">
-              <button
-                type="button"
-                onClick={onConfirmOrder}
-                disabled={checkoutStatus.kind === 'saving' || (fulfillmentMode === 'delivery' && deliveryCoverageStatus === 'out_zone')}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[hsl(var(--primary))] px-4 py-3 text-sm font-black text-white disabled:opacity-60"
-              >
-                <ShoppingBag className="h-4 w-4" /> Enregistrer la commande
-              </button>
-              <a href={orderTrackingUrl} className="inline-flex items-center justify-center gap-2 rounded-xl border border-orange-200 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]">
-                <Package className="h-4 w-4" /> Suivre ma commande
-              </a>
-              <button
-                type="button"
-                onClick={onWhatsAppFallback}
-                disabled={checkoutStatus.kind === 'saving'}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-800 disabled:opacity-60"
-              >
-                <MessageCircle className="h-4 w-4" /> WhatsApp (support)
-              </button>
-              <a href={supportLink} className="inline-flex items-center justify-center gap-2 rounded-xl border border-orange-200 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]">
-                <MessageCircle className="h-4 w-4" /> Besoin d’aide
-              </a>
-            </div>
-          </div>
+ <div className="rounded-2xl border border-primary/20 bg-white p-4">
+ <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">Commande client</p>
+ <div className="mt-3 grid gap-2">
+ <button
+ type="button"
+ onClick={onConfirmOrder}
+ disabled={checkoutStatus.kind ==='saving' || (fulfillmentMode ==='delivery' && deliveryCoverageStatus ==='out_zone')}
+ className="inline-flex items-center justify-center gap-2 rounded-xl bg-[hsl(var(--primary))] px-4 py-3 text-sm font-black text-white disabled:opacity-60"
+ >
+ <ShoppingBag className="h-4 w-4" /> Enregistrer la commande
+ </button>
+ <a href={orderTrackingUrl} className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary/20 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]">
+ <Package className="h-4 w-4" /> Suivre ma commande
+ </a>
+ <button
+ type="button"
+ onClick={onWhatsAppFallback}
+ disabled={checkoutStatus.kind ==='saving'}
+ className="inline-flex items-center justify-center gap-2 rounded-xl border border-success/20 bg-success/[0.15] px-4 py-3 text-sm font-black text-success disabled:opacity-60"
+ >
+ <MessageCircle className="h-4 w-4" /> WhatsApp (support)
+ </button>
+ <a href={supportLink} className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary/20 bg-white px-4 py-3 text-sm font-black text-[#7c2d12]">
+ <MessageCircle className="h-4 w-4" /> Besoin d’aide
+ </a>
+ </div>
+ </div>
 
-          <div className="rounded-2xl border border-orange-100 bg-white p-4">
-            <div className="flex items-center gap-2">
-              <Bell className="h-4 w-4 text-[hsl(var(--primary))]" />
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">Alertes utiles</p>
-            </div>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              {(Object.keys(notificationPrefs) as Array<keyof NotificationPreferences>).map((key) => (
-                <label key={key} className="flex items-center gap-2 rounded-xl bg-[#fff8ef] px-3 py-2 text-xs font-bold capitalize text-[#2a190f]">
-                  <input
-                    type="checkbox"
-                    checked={notificationPrefs[key]}
-                    onChange={(event) => onNotificationPreferenceChange(key, event.target.checked)}
-                  />
-                  {key}
-                </label>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={onRequestNotifications}
-              disabled={notificationPermission === 'granted' || notificationPermission === 'unsupported'}
-              className="mt-3 w-full rounded-2xl border border-orange-200 bg-white px-4 py-3 text-sm font-black text-[#7c2d12] disabled:opacity-60"
-            >
-              {notificationPermission === 'granted'
-                ? 'Notifications activées'
-                : notificationPermission === 'unsupported'
-                  ? 'Notifications non supportées'
-                  : 'Activer les notifications'}
-            </button>
-          </div>
+ <div className="rounded-2xl border border-primary/20 bg-white p-4">
+ <div className="flex items-center gap-2">
+ <Bell className="h-4 w-4 text-[hsl(var(--primary))]" />
+ <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">Alertes utiles</p>
+ </div>
+ <div className="mt-3 grid grid-cols-2 gap-2">
+ {(Object.keys(notificationPrefs) as Array<keyof NotificationPreferences>).map((key) => (
+ <label key={key} className="flex items-center gap-2 rounded-xl bg-[#fff8ef] px-3 py-2 text-xs font-bold capitalize text-[#2a190f]">
+ <input
+ type="checkbox"
+ checked={notificationPrefs[key]}
+ onChange={(event) => onNotificationPreferenceChange(key, event.target.checked)}
+ />
+ {key}
+ </label>
+ ))}
+ </div>
+ <button
+ type="button"
+ onClick={onRequestNotifications}
+ disabled={notificationPermission ==='granted' || notificationPermission ==='unsupported'}
+ className="mt-3 w-full rounded-2xl border border-primary/20 bg-white px-4 py-3 text-sm font-black text-[#7c2d12] disabled:opacity-60"
+ >
+ {notificationPermission ==='granted'
+ ?'Notifications activées'
+ : notificationPermission ==='unsupported'
+ ?'Notifications non supportées'
+ :'Activer les notifications'}
+ </button>
+ </div>
 
-          <button onClick={onConfirmOrder} disabled={checkoutStatus.kind === 'saving'} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[hsl(var(--primary))] px-5 py-3 font-black uppercase tracking-[0.14em] text-white disabled:opacity-60">
-            {checkoutStatus.kind === 'saving' ? 'Enregistrement...' : 'Confirmer la commande'} <ArrowRight className="h-4 w-4" />
-          </button>
-          {checkoutStatus.kind === 'error' && (
-            <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-800">
-              {checkoutStatus.message}
-            </div>
-          )}
-          {checkoutStatus.kind === 'success' && (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-bold text-emerald-900">
-              {checkoutStatus.message}
-            </div>
-          )}
-          {orderConfirmed && (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-              <p className="font-black">Commande enregistrée dans DELIKREOL.</p>
-              <p className="mt-1">Téléchargez le PDF ou envoyez l’email partenaire. WhatsApp reste disponible uniquement en support.</p>
-              <div className="mt-3 grid gap-2">
-                <button onClick={onDownloadPdf} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-[#2a190f]">
-                  <Download className="h-4 w-4" /> Télécharger le PDF
-                </button>
-                <a href={orderTrackingUrl} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-[#2a190f]">
-                  <Package className="h-4 w-4" /> Ouvrir mon suivi client
-                </a>
-                <a href={partnerDispatchLink} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-[#2a190f]">
-                  <Mail className="h-4 w-4" /> Email partenaire
-                </a>
-                <a href={supportLink} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-[#2a190f]">
-                  <MessageCircle className="h-4 w-4" /> Besoin d’aide
-                </a>
-              </div>
-            </div>
-          )}
-          <button onClick={onClear} className="w-full rounded-2xl border border-orange-200 bg-white px-5 py-3 text-sm font-black text-[#7c2d12]">
-            Vider le panier
-          </button>
-          <p className="text-xs font-medium text-stone-500">La commande peut être envoyée par email avec PDF, puis relayée sur WhatsApp si le partenaire le préfère.</p>
-        </div>
-      )}
-    </aside>
-  );
+ <button onClick={onConfirmOrder} disabled={checkoutStatus.kind ==='saving'} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[hsl(var(--primary))] px-5 py-3 font-black uppercase tracking-[0.14em] text-white disabled:opacity-60">
+ {checkoutStatus.kind ==='saving' ?'Enregistrement...' :'Confirmer la commande'} <ArrowRight className="h-4 w-4" />
+ </button>
+ {checkoutStatus.kind ==='error' && (
+ <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-800">
+ {checkoutStatus.message}
+ </div>
+ )}
+ {checkoutStatus.kind ==='success' && (
+ <div className="rounded-2xl border border-success/20 bg-success/[0.15] p-4 text-sm font-bold text-success">
+ {checkoutStatus.message}
+ </div>
+ )}
+ {orderConfirmed && (
+ <div className="rounded-2xl border border-success/20 bg-success/[0.15] p-4 text-sm text-success">
+ <p className="font-black">Commande enregistrée dans DELIKREOL.</p>
+ <p className="mt-1">Téléchargez le PDF ou envoyez l’email partenaire. WhatsApp reste disponible uniquement en support.</p>
+ <div className="mt-3 grid gap-2">
+ <button onClick={onDownloadPdf} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-[#2a190f]">
+ <Download className="h-4 w-4" /> Télécharger le PDF
+ </button>
+ <a href={orderTrackingUrl} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-[#2a190f]">
+ <Package className="h-4 w-4" /> Ouvrir mon suivi client
+ </a>
+ <a href={partnerDispatchLink} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-[#2a190f]">
+ <Mail className="h-4 w-4" /> Email partenaire
+ </a>
+ <a href={supportLink} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-[#2a190f]">
+ <MessageCircle className="h-4 w-4" /> Besoin d’aide
+ </a>
+ </div>
+ </div>
+ )}
+ <button onClick={onClear} className="w-full rounded-2xl border border-primary/20 bg-white px-5 py-3 text-sm font-black text-[#7c2d12]">
+ Vider le panier
+ </button>
+ <p className="text-xs font-medium text-stone-500">La commande peut être envoyée par email avec PDF, puis relayée sur WhatsApp si le partenaire le préfère.</p>
+ </div>
+ )}
+ </aside>
+ );
 }
 
 function EmptyState({ title, text, action }: { title: string; text: string; action?: string }) {
-  return (
-    <div className="rounded-[1.75rem] border border-orange-100 bg-white p-6 shadow-soft">
-      <div className="inline-flex rounded-2xl bg-[#fff3e5] p-3 text-[hsl(var(--primary))]">
-        <Package className="h-6 w-6" />
-      </div>
-      <h3 className="mt-4 text-2xl font-black text-[#2a190f]">{title}</h3>
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">{text}</p>
-      {action && (
-        <a href={action} className="mt-5 inline-flex rounded-2xl bg-[hsl(var(--primary))] px-5 py-3 text-sm font-black text-white">
-          Devenir partenaire
-        </a>
-      )}
-    </div>
-  );
+ return (
+ <div className="rounded-[1.75rem] border border-primary/20 bg-white p-6 shadow-soft">
+ <div className="inline-flex rounded-2xl bg-[#fff3e5] p-3 text-[hsl(var(--primary))]">
+ <Package className="h-6 w-6" />
+ </div>
+ <h3 className="mt-4 text-2xl font-black text-[#2a190f]">{title}</h3>
+ <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">{text}</p>
+ {action && (
+ <a href={action} className="mt-5 inline-flex rounded-2xl bg-[hsl(var(--primary))] px-5 py-3 text-sm font-black text-white">
+ Devenir partenaire
+ </a>
+ )}
+ </div>
+ );
 }
 
 function FaqItem({ question, answer }: { question: string; answer: string }) {
-  return (
-    <details className="group rounded-[1.5rem] border border-orange-100 bg-white p-5 shadow-soft">
-      <summary className="cursor-pointer list-none text-lg font-black text-[#2a190f]">
-        <span className="flex items-center justify-between gap-3">
-          {question}
-          <ChevronRight className="h-5 w-5 transition group-open:rotate-90" />
-        </span>
-      </summary>
-      <p className="mt-4 text-sm leading-6 text-stone-600">{answer}</p>
-    </details>
-  );
+ return (
+ <details className="group rounded-[1.5rem] border border-primary/20 bg-white p-5 shadow-soft">
+ <summary className="cursor-pointer list-none text-lg font-black text-[#2a190f]">
+ <span className="flex items-center justify-between gap-3">
+ {question}
+ <ChevronRight className="h-5 w-5 transition group-open:rotate-90" />
+ </span>
+ </summary>
+ <p className="mt-4 text-sm leading-6 text-stone-600">{answer}</p>
+ </details>
+ );
 }
 
 function ProofCard({ title }: { title: string }) {
-  return (
-    <div className="rounded-[1.5rem] border border-orange-100 bg-white p-5 shadow-soft">
-      <div className="inline-flex rounded-2xl bg-[#fff3e5] p-3 text-[hsl(var(--primary))]">
-        <Star className="h-5 w-5" />
-      </div>
-      <h3 className="mt-4 text-lg font-black text-[#2a190f]">{title}</h3>
-      <p className="mt-2 text-sm leading-6 text-stone-600">
-        Information vérifiable avant paiement, avec confirmation par email ou WhatsApp selon le canal choisi.
-      </p>
-    </div>
-  );
+ return (
+ <div className="rounded-[1.5rem] border border-primary/20 bg-white p-5 shadow-soft">
+ <div className="inline-flex rounded-2xl bg-[#fff3e5] p-3 text-[hsl(var(--primary))]">
+ <Star className="h-5 w-5" />
+ </div>
+ <h3 className="mt-4 text-lg font-black text-[#2a190f]">{title}</h3>
+ <p className="mt-2 text-sm leading-6 text-stone-600">
+ Information vérifiable avant paiement, avec confirmation par email ou WhatsApp selon le canal choisi.
+ </p>
+ </div>
+ );
 }
 
 function SectionTitle({ eyebrow, title, text }: { eyebrow: string; title: string; text: string }) {
-  return (
-    <div>
-      <p className="text-xs font-black uppercase tracking-[0.24em] text-[hsl(var(--primary))]">{eyebrow}</p>
-      <h2 className="mt-2 max-w-3xl font-display text-3xl font-black tracking-tight text-[#2a190f] sm:text-4xl">{title}</h2>
-      <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600 sm:text-base sm:leading-7">{text}</p>
-    </div>
-  );
+ return (
+ <div>
+ <p className="text-xs font-black uppercase tracking-[0.24em] text-[hsl(var(--primary))]">{eyebrow}</p>
+ <h2 className="mt-2 max-w-3xl font-display text-3xl font-black tracking-tight text-[#2a190f] sm:text-4xl">{title}</h2>
+ <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600 sm:text-base sm:leading-7">{text}</p>
+ </div>
+ );
 }
 
 function Input({
-  value,
-  onChange,
-  placeholder,
-  className = '',
-  required = false,
+ value,
+ onChange,
+ placeholder,
+ className ='',
+ required = false,
 }: {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-  className?: string;
-  required?: boolean;
+ value: string;
+ onChange: (value: string) => void;
+ placeholder: string;
+ className?: string;
+ required?: boolean;
 }) {
-  return (
-    <input
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      placeholder={placeholder}
-      required={required}
-      className={`rounded-2xl border border-orange-100 bg-[#fffaf4] px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4 ${className}`}
-    />
-  );
+ return (
+ <input
+ value={value}
+ onChange={(event) => onChange(event.target.value)}
+ placeholder={placeholder}
+ required={required}
+ className={`rounded-2xl border border-primary/20 bg-[#fffaf4] px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4 ${className}`}
+ />
+ );
 }
 
 function InputDark({
-  value,
-  onChange,
-  placeholder,
-  className = '',
-  required = false,
+ value,
+ onChange,
+ placeholder,
+ className ='',
+ required = false,
 }: {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-  className?: string;
-  required?: boolean;
+ value: string;
+ onChange: (value: string) => void;
+ placeholder: string;
+ className?: string;
+ required?: boolean;
 }) {
-  return (
-    <input
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      placeholder={placeholder}
-      required={required}
-      className={`rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white placeholder:text-stone-300 outline-none ring-white/20 focus:ring-4 ${className}`}
-    />
-  );
+ return (
+ <input
+ value={value}
+ onChange={(event) => onChange(event.target.value)}
+ placeholder={placeholder}
+ required={required}
+ className={`rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white placeholder:text-stone-300 outline-none ring-white/20 focus:ring-4 ${className}`}
+ />
+ );
 }
 
 function Textarea({
-  value,
-  onChange,
-  placeholder,
-  className = '',
-  rows = 3,
+ value,
+ onChange,
+ placeholder,
+ className ='',
+ rows = 3,
 }: {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-  className?: string;
-  rows?: number;
+ value: string;
+ onChange: (value: string) => void;
+ placeholder: string;
+ className?: string;
+ rows?: number;
 }) {
-  return (
-    <textarea
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      placeholder={placeholder}
-      rows={rows}
-      className={`rounded-2xl border border-orange-100 bg-[#fffaf4] px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4 ${className}`}
-    />
-  );
+ return (
+ <textarea
+ value={value}
+ onChange={(event) => onChange(event.target.value)}
+ placeholder={placeholder}
+ rows={rows}
+ className={`rounded-2xl border border-primary/20 bg-[#fffaf4] px-4 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4 ${className}`}
+ />
+ );
 }
 
 function TextareaDark({
-  value,
-  onChange,
-  placeholder,
-  className = '',
-  rows = 3,
+ value,
+ onChange,
+ placeholder,
+ className ='',
+ rows = 3,
 }: {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-  className?: string;
-  rows?: number;
+ value: string;
+ onChange: (value: string) => void;
+ placeholder: string;
+ className?: string;
+ rows?: number;
 }) {
-  return (
-    <textarea
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      placeholder={placeholder}
-      rows={rows}
-      className={`rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white placeholder:text-stone-300 outline-none ring-white/20 focus:ring-4 ${className}`}
-    />
-  );
+ return (
+ <textarea
+ value={value}
+ onChange={(event) => onChange(event.target.value)}
+ placeholder={placeholder}
+ rows={rows}
+ className={`rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white placeholder:text-stone-300 outline-none ring-white/20 focus:ring-4 ${className}`}
+ />
+ );
 }
 
 function Select({
-  value,
-  onChange,
-  children,
+ value,
+ onChange,
+ children,
 }: {
-  value: string;
-  onChange: (value: string) => void;
-  children: ReactNode;
+ value: string;
+ onChange: (value: string) => void;
+ children: ReactNode;
 }) {
-  return (
-    <div className="relative">
-      <Filter className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-full appearance-none rounded-2xl border border-orange-100 bg-[#fffaf4] px-10 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
-      >
-        {children}
-      </select>
-    </div>
-  );
+ return (
+ <div className="relative">
+ <Filter className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+ <select
+ value={value}
+ onChange={(event) => onChange(event.target.value)}
+ className="w-full appearance-none rounded-2xl border border-primary/20 bg-[#fffaf4] px-10 py-3 text-sm font-semibold text-[#2a190f] outline-none ring-orange-200 focus:ring-4"
+ >
+ {children}
+ </select>
+ </div>
+ );
 }
 
 function PriceLine({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
-  return (
-    <div className={`flex items-center justify-between py-1 ${strong ? 'text-base font-black text-[#2a190f]' : 'text-stone-600'}`}>
-      <span>{label}</span>
-      <span>{value}</span>
-    </div>
-  );
+ return (
+ <div className={`flex items-center justify-between py-1 ${strong ?'text-base font-black text-[#2a190f]' :'text-stone-600'}`}>
+ <span>{label}</span>
+ <span>{value}</span>
+ </div>
+ );
 }
 
 function MiniMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl bg-white/10 px-3 py-3">
-      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-300">{label}</p>
-      <p className="mt-1 text-sm font-bold text-white">{value}</p>
-    </div>
-  );
+ return (
+ <div className="rounded-2xl bg-white/10 px-3 py-3">
+ <p className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-300">{label}</p>
+ <p className="mt-1 text-sm font-bold text-white">{value}</p>
+ </div>
+ );
 }
 
 function StatChip({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-[1.25rem] border border-orange-100 bg-[#fffaf4] px-4 py-3 shadow-sm">
-      <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[hsl(var(--primary))]">{label}</p>
-      <p className="mt-1 text-base font-black text-[#2a190f]">{value}</p>
-    </div>
-  );
+ return (
+ <div className="rounded-[1.25rem] border border-primary/20 bg-[#fffaf4] px-4 py-3 shadow-sm">
+ <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[hsl(var(--primary))]">{label}</p>
+ <p className="mt-1 text-base font-black text-[#2a190f]">{value}</p>
+ </div>
+ );
 }
 
 function BusinessChip({ text }: { text: string }) {
-  return <span className="rounded-full border border-white/10 bg-white/8 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-stone-100">{text}</span>;
+ return <span className="rounded-full border border-white/10 bg-white/8 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-stone-100">{text}</span>;
 }
 
 function HeroFallback({ name, loading, configured }: { name: string; loading?: boolean; configured?: boolean }) {
-  return (
-    <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_30%_30%,rgba(217,95,45,0.28),transparent_35%),linear-gradient(135deg,#fde9d6,#fff3e4,#dfefe9)]">
-      <div className="rounded-full bg-white/85 px-6 py-4 text-center shadow-lg">
-        <Utensils className="mx-auto h-8 w-8 text-[hsl(var(--primary))]" />
-        <p className="mt-2 max-w-[220px] text-sm font-black text-[#2a190f]">
-          {loading ? 'Chargement...' : configured === false ? 'Catalogue non configuré' : name}
-        </p>
-      </div>
-    </div>
-  );
+ return (
+ <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_30%_30%,rgba(217,95,45,0.28),transparent_35%),linear-gradient(135deg,#fde9d6,#fff3e4,#dfefe9)]">
+ <div className="rounded-full bg-white/85 px-6 py-4 text-center shadow-lg">
+ <Utensils className="mx-auto h-8 w-8 text-[hsl(var(--primary))]" />
+ <p className="mt-2 max-w-[220px] text-sm font-black text-[#2a190f]">
+ {loading ?'Chargement...' : configured === false ?'Catalogue non configuré' : name}
+ </p>
+ </div>
+ </div>
+ );
 }
 
 function NavLink({ href, children }: { href: string; children: ReactNode }) {
-  return (
-    <a href={href} className="rounded-lg px-4 py-2 text-sm font-black text-[#5a4334] transition hover:bg-white hover:text-[#2a190f]">
-      {children}
-    </a>
-  );
+ return (
+ <a href={href} className="rounded-lg px-4 py-2 text-sm font-black text-[#5a4334] transition hover:bg-white hover:text-[#2a190f]">
+ {children}
+ </a>
+ );
 }
 
 function FooterBlock({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <div className="space-y-3">
-      <p className="text-xs font-black uppercase tracking-[0.22em] text-[hsl(var(--primary))]">{title}</p>
-      <div className="space-y-2">{children}</div>
-    </div>
-  );
+ return (
+ <div className="space-y-3">
+ <p className="text-xs font-black uppercase tracking-[0.22em] text-[hsl(var(--primary))]">{title}</p>
+ <div className="space-y-2">{children}</div>
+ </div>
+ );
 }
 
 function FooterLink({ label }: { label: string }) {
-  return <p className="text-sm font-semibold text-stone-600">{label}</p>;
+ return <p className="text-sm font-semibold text-stone-600">{label}</p>;
 }
 
 function StatusBanner({ status }: { status: SubmitStatus }) {
-  if (status.kind === 'idle') return null;
-  const tone =
-    status.kind === 'success'
-      ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-      : status.kind === 'error'
-        ? 'border-rose-200 bg-rose-50 text-rose-700'
-        : 'border-orange-200 bg-orange-50 text-orange-800';
-  return <p className={`mt-4 rounded-2xl border px-4 py-3 text-sm font-semibold ${tone}`}>{status.message}</p>;
+ if (status.kind ==='idle') return null;
+ const tone =
+ status.kind ==='success'
+ ?'border-success/20 bg-success/[0.15] text-success'
+ : status.kind ==='error'
+ ?'border-rose-200 bg-rose-50 text-rose-700'
+ :'border-primary/20 bg-primary/[0.05] text-orange-800';
+ return <p className={`mt-4 rounded-2xl border px-4 py-3 text-sm font-semibold ${tone}`}>{status.message}</p>;
 }
 
 function upsertMeta(name: string, content: string) {
-  const selector = `meta[name="${name}"]`;
-  let element = document.head.querySelector(selector) as HTMLMetaElement | null;
-  if (!element) {
-    element = document.createElement('meta');
-    element.setAttribute('name', name);
-    document.head.appendChild(element);
-  }
-  element.setAttribute('content', content);
+ const selector = `meta[name="${name}"]`;
+ let element = document.head.querySelector(selector) as HTMLMetaElement | null;
+ if (!element) {
+ element = document.createElement('meta');
+ element.setAttribute('name', name);
+ document.head.appendChild(element);
+ }
+ element.setAttribute('content', content);
 }
 
 function formatPrice(value: number | null | undefined) {
-  if (value == null) return 'Prix à confirmer';
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value);
+ if (value == null) return'Prix à confirmer';
+ return new Intl.NumberFormat('fr-FR', { style:'currency', currency:'EUR' }).format(value);
 }
 
 function getErrorMessage(error: unknown, fallback: string) {
-  if (error instanceof Error && error.message) return error.message;
-  return fallback;
+ if (error instanceof Error && error.message) return error.message;
+ return fallback;
 }
