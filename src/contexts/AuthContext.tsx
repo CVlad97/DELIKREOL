@@ -133,15 +133,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user).finally(() => setLoading(false));
-      } else {
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchProfile(session.user).finally(() => setLoading(false));
+        } else {
+          setLoading(false);
+        }
+      })
+      .catch((error) => {
+        console.error('Error restoring Supabase session:', error);
+        setSession(null);
+        setUser(null);
+        setProfile(null);
         setLoading(false);
-      }
-    });
+      });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       void (async () => {
@@ -199,14 +208,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) return { error };
 
       if (data.user) {
+        const cleanEmail = normalizeEmail(data.user.email || email);
         const { error: profileError } = await supabase
           .from('profiles')
-          .insert({
+          .upsert({
             id: data.user.id,
             full_name: fullName,
             phone,
             user_type: 'customer',
-          });
+            email: cleanEmail,
+            contact_email: cleanEmail,
+          }, { onConflict: 'id' });
 
         if (profileError) {
           console.error('Error creating profile:', profileError);

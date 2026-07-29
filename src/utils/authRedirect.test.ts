@@ -1,7 +1,11 @@
-import { describe, expect, it } from 'vitest';
-import { sanitizeAuthNext } from './authRedirect';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { consumePasswordSetup, rememberPasswordSetup, sanitizeAuthNext } from './authRedirect';
 
 describe('auth redirect helpers', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   it('keeps dashboard routes', () => {
     expect(sanitizeAuthNext('/admin/parametres')).toBe('/admin/parametres');
     expect(sanitizeAuthNext('/espace-partenaire')).toBe('/espace-partenaire');
@@ -12,5 +16,12 @@ describe('auth redirect helpers', () => {
     expect(sanitizeAuthNext('https://evil.test/admin')).toBe('/espace-partenaire');
     expect(sanitizeAuthNext('//evil.test')).toBe('/espace-partenaire');
     expect(sanitizeAuthNext('/catalogue')).toBe('/espace-partenaire');
+  });
+
+  it('consumes password setup intent once', () => {
+    expect(consumePasswordSetup()).toBe(false);
+    rememberPasswordSetup();
+    expect(consumePasswordSetup()).toBe(true);
+    expect(consumePasswordSetup()).toBe(false);
   });
 });

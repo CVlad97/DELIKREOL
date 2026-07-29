@@ -1,4 +1,5 @@
 const AUTH_NEXT_STORAGE_KEY = 'delikreol_auth_next';
+const AUTH_SET_PASSWORD_STORAGE_KEY = 'delikreol_auth_set_password';
 
 const allowedAuthPrefixes = [
   '/admin',
@@ -43,4 +44,16 @@ export function consumeAuthNext(): string | null {
   const value = window.localStorage.getItem(AUTH_NEXT_STORAGE_KEY);
   window.localStorage.removeItem(AUTH_NEXT_STORAGE_KEY);
   return value ? sanitizeAuthNext(value) : null;
+}
+
+export function rememberPasswordSetup(): void {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(AUTH_SET_PASSWORD_STORAGE_KEY, 'true');
+}
+
+export function consumePasswordSetup(): boolean {
+  if (typeof window === 'undefined') return false;
+  const value = window.localStorage.getItem(AUTH_SET_PASSWORD_STORAGE_KEY);
+  window.localStorage.removeItem(AUTH_SET_PASSWORD_STORAGE_KEY);
+  return value === 'true';
 }

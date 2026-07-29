@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Layout } from '../../components/layout/Layout';
 import { useAuth } from '../../contexts/AuthContext';
-import { consumeAuthNext } from '../../utils/authRedirect';
+import { consumeAuthNext, consumePasswordSetup } from '../../utils/authRedirect';
 
 export default function AuthCallbackPage() {
   const { user, loading } = useAuth();
@@ -12,7 +12,13 @@ export default function AuthCallbackPage() {
     if (loading) return;
 
     if (user) {
-      navigate(consumeAuthNext() || '/espace-partenaire', { replace: true });
+      const next = consumeAuthNext() || '/espace-partenaire';
+      if (consumePasswordSetup()) {
+        navigate(`/connexion?mode=set-password&next=${encodeURIComponent(next)}`, { replace: true });
+        return;
+      }
+
+      navigate(next, { replace: true });
       return;
     }
 
