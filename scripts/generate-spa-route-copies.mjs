@@ -23,6 +23,7 @@ const routes = [
   'contact',
   'feedback',
   'connexion',
+  'auth/callback',
   'inscription-traiteur',
   'pro',
   'espace-partenaire',
