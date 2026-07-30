@@ -115,7 +115,7 @@ export default function LoginPage() {
     rememberPasswordSetup();
 
     const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
-      redirectTo: getAuthCallbackUrl(),
+      redirectTo: `${getAuthCallbackUrl()}?intent=set-password`,
     });
 
     if (error) {

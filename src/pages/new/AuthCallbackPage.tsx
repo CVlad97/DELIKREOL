@@ -13,7 +13,8 @@ export default function AuthCallbackPage() {
 
     if (user) {
       const next = consumeAuthNext() || '/espace-partenaire';
-      if (consumePasswordSetup()) {
+      const callbackIntent = new URLSearchParams(window.location.search).get('intent');
+      if (callbackIntent === 'set-password' || consumePasswordSetup()) {
         navigate(`/connexion?mode=set-password&next=${encodeURIComponent(next)}`, { replace: true });
         return;
       }

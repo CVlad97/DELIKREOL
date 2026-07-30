@@ -1,6 +1,7 @@
 import { useEffect, useState } from'react';
 import { Settings, Save, AlertTriangle, ShieldCheck, RefreshCcw } from'lucide-react';
 import { supabase, type UserType } from'../../lib/supabase';
+import { useAuth } from'../../contexts/AuthContext';
 import { useToast } from'../../contexts/ToastContext';
 
 type ProfileAccess = {
@@ -25,6 +26,7 @@ const accessRoles: UserType[] = ['customer','vendor','driver','relay_host','admi
 
 export function AdminParametres() {
  const { showToast } = useToast();
+ const { user } = useAuth();
  const [settings, setSettings] = useState({
  whatsappNumber:'596696653589',
  contactEmail:'contact@delikreol.com',
@@ -71,11 +73,15 @@ export function AdminParametres() {
  };
 
  const updateProfileRole = async (profileId: string, userType: UserType) => {
+ if (profileId === user?.id && userType !=='admin') {
+ showToast('Impossible de retirer votre propre accès admin depuis cette page','error');
+ return;
+ }
  setUpdatingProfileId(profileId);
  try {
  const { error } = await supabase
  .from('profiles')
- .update({ user_type: userType })
+ .update({ user_type: userType, role: userType })
  .eq('id', profileId);
 
  if (error) throw error;
@@ -167,6 +173,7 @@ export function AdminParametres() {
  <div className="divide-y divide-orange-100">
  {profiles.map((profile) => {
  const email = profile.email || profile.contact_email ||'Email non renseigné';
+ const isCurrentAdmin = profile.id === user?.id && profile.user_type ==='admin';
  return (
  <div key={profile.id} className="grid gap-3 px-4 py-4 text-sm md:grid-cols-[1.4fr_.9fr_.8fr] md:items-center">
  <div>
@@ -179,7 +186,7 @@ export function AdminParametres() {
  </span>
  <select
  value={profile.user_type}
- disabled={updatingProfileId === profile.id}
+ disabled={updatingProfileId === profile.id || isCurrentAdmin}
  onChange={(event) => updateProfileRole(profile.id, event.target.value as UserType)}
  className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm font-bold"
  >
