@@ -47,6 +47,10 @@ const DevenirPointRelaisPage = lazy(async () => {
 const PointsRelaisPage = lazy(() => import('./pages/new/PointsRelaisPage'));
 const AidePage = lazy(() => import('./pages/new/AidePage'));
 const LivraisonPage = lazy(() => import('./pages/new/LivraisonPage'));
+const FAQPage = lazy(() => import('./pages/new/FAQPage'));
+const BlogPage = lazy(() => import('./pages/new/BlogPage'));
+const BusinessPage = lazy(() => import('./pages/new/BusinessPage'));
+const RecrutementPage = lazy(() => import('./pages/new/RecrutementPage'));
 const NotFoundPage = lazy(() => import('./pages/new/NotFoundPage'));
 const ContactPage = lazy(() => import('./pages/new/ContactPage'));
 const FeedbackPage = lazy(() => import('./pages/new/FeedbackPage'));
@@ -141,6 +145,11 @@ export function AppRouter() {
                   <Route path="devenir-point-relais" element={<DevenirPointRelaisPage />} />
                   <Route path="points-relais" element={<PointsRelaisPage />} />
                   <Route path="aide" element={<AidePage />} />
+                  <Route path="faq" element={<FAQPage />} />
+                  <Route path="blog" element={<BlogPage />} />
+                  <Route path="business" element={<BusinessPage />} />
+                  <Route path="recrutement" element={<RecrutementPage />} />
+                  <Route path="traiteur" element={<DevenirPartenairePage />} />
                   <Route path="livraison" element={<LivraisonPage />} />
                   <Route path="contact" element={<ContactPage />} />
                   <Route path="feedback" element={<FeedbackPage />} />
