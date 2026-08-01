@@ -91,5 +91,8 @@
     "vite": "^6.3.5",
     "vitest": "^4.1.8",
     "wrangler": "^4.99.0"
+  },
+  "overrides": {
+    "brace-expansion": "2.1.3"
   }
 }
