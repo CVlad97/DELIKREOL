@@ -80,6 +80,7 @@ const AdminSimulation = lazy(() => import('./pages/admin/AdminSimulation'));
 const AdminCatererValidation = lazy(() => import('./pages/admin/AdminCatererValidation'));
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'));
 const AdminFinance = lazy(() => import('./pages/admin/AdminFinance'));
+const AdminPaymentsReconciliation = lazy(() => import('./pages/admin/AdminPaymentsReconciliation'));
 const AdminFeedback = lazy(() => import('./pages/admin/AdminFeedback'));
 const AdminPilotAccess = lazy(() => import('./pages/admin/AdminPilotAccess'));
 const AdminPointsRelais = lazy(() => import('./pages/admin/AdminPointsRelais'));
@@ -183,6 +184,7 @@ export function AppRouter() {
                   <Route path="simulation" element={<AdminSimulation />} />
                   <Route path="dashboard" element={<AdminDashboardPage />} />
                   <Route path="finance" element={<AdminFinance />} />
+                  <Route path="paiements" element={<AdminPaymentsReconciliation />} />
                   <Route path="factures" element={<AdminInvoices />} />
                   <Route path="feedback" element={<AdminFeedback />} />
                   <Route path="applications" element={<AdminPartnersApplications />} />
