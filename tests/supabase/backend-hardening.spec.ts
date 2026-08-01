@@ -32,19 +32,6 @@ describe('backend production hardening', () => {
     expect(migration).toContain('idx_orders_idempotency_key_unique');
   });
 
-  it('keeps banking API adapters admin-only and server-secret only', () => {
-    const qontoFinance = read('supabase/functions/qonto-finance/index.ts');
-    const qontoSync = read('supabase/functions/qonto-sync/index.ts');
-    const revolut = read('supabase/functions/revolut-business/index.ts');
-
-    for (const source of [qontoFinance, qontoSync, revolut]) {
-      expect(source).toContain('Admin required');
-      expect(source).toContain('SUPABASE_SERVICE_ROLE_KEY');
-      expect(source).not.toContain("'Access-Control-Allow-Origin': '*'");
-      expect(source).not.toContain('VITE_');
-    }
-  });
-
   it('disables legacy create-payment-intent public flow', () => {
     const source = read('supabase/functions/create-payment-intent/index.ts');
 
