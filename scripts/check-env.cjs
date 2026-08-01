@@ -25,9 +25,9 @@ const REQUIRED_ENV_VARS = [
 
 const OPTIONAL_ENV_VARS = [
   {
-    name: 'VITE_STRIPE_PUBLIC_KEY',
-    description: 'Clé publique Stripe (pour paiements)',
-    example: 'pk_...',
+    name: 'VITE_ENABLE_STRIPE_PUBLIC',
+    description: 'Stripe public doit rester false pour le lancement manuel',
+    example: 'false',
   },
   {
     name: 'VITE_GOOGLE_MAPS_API_KEY',

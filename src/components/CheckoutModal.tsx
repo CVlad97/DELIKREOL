@@ -1,7 +1,6 @@
 import { useMemo, useState } from'react';
 import {
  CheckCircle,
- CreditCard,
  Landmark,
  MapPin,
  MessageCircle,
@@ -13,7 +12,6 @@ import { useCart } from'../contexts/CartContext';
 import { useAuth } from'../contexts/AuthContext';
 import { ordersService } from'../services/ordersService';
 import { shouldFallbackToDemo } from'../utils/supabaseFallback';
-import { createStripeCheckoutSession } from'../utils/stripe';
 import { Order } from'../types';
 
 interface CheckoutModalProps {
@@ -22,7 +20,7 @@ interface CheckoutModalProps {
  onOrderCreated?: (order: Order) => void;
 }
 
-type PaymentMode ='bank_transfer' |'whatsapp' |'stripe';
+type PaymentMode ='bank_transfer' |'whatsapp';
 
 interface SuccessState {
  orderNumber: string;
@@ -47,19 +45,15 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
  const [fallbackWhatsappUrl, setFallbackWhatsappUrl] = useState('');
  const [success, setSuccess] = useState<SuccessState | null>(null);
 
- // Stripe public reste désactivé tant que le go-live n'est pas validé explicitement.
- const stripeAvailable =
- import.meta.env.VITE_ENABLE_STRIPE_PUBLIC ==='true' &&
- Boolean(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
  const deliveryFee = deliveryType ==='home_delivery' ? 5 : 0;
  const finalTotal = total + deliveryFee;
  const commissionDelikreol = total * 0.2;
  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER ||'596696653589';
- const bankPaymentUrl = (import.meta.env.VITE_BANK_PAYMENT_URL as string | undefined) ||'';
- const bankPaymentIban = (import.meta.env.VITE_BANK_IBAN as string | undefined) ||'';
- const bankPaymentBic = (import.meta.env.VITE_BANK_BIC as string | undefined) ||'';
+ const bankPaymentUrl = (import.meta.env.VITE_EXTERNAL_PAYMENT_URL as string | undefined) ||'';
+ const bankPaymentIban = (import.meta.env.VITE_QONTO_IBAN as string | undefined) ||'';
+ const bankPaymentBic = (import.meta.env.VITE_QONTO_BIC as string | undefined) ||'';
  const bankPaymentLabel =
- (import.meta.env.VITE_BANK_PAYMENT_LABEL as string | undefined) ||'Virement / lien bancaire';
+ (import.meta.env.VITE_QONTO_ACCOUNT_NAME as string | undefined) ||'Virement Qonto';
 
  const paymentOptions = useMemo(() => {
  const options: Array<{
@@ -84,17 +78,8 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
  },
  ];
 
- if (stripeAvailable) {
- options.unshift({
- id:'stripe',
- title:'Carte bancaire (Stripe)',
- subtitle:'Paiement sécurisé sur la page Stripe',
- icon: CreditCard,
- });
- }
-
  return options;
- }, [bankPaymentLabel, bankPaymentUrl, stripeAvailable]);
+ }, [bankPaymentLabel, bankPaymentUrl]);
 
  if (!isOpen) return null;
 
@@ -144,7 +129,6 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
  try {
  const paymentNotes = [
  `Mode de paiement souhaité: ${paymentLabel}`,
- paymentMode ==='stripe' ?'Paiement Stripe en attente.' :'',
  `Assistance WhatsApp: https://wa.me/${whatsappNumber}`,
  bankPaymentUrl ? `Lien bancaire: ${bankPaymentUrl}` :'',
  bankPaymentIban ? `IBAN: ${bankPaymentIban}` :'',
@@ -175,24 +159,6 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
  });
 
  onOrderCreated?.(createdOrder);
-
- if (paymentMode ==='stripe') {
- try {
- const checkoutUrl = await createStripeCheckoutSession(createdOrder.id, window.location.origin);
- localStorage.setItem('pendingStripeOrderId', createdOrder.id);
- window.location.assign(checkoutUrl);
- return;
- } catch (stripeError) {
- console.error('Stripe Checkout error:', stripeError);
- setFallbackWhatsappUrl(whatsappUrl);
- setError(
- `Commande ${orderNumber} enregistrée, mais Stripe est indisponible (${errorMessage(
- stripeError,
- )}). Utilisez WhatsApp pour finaliser.`,
- );
- return;
- }
- }
 
  clearCart();
  setSuccess({
@@ -354,12 +320,9 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
  );
  })}
  </div>
- {paymentMode ==='stripe' && (
- <div className="mt-3 flex items-center gap-2 rounded-lg border border-success/30 bg-success/10 px-4 py-3 text-xs text-success">
- <CreditCard size={14} />
- Vous serez redirigé vers Stripe. La commande ne sera préparée qu'après paiement confirmé.
+ <div className="mt-3 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
+ Stripe est désactivé : finalisation par virement ou WhatsApp avec validation humaine.
  </div>
- )}
  </section>
 
  {deliveryType ==='home_delivery' && (
@@ -442,8 +405,6 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
  >
  {loading
  ?'Traitement…'
- : paymentMode ==='stripe'
- ? `Payer ${finalTotal.toFixed(2)} € avec Stripe`
  : `Enregistrer la commande ${finalTotal.toFixed(2)} €`}
  </button>
 

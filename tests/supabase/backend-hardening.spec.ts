@@ -15,8 +15,34 @@ describe('backend production hardening', () => {
     expect(source).toContain('.from("products")');
     expect(source).toContain('Panier multi-vendeur bloqué');
     expect(source).toContain('vendor_commission');
+    expect(source).toContain('paymentProvider === "stripe_test"');
+    expect(source).toContain('create_checkout_order_atomic');
     expect(source).not.toContain('Number(total || 0)');
     expect(source).not.toContain('Number(total_amount');
+  });
+
+  it('prepares atomic idempotence for checkout-order', () => {
+    const migration = read('supabase/migrations/20260731000001_modular_manual_payments.sql');
+
+    expect(migration).toContain('create_checkout_order_atomic');
+    expect(migration).toContain('pg_advisory_xact_lock');
+    expect(migration).toContain('target_idempotency_key');
+    expect(migration).toContain('grant execute on function public.create_checkout_order_atomic');
+    expect(migration).toContain('payment_duplicate_audit');
+    expect(migration).toContain('idx_orders_idempotency_key_unique');
+  });
+
+  it('keeps banking API adapters admin-only and server-secret only', () => {
+    const qontoFinance = read('supabase/functions/qonto-finance/index.ts');
+    const qontoSync = read('supabase/functions/qonto-sync/index.ts');
+    const revolut = read('supabase/functions/revolut-business/index.ts');
+
+    for (const source of [qontoFinance, qontoSync, revolut]) {
+      expect(source).toContain('Admin required');
+      expect(source).toContain('SUPABASE_SERVICE_ROLE_KEY');
+      expect(source).not.toContain("'Access-Control-Allow-Origin': '*'");
+      expect(source).not.toContain('VITE_');
+    }
   });
 
   it('disables legacy create-payment-intent public flow', () => {

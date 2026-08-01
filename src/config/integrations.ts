@@ -20,36 +20,31 @@ export interface IntegrationsConfig {
   };
 }
 
-export function isStripeTestPublicEnabled(flag: unknown, publicKey: unknown): boolean {
-  return flag === 'true' && typeof publicKey === 'string' && publicKey.startsWith('pk_test_');
+export function isStripeTestPublicEnabled(_flag: unknown, _publicKey: unknown): boolean {
+  return false;
 }
-
-const stripePublicEnabled = isStripeTestPublicEnabled(
-  import.meta.env.VITE_ENABLE_STRIPE_PUBLIC,
-  import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
-);
 
 export const integrations: IntegrationsConfig = {
   stripe: {
-    // Stripe public reste en mode test uniquement tant que le go-live n'est pas validé.
-    enabled: stripePublicEnabled,
+    // Stripe reste volontairement désactivé pour ne pas bloquer le lancement WhatsApp/virements.
+    enabled: false,
     label: 'Stripe (carte bancaire)',
-    description: 'Paiement sécurisé Stripe en mode test uniquement',
-    publicKey: stripePublicEnabled ? import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY : undefined,
-    status: stripePublicEnabled ? 'configured' : 'pending',
+    description: 'Désactivé pour ce lancement. Code conservé derrière feature flag serveur.',
+    publicKey: undefined,
+    status: 'pending',
   },
   qonto: {
     enabled: true,
     label: 'Qonto — Martinique 972',
     description: 'Compte pro Qonto pour DeliKreol · IBAN FR · Solo Premium (39€ HT) · Rapprochement auto commandes',
-    apiBaseUrl: import.meta.env.VITE_QONTO_API_URL,
+    apiBaseUrl: undefined,
     status: 'configured',
   },
   revolut: {
     enabled: false,
     label: 'Revolut Business',
     description: 'Paiements internationaux et multi-devises',
-    apiBaseUrl: import.meta.env.VITE_REVOLUT_API_URL,
+    apiBaseUrl: undefined,
     status: 'pending',
   },
   zapier: {
@@ -83,7 +78,7 @@ export const integrations: IntegrationsConfig = {
   crypto: {
     enabled: false,
     label: 'Crypto Wallet',
-    description: 'Conversion points → tokens blockchain (Solana/Polygon)',
+    description: 'Paiement wallet optionnel sans token DELIKREOL et sans clé privée frontend',
     provider: undefined,
     walletAddress: import.meta.env.VITE_CRYPTO_WALLET_ADDRESS,
     status: 'pending',
