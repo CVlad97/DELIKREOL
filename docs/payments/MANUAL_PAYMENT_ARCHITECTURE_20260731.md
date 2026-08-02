@@ -1,6 +1,6 @@
 # DELIKREOL — Audit et architecture paiements manuels
 
-Date : 2026-07-31  
+Date : 2026-07-31
 Décision : Stripe et Google Auth ne doivent pas bloquer la production. Le parcours prioritaire est Supabase + paiement manuel + confirmation WhatsApp.
 
 ## 1. État initial audité

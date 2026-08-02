@@ -781,7 +781,7 @@ export default function CartPage() {
 	 </div>
 	 )}
 	 </div>
-	
+
 	 {/* Delivery info */}
 	 <div className="bg-white rounded-2xl border border-primary/100 p-6 space-y-4">
  <h2 className="text-lg font-bold text-foreground">Informations de commande</h2>
