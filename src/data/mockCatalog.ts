@@ -66,7 +66,7 @@ export const mockProducts: LocalProduct[] = [
     vendor: 'Snack Save Peyia',
     price: 12,
     category: 'Plats',
-    image: photoAConfirmer,
+    image: vendorImage('vendors/save-peyia/drive-reimport/IMG-20260710-WA0005.jpg'),
     description: 'Côte de porc grillée au feu de bois, tendre et savoureuse, servie avec du riz blanc parfumé et des crudités fraîches. Le plat signature de Snack Savè Peyi\'A, un régal généreux fait maison ! 🔥',
     zone: 'Rivière-Pilote',
     available: true,

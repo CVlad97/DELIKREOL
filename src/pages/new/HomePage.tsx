@@ -342,22 +342,16 @@ export default function HomePage() {
       {/* Hero Section — concept moderne orienté conversion */}
       <section className="relative isolate overflow-hidden bg-background text-foreground">
         <div className="absolute inset-0">
-          <picture>
-            <source
-              srcSet={`${import.meta.env.BASE_URL}branding/hero-tropical-714.webp`}
-              type="image/webp"
-            />
-            <img
-              loading="eager"
-              {...{ fetchpriority: 'high' }}
-              decoding="async"
-              src={`${import.meta.env.BASE_URL}branding/hero-tropical.png`}
-              alt="Livraison DeliKreol en Martinique"
-              className="h-full w-full object-cover object-center opacity-[0.32] lg:opacity-55"
-              width={714}
-              height={720}
-            />
-          </picture>
+          <img
+            loading="eager"
+            {...{ fetchpriority: 'high' }}
+            decoding="async"
+            src={`${import.meta.env.BASE_URL}branding/hero-tropical.png`}
+            alt="Livraison DeliKreol en Martinique"
+            className="h-full w-full object-cover object-center"
+            width={714}
+            height={720}
+          />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(251,146,60,0.14),transparent_28%),radial-gradient(circle_at_86%_20%,rgba(16,185,129,0.1),transparent_24%),linear-gradient(90deg,rgba(255,253,248,0.98)_0%,rgba(255,249,239,0.94)_48%,rgba(255,253,248,0.38)_100%)]" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/85" />
         </div>
@@ -567,8 +561,8 @@ export default function HomePage() {
           <div className="mt-8 rounded-[2.25rem] border border-primary/20 bg-white p-4 shadow-soft md:p-6">
             <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
               <div>
-                <h2 className="text-3xl font-black tracking-tight text-foreground md:text-4xl">Meilleures ventes</h2>
-                <p className="mt-2 text-muted-foreground">Les plats les plus attractifs, visibles dès le haut de page</p>
+                <h2 className="text-3xl font-black tracking-tight text-foreground md:text-4xl">À commander maintenant</h2>
+                <p className="mt-2 text-muted-foreground">Meilleures ventes et plats disponibles dès le haut de page</p>
               </div>
               <Link
                 to="/catalogue"
