@@ -11,6 +11,9 @@ const allowedOrigins = new Set([
 const MAX_BODY_BYTES = 16_384;
 const MAX_ITEMS = 25;
 const DEFAULT_COMMISSION_RATE = 15;
+const DIRECT_DELIVERY_MULTIPLE_VENDORS_CODE = "DIRECT_DELIVERY_MULTIPLE_VENDORS_NOT_ALLOWED";
+const DIRECT_DELIVERY_MULTIPLE_VENDORS_MESSAGE =
+  "La livraison directe ne permet de commander qu’auprès d’un seul traiteur à la fois. Videz votre panier ou choisissez une livraison programmée pour commander auprès de plusieurs traiteurs.";
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const DELIVERY_FEES: Record<string, { cents: number; type: string }> = {
   retrait: { cents: 0, type: "pickup" },
@@ -89,6 +92,14 @@ function normalizeQuantity(value: unknown) {
 function sanitizeText(value: unknown, maxLength: number) {
   if (typeof value !== "string") return "";
   return value.trim().slice(0, maxLength);
+}
+
+function normalizeDeliveryOrderMode(value: unknown) {
+  const mode = sanitizeText(value, 40);
+  if (["livraison_programmee", "scheduled", "programmee", "programmée"].includes(mode)) {
+    return "livraison_programmee";
+  }
+  return "livraison_directe";
 }
 
 async function sha256Hex(value: string) {
@@ -218,13 +229,35 @@ Deno.serve(async (req: Request) => {
       };
     });
 
-    if (vendorIds.size !== 1) {
-      return json(req, { error: "Panier multi-vendeur bloqué en lancement: une commande par partenaire" }, 409);
-    }
-
     const mode = sanitizeText(body.delivery_mode || body.mode, 32) || "retrait";
     const delivery = DELIVERY_FEES[mode];
     if (!delivery) return json(req, { error: "delivery_mode invalide" }, 400);
+    const deliveryOrderMode = normalizeDeliveryOrderMode(
+      body.delivery_order_mode || body.order_delivery_mode || body.order_timing,
+    );
+    const creneaux = sanitizeText(body.creneaux, 240);
+
+    if (deliveryOrderMode === "livraison_directe" && vendorIds.size !== 1) {
+      return json(
+        req,
+        {
+          code: DIRECT_DELIVERY_MULTIPLE_VENDORS_CODE,
+          error: DIRECT_DELIVERY_MULTIPLE_VENDORS_MESSAGE,
+        },
+        409,
+      );
+    }
+
+    if (deliveryOrderMode === "livraison_programmee" && vendorIds.size > 1 && !creneaux) {
+      return json(
+        req,
+        {
+          code: "SCHEDULED_DELIVERY_SLOT_REQUIRED",
+          error: "Un créneau programmé est requis pour une commande multi-traiteurs.",
+        },
+        409,
+      );
+    }
 
     const subtotalCents = orderItems.reduce((sum, item) => sum + Math.round(Number(item.subtotal) * 100), 0);
     const totalCents = subtotalCents + delivery.cents;
@@ -260,7 +293,7 @@ Deno.serve(async (req: Request) => {
         total_amount: totalCents / 100,
         delivery_type: delivery.type,
         notes: sanitizeText(body.notes, 1000) || null,
-        creneaux: sanitizeText(body.creneaux, 240) || null,
+        creneaux: creneaux || null,
         address: sanitizeText(body.address, 240) || null,
         source: "checkout_order_function",
         status: "pending",
@@ -296,6 +329,9 @@ Deno.serve(async (req: Request) => {
         delivery_fee_cents: delivery.cents,
         total_cents: totalCents,
         vendor_id: Array.from(vendorIds)[0],
+        vendor_ids: Array.from(vendorIds),
+        delivery_order_mode: deliveryOrderMode,
+        order_scope: vendorIds.size > 1 ? "multi-traiteurs" : "mono-traiteur",
         payment_provider: paymentProvider,
       },
     });

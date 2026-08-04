@@ -1,5 +1,10 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Product } from '../lib/supabase';
+import {
+  DIRECT_DELIVERY_MULTIPLE_VENDORS_MESSAGE,
+  type CartDeliveryOrderMode,
+  validateCartVendorRule,
+} from '../utils/cartVendorRules';
 
 interface CartItem extends Product {
   quantity: number;
@@ -7,7 +12,12 @@ interface CartItem extends Product {
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (product: Product) => void;
+  deliveryOrderMode: CartDeliveryOrderMode;
+  setDeliveryOrderMode: (mode: CartDeliveryOrderMode) => void;
+  addItem: (product: Product, options?: { replaceCart?: boolean; deliveryOrderMode?: CartDeliveryOrderMode }) => {
+    added: boolean;
+    message?: string;
+  };
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -44,21 +54,47 @@ function readInitialCart(): CartItem[] {
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(readInitialCart);
+  const [deliveryOrderMode, setDeliveryOrderModeState] = useState<CartDeliveryOrderMode>(() => {
+    const saved = localStorage.getItem('cart_delivery_order_mode');
+    return saved === 'livraison_programmee' ? 'livraison_programmee' : 'livraison_directe';
+  });
 
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(items));
   }, [items]);
 
-  const addItem = (product: Product) => {
+  useEffect(() => {
+    localStorage.setItem('cart_delivery_order_mode', deliveryOrderMode);
+  }, [deliveryOrderMode]);
+
+  const setDeliveryOrderMode = (nextMode: CartDeliveryOrderMode) => {
+    setDeliveryOrderModeState(nextMode);
+  };
+
+  const addItem = (product: Product, options?: { replaceCart?: boolean; deliveryOrderMode?: CartDeliveryOrderMode }) => {
+    let result = { added: true as boolean, message: undefined as string | undefined };
+
     setItems((previousItems) => {
-      const existing = previousItems.find((item) => item.id === product.id);
+      const baseItems = options?.replaceCart ? [] : previousItems;
+      const rule = validateCartVendorRule(baseItems, product, options?.deliveryOrderMode || deliveryOrderMode);
+      if (!rule.allowed) {
+        result = {
+          added: false,
+          message: rule.message || DIRECT_DELIVERY_MULTIPLE_VENDORS_MESSAGE,
+        };
+        return previousItems;
+      }
+
+      const existing = baseItems.find((item) => item.id === product.id);
       if (existing) {
-        return previousItems.map((item) =>
+        return baseItems.map((item) =>
           item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
         );
       }
-      return [...previousItems, { ...product, quantity: 1 }];
+      return [...baseItems, { ...product, quantity: 1 }];
     });
+
+    return result;
   };
 
   const removeItem = (productId: string) => {
@@ -84,7 +120,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, removeItem, updateQuantity, clearCart, total, itemCount }}
+      value={{
+        items,
+        deliveryOrderMode,
+        setDeliveryOrderMode,
+        addItem,
+        removeItem,
+        updateQuantity,
+        clearCart,
+        total,
+        itemCount,
+      }}
     >
       {children}
     </CartContext.Provider>

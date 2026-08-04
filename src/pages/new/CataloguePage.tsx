@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
+  AlertCircle,
   ChefHat,
   Eye,
   LocateFixed,
@@ -31,6 +32,10 @@ import { calculateDistanceKm } from '../../services/geolocation';
 import { isUsableThumbnail } from '../../services/catalogImageResolver';
 import { trackPublicView } from '../../services/metricsService';
 import { setPageMeta } from '../../services/seo';
+import {
+  DIRECT_DELIVERY_MULTIPLE_VENDORS_MESSAGE,
+  validateCartVendorRule,
+} from '../../utils/cartVendorRules';
 
 type SortMode = 'default' | 'prix-croissant' | 'prix-decroissant' | 'disponible' | 'distance';
 type DeliveryOption = 'retraite' | 'bateau' | 'infirmiere';
@@ -97,8 +102,13 @@ function toCartProduct(product: LocalProduct): Product {
 
 export default function CataloguePage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { addItem } = useCart();
-  const { showSuccess } = useToast();
+  const {
+    items,
+    addItem,
+    deliveryOrderMode,
+    setDeliveryOrderMode,
+  } = useCart();
+  const { showSuccess, showError } = useToast();
 
   const [query, setQuery] = useState(searchParams.get('q') ?? '');
   const [category, setCategory] = useState(searchParams.get('cat') ?? 'tous');
@@ -113,6 +123,7 @@ export default function CataloguePage() {
   const [locating, setLocating] = useState(false);
   const [position, setPosition] = useState<{ latitude: number; longitude: number } | null>(null);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string; caption: string } | null>(null);
+  const [blockedProduct, setBlockedProduct] = useState<LocalProduct | null>(null);
 
   useEffect(() => {
     setPageMeta(
@@ -252,8 +263,32 @@ export default function CataloguePage() {
   };
 
   const addToCart = (product: LocalProduct) => {
-    addItem(toCartProduct(product));
+    const result = addItem(toCartProduct(product));
+    if (!result.added) {
+      setBlockedProduct(product);
+      showError(result.message || DIRECT_DELIVERY_MULTIPLE_VENDORS_MESSAGE);
+      return;
+    }
+    setBlockedProduct(null);
     showSuccess(`${product.name} ajouté au panier`);
+  };
+
+  const replaceCartWithProduct = (product: LocalProduct) => {
+    if (!window.confirm('Vider le panier actuel et commander auprès de ce traiteur ?')) return;
+    const result = addItem(toCartProduct(product), { replaceCart: true });
+    if (result.added) {
+      setBlockedProduct(null);
+      showSuccess(`Panier remplacé par ${product.name}`);
+    }
+  };
+
+  const switchToScheduledAndAdd = (product: LocalProduct) => {
+    setDeliveryOrderMode('livraison_programmee');
+    const result = addItem(toCartProduct(product), { deliveryOrderMode: 'livraison_programmee' });
+    if (result.added) {
+      setBlockedProduct(null);
+      showSuccess('Livraison programmée activée : panier multi-traiteurs autorisé.');
+    }
   };
 
   const openProductPreview = (product: LocalProduct, partnerImage?: string | null) => {
@@ -316,6 +351,58 @@ export default function CataloguePage() {
               </button>
             </div>
           </div>
+
+          {items.length > 0 && (
+            <div className="mb-6 rounded-2xl border border-border bg-white p-4 shadow-sm">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-sm font-black text-foreground">Mode de commande panier</p>
+                  <p className="text-xs text-muted-foreground">
+                    Livraison directe : un seul traiteur. Livraison programmée : plusieurs traiteurs si le créneau est compatible.
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryOrderMode('livraison_directe')}
+                    className={`rounded-xl px-4 py-2 text-sm font-black ${deliveryOrderMode === 'livraison_directe' ? 'bg-primary text-primary-foreground' : 'border border-border bg-muted'}`}
+                  >
+                    Directe
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryOrderMode('livraison_programmee')}
+                    className={`rounded-xl px-4 py-2 text-sm font-black ${deliveryOrderMode === 'livraison_programmee' ? 'bg-primary text-primary-foreground' : 'border border-border bg-muted'}`}
+                  >
+                    Programmée
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {blockedProduct && (
+            <div className="mb-6 rounded-2xl border border-secondary/30 bg-secondary/10 p-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-secondary" />
+                <div className="min-w-0 flex-1">
+                  <p className="font-black text-secondary">Traiteur incompatible avec la livraison directe</p>
+                  <p className="mt-1 text-sm text-secondary">{DIRECT_DELIVERY_MULTIPLE_VENDORS_MESSAGE}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button type="button" onClick={() => setBlockedProduct(null)} className="rounded-xl border border-secondary/30 bg-white px-3 py-2 text-xs font-black text-secondary">
+                      Conserver mon panier
+                    </button>
+                    <button type="button" onClick={() => replaceCartWithProduct(blockedProduct)} className="rounded-xl bg-secondary px-3 py-2 text-xs font-black text-white">
+                      Vider et commander chez {blockedProduct.vendor}
+                    </button>
+                    <button type="button" onClick={() => switchToScheduledAndAdd(blockedProduct)} className="rounded-xl bg-primary px-3 py-2 text-xs font-black text-primary-foreground">
+                      Passer en livraison programmée
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             {CATEGORIES.map((item) => (
@@ -382,6 +469,8 @@ export default function CataloguePage() {
               {filteredProducts.map((product) => {
                 const vendorData = vendorMap.get(normalizeVendor(product.vendor));
                 const tags: HealthTag[] = product.healthTags || vendorData?.healthTags || [];
+                const vendorRule = validateCartVendorRule(items, toCartProduct(product), deliveryOrderMode);
+                const isVendorCompatible = vendorRule.allowed;
 
                 return (
                   <article key={product.id} className="group relative flex min-w-0 flex-col overflow-hidden rounded-3xl border border-border bg-white shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg" data-product-card={product.id}>
@@ -436,13 +525,23 @@ export default function CataloguePage() {
                         </div>
 
                         <div className="mt-4 grid grid-cols-[1fr_auto] gap-2">
-                          <button type="button" onClick={() => addToCart(product)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2.5 text-sm font-black text-primary-foreground hover:bg-primary">
-                            <Plus className="h-4 w-4" /> Ajouter
+                          <button
+                            type="button"
+                            onClick={() => addToCart(product)}
+                            aria-describedby={!isVendorCompatible ? `vendor-rule-${product.id}` : undefined}
+                            className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-black ${isVendorCompatible ? 'bg-primary text-primary-foreground hover:bg-primary' : 'border border-secondary/30 bg-secondary/10 text-secondary'}`}
+                          >
+                            <Plus className="h-4 w-4" /> {isVendorCompatible ? 'Ajouter' : 'Incompatible'}
                           </button>
                           <button type="button" onClick={() => openProductPreview(product, vendorData?.partnerImage)} className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-muted hover:border-primary/40 hover:text-primary" aria-label={`Voir ${product.name} en gros plan`}>
                             <Eye className="h-4 w-4" />
                           </button>
                         </div>
+                        {!isVendorCompatible && (
+                          <p id={`vendor-rule-${product.id}`} className="mt-2 text-xs font-semibold text-secondary">
+                            Livraison directe limitée au traiteur déjà dans le panier.
+                          </p>
+                        )}
                       </div>
                     </div>
                   </article>

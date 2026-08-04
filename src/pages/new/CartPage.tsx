@@ -36,6 +36,11 @@ import { OrderSummaryByPartner, groupItemsByPartner } from'../../components/Orde
 import { isSupabaseConfigured, supabase } from'../../lib/supabase';
 import type { Product } from'../../lib/supabase';
 import { createStripeCheckoutSession } from'../../utils/stripe';
+import {
+ DIRECT_DELIVERY_MULTIPLE_VENDORS_MESSAGE,
+ groupCartItemsByVendor,
+ validateOrderVendorRule,
+} from'../../utils/cartVendorRules';
 
 interface CartItem extends Product {
  quantity: number;
@@ -73,6 +78,7 @@ function buildWhatsAppOrderMessage(params: {
  items: CartItem[];
  total: number;
  mode:'retrait' |'relais' |'livraison';
+ deliveryOrderMode:'livraison_directe' |'livraison_programmee';
  commune: string;
  creneauText: string;
  notes: string;
@@ -80,7 +86,7 @@ function buildWhatsAppOrderMessage(params: {
  phone: string;
  orderId: string;
 }): string {
- const { items, total, mode, commune, creneauText, notes, traiteurs, phone, orderId } = params;
+ const { items, total, mode, deliveryOrderMode, commune, creneauText, notes, traiteurs, phone, orderId } = params;
  const modeFee = DELIVERY_FEES[mode]?.fee || 0;
  const partnerGroups = groupItemsByPartner(items);
  const productList = partnerGroups
@@ -106,6 +112,7 @@ function buildWhatsAppOrderMessage(params: {
  `Total : ${(total + modeFee).toFixed(2).replace('.',',')} € (dont ${modeFee.toFixed(2).replace('.',',')} € de ${mode ==='retrait' ?'retrait' : mode ==='relais' ?'point relais' :'livraison'})`,
  `Commune : ${commune ||'Non précisée'}`,
  `Type : ${mode ==='retrait' ?'Retrait' : mode ==='relais' ?'Point relais' :'Livraison'}`,
+ `Commande : ${deliveryOrderMode ==='livraison_programmee' ?'Livraison programmée' :'Livraison directe'}${partnerGroups.length > 1 ?' — multi-traiteurs' :' — mono-traiteur'}`,
  `Créneau(x) souhaité(s) : ${creneauText ||'Non précisé'}`,
  `Traiteur : ${traiteurText}`,
  phone ? `Téléphone : ${phone}` :'','',
@@ -121,7 +128,16 @@ function buildWhatsAppOrderMessage(params: {
 }
 
 export default function CartPage() {
- const { items, updateQuantity, removeItem, clearCart, total, itemCount } = useCart();
+ const {
+ items,
+ updateQuantity,
+ removeItem,
+ clearCart,
+ total,
+ itemCount,
+ deliveryOrderMode,
+ setDeliveryOrderMode,
+ } = useCart();
  const { showSuccess, showError } = useToast();
  const navigate = useNavigate();
 
@@ -219,12 +235,7 @@ export default function CartPage() {
 
  // Get unique vendor names from cart
  const traiteurs = useMemo(() => {
- const vendorSet = new Set<string>();
- items.forEach((item) => {
- if (item.vendor_id) vendorSet.add(item.vendor_id);
- if (item.vendor?.business_name) vendorSet.add(item.vendor.business_name);
- });
- return Array.from(vendorSet);
+ return groupCartItemsByVendor(items).map((group) => group.name);
  }, [items]);
 
  const hasMultipleVendors = traiteurs.length > 1;
@@ -253,6 +264,7 @@ export default function CartPage() {
  notes,
  creneaux: getCreneauText(),
  payment_provider: paymentProvider,
+ delivery_order_mode: deliveryOrderMode,
  },
  });
 
@@ -283,9 +295,13 @@ export default function CartPage() {
  showError("Merci d'indiquer une adresse email valide.");
  return false;
  }
- // Block multi-traiteur
- if (hasMultipleVendors) {
- showError('Pour cette version test, merci de passer une commande par partenaire. Le panier multi-traiteur arrive bientôt.');
+ const vendorRule = validateOrderVendorRule(items, deliveryOrderMode);
+ if (!vendorRule.allowed) {
+ showError(vendorRule.message || DIRECT_DELIVERY_MULTIPLE_VENDORS_MESSAGE);
+ return false;
+ }
+ if (deliveryOrderMode ==='livraison_programmee' && hasMultipleVendors && !getCreneauText()) {
+ showError('Choisissez un créneau programmé compatible avant de valider une commande multi-traiteurs.');
  return false;
  }
  setPhoneError('');
@@ -322,6 +338,8 @@ export default function CartPage() {
  total_amount: total + deliveryFee,
  delivery_fee: deliveryFee,
  delivery_type: mode,
+ delivery_order_mode: deliveryOrderMode,
+ order_scope: hasMultipleVendors ?'multi-traiteurs' :'mono-traiteur',
  commune,
  creneaux: getCreneauText(),
  notes,
@@ -363,6 +381,7 @@ export default function CartPage() {
  items,
  total,
  mode,
+ deliveryOrderMode,
  commune,
  creneauText: getCreneauText(),
  notes,
@@ -485,6 +504,9 @@ export default function CartPage() {
  }
 
  const creneauText = getCreneauText();
+ const vendorGroups = groupCartItemsByVendor(items);
+ const orderScopeLabel = hasMultipleVendors ?'multi-traiteurs' :'mono-traiteur';
+ const orderModeLabel = deliveryOrderMode ==='livraison_programmee' ?'programmée' :'directe';
 
  return (
  <Layout>
@@ -646,6 +668,52 @@ export default function CartPage() {
  </div>
  </div>
 
+ {/* Mode direct / programmé */}
+ <div className="bg-white rounded-2xl border border-primary/100 p-6">
+ <h2 className="text-lg font-bold text-foreground mb-3">Type de commande</h2>
+ <div className="grid grid-cols-2 gap-2">
+ <button
+ type="button"
+ onClick={() => setDeliveryOrderMode('livraison_directe')}
+ className={`rounded-xl px-4 py-3 text-sm font-black transition-all ${
+ deliveryOrderMode ==='livraison_directe'
+ ?'bg-primary text-white shadow-md'
+ :'bg-muted text-muted-foreground border border-input hover:border-primary/300'
+ }`}
+ >
+ Directe
+ </button>
+ <button
+ type="button"
+ onClick={() => setDeliveryOrderMode('livraison_programmee')}
+ className={`rounded-xl px-4 py-3 text-sm font-black transition-all ${
+ deliveryOrderMode ==='livraison_programmee'
+ ?'bg-primary text-white shadow-md'
+ :'bg-muted text-muted-foreground border border-input hover:border-primary/300'
+ }`}
+ >
+ Programmée
+ </button>
+ </div>
+ <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold">
+ <span className="rounded-full bg-primary/10 px-3 py-1 text-primary">Commande {orderModeLabel}</span>
+ <span className="rounded-full bg-muted px-3 py-1 text-muted-foreground">{orderScopeLabel}</span>
+ <span className="rounded-full bg-muted px-3 py-1 text-muted-foreground">
+ {vendorGroups.length} traiteur{vendorGroups.length > 1 ?'s' :''}
+ </span>
+ </div>
+ {deliveryOrderMode ==='livraison_directe' && hasMultipleVendors && (
+ <div className="mt-3 rounded-xl border border-secondary/30 bg-secondary/10 px-3 py-2 text-xs font-semibold text-secondary">
+ {DIRECT_DELIVERY_MULTIPLE_VENDORS_MESSAGE}
+ </div>
+ )}
+ {deliveryOrderMode ==='livraison_programmee' && hasMultipleVendors && (
+ <div className="mt-3 rounded-xl border border-primary/20 bg-primary/10 px-3 py-2 text-xs font-semibold text-primary">
+ Commande programmée multi-traiteurs : chaque traiteur verra uniquement ses produits, quantités, sous-total et créneau de préparation.
+ </div>
+ )}
+ </div>
+
  {/* Récapitulatif par partenaire */}
  <OrderSummaryByPartner items={items} />
 
@@ -675,14 +743,12 @@ export default function CartPage() {
  <h2 className="text-lg font-bold text-foreground">Informations de commande</h2>
 
  {/* Multi-traiteur warning */}
- {hasMultipleVendors && (
+ {hasMultipleVendors && deliveryOrderMode ==='livraison_directe' && (
  <div className="flex items-start gap-3 bg-secondary/10 border border-secondary/30 rounded-xl p-4">
  <AlertCircle className="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
  <div className="text-sm">
- <p className="font-bold text-secondary">Panier multi-partenaires</p>
- <p className="text-secondary">
- Pour cette version test, merci de valider une commande par partenaire. Le panier multi-traiteur arrive bientôt.
- </p>
+ <p className="font-bold text-secondary">Panier multi-traiteurs incompatible en livraison directe</p>
+ <p className="text-secondary">{DIRECT_DELIVERY_MULTIPLE_VENDORS_MESSAGE}</p>
  </div>
  </div>
  )}
