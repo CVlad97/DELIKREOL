@@ -41,6 +41,12 @@ import {
  groupCartItemsByVendor,
  validateOrderVendorRule,
 } from'../../utils/cartVendorRules';
+import { traiteurSpaces } from'../../data/traiteurs';
+import {
+ buildOptimizableVendorsFromCart,
+ optimizeDeliveryPlan,
+ type DeliveryOptimizationPlan,
+} from'../../services/deliveryOptimization';
 
 interface CartItem extends Product {
  quantity: number;
@@ -158,6 +164,7 @@ export default function CartPage() {
  const [checkoutStatus, setCheckoutStatus] = useState<'idle' |'processing' |'success' |'error'>('idle');
  const [stripeStatus, setStripeStatus] = useState<'idle' |'processing' |'error'>('idle');
  const [savedField, setSavedField] = useState<string | null>(null);
+ const [splitDeliveryConfirmed, setSplitDeliveryConfirmed] = useState(false);
  const panierRef = useRef<HTMLDivElement>(null);
  const stripeTestCheckoutEnabled =
  integrations.stripe.enabled &&
@@ -239,6 +246,15 @@ export default function CartPage() {
  }, [items]);
 
  const hasMultipleVendors = traiteurs.length > 1;
+ const deliveryOptimizationPlan: DeliveryOptimizationPlan | null = useMemo(() => {
+ if (deliveryOrderMode !=='livraison_programmee' || !hasMultipleVendors) return null;
+ const vendors = buildOptimizableVendorsFromCart(items, traiteurSpaces);
+ return optimizeDeliveryPlan({ vendors });
+ }, [deliveryOrderMode, hasMultipleVendors, items]);
+
+ useEffect(() => {
+ setSplitDeliveryConfirmed(false);
+ }, [deliveryOptimizationPlan?.code, deliveryOrderMode, items.length]);
 
  const createPublicOrder = async (paymentProvider:'manual' |'stripe_test') => {
  const deliveryFee = DELIVERY_FEES[mode]?.fee || 0;
@@ -265,6 +281,8 @@ export default function CartPage() {
  creneaux: getCreneauText(),
  payment_provider: paymentProvider,
  delivery_order_mode: deliveryOrderMode,
+ delivery_plan_code: deliveryOptimizationPlan?.code,
+ delivery_plan_confirmed: deliveryOptimizationPlan?.requiresExplicitConfirmation ? splitDeliveryConfirmed : true,
  },
  });
 
@@ -304,6 +322,16 @@ export default function CartPage() {
  showError('Choisissez un créneau programmé compatible avant de valider une commande multi-traiteurs.');
  return false;
  }
+ if (deliveryOrderMode ==='livraison_programmee' && hasMultipleVendors) {
+ if (!deliveryOptimizationPlan || deliveryOptimizationPlan.code ==='NO_COMPATIBLE_DELIVERY_OPTION') {
+ showError(deliveryOptimizationPlan?.explanation || 'Aucune option de livraison compatible pour ce panier multi-traiteurs.');
+ return false;
+ }
+ if (deliveryOptimizationPlan.requiresExplicitConfirmation && !splitDeliveryConfirmed) {
+ showError('Confirmez explicitement les livraisons fractionnées avant de valider.');
+ return false;
+ }
+ }
  setPhoneError('');
  return true;
  };
@@ -339,6 +367,8 @@ export default function CartPage() {
  delivery_fee: deliveryFee,
  delivery_type: mode,
  delivery_order_mode: deliveryOrderMode,
+ delivery_plan_code: deliveryOptimizationPlan?.code,
+ delivery_plan_confirmed: deliveryOptimizationPlan?.requiresExplicitConfirmation ? splitDeliveryConfirmed : true,
  order_scope: hasMultipleVendors ?'multi-traiteurs' :'mono-traiteur',
  commune,
  creneaux: getCreneauText(),
@@ -713,6 +743,49 @@ export default function CartPage() {
  </div>
  )}
  </div>
+
+ {deliveryOptimizationPlan && (
+ <div className="bg-white rounded-2xl border border-primary/100 p-6">
+ <h2 className="text-lg font-bold text-foreground mb-3">Optimisation livraison</h2>
+ <div className="rounded-xl border border-border bg-muted/40 p-4">
+ <p className="font-black text-foreground">{deliveryOptimizationPlan.label}</p>
+ <p className="mt-1 text-sm text-muted-foreground">{deliveryOptimizationPlan.explanation}</p>
+ <div className="mt-3 grid grid-cols-2 gap-2 text-xs font-bold sm:grid-cols-4">
+ <span className="rounded-lg bg-white px-3 py-2">Livraisons : {deliveryOptimizationPlan.deliveriesCount}</span>
+ <span className="rounded-lg bg-white px-3 py-2">Frais : {deliveryOptimizationPlan.totalFee.toFixed(2).replace('.', ',')} €</span>
+ <span className="rounded-lg bg-white px-3 py-2">Délai : ~{deliveryOptimizationPlan.estimatedDurationMinutes} min</span>
+ <span className="rounded-lg bg-white px-3 py-2">Distance : {deliveryOptimizationPlan.totalDistanceKm.toFixed(1).replace('.', ',')} km</span>
+ </div>
+ {deliveryOptimizationPlan.commonSlots.length > 0 ? (
+ <p className="mt-3 text-xs text-muted-foreground">
+ Créneaux compatibles : {deliveryOptimizationPlan.commonSlots.join(', ')}
+ </p>
+ ) : (
+ <p className="mt-3 text-xs font-semibold text-secondary">
+ Aucun créneau commun : plusieurs livraisons ou modification du panier requise.
+ </p>
+ )}
+ {deliveryOptimizationPlan.code ==='NO_COMPATIBLE_DELIVERY_OPTION' && (
+ <div className="mt-3 rounded-xl border border-secondary/30 bg-secondary/10 p-3 text-xs font-semibold text-secondary">
+ Modifiez le panier : retirez les produits incompatibles, choisissez un autre traiteur de la même zone, sélectionnez un autre créneau ou privilégiez le retrait.
+ </div>
+ )}
+ {deliveryOptimizationPlan.requiresExplicitConfirmation && (
+ <label className="mt-3 flex items-start gap-3 rounded-xl border border-secondary/30 bg-secondary/10 p-3 text-xs font-semibold text-secondary">
+ <input
+ type="checkbox"
+ checked={splitDeliveryConfirmed}
+ onChange={(event) => setSplitDeliveryConfirmed(event.target.checked)}
+ className="mt-0.5 h-4 w-4 accent-primary"
+ />
+ <span>
+ Je confirme la livraison fractionnée : plusieurs créneaux/frais peuvent s’appliquer et aucun coût ou délai ne sera masqué.
+ </span>
+ </label>
+ )}
+ </div>
+ </div>
+ )}
 
  {/* Récapitulatif par partenaire */}
  <OrderSummaryByPartner items={items} />

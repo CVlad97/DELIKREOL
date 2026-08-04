@@ -23,4 +23,11 @@ describe('checkout-order delivery vendor rules', () => {
     expect(source).toContain('order_scope: vendorIds.size > 1 ? "multi-traiteurs" : "mono-traiteur"');
     expect(source).toContain('orderItems.map((item) => ({ ...item, order_id: order.id }))');
   });
+
+  it('requires server-side delivery plan confirmation before creating split deliveries', () => {
+    expect(source).toContain('chooseDeliveryOptimizationPlan');
+    expect(source).toContain('DELIVERY_PLAN_RECALCULATION_REQUIRED');
+    expect(source).toContain('deliveryPlan.requiresConfirmation && !deliveryPlanConfirmed');
+    expect(source).toContain('CROSS_ZONE_SPLIT_DELIVERY_REQUIRED');
+  });
 });
