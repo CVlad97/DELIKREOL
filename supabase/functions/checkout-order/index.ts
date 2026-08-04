@@ -11,6 +11,11 @@ const allowedOrigins = new Set([
 const MAX_BODY_BYTES = 16_384;
 const MAX_ITEMS = 25;
 const DEFAULT_COMMISSION_RATE = 15;
+const DIRECT_DELIVERY_MULTIPLE_VENDORS_CODE = "DIRECT_DELIVERY_MULTIPLE_VENDORS_NOT_ALLOWED";
+const VENDOR_PICKUP_MULTIPLE_VENDORS_CODE = "VENDOR_PICKUP_MULTIPLE_VENDORS_NOT_ALLOWED";
+const FULFILLMENT_CONFIRMATION_REQUIRED_CODE = "FULFILLMENT_CONFIRMATION_REQUIRED";
+const FULFILLMENT_FINGERPRINT_MISMATCH_CODE = "FULFILLMENT_FINGERPRINT_MISMATCH";
+const NO_COMPATIBLE_RELAY_OPTION_CODE = "NO_COMPATIBLE_RELAY_OPTION";
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const DELIVERY_FEES: Record<string, { cents: number; type: string }> = {
   retrait: { cents: 0, type: "pickup" },
@@ -89,6 +94,21 @@ function normalizeQuantity(value: unknown) {
 function sanitizeText(value: unknown, maxLength: number) {
   if (typeof value !== "string") return "";
   return value.trim().slice(0, maxLength);
+}
+
+function normalizeFulfillmentMode(value: unknown, deliveryMode: string) {
+  const mode = sanitizeText(value, 40);
+  if (
+    mode === "livraison_directe" ||
+    mode === "livraison_programmee" ||
+    mode === "retrait_traiteur" ||
+    mode === "point_relais"
+  ) {
+    return mode;
+  }
+  if (deliveryMode === "relais" || deliveryMode === "relay_point") return "point_relais";
+  if (deliveryMode === "retrait" || deliveryMode === "pickup") return "retrait_traiteur";
+  return "livraison_directe";
 }
 
 async function sha256Hex(value: string) {
@@ -218,13 +238,78 @@ Deno.serve(async (req: Request) => {
       };
     });
 
-    if (vendorIds.size !== 1) {
-      return json(req, { error: "Panier multi-vendeur bloqué en lancement: une commande par partenaire" }, 409);
-    }
-
     const mode = sanitizeText(body.delivery_mode || body.mode, 32) || "retrait";
     const delivery = DELIVERY_FEES[mode];
     if (!delivery) return json(req, { error: "delivery_mode invalide" }, 400);
+    const fulfillmentMode = normalizeFulfillmentMode(body.fulfillment_mode, mode);
+    const fulfillmentPlanCode = sanitizeText(body.fulfillment_plan_code, 80);
+    const fulfillmentPlanFingerprint = sanitizeText(body.fulfillment_plan_fingerprint, 160);
+    const fulfillmentPlanConfirmed = body.fulfillment_plan_confirmed === true;
+    const relayPointId = sanitizeText(body.relay_point_id, 80);
+    let relayPoint: { id: string; vendor_id: string | null; status: string | null; capacity: number | string | null } | null = null;
+
+    if (fulfillmentMode === "livraison_directe" && vendorIds.size !== 1) {
+      return json(req, {
+        code: DIRECT_DELIVERY_MULTIPLE_VENDORS_CODE,
+        error: "La livraison directe ne permet de commander qu’auprès d’un seul traiteur à la fois.",
+      }, 409);
+    }
+
+    if (fulfillmentMode === "retrait_traiteur" && vendorIds.size !== 1) {
+      return json(req, {
+        code: VENDOR_PICKUP_MULTIPLE_VENDORS_CODE,
+        error: "Le retrait chez le traiteur ne permet qu’un seul traiteur par commande.",
+      }, 409);
+    }
+
+    if (
+      (fulfillmentMode === "livraison_programmee" || fulfillmentMode === "point_relais") &&
+      vendorIds.size > 1 &&
+      !fulfillmentPlanConfirmed
+    ) {
+      return json(req, {
+        code: FULFILLMENT_CONFIRMATION_REQUIRED_CODE,
+        error: "La commande multi-traiteurs exige une confirmation explicite du plan de remise.",
+      }, 409);
+    }
+
+    if (fulfillmentMode === "point_relais") {
+      if (!relayPointId || !fulfillmentPlanCode || !fulfillmentPlanFingerprint || fulfillmentPlanFingerprint.length < 32) {
+        return json(req, {
+          code: FULFILLMENT_FINGERPRINT_MISMATCH_CODE,
+          error: "Le plan point relais doit être recalculé avant création de commande.",
+        }, 409);
+      }
+      if (!UUID_RE.test(relayPointId)) {
+        return json(req, {
+          code: NO_COMPATIBLE_RELAY_OPTION_CODE,
+          error: "Aucun point relais actif compatible n’a été validé côté serveur.",
+        }, 409);
+      }
+
+      const { data: relayPointData, error: relayPointError } = await admin
+        .from("relay_points")
+        .select("id, vendor_id, status, capacity")
+        .eq("id", relayPointId)
+        .maybeSingle();
+
+      if (relayPointError) throw relayPointError;
+      relayPoint = relayPointData;
+      if (!relayPoint || relayPoint.status !== "actif") {
+        return json(req, {
+          code: NO_COMPATIBLE_RELAY_OPTION_CODE,
+          error: "Aucun point relais actif compatible n’a été validé côté serveur.",
+        }, 409);
+      }
+
+      const unitsRequested = orderItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+      if (Number(relayPoint.capacity || 0) < unitsRequested) {
+        return json(req, {
+          code: "RELAY_POINT_CAPACITY_EXCEEDED",
+          error: "La capacité du point relais est insuffisante.",
+        }, 409);
+      }
+    }
 
     const subtotalCents = orderItems.reduce((sum, item) => sum + Math.round(Number(item.subtotal) * 100), 0);
     const totalCents = subtotalCents + delivery.cents;
@@ -259,6 +344,9 @@ Deno.serve(async (req: Request) => {
         total_cents: totalCents,
         total_amount: totalCents / 100,
         delivery_type: delivery.type,
+        fulfillment_mode: fulfillmentMode,
+        relay_point_id: relayPointId || null,
+        relay_host_vendor_id: fulfillmentMode === "point_relais" && relayPoint?.vendor_id ? relayPoint.vendor_id : null,
         notes: sanitizeText(body.notes, 1000) || null,
         creneaux: sanitizeText(body.creneaux, 240) || null,
         address: sanitizeText(body.address, 240) || null,
@@ -296,6 +384,13 @@ Deno.serve(async (req: Request) => {
         delivery_fee_cents: delivery.cents,
         total_cents: totalCents,
         vendor_id: Array.from(vendorIds)[0],
+        vendor_ids: Array.from(vendorIds),
+        fulfillment_mode: fulfillmentMode,
+        fulfillment_plan_code: fulfillmentPlanCode || null,
+        fulfillment_plan_fingerprint: fulfillmentPlanFingerprint || null,
+        fulfillment_plan_confirmed: fulfillmentPlanConfirmed,
+        relay_point_id: relayPointId || null,
+        relay_host_vendor_id: fulfillmentMode === "point_relais" && relayPoint?.vendor_id ? relayPoint.vendor_id : null,
         payment_provider: paymentProvider,
       },
     });
