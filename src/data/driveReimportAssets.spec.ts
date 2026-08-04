@@ -1,13 +1,13 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { driveReimportGalleries, driveReimportPortraits } from './driveReimportAssets';
+import { driveReimportGalleries, driveReimportLogos, driveReimportPortraits } from './driveReimportAssets';
 
 const expectedDrivePreimportCounts = {
-  coco: 27,
+  coco: 26,
   ninice: 12,
   savePeyia: 10,
-  saveursAfrique: 13,
+  saveursAfrique: 11,
   sweetFamily: 18,
   gouteMwen: 20,
 } as const;
@@ -34,6 +34,9 @@ describe('driveReimportAssets', () => {
       ...driveReimportGalleries.saveursAfrique,
       ...driveReimportGalleries.sweetFamily,
       ...driveReimportGalleries.gouteMwen,
+      driveReimportLogos.coco,
+      driveReimportLogos.chefAMada,
+      driveReimportPortraits.coco,
       driveReimportPortraits.ninice,
       driveReimportPortraits.gouteMwen,
     ];
@@ -44,5 +47,22 @@ describe('driveReimportAssets', () => {
     });
 
     expect(missingAssets).toEqual([]);
+  });
+
+  it('keeps logos and profile assets out of food galleries', () => {
+    const galleryAssets = Object.values(driveReimportGalleries).flat();
+
+    expect(galleryAssets.some((asset) => asset.includes('/profile.svg'))).toBe(false);
+    expect(galleryAssets.some((asset) => asset.includes('/logo.'))).toBe(false);
+    expect(driveReimportLogos.coco).toContain('/profile.svg');
+  });
+
+  it('excludes mismatched Saveurs Afrique photos without deleting originals', () => {
+    expect(driveReimportGalleries.saveursAfrique).not.toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('IMG-20260612-WA0205.jpg'),
+        expect.stringContaining('IMG-20260526-WA0162.jpg'),
+      ]),
+    );
   });
 });

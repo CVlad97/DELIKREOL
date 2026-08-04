@@ -8,7 +8,6 @@ const cocoProfile = assetFromPublic('vendors/coco/profile.svg');
 export const driveReimportGalleries = {
   coco: [
     assetFromPublic('vendors/coco/drive-reimport/IMG-20260526-WA0064.jpg'),
-    cocoProfile,
     assetFromPublic('vendors/coco/drive-reimport/IMG-20260526-WA0065.jpg'),
     assetFromPublic('vendors/coco/drive-reimport/IMG-20260526-WA0066.jpg'),
     assetFromPublic('vendors/coco/drive-reimport/IMG-20260526-WA0067.jpg'),
@@ -73,8 +72,6 @@ export const driveReimportGalleries = {
     assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0164.jpg'),
     assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260612-WA0141.jpg'),
     assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260612-WA0142.jpg'),
-    assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260612-WA0205.jpg'),
-    assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0162.jpg'),
   ],
   sweetFamily: [
     assetFromPublic('vendors/sweet-family/drive-reimport/IMG-20260627-WA0003.jpg'),
@@ -118,6 +115,11 @@ export const driveReimportGalleries = {
     assetFromPublic('vendors/goute-mwen/supplied-ai-20260722/goute-mwen-cerise-ai.jpg'),
     assetFromPublic('vendors/goute-mwen/supplied-ai-20260722/goute-mwen-assortiment-feuille-ai.jpg'),
   ],
+} as const;
+
+export const driveReimportLogos = {
+  coco: cocoProfile,
+  chefAMada: assetFromPublic('vendors/chef-a-mada/logo.jpg'),
 } as const;
 
 export const driveReimportPortraits = {

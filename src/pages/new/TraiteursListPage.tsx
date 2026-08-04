@@ -22,8 +22,9 @@ function hasMadaBadge(name: string) {
   return MADA_BADGE_TRAITEURS.has(name);
 }
 
-function getLogoForTraiteur(slug: string) {
-  if (slug === 'chef-a-mada') return `${import.meta.env.BASE_URL}vendors/chef-a-mada/logo.jpg`;
+function getLogoForTraiteur(traiteur: { logoImage?: string | null; slug: string }) {
+  if (traiteur.logoImage) return traiteur.logoImage;
+  if (traiteur.slug === 'chef-a-mada') return `${import.meta.env.BASE_URL}vendors/chef-a-mada/logo.jpg`;
   return `${import.meta.env.BASE_URL}branding/logo-mark.svg`;
 }
 
@@ -161,7 +162,7 @@ export function TraiteursListPage() {
                 <div className="absolute left-4 top-4 flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border-2 border-white bg-white p-1.5 shadow-lg">
                   <img
                     loading="lazy"
-                    src={getLogoForTraiteur(traiteur.slug)}
+                    src={getLogoForTraiteur(traiteur)}
                     alt={`Logo ${traiteur.name}`}
                     className="h-full w-full object-contain"
                   />

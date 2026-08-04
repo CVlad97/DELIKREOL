@@ -223,11 +223,23 @@ export function TraiteurDetailPage() {
               </div>
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                <div className="max-w-3xl">
-                  <h1 className="text-3xl font-black tracking-tight sm:text-5xl">{traiteur.name}</h1>
-                  <p className="mt-2 max-w-2xl text-sm text-white/90 sm:text-lg">
-                    {traiteur.promise || traiteur.offer}
-                  </p>
+                <div className="flex max-w-3xl gap-4">
+                  {traiteur.logoImage && (
+                    <div className="mt-1 flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/25 bg-white p-2 shadow-lg">
+                      <img
+                        loading="lazy"
+                        src={traiteur.logoImage}
+                        alt={`Logo ${traiteur.name}`}
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <h1 className="text-3xl font-black tracking-tight sm:text-5xl">{traiteur.name}</h1>
+                    <p className="mt-2 max-w-2xl text-sm text-white/90 sm:text-lg">
+                      {traiteur.promise || traiteur.offer}
+                    </p>
+                  </div>
                 </div>
                 <div className="shrink-0 rounded-2xl bg-white px-5 py-3 text-neutral-950 shadow-lg">
                   <p className="text-xs font-bold uppercase tracking-wide text-neutral-500">À partir de</p>

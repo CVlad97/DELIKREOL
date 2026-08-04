@@ -3,7 +3,7 @@ import type { HealthTag } from './mockCatalog';
 import { anTjeCocoAssets, cocoFoodAssets } from './partnerAssets';
 import { partnerProfiles, type PartnerProfile } from './partnerProfiles';
 import { additionalPartnerProfiles } from './additionalPartnerProfiles';
-import { driveReimportGalleries, driveReimportPortraits } from './driveReimportAssets';
+import { driveReimportGalleries, driveReimportLogos, driveReimportPortraits } from './driveReimportAssets';
 import { sanitizeSocialLinks, type SocialLinkSet } from '../utils/socialLinks';
 
 export type TraiteurMenuItem = {
@@ -29,6 +29,7 @@ export type TraiteurSpace = {
   availability: string;
   specialty: string;
   heroImage?: string | null;
+  logoImage?: string | null;
   portraitImage?: string | null;
   latitude?: number;
   longitude?: number;
@@ -117,6 +118,16 @@ function resolveGalleryImages(name: string) {
   return [];
 }
 
+function resolveLogoImage(name: string) {
+  if (name === "Coco's Food") {
+    return driveReimportLogos.coco;
+  }
+  if (name === 'Chef à Mada') {
+    return driveReimportLogos.chefAMada;
+  }
+  return null;
+}
+
 function normalizeVendorName(v: string) {
   return v.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/['']/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
@@ -175,7 +186,7 @@ function resolvePortraitImage(name: string) {
     return null;
   }
   if (name === "Coco's Food") {
-    return driveReimportGalleries.coco[1] ?? null;
+    return driveReimportPortraits.coco ?? null;
   }
   if (name === "Saveurs d'Afrique") {
     return driveReimportGalleries.saveursAfrique[1] ?? null;
@@ -224,6 +235,7 @@ function buildSpace(profile: PartnerProfile, gradient: string, accent: string, s
     availability: profile.availability,
     specialty: profile.specialty,
     heroImage: resolveHeroImage(profile.name),
+    logoImage: resolveLogoImage(profile.name),
     portraitImage: resolvePortraitImage(profile.name),
     gradient,
     accent,
@@ -296,7 +308,7 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
       // Gouté Mwen — glaces artisanales, public confirmé
       if (profile.name === 'Gouté Mwen') {
         return {
-          ...buildSpace(profile, 'from-[#eab308] via-[#f97316] to-[#dc2626]', '#fff7ed', 'public confirmé', 'à confirmer'),
+          ...buildSpace(profile, 'from-[#eab308] via-[#f97316] to-[#dc2626]', '#fff7ed', 'public confirmé', 'confirmée'),
           horaires: { lun: { open: '08:00', close: '18:00' }, mar: { open: '08:00', close: '18:00' }, mer: { open: '08:00', close: '18:00' }, jeu: { open: '08:00', close: '18:00' }, ven: { open: '08:00', close: '18:00' }, sam: { open: '09:00', close: '13:00' } },
           cutoff_time: '10:00',
           prep_time: 15,
@@ -307,7 +319,7 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
       // Sweet Family Traiteur Orianne — cocktails & mignardises, public confirmé
       if (profile.name === 'Sweet Family Traiteur Orianne') {
         return {
-          ...buildSpace(profile, 'from-[#dc2626] via-[#f97316] to-[#eab308]', '#fff7ed', 'public confirmé', 'à confirmer'),
+          ...buildSpace(profile, 'from-[#dc2626] via-[#f97316] to-[#eab308]', '#fff7ed', 'public confirmé', 'confirmée'),
           horaires: { lun: { open: '08:00', close: '20:00' }, mar: { open: '08:00', close: '20:00' }, mer: { open: '08:00', close: '20:00' }, jeu: { open: '08:00', close: '20:00' }, ven: { open: '08:00', close: '20:00' }, sam: { open: '09:00', close: '18:00' } },
           cutoff_time: '48:00',
           prep_time: 60,
