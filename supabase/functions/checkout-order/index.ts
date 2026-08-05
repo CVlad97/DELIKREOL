@@ -51,16 +51,30 @@ type ProductRow = {
   } | null;
 };
 
-const PAYMENT_PROVIDERS = new Set([
+// Fournisseurs de paiement toujours autorisés côté serveur. La liste est
+// volontairement stricte : toute valeur non listée ici (y compris
+// `stripe_disabled`, `stripe_test`, `manual` et les variants `sumup_*`) est
+// rejetée avec un 400 explicite. Stripe reste désactivé pour ce lancement et
+// "manual" est trop vague pour être exposé au client.
+const BASE_PAYMENT_PROVIDERS = new Set([
   "qonto_transfer",
   "revolut_transfer",
   "cash_on_delivery",
-  "crypto_wallet",
-  "external_payment_link",
-  "stripe_disabled",
-  "manual",
-  "stripe_test",
 ]);
+
+// Fournisseurs optionnels activés par feature flag serveur uniquement. Aucun
+// client ne peut forcer leur activation : la décision vient de Deno.env, pas
+// du corps de la requête.
+function resolveAllowedPaymentProviders(): Set<string> {
+  const providers = new Set(BASE_PAYMENT_PROVIDERS);
+  if (Deno.env.get("ENABLE_CRYPTO_PAYMENT") === "true") {
+    providers.add("crypto_wallet");
+  }
+  if (Deno.env.get("ENABLE_EXTERNAL_PAYMENT_LINK") === "true") {
+    providers.add("external_payment_link");
+  }
+  return providers;
+}
 
 function corsHeaders(req: Request) {
   const origin = req.headers.get("origin") || "";
@@ -241,11 +255,25 @@ Deno.serve(async (req: Request) => {
     const totalCents = subtotalCents + delivery.cents;
     if (totalCents <= 0) return json(req, { error: "Total commande invalide" }, 400);
 
-    const rawPaymentProvider = sanitizeText(body.payment_provider, 32) || "qonto_transfer";
-    const paymentProvider = PAYMENT_PROVIDERS.has(rawPaymentProvider) ? rawPaymentProvider : "qonto_transfer";
-    if (paymentProvider === "stripe_test") {
-      return json(req, { error: "Stripe disabled", reason: "Le paiement Stripe est désactivé pour ce lancement." }, 410);
+    // Validation stricte du provider : aucune confiance dans la valeur client.
+    // Un provider inconnu, désactivé (stripe_disabled, stripe_test, manual,
+    // sumup_*) ou non activé par feature flag serveur est rejeté en 400. Pas
+    // de repli silencieux vers qonto_transfer : le client doit désigner
+    // explicitement un provider autorisé.
+    const rawPaymentProvider = sanitizeText(body.payment_provider, 32);
+    const allowedPaymentProviders = resolveAllowedPaymentProviders();
+    if (!rawPaymentProvider || !allowedPaymentProviders.has(rawPaymentProvider)) {
+      return json(
+        req,
+        {
+          error: "payment_provider non autorisé",
+          reason:
+            "Provider de paiement inconnu, désactivé ou non activé par feature flag serveur.",
+        },
+        400,
+      );
     }
+    const paymentProvider = rawPaymentProvider;
     const phone = sanitizeText(body.phone || body.customer_phone, 30);
     if (!phone || phone.length < 8) return json(req, { error: "Téléphone requis" }, 400);
     const paymentExternalId = sanitizeText(body.payment_external_id, 180);
@@ -271,7 +299,13 @@ Deno.serve(async (req: Request) => {
       .join("");
     const orderNumber = `DK-${datePart}-${random}`;
 
-    const paymentStatus = paymentExternalId ? "proof_submitted" : "pending";
+    // Le statut de paiement est dérivé UNIQUEMENT de données serveur, jamais
+    // d'une valeur envoyée par le client (payment_external_id,
+    // payment_status, etc.). Toute commande nouvellement créée démarre à
+    // "pending" ; la transition vers "proof_submitted" / "paid" se fait via
+    // la revue admin ou un webhook de paiement vérifié, pas sur la base d'un
+    // champ fourni par le frontend.
+    const paymentStatus = "pending";
     const paymentReference = `${paymentProvider.toUpperCase()}-${orderNumber}`;
     const trackingToken = Array.from(crypto.getRandomValues(new Uint8Array(8)))
       .map((byte) => byte.toString(16).padStart(2, "0"))

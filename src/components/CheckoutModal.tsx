@@ -10,8 +10,13 @@ import {
 } from'lucide-react';
 import { useCart } from'../contexts/CartContext';
 import { useAuth } from'../contexts/AuthContext';
-import { ordersService } from'../services/ordersService';
+import { supabase } from'../lib/supabase';
 import { shouldFallbackToDemo } from'../utils/supabaseFallback';
+import {
+  buildCheckoutFingerprint,
+  clearCheckoutIdempotencyKey,
+  getStableCheckoutIdempotencyKey,
+} from'../utils/checkoutIdempotency';
 import { Order } from'../types';
 
 interface CheckoutModalProps {
@@ -35,7 +40,7 @@ function errorMessage(error: unknown) {
 
 export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModalProps) {
  const { items, total, clearCart } = useCart();
- const { user } = useAuth();
+ const { user, profile } = useAuth();
  const [deliveryType, setDeliveryType] = useState<'home_delivery' |'pickup'>('home_delivery');
  const [address, setAddress] = useState('');
  const [notes, setNotes] = useState('');
@@ -123,8 +128,23 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
 
  const paymentLabel =
  paymentOptions.find((option) => option.id === paymentMode)?.title ??'Assistance WhatsApp';
- const orderNumber = `DK${Date.now().toString().slice(-8)}`;
- const whatsappUrl = buildWhatsappUrl(orderNumber, paymentLabel);
+
+ // Même chemin atomique que CartPage : checkout-order Edge Function +
+ // create_checkout_order_atomic RPC, protégé par idempotency_key côté client.
+ const paymentProviderId: 'qonto_transfer' | 'cash_on_delivery' =
+ paymentMode === 'bank_transfer' ? 'qonto_transfer' : 'cash_on_delivery';
+
+ const fingerprint = buildCheckoutFingerprint(
+ items.map((item) => ({ id: item.id, quantity: item.quantity })),
+ {
+ mode: deliveryType,
+ provider: paymentProviderId,
+ address: deliveryType === 'home_delivery' ? address.trim() : '',
+ notes: notes.trim(),
+ },
+ );
+ const idempotencyKey = getStableCheckoutIdempotencyKey(paymentProviderId, fingerprint);
+ const customerPhone = profile?.phone ?? '';
 
  try {
  const paymentNotes = [
@@ -137,28 +157,56 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
  .filter(Boolean)
  .join('\n');
 
- const orderItems = items.map((item) => ({
+ const { data, error: fnError } = await supabase.functions.invoke('checkout-order', {
+ body: {
+ idempotency_key: idempotencyKey,
+ items: items.map((item) => ({ id: item.id, quantity: item.quantity })),
+ mode: deliveryType,
+ address: deliveryType === 'home_delivery' ? address.trim() : undefined,
+ phone: customerPhone,
+ email: user.email,
+ notes: [notes.trim(), paymentNotes].filter(Boolean).join('\n\n') || undefined,
+ payment_provider: paymentProviderId,
+ },
+ });
+
+ if (fnError) throw fnError;
+
+ const returnedOrder = data?.order as
+ | { id: string; order_number: string; [key: string]: unknown }
+ | undefined;
+ if (!returnedOrder?.id || !returnedOrder?.order_number) {
+ throw new Error(data?.error || 'Commande non créée par la Edge Function');
+ }
+
+ const orderNumber = returnedOrder.order_number;
+ const whatsappUrl = buildWhatsappUrl(orderNumber, paymentLabel);
+
+ const createdOrder: Order = {
+ id: returnedOrder.id,
+ customer_id: user.id,
+ order_number: orderNumber,
+ status: 'pending',
+ delivery_type: deliveryType,
+ delivery_address: deliveryType === 'home_delivery' ? address.trim() : undefined,
+ delivery_fee: deliveryFee,
+ total_amount: finalTotal,
+ notes: [notes.trim(), paymentNotes].filter(Boolean).join('\n\n') || undefined,
+ created_at: new Date().toISOString(),
+ items: items.map((item) => ({
+ id: '',
+ order_id: returnedOrder.id,
  product_id: item.id,
  vendor_id: item.vendor_id,
  quantity: item.quantity,
  unit_price: item.price,
  subtotal: item.price * item.quantity,
  vendor_commission: item.price * item.quantity * 0.2,
- }));
-
- const createdOrder = await ordersService.create({
- customer_id: user.id,
- order_number: orderNumber,
- status:'pending',
- delivery_type: deliveryType,
- delivery_address: deliveryType ==='home_delivery' ? address.trim() : undefined,
- delivery_fee: deliveryFee,
- total_amount: finalTotal,
- notes: [notes.trim(), paymentNotes].filter(Boolean).join('\n\n') || undefined,
- items: orderItems,
- });
+ })),
+ };
 
  onOrderCreated?.(createdOrder);
+ clearCheckoutIdempotencyKey(paymentProviderId, fingerprint);
 
  clearCart();
  setSuccess({
@@ -168,14 +216,15 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
  bankPaymentUrl: bankPaymentUrl || undefined,
  });
 
- if (paymentMode ==='whatsapp') {
+ if (paymentMode === 'whatsapp') {
  window.open(whatsappUrl,'_blank','noopener,noreferrer');
  }
  } catch (submitError) {
  console.error('Error creating order:', submitError);
- if (shouldFallbackToDemo(submitError)) {
+ // Fallback WhatsApp informatif SANS créer une seconde commande en base.
  const fallbackUrl = buildWhatsappUrl('non enregistrée', paymentLabel);
  setFallbackWhatsappUrl(fallbackUrl);
+ if (shouldFallbackToDemo(submitError)) {
  setError('Backend indisponible : utilisez WhatsApp pour valider la commande (panier conservé).');
  window.open(fallbackUrl,'_blank','noopener,noreferrer');
  return;

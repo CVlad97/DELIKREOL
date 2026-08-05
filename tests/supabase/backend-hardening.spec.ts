@@ -15,10 +15,66 @@ describe('backend production hardening', () => {
     expect(source).toContain('.from("products")');
     expect(source).toContain('Panier multi-vendeur bloqué');
     expect(source).toContain('vendor_commission');
-    expect(source).toContain('paymentProvider === "stripe_test"');
     expect(source).toContain('create_checkout_order_atomic');
     expect(source).not.toContain('Number(total || 0)');
     expect(source).not.toContain('Number(total_amount');
+  });
+
+  it('rejects forged and disabled payment providers with an explicit 400', () => {
+    const source = read('supabase/functions/checkout-order/index.ts');
+
+    // Liste blanche serveur stricte : seuls ces providers de base sont
+    // toujours autorisés. crypto_wallet et external_payment_link sont
+    // conditionnés par feature flag serveur.
+    expect(source).toContain('BASE_PAYMENT_PROVIDERS');
+    expect(source).toContain('"qonto_transfer"');
+    expect(source).toContain('"revolut_transfer"');
+    expect(source).toContain('"cash_on_delivery"');
+    expect(source).toContain('resolveAllowedPaymentProviders');
+    expect(source).toContain('Deno.env.get("ENABLE_CRYPTO_PAYMENT")');
+    expect(source).toContain('Deno.env.get("ENABLE_EXTERNAL_PAYMENT_LINK")');
+
+    // Les providers dangereux ou trop vastes ne doivent jamais être ajoutés à
+    // la liste blanche serveur (ni en base, ni via feature flag).
+    expect(source).not.toContain('providers.add("stripe_disabled")');
+    expect(source).not.toContain('providers.add("stripe_test")');
+    expect(source).not.toContain('providers.add("manual")');
+    expect(source).not.toContain('add("sumup_');
+    expect(source).toContain('providers.add("crypto_wallet")');
+    expect(source).toContain('providers.add("external_payment_link")');
+
+    // Tout provider inconnu/désactivé doit être rejeté en 400, jamais
+    // silencieusement remplacé par qonto_transfer.
+    expect(source).toContain('payment_provider non autorisé');
+    expect(source).toContain('Provider de paiement inconnu, désactivé ou non activé par feature flag serveur.');
+    expect(source).not.toContain('|| "qonto_transfer"');
+    expect(source).not.toContain('? rawPaymentProvider : "qonto_transfer"');
+  });
+
+  it('derives payment_status from server data only, never from client payment_external_id', () => {
+    const source = read('supabase/functions/checkout-order/index.ts');
+
+    // Le statut est fixé côté serveur à "pending" à la création, indépendant
+    // du payment_external_id envoyé par le client.
+    expect(source).toContain('const paymentStatus = "pending";');
+    // L'ancienne dérivation basée sur payment_external_id doit avoir disparu.
+    expect(source).not.toContain('paymentExternalId ? "proof_submitted" : "pending"');
+    // Aucune confiance dans un éventuel body.payment_status envoyé par le
+    // client : il ne doit pas être lu pour calculer le statut persisté.
+    expect(source).not.toMatch(/paymentStatus\s*=\s*sanitizeText\(body\.payment_status/);
+  });
+
+  it('never trusts a client-supplied order total', () => {
+    const source = read('supabase/functions/checkout-order/index.ts');
+
+    // Le total est recalculé depuis la base (prix produits + frais de
+    // livraison serveur), jamais depuis body.total / body.total_amount.
+    expect(source).toContain('subtotalCents = orderItems.reduce');
+    expect(source).toContain('totalCents = subtotalCents + delivery.cents');
+    expect(source).toContain('if (totalCents <= 0) return json(req, { error: "Total commande invalide" }, 400)');
+    expect(source).not.toContain('Number(body.total');
+    expect(source).not.toContain('Number(body.total_amount');
+    expect(source).not.toContain('body.total_cents');
   });
 
   it('prepares atomic idempotence for checkout-order', () => {
