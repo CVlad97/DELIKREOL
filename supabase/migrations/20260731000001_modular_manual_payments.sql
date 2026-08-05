@@ -323,9 +323,35 @@ $$;
 revoke all on function public.create_checkout_order_atomic(text, jsonb, jsonb, jsonb) from public, anon, authenticated;
 grant execute on function public.create_checkout_order_atomic(text, jsonb, jsonb, jsonb) to service_role;
 
+-- ─── CORRECTIFS P0 (audit Agent 3) ───
+
+-- R4.1 : Activer RLS sur payment_duplicate_audit (table d'audit sensible)
+alter table if exists public.payment_duplicate_audit enable row level security;
+drop policy if exists payment_duplicate_audit_service_only on public.payment_duplicate_audit;
+create policy payment_duplicate_audit_service_only on public.payment_duplicate_audit
+  for all to anon, authenticated
+  using (false) with check (false);
+-- Seul service_role peut lire/écrire dans la table d'audit
+
+-- R4.3 : Vérifier que RLS est activé sur orders (safe — no-op si déjà activé)
+alter table if exists public.orders enable row level security;
+
+-- R4.5 : Gérer la collision sur payment_external_id dans la RPC
+-- Ajouter un bloc de détection de doublon payment_external_id avant l'insert
+-- La logique est déjà partiellement gérée par l'index unique, mais la RPC
+-- doit retourner un 409 propre au lieu d'un 500.
+-- (La gestion se fait côté Edge Function qui appelle la RPC — le bloc
+-- de vérification pré-insert est déjà présent dans checkout-order/index.ts)
+
+-- R4.4 : Supprimer l'ancien index redondant si le nouveau existe
+drop index if exists idx_orders_idempotency_key;
+-- Le nouvel index unique idx_orders_idempotency_key_unique le remplace
+
 -- Rollback manuel documenté :
 -- drop function if exists public.create_checkout_order_atomic(text, jsonb, jsonb, jsonb);
 -- drop table if exists public.payment_duplicate_audit;
 -- drop index if exists idx_orders_payment_provider;
 -- drop index if exists idx_orders_payment_status;
+-- drop index if exists idx_orders_idempotency_key_unique;
+-- drop index if exists idx_orders_payment_external_id_unique;
 -- Les colonnes ajoutées sont conservées par défaut pour éviter toute perte d'audit historique.
