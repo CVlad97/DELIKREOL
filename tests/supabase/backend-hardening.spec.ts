@@ -9,11 +9,12 @@ function read(path: string) {
 }
 
 describe('backend production hardening', () => {
-  it('keeps checkout-order server-side priced and single-vendor', () => {
+  it('keeps checkout-order server-side priced and direct-delivery vendor constrained', () => {
     const source = read('supabase/functions/checkout-order/index.ts');
 
     expect(source).toContain('.from("products")');
-    expect(source).toContain('Panier multi-vendeur bloqué');
+    expect(source).toContain('DIRECT_DELIVERY_MULTIPLE_VENDORS_NOT_ALLOWED');
+    expect(source).toContain('deliveryOrderMode === "livraison_directe" && vendorIds.size !== 1');
     expect(source).toContain('vendor_commission');
     expect(source).not.toContain('Number(total || 0)');
     expect(source).not.toContain('Number(total_amount');

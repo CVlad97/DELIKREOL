@@ -11,6 +11,17 @@ const allowedOrigins = new Set([
 const MAX_BODY_BYTES = 16_384;
 const MAX_ITEMS = 25;
 const DEFAULT_COMMISSION_RATE = 15;
+const DIRECT_DELIVERY_MULTIPLE_VENDORS_CODE = "DIRECT_DELIVERY_MULTIPLE_VENDORS_NOT_ALLOWED";
+const DIRECT_DELIVERY_MULTIPLE_VENDORS_MESSAGE =
+  "La livraison directe ne permet de commander qu’auprès d’un seul traiteur à la fois. Videz votre panier ou choisissez une livraison programmée pour commander auprès de plusieurs traiteurs.";
+const DELIVERY_OPTIMIZATION = {
+  maxDetourMinutes: 15,
+  maxExtraKm: 10,
+  maxDeliveryCost: 18,
+  averageSpeedKmh: 35,
+  baseDeliveryFee: 4,
+  perKmFee: 0.85,
+};
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const DELIVERY_FEES: Record<string, { cents: number; type: string }> = {
   retrait: { cents: 0, type: "pickup" },
@@ -48,6 +59,13 @@ type ProductRow = {
     is_active: boolean | null;
     is_public: boolean | null;
     is_demo: boolean | null;
+    latitude?: number | string | null;
+    longitude?: number | string | null;
+    delivery_radius_km?: number | string | null;
+    zone_label?: string | null;
+    service_zone?: string | null;
+    address?: string | null;
+    opening_hours?: Record<string, unknown> | null;
   } | null;
 };
 
@@ -89,6 +107,107 @@ function normalizeQuantity(value: unknown) {
 function sanitizeText(value: unknown, maxLength: number) {
   if (typeof value !== "string") return "";
   return value.trim().slice(0, maxLength);
+}
+
+function normalizeDeliveryOrderMode(value: unknown) {
+  const mode = sanitizeText(value, 40);
+  if (["livraison_programmee", "scheduled", "programmee", "programmée"].includes(mode)) {
+    return "livraison_programmee";
+  }
+  return "livraison_directe";
+}
+
+function normalizeZone(value: unknown) {
+  return sanitizeText(value, 120)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[’']/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "martinique";
+}
+
+function numberOrNull(value: unknown) {
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function distanceKm(a: { latitude: number; longitude: number }, b: { latitude: number; longitude: number }) {
+  const earthRadiusKm = 6371;
+  const toRad = (value: number) => (value * Math.PI) / 180;
+  const dLat = toRad(b.latitude - a.latitude);
+  const dLng = toRad(b.longitude - a.longitude);
+  const lat1 = toRad(a.latitude);
+  const lat2 = toRad(b.latitude);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+  return 2 * earthRadiusKm * Math.asin(Math.sqrt(h));
+}
+
+function chooseDeliveryOptimizationPlan(vendors: ProductRow["vendors"][]) {
+  const activeVendors = vendors.filter((vendor): vendor is NonNullable<ProductRow["vendors"]> => Boolean(vendor));
+  const zones = Array.from(new Set(activeVendors.map((vendor) => normalizeZone(vendor?.zone_label || vendor?.service_zone || vendor?.address))));
+
+  if (activeVendors.length === 0) {
+    return {
+      code: "NO_COMPATIBLE_DELIVERY_OPTION",
+      requiresConfirmation: false,
+      error: "Aucun traiteur compatible trouvé pour optimiser la livraison.",
+    };
+  }
+
+  if (zones.length === 1) {
+    return {
+      code: "SAME_ZONE_CONSOLIDATED_DELIVERY",
+      requiresConfirmation: false,
+      error: "",
+    };
+  }
+
+  let maxDistanceKm = 0;
+  for (let leftIndex = 0; leftIndex < activeVendors.length; leftIndex += 1) {
+    for (let rightIndex = leftIndex + 1; rightIndex < activeVendors.length; rightIndex += 1) {
+      const left = activeVendors[leftIndex];
+      const right = activeVendors[rightIndex];
+      const leftLatitude = numberOrNull(left?.latitude);
+      const leftLongitude = numberOrNull(left?.longitude);
+      const rightLatitude = numberOrNull(right?.latitude);
+      const rightLongitude = numberOrNull(right?.longitude);
+      if (leftLatitude == null || leftLongitude == null || rightLatitude == null || rightLongitude == null) {
+        return {
+          code: "CROSS_ZONE_SPLIT_DELIVERY_REQUIRED",
+          requiresConfirmation: true,
+          error: "",
+        };
+      }
+      maxDistanceKm = Math.max(
+        maxDistanceKm,
+        distanceKm(
+          { latitude: leftLatitude, longitude: leftLongitude },
+          { latitude: rightLatitude, longitude: rightLongitude },
+        ),
+      );
+    }
+  }
+
+  const detourMinutes = (maxDistanceKm / DELIVERY_OPTIMIZATION.averageSpeedKmh) * 60;
+  const estimatedCost = DELIVERY_OPTIMIZATION.baseDeliveryFee + maxDistanceKm * DELIVERY_OPTIMIZATION.perKmFee;
+  if (
+    maxDistanceKm <= DELIVERY_OPTIMIZATION.maxExtraKm &&
+    detourMinutes <= DELIVERY_OPTIMIZATION.maxDetourMinutes &&
+    estimatedCost <= DELIVERY_OPTIMIZATION.maxDeliveryCost
+  ) {
+    return {
+      code: "CROSS_ZONE_OPTIMIZED_ROUTE",
+      requiresConfirmation: false,
+      error: "",
+    };
+  }
+
+  return {
+    code: "CROSS_ZONE_SPLIT_DELIVERY_REQUIRED",
+    requiresConfirmation: true,
+    error: "",
+  };
 }
 
 async function sha256Hex(value: string) {
@@ -183,7 +302,7 @@ Deno.serve(async (req: Request) => {
     const productIds = parsedItems.map((item) => item.productId);
     const { data: productsData, error: productsError } = await admin
       .from("products")
-      .select("id, vendor_id, name, price, is_available, is_public, is_demo, status, vendors(id, business_name, name, commission_rate, stripe_connect_account_id, stripe_charges_enabled, stripe_payouts_enabled, status, is_active, is_public, is_demo)")
+      .select("id, vendor_id, name, price, is_available, is_public, is_demo, status, vendors(id, business_name, name, commission_rate, stripe_connect_account_id, stripe_charges_enabled, stripe_payouts_enabled, status, is_active, is_public, is_demo, latitude, longitude, delivery_radius_km, zone_label, service_zone, address, opening_hours)")
       .in("id", productIds);
 
     if (productsError) throw productsError;
@@ -191,6 +310,7 @@ Deno.serve(async (req: Request) => {
     if (products.size !== productIds.length) return json(req, { error: "Produit introuvable" }, 404);
 
     const vendorIds = new Set<string>();
+    const vendorRows = new Map<string, ProductRow["vendors"]>();
     const orderItems = parsedItems.map((item) => {
       const product = products.get(item.productId);
       if (!product) throw new Response(JSON.stringify({ error: "Produit introuvable" }), { status: 404 });
@@ -201,6 +321,7 @@ Deno.serve(async (req: Request) => {
         throw new Response(JSON.stringify({ error: `Produit indisponible: ${product.name}` }), { status: 409 });
       }
       vendorIds.add(product.vendor_id);
+      vendorRows.set(product.vendor_id, vendor);
       const unitCents = toCents(product.price);
       const subtotalCents = unitCents * item.quantity;
       const commissionRate = Number(vendor?.commission_rate ?? DEFAULT_COMMISSION_RATE);
@@ -218,13 +339,73 @@ Deno.serve(async (req: Request) => {
       };
     });
 
-    if (vendorIds.size !== 1) {
-      return json(req, { error: "Panier multi-vendeur bloqué en lancement: une commande par partenaire" }, 409);
-    }
-
     const mode = sanitizeText(body.delivery_mode || body.mode, 32) || "retrait";
     const delivery = DELIVERY_FEES[mode];
     if (!delivery) return json(req, { error: "delivery_mode invalide" }, 400);
+    const deliveryOrderMode = normalizeDeliveryOrderMode(
+      body.delivery_order_mode || body.order_delivery_mode || body.order_timing,
+    );
+    const creneaux = sanitizeText(body.creneaux, 240);
+    const requestedDeliveryPlanCode = sanitizeText(body.delivery_plan_code, 80);
+    const deliveryPlanConfirmed = body.delivery_plan_confirmed === true;
+
+    if (deliveryOrderMode === "livraison_directe" && vendorIds.size !== 1) {
+      return json(
+        req,
+        {
+          code: DIRECT_DELIVERY_MULTIPLE_VENDORS_CODE,
+          error: DIRECT_DELIVERY_MULTIPLE_VENDORS_MESSAGE,
+        },
+        409,
+      );
+    }
+
+    if (deliveryOrderMode === "livraison_programmee" && vendorIds.size > 1 && !creneaux) {
+      return json(
+        req,
+        {
+          code: "SCHEDULED_DELIVERY_SLOT_REQUIRED",
+          error: "Un créneau programmé est requis pour une commande multi-traiteurs.",
+        },
+        409,
+      );
+    }
+
+    if (deliveryOrderMode === "livraison_programmee" && vendorIds.size > 1) {
+      const deliveryPlan = chooseDeliveryOptimizationPlan(Array.from(vendorRows.values()));
+      if (deliveryPlan.code === "NO_COMPATIBLE_DELIVERY_OPTION") {
+        return json(
+          req,
+          {
+            code: deliveryPlan.code,
+            error: deliveryPlan.error || "Aucune option de livraison compatible.",
+          },
+          409,
+        );
+      }
+      if (requestedDeliveryPlanCode && requestedDeliveryPlanCode !== deliveryPlan.code) {
+        return json(
+          req,
+          {
+            code: "DELIVERY_PLAN_RECALCULATION_REQUIRED",
+            expected_code: deliveryPlan.code,
+            received_code: requestedDeliveryPlanCode,
+            error: "La proposition de livraison doit être recalculée avant validation.",
+          },
+          409,
+        );
+      }
+      if (deliveryPlan.requiresConfirmation && !deliveryPlanConfirmed) {
+        return json(
+          req,
+          {
+            code: deliveryPlan.code,
+            error: "La livraison fractionnée doit être confirmée explicitement avant création de commande.",
+          },
+          409,
+        );
+      }
+    }
 
     const subtotalCents = orderItems.reduce((sum, item) => sum + Math.round(Number(item.subtotal) * 100), 0);
     const totalCents = subtotalCents + delivery.cents;
@@ -260,7 +441,7 @@ Deno.serve(async (req: Request) => {
         total_amount: totalCents / 100,
         delivery_type: delivery.type,
         notes: sanitizeText(body.notes, 1000) || null,
-        creneaux: sanitizeText(body.creneaux, 240) || null,
+        creneaux: creneaux || null,
         address: sanitizeText(body.address, 240) || null,
         source: "checkout_order_function",
         status: "pending",
@@ -296,6 +477,11 @@ Deno.serve(async (req: Request) => {
         delivery_fee_cents: delivery.cents,
         total_cents: totalCents,
         vendor_id: Array.from(vendorIds)[0],
+        vendor_ids: Array.from(vendorIds),
+        delivery_order_mode: deliveryOrderMode,
+        delivery_plan_code: requestedDeliveryPlanCode || null,
+        delivery_plan_confirmed: deliveryPlanConfirmed,
+        order_scope: vendorIds.size > 1 ? "multi-traiteurs" : "mono-traiteur",
         payment_provider: paymentProvider,
       },
     });
