@@ -25,9 +25,7 @@ import {
 } from'../../config/qontoConfig';
 
 /* ─── Configuration ─── */
-const QONTO_API_URL = import.meta.env.VITE_QONTO_API_URL;
-const QONTO_ENABLED = import.meta.env.VITE_QONTO_ENABLED ==='true';
-const qontoConfigured = !!(QONTO_API_URL && QONTO_ENABLED);
+const qontoManualConfigured = Boolean(import.meta.env.VITE_QONTO_IBAN && import.meta.env.VITE_QONTO_BIC);
 
 /* ─── Icône mapping ─── */
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -129,14 +127,14 @@ export function AdminQonto() {
  return (
  <div className="pageSection p-6 max-w-7xl mx-auto space-y-6">
  {/* Alerte config */}
- {!qontoConfigured && (
+ {!qontoManualConfigured && (
  <div className="bg-muted border border-input rounded-xl p-4 flex items-start gap-3">
  <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
  <div>
- <p className="font-bold text-muted-foreground text-sm">⚠️ Connexion Qonto API requise — voir .env.example</p>
+ <p className="font-bold text-muted-foreground text-sm">⚠️ Coordonnées Qonto publiques à compléter — voir .env.example</p>
  <p className="text-xs text-muted-foreground mt-1">
- Configurez <code className="bg-muted px-1 rounded text-xs">VITE_QONTO_API_URL</code> et{''}
- <code className="bg-muted px-1 rounded text-xs">VITE_QONTO_ENABLED=true</code> dans votre fichier <code className="bg-muted px-1 rounded text-xs">.env</code>.
+ Configurez uniquement <code className="bg-muted px-1 rounded text-xs">VITE_QONTO_IBAN</code> et{''}
+ <code className="bg-muted px-1 rounded text-xs">VITE_QONTO_BIC</code> côté frontend. Les clés API restent dans les secrets serveur.
  </p>
  </div>
  </div>

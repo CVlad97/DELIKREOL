@@ -1,385 +1,111 @@
-# DELIKREOL - Guide des Intégrations Externes
+# DELIKREOL — Intégrations paiements et services externes
 
-## Vue d'ensemble
+## Position de production
 
-Ce document décrit toutes les intégrations externes préparées dans DELIKREOL et comment les activer.
+Le parcours public de lancement ne dépend ni de Google Auth ni de Stripe.
 
----
+- Stripe public : désactivé par `VITE_ENABLE_STRIPE_PUBLIC=false`.
+- Google Auth : optionnel, jamais bloquant pour commander.
+- Paiement MVP : virement Qonto, virement Revolut, paiement à la livraison, crypto wallet facultatif, confirmation WhatsApp.
+- Toute API bancaire reste côté serveur via Supabase Edge Functions ou backend Hostinger.
 
-## 1. Stripe (Paiements)
+## Variables autorisées côté frontend
 
-**Statut:** ✅ Configuré si clé présente
-**Priorité:** Haute (MVP)
-
-### Configuration
-
-1. Créez un compte sur [stripe.com](https://stripe.com)
-2. Récupérez votre clé publique dans le Dashboard
-3. Ajoutez à `.env`:
-   ```
-   VITE_STRIPE_PUBLIC_KEY=pk_...
-   ```
-
-### Utilisation
-
-Le système de paiement est déjà intégré dans:
-- `src/utils/stripe.ts`
-- CheckoutModal pour les paiements clients
-- Split payments automatiques (vendeur, livreur, relais, plateforme)
-
----
-
-## 2. Qonto (Banque Pro)
-
-**Statut:** ⏳ À configurer
-**Priorité:** Moyenne
-
-### Configuration
-
-1. Ouvrez un compte Qonto Business
-2. Activez l'API dans les paramètres
-3. Récupérez vos credentials API
-4. Ajoutez à `.env`:
-   ```
-   VITE_QONTO_API_URL=https://thirdparty.qonto.com/v2
-   VITE_QONTO_API_KEY=...
-   ```
-
-### Cas d'usage
-
-- Versements automatiques aux vendeurs
-- Comptabilité en temps réel
-- Export des transactions
-- Gestion multi-comptes
-
----
-
-## 3. Revolut Business
-
-**Statut:** ⏳ À configurer
-**Priorité:** Moyenne
-
-### Configuration
-
-1. Créez un compte Revolut Business
-2. Activez l'API dans les paramètres
-3. Ajoutez à `.env`:
-   ```
-   VITE_REVOLUT_API_URL=https://b2b.revolut.com/api
-   VITE_REVOLUT_API_KEY=...
-   ```
-
-### Cas d'usage
-
-- Paiements internationaux
-- Change multi-devises
-- Cartes virtuelles pour dépenses
-- Alternative à Qonto
-
----
-
-## 4. Zapier (Automatisation)
-
-**Statut:** ⏳ À configurer
-**Priorité:** Faible (post-MVP)
-
-### Configuration
-
-1. Créez un compte sur [zapier.com](https://zapier.com)
-2. Créez un Zap avec webhook trigger
-3. Récupérez l'URL du webhook
-4. Ajoutez à `.env`:
-   ```
-   VITE_ZAPIER_WEBHOOK_URL=https://hooks.zapier.com/hooks/catch/...
-   ```
-
-### Cas d'usage
-
-- Notifications automatiques (Slack, Email, SMS)
-- Export vers CRM (Notion, Airtable, etc.)
-- Synchronisation calendrier
-- Alertes personnalisées
-
-### Événements à envoyer
-
-```typescript
-// Nouvelle commande
-{
-  event: 'order.created',
-  data: {
-    order_id: '...',
-    customer: '...',
-    total: 45.50,
-    delivery_address: '...'
-  }
-}
-
-// Candidature partenaire
-{
-  event: 'application.received',
-  data: {
-    type: 'vendor',
-    business_name: '...',
-    contact: '...'
-  }
-}
-```
-
----
-
-## 5. Make (Integromat)
-
-**Statut:** ⏳ À configurer
-**Priorité:** Faible (post-MVP)
-
-### Configuration
-
-1. Créez un compte sur [make.com](https://make.com)
-2. Créez un scénario avec webhook
-3. Récupérez l'URL du webhook
-4. Ajoutez à `.env`:
-   ```
-   VITE_MAKE_WEBHOOK_URL=https://hook.integromat.com/...
-   ```
-
-### Cas d'usage
-
-Similaire à Zapier, mais plus puissant pour:
-- Workflows complexes multi-étapes
-- Traitement de données avancé
-- Intégrations avec +1000 services
-
----
-
-## 6. Google Sheets (Export données)
-
-**Statut:** ⏳ À configurer
-**Priorité:** Moyenne
-
-### Configuration
-
-1. Créez un projet Google Cloud
-2. Activez l'API Google Sheets
-3. Créez des credentials (Service Account)
-4. Ajoutez à `.env`:
-   ```
-   VITE_SHEETS_API_URL=https://sheets.googleapis.com/v4
-   VITE_SHEETS_API_KEY=...
-   ```
-
-### Cas d'usage
-
-- Export automatique des commandes
-- Reporting quotidien/hebdomadaire
-- Dashboard partagé avec l'équipe
-- Archivage des données
-
-### Fonctions à implémenter
-
-```typescript
-// src/utils/sheets.ts
-export async function exportOrdersToSheet(orders: Order[]) {
-  // TODO: Implémenter l'export
-}
-
-export async function syncMetricsDaily() {
-  // TODO: Sync automatique des métriques
-}
-```
-
----
-
-## 7. OpenAI (Intelligence Artificielle)
-
-**Statut:** ⏳ À configurer
-**Priorité:** Haute (pour Admin Copilot)
-
-### Configuration
-
-1. Créez un compte sur [platform.openai.com](https://platform.openai.com)
-2. Générez une API key
-3. Ajoutez à `.env`:
-   ```
-   VITE_OPENAI_API_KEY=sk-...
-   ```
-
-### Utilisation actuelle
-
-- **Admin Copilot** (`src/services/adminCopilot.ts`)
-  - Mode démo sans clé → affiche données brutes
-  - Avec clé → analyse intelligente + suggestions
-
-### Fonctionnalités IA
-
-1. **Analyse prédictive**
-   - Prévision de demande par zone
-   - Détection d'anomalies
-   - Optimisation des tournées
-
-2. **Assistant conversationnel**
-   - Réponse aux questions admin
-   - Génération de rapports
-   - Recommandations stratégiques
-
-3. **Scoring automatique**
-   - Évaluation des candidatures partenaires
-   - Notation des livreurs
-   - Analyse de satisfaction client
-
----
-
-## 8. Crypto Wallet (Points → Tokens)
-
-**Statut:** ⏳ À configurer
-**Priorité:** Faible (post-MVP)
-
-### Configuration
-
-#### Option A: Coinbase Commerce
-
-1. Compte sur [commerce.coinbase.com](https://commerce.coinbase.com)
-2. Créez une API key
-3. Ajoutez à `.env`:
-   ```
-   VITE_CRYPTO_PROVIDER=coinbase
-   VITE_CRYPTO_WALLET_ADDRESS=...
-   VITE_COINBASE_API_KEY=...
-   ```
-
-#### Option B: Solana (Direct)
-
-1. Créez un wallet Solana
-2. Déployez un SPL Token
-3. Ajoutez à `.env`:
-   ```
-   VITE_CRYPTO_PROVIDER=solana
-   VITE_CRYPTO_WALLET_ADDRESS=...
-   VITE_SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
-   ```
-
-#### Option C: Polygon (Ethereum L2)
-
-1. Wallet Ethereum/Polygon
-2. Déployez un ERC-20 token
-3. Ajoutez à `.env`:
-   ```
-   VITE_CRYPTO_PROVIDER=polygon
-   VITE_CRYPTO_WALLET_ADDRESS=...
-   VITE_POLYGON_RPC_URL=https://polygon-rpc.com
-   ```
-
-### Système de Points actuel
-
-Le système est déjà fonctionnel:
-- Table `loyalty_points` (solde par user)
-- Table `loyalty_events` (historique)
-- Service `src/services/loyaltyService.ts`
-
-### Conversion Points → Crypto
-
-```typescript
-// src/services/loyaltyService.ts
-export async function syncLoyaltyToCryptoWallet(userId: string) {
-  // TODO: Implémenter selon le provider choisi
-  // 1. Récupérer le solde de points
-  // 2. Calculer l'équivalent en tokens (ex: 100 points = 1 TOKEN)
-  // 3. Mint ou transfer des tokens vers le wallet user
-  // 4. Logger la transaction
-}
-```
-
-### Cas d'usage
-
-- Fidélité gamifiée (tokens échangeables)
-- Staking pour réductions
-- NFT badges pour super-users
-- DAO gouvernance (plus tard)
-
----
-
-## 9. WhatsApp Business API
-
-**Statut:** ✅ Partiellement configuré
-**Priorité:** Haute
-
-### Configuration
-
-Déjà préparé dans:
-- `supabase/functions/whatsapp-webhook`
-- `src/components/admin/WhatsAppManager.tsx`
-- Tables: `whatsapp_messages`, `whatsapp_sessions`, `whatsapp_templates`
-
-Pour activer complètement:
-1. Créez un compte Meta Business
-2. Configurez WhatsApp Business API
-3. Ajoutez les credentials dans APIKeysManager
-
-### Cas d'usage
-
-- Notifications clients (commande, livraison)
-- Support conversationnel
-- Confirmation de rendez-vous
-- Marketing ciblé
-
----
-
-## Checklist d'activation
-
-### Phase 1 - MVP (maintenant)
-
-- [x] Stripe (paiements) → Priorité 1
-- [ ] OpenAI (admin copilot) → Priorité 2
-- [ ] WhatsApp (notifications) → Priorité 3
-
-### Phase 2 - Post-MVP (mois 1-2)
-
-- [ ] Qonto ou Revolut (banque pro)
-- [ ] Google Sheets (reporting)
-- [ ] Zapier ou Make (automatisation basique)
-
-### Phase 3 - Scaling (mois 3+)
-
-- [ ] Crypto wallet (points → tokens)
-- [ ] Automatisations avancées
-- [ ] Intégrations ERP/Comptabilité
-
----
-
-## Sécurité
-
-### Variables d'environnement
-
-**JAMAIS** commiter les clés dans Git:
+Les variables `VITE_*` sont visibles dans le navigateur. Elles doivent contenir uniquement des informations affichables publiquement :
 
 ```bash
-# .env (local uniquement)
-VITE_STRIPE_PUBLIC_KEY=pk_...
-VITE_OPENAI_API_KEY=sk-...
-VITE_QONTO_API_KEY=...
+VITE_QONTO_ACCOUNT_NAME=DELIKREOL
+VITE_QONTO_IBAN=FR76...
+VITE_QONTO_BIC=...
+VITE_REVOLUT_ACCOUNT_NAME=DELIKREOL
+VITE_REVOLUT_IBAN=FR76...
+VITE_REVOLUT_BIC=...
+VITE_CRYPTO_NETWORK=polygon
+VITE_CRYPTO_WALLET_ADDRESS=0x...
+VITE_EXTERNAL_PAYMENT_URL=https://...
 ```
 
-Pour la production:
-- Utiliser les secrets Vercel/Netlify/etc.
-- Rotation des clés tous les 3 mois
-- Monitoring des usages API
+Ne jamais placer dans `VITE_*` : clé Qonto, token Revolut, clé Stripe secrète, secret webhook, clé OpenAI, clé Supabase `service_role`, seed phrase ou clé privée wallet.
 
-### Permissions
+## Qonto
 
-Chaque intégration doit avoir:
-- Accès minimum requis (principle of least privilege)
-- Rate limiting configuré
-- Logs d'activité
-- Alertes sur usage anormal
+**Statut :** MVP manuel fonctionnel après déploiement de la migration paiement.
 
----
+- Le panier affiche bénéficiaire, IBAN, BIC et référence unique.
+- Le client confirme sur WhatsApp.
+- L’admin valide le statut dans `/admin/paiements`.
+- `supabase/functions/qonto-finance` est réservé admin et lit les credentials via `Deno.env`.
+- Si les credentials Qonto sont absents, la commande reste possible en mode manuel.
 
-## Support
+Secrets serveur uniquement :
 
-Pour toute question sur les intégrations:
-- Email: tech@delikreol.com
-- Slack: #integrations
-- Doc officielle: `/docs/integrations.md`
+```bash
+QONTO_API_BASE_URL=https://thirdparty.qonto.com/v2
+QONTO_CLIENT_ID=...
+QONTO_CLIENT_SECRET=...
+QONTO_WEBHOOK_SECRET=...
+```
 
----
+## Revolut Business
 
-**DELIKREOL - Intégrations pour l'abondance** 🔌✨
+**Statut :** MVP manuel fonctionnel après déploiement de la migration paiement.
+
+- Le panier affiche les coordonnées Revolut Business publiques.
+- `supabase/functions/revolut-business` est un adaptateur serveur sécurisé, admin-only.
+- L’automatisation API doit être validée en sandbox avant activation.
+
+Secrets serveur uniquement :
+
+```bash
+REVOLUT_BUSINESS_API_TOKEN=...
+REVOLUT_WEBHOOK_SECRET=...
+```
+
+## Crypto wallet
+
+**Statut :** facultatif, validation manuelle.
+
+- Priorité réseau : USDT Polygon, puis USDT Solana.
+- Le frontend peut afficher une adresse publique de réception et un QR code.
+- Le client renseigne un hash de transaction.
+- Le backend refuse la réutilisation d’un même hash via `payment_external_id`.
+- Aucune seed phrase ni clé privée ne doit exister dans GitHub, Supabase public, `localStorage` ou le navigateur.
+
+## Stripe
+
+**Statut :** désactivé pour le go-live manuel.
+
+- `create-payment-intent` reste neutralisé.
+- Le panier public ne propose plus Stripe.
+- L’ancien code Stripe est conservé derrière feature flag désactivé pour une réactivation future en mode test uniquement.
+- Ne pas activer Stripe Live tant qu’un test complet signé webhook → commande payée → audit n’a pas été réalisé.
+
+## WhatsApp
+
+**Statut :** canal principal de confirmation.
+
+- La commande est préparée avec un numéro `DK-...`.
+- Le client confirme le mode de paiement et les détails sur WhatsApp.
+- Si popup WhatsApp bloquée, la commande reste enregistrée et le client peut relancer le lien.
+- Aucun message WhatsApp réel ne doit être envoyé par automation sans validation explicite.
+
+## Google Sheets, Zapier, Make, OpenAI
+
+**Statut :** non bloquants pour le paiement.
+
+- Les webhooks Zapier/Make peuvent rester publics uniquement s’ils ne contiennent pas de secret.
+- Google Sheets doit rester fallback/reporting, pas source de vérité paiement.
+- OpenAI doit passer par un proxy/Edge Function ; aucune clé OpenAI dans `VITE_*`.
+
+## Hostinger / VPS
+
+- Mettre les secrets bancaires dans un fichier serveur non versionné avec permissions restrictives ou dans le gestionnaire de secrets du déploiement.
+- Auditer Docker, UFW, ports exposés, reverse proxy, certificats TLS et logs avant tout changement.
+- Préparer rollback avant modification de service.
+
+## Procédure de rollback paiement manuel
+
+1. Désactiver les providers publics dans `.env` sauf `cash_on_delivery`.
+2. Redéployer le frontend.
+3. Conserver les colonnes paiement ajoutées pour audit historique.
+4. Si la migration SQL doit être annulée, supprimer seulement les fonctions/RLS créées après export des événements d’audit.
