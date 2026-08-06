@@ -51,6 +51,31 @@ type ProductRow = {
   } | null;
 };
 
+// Fournisseurs de paiement toujours autorisés côté serveur. La liste est
+// volontairement stricte : toute valeur non listée ici (y compris
+// `stripe_disabled`, `stripe_test`, `manual` et les variants `sumup_*`) est
+// rejetée avec un 400 explicite. Stripe reste désactivé pour ce lancement et
+// "manual" est trop vague pour être exposé au client.
+const BASE_PAYMENT_PROVIDERS = new Set([
+  "qonto_transfer",
+  "revolut_transfer",
+  "cash_on_delivery",
+]);
+
+// Fournisseurs optionnels activés par feature flag serveur uniquement. Aucun
+// client ne peut forcer leur activation : la décision vient de Deno.env, pas
+// du corps de la requête.
+function resolveAllowedPaymentProviders(): Set<string> {
+  const providers = new Set(BASE_PAYMENT_PROVIDERS);
+  if (Deno.env.get("ENABLE_CRYPTO_PAYMENT") === "true") {
+    providers.add("crypto_wallet");
+  }
+  if (Deno.env.get("ENABLE_EXTERNAL_PAYMENT_LINK") === "true") {
+    providers.add("external_payment_link");
+  }
+  return providers;
+}
+
 function corsHeaders(req: Request) {
   const origin = req.headers.get("origin") || "";
   return {
@@ -230,9 +255,42 @@ Deno.serve(async (req: Request) => {
     const totalCents = subtotalCents + delivery.cents;
     if (totalCents <= 0) return json(req, { error: "Total commande invalide" }, 400);
 
-    const paymentProvider = sanitizeText(body.payment_provider, 32) === "stripe_test" ? "stripe_test" : "manual";
+    // Validation stricte du provider : aucune confiance dans la valeur client.
+    // Un provider inconnu, désactivé (stripe_disabled, stripe_test, manual,
+    // sumup_*) ou non activé par feature flag serveur est rejeté en 400. Pas
+    // de repli silencieux vers qonto_transfer : le client doit désigner
+    // explicitement un provider autorisé.
+    const rawPaymentProvider = sanitizeText(body.payment_provider, 32);
+    const allowedPaymentProviders = resolveAllowedPaymentProviders();
+    if (!rawPaymentProvider || !allowedPaymentProviders.has(rawPaymentProvider)) {
+      return json(
+        req,
+        {
+          error: "payment_provider non autorisé",
+          reason:
+            "Provider de paiement inconnu, désactivé ou non activé par feature flag serveur.",
+        },
+        400,
+      );
+    }
+    const paymentProvider = rawPaymentProvider;
     const phone = sanitizeText(body.phone || body.customer_phone, 30);
     if (!phone || phone.length < 8) return json(req, { error: "Téléphone requis" }, 400);
+    const paymentExternalId = sanitizeText(body.payment_external_id, 180);
+    if (paymentProvider === "crypto_wallet" && !paymentExternalId) {
+      return json(req, { error: "Hash de transaction requis pour le paiement crypto" }, 400);
+    }
+    if (paymentExternalId) {
+      const { data: duplicatePayment, error: duplicatePaymentError } = await admin
+        .from("orders")
+        .select("id, order_number, payment_status")
+        .eq("payment_external_id", paymentExternalId)
+        .maybeSingle();
+      if (duplicatePaymentError) throw duplicatePaymentError;
+      if (duplicatePayment) {
+        return json(req, { error: "Référence paiement déjà utilisée", order: duplicatePayment }, 409);
+      }
+    }
 
     const now = new Date();
     const datePart = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
@@ -241,12 +299,23 @@ Deno.serve(async (req: Request) => {
       .join("");
     const orderNumber = `DK-${datePart}-${random}`;
 
-    const { data: order, error: orderError } = await admin
-      .from("orders")
-      .insert({
+    // Le statut de paiement est dérivé UNIQUEMENT de données serveur, jamais
+    // d'une valeur envoyée par le client (payment_external_id,
+    // payment_status, etc.). Toute commande nouvellement créée démarre à
+    // "pending" ; la transition vers "proof_submitted" / "paid" se fait via
+    // la revue admin ou un webhook de paiement vérifié, pas sur la base d'un
+    // champ fourni par le frontend.
+    const paymentStatus = "pending";
+    const paymentReference = `${paymentProvider.toUpperCase()}-${orderNumber}`;
+    const trackingToken = Array.from(crypto.getRandomValues(new Uint8Array(8)))
+      .map((byte) => byte.toString(16).padStart(2, "0"))
+      .join("");
+
+    const { data: result, error: rpcError } = await admin.rpc("create_checkout_order_atomic", {
+      target_idempotency_key: idempotencyKey,
+      order_payload: {
         order_number: orderNumber,
-        idempotency_key: idempotencyKey,
-        customer_id: authData.user?.id || null,
+        customer_id: authData.user?.id || "",
         customer_name: sanitizeText(body.customer_name, 120) || null,
         customer_phone: phone,
         customer_email: sanitizeText(body.email || authData.user?.email, 160) || null,
@@ -265,51 +334,40 @@ Deno.serve(async (req: Request) => {
         source: "checkout_order_function",
         status: "pending",
         delivery_status: "pending",
-        payment_status: paymentProvider === "stripe_test" ? "awaiting_payment" : "pending",
+        payment_status: paymentStatus,
         payment_provider: paymentProvider,
-        payment_method: paymentProvider === "stripe_test" ? "card" : "manual",
-        tracking_token: Array.from(crypto.getRandomValues(new Uint8Array(8)))
-          .map((byte) => byte.toString(16).padStart(2, "0"))
-          .join(""),
-      })
-      .select("id, order_number, tracking_token")
-      .single();
-
-    if (orderError) throw orderError;
-
-    const { error: itemsError } = await admin
-      .from("order_items")
-      .insert(orderItems.map((item) => ({ ...item, order_id: order.id })));
-
-    if (itemsError) {
-      await admin.from("orders").delete().eq("id", order.id);
-      throw itemsError;
-    }
-
-    await admin.from("order_events").insert({
-      order_id: order.id,
-      event_type: paymentProvider === "stripe_test" ? "public_order_created" : "whatsapp_order_prepared",
-      payload: {
-        mode,
-        items_count: orderItems.length,
-        subtotal_cents: subtotalCents,
-        delivery_fee_cents: delivery.cents,
-        total_cents: totalCents,
-        vendor_id: Array.from(vendorIds)[0],
-        payment_provider: paymentProvider,
+        payment_method: paymentProvider,
+        payment_reference: paymentReference,
+        payment_external_id: paymentExternalId || null,
+        payment_amount: totalCents / 100,
+        payment_currency: "EUR",
+        payment_proof_url: sanitizeText(body.payment_proof_url, 500) || null,
+        tracking_token: trackingToken,
+      },
+      items_payload: orderItems,
+      event_payload: {
+        event_type: "whatsapp_order_prepared",
+        payload: {
+          mode,
+          items_count: orderItems.length,
+          subtotal_cents: subtotalCents,
+          delivery_fee_cents: delivery.cents,
+          total_cents: totalCents,
+          vendor_id: Array.from(vendorIds)[0],
+          payment_provider: paymentProvider,
+          payment_reference: paymentReference,
+        },
       },
     });
 
+    if (rpcError) throw rpcError;
+    const order = result?.order;
+    if (!order?.id || !order?.order_number) throw new Error("RPC create_checkout_order_atomic returned no order");
+
     return json(req, {
       success: true,
-      order: {
-        id: order.id,
-        order_number: order.order_number,
-        tracking_token: order.tracking_token,
-        status: "pending",
-        payment_status: paymentProvider === "stripe_test" ? "awaiting_payment" : "pending",
-        total_cents: totalCents,
-      },
+      existing: Boolean(result?.existing),
+      order,
     });
   } catch (error) {
     if (error instanceof Response) {
