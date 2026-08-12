@@ -11,11 +11,14 @@ const allowedOrigins = new Set([
 const MAX_BODY_BYTES = 16_384;
 const MAX_ITEMS = 25;
 const DEFAULT_COMMISSION_RATE = 15;
+const WHATSAPP_NUMBER = "596696653589";
 const DIRECT_DELIVERY_MULTIPLE_VENDORS_CODE = "DIRECT_DELIVERY_MULTIPLE_VENDORS_NOT_ALLOWED";
 const VENDOR_PICKUP_MULTIPLE_VENDORS_CODE = "VENDOR_PICKUP_MULTIPLE_VENDORS_NOT_ALLOWED";
 const FULFILLMENT_CONFIRMATION_REQUIRED_CODE = "FULFILLMENT_CONFIRMATION_REQUIRED";
 const FULFILLMENT_FINGERPRINT_MISMATCH_CODE = "FULFILLMENT_FINGERPRINT_MISMATCH";
 const NO_COMPATIBLE_RELAY_OPTION_CODE = "NO_COMPATIBLE_RELAY_OPTION";
+const ORDER_DRIVER_MISSION_CREATED_CODE = "ORDER_DRIVER_MISSION_CREATED";
+const WHATSAPP_COORDINATION_PREPARED_CODE = "WHATSAPP_COORDINATION_PREPARED";
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const DELIVERY_FEES: Record<string, { cents: number; type: string }> = {
   retrait: { cents: 0, type: "pickup" },
@@ -56,6 +59,14 @@ type ProductRow = {
   } | null;
 };
 
+type ExistingOrderRow = {
+  id: string;
+  order_number: string;
+  status: string;
+  payment_status: string;
+  tracking_token: string | null;
+};
+
 function corsHeaders(req: Request) {
   const origin = req.headers.get("origin") || "";
   return {
@@ -94,6 +105,11 @@ function normalizeQuantity(value: unknown) {
 function sanitizeText(value: unknown, maxLength: number) {
   if (typeof value !== "string") return "";
   return value.trim().slice(0, maxLength);
+}
+
+function waLink(phone: string, message: string) {
+  const cleanPhone = phone.replace(/\D/g, "");
+  return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
 }
 
 function normalizeFulfillmentMode(value: unknown, deliveryMode: string) {
@@ -161,6 +177,25 @@ async function enforceRateLimit(
   }
 }
 
+async function findExistingOrder(
+  admin: ReturnType<typeof createClient>,
+  idempotencyKey: string,
+): Promise<ExistingOrderRow | null> {
+  const { data, error } = await admin
+    .from("orders")
+    .select("id, order_number, status, payment_status, tracking_token")
+    .eq("idempotency_key", idempotencyKey)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+function isUniqueViolation(error: unknown) {
+  const dbError = error as { code?: string; message?: string };
+  return dbError?.code === "23505" || /duplicate key value|unique constraint/i.test(dbError?.message || "");
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders(req) });
   if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
@@ -190,13 +225,7 @@ Deno.serve(async (req: Request) => {
       `${req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for") || "unknown"}:${req.headers.get("user-agent") || "ua"}`,
     );
 
-    const { data: existing, error: existingError } = await admin
-      .from("orders")
-      .select("id, order_number, status, payment_status, tracking_token")
-      .eq("idempotency_key", idempotencyKey)
-      .maybeSingle();
-
-    if (existingError) throw existingError;
+    const existing = await findExistingOrder(admin, idempotencyKey);
     if (existing) return json(req, { existing: true, order: existing });
 
     const parsedItems = parseItems(body.items);
@@ -363,7 +392,13 @@ Deno.serve(async (req: Request) => {
       .select("id, order_number, tracking_token")
       .single();
 
-    if (orderError) throw orderError;
+    if (orderError) {
+      if (isUniqueViolation(orderError)) {
+        const existingAfterConflict = await findExistingOrder(admin, idempotencyKey);
+        if (existingAfterConflict) return json(req, { existing: true, order: existingAfterConflict });
+      }
+      throw orderError;
+    }
 
     const { error: itemsError } = await admin
       .from("order_items")
@@ -374,7 +409,47 @@ Deno.serve(async (req: Request) => {
       throw itemsError;
     }
 
-    await admin.from("order_events").insert({
+    let deliveryMission: { id: string } | null = null;
+    if (delivery.type === "home_delivery" || delivery.type === "relay_point") {
+      const { data: deliveryData, error: deliveryError } = await admin
+        .from("deliveries")
+        .insert({
+          order_id: order.id,
+          status: "pending",
+          pickup_address: orderItems[0]?.vendor_name || "À coordonner",
+          driver_fee: delivery.cents / 100,
+        })
+        .select("id")
+        .single();
+
+      if (deliveryError) {
+        await admin.from("order_items").delete().eq("order_id", order.id);
+        await admin.from("orders").delete().eq("id", order.id);
+        throw deliveryError;
+      }
+      deliveryMission = deliveryData;
+    }
+
+    const driverCoordinationMessage = `DELIKREOL — coordination livreur\n\nCommande : ${order.order_number}\nZone : ${sanitizeText(body.commune, 120) || "Non précisée"}\nMission : ${deliveryMission?.id || "non requise"}\n\nAucun message automatique n'a été envoyé.`;
+    if (deliveryMission) {
+      const { error: communicationError } = await admin.from("delivery_communications").insert({
+        order_number: order.order_number,
+        from_type: "coordinator",
+        from_name: "DELIKREOL",
+        to_type: "driver",
+        to_phone: WHATSAPP_NUMBER,
+        message_type: "driver_needed",
+        wa_link: waLink(WHATSAPP_NUMBER, driverCoordinationMessage),
+        message_preview: driverCoordinationMessage,
+        status: "pending",
+      });
+
+      if (communicationError) {
+        console.warn("[checkout-order] delivery communication log skipped", communicationError.message);
+      }
+    }
+
+    await admin.from("order_events").insert([{
       order_id: order.id,
       event_type: paymentProvider === "stripe_test" ? "public_order_created" : "whatsapp_order_prepared",
       payload: {
@@ -393,7 +468,26 @@ Deno.serve(async (req: Request) => {
         relay_host_vendor_id: fulfillmentMode === "point_relais" && relayPoint?.vendor_id ? relayPoint.vendor_id : null,
         payment_provider: paymentProvider,
       },
-    });
+    }, ...(deliveryMission ? [
+      {
+        order_id: order.id,
+        event_type: ORDER_DRIVER_MISSION_CREATED_CODE,
+        payload: {
+          delivery_id: deliveryMission.id,
+          delivery_type: delivery.type,
+          fulfillment_mode: fulfillmentMode,
+        },
+      },
+      {
+        order_id: order.id,
+        event_type: WHATSAPP_COORDINATION_PREPARED_CODE,
+        payload: {
+          channel: "wa.me",
+          status: "pending",
+          auto_sent: false,
+        },
+      },
+    ] : [])]);
 
     return json(req, {
       success: true,

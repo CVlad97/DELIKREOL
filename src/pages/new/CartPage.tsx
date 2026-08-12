@@ -52,6 +52,8 @@ interface CartItem extends Product {
 }
 
 const WHATSAPP_NUMBER ='596696653589';
+const CHECKOUT_IDEMPOTENCY_STORAGE_KEY = 'delikreol_checkout_idempotency_v1';
+const CHECKOUT_IDEMPOTENCY_TTL_MS = 2 * 60 * 60 * 1000;
 
 const CRENEAUX_OPTIONS = [
  { id:'des-que-possible', label:'Dès que possible' },
@@ -73,6 +75,34 @@ function validatePhone(phone: string): boolean {
 
 function formatPhoneError(): string {
  return'Merci d\'indiquer un numéro WhatsApp valide, par exemple 0696 XX XX XX ou +596 696 XX XX XX.';
+}
+
+function getStableCheckoutIdempotencyKey(paymentProvider: 'manual' | 'stripe_test', fingerprint: string): string {
+ const now = Date.now();
+ try {
+ const stored = JSON.parse(localStorage.getItem(CHECKOUT_IDEMPOTENCY_STORAGE_KEY) ||'null') as {
+ fingerprint?: string;
+ key?: string;
+ expiresAt?: number;
+ } | null;
+ if (stored?.fingerprint === fingerprint && stored.key && Number(stored.expiresAt || 0) > now) {
+ return stored.key;
+ }
+ } catch {
+ localStorage.removeItem(CHECKOUT_IDEMPOTENCY_STORAGE_KEY);
+ }
+
+ const key = `public_${paymentProvider}_${crypto.randomUUID()}`;
+ localStorage.setItem(CHECKOUT_IDEMPOTENCY_STORAGE_KEY, JSON.stringify({
+ fingerprint,
+ key,
+ expiresAt: now + CHECKOUT_IDEMPOTENCY_TTL_MS,
+ }));
+ return key;
+}
+
+function clearStableCheckoutIdempotencyKey(): void {
+ localStorage.removeItem(CHECKOUT_IDEMPOTENCY_STORAGE_KEY);
 }
 
 /**
@@ -258,7 +288,17 @@ export default function CartPage() {
 
  const createPublicOrder = async (paymentProvider:'manual' |'stripe_test') => {
  const deliveryFee = DELIVERY_FEES[mode]?.fee || 0;
- const idempotencyKey = `public_${paymentProvider}_${Date.now()}_${crypto.randomUUID()}`;
+ const cartFingerprint = JSON.stringify({
+ paymentProvider,
+ items: items.map((item) => ({ id: item.id, quantity: item.quantity })).sort((left, right) => left.id.localeCompare(right.id)),
+ fulfillmentMode,
+ fulfillmentPlanFingerprint: fulfillmentPlan?.fingerprint || null,
+ creneaux: getCreneauText(),
+ commune: commune.trim(),
+ phone: phone.trim(),
+ total,
+ });
+ const idempotencyKey = getStableCheckoutIdempotencyKey(paymentProvider, cartFingerprint);
  const { data, error } = await supabase.functions.invoke('checkout-order', {
  body: {
  idempotency_key: idempotencyKey,
@@ -292,6 +332,7 @@ export default function CartPage() {
  if (!data?.order?.id || !data?.order?.order_number) {
  throw new Error(data?.error ||'Commande non créée');
  }
+ clearStableCheckoutIdempotencyKey();
  return data.order as { id: string; order_number: string; tracking_token?: string };
  };
 
