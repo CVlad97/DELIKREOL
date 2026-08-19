@@ -5,6 +5,7 @@ import { MapView } from '../components/Map/MapView';
 import { QRScanner } from '../components/QRScanner';
 import { ProDashboard } from './ProDashboard';
 import { PartnerDashboardPage } from './PartnerDashboardPage';
+import { LogisticsBillingPanel } from '../components/logistics/LogisticsBillingPanel';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Driver, Delivery, Location } from '../types';
@@ -565,6 +566,20 @@ export function DriverApp() {
         return renderActive();
       case 'documents':
         return <PartnerDashboardPage />;
+      case 'billing':
+        return (
+          <LogisticsBillingPanel
+            partnerKind="driver"
+            partnerName={`Livreur ${driver?.id?.slice(0, 8) || 'DELIKREOL'}`}
+            missions={deliveryHistory.map((delivery) => ({
+              id: delivery.id,
+              orderNumber: delivery.order?.order_number || delivery.order_id,
+              completedAt: delivery.delivered_at || delivery.created_at,
+              amount: Number(delivery.driver_fee || 0),
+              label: `Course ${delivery.order?.order_number || delivery.order_id}`,
+            }))}
+          />
+        );
       case 'history':
         return renderHistory();
       case 'earnings':

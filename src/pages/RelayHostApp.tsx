@@ -4,6 +4,7 @@ import { QRScanner } from '../components/QRScanner';
 import { ProDashboard } from './ProDashboard';
 import { supabase } from '../lib/supabase';
 import { PartnerDashboardPage } from './PartnerDashboardPage';
+import { LogisticsBillingPanel } from '../components/logistics/LogisticsBillingPanel';
 
 export function RelayHostApp() {
   const [currentView, setCurrentView] = useState('dashboard');
@@ -71,6 +72,14 @@ export function RelayHostApp() {
         return <PartnerDashboardPage />;
       case 'capacity':
         return <ProDashboard onNavigate={setCurrentView} />;
+      case 'billing':
+        return (
+          <LogisticsBillingPanel
+            partnerKind="relay_host"
+            partnerName="Point relais DELIKREOL"
+            missions={[]}
+          />
+        );
       case 'scanner':
         return <ProDashboard onNavigate={setCurrentView} />;
       default:

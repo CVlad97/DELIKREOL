@@ -5,21 +5,28 @@ import { Layout } from '../../components/layout/Layout';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 import { useToast } from '../../contexts/ToastContext';
 import { supabase, isDemoMode, isSupabaseConfigured } from '../../lib/supabase';
+import { buildOnboardingWhatsAppMessage } from '../../services/logisticsPartnerBilling';
 
 const WHATSAPP_NUMBER = '596696653589';
 const TRANSPORT_MODES = ['Voiture', 'Scooter', 'Vélo', 'Autre'];
+const LEGAL_STATUSES = ['Micro-entrepreneur', 'Entreprise individuelle', 'SASU/EURL', 'En création'];
 
 type DriverFormData = {
   nom: string;
   telephone: string;
   whatsapp: string;
   email: string;
+  siret: string;
+  legalStatus: string;
   commune: string;
   zonesAcceptees: string[];
   moyenTransport: string;
   disponibilite: string;
   horaires: string;
   experienceLivraison: string;
+  insuranceConfirmed: boolean;
+  independentStatusConfirmed: boolean;
+  termsConfirmed: boolean;
 };
 
 const initialFormData: DriverFormData = {
@@ -27,12 +34,17 @@ const initialFormData: DriverFormData = {
   telephone: '',
   whatsapp: '',
   email: '',
+  siret: '',
+  legalStatus: '',
   commune: '',
   zonesAcceptees: [],
   moyenTransport: '',
   disponibilite: '',
   horaires: '',
   experienceLivraison: '',
+  insuranceConfirmed: false,
+  independentStatusConfirmed: false,
+  termsConfirmed: false,
 };
 
 export default function DevenirLivreurPage() {
@@ -58,21 +70,19 @@ export default function DevenirLivreurPage() {
   };
 
   const buildWhatsAppMessage = () => {
-    const lines = [
-      '🚚 *Candidature livreur — DeliKreol*',
-      '',
-      `👤 Nom : ${form.nom}`,
-      `📞 Tél : ${form.telephone}`,
-      form.whatsapp ? `💬 WhatsApp : ${form.whatsapp}` : '',
-      form.email ? `📧 Email : ${form.email}` : '',
-      `📍 Commune : ${form.commune}`,
-      `🗺️ Zones : ${form.zonesAcceptees.join(', ') || 'Non précisé'}`,
-      `🚗 Transport : ${form.moyenTransport}`,
-      form.disponibilite ? `📅 Disponibilité : ${form.disponibilite}` : '',
-      form.horaires ? `🕐 Horaires : ${form.horaires}` : '',
-      form.experienceLivraison ? `💼 Expérience : ${form.experienceLivraison}` : '',
-    ];
-    return lines.filter(Boolean).join('\n');
+    return [
+      buildOnboardingWhatsAppMessage({
+        partnerKind: 'driver',
+        name: form.nom,
+        commune: form.commune,
+        phone: form.telephone,
+        availability: `${form.disponibilite || 'Non précisée'} ${form.horaires || ''}`.trim(),
+        zones: form.zonesAcceptees,
+      }),
+      form.siret ? `SIRET : ${form.siret}` : 'SIRET : à compléter',
+      form.legalStatus ? `Statut : ${form.legalStatus}` : 'Statut : à préciser',
+      form.experienceLivraison ? `Expérience : ${form.experienceLivraison}` : '',
+    ].filter(Boolean).join('\n');
   };
 
   const saveLocalCopy = () => {
@@ -103,12 +113,17 @@ export default function DevenirLivreurPage() {
           phone: form.telephone.trim(),
           whatsapp: form.whatsapp.trim() || null,
           email: form.email.trim() || null,
+          siret: form.siret.trim() || null,
+          legal_status: form.legalStatus || null,
           commune: form.commune,
           zones_acceptees: form.zonesAcceptees,
           transport_mode: form.moyenTransport,
           disponibilite: form.disponibilite || null,
           horaires: form.horaires || null,
           experience_livraison: form.experienceLivraison || null,
+          insurance_confirmed: form.insuranceConfirmed,
+          independent_status_confirmed: form.independentStatusConfirmed,
+          terms_confirmed: form.termsConfirmed,
           status: 'candidat',
         });
 
@@ -164,7 +179,7 @@ export default function DevenirLivreurPage() {
           <h1 className="text-2xl font-black tracking-tight text-foreground md:text-3xl">Devenir livreur DeliKreol</h1>
           <div className="flex gap-3 rounded-xl border border-secondary/30 bg-secondary/10 p-4">
             <AlertTriangle size={20} className="mt-0.5 flex-shrink-0 text-secondary" />
-            <p className="text-sm text-secondary">Les livreurs sont validés progressivement selon les zones, disponibilités et documents.</p>
+            <p className="text-sm text-secondary">Modèle indépendant : aucune activation automatique. DELIKREOL vérifie identité, SIRET, assurance, zones et disponibilité avant les premières courses.</p>
           </div>
         </div>
 
@@ -176,6 +191,11 @@ export default function DevenirLivreurPage() {
               <input name="telephone" required type="tel" value={form.telephone} onChange={handleChange} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary" placeholder="Téléphone *" />
               <input name="whatsapp" type="tel" value={form.whatsapp} onChange={handleChange} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary" placeholder="WhatsApp" />
               <input name="email" type="email" value={form.email} onChange={handleChange} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary" placeholder="Email" />
+              <input name="siret" value={form.siret} onChange={handleChange} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary" placeholder="SIRET ou en cours" />
+              <select name="legalStatus" required value={form.legalStatus} onChange={handleChange} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary">
+                <option value="">— Statut indépendant * —</option>
+                {LEGAL_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
+              </select>
             </div>
             <select name="commune" required value={form.commune} onChange={handleChange} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary">
               <option value="">— Votre commune * —</option>
@@ -204,6 +224,11 @@ export default function DevenirLivreurPage() {
             <input name="disponibilite" value={form.disponibilite} onChange={handleChange} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary" placeholder="Disponibilité : semaine, week-end, soir..." />
             <input name="horaires" value={form.horaires} onChange={handleChange} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary" placeholder="Horaires possibles" />
             <textarea name="experienceLivraison" rows={4} value={form.experienceLivraison} onChange={handleChange} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary" placeholder="Expérience livraison / remarques" />
+            <div className="space-y-3 rounded-2xl border border-primary/20 bg-primary/[0.04] p-4 text-sm">
+              <label className="flex gap-3"><input required type="checkbox" checked={form.independentStatusConfirmed} onChange={(event) => setForm((prev) => ({ ...prev, independentStatusConfirmed: event.target.checked }))} className="mt-1 accent-primary" /><span>Je confirme candidater comme prestataire indépendant, non salarié DELIKREOL.</span></label>
+              <label className="flex gap-3"><input required type="checkbox" checked={form.insuranceConfirmed} onChange={(event) => setForm((prev) => ({ ...prev, insuranceConfirmed: event.target.checked }))} className="mt-1 accent-primary" /><span>Je pourrai fournir une assurance adaptée avant activation.</span></label>
+              <label className="flex gap-3"><input required type="checkbox" checked={form.termsConfirmed} onChange={(event) => setForm((prev) => ({ ...prev, termsConfirmed: event.target.checked }))} className="mt-1 accent-primary" /><span>J’accepte une validation manuelle avant toute première course.</span></label>
+            </div>
           </fieldset>
 
           {error && <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}

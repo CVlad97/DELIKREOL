@@ -1,5 +1,6 @@
 import { useEffect, useState } from'react';
 import { supabase, isSupabaseConfigured } from'../../lib/supabase';
+import { buildOnboardingWhatsAppMessage } from'../../services/logisticsPartnerBilling';
 
 function loadLocal(): any[] {
  try { return JSON.parse(localStorage.getItem('delikreol_relay_applications') ||'[]'); }
@@ -12,7 +13,7 @@ function formatDate(v?: string) {
  return Number.isNaN(d.getTime()) ?'—' : d.toLocaleDateString('fr-FR');
 }
 
-const STATUSES = ['candidat','a_appeler','valide','actif','suspendu','inactif'];
+const STATUSES = ['candidat','a_appeler','documents','valide','pret_pilote','actif','suspendu','inactif'];
 
 export function AdminPointsRelais() {
  const [items, setItems] = useState<any[]>([]);
@@ -83,13 +84,29 @@ export function AdminPointsRelais() {
  <th className="p-3">Adresse</th>
  <th className="p-3">Horaires</th>
  <th className="p-3">Capacité</th>
+ <th className="p-3">Type</th>
+ <th className="p-3">Stockage</th>
  <th className="p-3">Statut</th>
  <th className="p-3">Date</th>
  <th className="p-3"></th>
  </tr>
  </thead>
  <tbody>
- {items.map((r: any) => (
+ {items.map((r: any) => {
+ const storage = Array.isArray(r.storage) ? r.storage : [
+ r.accepts_hot_food || r.acceptsHotFood ?'chaud' :'',
+ r.accepts_cold_food || r.acceptsColdFood ?'froid' :'',
+ r.accepts_frozen_food || r.acceptsFrozenFood ?'surgelé' :'',
+ ].filter(Boolean);
+ const onboardingMessage = buildOnboardingWhatsAppMessage({
+ partnerKind:'relay_host',
+ name:r.business_name || r.manager_name ||'Point relais',
+ commune:r.commune ||'—',
+ phone:r.whatsapp || r.phone ||'',
+ availability:[r.opening_hours, r.pickup_windows].filter(Boolean).join(' '),
+ relayStorage:storage,
+ });
+ return (
  <tr key={r.id} className="border-b hover:bg-muted/50">
  <td className="p-3 font-medium">{r.business_name}</td>
  <td className="p-3 text-muted-foreground">{r.manager_name ||'—'}</td>
@@ -104,6 +121,10 @@ export function AdminPointsRelais() {
  <td className="p-3 text-xs text-muted-foreground max-w-[120px] truncate">{r.address ||'—'}</td>
  <td className="p-3 text-xs">{r.opening_hours ||'—'}</td>
  <td className="p-3 text-xs">{r.capacity ||'—'}</td>
+ <td className="p-3 text-xs">
+ <span className="rounded-full bg-muted px-2 py-0.5">{r.relay_type ==='traiteur_point_relais' || r.can_act_as_vendor_relay ?'Traiteur + relais' : (r.relay_type ||'commerce')}</span>
+ </td>
+ <td className="p-3 text-xs">{storage.length ? storage.join(', ') :'—'}</td>
  <td className="p-3">
  <select value={r.status} onChange={e => updateStatus(r.id, e.target.value)}
  className="border rounded-lg px-2 py-1 text-xs outline-none focus:border-orange-400 bg-white">
@@ -113,14 +134,15 @@ export function AdminPointsRelais() {
  <td className="p-3 text-xs text-muted-foreground">{formatDate(r.created_at)}</td>
  <td className="p-3">
  {(r.whatsapp || r.phone) && (
- <a href={`https://wa.me/${cleanPhone(r.whatsapp || r.phone)}`} target="_blank" rel="noopener noreferrer"
+ <a href={`https://wa.me/${cleanPhone(r.whatsapp || r.phone)}?text=${encodeURIComponent(onboardingMessage)}`} target="_blank" rel="noopener noreferrer"
  className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-500 text-white rounded-lg text-xs font-semibold hover:bg-green-600 transition-all">
- 💬
+ 💬 Préparer
  </a>
  )}
  </td>
  </tr>
- ))}
+ );
+ })}
  </tbody>
  </table>
  </div>
