@@ -1,5 +1,6 @@
 import { useEffect, useState } from'react';
 import { supabase, isDemoMode, isSupabaseConfigured } from'../../lib/supabase';
+import { buildOnboardingWhatsAppMessage } from'../../services/logisticsPartnerBilling';
 
 function loadLocal(): any[] {
  try { return JSON.parse(localStorage.getItem('delikreol_driver_applications') ||'[]'); }
@@ -27,7 +28,7 @@ export function AdminLivreurs() {
  try {
  const { data, error: dbError } = await supabase
  .from('driver_applications')
- .select('id,name,phone,whatsapp,email,commune,transport_mode,zones_acceptees,disponibilite,horaires,experience_livraison,status,created_at')
+ .select('id,name,phone,whatsapp,email,siret,legal_status,commune,transport_mode,zones_acceptees,disponibilite,horaires,experience_livraison,insurance_confirmed,independent_status_confirmed,terms_confirmed,status,created_at')
  .order('created_at', { ascending: false });
 
  if (dbError) throw dbError;
@@ -98,6 +99,7 @@ export function AdminLivreurs() {
  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Zones</th>
  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Date</th>
  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Statut</th>
+ <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Action</th>
  </tr>
  </thead>
  <tbody className="divide-y">
@@ -107,6 +109,14 @@ export function AdminLivreurs() {
  const transport = item.transport_mode || item.transportMode || item.moyenTransport ||'—';
  const zones = item.zones_acceptees || item.zonesAcceptees || [];
  const created = item.created_at || item.createdAt;
+ const onboardingMessage = buildOnboardingWhatsAppMessage({
+ partnerKind:'driver',
+ name,
+ commune:item.commune ||'—',
+ phone:phone ||'',
+ availability:[item.disponibilite, item.horaires].filter(Boolean).join(' '),
+ zones:Array.isArray(zones) ? zones : [],
+ });
 
  return (
  <tr key={item.id} className="hover:bg-muted/10 align-top">
@@ -131,9 +141,18 @@ export function AdminLivreurs() {
  <option value="a_appeler">À appeler</option>
  <option value="documents">Documents</option>
  <option value="valide">Validé</option>
+ <option value="pret_pilote">Prêt pilote</option>
  <option value="suspendu">Suspendu</option>
  <option value="inactif">Inactif</option>
  </select>
+ <div className="mt-2 flex flex-wrap gap-1 text-[10px]">
+ {item.siret && <span className="rounded-full bg-muted px-2 py-0.5">SIRET</span>}
+ {item.independent_status_confirmed && <span className="rounded-full bg-green-100 px-2 py-0.5 text-green-700">Indép.</span>}
+ {item.insurance_confirmed && <span className="rounded-full bg-green-100 px-2 py-0.5 text-green-700">Assurance</span>}
+ </div>
+ </td>
+ <td className="px-4 py-3 text-sm">
+ {phone ? <a className="rounded-lg bg-green-500 px-2.5 py-1 text-xs font-bold text-white hover:bg-green-600" href={`https://wa.me/${String(phone).replace(/\D/g,'')}?text=${encodeURIComponent(onboardingMessage)}`} target="_blank" rel="noopener noreferrer">Préparer WhatsApp</a> :'—'}
  </td>
  </tr>
  );

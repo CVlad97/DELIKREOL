@@ -1,4 +1,4 @@
-import { Home, Store, MapPin, Truck, User, LogIn, FileText, Heart, Package, Activity } from 'lucide-react';
+import { Home, Store, MapPin, Truck, User, LogIn, FileText, Heart, Package, Activity, ReceiptText } from 'lucide-react';
 import { UserType } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useState } from 'react';
@@ -45,12 +45,14 @@ export function Navigation({ userType, currentView, onNavigate }: NavigationProp
           { id: 'deposits', label: 'Dépôts', icon: MapPin },
           { id: 'documents', label: 'Documents', icon: FileText },
           { id: 'capacity', label: 'Capacité', icon: Store },
+          { id: 'billing', label: 'Factures', icon: ReceiptText },
         ];
       case 'driver':
         return [
           { id: 'available', label: 'Courses', icon: Truck },
           { id: 'active', label: 'En cours', icon: MapPin },
           { id: 'documents', label: 'Documents', icon: FileText },
+          { id: 'billing', label: 'Factures', icon: ReceiptText },
           { id: 'history', label: 'Historique', icon: Store },
         ];
       case 'admin':
