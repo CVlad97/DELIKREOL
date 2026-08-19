@@ -36,12 +36,24 @@ import { OrderSummaryByPartner, groupItemsByPartner } from'../../components/Orde
 import { isSupabaseConfigured, supabase } from'../../lib/supabase';
 import type { Product } from'../../lib/supabase';
 import { createStripeCheckoutSession } from'../../utils/stripe';
+import { traiteurSpaces } from'../../data/traiteurs';
+import { pointsRelais } from'../../pointsRelais';
+import {
+ buildFulfillmentProductsFromCart,
+ buildFulfillmentRelayPoints,
+ buildFulfillmentVendorsFromCart,
+ evaluateFulfillmentPlan,
+ type FulfillmentMode,
+ type FulfillmentPlan,
+} from'../../services/fulfillmentRules';
 
 interface CartItem extends Product {
  quantity: number;
 }
 
 const WHATSAPP_NUMBER ='596696653589';
+const CHECKOUT_IDEMPOTENCY_STORAGE_KEY = 'delikreol_checkout_idempotency_v1';
+const CHECKOUT_IDEMPOTENCY_TTL_MS = 2 * 60 * 60 * 1000;
 
 const CRENEAUX_OPTIONS = [
  { id:'des-que-possible', label:'Dès que possible' },
@@ -65,6 +77,34 @@ function formatPhoneError(): string {
  return'Merci d\'indiquer un numéro WhatsApp valide, par exemple 0696 XX XX XX ou +596 696 XX XX XX.';
 }
 
+function getStableCheckoutIdempotencyKey(paymentProvider: 'manual' | 'stripe_test', fingerprint: string): string {
+ const now = Date.now();
+ try {
+ const stored = JSON.parse(localStorage.getItem(CHECKOUT_IDEMPOTENCY_STORAGE_KEY) ||'null') as {
+ fingerprint?: string;
+ key?: string;
+ expiresAt?: number;
+ } | null;
+ if (stored?.fingerprint === fingerprint && stored.key && Number(stored.expiresAt || 0) > now) {
+ return stored.key;
+ }
+ } catch {
+ localStorage.removeItem(CHECKOUT_IDEMPOTENCY_STORAGE_KEY);
+ }
+
+ const key = `public_${paymentProvider}_${crypto.randomUUID()}`;
+ localStorage.setItem(CHECKOUT_IDEMPOTENCY_STORAGE_KEY, JSON.stringify({
+ fingerprint,
+ key,
+ expiresAt: now + CHECKOUT_IDEMPOTENCY_TTL_MS,
+ }));
+ return key;
+}
+
+function clearStableCheckoutIdempotencyKey(): void {
+ localStorage.removeItem(CHECKOUT_IDEMPOTENCY_STORAGE_KEY);
+}
+
 /**
  * Construit le message WhatsApp complet pour une commande.
  * Inclut le n° de commande pour dédoublonnage côté partenaire.
@@ -73,14 +113,16 @@ function buildWhatsAppOrderMessage(params: {
  items: CartItem[];
  total: number;
  mode:'retrait' |'relais' |'livraison';
+ fulfillmentMode: FulfillmentMode;
  commune: string;
  creneauText: string;
  notes: string;
  traiteurs: string[];
  phone: string;
  orderId: string;
+ fulfillmentPlan: FulfillmentPlan | null;
 }): string {
- const { items, total, mode, commune, creneauText, notes, traiteurs, phone, orderId } = params;
+ const { items, total, mode, fulfillmentMode, commune, creneauText, notes, traiteurs, phone, orderId, fulfillmentPlan } = params;
  const modeFee = DELIVERY_FEES[mode]?.fee || 0;
  const partnerGroups = groupItemsByPartner(items);
  const productList = partnerGroups
@@ -106,8 +148,10 @@ function buildWhatsAppOrderMessage(params: {
  `Total : ${(total + modeFee).toFixed(2).replace('.',',')} € (dont ${modeFee.toFixed(2).replace('.',',')} € de ${mode ==='retrait' ?'retrait' : mode ==='relais' ?'point relais' :'livraison'})`,
  `Commune : ${commune ||'Non précisée'}`,
  `Type : ${mode ==='retrait' ?'Retrait' : mode ==='relais' ?'Point relais' :'Livraison'}`,
+ `Mode de remise : ${fulfillmentMode}`,
  `Créneau(x) souhaité(s) : ${creneauText ||'Non précisé'}`,
  `Traiteur : ${traiteurText}`,
+ fulfillmentPlan ? `Plan : ${fulfillmentPlan.code} — ${fulfillmentPlan.message}` :'',
  phone ? `Téléphone : ${phone}` :'','',
  mode ==='livraison'
  ? `Livraison éloignée possible à partir de 40 € de commande, selon validation du prestataire et disponibilité DeliKreol.`
@@ -128,7 +172,7 @@ export default function CartPage() {
  const [commune, setCommune] = useState('');
  const [communeSuggestions, setCommuneSuggestions] = useState<string[]>([]);
  const [showSuggestions, setShowSuggestions] = useState(false);
- const [mode, setMode] = useState<'retrait' |'relais' |'livraison'>('retrait');
+ const [fulfillmentMode, setFulfillmentMode] = useState<FulfillmentMode>('retrait_traiteur');
  const [selectedCreneaux, setSelectedCreneaux] = useState<string[]>([]);
  const [autreCreneau, setAutreCreneau] = useState('');
  const [notes, setNotes] = useState('');
@@ -142,7 +186,10 @@ export default function CartPage() {
  const [checkoutStatus, setCheckoutStatus] = useState<'idle' |'processing' |'success' |'error'>('idle');
  const [stripeStatus, setStripeStatus] = useState<'idle' |'processing' |'error'>('idle');
  const [savedField, setSavedField] = useState<string | null>(null);
+ const [fulfillmentConfirmed, setFulfillmentConfirmed] = useState(false);
  const panierRef = useRef<HTMLDivElement>(null);
+ const mode:'retrait' |'relais' |'livraison' =
+ fulfillmentMode ==='retrait_traiteur' ?'retrait' : fulfillmentMode ==='point_relais' ?'relais' :'livraison';
  const stripeTestCheckoutEnabled =
  integrations.stripe.enabled &&
  !!integrations.stripe.publicKey?.startsWith('pk_test_') &&
@@ -219,19 +266,39 @@ export default function CartPage() {
 
  // Get unique vendor names from cart
  const traiteurs = useMemo(() => {
- const vendorSet = new Set<string>();
- items.forEach((item) => {
- if (item.vendor_id) vendorSet.add(item.vendor_id);
- if (item.vendor?.business_name) vendorSet.add(item.vendor.business_name);
- });
- return Array.from(vendorSet);
+ return groupItemsByPartner(items).map((group) => group.name);
  }, [items]);
 
  const hasMultipleVendors = traiteurs.length > 1;
+ const fulfillmentPlan = useMemo(() => {
+ if (items.length === 0) return null;
+ return evaluateFulfillmentPlan({
+ mode: fulfillmentMode,
+ products: buildFulfillmentProductsFromCart(items),
+ vendors: buildFulfillmentVendorsFromCart(items, traiteurSpaces),
+ relayPoints: buildFulfillmentRelayPoints(pointsRelais),
+ selectedRelayPointId: fulfillmentMode ==='point_relais' ? String(pointsRelais[0]?.id ||'') : null,
+ selectedSlot: null,
+ });
+ }, [fulfillmentMode, items]);
+
+ useEffect(() => {
+ setFulfillmentConfirmed(false);
+ }, [fulfillmentPlan?.fingerprint]);
 
  const createPublicOrder = async (paymentProvider:'manual' |'stripe_test') => {
  const deliveryFee = DELIVERY_FEES[mode]?.fee || 0;
- const idempotencyKey = `public_${paymentProvider}_${Date.now()}_${crypto.randomUUID()}`;
+ const cartFingerprint = JSON.stringify({
+ paymentProvider,
+ items: items.map((item) => ({ id: item.id, quantity: item.quantity })).sort((left, right) => left.id.localeCompare(right.id)),
+ fulfillmentMode,
+ fulfillmentPlanFingerprint: fulfillmentPlan?.fingerprint || null,
+ creneaux: getCreneauText(),
+ commune: commune.trim(),
+ phone: phone.trim(),
+ total,
+ });
+ const idempotencyKey = getStableCheckoutIdempotencyKey(paymentProvider, cartFingerprint);
  const { data, error } = await supabase.functions.invoke('checkout-order', {
  body: {
  idempotency_key: idempotencyKey,
@@ -253,6 +320,11 @@ export default function CartPage() {
  notes,
  creneaux: getCreneauText(),
  payment_provider: paymentProvider,
+ fulfillment_mode: fulfillmentMode,
+ fulfillment_plan_code: fulfillmentPlan?.code,
+ fulfillment_plan_fingerprint: fulfillmentPlan?.fingerprint,
+ fulfillment_plan_confirmed: fulfillmentPlan?.requiresExplicitConfirmation ? fulfillmentConfirmed : true,
+ relay_point_id: fulfillmentPlan?.relayPointId,
  },
  });
 
@@ -260,6 +332,7 @@ export default function CartPage() {
  if (!data?.order?.id || !data?.order?.order_number) {
  throw new Error(data?.error ||'Commande non créée');
  }
+ clearStableCheckoutIdempotencyKey();
  return data.order as { id: string; order_number: string; tracking_token?: string };
  };
 
@@ -283,9 +356,22 @@ export default function CartPage() {
  showError("Merci d'indiquer une adresse email valide.");
  return false;
  }
- // Block multi-traiteur
- if (hasMultipleVendors) {
- showError('Pour cette version test, merci de passer une commande par partenaire. Le panier multi-traiteur arrive bientôt.');
+ if ((fulfillmentMode ==='retrait_traiteur' || fulfillmentMode ==='livraison_directe') && hasMultipleVendors) {
+ showError(fulfillmentMode ==='retrait_traiteur'
+ ?'Le retrait chez le traiteur ne permet qu’un seul traiteur. Videz le panier ou choisissez un point relais compatible.'
+ :'La livraison directe ne permet qu’un seul traiteur. Videz le panier ou choisissez une livraison programmée.');
+ return false;
+ }
+ if ((fulfillmentMode ==='retrait_traiteur' || fulfillmentMode ==='point_relais') && !getCreneauText()) {
+ showError('Choisissez un créneau avant de valider ce mode de remise.');
+ return false;
+ }
+ if (!fulfillmentPlan || !fulfillmentPlan.possible) {
+ showError(fulfillmentPlan?.message ||'Aucune option de remise compatible.');
+ return false;
+ }
+ if (fulfillmentPlan.requiresExplicitConfirmation && !fulfillmentConfirmed) {
+ showError('Confirmez explicitement le plan de remise avant de créer la commande.');
  return false;
  }
  setPhoneError('');
@@ -322,6 +408,11 @@ export default function CartPage() {
  total_amount: total + deliveryFee,
  delivery_fee: deliveryFee,
  delivery_type: mode,
+ fulfillment_mode: fulfillmentMode,
+ fulfillment_plan_code: fulfillmentPlan?.code,
+ fulfillment_plan_fingerprint: fulfillmentPlan?.fingerprint,
+ fulfillment_plan_confirmed: fulfillmentPlan?.requiresExplicitConfirmation ? fulfillmentConfirmed : true,
+ relay_point_id: fulfillmentPlan?.relayPointId,
  commune,
  creneaux: getCreneauText(),
  notes,
@@ -363,12 +454,14 @@ export default function CartPage() {
  items,
  total,
  mode,
+ fulfillmentMode,
  commune,
  creneauText: getCreneauText(),
  notes,
  traiteurs,
  phone,
  orderId: orderNumber,
+ fulfillmentPlan,
  });
  const confirmedWhatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(confirmedWhatsappText)}`;
  setOrderNumber(orderNumber);
@@ -675,13 +768,13 @@ export default function CartPage() {
  <h2 className="text-lg font-bold text-foreground">Informations de commande</h2>
 
  {/* Multi-traiteur warning */}
- {hasMultipleVendors && (
+ {hasMultipleVendors && (fulfillmentMode ==='livraison_directe' || fulfillmentMode ==='retrait_traiteur') && (
  <div className="flex items-start gap-3 bg-secondary/10 border border-secondary/30 rounded-xl p-4">
  <AlertCircle className="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
  <div className="text-sm">
- <p className="font-bold text-secondary">Panier multi-partenaires</p>
+ <p className="font-bold text-secondary">Panier multi-traiteurs incompatible</p>
  <p className="text-secondary">
- Pour cette version test, merci de valider une commande par partenaire. Le panier multi-traiteur arrive bientôt.
+ Choisissez une livraison programmée ou un point relais compatible, ou validez une commande par traiteur.
  </p>
  </div>
  </div>
@@ -781,22 +874,44 @@ export default function CartPage() {
  {/* Mode */}
  <div>
  <label className="block text-sm font-bold text-foreground mb-1.5">Mode</label>
- <div className="grid grid-cols-3 gap-2">
+ <div className="grid grid-cols-2 gap-2">
  <button
- onClick={() => setMode('retrait')}
+ onClick={() => setFulfillmentMode('livraison_directe')}
  className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
- mode ==='retrait'
+ fulfillmentMode ==='livraison_directe'
+ ?'bg-primary text-white shadow-md'
+ :'bg-muted text-muted-foreground border border-input hover:border-primary/300'
+ }`}
+ >
+ <Truck className="w-4 h-4" />
+ Direct +4€
+ </button>
+ <button
+ onClick={() => setFulfillmentMode('livraison_programmee')}
+ className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
+ fulfillmentMode ==='livraison_programmee'
+ ?'bg-primary text-white shadow-md'
+ :'bg-muted text-muted-foreground border border-input hover:border-primary/300'
+ }`}
+ >
+ <Clock className="w-4 h-4" />
+ Programmée +4€
+ </button>
+ <button
+ onClick={() => setFulfillmentMode('retrait_traiteur')}
+ className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
+ fulfillmentMode ==='retrait_traiteur'
  ?'bg-primary text-white shadow-md'
  :'bg-muted text-muted-foreground border border-input hover:border-primary/300'
  }`}
  >
  <Store className="w-4 h-4" />
- Retrait {total > 0 ? `${total.toFixed(2).replace('.',',')} €` :''}
+ Retrait gratuit
  </button>
  <button
- onClick={() => setMode('relais')}
+ onClick={() => setFulfillmentMode('point_relais')}
  className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
- mode ==='relais'
+ fulfillmentMode ==='point_relais'
  ?'bg-primary text-white shadow-md'
  :'bg-muted text-muted-foreground border border-input hover:border-primary/300'
  }`}
@@ -804,19 +919,42 @@ export default function CartPage() {
  <Store className="w-4 h-4" />
  Relais +2,50€
  </button>
- <button
- onClick={() => setMode('livraison')}
- className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
- mode ==='livraison'
- ?'bg-primary text-white shadow-md'
- :'bg-muted text-muted-foreground border border-input hover:border-primary/300'
- }`}
- >
- <Truck className="w-4 h-4" />
- Livraison +4€
- </button>
  </div>
  </div>
+
+ {fulfillmentPlan && (
+ <div className={`rounded-2xl border p-4 text-sm ${
+ fulfillmentPlan.possible ?'border-success/30 bg-success/[0.08] text-success' :'border-secondary/30 bg-secondary/10 text-secondary'
+ }`}>
+ <p className="font-black">{fulfillmentPlan.code}</p>
+ <p className="mt-1">{fulfillmentPlan.message}</p>
+ <div className="mt-2 grid grid-cols-2 gap-2 text-xs font-semibold">
+ <span>Traiteurs : {fulfillmentPlan.vendorIds.length}</span>
+ <span>Livraisons : {fulfillmentPlan.numberOfDeliveries}</span>
+ <span>Transferts : {fulfillmentPlan.numberOfTransfers}</span>
+ <span>Frais plan : {fulfillmentPlan.totalCost.toFixed(2).replace('.',',')} €</span>
+ </div>
+ {fulfillmentPlan.relayPointId && (
+ <p className="mt-2 text-xs">Point relais : {fulfillmentPlan.relayPointId}</p>
+ )}
+ {fulfillmentPlan.alternatives.length > 0 && (
+ <ul className="mt-2 list-disc pl-5 text-xs">
+ {fulfillmentPlan.alternatives.map((alternative) => <li key={alternative}>{alternative}</li>)}
+ </ul>
+ )}
+ {fulfillmentPlan.requiresExplicitConfirmation && (
+ <label className="mt-3 flex items-start gap-3 rounded-xl border border-current/20 bg-white/70 p-3 text-xs font-semibold">
+ <input
+ type="checkbox"
+ checked={fulfillmentConfirmed}
+ onChange={(event) => setFulfillmentConfirmed(event.target.checked)}
+ className="mt-0.5 h-4 w-4 accent-primary"
+ />
+ <span>Je confirme ce plan de remise : regroupement, transferts, frais et créneaux sont affichés avant validation.</span>
+ </label>
+ )}
+ </div>
+ )}
 
  {/* Créneaux - checkboxes */}
  <div>

@@ -9,14 +9,42 @@ function read(path: string) {
 }
 
 describe('backend production hardening', () => {
-  it('keeps checkout-order server-side priced and single-vendor', () => {
+  it('keeps checkout-order server-side priced and fulfillment constrained', () => {
     const source = read('supabase/functions/checkout-order/index.ts');
 
     expect(source).toContain('.from("products")');
-    expect(source).toContain('Panier multi-vendeur bloqué');
+    expect(source).toContain('.from("deliveries")');
+    expect(source).toContain('.from("delivery_communications")');
+    expect(source).toContain('DIRECT_DELIVERY_MULTIPLE_VENDORS_NOT_ALLOWED');
+    expect(source).toContain('VENDOR_PICKUP_MULTIPLE_VENDORS_NOT_ALLOWED');
+    expect(source).toContain('FULFILLMENT_CONFIRMATION_REQUIRED');
+    expect(source).toContain('NO_COMPATIBLE_RELAY_OPTION');
+    expect(source).toContain('ORDER_DRIVER_MISSION_CREATED');
+    expect(source).toContain('WHATSAPP_COORDINATION_PREPARED');
     expect(source).toContain('vendor_commission');
     expect(source).not.toContain('Number(total || 0)');
     expect(source).not.toContain('Number(total_amount');
+  });
+
+  it('keeps public checkout idempotency stable across retries', () => {
+    const source = read('src/pages/new/CartPage.tsx');
+
+    expect(source).toContain('delikreol_checkout_idempotency_v1');
+    expect(source).toContain('getStableCheckoutIdempotencyKey');
+    expect(source).toContain('clearStableCheckoutIdempotencyKey');
+    expect(source).not.toContain('Date.now()}_${crypto.randomUUID()}');
+  });
+
+  it('prepares RLS for driver-scoped delivery access without applying production changes', () => {
+    const migration = read('supabase/migrations/20260812000001_order_driver_whatsapp_integration.sql');
+
+    expect(migration).toContain('create table if not exists public.deliveries');
+    expect(migration).toContain('idx_deliveries_order_unique');
+    expect(migration).toContain('drivers_select_own_profile');
+    expect(migration).toContain('drivers_select_available_deliveries');
+    expect(migration).toContain('drivers_update_assignable_deliveries');
+    expect(migration).toContain('user_id = (select auth.uid())');
+    expect(migration).toContain('Rollback sans suppression de données');
   });
 
   it('disables legacy create-payment-intent public flow', () => {
