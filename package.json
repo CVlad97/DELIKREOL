@@ -29,8 +29,9 @@
     "deploy": "npm run build && wrangler deploy",
     "prepare": "husky",
     "supabase:link": "supabase link --project-ref boihlgodmclljtckhmgz",
-    "supabase:deploy:functions": "supabase functions deploy checkout-order create-checkout-session create-payment-intent stripe-webhook --project-ref boihlgodmclljtckhmgz --use-api",
-    "supabase:deploy:checkout": "supabase functions deploy checkout-order create-checkout-session create-payment-intent stripe-webhook --project-ref boihlgodmclljtckhmgz --use-api"
+    "supabase:deploy:functions": "supabase functions deploy checkout-order qonto-finance qonto-sync revolut-business --project-ref boihlgodmclljtckhmgz --use-api",
+    "supabase:deploy:checkout": "supabase functions deploy checkout-order --project-ref boihlgodmclljtckhmgz --use-api",
+    "supabase:deploy:stripe:test": "supabase functions deploy create-checkout-session create-payment-intent stripe-webhook --project-ref boihlgodmclljtckhmgz --use-api"
   },
   "dependencies": {
     "@blinkdotnew/react": "^1.0.2",

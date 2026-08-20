@@ -1,10 +1,21 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+const allowedOrigins = new Set([
+  'https://delikreol.com',
+  'https://www.delikreol.com',
+  'https://cvlad97.github.io',
+  'http://localhost:5173',
+])
+
+function corsHeaders(req: Request) {
+  const origin = req.headers.get('origin') || ''
+  return {
+    'Access-Control-Allow-Origin': allowedOrigins.has(origin) ? origin : 'https://delikreol.com',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Vary': 'Origin',
+  }
 }
 
 const QONTO_API = Deno.env.get('QONTO_API_BASE_URL') || 'https://thirdparty.qonto.com/v2'
@@ -43,6 +54,9 @@ async function getQontoToken(): Promise<string> {
 
 // ── Appel Qonto API ────────────────────────────────────────────────
 async function qontoGet<T>(path: string): Promise<{ data?: T; error?: string }> {
+  if (!QONTO_CLIENT_ID || !QONTO_CLIENT_SECRET) {
+    return { error: 'Qonto API disabled: missing server credentials' }
+  }
   try {
     const token = await getQontoToken()
     const resp = await fetch(`${QONTO_API}${path}`, {
@@ -81,7 +95,13 @@ async function handleReconciliation(supabase: ReturnType<typeof createClient>) {
   // Récupère les transactions Qonto et les commandes non rapprochées
   const [qontoRes, ordersRes] = await Promise.all([
     qontoGet('/transactions?page=1&per_page=50'),
-    supabase.from('orders').select('id, order_number, total, status').is('qonto_reconciled_at', null).limit(50),
+    supabase
+      .from('orders')
+      .select('id, order_number, total_amount, total_cents, payment_status, payment_reference')
+      .eq('payment_provider', 'qonto_transfer')
+      .in('payment_status', ['pending', 'proof_submitted', 'under_review'])
+      .is('payment_verified_at', null)
+      .limit(50),
   ])
 
   if (qontoRes.error) return qontoRes
@@ -97,9 +117,11 @@ async function handleReconciliation(supabase: ReturnType<typeof createClient>) {
       matchSuggestions: orders.map((o: any) => ({
         orderId: o.id,
         orderNumber: o.order_number,
-        amount: o.total,
+        amount: Number(o.total_amount || (o.total_cents ? o.total_cents / 100 : 0)),
+        paymentReference: o.payment_reference,
         possibleMatches: transactions.filter((t: any) =>
-          Math.abs(t.amount_cents / 100 - o.total) < 0.5
+          Math.abs(t.amount_cents / 100 - Number(o.total_amount || (o.total_cents ? o.total_cents / 100 : 0))) < 0.5
+          || (o.payment_reference && String(t.reference || t.label || '').includes(o.payment_reference))
         ),
       })),
     },
@@ -123,27 +145,28 @@ async function handleExport(supabase: ReturnType<typeof createClient>, url: URL)
 
   const csvLines = [
     'Date;N° commande;Client;Montant TTC;Commission Delikreol;Montant traiteur;Frais livraison;Statut;Mode paiement',
-    ...orders.map((o: any) =>
-      [
+    ...orders.map((o: any) => {
+      const totalAmount = Number(o.total_amount || (o.total_cents ? o.total_cents / 100 : 0))
+      return [
         o.created_at?.split('T')[0] || '',
         o.order_number || '',
-        o.client_name || '',
-        (o.total || 0).toFixed(2),
-        ((o.total || 0) * 0.15).toFixed(2),
-        ((o.total || 0) * 0.75).toFixed(2),
-        (o.delivery_fee || 0).toFixed(2),
-        o.status || '',
-        o.payment_method || '',
+        o.customer_name || o.client_name || '',
+        totalAmount.toFixed(2),
+        (totalAmount * 0.15).toFixed(2),
+        (totalAmount * 0.85).toFixed(2),
+        Number(o.delivery_fee || 0).toFixed(2),
+        o.payment_status || o.status || '',
+        o.payment_provider || o.payment_method || '',
       ].join(';')
-    ),
+    }),
   ]
 
   return {
     data: {
       period: `${year}-${String(month).padStart(2, '0')}`,
       totalOrders: orders.length,
-      totalRevenue: orders.reduce((s: number, o: any) => s + (o.total || 0), 0),
-      totalCommissions: orders.reduce((s: number, o: any) => s + (o.total || 0) * 0.15, 0),
+      totalRevenue: orders.reduce((s: number, o: any) => s + Number(o.total_amount || (o.total_cents ? o.total_cents / 100 : 0)), 0),
+      totalCommissions: orders.reduce((s: number, o: any) => s + Number(o.total_amount || (o.total_cents ? o.total_cents / 100 : 0)) * 0.15, 0),
       csv: csvLines.join('\n'),
       rows: orders,
     },
@@ -152,12 +175,37 @@ async function handleExport(supabase: ReturnType<typeof createClient>, url: URL)
 
 // ── Router principal ──────────────────────────────────────────────
 serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(req) })
 
   try {
     const url = new URL(req.url)
     const path = url.pathname.replace('/functions/v1/qonto-finance/', '').replace('/functions/v1/qonto-finance', '')
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+    const token = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '')
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'Authentication required' }), {
+        status: 401,
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
+      })
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    })
+
+    const { data: userData, error: userError } = await supabase.auth.getUser(token)
+    if (userError || !userData.user) {
+      return new Response(JSON.stringify({ error: 'Invalid session' }), {
+        status: 401,
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
+      })
+    }
+    const { data: isAdmin, error: adminError } = await supabase.rpc('is_admin')
+    if (adminError || !isAdmin) {
+      return new Response(JSON.stringify({ error: 'Admin required' }), {
+        status: 403,
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
+      })
+    }
 
     let result: { data?: unknown; error?: string }
 
@@ -183,19 +231,19 @@ serve(async (req) => {
       default:
         return new Response(JSON.stringify({ error: 'Not found', available: ['/organization', '/bank-accounts', '/transactions', '/reconciliation', '/export', '/health'] }), {
           status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
         })
     }
 
     const status = result.error ? 500 : 200
     return new Response(JSON.stringify(result.error ? { error: result.error } : result.data), {
       status,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
     })
   } catch (e: unknown) {
     return new Response(JSON.stringify({ error: String(e) }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
     })
   }
 })
