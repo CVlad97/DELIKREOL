@@ -36,7 +36,7 @@ export function CGVPage() {
 
           <div>
             <h2 className="text-lg font-semibold mb-2">6. Paiement</h2>
-            <p>Le paiement est sécurisé via Stripe ou PayPal. Delikreol traite les transactions et reverse les montants aux partenaires selon les conditions définies. Aucune donnée bancaire n'est stockée par Delikreol.</p>
+            <p>Le paiement s'effectue au lancement par virement Qonto, virement Revolut Business, paiement à la livraison, lien externe sécurisé ou wallet crypto facultatif. La commande reste à confirmer par WhatsApp et le statut payé est validé après rapprochement manuel ou preuve de paiement. Aucune donnée bancaire ni clé privée n'est stockée par Delikreol.</p>
           </div>
 
           <div>

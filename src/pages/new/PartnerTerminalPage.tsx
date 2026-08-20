@@ -39,7 +39,7 @@ type TerminalDraft = {
  items: Array<{ name: string; quantity: number; unit_price: number }>;
  total_amount: number;
  payment_status: PaymentStatus;
- payment_provider:'manual' |'sumup_manual' |'sumup_payment_link' |'stripe_test';
+ payment_provider:'manual' |'sumup_manual' |'sumup_payment_link';
  external_payment_reference: string;
  payment_note: string;
  invoice_status:'draft' |'ready_to_send';
@@ -124,7 +124,7 @@ export default function PartnerTerminalPage() {
  `Partenaire : ${createdOrder.partner_name}`,
  `Client : ${createdOrder.customer_name}`,
  `Total : ${money(createdOrder.total_amount)}`,
- `Paiement : ${createdOrder.payment_provider ==='sumup_manual' ?'Encaissement SumUp manuel' : createdOrder.payment_provider ==='sumup_payment_link' ?'Lien de paiement SumUp à générer dans l’app SumUp' : createdOrder.payment_provider ==='stripe_test' ?'Stripe test' :'Manuel'}`,
+ `Paiement : ${createdOrder.payment_provider ==='sumup_manual' ?'Encaissement SumUp manuel' : createdOrder.payment_provider ==='sumup_payment_link' ?'Lien de paiement SumUp à générer dans l’app SumUp' :'Manuel'}`,
  createdOrder.external_payment_reference ? `Référence externe : ${createdOrder.external_payment_reference}` :'',
  `Note paiement : ${createdOrder.payment_note}`,
  `Suivi : ${window.location.origin}/statut-commande?order=${createdOrder.order_number}`,
@@ -175,7 +175,6 @@ export default function PartnerTerminalPage() {
  {[
  { id:'sumup_manual', label:'SumUp manuel', icon: Smartphone, text:'À valider dans SumUp' },
  { id:'sumup_payment_link', label:'Lien SumUp', icon: CreditCard, text:'À générer dans SumUp' },
- { id:'stripe_test', label:'Stripe test', icon: WalletCards, text:'Pré-prod uniquement' },
  { id:'manual', label:'Manuel', icon: Banknote, text:'Espèces/virement' },
  ].map((option) => {
  const Icon = option.icon;

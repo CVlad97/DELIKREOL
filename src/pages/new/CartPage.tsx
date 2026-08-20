@@ -23,11 +23,21 @@ import {
  AlertCircle,
  FileText,
  CreditCard,
+ Banknote,
+ Landmark,
+ Wallet,
+ Copy,
 } from'lucide-react';
+import { QRCodeSVG } from'qrcode.react';
 import { Layout } from'../../components/layout/Layout';
 import { useCart } from'../../contexts/CartContext';
 import { useToast } from'../../contexts/ToastContext';
-import { integrations } from'../../config/integrations';
+import {
+ PAYMENT_PROVIDERS,
+ buildPaymentReference,
+ getPaymentProvider,
+ type PaymentProviderId,
+} from'../../config/paymentProviders';
 import {
  martiniqueCommunes,
  normalizeCommuneQuery,
@@ -35,13 +45,13 @@ import {
 import { OrderSummaryByPartner, groupItemsByPartner } from'../../components/OrderSummaryByPartner';
 import { isSupabaseConfigured, supabase } from'../../lib/supabase';
 import type { Product } from'../../lib/supabase';
-import { createStripeCheckoutSession } from'../../utils/stripe';
 
 interface CartItem extends Product {
  quantity: number;
 }
 
 const WHATSAPP_NUMBER ='596696653589';
+const CHECKOUT_IDEMPOTENCY_STORAGE_KEY = 'delikreol_checkout_idempotency_v1';
 
 const CRENEAUX_OPTIONS = [
  { id:'des-que-possible', label:'Dès que possible' },
@@ -65,6 +75,28 @@ function formatPhoneError(): string {
  return'Merci d\'indiquer un numéro WhatsApp valide, par exemple 0696 XX XX XX ou +596 696 XX XX XX.';
 }
 
+function buildCartFingerprint(items: CartItem[], mode: string, phone: string, email: string) {
+ return JSON.stringify({
+ items: items.map((item) => ({ id: item.id, quantity: item.quantity })).sort((a, b) => a.id.localeCompare(b.id)),
+ mode,
+ phone: phone.replace(/\s+/g, ''),
+ email: email.trim().toLowerCase(),
+ });
+}
+
+function getStableCheckoutIdempotencyKey(provider: PaymentProviderId, fingerprint: string) {
+ try {
+ const existing = JSON.parse(localStorage.getItem(CHECKOUT_IDEMPOTENCY_STORAGE_KEY) || '{}');
+ const slot = `${provider}:${fingerprint}`;
+ if (typeof existing[slot] === 'string' && existing[slot].length >= 16) return existing[slot];
+ const nextKey = `public_${provider}_${crypto.randomUUID()}`;
+ localStorage.setItem(CHECKOUT_IDEMPOTENCY_STORAGE_KEY, JSON.stringify({ ...existing, [slot]: nextKey }));
+ return nextKey;
+ } catch {
+ return `public_${provider}_${crypto.randomUUID()}`;
+ }
+}
+
 /**
  * Construit le message WhatsApp complet pour une commande.
  * Inclut le n° de commande pour dédoublonnage côté partenaire.
@@ -79,8 +111,10 @@ function buildWhatsAppOrderMessage(params: {
  traiteurs: string[];
  phone: string;
  orderId: string;
+ paymentLabel?: string;
+ paymentReference?: string;
 }): string {
- const { items, total, mode, commune, creneauText, notes, traiteurs, phone, orderId } = params;
+ const { items, total, mode, commune, creneauText, notes, traiteurs, phone, orderId, paymentLabel, paymentReference } = params;
  const modeFee = DELIVERY_FEES[mode]?.fee || 0;
  const partnerGroups = groupItemsByPartner(items);
  const productList = partnerGroups
@@ -108,6 +142,8 @@ function buildWhatsAppOrderMessage(params: {
  `Type : ${mode ==='retrait' ?'Retrait' : mode ==='relais' ?'Point relais' :'Livraison'}`,
  `Créneau(x) souhaité(s) : ${creneauText ||'Non précisé'}`,
  `Traiteur : ${traiteurText}`,
+ `Paiement souhaité : ${paymentLabel ||'À confirmer'}`,
+ paymentReference ? `Référence paiement : ${paymentReference}` :'',
  phone ? `Téléphone : ${phone}` :'','',
  mode ==='livraison'
  ? `Livraison éloignée possible à partir de 40 € de commande, selon validation du prestataire et disponibilité DeliKreol.`
@@ -140,13 +176,12 @@ export default function CartPage() {
  const [orderNumber, setOrderNumber] = useState('');
  const [whatsappShareUrl, setWhatsappShareUrl] = useState('');
  const [checkoutStatus, setCheckoutStatus] = useState<'idle' |'processing' |'success' |'error'>('idle');
- const [stripeStatus, setStripeStatus] = useState<'idle' |'processing' |'error'>('idle');
  const [savedField, setSavedField] = useState<string | null>(null);
+ const [paymentProvider, setPaymentProvider] = useState<PaymentProviderId>('qonto_transfer');
+ const [paymentProofUrl, setPaymentProofUrl] = useState('');
+ const [paymentExternalId, setPaymentExternalId] = useState('');
  const panierRef = useRef<HTMLDivElement>(null);
- const stripeTestCheckoutEnabled =
- integrations.stripe.enabled &&
- !!integrations.stripe.publicKey?.startsWith('pk_test_') &&
- isSupabaseConfigured;
+ const selectedPaymentProvider = getPaymentProvider(paymentProvider);
 
  useEffect(() => {
  if (panierRef.current) {
@@ -170,6 +205,9 @@ export default function CartPage() {
  setNotes('');
  setPhone('');
  setPhoneError('');
+ setPaymentProvider('qonto_transfer');
+ setPaymentProofUrl('');
+ setPaymentExternalId('');
  showSuccess('Panier vidé');
  };
 
@@ -229,30 +267,29 @@ export default function CartPage() {
 
  const hasMultipleVendors = traiteurs.length > 1;
 
- const createPublicOrder = async (paymentProvider:'manual' |'stripe_test') => {
+ const createPublicOrder = async (provider: PaymentProviderId) => {
  const deliveryFee = DELIVERY_FEES[mode]?.fee || 0;
- const idempotencyKey = `public_${paymentProvider}_${Date.now()}_${crypto.randomUUID()}`;
+ const fingerprint = buildCartFingerprint(items, mode, phone, email);
+ const idempotencyKey = getStableCheckoutIdempotencyKey(provider, fingerprint);
+ const provisionalOrderNumber = generateOrderId();
+ const paymentReference = buildPaymentReference(provisionalOrderNumber, provider);
  const { data, error } = await supabase.functions.invoke('checkout-order', {
  body: {
  idempotency_key: idempotencyKey,
  items: items.map((item) => ({
  id: item.id,
- name: item.name,
  quantity: item.quantity,
- price: item.price,
- vendor_id: item.vendor_id,
- vendor: item.vendor?.business_name || item.vendor_id ||'',
  })),
- total,
- total_amount: total + deliveryFee,
- delivery_fee: deliveryFee,
  commune,
  mode,
  phone,
  email,
  notes,
  creneaux: getCreneauText(),
- payment_provider: paymentProvider,
+ payment_provider: provider,
+ payment_reference: paymentReference,
+ payment_external_id: paymentExternalId.trim() || undefined,
+ payment_proof_url: paymentProofUrl.trim() || undefined,
  },
  });
 
@@ -270,7 +307,7 @@ export default function CartPage() {
  return false;
  }
  // Anti-double-click
- if (checkoutStatus ==='processing' || stripeStatus ==='processing' || messageSent) {
+ if (checkoutStatus ==='processing' || messageSent) {
  return false;
  }
  // Validate phone — obligatoire
@@ -286,6 +323,10 @@ export default function CartPage() {
  // Block multi-traiteur
  if (hasMultipleVendors) {
  showError('Pour cette version test, merci de passer une commande par partenaire. Le panier multi-traiteur arrive bientôt.');
+ return false;
+ }
+ if (paymentProvider ==='crypto_wallet' && !paymentExternalId.trim()) {
+ showError('Pour le paiement crypto, renseignez le hash de transaction avant validation.');
  return false;
  }
  setPhoneError('');
@@ -327,6 +368,10 @@ export default function CartPage() {
  notes,
  source:'public_checkout',
  payment_status:'pending',
+ payment_provider: paymentProvider,
+ payment_reference: buildPaymentReference(orderNumber, paymentProvider),
+ payment_external_id: paymentExternalId.trim() || null,
+ payment_proof_url: paymentProofUrl.trim() || null,
  invoice_status:'draft',
  qonto_status:'pending_reconciliation',
  delivery_status:'pending',
@@ -347,10 +392,11 @@ export default function CartPage() {
 
  try {
  if (isSupabaseConfigured) {
- const createdOrder = await createPublicOrder('manual');
+ const createdOrder = await createPublicOrder(paymentProvider);
  orderNumber = createdOrder.order_number;
  order.order_number = orderNumber;
  order.id = createdOrder.id;
+ order.payment_reference = buildPaymentReference(orderNumber, paymentProvider);
  } else {
  saveLocal();
  }
@@ -369,6 +415,8 @@ export default function CartPage() {
  traiteurs,
  phone,
  orderId: orderNumber,
+ paymentLabel: selectedPaymentProvider.label,
+ paymentReference: buildPaymentReference(orderNumber, paymentProvider),
  });
  const confirmedWhatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(confirmedWhatsappText)}`;
  setOrderNumber(orderNumber);
@@ -383,30 +431,13 @@ export default function CartPage() {
  setTimeout(() => navigate(`/statut-commande?order=${orderNumber}`), 1500);
  };
 
- const handleStripeCheckoutClick = async () => {
- if (!validateOrderForm()) return;
- if (!stripeTestCheckoutEnabled) {
- showError('Paiement test indisponible : configuration Stripe test incomplète.');
- return;
- }
-
- setStripeStatus('processing');
+ const copyPaymentInfo = async (label: string, value?: string) => {
+ if (!value) return;
  try {
- const { data: userData } = await supabase.auth.getUser();
- if (!userData.user) {
- showError('Connectez-vous à Mon espace pour tester le paiement CB sécurisé.');
- setStripeStatus('idle');
- navigate('/connexion?next=/panier');
- return;
- }
-
- const createdOrder = await createPublicOrder('stripe_test');
- const checkoutUrl = await createStripeCheckoutSession(createdOrder.id, window.location.origin);
- window.location.href = checkoutUrl;
- } catch (err) {
- console.error('[DELIKREOL] Stripe checkout indisponible:', err);
- showError('Paiement test indisponible. Utilisez WhatsApp pour confirmer la demande.');
- setStripeStatus('error');
+ await navigator.clipboard.writeText(value);
+ showSuccess(`${label} copié`);
+ } catch {
+ showError(`Copie impossible. ${label} : ${value}`);
  }
  };
 
@@ -651,27 +682,108 @@ export default function CartPage() {
 
  {/* Paiement info card */}
  <div className="bg-white rounded-2xl border border-primary/100 p-6">
- <h3 className="text-sm font-bold text-foreground mb-2 flex items-center gap-2">
+ <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
  <CreditCard className="w-4 h-4" />
  Paiement
  </h3>
- <div className="flex items-center gap-2 mb-2">
+ <div className="flex flex-wrap items-center gap-2 mb-3">
  <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-semibold">
  WhatsApp-first
  </span>
- {stripeTestCheckoutEnabled && (
  <span className="text-xs px-2 py-0.5 bg-muted text-muted-foreground rounded-full font-semibold">
- Mode test Stripe — aucun vrai paiement
+ Stripe désactivé
  </span>
- )}
  </div>
  <p className="text-xs text-muted-foreground leading-relaxed">
- WhatsApp reste le canal principal de confirmation. Le paiement CB est disponible uniquement en test sécurisé quand vous êtes connecté.
+ Choisissez un moyen de paiement hors Stripe. La commande reste à confirmer sur WhatsApp et le statut passe à payé uniquement après validation.
  </p>
  </div>
 
- {/* Delivery info */}
+ {/* Payment provider */}
  <div className="bg-white rounded-2xl border border-primary/100 p-6 space-y-4">
+ <h2 className="text-lg font-bold text-foreground">Moyen de paiement</h2>
+ <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+ {PAYMENT_PROVIDERS.filter((provider) => provider.status !=='disabled' && provider.id !=='stripe_disabled').map((provider) => {
+ const active = paymentProvider === provider.id;
+ const Icon = provider.id ==='cash_on_delivery' ? Banknote : provider.id ==='crypto_wallet' ? Wallet : Landmark;
+ return (
+ <button
+ key={provider.id}
+ type="button"
+ onClick={() => setPaymentProvider(provider.id)}
+ className={`rounded-2xl border-2 p-4 text-left transition-all ${
+ active ?'border-primary bg-primary/[0.08]' :'border-input bg-white hover:border-primary/40'
+ }`}
+ >
+ <div className="flex items-start gap-3">
+ <div className={`rounded-xl p-2 ${active ?'bg-primary/[0.15] text-primary' :'bg-muted text-muted-foreground'}`}>
+ <Icon className="h-5 w-5" />
+ </div>
+ <div>
+ <p className="font-black text-foreground">{provider.shortLabel}</p>
+ <p className="text-xs leading-relaxed text-muted-foreground">{provider.description}</p>
+ </div>
+ </div>
+ </button>
+ );
+ })}
+ </div>
+
+ {(paymentProvider ==='qonto_transfer' || paymentProvider ==='revolut_transfer') && (
+ <div className="rounded-2xl border border-primary/20 bg-primary/[0.04] p-4 text-sm">
+ <p className="font-black text-foreground">{selectedPaymentProvider.label}</p>
+ <p className="mt-1 text-xs text-muted-foreground">Référence à indiquer : générée automatiquement après validation de la commande.</p>
+ <div className="mt-3 grid gap-2">
+ <button type="button" onClick={() => copyPaymentInfo('Bénéficiaire', selectedPaymentProvider.accountName)} className="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-left">
+ <span><span className="block text-xs text-muted-foreground">Bénéficiaire</span><strong>{selectedPaymentProvider.accountName ||'À confirmer sur WhatsApp'}</strong></span><Copy className="h-4 w-4 text-primary" />
+ </button>
+ <button type="button" onClick={() => copyPaymentInfo('IBAN', selectedPaymentProvider.iban)} className="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-left">
+ <span><span className="block text-xs text-muted-foreground">IBAN</span><strong>{selectedPaymentProvider.iban ||'À renseigner côté configuration publique'}</strong></span><Copy className="h-4 w-4 text-primary" />
+ </button>
+ <button type="button" onClick={() => copyPaymentInfo('BIC', selectedPaymentProvider.bic)} className="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-left">
+ <span><span className="block text-xs text-muted-foreground">BIC</span><strong>{selectedPaymentProvider.bic ||'À renseigner côté configuration publique'}</strong></span><Copy className="h-4 w-4 text-primary" />
+ </button>
+ </div>
+ <label className="mt-3 block">
+ <span className="text-xs font-black uppercase tracking-[0.18em] text-muted-foreground">Preuve de virement optionnelle</span>
+ <input value={paymentProofUrl} onChange={(event) => setPaymentProofUrl(event.target.value)} placeholder="Lien photo/reçu ou note de preuve" className="mt-2 w-full rounded-xl border border-input px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30" />
+ </label>
+ </div>
+ )}
+
+ {paymentProvider ==='cash_on_delivery' && (
+ <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+ Paiement à la livraison sélectionné. La préparation reste soumise à validation du partenaire sur WhatsApp.
+ </div>
+ )}
+
+ {paymentProvider ==='crypto_wallet' && (
+ <div className="rounded-2xl border border-primary/20 bg-primary/[0.04] p-4 text-sm">
+ <p className="font-black text-foreground">USDT {selectedPaymentProvider.network ==='solana' ?'Solana' :'Polygon'}</p>
+ <p className="mt-1 text-xs text-muted-foreground">Aucune clé privée n’est stockée. Validation manuelle du hash au départ.</p>
+ {selectedPaymentProvider.walletAddress ? (
+ <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+ <div className="rounded-xl bg-white p-3">
+ <QRCodeSVG value={selectedPaymentProvider.walletAddress} size={112} />
+ </div>
+ <button type="button" onClick={() => copyPaymentInfo('Adresse wallet', selectedPaymentProvider.walletAddress)} className="flex-1 rounded-xl bg-white px-3 py-2 text-left">
+ <span className="block text-xs text-muted-foreground">Adresse wallet</span>
+ <strong className="break-all text-xs">{selectedPaymentProvider.walletAddress}</strong>
+ </button>
+ </div>
+ ) : (
+ <p className="mt-2 rounded-xl bg-white p-3 text-xs text-red-700">Wallet non configuré : choisissez Qonto, Revolut ou paiement à la livraison.</p>
+ )}
+ <label className="mt-3 block">
+ <span className="text-xs font-black uppercase tracking-[0.18em] text-muted-foreground">Hash de transaction</span>
+ <input value={paymentExternalId} onChange={(event) => setPaymentExternalId(event.target.value)} placeholder="0x... ou signature Solana" className="mt-2 w-full rounded-xl border border-input px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30" />
+ </label>
+	 </div>
+	 )}
+	 </div>
+
+	 {/* Delivery info */}
+	 <div className="bg-white rounded-2xl border border-primary/100 p-6 space-y-4">
  <h2 className="text-lg font-bold text-foreground">Informations de commande</h2>
 
  {/* Multi-traiteur warning */}
@@ -890,18 +1002,8 @@ export default function CartPage() {
  Commander sur WhatsApp
  </button>
  )}
- {stripeTestCheckoutEnabled && (
- <button
- onClick={handleStripeCheckoutClick}
- disabled={stripeStatus ==='processing' || checkoutStatus ==='processing'}
- className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white hover:bg-muted text-foreground font-bold rounded-2xl border-2 border-primary/30 transition-all disabled:opacity-60"
- >
- <CreditCard className="w-5 h-5" />
- {stripeStatus ==='processing' ?'Préparation Stripe test...' :'Tester le paiement CB sécurisé'}
- </button>
- )}
  <p className="text-xs text-center text-muted-foreground">
- Demande à confirmer : aucun paiement réel n’est activé tant que le go-live Stripe live n’est pas validé.
+ Demande à confirmer : aucun débit carte n’est lancé par le site. Le paiement est validé après rapprochement manuel.
  </p>
  </div>
  </div>
