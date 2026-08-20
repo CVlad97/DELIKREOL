@@ -1,7 +1,7 @@
 import { useEffect, useState } from'react';
-import { erpRequest, isErpConfigured } from'../lib/erpClient';
-import { readDemoOrders, seedDemoData } from'../data/demoDb';
 import { Layout } from'../components/layout/Layout';
+import { isSupabaseConfigured, supabase } from'../lib/supabase';
+import { readDemoOrders, seedDemoData } from'../data/demoDb';
 
 const allowDemoFallback = import.meta.env.VITE_ERP_FALLBACK_DEMO !=='false';
 const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER ||'596696653589';
@@ -69,31 +69,62 @@ export function OrderStatusPage() {
  setResult(null);
 
  try {
- const localOrders = readLocalOrders();
- const localOrder = localOrders.find((o) => o.id === trimmed || o.order_number === trimmed);
- if (localOrder) {
- setResult(normalizeLocalOrder(localOrder));
- return;
- }
+     const localOrders = readLocalOrders();
+     const localOrder = localOrders.find((o) => o.id === trimmed || o.order_number === trimmed);
+     if (localOrder) {
+       setResult(normalizeLocalOrder(localOrder));
+       return;
+     }
 
- if (isErpConfigured) {
- const res = await erpRequest<any>(`/orders/lookup?q=${encodeURIComponent(trimmed)}`);
- if (!res || res.error) throw new Error('NOT_FOUND');
- setResult({ id: res.order.id, orderNumber: res.order.orderNumber, status: res.order.status, totalAmount: res.order.totalAmount, createdAt: res.order.createdAt, items: res.items || [] });
- return;
- }
+     if (isSupabaseConfigured) {
+       const { data: orderData, error: supabaseError } = await supabase
+         .from('orders')
+         .select('id, order_number, status, payment_status, delivery_status, total_amount, subtotal, delivery_fee, created_at, customer_name, customer_phone, customer_email, customer_commune, order_mode, tracking_token')
+         .or(`order_number.eq.${trimmed},tracking_token.eq.${trimmed}`)
+         .maybeSingle();
 
- if (allowDemoFallback) {
- seedDemoData();
- const orders = readDemoOrders();
- const order = orders.find((o) => o.id === trimmed || o.order_number === trimmed);
- if (!order) throw new Error('NOT_FOUND');
- setResult({ id: order.id, orderNumber: order.order_number, status: order.status, totalAmount: order.total_amount, createdAt: order.created_at, items: order.items || [] });
- return;
- }
+       if (supabaseError) throw supabaseError;
+       if (!orderData) throw new Error('NOT_FOUND');
 
- throw new Error('NOT_FOUND');
- } catch (err: any) {
+       const { data: itemsData, error: itemsError } = await supabase
+         .from('order_items')
+         .select('product_id, product_name, quantity, unit_price, subtotal, vendor_name')
+         .eq('order_id', orderData.id);
+
+       if (itemsError) throw itemsError;
+
+       setResult({
+         id: orderData.id,
+         orderNumber: orderData.order_number,
+         status: orderData.status,
+         paymentStatus: orderData.payment_status,
+         deliveryStatus: orderData.delivery_status,
+         totalAmount: orderData.total_amount,
+         createdAt: orderData.created_at,
+         commune: orderData.customer_commune,
+         mode: orderData.order_mode,
+         trackingToken: orderData.tracking_token,
+         items: (itemsData || []).map((i: any) => ({
+           id: i.product_id,
+           name: i.product_name,
+           quantity: i.quantity,
+           price: i.unit_price,
+         })),
+       });
+       return;
+     }
+
+     if (allowDemoFallback) {
+       seedDemoData();
+       const orders = readDemoOrders();
+       const order = orders.find((o) => o.id === trimmed || o.order_number === trimmed);
+       if (!order) throw new Error('NOT_FOUND');
+       setResult({ id: order.id, orderNumber: order.order_number, status: order.status, totalAmount: order.total_amount, createdAt: order.created_at, items: order.items || [] });
+       return;
+     }
+
+     throw new Error('NOT_FOUND');
+   } catch (err: any) {
  setError(err?.message ==='NOT_FOUND' ?'Commande introuvable. Vérifie ton numéro ou contacte le support WhatsApp.' :'Erreur lors de la recherche.');
  } finally {
  setLoading(false);

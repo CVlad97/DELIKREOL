@@ -18,38 +18,46 @@ CREATE POLICY "Admin write media_assets" ON public.media_assets
 ALTER TABLE public.media_assets ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
--- 2. PILOT_TEST_FEEDBACK — désactiver usage public large
+-- 2. PROFILES — policies ownership
 -- ============================================================
-DROP POLICY IF EXISTS "Public insert pilot_test_feedback" ON public.pilot_test_feedback;
-CREATE POLICY "Public insert pilot_test_feedback" ON public.pilot_test_feedback
-  FOR INSERT TO anon, authenticated
-  WITH CHECK (true);
+DROP POLICY IF EXISTS "Public read profiles" ON public.profiles;
+CREATE POLICY "Public read profiles" ON public.profiles
+  FOR SELECT TO anon, authenticated
+  USING (is_delikreol_admin() OR id = auth.uid());
 
-DROP POLICY IF EXISTS "Admin all pilot_test_feedback" ON public.pilot_test_feedback;
-CREATE POLICY "Admin all pilot_test_feedback" ON public.pilot_test_feedback
+DROP POLICY IF EXISTS "Admin write profiles" ON public.profiles;
+CREATE POLICY "Admin write profiles" ON public.profiles
   FOR ALL TO authenticated
   USING (is_delikreol_admin())
   WITH CHECK (is_delikreol_admin());
 
-ALTER TABLE public.pilot_test_feedback ENABLE ROW LEVEL SECURITY;
+-- ============================================================
+-- 3. ORDERS — SECURITY P0 CRITIQUE
+-- ============================================================
+-- Suppression des policies over-permissives
+DROP POLICY IF EXISTS "orders_insert_anon" ON public.orders;
+DROP POLICY IF EXISTS "orders_update_anon" ON public.orders;
+DROP POLICY IF EXISTS "orders_select_anon" ON public.orders;
+-- NO new policy: orders INSERT must be authenticated or go through edge function with service_role
+-- The checkout-order edge function (with service_role) handles order creation
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
--- 3. RESTREINDRE WITH CHECK true
+-- 4. ORDER_ITEMS — same treatment as orders
 -- ============================================================
--- Vérifier les policies existantes avec WITH CHECK true sur des tables sensibles
--- Si elles existent, les remplacer par des conditions plus strictes
-DO $$
-BEGIN
-  -- orders : pas de WITH CHECK true sur anon
-  DROP POLICY IF EXISTS "orders_insert_anon" ON public.orders;
-  CREATE POLICY "orders_insert_anon" ON public.orders
-    FOR INSERT TO anon
-    WITH CHECK (customer_phone IS NOT NULL);
-EXCEPTION WHEN undefined_table THEN NULL;
-END $$;
+DROP POLICY IF EXISTS "order_items_insert_anon" ON public.order_items;
+DROP POLICY IF EXISTS "order_items_update_anon" ON public.order_items;
+DROP POLICY IF EXISTS "order_items_select_anon" ON public.order_items;
+ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
--- 4. STORAGE BUCKETS — éviter listing public large
+-- 5. PAYMENTS — already protected by FK to orders
+-- ============================================================
+DROP POLICY IF EXISTS "payments_select_anon" ON public.payments;
+ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
+
+-- ============================================================
+-- 6. STORAGE BUCKETS — éviter listing public large
 -- ============================================================
 -- caterer-photos : déjà durci dans rls_policy_hardening.sql
 -- product-photos : ajouter si bucket existe
@@ -77,24 +85,3 @@ BEGIN
     USING (bucket_id = 'product-photos' AND is_delikreol_admin());
 EXCEPTION WHEN undefined_table THEN NULL;
 END $$;
-
--- ============================================================
--- 5. RÉVOQUER EXECUTE anon/authenticated sur SECURITY DEFINER non publiques
--- ============================================================
-REVOKE EXECUTE ON FUNCTION public.is_delikreol_admin() FROM anon;
-REVOKE EXECUTE ON FUNCTION public.is_admin() FROM anon;
-
--- ============================================================
--- 6. PROTECTION AUTH — leaked password detection
--- ============================================================
-ALTER SYSTEM SET pgaudit.log_level TO 'warning';
--- Note: la protection des mots de passe fuite est gérée côté Supabase Auth
--- Activer dans le dashboard : Authentication > Settings > Leaked password protection
-
--- ============================================================
--- VERIFICATION
--- ============================================================
-SELECT schemaname, tablename, policyname, permissive, roles, cmd, qual
-FROM pg_policies
-WHERE tablename IN ('media_assets', 'pilot_test_feedback', 'orders')
-ORDER BY tablename, policyname;

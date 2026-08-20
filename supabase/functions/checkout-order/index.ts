@@ -370,11 +370,23 @@ Deno.serve(async (req: Request) => {
       order,
     });
   } catch (error) {
-    if (error instanceof Response) {
-      const body = await error.text();
-      return json(req, JSON.parse(body), error.status);
+      if (error instanceof Response) {
+        const body = await error.text();
+        return json(req, JSON.parse(body), error.status);
+      }
+      // Payment external_id collision → 409 Conflict
+      if (error instanceof Error && (
+        error.message?.includes('23505') ||
+        error.message?.includes('unique_violation') ||
+        error.message?.includes('duplicate key') ||
+        error.message?.includes('idx_orders_payment_external_id_unique')
+      )) {
+        return json(req, {
+          error: 'Ce paiement a déjà été utilisé pour une autre commande.',
+          code: 'PAYMENT_EXTERNAL_ID_COLLISION',
+        }, 409);
+      }
+      console.error('[checkout-order] error', error instanceof Error ? error.message : String(error));
+      return json(req, { error: 'Unable to create order' }, 500);
     }
-    console.error("[checkout-order] error", error instanceof Error ? error.message : String(error));
-    return json(req, { error: "Unable to create order" }, 500);
-  }
 });
