@@ -77,38 +77,39 @@ export function OrderStatusPage() {
      }
 
      if (isSupabaseConfigured) {
-       const { data: orderData, error: supabaseError } = await supabase
-         .from('orders')
-         .select('id, order_number, status, payment_status, delivery_status, total_amount, subtotal, delivery_fee, created_at, customer_name, customer_phone, customer_email, customer_commune, order_mode, tracking_token')
-         .or(`order_number.eq.${trimmed},tracking_token.eq.${trimmed}`)
-         .maybeSingle();
+       if (!/^[0-9a-f]{32}$/i.test(trimmed)) throw new Error('TRACKING_TOKEN_REQUIRED');
+       const { data, error: supabaseError } = await supabase.functions.invoke('public-order-status', {
+         body: { tracking_token: trimmed },
+       });
 
        if (supabaseError) throw supabaseError;
-       if (!orderData) throw new Error('NOT_FOUND');
-
-       const { data: itemsData, error: itemsError } = await supabase
-         .from('order_items')
-         .select('product_id, product_name, quantity, unit_price, subtotal, vendor_name')
-         .eq('order_id', orderData.id);
-
-       if (itemsError) throw itemsError;
+       const orderData = data?.order as {
+         order_number?: string;
+         status?: string;
+         payment_status?: string;
+         delivery_status?: string;
+         total_amount?: number;
+         created_at?: string;
+         commune?: string;
+         mode?: string;
+         items?: Array<{ product_id?: string; name?: string; quantity?: number; unit_price?: number }>;
+       } | undefined;
+       if (!orderData?.order_number) throw new Error('NOT_FOUND');
 
        setResult({
-         id: orderData.id,
          orderNumber: orderData.order_number,
          status: orderData.status,
          paymentStatus: orderData.payment_status,
          deliveryStatus: orderData.delivery_status,
          totalAmount: orderData.total_amount,
          createdAt: orderData.created_at,
-         commune: orderData.customer_commune,
-         mode: orderData.order_mode,
-         trackingToken: orderData.tracking_token,
-         items: (itemsData || []).map((i: any) => ({
-           id: i.product_id,
-           name: i.product_name,
-           quantity: i.quantity,
-           price: i.unit_price,
+         commune: orderData.commune,
+         mode: orderData.mode,
+         items: (orderData.items || []).map((item) => ({
+           id: item.product_id,
+           name: item.name,
+           quantity: item.quantity,
+           price: item.unit_price,
          })),
        });
        return;
@@ -124,8 +125,15 @@ export function OrderStatusPage() {
      }
 
      throw new Error('NOT_FOUND');
-   } catch (err: any) {
- setError(err?.message ==='NOT_FOUND' ?'Commande introuvable. Vérifie ton numéro ou contacte le support WhatsApp.' :'Erreur lors de la recherche.');
+   } catch (err: unknown) {
+ const message = err instanceof Error ? err.message :'';
+ setError(
+ message ==='TRACKING_TOKEN_REQUIRED'
+ ?'Pour une commande en ligne, utilise le lien de suivi sécurisé reçu après validation. Le numéro seul ne permet pas d’accéder aux détails.'
+ : message ==='NOT_FOUND'
+ ?'Commande introuvable. Vérifie ton lien de suivi ou contacte le support WhatsApp.'
+ :'Erreur lors de la recherche.',
+ );
  } finally {
  setLoading(false);
  }
@@ -146,11 +154,11 @@ export function OrderStatusPage() {
  <div className="max-w-3xl mx-auto px-6 py-12">
  <div className="bg-white/90 border border-primary/20 rounded-3xl p-6 shadow-lg">
  <h1 className="text-3xl font-black text-primary mb-2">Suivre ma commande</h1>
- <p className="text-sm text-slate-600 mb-6">Entre ton numéro de commande pour suivre son statut.</p>
+ <p className="text-sm text-slate-600 mb-6">Entre le token de suivi sécurisé reçu après ta commande.</p>
  <div className="text-xs text-slate-500 mb-4">Suivi mis à jour manuellement. Pour une question urgente, contacte-nous sur WhatsApp.</div>
 
  <div className="flex flex-col sm:flex-row gap-3">
- <input className="flex-1 border border-primary/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-300" placeholder="Ex: DK12345678" value={query} onChange={(e) => setQuery(e.target.value)} />
+ <input className="flex-1 border border-primary/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-300" placeholder="Token de suivi sécurisé" value={query} onChange={(e) => setQuery(e.target.value)} />
  <button onClick={() => handleLookup()} className="px-6 py-3 rounded-xl bg-primary text-white font-bold">Vérifier</button>
  </div>
 

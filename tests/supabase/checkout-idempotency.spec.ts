@@ -32,6 +32,24 @@ describe('CheckoutModal — unification du chemin atomique de commande', () => {
     expect(source).toContain('buildCheckoutFingerprint');
   });
 
+  it('force aussi le checkout historique de PublicHomePage via checkout-order', () => {
+    const source = read('src/pages/PublicHomePage.tsx');
+
+    expect(source).toContain("publicSupabase.functions.invoke('checkout-order'");
+    expect(source).toContain('idempotency_key: `public-home-${checkoutOrderId}`');
+    expect(source).not.toMatch(/\.from\(['"]orders['"]\)[\s\S]{0,80}\.insert\s*\(/);
+    expect(source).not.toMatch(/\.from\(['"]order_items['"]\)[\s\S]{0,80}\.insert\s*\(/);
+  });
+
+  it('conserve une syntaxe PostgreSQL valide pour les échantillons de doublons', () => {
+    const migration = read(
+      'supabase/migrations/20260731000001_modular_manual_payments.sql',
+    );
+
+    expect(migration).not.toMatch(/array_agg\([^\n]+\)\[:10\]/);
+    expect(migration.match(/\(array_agg\([^\n]+\)\)\[1:10\]/g)).toHaveLength(4);
+  });
+
   it('ne crée plus de commande via ordersService.create()', () => {
     const source = read('src/components/CheckoutModal.tsx');
 
@@ -55,6 +73,37 @@ describe('CheckoutModal — unification du chemin atomique de commande', () => {
  * physiquement deux commandes avec la même `idempotency_key`, ce qui protège
  * le chemin unifié (CheckoutModal + CartPage) contre les doubles soumissions.
  */
+describe('suivi et administration — accès Supabase sécurisé', () => {
+  it('ne recherche plus publiquement une commande directement dans orders', () => {
+    const source = read('src/pages/OrderStatusPage.tsx');
+    const edgeFunction = read('supabase/functions/public-order-status/index.ts');
+
+    expect(source).toContain("supabase.functions.invoke('public-order-status'");
+    expect(source).not.toContain(".from('orders')");
+    expect(source).toContain('/^[0-9a-f]{32}$/i');
+    expect(edgeFunction).not.toContain('customer_phone');
+    expect(edgeFunction).not.toContain('customer_email');
+    expect(edgeFunction).not.toContain('customer_name');
+  });
+
+  it('charge les commandes admin depuis Supabase et sépare le secours local', () => {
+    const source = read('src/pages/admin/AdminCommandes.tsx');
+
+    expect(source).toContain(".from('orders')");
+    expect(source).toContain('delikreol_local_orders_v1');
+    expect(source).toContain('Commandes locales non synchronisées');
+    expect(source).not.toContain('delikreol_orders');
+  });
+
+  it('bloque le checkout si le rate limiter serveur est indisponible', () => {
+    const source = read('supabase/functions/checkout-order/index.ts');
+
+    expect(source).toContain('Service de protection temporairement indisponible');
+    expect(source).toContain('{ status: 503 }');
+    expect(source).not.toContain('rate limit skipped');
+  });
+});
+
 describe('idempotence commande — contrainte unique en base', () => {
   it('pose un index unique sur orders.idempotency_key', () => {
     const migration = read(

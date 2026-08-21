@@ -339,6 +339,7 @@ export default function CartPage() {
 
  // Générer ID commande
  let orderNumber = generateOrderId();
+ let trackingToken ='';
  const orderUuid = crypto.randomUUID();
  const deliveryFee = DELIVERY_FEES[mode]?.fee || 0;
 
@@ -396,6 +397,7 @@ export default function CartPage() {
  orderNumber = createdOrder.order_number;
  order.order_number = orderNumber;
  order.id = createdOrder.id;
+ trackingToken = createdOrder.tracking_token ||'';
  order.payment_reference = buildPaymentReference(orderNumber, paymentProvider);
  } else {
  saveLocal();
@@ -428,7 +430,10 @@ export default function CartPage() {
  clearCart();
  setPreparedMessage(`Demande préparée — à confirmer sur WhatsApp.`);
  showSuccess('Demande préparée — à confirmer sur WhatsApp.');
- setTimeout(() => navigate(`/statut-commande?order=${orderNumber}`), 1500);
+ setTimeout(
+ () => navigate(trackingToken ? `/statut-commande?order=${encodeURIComponent(trackingToken)}` :'/statut-commande'),
+ 1500,
+ );
  };
 
  const copyPaymentInfo = async (label: string, value?: string) => {

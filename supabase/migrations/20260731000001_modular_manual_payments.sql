@@ -11,28 +11,28 @@ create table if not exists public.payment_duplicate_audit (
 );
 
 insert into public.payment_duplicate_audit(field_name, field_value, duplicate_count, sample_order_ids)
-select 'order_number', order_number, count(*)::integer, array_agg(id order by created_at desc)[:10]
+select 'order_number', order_number, count(*)::integer, (array_agg(id order by created_at desc))[1:10]
 from public.orders
 where order_number is not null and order_number <> ''
 group by order_number
 having count(*) > 1;
 
 insert into public.payment_duplicate_audit(field_name, field_value, duplicate_count, sample_order_ids)
-select 'idempotency_key', idempotency_key, count(*)::integer, array_agg(id order by created_at desc)[:10]
+select 'idempotency_key', idempotency_key, count(*)::integer, (array_agg(id order by created_at desc))[1:10]
 from public.orders
 where idempotency_key is not null and idempotency_key <> ''
 group by idempotency_key
 having count(*) > 1;
 
 insert into public.payment_duplicate_audit(field_name, field_value, duplicate_count, sample_order_ids)
-select 'payment_reference', payment_reference, count(*)::integer, array_agg(id order by created_at desc)[:10]
+select 'payment_reference', payment_reference, count(*)::integer, (array_agg(id order by created_at desc))[1:10]
 from public.orders
 where payment_reference is not null and payment_reference <> ''
 group by payment_reference
 having count(*) > 1;
 
 insert into public.payment_duplicate_audit(field_name, field_value, duplicate_count, sample_order_ids)
-select 'payment_external_id', payment_external_id, count(*)::integer, array_agg(id order by created_at desc)[:10]
+select 'payment_external_id', payment_external_id, count(*)::integer, (array_agg(id order by created_at desc))[1:10]
 from public.orders
 where payment_external_id is not null and payment_external_id <> ''
 group by payment_external_id

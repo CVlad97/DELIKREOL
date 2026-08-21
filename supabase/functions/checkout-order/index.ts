@@ -157,8 +157,11 @@ async function enforceRateLimit(
   });
 
   if (error) {
-    console.warn("[checkout-order] rate limit skipped", error.message);
-    return;
+    console.error("[checkout-order] rate limit unavailable", error.message);
+    throw new Response(
+      JSON.stringify({ error: "Service de protection temporairement indisponible" }),
+      { status: 503 },
+    );
   }
 
   if (Number(data || 0) > 20) {

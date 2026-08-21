@@ -100,6 +100,7 @@ type SubmitStatus = {
 
 type CheckoutStatus = SubmitStatus & {
  orderNumber?: string;
+ trackingToken?: string;
 };
 
 function isSupabasePausedError(error: unknown) {
@@ -435,7 +436,7 @@ export function PublicHomePage() {
  const [geoError, setGeoError] = useState('');
  const [vendorAvailabilityStatus, setVendorAvailabilityStatus] = useState('À confirmer par DELIKREOL');
  const [copyStatus, setCopyStatus] = useState('');
- const [paymentMethod, setPaymentMethod] = useState('Carte via lien sécurisé');
+ const [paymentMethod, setPaymentMethod] = useState('Virement bancaire');
  const [orderConfirmed, setOrderConfirmed] = useState(false);
  const [checkoutStatus, setCheckoutStatus] = useState<CheckoutStatus>({ kind:'idle' });
  const [activeScenario, setActiveScenario] = useState(0);
@@ -1257,59 +1258,57 @@ export function PublicHomePage() {
 
  setCheckoutStatus({ kind:'saving', message:'Création de la commande...' });
 
- const orderPayload = {
- order_number: checkoutOrderNumber,
+ let createdServerOrder: { id: string; order_number: string; tracking_token?: string } | null = null;
+ try {
+ const paymentProvider = paymentMethod === 'Paiement à la livraison'
+ ? 'cash_on_delivery'
+ : 'qonto_transfer';
+ const { data, error: checkoutError } = await publicSupabase.functions.invoke('checkout-order', {
+ body: {
+ idempotency_key: `public-home-${checkoutOrderId}`,
+ items: selectedProducts.map((product) => ({
+ id: product.id,
+ quantity: 1,
+ })),
  customer_name: customerName.trim(),
  customer_phone: customerPhone.trim(),
- status:'pending',
- payment_status:'pending',
- delivery_status:'pending',
- delivery_type: fulfillmentMode ==='delivery' ?'home_delivery' :'pickup',
- delivery_address: deliveryAddress.trim() || null,
- delivery_latitude: customerLocation?.lat ?? null,
- delivery_longitude: customerLocation?.lng ?? null,
- scheduled_time: deliverySlot.trim() || null,
- delivery_fee: selectionEconomics.frais_livraison,
- total_amount: selectionEconomics.total_client,
- source:'public_checkout',
+ phone: customerPhone.trim(),
+ mode: fulfillmentMode === 'delivery' ? 'livraison' : 'retrait',
+ address: fulfillmentMode === 'delivery' ? deliveryAddress.trim() : undefined,
+ commune: communeFilter || undefined,
+ creneaux: deliverySlot.trim() || undefined,
  notes: [
  deliveryNotes && `Instructions: ${deliveryNotes}`,
  customerLocation?.mapsUrl && `Maps: ${customerLocation.mapsUrl}`,
- `Paiement souhaité: ${paymentMethod}`,
  `Statut vendeur: ${vendorAvailabilityStatus}`,
  ]
  .filter(Boolean)
- .join('\n') || null,
+ .join('\n') || undefined,
+ payment_provider: paymentProvider,
+ },
+ });
+
+ if (checkoutError) {
+ if (isSupabasePausedError(checkoutError) || isSupabaseUnavailableError(checkoutError)) {
+ await fallbackToSheets('Supabase indisponible. Bascule sur enregistrement Sheets.');
+ return;
+ }
+ setCheckoutStatus({ kind:'error', message: `Commande non créée : ${checkoutError.message}` });
+ return;
+ }
+
+ const returnedOrder = data?.order as
+ | { id?: string; order_number?: string; tracking_token?: string }
+ | undefined;
+ if (!returnedOrder?.id || !returnedOrder.order_number) {
+ setCheckoutStatus({ kind:'error', message:'Commande non créée par le serveur sécurisé.' });
+ return;
+ }
+ createdServerOrder = {
+ id: returnedOrder.id,
+ order_number: returnedOrder.order_number,
+ tracking_token: returnedOrder.tracking_token,
  };
-
- try {
- const { data: createdOrder, error: orderError } = await publicSupabase
- .from('orders')
- .insert(orderPayload)
- .select('id')
- .single();
- if (orderError) {
- if (isSupabasePausedError(orderError) || isSupabaseUnavailableError(orderError)) {
- await fallbackToSheets('Supabase indisponible. Bascule sur enregistrement Sheets.');
- return;
- }
- setCheckoutStatus({ kind:'error', message: `Commande non créée : ${orderError.message}` });
- return;
- }
-
- const supabaseOrderItemsPayload = orderItemsPayload.map((item) => ({
- ...item,
- order_id: createdOrder.id,
- }));
- const { error: itemsError } = await publicSupabase.from('order_items').insert(supabaseOrderItemsPayload);
- if (itemsError) {
- if (isSupabasePausedError(itemsError) || isSupabaseUnavailableError(itemsError)) {
- await fallbackToSheets('Supabase indisponible. Bascule sur enregistrement Sheets.');
- return;
- }
- setCheckoutStatus({ kind:'error', message: `Produits non enregistrés : ${itemsError.message}` });
- return;
- }
  } catch (unexpectedError) {
  if (isSupabasePausedError(unexpectedError) || isSupabaseUnavailableError(unexpectedError)) {
  await fallbackToSheets('Supabase indisponible. Bascule sur enregistrement Sheets.');
@@ -1317,16 +1316,19 @@ export function PublicHomePage() {
  }
  setCheckoutStatus({
  kind:'error',
- message: `Erreur checkout : ${String((unexpectedError as any)?.message ?? unexpectedError)}`,
+ message: `Erreur checkout : ${unexpectedError instanceof Error ? unexpectedError.message : String(unexpectedError)}`,
  });
  return;
  }
 
+ if (!createdServerOrder) return;
+
  setOrderConfirmed(true);
  setCheckoutStatus({
  kind:'success',
- orderNumber: checkoutOrderNumber,
- message: `Commande ${checkoutOrderNumber} enregistrée. Statut : pending. Paiement : pending.`,
+ orderNumber: createdServerOrder.order_number,
+ trackingToken: createdServerOrder.tracking_token,
+ message: `Commande ${createdServerOrder.order_number} enregistrée. Statut : pending. Paiement : pending.`,
  });
  trackCheckoutSuccess({
  order_number: checkoutOrderNumber,
@@ -2114,8 +2116,8 @@ export function PublicHomePage() {
  deliveryCoverageStatus={deliveryCoverage.status}
  deliveryCoverageMessage={deliveryCoverage.message}
  orderTrackingUrl={
- checkoutStatus.orderNumber
- ? `${orderStatusBaseUrl}&order=${encodeURIComponent(checkoutStatus.orderNumber)}`
+ checkoutStatus.trackingToken
+ ? `${orderStatusBaseUrl}&order=${encodeURIComponent(checkoutStatus.trackingToken)}`
  : orderStatusBaseUrl
  }
  />
@@ -3001,7 +3003,7 @@ function SelectionPanel({
  <div className="rounded-2xl border border-primary/20 bg-white p-4">
  <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">Paiement</p>
  <div className="mt-3 grid gap-2 text-sm font-bold text-[#2a190f]">
- {['PayPal','Carte via lien sécurisé','Assistance WhatsApp'].map((method) => (
+ {['Virement bancaire','Paiement à la livraison'].map((method) => (
  <button
  key={method}
  type="button"

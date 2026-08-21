@@ -29,7 +29,7 @@
     "deploy": "npm run build && wrangler deploy",
     "prepare": "husky",
     "supabase:link": "supabase link --project-ref boihlgodmclljtckhmgz",
-    "supabase:deploy:functions": "supabase functions deploy checkout-order create-checkout-session create-payment-intent stripe-webhook --project-ref boihlgodmclljtckhmgz --use-api",
+    "supabase:deploy:functions": "supabase functions deploy checkout-order public-order-status create-checkout-session create-payment-intent stripe-webhook --project-ref boihlgodmclljtckhmgz --use-api",
     "supabase:deploy:checkout": "supabase functions deploy checkout-order create-checkout-session create-payment-intent stripe-webhook --project-ref boihlgodmclljtckhmgz --use-api"
   },
   "dependencies": {
