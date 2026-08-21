@@ -31,8 +31,11 @@ Dans Google Cloud OAuth client :
 1. Créer ou ouvrir un OAuth Client ID Google de type Web.
 2. Copier le Client ID et le Client Secret dans Supabase Auth > Providers > Google.
 3. Activer Google provider.
-4. Ajouter le secret GitHub Actions `VITE_ENABLE_GOOGLE_AUTH=true`.
-5. Redéployer GitHub Pages.
+4. Vérifier publiquement l'état avec :
+   `curl -s https://boihlgodmclljtckhmgz.supabase.co/auth/v1/settings -H "apikey: <ANON_KEY>"`
+   (`external.google` doit être `true`).
+5. Redéployer GitHub Pages. Aucun feature flag Google n'est nécessaire : la page
+   `/connexion` détecte automatiquement l'état réel du provider Supabase.
 
 ## Règle de sécurité
 

@@ -15,6 +15,7 @@ import {
 
 type LoginMode = 'magic' | 'password' | 'reset' | 'set-password';
 type LoginStatus = 'idle' | 'loading' | 'sent' | 'error';
+type GoogleAuthStatus = 'checking' | 'enabled' | 'disabled' | 'unavailable';
 
 const passwordModes: LoginMode[] = ['magic', 'password', 'reset', 'set-password'];
 
@@ -42,7 +43,43 @@ export default function LoginPage() {
     return requestedMode && passwordModes.includes(requestedMode) ? requestedMode : 'magic';
   }, [params]);
   const isSettingPassword = mode === 'set-password';
-  const googleAuthEnabled = import.meta.env.VITE_ENABLE_GOOGLE_AUTH === 'true';
+  const [googleAuthStatus, setGoogleAuthStatus] = useState<GoogleAuthStatus>(
+    isDemoMode ? 'unavailable' : 'checking',
+  );
+  const googleAuthEnabled = googleAuthStatus === 'enabled';
+
+  useEffect(() => {
+    if (isDemoMode) return;
+
+    let cancelled = false;
+
+    async function checkGoogleProvider() {
+      try {
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+        const response = await fetch(`${supabaseUrl}/auth/v1/settings`, {
+          headers: {
+            apikey: supabaseAnonKey,
+            Authorization: `Bearer ${supabaseAnonKey}`,
+          },
+        });
+        if (!response.ok) throw new Error(`Auth settings HTTP ${response.status}`);
+
+        const settings = (await response.json()) as { external?: { google?: boolean } };
+        if (!cancelled) {
+          setGoogleAuthStatus(settings.external?.google ? 'enabled' : 'disabled');
+        }
+      } catch (providerError) {
+        console.warn('[auth] Impossible de vérifier le provider Google', providerError);
+        if (!cancelled) setGoogleAuthStatus('unavailable');
+      }
+    }
+
+    void checkGoogleProvider();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!loading && user && !isSettingPassword) {
@@ -399,9 +436,18 @@ export default function LoginPage() {
                     setMessage('Connexion Google indisponible sans Supabase.');
                     return;
                   }
+                  if (googleAuthStatus === 'checking') {
+                    setStatus('error');
+                    setMessage('Vérification de Google en cours. Réessaie dans un instant.');
+                    return;
+                  }
                   if (!googleAuthEnabled) {
                     setStatus('error');
-                    setMessage('Connexion Google en cours de configuration. Utilise le lien email ou le mot de passe.');
+                    setMessage(
+                      googleAuthStatus === 'disabled'
+                        ? 'Google n’est pas encore activé dans Supabase. Utilise temporairement le lien email.'
+                        : 'Impossible de vérifier Google actuellement. Utilise temporairement le lien email.',
+                    );
                     return;
                   }
                   setStatus('loading');
@@ -422,7 +468,7 @@ export default function LoginPage() {
                     setMessage(error.message || 'Connexion Google indisponible. Essaie avec le lien email.');
                   }
                 }}
-                disabled={status === 'loading'}
+                disabled={status === 'loading' || googleAuthStatus === 'checking'}
                 className="flex w-full items-center justify-center gap-3 rounded-2xl border border-input bg-white px-5 py-3 font-bold text-foreground shadow-sm transition hover:bg-muted disabled:opacity-60"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -431,14 +477,18 @@ export default function LoginPage() {
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                 </svg>
-                Continuer avec Google
+                {googleAuthStatus === 'checking' ? 'Vérification de Google…' : 'Continuer avec Google'}
               </button>
             </>
           )}
 
-          {!googleAuthEnabled && !isDemoMode && !isSettingPassword && (
+          {googleAuthStatus !== 'enabled' && !isDemoMode && !isSettingPassword && (
             <p className="mt-3 text-center text-xs leading-5 text-muted-foreground">
-              Google sera disponible après activation du provider dans Supabase et du secret GitHub associé.
+              {googleAuthStatus === 'disabled'
+                ? 'Google est désactivé dans Supabase. Le lien email reste disponible immédiatement.'
+                : googleAuthStatus === 'unavailable'
+                  ? 'État Google indisponible. Le lien email reste disponible immédiatement.'
+                  : 'Vérification de la configuration Google…'}
             </p>
           )}
 
