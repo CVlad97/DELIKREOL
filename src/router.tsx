@@ -82,6 +82,7 @@ const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage')
 const AdminFinance = lazy(() => import('./pages/admin/AdminFinance'));
 const AdminFeedback = lazy(() => import('./pages/admin/AdminFeedback'));
 const AdminPilotAccess = lazy(() => import('./pages/admin/AdminPilotAccess'));
+const AdminPartnerCorrections = lazy(() => import('./pages/admin/AdminPartnerCorrections'));
 const AdminPointsRelais = lazy(() => import('./pages/admin/AdminPointsRelais'));
 const AdminAnalytics = lazy(() => import('./pages/admin/AdminAnalytics'));
 const AdminReviews = lazy(() => import('./pages/admin/AdminReviews'));
@@ -187,6 +188,7 @@ export function AppRouter() {
                   <Route path="feedback" element={<AdminFeedback />} />
                   <Route path="applications" element={<AdminPartnersApplications />} />
                   <Route path="caterer-validation" element={<AdminCatererValidation />} />
+                  <Route path="corrections-partenaires" element={<AdminPartnerCorrections />} />
                   <Route path="acces-pilote" element={<AdminPilotAccess />} />
                   <Route path="points-relais-v2" element={<AdminPointsRelais />} />
                   <Route path="analytics" element={<AdminAnalytics />} />

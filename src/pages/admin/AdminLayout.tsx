@@ -27,6 +27,7 @@ const adminNav = [
   { label: 'Candidatures', icon: ClipboardList, path: '/admin/applications' },
   { label: 'Validation traiteurs', icon: ChefHat, path: '/admin/caterer-validation' },
   { label: 'Accès pilote', icon: KeyRound, path: '/admin/acces-pilote' },
+  { label: 'Corrections', icon: MessageCircle, path: '/admin/corrections-partenaires' },
 ];
 
 export function AdminLayout() {
