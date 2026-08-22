@@ -29,3 +29,4 @@ La branche de correction `fix/delikreol-go-live-20260822` sert à préparer un c
 - La PR historique #8 est fermée sans merge.
 - L'accès Hostinger Mail disponible dans l'environnement pointe actuellement vers `contactcvs@ikabay.store`, pas vers une boîte Delikreol confirmée.
 - Aucun accès de gestion VPS/domaine Hostinger ni connecteur SumUp n'est disponible dans la session actuelle.
+- Les fonctions Stripe déployées dans Supabase sont plus anciennes que le code GitHub corrigé ; aucun déploiement automatique de la branche n'est confirmé.
