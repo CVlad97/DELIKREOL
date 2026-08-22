@@ -30,6 +30,7 @@
     "title": "Menu",
     "filter_commune": "City",
     "filter_price": "Price",
+    "filters": "Filters",
     "filter_available": "Available",
     "sort_distance": "Distance",
     "sort_price": "Price",
