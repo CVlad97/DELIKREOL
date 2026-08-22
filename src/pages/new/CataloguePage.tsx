@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import {
   ChefHat,
@@ -96,6 +97,7 @@ function toCartProduct(product: LocalProduct): Product {
 }
 
 export default function CataloguePage() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { addItem } = useCart();
   const { showSuccess } = useToast();
@@ -269,12 +271,12 @@ export default function CataloguePage() {
 
   return (
     <Layout>
-      <BackBar label="Accueil" backTo="/" />
+      <BackBar label={t('nav.home')} backTo="/" />
       <main className="min-h-screen bg-background">
         <section className="bg-gradient-to-r from-primary via-primary to-secondary text-primary-foreground">
           <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
             <p className="text-xs font-black uppercase tracking-[0.24em] text-white/80">Marketplace locale</p>
-            <h1 className="mt-2 text-4xl font-black tracking-tight md:text-5xl">Catalogue</h1>
+            <h1 className="mt-2 text-4xl font-black tracking-tight md:text-5xl">{t('catalog.title')}</h1>
             <p className="mt-3 max-w-2xl text-white/85">
               Plats, desserts, boissons et prestations de partenaires martiniquais. Les visuels provisoires sont signalés clairement.
             </p>
@@ -285,7 +287,7 @@ export default function CataloguePage() {
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Rechercher un plat, un traiteur ou une commune…"
+                placeholder={t('catalog.search_placeholder')}
                 className="w-full rounded-2xl border-0 bg-white py-4 pl-12 pr-12 text-foreground shadow-lg outline-none focus:ring-4 focus:ring-white/35"
               />
               {query && (
@@ -301,18 +303,18 @@ export default function CataloguePage() {
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-sm font-semibold text-muted-foreground">{filteredProducts.length} référence{filteredProducts.length > 1 ? 's' : ''}</p>
-              <h2 className="text-2xl font-black text-foreground">Choisissez votre prochain repas</h2>
+              <h2 className="text-2xl font-black text-foreground">{t('home.hero_cta')}</h2>
             </div>
 
             <div className="flex flex-wrap gap-2">
               <button type="button" onClick={() => setShowFilters((value) => !value)} className="inline-flex items-center gap-2 rounded-xl border border-border bg-white px-4 py-2.5 text-sm font-bold shadow-sm hover:border-primary/40" aria-expanded={showFilters}>
-                <SlidersHorizontal className="h-4 w-4" /> Filtres
+                <SlidersHorizontal className="h-4 w-4" /> {t('catalog.filter_price')}
               </button>
               <button type="button" onClick={() => setShowMap((value) => !value)} className="inline-flex items-center gap-2 rounded-xl border border-border bg-white px-4 py-2.5 text-sm font-bold shadow-sm hover:border-primary/40" aria-pressed={showMap}>
-                <MapIcon className="h-4 w-4" /> {showMap ? 'Voir les cartes' : 'Voir la carte'}
+                <MapIcon className="h-4 w-4" /> {showMap ? t('catalog.sort_distance') : t('catalog.filter_commune')}
               </button>
               <button type="button" onClick={requestLocation} disabled={locating} className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-accent-foreground disabled:opacity-60">
-                <LocateFixed className="h-4 w-4" /> {locating ? 'Localisation…' : 'Près de moi'}
+                <LocateFixed className="h-4 w-4" /> {locating ? t('common.loading') : t('catalog.sort_distance')}
               </button>
             </div>
           </div>
@@ -437,7 +439,7 @@ export default function CataloguePage() {
 
                         <div className="mt-4 grid grid-cols-[1fr_auto] gap-2">
                           <button type="button" onClick={() => addToCart(product)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2.5 text-sm font-black text-primary-foreground hover:bg-primary">
-                            <Plus className="h-4 w-4" /> Ajouter
+                            <Plus className="h-4 w-4" /> {t('product.add_to_cart')}
                           </button>
                           <button type="button" onClick={() => openProductPreview(product, vendorData?.partnerImage)} className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-muted hover:border-primary/40 hover:text-primary" aria-label={`Voir ${product.name} en gros plan`}>
                             <Eye className="h-4 w-4" />
