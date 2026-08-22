@@ -93,7 +93,7 @@ Deno.serve(async (req: Request) => {
     if (order.payment_status === "paid") return json(req, { error: "Order already paid" }, 409);
     if (order.stripe_checkout_session_id) {
       const stripe = new Stripe(assertEnv("STRIPE_SECRET_KEY"), {
-        apiVersion: "2026-02-25.clover",
+        apiVersion: "2026-07-29.dahlia",
       });
       const existingSession = await stripe.checkout.sessions.retrieve(order.stripe_checkout_session_id);
       if (existingSession.url) {
@@ -152,7 +152,7 @@ Deno.serve(async (req: Request) => {
 
     const siteUrl = safeBaseUrl(body.returnUrl, req.headers.get("origin"));
     const stripe = new Stripe(assertEnv("STRIPE_SECRET_KEY"), {
-      apiVersion: "2026-02-25.clover",
+      apiVersion: "2026-07-29.dahlia",
     });
 
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map((item) => ({
