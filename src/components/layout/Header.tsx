@@ -75,7 +75,7 @@ export function Header() {
   const userEmail = (user?.email || '').trim().toLowerCase();
   const isAdmin = !!user && (profile?.user_type === 'admin' || userEmail === OWNER_EMAIL);
   const accountTarget = !user ? '/pro' : isAdmin ? '/admin' : '/compte';
-  const accountLabel = t('nav.account');
+  const accountLabel = user ? t('nav.account') : t('nav.login');
   const accountIcon = user
     ? <LayoutDashboard className="h-4 w-4" />
     : <LogIn className="h-4 w-4" />;
@@ -145,7 +145,7 @@ export function Header() {
             className="flex min-w-0 items-center gap-1 justify-self-start rounded-2xl border border-border-strong/40 bg-card p-1 shadow-sm"
             aria-label="Navigation principale"
           >
-            {primaryNavItems.map((item) => {
+            {localizedPrimaryNavItems.map((item) => {
               const active = isActive(item);
               return (
                 <Link
@@ -242,7 +242,7 @@ export function Header() {
             </div>
 
             <div className="space-y-1 pt-1">
-              {allMobileNavItems.map((item) => {
+              {[...localizedPrimaryNavItems, ...secondaryNavItems].map((item) => {
                 const active = isActive(item);
                 return (
                   <Link
