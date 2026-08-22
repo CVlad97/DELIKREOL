@@ -23,7 +23,7 @@ function assertEnv(name: string) {
 
 function getStripe() {
   return new Stripe(assertEnv("STRIPE_SECRET_KEY"), {
-    apiVersion: "2026-02-25.clover",
+    apiVersion: "2026-07-29.dahlia",
   });
 }
 
