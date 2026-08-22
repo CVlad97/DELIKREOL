@@ -1,48 +1,59 @@
-# 🚀 DELIKREOL — CHECKLIST GO LIVE (6h)
+# DELIKREOL — CHECKLIST GO-LIVE
 
-## ✅ PRÉ-REQUIS (T0)
+Date de révision : 22 août 2026
 
-- [x] 63 tests unitaires passent
-- [x] TypeScript 0 erreur
-- [x] Lint 0 warning
-- [x] 24 routes configurées
-- [x] 29 pages publiques + 30 pages admin
+## Verdict
 
-## 🔴 P0 — Modules critiques (H-6 à H-4)
+- **Pilote manuel assisté : possible sous réserve des tests utilisateur.**
+- **Paiement Stripe live : NON autorisé.**
+- **Paiement SumUp/API : NON intégré et non vérifié.**
+- **Ouverture publique automatisée : NON validée.**
 
-| # | Module | Statut | Responsable |
-|---|--------|--------|-------------|
-| 1 | **Paiement SumUp/TPE** partenaire | ✅ Routes OK | Automatique |
-| 2 | **WhatsApp commandes** (coordination) | ✅ Service 164 lignes | Automatique |
-| 3 | **Waze navigation** (optimisation livraison) | ✅ Service 321 lignes | Automatique |
-| 4 | **Terminal partenaire** (gestion commandes) | ✅ Page 222 lignes | Automatique |
-| 5 | **Notifications traiteurs** | ✅ whatsappCoordination.ts | Automatique |
+## Pré-requis vérifiés
 
-## 🟠 P1 — Tests utilisateur (H-4 à H-2)
+- [x] Dépôt GitHub public et branche principale identifiés.
+- [x] Build Vite et workflow GitHub Pages présents.
+- [x] Supabase Delikreol actif et sain côté disponibilité.
+- [x] RLS activé sur les tables métier Delikreol principales.
+- [x] Flux pilote WhatsApp/paiement manuel documenté.
+- [x] Parcours catalogue, panier, livraison et contact présents sur le site public.
 
-| # | Test | Statut |
-|---|------|--------|
-| 1 | Commande client → WhatsApp traiteur | ⬜ À tester |
-| 2 | Traiteur → Confirmation + préparation | ⬜ À tester |
-| 3 | Livreur assigné → Notifié | ⬜ À tester |
-| 4 | Livraison → Tracking Waze | ⬜ À tester |
-| 5 | Client → Reçu confirmation | ⬜ À tester |
+## Bloquants P0
 
-## 🟢 P2 — Finalisation (H-2 à H-0)
+- [ ] Exécuter un test complet : catalogue → panier → commande → création de commande Supabase.
+- [ ] Vérifier la réception de la commande côté équipe/partenaire.
+- [ ] Vérifier les règles livraison, notamment le seuil de 40 €.
+- [ ] Vérifier le suivi de commande avec un vrai token.
+- [ ] Vérifier les coordonnées publiques et les e-mails de réception.
+- [ ] Corriger ou isoler les six tables publiques sans RLS signalées par Supabase : `wallets`, `trips`, `shipments`, `matches`, `projects`, `investments`.
+- [ ] Ne pas activer Stripe live avant les tests webhook, idempotence, remboursement, litige et réconciliation.
+- [ ] Ne pas annoncer SumUp comme disponible tant qu'aucune intégration API/TPE n'est reliée et testée.
 
-- [ ] Déployer sur Netlify
-- [ ] Configurer domaine .mq
-- [ ] Vérifier les 7 liens partenaires
-- [ ] Envoyer messages WhatsApp
-- [ ] GO LIVE
+## Paiements actuels
 
-## 📊 STATUT GLOBAL
+| Moyen | État |
+|---|---|
+| WhatsApp + validation humaine | Pilote |
+| Virement manuel | Pilote, si compte et coordonnées confirmés |
+| Paiement à la remise | À confirmer avec le partenaire |
+| Stripe Checkout | Présent dans le code, désactivé pour le pilote |
+| Stripe Connect | Code présent, non validé en production |
+| SumUp | Non intégré |
+| Qonto API | Non configuré dans l'application |
 
-```
-✅ Modules : 16/16
-✅ Tests : 63/63
-✅ Routes : 24/24
-✅ Pages : 59/59
-✅ Services : 44/44
-🔥 READY FOR GO LIVE
-```
+## Tests utilisateur obligatoires
+
+1. Client → commande.
+2. Commande → notification/coordination.
+3. Partenaire → confirmation.
+4. Paiement manuel → preuve → validation admin.
+5. Livraison/retrait → statut final.
+6. Réouverture du lien de suivi.
+7. Double-clic ou nouvelle tentative → aucune double commande.
+8. Erreur réseau → message compréhensible et reprise possible.
+
+## Critère de décision
+
+Le pilote peut être annoncé uniquement après réussite des tests 1 à 7 sur données de test et confirmation manuelle du canal de réception.
+
+Le go-live automatisé reste bloqué tant que Stripe live, SumUp, la réconciliation financière et les tables publiques non classifiées ne sont pas validés.
