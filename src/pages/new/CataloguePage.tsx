@@ -303,7 +303,7 @@ export default function CataloguePage() {
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-sm font-semibold text-muted-foreground">{filteredProducts.length} référence{filteredProducts.length > 1 ? 's' : ''}</p>
-              <h2 className="text-2xl font-black text-foreground">{t('home.hero_cta')}</h2>
+              <h2 className="text-2xl font-black text-foreground">{t('catalog.results_title')}</h2>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -314,7 +314,7 @@ export default function CataloguePage() {
                 <MapIcon className="h-4 w-4" /> {showMap ? t('catalog.sort_distance') : t('catalog.filter_commune')}
               </button>
               <button type="button" onClick={requestLocation} disabled={locating} className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-accent-foreground disabled:opacity-60">
-                <LocateFixed className="h-4 w-4" /> {locating ? t('common.loading') : t('catalog.sort_distance')}
+                <LocateFixed className="h-4 w-4" /> {locating ? t('common.loading') : t('catalog.near_me')}
               </button>
             </div>
           </div>
