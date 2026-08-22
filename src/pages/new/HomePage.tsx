@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Search,
   ShoppingBag,
@@ -157,6 +158,7 @@ function ReviewsSection() {
 }
 
 export default function HomePage() {
+  const { t } = useTranslation();
   useEffect(() => { trackPublicView(); }, []);
   const [searchQuery, setSearchQuery] = useState('');
   const [shareFeedback, setShareFeedback] = useState('');
@@ -200,7 +202,7 @@ export default function HomePage() {
       title: 'Commander maintenant',
       description: 'Parcours court vers les plats disponibles, retrait ou livraison selon la commune.',
       to: '/catalogue',
-      cta: 'Voir le catalogue',
+      cta: t('home.hero_cta'),
       icon: ShoppingBag,
       tone: 'from-primary to-primary',
     },
@@ -586,7 +588,7 @@ export default function HomePage() {
               Localisation
             </div>
             <h2 className="text-3xl md:text-4xl font-black text-foreground mb-2">
-              Traiteurs près de chez toi
+              {t('home.section_traiteurs')}
             </h2>
             <p className="text-muted-foreground text-base">
               Active la géolocalisation pour voir les partenaires autour de toi sur la carte
@@ -985,7 +987,7 @@ export default function HomePage() {
                   className="flex items-center gap-2 px-8 py-4 bg-primary hover:bg-primary text-white font-bold rounded-2xl transition-all hover:-translate-y-0.5 shadow-lg shadow-primary/20 text-lg"
                 >
                   <ShoppingBag className="w-5 h-5" />
-                  Voir le catalogue
+                  {t('home.hero_cta')}
                 </Link>
                 <a
                   href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Bonjour, j\'ai besoin d\'aide sur DELIKREOL.')}`}
