@@ -36,7 +36,9 @@
     "sort_price": "Prix",
     "sort_name": "Nom",
     "no_results": "Aucun plat trouvé",
-    "search_placeholder": "Rechercher un plat…"
+    "search_placeholder": "Rechercher un plat…",
+    "results_title": "Plats disponibles",
+    "near_me": "Près de moi"
   },
   "product": {
     "add_to_cart": "Ajouter au panier",
