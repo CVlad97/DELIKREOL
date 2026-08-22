@@ -78,7 +78,7 @@ Deno.serve(async (req: Request) => {
     if (!email) return json(req, { error: "Email partenaire requis avant onboarding Stripe" }, 400);
 
     const stripe = new Stripe(assertEnv("STRIPE_SECRET_KEY"), {
-      apiVersion: "2026-02-25.clover",
+      apiVersion: "2026-07-29.dahlia",
     });
 
     const accountId = entity.stripe_connect_account_id || entity.stripe_account_id || (await stripe.accounts.create({
