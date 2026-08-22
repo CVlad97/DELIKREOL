@@ -1,43 +1,31 @@
 # DeliKreol — statut de travail actuel
 
-## Priorite en cours
+## Audit du 22 août 2026
 
-Brancher progressivement la structure simple type Hostinger sans casser la page principale :
+Le site public `delikreol.com` est accessible. Le dépôt GitHub principal est `CVlad97/DELIKREOL`, branche `main`.
 
-- menu simple ;
-- categories visibles ;
-- filtres multiples ;
-- ville/commune ;
-- panier visible ;
-- confirmation des saisies ;
-- livraison eloignee a partir de 40 EUR ;
-- verification WhatsApp si hors zone ou horaire limite depasse ;
-- espace partenaire pour preparer/simuler ses produits.
+La branche de correction `fix/delikreol-go-live-20260822` sert à préparer un correctif vérifiable sans modifier `main`.
 
-## Deja pousse
+## Décision de lancement
 
-- `src/data/martiniqueCommunes.ts` : 34 communes + alias, dont Fort de France / FDF.
-- `src/data/simpleHostingerStyleStructure.ts` : menu, categories, filtres, messages humains, seuil 40 EUR.
-- `HOSTINGER_STYLE_UI_INTEGRATION_PLAN.md` : plan de branchement interface.
-- `DEPLOY_TRIGGER_GITHUB_PAGES.md` : declencheur rebuild Pages avec seuil 40 EUR.
+- Pilote manuel assisté : possible après tests réels.
+- Stripe live : désactivé.
+- SumUp : non intégré.
+- Paiement et coordination : WhatsApp / validation humaine pendant le pilote.
+- Livraison éloignée : possible à partir de 40 €, selon validation et disponibilité.
 
-## Decision seuil livraison eloignee
+## Points à vérifier avant annonce publique
 
-Seuil retenu : 40 EUR.
+1. Catalogue et panier avec une commande réelle de test.
+2. Création serveur de commande et idempotence.
+3. Réception de la commande par l'équipe.
+4. Suivi de commande avec token.
+5. Cohérence des coordonnées de contact.
+6. Sécurité Supabase : six tables publiques sans RLS à classer et corriger.
+7. Paiements : ne pas afficher Stripe ou SumUp comme disponibles avant validation.
 
-Regle : livraison eloignee possible a partir de 40 EUR, seulement selon validation du prestataire et disponibilite DeliKreol.
+## Limites connues
 
-## Points a brancher dans l interface
-
-1. Recherche commune tolerante.
-2. Liste deroulante commune.
-3. Message visible apres saisie/formulaire.
-4. Bouton Voir le panier centre sur le panier.
-5. Message livraison eloignee 40 EUR.
-6. Bouton verification WhatsApp.
-7. Formulaire partenaire produit en brouillon.
-
-## Limites
-
-Ne pas publier officiellement `delikreol.com` tant que GitHub Pages n est pas teste et valide.
-Ne pas activer paiement ou titre-restaurant comme si c etait disponible.
+- La PR historique #8 est fermée sans merge.
+- L'accès Hostinger Mail disponible dans l'environnement pointe actuellement vers `contactcvs@ikabay.store`, pas vers une boîte Delikreol confirmée.
+- Aucun accès de gestion VPS/domaine Hostinger ni connecteur SumUp n'est disponible dans la session actuelle.
