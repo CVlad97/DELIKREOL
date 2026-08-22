@@ -308,7 +308,7 @@ export default function CataloguePage() {
 
             <div className="flex flex-wrap gap-2">
               <button type="button" onClick={() => setShowFilters((value) => !value)} className="inline-flex items-center gap-2 rounded-xl border border-border bg-white px-4 py-2.5 text-sm font-bold shadow-sm hover:border-primary/40" aria-expanded={showFilters}>
-                <SlidersHorizontal className="h-4 w-4" /> {t('catalog.filter_price')}
+                <SlidersHorizontal className="h-4 w-4" /> {t('catalog.filters')}
               </button>
               <button type="button" onClick={() => setShowMap((value) => !value)} className="inline-flex items-center gap-2 rounded-xl border border-border bg-white px-4 py-2.5 text-sm font-bold shadow-sm hover:border-primary/40" aria-pressed={showMap}>
                 <MapIcon className="h-4 w-4" /> {showMap ? t('catalog.sort_distance') : t('catalog.filter_commune')}
