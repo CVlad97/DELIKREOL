@@ -36,7 +36,9 @@
     "sort_price": "Price",
     "sort_name": "Name",
     "no_results": "No meals found",
-    "search_placeholder": "Search a meal…"
+    "search_placeholder": "Search a meal…",
+    "results_title": "Available dishes",
+    "near_me": "Near me"
   },
   "product": {
     "add_to_cart": "Add to cart",
