@@ -37,7 +37,7 @@ export const integrations: IntegrationsConfig = {
     // Le virement Qonto peut être proposé manuellement, mais l'API Qonto n'est pas configurée.
     enabled: false,
     label: 'Qonto — virement manuel',
-    description: 'Virement manuel à confirmer par l'équipe. Aucune synchronisation API active.',
+    description: "Virement manuel à confirmer par l'équipe. Aucune synchronisation API active.",
     apiBaseUrl: undefined,
     status: 'pending',
   },
