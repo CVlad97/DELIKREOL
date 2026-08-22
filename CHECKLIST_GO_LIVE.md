@@ -26,6 +26,9 @@ Date de révision : 22 août 2026
 - [ ] Vérifier le suivi de commande avec un vrai token.
 - [ ] Vérifier les coordonnées publiques et les e-mails de réception.
 - [ ] Corriger ou isoler les six tables publiques sans RLS signalées par Supabase : `wallets`, `trips`, `shipments`, `matches`, `projects`, `investments`.
+- [ ] Corriger la vue `api.managed_wallets` signalée en `SECURITY DEFINER`.
+- [ ] Activer la protection Supabase contre les mots de passe compromis.
+- [ ] Déployer les fonctions Edge corrigées après validation, car la production Supabase est en retard sur le dépôt GitHub.
 - [ ] Ne pas activer Stripe live avant les tests webhook, idempotence, remboursement, litige et réconciliation.
 - [ ] Ne pas annoncer SumUp comme disponible tant qu'aucune intégration API/TPE n'est reliée et testée.
 
