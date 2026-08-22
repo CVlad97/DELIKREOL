@@ -7,7 +7,7 @@
     "account": "Compte",
     "admin": "Admin",
     "partner": "Espace Partenaire",
-    "login": "Connexion",
+    "login": "Se connecter",
     "logout": "Déconnexion"
   },
   "home": {
@@ -30,6 +30,7 @@
     "title": "Catalogue des plats",
     "filter_commune": "Commune",
     "filter_price": "Prix",
+    "filters": "Filtres",
     "filter_available": "Disponible",
     "sort_distance": "Distance",
     "sort_price": "Prix",
