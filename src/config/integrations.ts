@@ -26,7 +26,7 @@ export function isStripeTestPublicEnabled(_flag: unknown, _publicKey: unknown): 
 
 export const integrations: IntegrationsConfig = {
   stripe: {
-    // Stripe reste volontairement désactivé pour ne pas bloquer le lancement WhatsApp/virements.
+    // Stripe reste désactivé tant que le flux test et les webhooks ne sont pas validés.
     enabled: false,
     label: 'Stripe (carte bancaire)',
     description: 'Désactivé pour ce lancement. Code conservé derrière feature flag serveur.',
@@ -34,11 +34,12 @@ export const integrations: IntegrationsConfig = {
     status: 'pending',
   },
   qonto: {
-    enabled: true,
-    label: 'Qonto — Martinique 972',
-    description: 'Compte pro Qonto pour DeliKreol · IBAN FR · Solo Premium (39€ HT) · Rapprochement auto commandes',
+    // Le virement Qonto peut être proposé manuellement, mais l'API Qonto n'est pas configurée.
+    enabled: false,
+    label: 'Qonto — virement manuel',
+    description: 'Virement manuel à confirmer par l'équipe. Aucune synchronisation API active.',
     apiBaseUrl: undefined,
-    status: 'configured',
+    status: 'pending',
   },
   revolut: {
     enabled: false,
