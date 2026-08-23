@@ -32,6 +32,10 @@ function assertEnv(name: string) {
   return value;
 }
 
+function stripePaymentProvider() {
+  return Deno.env.get("STRIPE_SECRET_KEY")?.startsWith("sk_live_") ? "stripe" : "stripe_test";
+}
+
 function toNumber(value: unknown) {
   const parsed = typeof value === "number" ? value : Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -192,7 +196,6 @@ Deno.serve(async (req: Request) => {
     const session = await stripe.checkout.sessions.create(
       {
         mode: "payment",
-        integration_identifier: "delikreol_checkout_QmRzTnVa",
         line_items: lineItems,
         customer_email: authData.user.email || undefined,
         client_reference_id: order.id,
@@ -213,7 +216,7 @@ Deno.serve(async (req: Request) => {
       .from("orders")
       .update({
         payment_status: "processing",
-        payment_provider: "stripe_test",
+        payment_provider: stripePaymentProvider(),
         payment_method: "card",
         stripe_checkout_session_id: session.id,
         updated_at: new Date().toISOString(),
