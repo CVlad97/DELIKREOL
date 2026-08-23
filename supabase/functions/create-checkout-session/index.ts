@@ -32,6 +32,10 @@ function assertEnv(name: string) {
   return value;
 }
 
+function stripePaymentProvider() {
+  return Deno.env.get("STRIPE_SECRET_KEY")?.startsWith("sk_live_") ? "stripe" : "stripe_test";
+}
+
 function toNumber(value: unknown) {
   const parsed = typeof value === "number" ? value : Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -93,7 +97,7 @@ Deno.serve(async (req: Request) => {
     if (order.payment_status === "paid") return json(req, { error: "Order already paid" }, 409);
     if (order.stripe_checkout_session_id) {
       const stripe = new Stripe(assertEnv("STRIPE_SECRET_KEY"), {
-        apiVersion: "2026-02-25.clover",
+        apiVersion: "2026-07-29.dahlia",
       });
       const existingSession = await stripe.checkout.sessions.retrieve(order.stripe_checkout_session_id);
       if (existingSession.url) {
@@ -152,7 +156,7 @@ Deno.serve(async (req: Request) => {
 
     const siteUrl = safeBaseUrl(body.returnUrl, req.headers.get("origin"));
     const stripe = new Stripe(assertEnv("STRIPE_SECRET_KEY"), {
-      apiVersion: "2026-02-25.clover",
+      apiVersion: "2026-07-29.dahlia",
     });
 
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map((item) => ({
@@ -212,7 +216,7 @@ Deno.serve(async (req: Request) => {
       .from("orders")
       .update({
         payment_status: "processing",
-        payment_provider: "stripe_test",
+        payment_provider: stripePaymentProvider(),
         payment_method: "card",
         stripe_checkout_session_id: session.id,
         updated_at: new Date().toISOString(),

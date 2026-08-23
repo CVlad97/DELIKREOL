@@ -111,7 +111,7 @@ Deno.serve(async (req: Request) => {
     if (eligibleCents <= 0) return json(req, { error: "No eligible payout amount" }, 400);
 
     const stripe = new Stripe(assertEnv("STRIPE_SECRET_KEY"), {
-      apiVersion: "2026-02-25.clover",
+      apiVersion: "2026-07-29.dahlia",
     });
     const account = await stripe.accounts.retrieve(vendor.stripe_connect_account_id);
     if (!account.charges_enabled || !account.payouts_enabled) {

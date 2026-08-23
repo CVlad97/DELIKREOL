@@ -11,6 +11,7 @@ const adminNav = [
   { label: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
   { label: 'Test système', icon: Activity, path: '/admin/test-systeme' },
   { label: 'Commandes', icon: ShoppingCart, path: '/admin/commandes' },
+  { label: 'Opérations', icon: ClipboardList, path: '/admin/operations' },
   { label: 'Produits', icon: Package, path: '/admin/catalogue' },
   { label: 'Partenaires', icon: ChefHat, path: '/admin/partenaires' },
   { label: 'Livreurs', icon: Truck, path: '/admin/livreurs' },

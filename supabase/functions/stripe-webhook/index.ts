@@ -21,9 +21,13 @@ function assertEnv(name: string) {
   return value;
 }
 
+function stripePaymentProvider() {
+  return Deno.env.get("STRIPE_SECRET_KEY")?.startsWith("sk_live_") ? "stripe" : "stripe_test";
+}
+
 function getStripe() {
   return new Stripe(assertEnv("STRIPE_SECRET_KEY"), {
-    apiVersion: "2026-02-25.clover",
+    apiVersion: "2026-07-29.dahlia",
   });
 }
 
@@ -160,7 +164,7 @@ async function markOrderPaid(
     .update({
       payment_status: "paid",
       payment_method: "card",
-      payment_provider: "stripe_test",
+      payment_provider: stripePaymentProvider(),
       paid_at: new Date().toISOString(),
       ...patch,
     })
@@ -198,7 +202,7 @@ async function handleCheckoutCompleted(
       .update({
         ...patch,
         payment_status: "processing",
-        payment_provider: "stripe_test",
+        payment_provider: stripePaymentProvider(),
         payment_method: "card",
       })
       .eq("id", orderId);
@@ -230,7 +234,7 @@ async function handleCheckoutAsyncFailed(
       stripe_checkout_session_id: session.id,
       payment_intent_id: paymentIntentId,
       payment_status: "failed",
-      payment_provider: "stripe_test",
+      payment_provider: stripePaymentProvider(),
       payment_method: "card",
       payment_error: "Paiement asynchrone échoué",
     })

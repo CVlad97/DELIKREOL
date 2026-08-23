@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from'react';
+import { useTranslation } from'react-i18next';
 import { Link, useNavigate } from'react-router-dom';
 import { validateMartiniquePhone, PHONE_ERROR_MESSAGE } from'../../utils/phone';
 import { validateEmail } from'../../utils/validation';
@@ -157,6 +158,7 @@ function buildWhatsAppOrderMessage(params: {
 }
 
 export default function CartPage() {
+ const { t } = useTranslation();
  const { items, updateQuantity, removeItem, clearCart, total, itemCount } = useCart();
  const { showSuccess, showError } = useToast();
  const navigate = useNavigate();
@@ -461,7 +463,7 @@ export default function CartPage() {
  <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary/[0.15] mb-6">
  <ShoppingCart className="w-10 h-10 text-primary/400" />
  </div>
- <h1 className="text-2xl font-black text-foreground mb-3">Votre panier est vide</h1>
+ <h1 className="text-2xl font-black text-foreground mb-3">{t('cart.empty')}</h1>
  <p className="text-muted-foreground mb-8 leading-relaxed">
  Ajoutez un plat pour préparer une commande. Parcourez notre catalogue de traiteurs martiniquais.
  </p>
@@ -470,7 +472,7 @@ export default function CartPage() {
  className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary hover:bg-primary text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-primary/200"
  >
  <ArrowLeft className="w-4 h-4" />
- Voir le catalogue
+ {t('home.hero_cta')}
  </Link>
  </div>
  </div>
@@ -531,7 +533,7 @@ export default function CartPage() {
  <div className="flex items-center gap-3">
  <ShoppingCart className="w-7 h-7" />
  <div>
- <h1 className="text-2xl md:text-3xl font-black">Mon panier</h1>
+ <h1 className="text-2xl md:text-3xl font-black">{t('cart.title')}</h1>
  <p className="text-primary/100 text-sm">
  {itemCount} {itemCount === 1 ?'article' :'articles'}
  </p>
@@ -671,7 +673,7 @@ export default function CartPage() {
  )}
  <hr className="border-primary/100" />
  <div className="flex justify-between">
- <span className="font-bold text-foreground">Total estimé</span>
+ <span className="font-bold text-foreground">{t('cart.total')} estimé</span>
  <span className="text-2xl font-black text-primary">
  {(total + (DELIVERY_FEES[mode]?.fee || 0)).toFixed(2).replace('.',',')} €
  </span>
@@ -1004,7 +1006,7 @@ export default function CartPage() {
  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-primary hover:bg-primary text-white font-bold rounded-2xl transition-all hover:scale-[1.02] shadow-lg shadow-primary/200 text-lg"
  >
  <MessageCircle className="w-6 h-6" />
- Commander sur WhatsApp
+ {t('cart.checkout')} WhatsApp
  </button>
  )}
  <p className="text-xs text-center text-muted-foreground">

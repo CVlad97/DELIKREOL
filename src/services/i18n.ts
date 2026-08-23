@@ -5,7 +5,7 @@ import kr from '../locales/kr.json';
 import en from '../locales/en.json';
 
 const savedLang = typeof window !== 'undefined'
-  ? localStorage.getItem('delikreol_lang') || navigator.language.slice(0, 2)
+  ? localStorage.getItem('delikreol_lang') || 'fr'
   : 'fr';
 
 const detectedLang = ['fr', 'kr', 'en'].includes(savedLang) ? savedLang : 'fr';

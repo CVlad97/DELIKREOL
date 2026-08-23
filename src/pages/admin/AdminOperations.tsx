@@ -82,6 +82,9 @@ export default function AdminOperations() {
  supabase.from('deliveries').select('*, order:orders(order_number, total_amount), driver:drivers(vehicle_type)').order('created_at', { ascending: false }).limit(20),
  ]);
 
+ if (ordersRes.error) throw ordersRes.error;
+ if (deliveriesRes.error) throw deliveriesRes.error;
+
  const ordersData = ordersRes.data || [];
  const deliveriesData = deliveriesRes.data || [];
 
@@ -251,7 +254,7 @@ export default function AdminOperations() {
  <span className="text-sm text-muted-foreground">{deliveryLabels[o.delivery_type] || o.delivery_type}</span>
  </td>
  <td className="px-4 py-3 text-right">
- <span className="font-black text-foreground">{o.total_amount.toFixed(2)} EUR</span>
+ <span className="font-black text-foreground">{Number(o.total_amount || 0).toFixed(2)} EUR</span>
  </td>
  <td className="px-4 py-3 text-right hidden sm:table-cell">
  <span className="text-xs text-muted-foreground">

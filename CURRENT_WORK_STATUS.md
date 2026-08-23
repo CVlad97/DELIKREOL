@@ -1,43 +1,39 @@
 # DeliKreol — statut de travail actuel
 
-## Priorite en cours
+## Audit et corrections du 22 août 2026
 
-Brancher progressivement la structure simple type Hostinger sans casser la page principale :
+Le site public `delikreol.com` est accessible. Le dépôt GitHub principal est `CVlad97/DELIKREOL`, branche `main`.
 
-- menu simple ;
-- categories visibles ;
-- filtres multiples ;
-- ville/commune ;
-- panier visible ;
-- confirmation des saisies ;
-- livraison eloignee a partir de 40 EUR ;
-- verification WhatsApp si hors zone ou horaire limite depasse ;
-- espace partenaire pour preparer/simuler ses produits.
+La branche de correction `fix/delikreol-go-live-20260822` prépare les changements sans modifier `main`. La PR #55 reste ouverte en brouillon.
 
-## Deja pousse
+## État du lancement
 
-- `src/data/martiniqueCommunes.ts` : 34 communes + alias, dont Fort de France / FDF.
-- `src/data/simpleHostingerStyleStructure.ts` : menu, categories, filtres, messages humains, seuil 40 EUR.
-- `HOSTINGER_STYLE_UI_INTEGRATION_PLAN.md` : plan de branchement interface.
-- `DEPLOY_TRIGGER_GITHUB_PAGES.md` : declencheur rebuild Pages avec seuil 40 EUR.
+- Pilote manuel assisté : possible après tests utilisateur.
+- Stripe live : désactivé ; le compte connecté est uniquement en mode test.
+- SumUp : non intégré.
+- Paiement et coordination : WhatsApp / validation humaine pendant le pilote.
+- Livraison éloignée : possible à partir de 40 €, selon validation et disponibilité.
 
-## Decision seuil livraison eloignee
+## Corrections vérifiées
 
-Seuil retenu : 40 EUR.
+- CI GitHub et tests Playwright : réussis sur le dernier commit de code.
+- Fonctions Stripe Supabase déployées et actives : `create-checkout-session` v8, `stripe-webhook` v8, `stripe-connect-onboard` v5, `stripe-payout` v5.
+- API Stripe des fonctions : `2026-07-29.dahlia`.
+- RLS activé sur les six anciennes tables publiques non utilisées par le flux commercial actuel.
+- Accès anonyme retiré de la vue `api.managed_wallets`, avec mode `security_invoker`.
 
-Regle : livraison eloignee possible a partir de 40 EUR, seulement selon validation du prestataire et disponibilite DeliKreol.
+## Points restant obligatoires avant ouverture commerciale complète
 
-## Points a brancher dans l interface
+1. Exécuter une commande de test complète : catalogue → panier → commande → paiement test → webhook → suivi.
+2. Vérifier la réception côté équipe et partenaire.
+3. Vérifier remboursement, paiement refusé, double soumission et litige en mode test.
+4. Configurer un compte Stripe live et ses secrets uniquement après validation des tests.
+5. Activer la protection Supabase contre les mots de passe compromis.
+6. Confirmer une boîte e-mail DELIKREOL sur Hostinger.
+7. Intégrer SumUp ou retirer toute mention de paiement SumUp.
+8. Mettre en place sauvegarde, journalisation et procédure de retour arrière.
 
-1. Recherche commune tolerante.
-2. Liste deroulante commune.
-3. Message visible apres saisie/formulaire.
-4. Bouton Voir le panier centre sur le panier.
-5. Message livraison eloignee 40 EUR.
-6. Bouton verification WhatsApp.
-7. Formulaire partenaire produit en brouillon.
+## Limites d'accès actuelles
 
-## Limites
-
-Ne pas publier officiellement `delikreol.com` tant que GitHub Pages n est pas teste et valide.
-Ne pas activer paiement ou titre-restaurant comme si c etait disponible.
+- L'accès Hostinger Mail disponible pointe vers `contactcvs@ikabay.store`, pas vers une boîte DELIKREOL confirmée.
+- Aucun accès de gestion VPS/domaine Hostinger ni connecteur SumUp n'est disponible dans la session actuelle.

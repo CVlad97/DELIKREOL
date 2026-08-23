@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
 import {
   ShoppingCart,
@@ -51,6 +52,14 @@ export function Header() {
   const { itemCount } = useCart();
   const { user, profile } = useAuth();
   const location = useLocation();
+  const { t } = useTranslation();
+  const localizedPrimaryNavItems = primaryNavItems.map((item) => ({
+    ...item,
+    label: item.to === '/catalogue' ? t('nav.catalog')
+      : item.to === '/traiteurs' ? t('nav.traiteurs')
+        : item.to === '/devenir-partenaire' ? t('nav.partner')
+          : t('home.hero_cta'),
+  }));
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -66,7 +75,7 @@ export function Header() {
   const userEmail = (user?.email || '').trim().toLowerCase();
   const isAdmin = !!user && (profile?.user_type === 'admin' || userEmail === OWNER_EMAIL);
   const accountTarget = !user ? '/pro' : isAdmin ? '/admin' : '/compte';
-  const accountLabel = 'Mon espace';
+  const accountLabel = user ? t('nav.account') : t('nav.login');
   const accountIcon = user
     ? <LayoutDashboard className="h-4 w-4" />
     : <LogIn className="h-4 w-4" />;
@@ -136,7 +145,7 @@ export function Header() {
             className="flex min-w-0 items-center gap-1 justify-self-start rounded-2xl border border-border-strong/40 bg-card p-1 shadow-sm"
             aria-label="Navigation principale"
           >
-            {primaryNavItems.map((item) => {
+            {localizedPrimaryNavItems.map((item) => {
               const active = isActive(item);
               return (
                 <Link
@@ -228,12 +237,12 @@ export function Header() {
             </Link>
 
             <div className="flex min-h-12 items-center justify-between gap-3 rounded-xl border border-border-strong/40 bg-card px-3 py-2">
-              <span className="text-sm font-bold text-foreground">Langue du site</span>
+              <span className="text-sm font-bold text-foreground">{t('common.language')}</span>
               <LanguageSwitcher />
             </div>
 
             <div className="space-y-1 pt-1">
-              {allMobileNavItems.map((item) => {
+              {[...localizedPrimaryNavItems, ...secondaryNavItems].map((item) => {
                 const active = isActive(item);
                 return (
                   <Link

@@ -35,7 +35,9 @@
     "sort_price": "PRIX",
     "sort_name": "Non",
     "no_results": "Pa ni manjé",
-    "search_placeholder": "Chèché on manjé…"
+    "search_placeholder": "Chèché on manjé…",
+    "results_title": "Manjé ki disponib",
+    "near_me": "Prè mwen"
   },
   "product": {
     "add_to_cart": "Mété an panyen",
@@ -88,7 +90,8 @@
     "privacy": "Konfidansyalité",
     "cookies": "Biskwit",
     "terms": "CGV",
-    "legal": "Mansyon légal"
+    "legal": "Mansyon légal",
+    "language": "Langaj"
   },
   "footer": {
     "description": "DELIKREOL ka mété an kontak kwizinnyé péyi-a ak boug ki anvi manjé Matinik",

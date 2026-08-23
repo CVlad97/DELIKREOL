@@ -7,7 +7,7 @@
     "account": "Compte",
     "admin": "Admin",
     "partner": "Espace Partenaire",
-    "login": "Connexion",
+    "login": "Se connecter",
     "logout": "Déconnexion"
   },
   "home": {
@@ -30,12 +30,15 @@
     "title": "Catalogue des plats",
     "filter_commune": "Commune",
     "filter_price": "Prix",
+    "filters": "Filtres",
     "filter_available": "Disponible",
     "sort_distance": "Distance",
     "sort_price": "Prix",
     "sort_name": "Nom",
     "no_results": "Aucun plat trouvé",
-    "search_placeholder": "Rechercher un plat…"
+    "search_placeholder": "Rechercher un plat, un traiteur ou une commune…",
+    "results_title": "Plats disponibles",
+    "near_me": "Près de moi"
   },
   "product": {
     "add_to_cart": "Ajouter au panier",
@@ -88,7 +91,8 @@
     "privacy": "Confidentialité",
     "cookies": "Cookies",
     "terms": "CGV",
-    "legal": "Mentions légales"
+    "legal": "Mentions légales",
+    "language": "Langue"
   },
   "footer": {
     "description": "DELIKREOL met en relation les traiteurs locaux avec les gourmands en Martinique",
