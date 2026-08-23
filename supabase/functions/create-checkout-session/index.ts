@@ -196,6 +196,7 @@ Deno.serve(async (req: Request) => {
     const session = await stripe.checkout.sessions.create(
       {
         mode: "payment",
+        integration_identifier: "delikreol_web_Abcdefgh",
         line_items: lineItems,
         customer_email: authData.user.email || undefined,
         client_reference_id: order.id,
