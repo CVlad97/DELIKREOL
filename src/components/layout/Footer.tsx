@@ -9,11 +9,14 @@ const CONTACT_EMAIL = 'contact@delikreol.com';
 const quickLinks = [
   { label: 'Catalogue', to: '/catalogue' },
   { label: 'Traiteurs', to: '/traiteurs' },
+  { label: 'DeliKreol Business', to: '/business' },
+  { label: 'Blog', to: '/blog' },
+  { label: 'FAQ', to: '/faq' },
   { label: 'Devis traiteur', to: '/devis' },
+  { label: 'Recrutement', to: '/recrutement' },
   { label: 'Devenir partenaire', to: '/devenir-partenaire' },
   { label: 'Devenir livreur', to: '/devenir-livreur' },
   { label: 'Points relais', to: '/points-relais' },
-  { label: 'Aide', to: '/aide' },
 ];
 
 const legalLinks = [
