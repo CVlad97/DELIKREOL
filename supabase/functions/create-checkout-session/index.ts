@@ -123,37 +123,6 @@ Deno.serve(async (req: Request) => {
 
     if (totalCents <= 0) return json(req, { error: "Invalid order total" }, 400);
 
-    const vendorIds = Array.from(new Set(items.map((item) => item.vendor_id).filter(Boolean))) as string[];
-    let connectedAccountId: string | null = null;
-    let applicationFeeCents = 0;
-
-    if (vendorIds.length !== 1) {
-      return json(req, { error: "Panier multi-vendeur non supporté en lancement: une commande par partenaire" }, 409);
-    }
-
-    const { data: vendor, error: vendorError } = await admin
-        .from("vendors")
-        .select("stripe_connect_account_id, stripe_charges_enabled, stripe_payouts_enabled, commission_rate")
-        .eq("id", vendorIds[0])
-        .maybeSingle();
-
-    if (vendorError || !vendor) return json(req, { error: "Vendeur introuvable" }, 404);
-    if (!vendor.stripe_charges_enabled || !vendor.stripe_payouts_enabled || !vendor.stripe_connect_account_id?.startsWith("acct_")) {
-      return json(req, { error: "Compte Stripe Connect vendeur incomplet" }, 409);
-    }
-
-    connectedAccountId = vendor.stripe_connect_account_id;
-    const recordedCommission = items.reduce(
-      (sum, item) => sum + Math.round(toNumber(item.vendor_commission) * 100),
-      0,
-    );
-    const commissionRate = toNumber(vendor.commission_rate) || 15;
-    const rateCommission = Math.round(itemTotalCents * (commissionRate / 100));
-    applicationFeeCents = Math.min(
-      Math.max(recordedCommission || rateCommission, 0),
-      Math.max(totalCents - 1, 0),
-    );
-
     const siteUrl = safeBaseUrl(body.returnUrl, req.headers.get("origin"));
     const stripe = new Stripe(assertEnv("STRIPE_SECRET_KEY"), {
       apiVersion: "2026-07-29.dahlia",
@@ -181,18 +150,9 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const paymentIntentData: Stripe.Checkout.SessionCreateParams.PaymentIntentData = {
-      metadata: {
-        orderId: order.id,
-        order_number: order.order_number || "",
-      },
-    };
-
-    if (connectedAccountId) {
-      paymentIntentData.transfer_data = { destination: connectedAccountId };
-      paymentIntentData.application_fee_amount = applicationFeeCents;
-    }
-
+    // P8S — Stripe Checkout SANS Connect (premier lancement)
+    // Toutes les sommes sont encaissées sur le compte plateforme DELIKREOL.
+    // Aucune logique Stripe Connect, destination charge ou application_fee.
     const session = await stripe.checkout.sessions.create(
       {
         mode: "payment",
@@ -206,7 +166,6 @@ Deno.serve(async (req: Request) => {
           orderId: order.id,
           order_number: order.order_number || "",
         },
-        payment_intent_data: paymentIntentData,
       },
       { idempotencyKey: `delikreol_checkout_${order.id}` },
     );
@@ -227,14 +186,12 @@ Deno.serve(async (req: Request) => {
     await admin.from("order_events").insert({
       order_id: order.id,
       event_type: "stripe_checkout_created",
-        payload: {
-          checkout_session_id: session.id,
-          amount_total: totalCents,
-          connected_account_id: connectedAccountId,
-          application_fee_amount: applicationFeeCents,
-          architecture: "destination_charge_single_vendor",
-        },
-      });
+      payload: {
+        checkout_session_id: session.id,
+        amount_total: totalCents,
+        architecture: "platform_only_no_connect",
+      },
+    });
 
     return json(req, { url: session.url, sessionId: session.id });
   } catch (error) {
