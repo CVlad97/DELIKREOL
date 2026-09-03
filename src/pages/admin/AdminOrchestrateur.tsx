@@ -34,7 +34,7 @@ export default function AdminOrchestrateur() {
  { id:'dl-admin', label:'Dashboard admin', status:'done' },
  { id:'dl-supabase', label:'Backend Supabase', status:'done' },
  { id:'dl-traiteurs', label:'Données traiteurs réels', status:'running', dependsOn: ['dl-forms'] },
- { id:'dl-domain', label:'Domaine delikreol.mq', status:'pending' },
+ { id:'dl-domain', label:'Domaine delikreol.com', status:'pending' },
  { id:'dl-pilot', label:'Lancement pilote 7 traiteurs', status:'pending', dependsOn: ['dl-traiteurs'] },
  ],
  },
