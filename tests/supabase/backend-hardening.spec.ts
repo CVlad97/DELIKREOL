@@ -96,13 +96,21 @@ describe('backend production hardening', () => {
     expect(source).not.toContain('paymentIntents.create');
   });
 
-  it('requires Connect readiness before Stripe Checkout', () => {
+  it('uses Stripe Checkout Sessions without Connect (P8S go-live)', () => {
     const source = read('supabase/functions/create-checkout-session/index.ts');
 
-    expect(source).toContain('stripe_payouts_enabled');
-    expect(source).toContain('Compte Stripe Connect vendeur incomplet');
-    expect(source).toContain('destination: connectedAccountId');
-    expect(source).toContain('application_fee_amount');
+    // Architecture P8S : lancement sans Stripe Connect.
+    // Les sommes sont encaissées directement par la plateforme DELIKREOL.
+    expect(source).toContain('mode: "payment"');
+    expect(source).toContain('architecture: "platform_only_no_connect"');
+
+    // Aucune logique Connect / destination / application_fee.
+    expect(source).not.toContain('stripe_payouts_enabled');
+    expect(source).not.toContain('Compte Stripe Connect vendeur incomplet');
+    expect(source).not.toContain('destination: connectedAccountId');
+    expect(source).not.toContain('application_fee_amount');
+    expect(source).not.toContain('transfer_data');
+    expect(source).not.toContain('connectedAccountId');
   });
 
   it('tracks required Stripe webhook events durably', () => {
