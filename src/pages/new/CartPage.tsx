@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from'react';
 import { useTranslation } from'react-i18next';
-import { Link, useNavigate } from'react-router-dom';
+import { Link } from'react-router-dom';
 import { validateMartiniquePhone, PHONE_ERROR_MESSAGE } from'../../utils/phone';
 import { validateEmail } from'../../utils/validation';
 import { DELIVERY_FEES } from'../../services/pricing';
@@ -53,6 +53,61 @@ interface CartItem extends Product {
 
 const WHATSAPP_NUMBER ='596696653589';
 const CHECKOUT_IDEMPOTENCY_STORAGE_KEY = 'delikreol_checkout_idempotency_v1';
+const LAST_WHATSAPP_ORDER_STORAGE_KEY = 'delikreol_last_whatsapp_order_v1';
+
+interface PreparedWhatsAppOrder {
+ orderNumber: string;
+ whatsappShareUrl: string;
+ orderStatusUrl: string;
+ savedAt: string;
+}
+
+function isSafePreparedWhatsAppUrl(value: string) {
+ try {
+ const url = new URL(value);
+ return url.protocol === 'https:' && url.hostname === 'wa.me' && url.pathname === `/${WHATSAPP_NUMBER}`;
+ } catch {
+ return false;
+ }
+}
+
+function isSafeOrderStatusUrl(value: string) {
+ return value === '/statut-commande' || value.startsWith('/statut-commande?order=');
+}
+
+function loadLastPreparedWhatsAppOrder(): PreparedWhatsAppOrder | null {
+ if (typeof window === 'undefined') return null;
+ try {
+ const raw = sessionStorage.getItem(LAST_WHATSAPP_ORDER_STORAGE_KEY);
+ if (!raw) return null;
+ const parsed: unknown = JSON.parse(raw);
+ if (!parsed || typeof parsed !== 'object') return null;
+ const record = parsed as Record<string, unknown>;
+ if (typeof record.orderNumber !== 'string' || typeof record.whatsappShareUrl !== 'string' || typeof record.orderStatusUrl !== 'string' || typeof record.savedAt !== 'string') return null;
+ if (!isSafePreparedWhatsAppUrl(record.whatsappShareUrl) || !isSafeOrderStatusUrl(record.orderStatusUrl)) return null;
+ return {
+ orderNumber: record.orderNumber,
+ whatsappShareUrl: record.whatsappShareUrl,
+ orderStatusUrl: record.orderStatusUrl,
+ savedAt: record.savedAt,
+ };
+ } catch {
+ return null;
+ }
+}
+
+function saveLastPreparedWhatsAppOrder(order: PreparedWhatsAppOrder) {
+ try {
+ sessionStorage.setItem(LAST_WHATSAPP_ORDER_STORAGE_KEY, JSON.stringify(order));
+ } catch {
+ // Non bloquant : le bouton reste disponible via l'état React courant.
+ }
+}
+
+function scrollToField(field: HTMLElement | null) {
+ field?.scrollIntoView({ behavior:'smooth', block:'center' });
+ window.setTimeout(() => field?.focus(), 250);
+}
 
 const CRENEAUX_OPTIONS = [
  { id:'des-que-possible', label:'Dès que possible' },
@@ -161,7 +216,7 @@ export default function CartPage() {
  const { t } = useTranslation();
  const { items, updateQuantity, removeItem, clearCart, total, itemCount } = useCart();
  const { showSuccess, showError } = useToast();
- const navigate = useNavigate();
+ const initialPreparedOrder = useMemo(() => loadLastPreparedWhatsAppOrder(), []);
 
  const [commune, setCommune] = useState('');
  const [communeSuggestions, setCommuneSuggestions] = useState<string[]>([]);
@@ -173,17 +228,20 @@ export default function CartPage() {
  const [phone, setPhone] = useState('');
  const [email, setEmail] = useState('');
  const [phoneError, setPhoneError] = useState('');
- const [messageSent, setMessageSent] = useState(false);
- const [preparedMessage, setPreparedMessage] = useState('');
- const [orderNumber, setOrderNumber] = useState('');
- const [whatsappShareUrl, setWhatsappShareUrl] = useState('');
+ const [messageSent, setMessageSent] = useState(Boolean(initialPreparedOrder));
+ const [preparedMessage, setPreparedMessage] = useState(initialPreparedOrder ? 'Votre demande WhatsApp est prête. Vous pouvez la rouvrir ci-dessous.' : '');
+ const [orderNumber, setOrderNumber] = useState(initialPreparedOrder?.orderNumber || '');
+ const [whatsappShareUrl, setWhatsappShareUrl] = useState(initialPreparedOrder?.whatsappShareUrl || '');
+ const [orderStatusUrl, setOrderStatusUrl] = useState(initialPreparedOrder?.orderStatusUrl || '/statut-commande');
  const [checkoutStatus, setCheckoutStatus] = useState<'idle' |'processing' |'success' |'error'>('idle');
  const [savedField, setSavedField] = useState<string | null>(null);
  const [paymentProvider, setPaymentProvider] = useState<PaymentProviderId>('qonto_transfer');
  const [paymentProofUrl, setPaymentProofUrl] = useState('');
  const [paymentExternalId, setPaymentExternalId] = useState('');
  const panierRef = useRef<HTMLDivElement>(null);
+ const phoneInputRef = useRef<HTMLInputElement>(null);
  const selectedPaymentProvider = getPaymentProvider(paymentProvider);
+ const orderTotal = total + (DELIVERY_FEES[mode]?.fee || 0);
 
  useEffect(() => {
  if (panierRef.current) {
@@ -200,6 +258,7 @@ export default function CartPage() {
  clearCart();
  setMessageSent(false);
  setPreparedMessage('');
+ sessionStorage.removeItem(LAST_WHATSAPP_ORDER_STORAGE_KEY);
  setCommune('');
  setCreneau('');
  setSelectedCreneaux([]);
@@ -309,12 +368,13 @@ export default function CartPage() {
  return false;
  }
  // Anti-double-click
- if (checkoutStatus ==='processing' || messageSent) {
+ if (checkoutStatus ==='processing') {
  return false;
  }
  // Validate phone — obligatoire
  if (!phone || !validateMartiniquePhone(phone)) {
  setPhoneError("Merci d'indiquer un numéro WhatsApp valide, ex : 0696 XX XX XX");
+ scrollToField(phoneInputRef.current);
  return false;
  }
  // Email valide si fourni
@@ -423,8 +483,16 @@ export default function CartPage() {
  paymentReference: buildPaymentReference(orderNumber, paymentProvider),
  });
  const confirmedWhatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(confirmedWhatsappText)}`;
+ const confirmedOrderStatusUrl = trackingToken ? `/statut-commande?order=${encodeURIComponent(trackingToken)}` :'/statut-commande';
  setOrderNumber(orderNumber);
  setWhatsappShareUrl(confirmedWhatsappUrl);
+ setOrderStatusUrl(confirmedOrderStatusUrl);
+ saveLastPreparedWhatsAppOrder({
+ orderNumber,
+ whatsappShareUrl: confirmedWhatsappUrl,
+ orderStatusUrl: confirmedOrderStatusUrl,
+ savedAt: new Date().toISOString(),
+ });
  window.open(confirmedWhatsappUrl,'_blank','noopener,noreferrer');
 
  setCheckoutStatus('success');
@@ -432,10 +500,6 @@ export default function CartPage() {
  clearCart();
  setPreparedMessage(`Demande préparée — à confirmer sur WhatsApp.`);
  showSuccess('Demande préparée — à confirmer sur WhatsApp.');
- setTimeout(
- () => navigate(trackingToken ? `/statut-commande?order=${encodeURIComponent(trackingToken)}` :'/statut-commande'),
- 1500,
- );
  };
 
  const copyPaymentInfo = async (label: string, value?: string) => {
@@ -500,6 +564,23 @@ export default function CartPage() {
  Besoin d'aide ? Contactez-nous sur WhatsApp.
  </p>
  <div className="flex flex-col gap-3">
+ {whatsappShareUrl && (
+ <a
+ href={whatsappShareUrl}
+ target="_blank"
+ rel="noopener noreferrer"
+ className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-primary hover:bg-primary text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-primary/200"
+ >
+ <MessageCircle className="w-5 h-5" fill="white" />
+ Ouvrir ma demande WhatsApp
+ </a>
+ )}
+ <Link
+ to={orderStatusUrl}
+ className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white text-primary font-bold rounded-2xl border-2 border-primary/200 transition-all hover:scale-105"
+ >
+ Voir le statut
+ </Link>
  <a
  href={`https://wa.me/596696653589?text=${encodeURIComponent(`Bonjour, j'ai besoin d'aide pour ma commande ${orderNumber}.`)}`}
  target="_blank"
@@ -526,7 +607,7 @@ export default function CartPage() {
 
  return (
  <Layout>
- <div className="bg-[#FFFBF0] min-h-screen">
+ <div className="bg-[#FFFBF0] min-h-screen pb-28 lg:pb-0">
  {/* Header */}
  <div className="bg-gradient-to-r from-primary to-secondary text-white">
  <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
@@ -675,7 +756,7 @@ export default function CartPage() {
  <div className="flex justify-between">
  <span className="font-bold text-foreground">{t('cart.total')} estimé</span>
  <span className="text-2xl font-black text-primary">
- {(total + (DELIVERY_FEES[mode]?.fee || 0)).toFixed(2).replace('.',',')} €
+ {orderTotal.toFixed(2).replace('.',',')} €
  </span>
  </div>
  <p className="text-xs text-muted-foreground">
@@ -813,7 +894,12 @@ export default function CartPage() {
  Téléphone WhatsApp
  </label>
  <input
+ ref={phoneInputRef}
  type="tel"
+ inputMode="tel"
+ autoComplete="tel"
+ aria-invalid={Boolean(phoneError)}
+ aria-describedby="cart-phone-help cart-phone-error"
  value={phone}
  onChange={(e) => {
  setPhone(e.target.value);
@@ -827,13 +913,16 @@ export default function CartPage() {
  :'border-input focus:border-primary/400 focus:ring-2 focus:ring-ring/30'
  }`}
  />
+ <p id="cart-phone-help" className="mt-1 text-xs leading-relaxed text-muted-foreground">
+ Indiquez le WhatsApp qui servira à confirmer la commande avec le traiteur. Exemple : 0696 12 34 56.
+ </p>
  {savedField ==='phone' && (
  <span className="inline-flex items-center gap-1 text-xs text-success font-semibold mt-1 animate-pulse">
  ✓ Enregistré
  </span>
  )}
  {phoneError && (
- <p className="text-xs text-red-500 mt-1">{phoneError}</p>
+ <p id="cart-phone-error" className="text-xs text-red-500 mt-1">{phoneError}</p>
  )}
  </div>
 
@@ -1015,6 +1104,20 @@ export default function CartPage() {
  </div>
  </div>
  </div>
+ </div>
+ <div className="fixed inset-x-0 bottom-0 z-40 border-t border-primary/20 bg-white/95 px-4 py-3 shadow-[0_-8px_24px_rgba(0,0,0,0.10)] backdrop-blur lg:hidden">
+ <button
+ type="button"
+ onClick={handleWhatsAppClick}
+ disabled={checkoutStatus ==='processing'}
+ className="flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-primary px-5 py-3 text-base font-black text-white shadow-lg shadow-primary/200 transition-all disabled:cursor-not-allowed disabled:opacity-70"
+ >
+ <MessageCircle className="h-5 w-5" />
+ {checkoutStatus ==='processing' ? 'Préparation...' : `Confirmer WhatsApp · ${orderTotal.toFixed(2).replace('.', ',')} €`}
+ </button>
+ <p className="mt-1 text-center text-[11px] font-medium text-muted-foreground">
+ Aucun débit carte : validation finale sur WhatsApp.
+ </p>
  </div>
  </Layout>
  );
