@@ -19,7 +19,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "audit:links": "node scripts/audit-http.cjs",
-    "audit:all": "npm run typecheck && npm run build && npm run audit:links",
+    "audit:all": "npm run typecheck && npm run lint && npm run build && npm run test && npm run audit:links && npm run audit:secrets",
     "audit:secrets": "node scripts/audit-secrets.mjs",
     "partners:sync:dry": "node scripts/partners-sync.mjs --dry-run",
     "partners:sync:apply": "node scripts/partners-sync.mjs --apply",
