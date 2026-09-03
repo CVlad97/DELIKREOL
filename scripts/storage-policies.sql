@@ -1,0 +1,23 @@
+-- DELIKREOL — référence des policies Storage traiteur-media.
+-- Source de vérité exécutable :
+-- supabase/migrations/20260901000000_create_traiteur_media.sql
+--
+-- Le bucket est PRIVÉ. Aucun utilisateur simplement "authenticated" ne reçoit
+-- de droit implicite. Lecture, ajout, mise à jour et suppression exigent :
+--   public.is_delikreol_admin()
+-- Les limites 50 Mo et MIME sont configurées sur storage.buckets.
+-- Les objets sont prévisualisés dans l'admin via createSignedUrl().
+-- La publication publique doit faire l'objet d'un flux séparé et explicite.
+--
+-- Vérification après migration :
+-- SELECT id, public, file_size_limit, allowed_mime_types
+-- FROM storage.buckets WHERE id = 'traiteur-media';
+--
+-- SELECT policyname, roles, cmd, qual, with_check
+-- FROM pg_policies
+-- WHERE schemaname = 'storage' AND tablename = 'objects'
+--   AND policyname LIKE 'traiteur_media_storage_%';
+--
+-- SELECT policyname, roles, cmd, qual, with_check
+-- FROM pg_policies
+-- WHERE schemaname = 'public' AND tablename = 'traiteur_media';

@@ -63,6 +63,7 @@ const routes = [
   'admin/applications',
   'admin/caterer-validation',
   'admin/corrections-partenaires',
+  'admin/media-traiteurs',
   'admin/acces-pilote',
   'admin/points-relais-v2',
   'admin/analytics',
