@@ -1,10 +1,11 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Outlet, useLocation } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { PWAUpdatePrompt } from './components/PWAUpdatePrompt';
 import { AuthReturnHandler } from './components/AuthReturnHandler';
 import { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
 import { ProtectedPartnerRoute } from './components/ProtectedPartnerRoute';
+import { BackBar } from './components/BackBar';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { ToastProvider } from './contexts/ToastContext';
@@ -101,8 +102,47 @@ function PageLoader() {
   return <div className="flex items-center justify-center min-h-[60vh]"><div className="flex flex-col items-center gap-4"><div className="w-10 h-10 rounded-full border-3 border-primary/20 border-t-primary animate-spin" /><p className="text-sm text-muted-foreground">Chargement…</p></div></div>;
 }
 
+const ROUTES_WITH_OWN_BACKBAR = [
+  /^\/catalogue\/?$/,
+  /^\/produit\/[^/]+\/?$/,
+  /^\/traiteurs\/?$/,
+  /^\/traiteur\/[^/]+\/?$/,
+  /^\/compte\/?$/,
+  /^\/devis\/?$/,
+  /^\/livraison\/?$/,
+  /^\/contact\/?$/,
+  /^\/aide\/?$/,
+  /^\/partenaire\/?$/,
+];
+
+export function normalizePublicPath(pathname: string) {
+  const withoutBase = pathname.replace(/^\/DELIKREOL(?=\/|$)/, '') || '/';
+  return withoutBase.endsWith('/') && withoutBase.length > 1
+    ? withoutBase.slice(0, -1)
+    : withoutBase;
+}
+
+export function shouldShowGlobalBackBar(pathname: string) {
+  const path = normalizePublicPath(pathname);
+  if (path === '/' || path.startsWith('/admin')) return false;
+  return !ROUTES_WITH_OWN_BACKBAR.some((route) => route.test(path));
+}
+
+function GlobalPublicBackBar() {
+  const location = useLocation();
+  if (!shouldShowGlobalBackBar(location.pathname)) return null;
+
+  return (
+    <div className="px-4 pt-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <BackBar backTo="/" />
+      </div>
+    </div>
+  );
+}
+
 function LayoutWrapper() {
-  return <Suspense fallback={<PageLoader />}><Outlet /></Suspense>;
+  return <Suspense fallback={<PageLoader />}><GlobalPublicBackBar /><Outlet /></Suspense>;
 }
 
 function AdminWrapper() {
