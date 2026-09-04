@@ -77,13 +77,13 @@ DROP POLICY IF EXISTS traiteur_media_select_public ON public.traiteur_media;
 DROP POLICY IF EXISTS traiteur_media_select_admin ON public.traiteur_media;
 CREATE POLICY traiteur_media_select_admin ON public.traiteur_media
   FOR SELECT TO authenticated
-  USING (public.is_delikreol_admin());
+  USING (private.is_delikreol_admin());
 
 DROP POLICY IF EXISTS traiteur_media_insert_admin ON public.traiteur_media;
 CREATE POLICY traiteur_media_insert_admin ON public.traiteur_media
   FOR INSERT TO authenticated
   WITH CHECK (
-    public.is_delikreol_admin()
+    private.is_delikreol_admin()
     AND uploaded_by = auth.uid()
     AND is_published = false
     AND published_at IS NULL
@@ -92,13 +92,13 @@ CREATE POLICY traiteur_media_insert_admin ON public.traiteur_media
 DROP POLICY IF EXISTS traiteur_media_update_admin ON public.traiteur_media;
 CREATE POLICY traiteur_media_update_admin ON public.traiteur_media
   FOR UPDATE TO authenticated
-  USING (public.is_delikreol_admin())
-  WITH CHECK (public.is_delikreol_admin());
+  USING (private.is_delikreol_admin())
+  WITH CHECK (private.is_delikreol_admin());
 
 DROP POLICY IF EXISTS traiteur_media_delete_admin ON public.traiteur_media;
 CREATE POLICY traiteur_media_delete_admin ON public.traiteur_media
   FOR DELETE TO authenticated
-  USING (public.is_delikreol_admin());
+  USING (private.is_delikreol_admin());
 
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES (
@@ -120,31 +120,31 @@ ON CONFLICT (id) DO UPDATE SET
 DROP POLICY IF EXISTS traiteur_media_storage_select ON storage.objects;
 CREATE POLICY traiteur_media_storage_select ON storage.objects
   FOR SELECT TO authenticated
-  USING (bucket_id = 'traiteur-media' AND public.is_delikreol_admin());
+  USING (bucket_id = 'traiteur-media' AND private.is_delikreol_admin());
 
 DROP POLICY IF EXISTS traiteur_media_storage_insert ON storage.objects;
 CREATE POLICY traiteur_media_storage_insert ON storage.objects
   FOR INSERT TO authenticated
   WITH CHECK (
     bucket_id = 'traiteur-media'
-    AND public.is_delikreol_admin()
+    AND private.is_delikreol_admin()
     AND owner_id = auth.uid()::text
   );
 
 DROP POLICY IF EXISTS traiteur_media_storage_update ON storage.objects;
 CREATE POLICY traiteur_media_storage_update ON storage.objects
   FOR UPDATE TO authenticated
-  USING (bucket_id = 'traiteur-media' AND public.is_delikreol_admin())
+  USING (bucket_id = 'traiteur-media' AND private.is_delikreol_admin())
   WITH CHECK (
     bucket_id = 'traiteur-media'
-    AND public.is_delikreol_admin()
+    AND private.is_delikreol_admin()
     AND owner_id = auth.uid()::text
   );
 
 DROP POLICY IF EXISTS traiteur_media_storage_delete ON storage.objects;
 CREATE POLICY traiteur_media_storage_delete ON storage.objects
   FOR DELETE TO authenticated
-  USING (bucket_id = 'traiteur-media' AND public.is_delikreol_admin());
+  USING (bucket_id = 'traiteur-media' AND private.is_delikreol_admin());
 
 -- Rollback non destructif recommandé : supprimer seulement policies/index ajoutés.
 -- Ne pas supprimer la table ni les objets Storage sans sauvegarde et inventaire.
