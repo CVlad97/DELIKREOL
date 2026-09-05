@@ -66,20 +66,21 @@ export default function ClientAccountPage() {
     async function loadOrders() {
       if (!user) return;
 
+      setLoadError(null);
+
       if (isSupabaseConfigured && !isDemoMode) {
         try {
           const { data, error } = await supabase
             .from('orders')
             .select('id,order_number,status,total_amount,subtotal,commune,order_mode,created_at')
+            .eq('customer_id', user.id)
             .order('created_at', { ascending: false })
             .limit(20);
 
           if (error) throw error;
-          if (data && data.length > 0) {
-            setOrders(data as ClientOrder[]);
-            setSource('supabase');
-            return;
-          }
+          setOrders((data || []) as ClientOrder[]);
+          setSource('supabase');
+          return;
         } catch (err: any) {
           console.warn('[ClientAccount] Supabase orders unavailable, fallback local', err);
           setLoadError(err?.message || 'Commandes Supabase indisponibles. Affichage local.');
