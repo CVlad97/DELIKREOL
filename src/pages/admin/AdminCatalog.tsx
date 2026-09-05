@@ -207,8 +207,8 @@ export default function AdminCatalog() {
         </div>
       ) : (
         <div className="bg-card rounded-2xl border border-border/50 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="hidden overflow-x-auto md:block">
+            <table className="w-full min-w-[760px]">
               <thead>
                 <tr className="border-b border-border/50">
                   <th className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Produit</th>
@@ -264,6 +264,31 @@ export default function AdminCatalog() {
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="divide-y divide-border/30 md:hidden">
+            {filtered.map(p => (
+              <article key={p.id} className="space-y-3 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h2 className="truncate font-bold text-foreground">{p.name}</h2>
+                    <p className="mt-1 text-xs text-muted-foreground">{p.vendor?.business_name || 'Vendeur non renseigné'} · {p.category}</p>
+                  </div>
+                  <span className="shrink-0 font-black text-foreground">{Number(p.price).toFixed(2)} €</span>
+                </div>
+                {p.description && <p className="line-clamp-2 text-xs text-muted-foreground">{p.description}</p>}
+                <div className="flex items-center justify-between gap-3 text-xs">
+                  <span className={p.stock_quantity === 0 ? 'font-bold text-red-500' : 'text-muted-foreground'}>Stock : {p.stock_quantity ?? '—'}</span>
+                  <span className={p.is_available ? 'font-bold text-success' : 'font-bold text-muted-foreground'}>{p.is_available ? 'Disponible' : 'Indisponible'}</span>
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => toggleAvailability(p)} className="rounded-xl p-2 hover:bg-muted" aria-label={p.is_available ? 'Rendre indisponible' : 'Rendre disponible'}>
+                      {p.is_available ? <ToggleRight className="h-5 w-5 text-success" /> : <ToggleLeft className="h-5 w-5 text-muted-foreground" />}
+                    </button>
+                    <button onClick={() => openEdit(p)} className="rounded-xl p-2 hover:bg-muted" aria-label="Modifier le produit"><Edit3 className="h-4 w-4 text-muted-foreground" /></button>
+                    <button onClick={() => handleDelete(p)} className="rounded-xl p-2 hover:bg-red-50" aria-label="Supprimer le produit"><Trash2 className="h-4 w-4 text-red-400" /></button>
+                  </div>
+                </div>
+              </article>
+            ))}
           </div>
         </div>
       )}

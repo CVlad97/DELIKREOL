@@ -160,7 +160,7 @@ export function AdminParametres() {
  </div>
 
  <div className="mt-5 overflow-hidden rounded-2xl border border-primary/20">
- <div className="grid grid-cols-[1.4fr_.9fr_.8fr] bg-[#fff8ef] px-4 py-3 text-xs font-black uppercase tracking-[0.14em] text-stone-600">
+ <div className="hidden grid-cols-[1.4fr_.9fr_.8fr] bg-[#fff8ef] px-4 py-3 text-xs font-black uppercase tracking-[0.14em] text-stone-600 md:grid">
  <span>Compte</span>
  <span>Rôle actuel</span>
  <span>Activation</span>

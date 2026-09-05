@@ -155,7 +155,7 @@ export default function AdminPartnersApplications() {
  </div>
 
  {/* Stats cards */}
- <div className="grid grid-cols-4 gap-4 mb-8">
+ <div className="grid grid-cols-2 gap-4 mb-8 lg:grid-cols-4">
  <div className="card">
  <div className="text-sm text-muted-foreground mb-1">Total</div>
  <div className="text-3xl font-bold text-foreground">{stats.total}</div>

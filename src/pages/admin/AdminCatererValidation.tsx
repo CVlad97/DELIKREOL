@@ -246,7 +246,7 @@ export default function AdminCatererValidation() {
  </div>
 
  {/* Stats cards */}
- <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+ <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
  <div className="bg-card border border-border rounded-xl p-4">
  <div className="text-xs text-muted-foreground mb-1">Total</div>
  <div className="text-2xl font-bold text-foreground">{stats.total}</div>
