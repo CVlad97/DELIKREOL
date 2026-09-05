@@ -33,7 +33,7 @@ const CataloguePage = lazy(() => import('./pages/new/CataloguePage'));
 const ProductDetailPage = lazy(() => import('./pages/new/ProductDetailPage'));
 const TraiteursListPage = lazy(() => import('./pages/new/TraiteursListPage'));
 const TraiteurDetailPage = lazy(() => import('./pages/new/TraiteurDetailPage'));
-const AccountPage = lazy(() => import('./pages/new/AccountPage'));
+const AccountPage = lazy(() => import('./pages/new/ClientAccountPage'));
 const CartPage = lazy(() => import('./pages/new/CartPage'));
 const DevisPage = lazy(() => import('./pages/new/DevisPage'));
 const DevenirPartenairePage = lazy(() => import('./pages/new/DevenirPartenairePage'));
