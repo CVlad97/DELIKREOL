@@ -59,14 +59,25 @@ function parseItems(raw: string) {
  .filter(Boolean)
  .map((line) => {
  const [namePart, quantityPart, pricePart] = line.split(';').map((value) => value?.trim());
- const quantity = Math.max(1, Number(quantityPart || 1));
- const unitPrice = Math.max(0, Number((pricePart ||'0').replace(',','.')));
- return { name: namePart ||'Article', quantity, unit_price: unitPrice };
- });
+    const quantity = Number(quantityPart || 1);
+    const unitPrice = Number((pricePart ||'0').replace(',','.'));
+    if (!namePart || !Number.isFinite(quantity) || !Number.isFinite(unitPrice) || quantity <= 0 || unitPrice < 0) {
+      return null;
+    }
+    return { name: namePart, quantity: Math.floor(quantity), unit_price: unitPrice };
+ }).filter((item): item is { name: string; quantity: number; unit_price: number } => item !== null);
 }
 
 function saveTerminalDraft(draft: TerminalDraft) {
- const localOrders = JSON.parse(localStorage.getItem('delikreol_local_orders_v1') ||'[]');
+ const readArray = (key: string) => {
+  try {
+   const parsed = JSON.parse(localStorage.getItem(key) || '[]');
+   return Array.isArray(parsed) ? parsed : [];
+  } catch {
+   return [];
+  }
+ };
+ const localOrders = readArray('delikreol_local_orders_v1');
  localOrders.push({
  ...draft,
  id: draft.order_number,
@@ -77,7 +88,7 @@ function saveTerminalDraft(draft: TerminalDraft) {
  });
  localStorage.setItem('delikreol_local_orders_v1', JSON.stringify(localOrders));
 
- const terminalOrders = JSON.parse(localStorage.getItem('delikreol_partner_terminal_orders_v1') ||'[]');
+ const terminalOrders = readArray('delikreol_partner_terminal_orders_v1');
  terminalOrders.push(draft);
  localStorage.setItem('delikreol_partner_terminal_orders_v1', JSON.stringify(terminalOrders));
 }
@@ -92,12 +103,18 @@ export default function PartnerTerminalPage() {
  const [externalPaymentReference, setExternalPaymentReference] = useState('');
  const [paymentNote, setPaymentNote] = useState('');
  const [createdOrder, setCreatedOrder] = useState<TerminalDraft | null>(null);
+ const [formError, setFormError] = useState('');
 
  const items = useMemo(() => parseItems(rawItems), [rawItems]);
  const total = useMemo(() => items.reduce((sum, item) => sum + item.quantity * item.unit_price, 0), [items]);
 
  const createDraft = () => {
- const orderNumber = generateOrderId();
+  if (items.length === 0 || !Number.isFinite(total) || total <= 0) {
+   setFormError('Ajoutez au moins un article valide : nom ; quantité entière ; prix positif.');
+   return;
+  }
+  setFormError('');
+  const orderNumber = generateOrderId();
  const draft: TerminalDraft = {
  order_number: orderNumber,
  partner_name: partnerName,
@@ -169,6 +186,7 @@ export default function PartnerTerminalPage() {
  <label className="block"><span className="text-sm font-black">Référence paiement externe</span><input value={externalPaymentReference} onChange={(event) => setExternalPaymentReference(event.target.value)} placeholder="Réf. SumUp / virement / espèces" className="mt-2 w-full rounded-2xl border border-primary/20 bg-[#fffaf3] px-4 py-3 text-sm" /></label>
  </div>
  <label className="mt-4 block"><span className="text-sm font-black">Articles — format : nom; quantité; prix</span><textarea value={rawItems} onChange={(event) => setRawItems(event.target.value)} rows={5} className="mt-2 w-full rounded-2xl border border-primary/20 bg-[#fffaf3] px-4 py-3 font-mono text-sm" /></label>
+ {formError && <p role="alert" className="mt-2 rounded-xl bg-red-50 px-3 py-2 text-sm font-bold text-red-700">{formError}</p>}
  <label className="mt-4 block"><span className="text-sm font-black">Note paiement</span><textarea value={paymentNote} onChange={(event) => setPaymentNote(event.target.value)} rows={2} placeholder="Statut payé à confirmer manuellement." className="mt-2 w-full rounded-2xl border border-primary/20 bg-[#fffaf3] px-4 py-3 text-sm" /></label>
 
  <div className="mt-5 grid gap-3 sm:grid-cols-4">
