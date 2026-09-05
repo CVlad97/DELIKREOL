@@ -8,6 +8,7 @@ import {
 import { mockProducts } from'../../data/mockCatalog';
 import { traiteurSpaces } from'../../data/traiteurs';
 import { PARTNER_PLANS } from'../../services/pricing';
+import { supabase } from'../../lib/supabase';
 
 function loadFromStorage(key: string): any[] {
  try { return JSON.parse(localStorage.getItem(key) ||'[]'); }
@@ -55,19 +56,13 @@ function LatestApplications() {
  );
 }
 
-/* ─── Données démo réalistes ─── */
-const DEMO_STATS = {
- ordersToday: 14,
- revenueMonth: 4_280.50,
- activePartners: 8,
- ongoingDeliveries: 6,
-};
-
 export function AdminDashboard() {
  const [stats, setStats] = useState({
  orders: 0, cateringRequests: 0, partnerApplications: 0,
  driverApplications: 0, relayApplications: 0, leads: 0,
  });
+ const [liveStats, setLiveStats] = useState({ ordersToday: 0, revenueMonth: 0, activePartners: 0, ongoingDeliveries: 0 });
+ const [catalogStats, setCatalogStats] = useState({ total: mockProducts.length, withoutDescription: 0, withoutPrice: 0 });
 
  useEffect(() => {
  document.title ='Dashboard Admin — DeliKreol';
@@ -81,12 +76,44 @@ export function AdminDashboard() {
  });
  }, []);
 
+ useEffect(() => {
+   const loadLiveStats = async () => {
+     const now = new Date();
+     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+     const [todayRes, monthRes, vendorsRes, deliveriesRes, productsRes] = await Promise.all([
+       supabase.from('orders').select('id').gte('created_at', startOfDay),
+       supabase.from('orders').select('total_amount').gte('created_at', startOfMonth),
+       supabase.from('vendors').select('id').eq('is_active', true),
+       supabase.from('deliveries').select('id').in('status', ['assigned', 'accepted', 'in_progress', 'picked_up', 'en_route']),
+       supabase.from('products').select('id, description, price'),
+     ]);
+     const localOrders = loadFromStorage('delikreol_orders');
+     const revenue = (monthRes.data || []).reduce((sum, row) => sum + Number((row as { total_amount?: number }).total_amount || 0), 0);
+     const catalog = productsRes.data || [];
+     setLiveStats({
+       ordersToday: todayRes.error ? localOrders.length : (todayRes.data || []).length,
+       revenueMonth: monthRes.error ? 0 : revenue,
+       activePartners: vendorsRes.error ? 0 : (vendorsRes.data || []).length,
+       ongoingDeliveries: deliveriesRes.error ? 0 : (deliveriesRes.data || []).length,
+     });
+     if (!productsRes.error && catalog.length > 0) {
+       setCatalogStats({
+         total: catalog.length,
+         withoutDescription: catalog.filter((p) => !p.description || p.description.trim().length < 10).length,
+         withoutPrice: catalog.filter((p) => p.price == null || Number(p.price) <= 0).length,
+       });
+     }
+   };
+   void loadLiveStats();
+ }, []);
+
  // Audit live depuis les données réelles
- const productsSansDescription = mockProducts.filter(p => !p.description || p.description.includes('confirmer')).length;
- const productsSansPrix = mockProducts.filter(p => !p.price || p.price === 0).length;
+ const productsSansDescription = catalogStats.withoutDescription;
+ const productsSansPrix = catalogStats.withoutPrice;
  const partenairesActifs = traiteurSpaces.filter(t => t.status ==='public confirmé').length;
  const partenairesAVerifier = traiteurSpaces.filter(t => t.status !=='public confirmé').length;
- const totalProduits = mockProducts.length;
+ const totalProduits = catalogStats.total;
 
  const cards = [
  { label:'Commandes', value: stats.orders, icon: ShoppingCart, color:'text-blue-600 bg-blue-50', link:'/admin/commandes' },
@@ -97,12 +124,12 @@ export function AdminDashboard() {
  { label:'Leads', value: stats.leads, icon: Target, color:'text-indigo-600 bg-indigo-50', link:'/admin/leads' },
  ];
 
- /* Cartes stats"live" (démo réalistes) */
+ /* Cartes alimentées par les données disponibles */
  const quickCards = [
- { label:'Commandes aujourd\'hui', value: DEMO_STATS.ordersToday, icon: CalendarDays, color:'text-blue-600 bg-blue-50' },
- { label:'Revenus du mois', value: `${DEMO_STATS.revenueMonth.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €`, icon: DollarSign, color:'text-success bg-success/10' },
- { label:'Partenaires actifs', value: DEMO_STATS.activePartners, icon: Users, color:'text-primary bg-primary/[0.08]' },
- { label:'Livraisons en cours', value: DEMO_STATS.ongoingDeliveries, icon: Bike, color:'text-purple-600 bg-purple-50' },
+ { label:'Commandes aujourd\'hui', value: liveStats.ordersToday, icon: CalendarDays, color:'text-blue-600 bg-blue-50' },
+ { label:'Revenus du mois', value: `${liveStats.revenueMonth.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €`, icon: DollarSign, color:'text-success bg-success/10' },
+ { label:'Partenaires actifs', value: liveStats.activePartners, icon: Users, color:'text-primary bg-primary/[0.08]' },
+ { label:'Livraisons en cours', value: liveStats.ongoingDeliveries, icon: Bike, color:'text-purple-600 bg-purple-50' },
  ];
 
  return (
