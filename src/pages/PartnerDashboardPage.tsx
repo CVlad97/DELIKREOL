@@ -26,10 +26,10 @@ const statusLabels: Record<PartnerDocumentStatus, string> = {
 const statusStyles: Record<PartnerDocumentStatus, string> = {
  missing:'bg-slate-800 text-slate-300 border-slate-700',
  uploaded:'bg-blue-500/10 text-blue-200 border-blue-500/30',
- under_review:'bg-muted0/10 text-amber-200 border-amber-500/30',
- approved:'bg-success/[0.15]0/10 text-emerald-200 border-emerald-500/30',
+ under_review:'bg-amber-500/10 text-amber-200 border-amber-500/30',
+ approved:'bg-success/10 text-emerald-200 border-emerald-500/30',
  rejected:'bg-red-500/10 text-red-200 border-red-500/30',
- expired:'bg-primary/[0.05]0/10 text-primary/60 border-primary/30',
+ expired:'bg-primary/5 text-primary/60 border-primary/30',
 };
 
 function isPartnerRole(role: unknown): role is PartnerRole {
@@ -399,3 +399,4 @@ export function PartnerDashboardPage() {
  </div>
  );
 }
+
