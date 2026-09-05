@@ -27,8 +27,8 @@ create policy "orders_customer_select"
   using (
     (customer_id is not null and customer_id = (select auth.uid()))
     or (
-      client_phone is not null
-      and client_phone = coalesce(
+      customer_phone is not null
+      and customer_phone = coalesce(
         (select p.phone from public.profiles p where p.id = (select auth.uid()) limit 1),
         ''
       )
