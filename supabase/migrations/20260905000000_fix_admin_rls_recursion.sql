@@ -18,7 +18,7 @@ create policy "orders_admin_select"
   on public.orders
   for select
   to authenticated
-  using (public.is_delikreol_admin());
+  using (private.is_delikreol_admin());
 
 create policy "orders_customer_select"
   on public.orders
