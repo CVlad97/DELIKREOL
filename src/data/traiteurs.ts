@@ -5,6 +5,7 @@ import { partnerProfiles, type PartnerProfile } from './partnerProfiles';
 import { additionalPartnerProfiles } from './additionalPartnerProfiles';
 import { driveReimportGalleries, driveReimportPortraits } from './driveReimportAssets';
 import { sanitizeSocialLinks, type SocialLinkSet } from '../utils/socialLinks';
+import { resolveTraiteurCoords } from '../services/partnerGeo';
 
 export type TraiteurMenuItem = {
   name: string;
@@ -209,6 +210,7 @@ function buildSpace(profile: PartnerProfile, gradient: string, accent: string, s
   const startingAt = formatStartPrice(menuItems);
   const averageTicket = formatAverageTicket(menuItems);
   const commune = profile.zone.split('—')[0].split('–')[0].trim();
+  const coordinates = resolveTraiteurCoords(profile.address, commune);
 
   return {
     slug: normalizeSpaceSlug(profile.name),
@@ -217,6 +219,8 @@ function buildSpace(profile: PartnerProfile, gradient: string, accent: string, s
     zone: profile.zone,
     commune,
     address: profile.address,
+    latitude: coordinates?.latitude,
+    longitude: coordinates?.longitude,
     offer: profile.offer,
     description: profile.story,
     story: profile.story,
