@@ -1,0 +1,133 @@
+-- Fix production checkout: order_items.subtotal is GENERATED ALWAYS.
+-- The atomic checkout function must let PostgreSQL compute it.
+
+create or replace function public.create_checkout_order_atomic(
+  target_idempotency_key text,
+  order_payload jsonb,
+  items_payload jsonb,
+  event_payload jsonb
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  existing_order public.orders%rowtype;
+  inserted_order public.orders%rowtype;
+  item_record jsonb;
+  advisory_key bigint;
+begin
+  if target_idempotency_key is null or length(trim(target_idempotency_key)) < 16 then
+    raise exception 'idempotency_key required' using errcode = '22023';
+  end if;
+  if jsonb_typeof(items_payload) <> 'array' or jsonb_array_length(items_payload) = 0 then
+    raise exception 'items_payload required' using errcode = '22023';
+  end if;
+
+  advisory_key := ('x' || substr(md5(target_idempotency_key), 1, 16))::bit(64)::bigint;
+  perform pg_advisory_xact_lock(advisory_key);
+
+  select * into existing_order
+  from public.orders
+  where idempotency_key = target_idempotency_key
+  order by created_at asc
+  limit 1;
+
+  if found then
+    return jsonb_build_object(
+      'existing', true,
+      'order', jsonb_build_object(
+        'id', existing_order.id,
+        'order_number', existing_order.order_number,
+        'tracking_token', existing_order.tracking_token,
+        'status', existing_order.status,
+        'payment_status', existing_order.payment_status,
+        'total_cents', existing_order.total_cents
+      )
+    );
+  end if;
+
+  insert into public.orders (
+    order_number, idempotency_key, customer_id, customer_name, customer_phone, customer_email,
+    customer_commune, order_mode, subtotal, delivery_fee, delivery_fee_cents, sub_total_cents,
+    total_cents, total_amount, delivery_type, notes, creneaux, address, source, status,
+    delivery_status, payment_status, payment_provider, payment_method, payment_reference,
+    payment_external_id, payment_amount, payment_currency, payment_proof_url, tracking_token
+  ) values (
+    order_payload->>'order_number',
+    target_idempotency_key,
+    nullif(order_payload->>'customer_id', '')::uuid,
+    nullif(order_payload->>'customer_name', ''),
+    order_payload->>'customer_phone',
+    nullif(order_payload->>'customer_email', ''),
+    nullif(order_payload->>'customer_commune', ''),
+    order_payload->>'order_mode',
+    (order_payload->>'subtotal')::numeric,
+    (order_payload->>'delivery_fee')::numeric,
+    (order_payload->>'delivery_fee_cents')::integer,
+    (order_payload->>'sub_total_cents')::integer,
+    (order_payload->>'total_cents')::integer,
+    (order_payload->>'total_amount')::numeric,
+    order_payload->>'delivery_type',
+    nullif(order_payload->>'notes', ''),
+    nullif(order_payload->>'creneaux', ''),
+    nullif(order_payload->>'address', ''),
+    order_payload->>'source',
+    coalesce(order_payload->>'status', 'pending'),
+    coalesce(order_payload->>'delivery_status', 'pending'),
+    coalesce(order_payload->>'payment_status', 'pending'),
+    coalesce(order_payload->>'payment_provider', 'qonto_transfer'),
+    coalesce(order_payload->>'payment_method', 'manual'),
+    nullif(order_payload->>'payment_reference', ''),
+    nullif(order_payload->>'payment_external_id', ''),
+    (order_payload->>'payment_amount')::numeric,
+    coalesce(order_payload->>'payment_currency', 'EUR'),
+    nullif(order_payload->>'payment_proof_url', ''),
+    order_payload->>'tracking_token'
+  )
+  returning * into inserted_order;
+
+  for item_record in select * from jsonb_array_elements(items_payload)
+  loop
+    insert into public.order_items (
+      order_id, product_id, vendor_id, product_name, vendor_name,
+      unit_price, quantity, total, vendor_commission
+    ) values (
+      inserted_order.id,
+      (item_record->>'product_id')::uuid,
+      (item_record->>'vendor_id')::uuid,
+      item_record->>'product_name',
+      item_record->>'vendor_name',
+      (item_record->>'unit_price')::numeric,
+      (item_record->>'quantity')::integer,
+      (item_record->>'total')::numeric,
+      (item_record->>'vendor_commission')::numeric
+    );
+  end loop;
+
+  insert into public.order_events (order_id, event_type, payload)
+  values (
+    inserted_order.id,
+    coalesce(event_payload->>'event_type', 'public_order_created'),
+    coalesce(event_payload->'payload', '{}'::jsonb)
+  );
+
+  return jsonb_build_object(
+    'existing', false,
+    'order', jsonb_build_object(
+      'id', inserted_order.id,
+      'order_number', inserted_order.order_number,
+      'tracking_token', inserted_order.tracking_token,
+      'status', inserted_order.status,
+      'payment_status', inserted_order.payment_status,
+      'total_cents', inserted_order.total_cents
+    )
+  );
+end;
+$$;
+
+revoke all on function public.create_checkout_order_atomic(text, jsonb, jsonb, jsonb)
+from public, anon, authenticated;
+grant execute on function public.create_checkout_order_atomic(text, jsonb, jsonb, jsonb)
+to service_role;
