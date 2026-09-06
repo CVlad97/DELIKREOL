@@ -55,6 +55,8 @@ const CatererSignupPage = lazy(() => import('./pages/new/CatererSignupPage'));
 const PartnerAccessPage = lazy(() => import('./pages/new/PartnerAccessPage'));
 const PartnerTerminalPage = lazy(() => import('./pages/new/PartnerTerminalPage'));
 const ReviewPage = lazy(() => import('./pages/new/ReviewPage'));
+const JobsPage = lazy(() => import('./pages/Jobs'));
+const OffresCashPage = lazy(() => import('./pages/OffresCash'));
 const PartnerDashboardPage = lazy(async () => {
   const module = await import('./pages/PartnerDashboardPage');
   return { default: module.PartnerDashboardPage };
@@ -187,6 +189,8 @@ export function AppRouter() {
                   <Route path="livraison" element={<LivraisonPage />} />
                   <Route path="contact" element={<ContactPage />} />
                   <Route path="feedback" element={<FeedbackPage />} />
+                  <Route path="jobs" element={<JobsPage />} />
+                  <Route path="offres-cash" element={<OffresCashPage />} />
                   <Route path="connexion" element={<LoginPage />} />
                   <Route path="auth/callback" element={<AuthCallbackPage />} />
                   <Route path="inscription-traiteur" element={<CatererSignupPage />} />

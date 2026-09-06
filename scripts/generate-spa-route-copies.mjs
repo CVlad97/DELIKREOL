@@ -22,6 +22,8 @@ const routes = [
   'livraison',
   'contact',
   'feedback',
+  'jobs',
+  'offres-cash',
   'connexion',
   'auth/callback',
   'inscription-traiteur',
