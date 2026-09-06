@@ -62,10 +62,10 @@ export function resolveTraiteurCoords(
   zone?: string,
   commune?: string
 ): { latitude: number; longitude: number } | null {
-  const query = commune || zone || '';
-  const coords = getCommuneCoordinates(query);
-  if (coords) return { latitude: coords.lat, longitude: coords.lng };
+  for (const query of [commune, zone].filter((value): value is string => Boolean(value))) {
+    const coords = getCommuneCoordinates(query);
+    if (coords) return { latitude: coords.lat, longitude: coords.lng };
+  }
 
-  // Add small random offset for variety if same commune
   return null;
 }
