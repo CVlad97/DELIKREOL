@@ -11,6 +11,8 @@ const ROUTES_200 = [
   'panier',
   'statut-commande',
   'pro',
+  'jobs',
+  'offres-cash',
   'devenir-livreur',
   'devenir-point-relais',
   'points-relais',

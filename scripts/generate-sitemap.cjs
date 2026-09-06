@@ -2,7 +2,6 @@
 /**
  * Générateur de sitemap.xml pour DeliKreol.
  * Liste blanche des routes publiques indexables.
- * Les pages utilitaires (panier, connexion, feedback, compte, admin) sont exclues.
  */
 const fs = require('fs');
 const path = require('path');
@@ -14,6 +13,8 @@ const publicRoutes = [
   { path: '/', priority: '1.0', changefreq: 'weekly', lastmod: TODAY },
   { path: '/catalogue', priority: '0.9', changefreq: 'daily', lastmod: TODAY },
   { path: '/traiteurs', priority: '0.8', changefreq: 'weekly', lastmod: TODAY },
+  { path: '/offres-cash', priority: '0.7', changefreq: 'weekly', lastmod: TODAY },
+  { path: '/jobs', priority: '0.7', changefreq: 'weekly', lastmod: TODAY },
   { path: '/devis', priority: '0.7', changefreq: 'weekly', lastmod: TODAY },
   { path: '/devenir-partenaire', priority: '0.6', changefreq: 'monthly', lastmod: TODAY },
   { path: '/devenir-livreur', priority: '0.6', changefreq: 'monthly', lastmod: TODAY },

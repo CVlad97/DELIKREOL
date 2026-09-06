@@ -9,6 +9,8 @@ const CONTACT_EMAIL = 'contact@delikreol.com';
 const quickLinks = [
   { label: 'Catalogue', to: '/catalogue' },
   { label: 'Traiteurs', to: '/traiteurs' },
+  { label: 'Offres et services', to: '/offres-cash' },
+  { label: 'Emplois et candidatures', to: '/jobs' },
   { label: 'Devis traiteur', to: '/devis' },
   { label: 'Devenir partenaire', to: '/devenir-partenaire' },
   { label: 'Devenir livreur', to: '/devenir-livreur' },
@@ -47,162 +49,69 @@ const socialLinks = [
 export function Footer() {
   return (
     <footer className="relative mt-auto border-t border-border/40">
-      {/* Madras strip */}
       <div className="madras-strip" />
-
       <div className="bg-gradient-to-b from-white to-muted/40">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
           <div className="mb-12 rounded-[2rem] bg-gradient-to-br from-foreground via-accent to-primary p-6 text-white shadow-[0_28px_80px_-52px_rgba(42,25,15,0.8)] md:p-8">
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.22em] text-secondary">
-                  DeliKreol opérationnel
-                </p>
-                <h2 className="mt-2 text-2xl font-black tracking-tight md:text-3xl">
-                  Commande client, demande pro ou partenariat.
-                </h2>
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-secondary">DeliKreol opérationnel</p>
+                <h2 className="mt-2 text-2xl font-black tracking-tight md:text-3xl">Commande client, demande pro ou partenariat.</h2>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">
-                <Link
-                  to="/catalogue"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-black text-primary-foreground transition-all hover:bg-primary/90"
-                >
-                  Catalogue
-                  <ArrowRight className="h-4 w-4" />
+                <Link to="/catalogue" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-black text-primary-foreground transition-all hover:bg-primary/90">
+                  Catalogue <ArrowRight className="h-4 w-4" />
                 </Link>
-                <Link
-                  to="/devis"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-black text-white transition-all hover:bg-white/20"
-                >
-                  Demande pro
-                  <ArrowRight className="h-4 w-4" />
+                <Link to="/devis" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-black text-white transition-all hover:bg-white/20">
+                  Demande pro <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
-            {/* Brand */}
             <div className="sm:col-span-2 lg:col-span-1">
               <Link to="/" className="inline-flex items-center gap-2 group">
-                <img
-                  src={`${import.meta.env.BASE_URL || '/'}branding/logo-mark.svg`}
-                  alt="Logo DeliKreol"
-                  className="brand-logo-frame h-10 w-10 rounded-2xl object-contain p-1.5 transition-transform group-hover:scale-105"
-                />
-                <span className="text-lg font-bold tracking-tight text-foreground">
-                  Deli<span className="text-primary">Kreol</span>
-                </span>
+                <img src={`${import.meta.env.BASE_URL || '/'}branding/logo-mark.svg`} alt="Logo DeliKreol" className="brand-logo-frame h-10 w-10 rounded-2xl object-contain p-1.5 transition-transform group-hover:scale-105" />
+                <span className="text-lg font-bold tracking-tight text-foreground">Deli<span className="text-primary">Kreol</span></span>
               </Link>
-              <p className="mt-3 text-sm text-muted-foreground leading-relaxed max-w-xs">
-                Le goût local, simple à commander.
-              </p>
-
-              {/* Social */}
+              <p className="mt-3 text-sm text-muted-foreground leading-relaxed max-w-xs">Le goût local, simple à commander.</p>
               <div className="mt-5 flex items-center gap-3">
                 {socialLinks.map((social) => (
-                  <a
-                    key={social.label}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-xl bg-card border border-border/60 px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
-                    aria-label={social.label}
-                  >
-                    {social.icon}
-                    <span>{social.label}</span>
+                  <a key={social.label} href={social.href} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-card border border-border/60 px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-primary hover:border-primary/30 transition-all" aria-label={social.label}>
+                    {social.icon}<span>{social.label}</span>
                   </a>
                 ))}
               </div>
             </div>
-
-            {/* Quick links */}
             <div>
-              <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4">
-                Liens rapides
-              </h3>
+              <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4">Liens rapides</h3>
               <ul className="space-y-2.5">
                 {quickLinks.map((link) => (
-                  <li key={link.to}>
-                    <Link
-                      to={link.to}
-                      className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
+                  <li key={link.to}><Link to={link.to} className="text-sm text-muted-foreground hover:text-primary transition-colors">{link.label}</Link></li>
                 ))}
               </ul>
             </div>
-
-            {/* Contact */}
             <div>
-              <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4">
-                Contact
-              </h3>
+              <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4">Contact</h3>
               <ul className="space-y-3">
-                <li>
-                  <a
-                    href={WHATSAPP_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2.5 text-sm text-muted-foreground hover:text-accent transition-colors group"
-                  >
-                    <MessageCircle className="w-4 h-4 text-accent group-hover:scale-110 transition-transform" />
-                    {WHATSAPP_DISPLAY}
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href={`mailto:${CONTACT_EMAIL}`}
-                    className="flex items-center gap-2.5 text-sm text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    <Phone className="w-4 h-4" />
-                    {CONTACT_EMAIL}
-                  </a>
-                </li>
-                <li className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                  <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
-                  <span>Martinique, Antilles françaises</span>
-                </li>
+                <li><a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 text-sm text-muted-foreground hover:text-accent transition-colors group"><MessageCircle className="w-4 h-4 text-accent group-hover:scale-110 transition-transform" />{WHATSAPP_DISPLAY}</a></li>
+                <li><a href={`mailto:${CONTACT_EMAIL}`} className="flex items-center gap-2.5 text-sm text-muted-foreground hover:text-primary transition-colors"><Phone className="w-4 h-4" />{CONTACT_EMAIL}</a></li>
+                <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><MapPin className="w-4 h-4 mt-0.5 shrink-0" /><span>Martinique, Antilles françaises</span></li>
               </ul>
             </div>
-
-            {/* Legal */}
             <div>
-              <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4">
-                Informations légales
-              </h3>
+              <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4">Informations légales</h3>
               <ul className="space-y-2.5">
                 {legalLinks.map((link) => (
-                  <li key={link.to}>
-                    <Link
-                      to={link.to}
-                      className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
+                  <li key={link.to}><Link to={link.to} className="text-sm text-muted-foreground hover:text-primary transition-colors">{link.label}</Link></li>
                 ))}
-                <li>
-                  <Link
-                    to="/livraison"
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    Infos livraison
-                  </Link>
-                </li>
+                <li><Link to="/livraison" className="text-sm text-muted-foreground hover:text-primary transition-colors">Infos livraison</Link></li>
               </ul>
             </div>
           </div>
-
-          {/* Bottom bar */}
           <div className="mt-12 pt-6 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-muted-foreground">
-              © 2026 DeliKreol — Martinique. Tous droits réservés. Propriété exclusive.
-            </p>
-            <p className="text-xs text-muted-foreground/60">
-              Fait avec 🧡 en Martinique
-            </p>
+            <p className="text-xs text-muted-foreground">© 2026 DeliKreol — Martinique. Tous droits réservés. Propriété exclusive.</p>
+            <p className="text-xs text-muted-foreground/60">Fait avec 🧡 en Martinique</p>
           </div>
         </div>
       </div>
