@@ -231,6 +231,21 @@ export function PartnerDashboardPage() {
  </div>
  </section>
 
+ <section className="mt-6 overflow-hidden rounded-3xl border border-primary/20 bg-white p-5 shadow-sm">
+ <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+ <div>
+ <p className="text-xs font-black uppercase tracking-[0.2em] text-primary">Ma vitrine</p>
+ <h2 className="mt-1 text-xl font-black">Profil, photos et catalogue</h2>
+ <p className="mt-1 text-sm leading-6 text-[#6f5b4b]">
+ Modifiez simplement votre présentation et vos produits. Chaque changement est contrôlé avant publication.
+ </p>
+ </div>
+ <a href="/catalogue-partenaire" className="rounded-2xl bg-primary px-5 py-3 text-center text-sm font-black text-white">
+ Ouvrir mon studio
+ </a>
+ </div>
+ </section>
+
  <section className="mt-6 rounded-3xl border border-success/20 bg-success/[0.15] p-5">
  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
  <div className="flex gap-3">
