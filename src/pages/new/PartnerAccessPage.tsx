@@ -100,7 +100,7 @@ export default function PartnerAccessPage() {
         commune: form.commune || null,
         description: form.description || null,
         horaires: form.horaires || null,
-        modes: form.modes,
+        modes: form.modes.join(', ') || null,
         plats: form.plats || null,
         prix: form.prix || null,
         compositions: form.compositions || null,
