@@ -11,6 +11,8 @@ import { CartProvider } from './contexts/CartContext';
 import { ToastProvider } from './contexts/ToastContext';
 
 const HomePage = lazy(() => import('./pages/new/HomePage'));
+const JobsPage = lazy(() => import('./pages/Jobs'));
+const OffresCashPage = lazy(() => import('./pages/OffresCash'));
 const ProSpacePage = lazy(async () => {
   const module = await import('./pages/ProSpacePage');
   return { default: module.ProSpacePage };
@@ -176,6 +178,8 @@ export function AppRouter() {
                   <Route path="panier" element={<CartPage />} />
                   <Route path="compte" element={<AccountPage />} />
                   <Route path="devis" element={<DevisPage />} />
+                  <Route path="jobs" element={<JobsPage />} />
+                  <Route path="offres-cash" element={<OffresCashPage />} />
                   <Route path="devenir-partenaire" element={<DevenirPartenairePage />} />
                   <Route path="marches-publics" element={<MarchesPublicsPage />} />
                   <Route path="comptabilite" element={<ComptabilitePage />} />
