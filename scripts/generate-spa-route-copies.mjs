@@ -6,6 +6,8 @@ const distDir = join(process.cwd(), 'dist');
 const indexPath = join(distDir, 'index.html');
 
 const routes = [
+  'jobs',
+  'offres-cash',
   'catalogue',
   'traiteurs',
   'panier',
