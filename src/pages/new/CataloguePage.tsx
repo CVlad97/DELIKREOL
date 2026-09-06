@@ -384,6 +384,11 @@ export default function CataloguePage() {
               {filteredProducts.map((product) => {
                 const vendorData = vendorMap.get(normalizeVendor(product.vendor));
                 const tags: HealthTag[] = product.healthTags || vendorData?.healthTags || [];
+                const vendorLatitude = vendorData?.space.latitude;
+                const vendorLongitude = vendorData?.space.longitude;
+                const distanceKm = position && vendorLatitude != null && vendorLongitude != null
+                  ? calculateDistanceKm(position, { latitude: vendorLatitude, longitude: vendorLongitude })
+                  : null;
 
                 return (
                   <article key={product.id} className="group relative flex min-w-0 flex-col overflow-hidden rounded-3xl border border-border bg-white shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg" data-product-card={product.id}>
@@ -414,6 +419,7 @@ export default function CataloguePage() {
                       <h3 className="mt-1 line-clamp-2 min-h-[3rem] text-lg font-black leading-snug">{product.name}</h3>
                       <p className="mt-1 text-sm font-semibold text-muted-foreground">{product.vendor}</p>
                       {product.zone && <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3.5 w-3.5" /> {product.zone}</p>}
+                      {distanceKm != null && <p className="mt-1 flex items-center gap-1 text-xs font-bold text-primary"><LocateFixed className="h-3.5 w-3.5" /> À environ {distanceKm.toFixed(1).replace('.', ',')} km de vous</p>}
 
                       {tags.length > 0 && (
                         <div className="mt-3 flex flex-wrap gap-1.5">
