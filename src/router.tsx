@@ -52,7 +52,8 @@ const NotFoundPage = lazy(() => import('./pages/new/NotFoundPage'));
 const ContactPage = lazy(() => import('./pages/new/ContactPage'));
 const FeedbackPage = lazy(() => import('./pages/new/FeedbackPage'));
 const CatererSignupPage = lazy(() => import('./pages/new/CatererSignupPage'));
-const PartnerAccessPage = lazy(() => import('./pages/new/PartnerAccessPage'));\nconst PartnerCatalogPage = lazy(() => import('./pages/new/PartnerCatalogPage'));
+const PartnerAccessPage = lazy(() => import('./pages/new/PartnerAccessPage'));
+const PartnerCatalogPage = lazy(() => import('./pages/new/PartnerCatalogPage'));
 const PartnerTerminalPage = lazy(() => import('./pages/new/PartnerTerminalPage'));
 const ReviewPage = lazy(() => import('./pages/new/ReviewPage'));
 const JobsPage = lazy(() => import('./pages/Jobs'));
@@ -198,7 +199,8 @@ export function AppRouter() {
                   <Route path="partenaires-plateforme" element={<ProPartnerPlatformPage />} />
                   <Route path="statut-commande" element={<OrderStatusPage />} />
                   <Route path="carte" element={<DiscoveryMapPage />} />
-                  <Route path="partenaire" element={<PartnerAccessPage />} />\n                   <Route path="catalogue-partenaire" element={<PartnerCatalogPage />} />
+                  <Route path="partenaire" element={<PartnerAccessPage />} />
+                  <Route path="catalogue-partenaire" element={<PartnerCatalogPage />} />
                   <Route path="espace-partenaire" element={<PartnerWrapper />} />
                   <Route path="espace-livreur" element={<PartnerWrapper />} />
                   <Route path="partner-documents" element={<PartnerWrapper />} />
