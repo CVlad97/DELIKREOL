@@ -39,7 +39,7 @@ export function ProtectedPartnerRoute({ children }: { children: ReactNode }) {
  <h1 className="mt-2 text-2xl font-black">Accès partenaire à activer</h1>
  <p className="mt-3 text-sm leading-6 text-stone-600">
  Votre compte existe, mais il n’est pas encore rattaché à un rôle traiteur, livreur ou point relais.
- L’admin doit passer votre profil en <strong>vendor</strong>, <strong>driver</strong> ou <strong>relay_host</strong>.
+ Si votre email confirmé correspond à une fiche traiteur, vous pouvez rattacher votre compte automatiquement et en toute sécurité.
  </p>
  </div>
  </div>
@@ -47,10 +47,10 @@ export function ProtectedPartnerRoute({ children }: { children: ReactNode }) {
  <div className="mt-6 rounded-2xl border border-success/20 bg-success/[0.15] p-4 text-sm leading-6 text-success">
  <div className="flex items-center gap-2 font-black">
  <ShieldCheck className="h-5 w-5" />
- À faire côté admin
+ Activation sécurisée
  </div>
  <p className="mt-2">
- Ouvrir Admin → Paramètres/Profils ou Supabase → <code>profiles.user_type</code>, puis affecter le bon rôle au compte connecté.
+ Le rattachement vérifie l’adresse email confirmée du compte. Les informations sensibles et la publication finale restent contrôlées par DELIKREOL.
  </p>
  </div>
 
