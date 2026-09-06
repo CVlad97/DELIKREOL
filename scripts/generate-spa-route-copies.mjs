@@ -36,6 +36,7 @@ const routes = [
   'statut-commande',
   'carte',
   'partenaire',
+  'catalogue-partenaire',
   'avis',
   'cgu',
   'cgv',
