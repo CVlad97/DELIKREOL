@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BriefcaseBusiness, ChefHat, Mail, MapPin, MessageCircle, Store, Truck } from 'lucide-react';
+import { ArrowRight, Briefcase, ChefHat, Mail, MapPin, MessageCircle, Store, Truck } from 'lucide-react';
 
 const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 const CONTACT_EMAIL = 'contact@delikreol.com';
@@ -53,7 +53,7 @@ export default function JobsPage() {
       <section className="border-b border-border/60 bg-gradient-to-br from-orange-50 via-white to-amber-50">
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
           <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-primary">
-            <BriefcaseBusiness className="h-4 w-4" />
+            <Briefcase className="h-4 w-4" />
             Rejoindre le réseau
           </span>
           <h1 className="mt-5 max-w-3xl text-4xl font-black tracking-tight text-foreground sm:text-5xl">
