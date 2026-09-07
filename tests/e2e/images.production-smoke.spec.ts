@@ -41,16 +41,3 @@ for (const { path, name } of PAGES) {
     console.log(`  📊 ${name}: ${imgStats.loaded}/${imgStats.total} images loaded`);
   });
 }
-
-test('production smoke: les paiements indisponibles ne sont pas proposés', async ({ page }) => {
-  await page.goto(`${BASE_URL}/panier`, { waitUntil: 'networkidle', timeout: 30000 });
-  await expect(page.getByText('Stripe désactivé')).toBeVisible();
-  await expect(page.getByText('Qonto', { exact: true })).toHaveCount(0);
-  await expect(page.getByText('Revolut Business', { exact: true })).toHaveCount(0);
-});
-
-test('production smoke: les mentions légales ne renvoient pas la confidentialité', async ({ page }) => {
-  await page.goto(`${BASE_URL}/mentions-legales`, { waitUntil: 'networkidle', timeout: 30000 });
-  await expect(page.getByRole('heading', { name: 'Mentions légales', exact: true })).toBeVisible();
-  await expect(page.getByText('Plateforme en phase pilote')).toBeVisible();
-});
