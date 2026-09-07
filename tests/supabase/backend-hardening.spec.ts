@@ -144,4 +144,12 @@ describe('backend production hardening', () => {
     expect(migration).toContain('role = (');
     expect(migration).toContain('idx_external_payment_events_order_id');
   });
+
+  it('keeps partner invitation tokens out of the public Data API', () => {
+    const migration = read('supabase/migrations/20260907000001_lock_partner_invites_rls.sql');
+
+    expect(migration).toContain('drop policy if exists "Public open partner invite by token"');
+    expect(migration).toContain('revoke all on table public.partner_invites from anon, authenticated');
+    expect(migration).toContain('grant all on table public.partner_invites to service_role');
+  });
 });
