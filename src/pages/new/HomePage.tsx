@@ -66,30 +66,6 @@ const ALL_CATEGORIES = [
   { id: 'commandes-entreprise', name: 'Commandes entreprise' },
 ];
 
-// Demo fallback reviews — used until real approved reviews arrive from localStorage
-const DEMO_REVIEWS: Array<{ initial: string; name: string; comment: string }> = [
-  {
-    initial: 'M',
-    name: 'Marie-Line',
-    comment: 'Le colombo de Ninice est un délice. Livré en 45 min à Ducos, parfait !',
-  },
-  {
-    initial: 'J',
-    name: 'Jean-Philippe',
-    comment: "Commander les accras de Coco's Food pour une fête, tout le monde a adoré. Click & collect super pratique.",
-  },
-  {
-    initial: 'S',
-    name: 'Sandra',
-    comment: "Je commande toutes les semaines chez Saveurs d'Afrique. Les plats sont toujours frais et les portions généreuses.",
-  },
-  {
-    initial: 'P',
-    name: 'Patrick',
-    comment: "Le service traiteur événementiel au Marin, nickel. Livraison à l'heure, plat chaud. Je recommande.",
-  },
-];
-
 function ReviewsSection() {
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -112,14 +88,21 @@ function ReviewsSection() {
     setLoaded(true);
   }, []);
 
-  const displayReviews = reviews.length > 0
-    ? reviews.map(r => ({
+  const displayReviews = reviews.map(r => ({
         initial: r.name.charAt(0).toUpperCase(),
         name: r.name,
         comment: r.comment,
         rating: r.rating,
-      }))
-    : DEMO_REVIEWS.map(r => ({ ...r, rating: 5 }));
+      }));
+
+  if (!loaded || displayReviews.length === 0) {
+    return (
+      <div className="mx-auto max-w-2xl rounded-[2rem] border border-primary/20 bg-white p-8 text-center shadow-sm">
+        <p className="font-black text-foreground">Les premiers avis vérifiés arrivent avec la phase pilote.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Seuls les retours réellement déposés et approuvés seront publiés ici.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="cardGrid grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -821,10 +804,10 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
             {([
-              { name: 'Ninice', slug: 'ninice', image: `${import.meta.env.BASE_URL}vendors/ninice/drive-reimport/IMG-20260521-WA0070.jpg` },
-              { name: "Coco's Food", slug: 'coco', image: `${import.meta.env.BASE_URL}vendors/coco/drive-reimport/IMG-20260526-WA0064.jpg` },
-              { name: "Saveurs d'Afrique", slug: 'saveurs-afrique', image: `${import.meta.env.BASE_URL}vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0156.jpg` },
-              { name: 'Snack Save Peyi\'A', slug: 'save-peyia', image: `${import.meta.env.BASE_URL}vendors/save-peyia/drive-reimport/IMG-20260710-WA0008.jpg` },
+              { name: 'Les Délices de Ninice', slug: 'les-delices-de-ninice', image: `${import.meta.env.BASE_URL}vendors/ninice/drive-reimport/IMG-20260521-WA0070.jpg` },
+              { name: "Coco's Food", slug: 'cocos-food', image: `${import.meta.env.BASE_URL}vendors/coco/drive-reimport/IMG-20260526-WA0064.jpg` },
+              { name: "Saveurs d'Afrique", slug: 'saveurs-dafrique', image: `${import.meta.env.BASE_URL}vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0156.jpg` },
+              { name: 'Snack Savè Peyi\'A', slug: 'snack-save-peyia', image: `${import.meta.env.BASE_URL}vendors/save-peyia/drive-reimport/IMG-20260710-WA0008.jpg` },
             ] as const).map((caterer) => (
               <Link
                 key={caterer.slug}
