@@ -23,6 +23,12 @@ describe('manual payment providers', () => {
     expect(PAYMENT_PROVIDERS.find((provider) => provider.id === 'stripe_disabled')?.status).toBe('disabled');
   });
 
+  it('does not expose bank transfers without complete public bank coordinates', () => {
+    expect(isCustomerSelectablePaymentProvider('qonto_transfer')).toBe(false);
+    expect(isCustomerSelectablePaymentProvider('revolut_transfer')).toBe(false);
+    expect(isCustomerSelectablePaymentProvider('cash_on_delivery')).toBe(true);
+  });
+
   it('supports requested manual payment statuses', () => {
     expect(PAYMENT_STATUSES).toEqual([
       'pending',
