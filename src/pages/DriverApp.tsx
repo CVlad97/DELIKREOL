@@ -174,14 +174,9 @@ export function DriverApp() {
   const acceptDelivery = async (deliveryId: string) => {
     if (!driver) return;
 
-    const { error } = await supabase
-      .from('deliveries')
-      .update({
-        driver_id: driver.id,
-        status: 'assigned',
-        assigned_at: new Date().toISOString(),
-      })
-      .eq('id', deliveryId);
+    const { error } = await supabase.rpc('accept_delivery_mission', {
+      p_delivery_id: deliveryId,
+    });
 
     if (!error) {
       loadDriverData();
