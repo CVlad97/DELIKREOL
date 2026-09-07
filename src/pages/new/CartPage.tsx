@@ -37,6 +37,7 @@ import {
  PAYMENT_PROVIDERS,
  buildPaymentReference,
  getPaymentProvider,
+ isCustomerSelectablePaymentProvider,
  type PaymentProviderId,
 } from'../../config/paymentProviders';
 import {
@@ -235,7 +236,7 @@ export default function CartPage() {
  const [orderStatusUrl, setOrderStatusUrl] = useState(initialPreparedOrder?.orderStatusUrl || '/statut-commande');
  const [checkoutStatus, setCheckoutStatus] = useState<'idle' |'processing' |'success' |'error'>('idle');
  const [savedField, setSavedField] = useState<string | null>(null);
- const [paymentProvider, setPaymentProvider] = useState<PaymentProviderId>('qonto_transfer');
+ const [paymentProvider, setPaymentProvider] = useState<PaymentProviderId>('cash_on_delivery');
  const [paymentProofUrl, setPaymentProofUrl] = useState('');
  const [paymentExternalId, setPaymentExternalId] = useState('');
  const panierRef = useRef<HTMLDivElement>(null);
@@ -266,7 +267,7 @@ export default function CartPage() {
  setNotes('');
  setPhone('');
  setPhoneError('');
- setPaymentProvider('qonto_transfer');
+ setPaymentProvider('cash_on_delivery');
  setPaymentProofUrl('');
  setPaymentExternalId('');
  showSuccess('Panier vidé');
@@ -791,7 +792,7 @@ export default function CartPage() {
  <div className="bg-white rounded-2xl border border-primary/100 p-6 space-y-4">
  <h2 className="text-lg font-bold text-foreground">Moyen de paiement</h2>
  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
- {PAYMENT_PROVIDERS.filter((provider) => provider.status !=='disabled' && provider.id !=='stripe_disabled').map((provider) => {
+ {PAYMENT_PROVIDERS.filter((provider) => isCustomerSelectablePaymentProvider(provider.id)).map((provider) => {
  const active = paymentProvider === provider.id;
  const Icon = provider.id ==='cash_on_delivery' ? Banknote : provider.id ==='crypto_wallet' ? Wallet : Landmark;
  return (
