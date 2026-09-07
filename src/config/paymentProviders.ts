@@ -106,7 +106,16 @@ export function isCustomerSelectablePaymentProvider(id: PaymentProviderId): bool
   const provider = getPaymentProvider(id);
   if (provider.status === 'disabled' || id === 'stripe_disabled') return false;
   if (id === 'qonto_transfer' || id === 'revolut_transfer') {
-    return Boolean(provider.iban && provider.bic);
+    // These are manual bank-transfer providers. Selectable when IBAN/BIC are
+    // configured — either dedicated per-provider vars OR the generic VITE_BANK_*
+    // fallback that the provider itself uses (see lines 53-54).
+    const hasIban = id === 'qonto_transfer'
+      ? Boolean(import.meta.env.VITE_QONTO_IBAN || import.meta.env.VITE_BANK_IBAN)
+      : Boolean(import.meta.env.VITE_REVOLUT_IBAN || import.meta.env.VITE_BANK_IBAN);
+    const hasBic = id === 'qonto_transfer'
+      ? Boolean(import.meta.env.VITE_QONTO_BIC || import.meta.env.VITE_BANK_BIC)
+      : Boolean(import.meta.env.VITE_REVOLUT_BIC || import.meta.env.VITE_BANK_BIC);
+    return hasIban && hasBic;
   }
   return true;
 }
