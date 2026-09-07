@@ -98,6 +98,10 @@ const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/legal/PrivacyPolicy'));
 const CGVPage = lazy(() => import('./pages/legal/CGVPage'));
 const CookiesPage = lazy(() => import('./pages/legal/CookiesPage'));
+const LegalMentionsPage = lazy(async () => {
+  const module = await import('./pages/LegalMentionsPage');
+  return { default: module.LegalMentionsPage };
+});
 const RemoursementPage = lazy(() => import('./pages/legal/RemoursementPage'));
 const PartnerTermsPage = lazy(() => import('./pages/legal/PartnerTermsPage'));
 
@@ -209,7 +213,7 @@ export function AppRouter() {
                   <Route path="cgu" element={<TermsOfService />} />
                   <Route path="cgv" element={<CGVPage />} />
                   <Route path="confidentialite" element={<PrivacyPolicy />} />
-                  <Route path="mentions-legales" element={<PrivacyPolicy />} />
+                  <Route path="mentions-legales" element={<LegalMentionsPage />} />
                   <Route path="cookies" element={<CookiesPage />} />
                   <Route path="remboursement" element={<RemoursementPage />} />
                   <Route path="conditions-partenaires" element={<PartnerTermsPage />} />

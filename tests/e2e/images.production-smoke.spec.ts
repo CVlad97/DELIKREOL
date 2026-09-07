@@ -9,6 +9,12 @@ const PAGES = [
   { path: '/traiteur/snack-save-peyia', name: 'save-peyia' },
   { path: '/traiteur/sweet-family-traiteur-orianne', name: 'sweet-family' },
   { path: '/carte', name: 'carte-interactive' },
+  { path: '/panier', name: 'panier' },
+  { path: '/cgu', name: 'cgu' },
+  { path: '/cgv', name: 'cgv' },
+  { path: '/mentions-legales', name: 'mentions-legales' },
+  { path: '/jobs', name: 'jobs' },
+  { path: '/offres-cash', name: 'offres-cash' },
 ];
 
 for (const { path, name } of PAGES) {
