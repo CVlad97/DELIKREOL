@@ -36,7 +36,7 @@ export function CGVPage() {
 
           <div>
             <h2 className="text-lg font-semibold mb-2">6. Paiement</h2>
-            <p>Le paiement s'effectue au lancement par virement Qonto, virement Revolut Business, paiement à la livraison, lien externe sécurisé ou wallet crypto facultatif. La commande reste à confirmer par WhatsApp et le statut payé est validé après rapprochement manuel ou preuve de paiement. Aucune donnée bancaire ni clé privée n'est stockée par Delikreol.</p>
+            <p>Les seuls moyens de paiement utilisables sont ceux affichés au moment de la demande. Pendant la phase pilote, le paiement à la livraison peut être proposé. Un lien de paiement externe ou un virement ne sera présenté qu'après son activation et sa validation. La commande reste à confirmer par WhatsApp et le statut payé n'est validé qu'après contrôle du règlement. Aucune donnée bancaire ni clé privée n'est stockée par Delikreol.</p>
           </div>
 
           <div>
@@ -56,7 +56,7 @@ export function CGVPage() {
 
           <div className="border-t pt-6 mt-8 text-xs text-muted-foreground">
             <p>Delikreol — Martinique, Caraïbe</p>
-            <p>SIRET à venir</p>
+            <p>Plateforme en phase pilote — informations d'immatriculation à publier avant l'ouverture commerciale complète.</p>
           </div>
         </div>
       </section>
