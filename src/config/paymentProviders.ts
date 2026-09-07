@@ -103,7 +103,12 @@ export function getPaymentProvider(id: PaymentProviderId): PaymentProvider {
 }
 
 export function isCustomerSelectablePaymentProvider(id: PaymentProviderId): boolean {
-  return getPaymentProvider(id).status !== 'disabled' && id !== 'stripe_disabled';
+  const provider = getPaymentProvider(id);
+  if (provider.status === 'disabled' || id === 'stripe_disabled') return false;
+  if (id === 'qonto_transfer' || id === 'revolut_transfer') {
+    return Boolean(provider.iban && provider.bic);
+  }
+  return true;
 }
 
 export function buildPaymentReference(orderNumber: string, providerId: PaymentProviderId): string {
