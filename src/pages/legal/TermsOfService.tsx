@@ -12,7 +12,7 @@ export default function TermsOfService() {
             ← Retour à l'accueil
           </Link>
           <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-            Conditions Générales de Vente
+            Conditions Générales d’Utilisation
           </h1>
           <p className="text-muted-foreground mt-2">
             Dernière mise à jour : 22 mai 2026
@@ -24,12 +24,12 @@ export default function TermsOfService() {
         <div className="max-w-4xl mx-auto prose prose-lg">
           <h2>1. Objet</h2>
           <p>
-            Les présentes Conditions Générales de Vente (CGV) régissent les relations contractuelles entre Delikreol (ci-après "la Plateforme") et tout utilisateur (ci-après "l'Utilisateur" ou "le Client") souhaitant effectuer un achat via la plateforme delikreol.com.
+            Les présentes Conditions Générales d’Utilisation (CGU) définissent les règles d’accès et d’utilisation de Delikreol (ci-après « la Plateforme »). Les conditions applicables aux commandes sont détaillées dans les CGV.
           </p>
 
           <h2>2. Acceptation des conditions</h2>
           <p>
-            Toute commande passée sur la Plateforme implique l'acceptation sans réserve des présentes CGV. L'Utilisateur reconnaît avoir pris connaissance des CGV et les accepter.
+            Toute utilisation de la Plateforme implique l’acceptation des présentes CGU. Avant une commande, l’Utilisateur est également invité à consulter les CGV.
           </p>
 
           <h2>3. Services proposés</h2>
@@ -51,18 +51,18 @@ export default function TermsOfService() {
           <h2>4. Commandes</h2>
           <h3>4.1 Processus de commande</h3>
           <p>
-            Pour passer commande, l'Utilisateur doit :
+            Pour préparer une demande de commande, l'Utilisateur doit :
           </p>
           <ul>
-            <li>Créer un compte ou se connecter</li>
             <li>Sélectionner ses produits</li>
-            <li>Choisir son mode de livraison (domicile ou point relais)</li>
-            <li>Valider son panier et procéder au paiement</li>
+            <li>Choisir le retrait, le point relais ou la livraison selon les disponibilités</li>
+            <li>Indiquer ses coordonnées et ses créneaux souhaités</li>
+            <li>Confirmer la demande avec Delikreol sur WhatsApp</li>
           </ul>
 
           <h3>4.2 Validation de la commande</h3>
           <p>
-            La commande est définitivement validée après confirmation du paiement. Un email de confirmation est envoyé au Client contenant le récapitulatif de la commande.
+            La demande n’est définitive qu’après confirmation de la disponibilité par Delikreol et le partenaire. Les modalités de paiement sont communiquées avant la préparation.
           </p>
 
           <h2>5. Prix et paiement</h2>
@@ -127,7 +127,7 @@ export default function TermsOfService() {
           <h2>9. Protection des données</h2>
           <p>
             Les données personnelles collectées font l'objet d'un traitement conforme au RGPD. Pour plus d'informations, consultez notre{' '}
-            <Link to="/legal/privacy" className="text-success hover:text-success">
+            <Link to="/confidentialite" className="text-success hover:text-success">
               Politique de confidentialité
             </Link>.
           </p>
@@ -166,7 +166,7 @@ export default function TermsOfService() {
 
           <h2>15. Contact</h2>
           <p>
-            Pour toute question concernant les présentes CGV, vous pouvez nous contacter :
+            Pour toute question concernant les présentes CGU, vous pouvez nous contacter :
           </p>
           <ul>
             <li>Email : {PUBLIC_CONTACT_EMAIL}</li>
