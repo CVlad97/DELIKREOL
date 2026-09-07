@@ -16,6 +16,8 @@ export type PublicVendorRow = {
   description?: string | null;
   logo_url?: string | null;
   image_url?: string | null;
+  hero_image?: string | null;
+  portrait_image?: string | null;
   address?: string | null;
   phone?: string | null;
   latitude?: number | null;
@@ -167,7 +169,7 @@ function normalizeVendor(row: PublicVendorRow): PublicCatalogVendor {
     business_name: row.business_name ?? row.name ?? 'Partenaire DELIKREOL',
     business_type: row.business_type ?? 'Partenaire local',
     description: row.description ?? 'Partenaire vérifié en Martinique.',
-    logo_url: row.logo_url ?? row.image_url ?? PRODUCT_IMAGE_FALLBACK,
+    logo_url: row.logo_url ?? row.portrait_image ?? row.hero_image ?? row.image_url ?? PRODUCT_IMAGE_FALLBACK,
     address: row.address ?? row.zone_label ?? row.service_zone ?? 'Martinique',
     phone: row.phone ?? '',
     latitude: row.latitude ?? null,
