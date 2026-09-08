@@ -132,7 +132,7 @@ export default function MarketingContact() {
  <h3 className="text-lg font-semibold text-foreground mb-1">Email</h3>
  <p className="text-muted-foreground">{PUBLIC_CONTACT_EMAIL}</p>
  <p className="text-sm text-muted-foreground mt-1">
- Les messages sont relayés vers vladimir.claveau@gmail.com.
+ Les messages sont relayés vers contactcvs@ikabay.store.
  </p>
  </div>
  </div>

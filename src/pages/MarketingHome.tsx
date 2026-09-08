@@ -173,7 +173,7 @@ export default function MarketingHome() {
               <h4 className="text-white font-semibold mb-4">Contact</h4>
               <ul className="space-y-2 text-sm">
                 <li>Email: {PUBLIC_CONTACT_EMAIL}</li>
-                <li>Messages relayés vers vladimir.claveau@gmail.com</li>
+                <li>Messages relayés vers contactcvs@ikabay.store</li>
                 <li>Guadeloupe</li>
               </ul>
             </div>

@@ -199,15 +199,12 @@ export async function uploadPartnerCatalogFile(
       return { success: false, error: 'Erreur lors de l\'upload du catalogue' };
     }
 
-    const { data: urlData } = supabase.storage
-      .from('partner-catalog')
-      .getPublicUrl(fileName);
-
     const { data, error } = await supabase
       .from('partner_catalog_files')
       .insert({
         partner_application_id: partnerApplicationId,
-        file_url: urlData.publicUrl,
+        file_path: fileName,
+        bucket_id: 'partner-catalog',
         file_name: file.name,
         file_size: file.size,
         format,
@@ -223,7 +220,7 @@ export async function uploadPartnerCatalogFile(
 
     return {
       success: true,
-      data: { id: data.id, url: urlData.publicUrl },
+      data: { id: data.id, url: fileName },
     };
   } catch (error) {
     console.error('Unexpected error:', error);
@@ -310,15 +307,38 @@ export async function listPartnerApplications(
       `)
       .order('created_at', { ascending: false });
 
-    if (status) {
+    if (status === 'pending') {
+      query = query.in('status', ['pending', 'pending_review', 'new']);
+    } else if (status) {
       query = query.eq('status', status);
     }
 
-    const { data, error } = await query;
+    let { data, error } = await query;
+
+    // Des installations plus anciennes n'ont pas toutes les relations/FK
+    // utilisées par la vue enrichie. On conserve alors la liste principale
+    // plutôt que d'afficher à tort « aucune candidature ».
+    if (error) {
+      let fallbackQuery = supabase
+        .from('partner_applications')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (status === 'pending') {
+        fallbackQuery = fallbackQuery.in('status', ['pending', 'pending_review', 'new']);
+      } else if (status) {
+        fallbackQuery = fallbackQuery.eq('status', status);
+      }
+      const fallback = await fallbackQuery;
+      data = fallback.data;
+      error = fallback.error;
+    }
 
     if (error) {
       console.error('Error listing applications:', error);
-      return { success: false, error: 'Erreur lors du chargement des candidatures' };
+      return {
+        success: false,
+        error: `Candidatures indisponibles : ${error.message || 'accès Supabase refusé'}`,
+      };
     }
 
     return { success: true, data: data || [] };

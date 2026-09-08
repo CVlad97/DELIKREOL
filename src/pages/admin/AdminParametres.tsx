@@ -37,6 +37,7 @@ export function AdminParametres() {
  });
  const [profiles, setProfiles] = useState<ProfileAccess[]>([]);
  const [profilesLoading, setProfilesLoading] = useState(false);
+ const [profilesError, setProfilesError] = useState('');
  const [updatingProfileId, setUpdatingProfileId] = useState<string | null>(null);
 
  useEffect(() => {
@@ -55,18 +56,33 @@ export function AdminParametres() {
 
  const loadProfiles = async () => {
  setProfilesLoading(true);
+ setProfilesError('');
  try {
- const { data, error } = await supabase
+ let { data, error } = await supabase
  .from('profiles')
  .select('id, full_name, email, contact_email, phone, user_type, created_at')
  .order('created_at', { ascending: false })
  .limit(80);
 
+ // Certaines bases historiques n'ont pas encore la colonne contact_email.
+ // Une colonne optionnelle absente ne doit pas masquer tous les comptes.
+ if (error) {
+ const fallback = await supabase
+ .from('profiles')
+ .select('id, full_name, phone, user_type, created_at')
+ .order('created_at', { ascending: false })
+ .limit(80);
+ data = fallback.data as typeof data;
+ error = fallback.error;
+ }
+
  if (error) throw error;
  setProfiles((data || []) as ProfileAccess[]);
  } catch (error) {
  console.error('Error loading profiles:', error);
- showToast('Impossible de charger les comptes','error');
+ const message = error instanceof Error ? error.message :'Accès Supabase refusé ou schéma indisponible';
+ setProfilesError(message);
+ showToast('Impossible de charger les comptes — vérifiez le rôle admin Supabase','error');
  } finally {
  setProfilesLoading(false);
  }
@@ -165,6 +181,13 @@ export function AdminParametres() {
  <span>Rôle actuel</span>
  <span>Activation</span>
  </div>
+ {profilesError && (
+ <div className="border-b border-red-200 bg-red-50 p-4 text-sm text-red-800">
+ <p className="font-black">Connexion aux comptes impossible</p>
+ <p className="mt-1 break-words">{profilesError}</p>
+ <p className="mt-1 text-xs">Contrôlez la migration des rôles admin et les politiques RLS de la table profiles.</p>
+ </div>
+ )}
  {profilesLoading ? (
  <div className="p-5 text-sm text-muted-foreground">Chargement des comptes...</div>
  ) : profiles.length === 0 ? (

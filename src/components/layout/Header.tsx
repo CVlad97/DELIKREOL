@@ -20,7 +20,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const WHATSAPP_NUMBER = '596696653589';
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
-const OWNER_EMAIL = 'vladimir.claveau@gmail.com';
+const OWNER_EMAIL = 'contactcvs@ikabay.store';
 
 interface NavItem {
   label: string;

@@ -14,6 +14,7 @@ export function AdminPartners() {
  const [applications, setApplications] = useState<any[]>([]);
  const [selectedApp, setSelectedApp] = useState<any | null>(null);
  const [loading, setLoading] = useState(true);
+ const [loadError, setLoadError] = useState('');
  const [filterStatus, setFilterStatus] = useState<string>('all');
  const [adminNotes, setAdminNotes] = useState('');
  const { showSuccess, showError } = useToast();
@@ -24,11 +25,14 @@ export function AdminPartners() {
 
  const loadApplications = async () => {
  setLoading(true);
+ setLoadError('');
  const result = await listPartnerApplications(filterStatus ==='all' ? undefined : filterStatus);
  if (result.success) {
  setApplications(result.data || []);
  } else {
- showError(result.error ||'Erreur de chargement');
+ const message = result.error ||'Erreur de chargement';
+ setLoadError(message);
+ showError(message);
  }
  setLoading(false);
  };
@@ -100,6 +104,8 @@ export function AdminPartners() {
  const getStatusBadge = (status: string) => {
  switch (status) {
  case'pending':
+ case'pending_review':
+ case'new':
  return <span className="px-3 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">En attente</span>;
  case'accepted':
  return <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">Acceptée</span>;
@@ -139,7 +145,7 @@ export function AdminPartners() {
 
  const statsCounts = {
  all: applications.length,
- pending: applications.filter(a => a.status ==='pending').length,
+ pending: applications.filter(a => ['pending', 'pending_review', 'new'].includes(a.status)).length,
  accepted: applications.filter(a => a.status ==='accepted').length,
  rejected: applications.filter(a => a.status ==='rejected').length,
  };
@@ -212,6 +218,14 @@ export function AdminPartners() {
  <div className="text-sm text-slate-400">Refusées</div>
  </button>
  </div>
+
+ {loadError && (
+ <div className="rounded-xl border border-red-500/40 bg-red-950/40 p-4 text-sm text-red-100">
+ <p className="font-black">Les candidatures n'ont pas pu être lues dans Supabase.</p>
+ <p className="mt-1 break-words">{loadError}</p>
+ <p className="mt-1 text-xs text-red-200">Ne pas interpréter les compteurs à zéro comme une absence de candidatures.</p>
+ </div>
+ )}
 
  {loading ? (
  <div className="space-y-4">
@@ -423,15 +437,14 @@ export function AdminPartners() {
  </div>
  </div>
  </div>
- <a
- href={file.file_url}
- target="_blank"
- rel="noopener noreferrer"
+ <button
+ type="button"
+ onClick={() => openSecureDocument(file)}
  className="flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm"
  >
  Télécharger
  <ExternalLink className="w-4 h-4" />
- </a>
+ </button>
  </div>
  ))}
  </div>
@@ -471,7 +484,7 @@ export function AdminPartners() {
  />
  </div>
 
- {selectedApp.status ==='pending' && (
+ {['pending', 'pending_review', 'new'].includes(selectedApp.status) && (
  <div className="flex gap-3">
  <button
  onClick={() => handleStatusChange(selectedApp.id,'accepted')}

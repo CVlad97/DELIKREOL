@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-const OWNER_EMAIL = 'vladimir.claveau@gmail.com';
+const OWNER_EMAIL = 'contactcvs@ikabay.store';
 
 /**
  * Bloque /admin/* si :
