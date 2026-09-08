@@ -14,6 +14,7 @@ describe('manual payment providers', () => {
       'cash_on_delivery',
       'crypto_wallet',
       'external_payment_link',
+      'sumup',
       'stripe_disabled',
     ]);
   });

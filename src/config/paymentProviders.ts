@@ -4,6 +4,7 @@ export type PaymentProviderId =
   | 'cash_on_delivery'
   | 'crypto_wallet'
   | 'external_payment_link'
+  | 'sumup'
   | 'stripe_disabled';
 
 export type PaymentStatus =
@@ -90,6 +91,15 @@ export const PAYMENT_PROVIDERS: PaymentProvider[] = [
     paymentUrl: import.meta.env.VITE_EXTERNAL_PAYMENT_URL || '',
   },
   {
+    id: 'sumup',
+    label: 'SumUp',
+    shortLabel: 'SumUp',
+    description: 'Lien de paiement SumUp généré manuellement. Aucun paiement automatisé côté site.',
+    status: import.meta.env.VITE_SUMUP_PUBLIC_KEY ? 'manual' : 'disabled',
+    requiresProof: false,
+    paymentUrl: import.meta.env.VITE_SUMUP_PUBLIC_KEY || '',
+  },
+  {
     id: 'stripe_disabled',
     label: 'Stripe désactivé',
     shortLabel: 'Stripe OFF',
@@ -106,15 +116,17 @@ export function isCustomerSelectablePaymentProvider(id: PaymentProviderId): bool
   const provider = getPaymentProvider(id);
   if (provider.status === 'disabled' || id === 'stripe_disabled') return false;
   if (id === 'qonto_transfer' || id === 'revolut_transfer') {
-    // These are manual bank-transfer providers. Selectable when IBAN/BIC are
-    // configured — either dedicated per-provider vars OR the generic VITE_BANK_*
-    // fallback that the provider itself uses (see lines 53-54).
+    // Manual bank-transfer providers. Selectable ONLY when the dedicated
+    // per-provider IBAN/BIC are configured — the generic VITE_BANK_* fallback
+    // is used for display inside the provider card, but must NOT make the
+    // provider selectable by customers (bank coordinates must be explicit
+    // and verified before exposing a transfer option).
     const hasIban = id === 'qonto_transfer'
-      ? Boolean(import.meta.env.VITE_QONTO_IBAN || import.meta.env.VITE_BANK_IBAN)
-      : Boolean(import.meta.env.VITE_REVOLUT_IBAN || import.meta.env.VITE_BANK_IBAN);
+      ? Boolean(import.meta.env.VITE_QONTO_IBAN)
+      : Boolean(import.meta.env.VITE_REVOLUT_IBAN);
     const hasBic = id === 'qonto_transfer'
-      ? Boolean(import.meta.env.VITE_QONTO_BIC || import.meta.env.VITE_BANK_BIC)
-      : Boolean(import.meta.env.VITE_REVOLUT_BIC || import.meta.env.VITE_BANK_BIC);
+      ? Boolean(import.meta.env.VITE_QONTO_BIC)
+      : Boolean(import.meta.env.VITE_REVOLUT_BIC);
     return hasIban && hasBic;
   }
   return true;
@@ -125,6 +137,7 @@ export function buildPaymentReference(orderNumber: string, providerId: PaymentPr
     : providerId === 'revolut_transfer' ? 'REVOLUT'
       : providerId === 'crypto_wallet' ? 'CRYPTO'
         : providerId === 'cash_on_delivery' ? 'COD'
-          : 'EXT';
+          : providerId === 'sumup' ? 'SUMUP'
+            : 'EXT';
   return `${prefix}-${orderNumber}`;
 }
