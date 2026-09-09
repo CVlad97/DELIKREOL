@@ -1,3 +1,7 @@
+truncated output (original token count: 635275)
+... 1492522 bytes omitted ...
+
+__TEXT__
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, ChefHat, Eye, ImagePlus, Loader2, Pencil, Plus, Save, ShieldCheck, Store, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -40,6 +44,23 @@ type Product = {
 
 const categories = ['Plat', 'Menu', 'Dessert', 'Boisson', 'Buffet', 'Brunch', 'Autre'];
 const blankProduct = { name: '', description: '', category: 'Plat', price: '', stock: '', imageUrl: '', available: true, sides: '' };
+const partnerTutorialImage = `${import.meta.env.BASE_URL}tutorials/tuto-ajouter-plat-delikreol.png`;
+
+function PartnerTutorial() {
+  return (
+    <figure className="mx-auto mt-6 max-w-3xl overflow-hidden rounded-[2rem] border border-primary/20 bg-white shadow-soft">
+      <img
+        src={partnerTutorialImage}
+        alt="Tutoriel en quatre étapes pour se connecter à l’espace partenaire, ajouter un plat, compléter sa fiche et le publier"
+        className="h-auto w-full"
+        loading="lazy"
+      />
+      <figcaption className="p-4 text-center text-sm font-bold text-stone-600">
+        Appuyez sur « + Ajouter un plat » dans votre studio partenaire.
+      </figcaption>
+    </figure>
+  );
+}
 
 function slugify(value: string) {
   return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -249,7 +270,7 @@ export default function PartnerCatalogPage() {
       <Store className="mx-auto h-12 w-12 text-primary" /><h1 className="mt-4 text-3xl font-black">Votre espace traiteur</h1>
       <p className="mt-3 text-stone-600">Connectez-vous avec l’adresse email enregistrée sur votre fiche DELIKREOL.</p>
       <Link to="/connexion?next=/catalogue-partenaire" className="mt-6 inline-flex rounded-2xl bg-primary px-6 py-3 font-black text-white">Se connecter</Link>
-    </section></main></Layout>
+    </section><PartnerTutorial /></main></Layout>
   );
 
   if (!vendor) return (
@@ -257,7 +278,7 @@ export default function PartnerCatalogPage() {
       <div className="bg-gradient-to-br from-[#26150f] to-[#8d3d23] p-8 text-white"><ChefHat className="h-12 w-12" /><h1 className="mt-4 text-3xl font-black">Activez votre vitrine</h1><p className="mt-3 text-orange-50/85">Un clic suffit si l’email confirmé de votre compte correspond à celui de votre fiche partenaire.</p></div>
       <div className="p-8"><button onClick={claimAccess} disabled={claiming} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-4 font-black text-white disabled:opacity-60">{claiming ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShieldCheck className="h-5 w-5" />} Activer mon accès sécurisé</button>
       <p className="mt-4 text-center text-sm text-stone-500">Pas encore référencé ? <Link className="font-black text-primary" to="/inscription-traiteur">Créer ma fiche gratuitement</Link></p></div>
-    </section></main></Layout>
+    </section><PartnerTutorial /></main></Layout>
   );
 
   return (
@@ -273,6 +294,7 @@ export default function PartnerCatalogPage() {
           <h2 className="font-black">Comment ajouter un plat ?</h2>
           <ol className="mt-2 grid gap-2 text-sm text-stone-700 sm:grid-cols-3"><li><strong>1.</strong> Appuyez sur « + Ajouter un plat ».</li><li><strong>2.</strong> Indiquez nom, prix, stock, accompagnements et photo.</li><li><strong>3.</strong> Enregistrez : {canPublishDirectly ? 'le plat apparaît immédiatement sur DELIKREOL.' : 'DELIKREOL contrôle le plat avant publication.'}</li></ol>
         </section>
+        <PartnerTutorial />
 
         <section className="grid gap-6 lg:grid-cols-2">
           <form onSubmit={saveProfile} className="rounded-[2rem] border border-primary/20 bg-white p-6 shadow-soft">
