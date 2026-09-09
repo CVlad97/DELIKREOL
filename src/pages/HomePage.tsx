@@ -90,7 +90,7 @@ export function HomePage() {
  <div className="text-center">
  <div className="flex justify-center mb-2 animate-pulse">
  <img
- src="/capture_d'ecran_2025-12-15_144525.png"
+ src="/branding/logo-wordmark.svg"
  alt="DELIKREOL Logo"
  className="h-16 md:h-24 w-auto drop-shadow-2xl transition-transform hover:scale-105"
  onError={(e) => {
@@ -154,6 +154,8 @@ export function HomePage() {
  </div>
  </header>
 
+
+<p className="text-center text-red-600 font-bold text-lg mt-2">Nos traiteurs géolocalisés</p>
  <main className="max-w-7xl mx-auto px-4 py-6">
  <div className="bg-gradient-to-br from-white to-orange-50 rounded-2xl shadow-2xl p-6 md:p-8 mb-8 border-2 border-primary/20">
  <div className="text-center mb-8">
