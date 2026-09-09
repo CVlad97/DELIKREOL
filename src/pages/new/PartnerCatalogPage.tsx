@@ -1,7 +1,3 @@
-truncated output (original token count: 635275)
-... 1492522 bytes omitted ...
-
-__TEXT__
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, ChefHat, Eye, ImagePlus, Loader2, Pencil, Plus, Save, ShieldCheck, Store, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -44,7 +40,7 @@ type Product = {
 
 const categories = ['Plat', 'Menu', 'Dessert', 'Boisson', 'Buffet', 'Brunch', 'Autre'];
 const blankProduct = { name: '', description: '', category: 'Plat', price: '', stock: '', imageUrl: '', available: true, sides: '' };
-const partnerTutorialImage = `${import.meta.env.BASE_URL}tutorials/tuto-ajouter-plat-delikreol.png`;
+const partnerTutorialImage = `${import.meta.env.BASE_URL}tutorials/tuto-ajouter-plat-delikreol.jpg`;
 
 function PartnerTutorial() {
   return (
