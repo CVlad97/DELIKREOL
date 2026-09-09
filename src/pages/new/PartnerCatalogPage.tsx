@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, ChefHat, Eye, ImagePlus, Loader2, Pencil, Plus, Save, ShieldCheck, Store, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Layout } from '../../components/layout/Layout';
@@ -35,10 +35,11 @@ type Product = {
   is_available: boolean;
   status: string;
   is_public: boolean;
+  sides: string[] | null;
 };
 
 const categories = ['Plat', 'Menu', 'Dessert', 'Boisson', 'Buffet', 'Brunch', 'Autre'];
-const blankProduct = { name: '', description: '', category: 'Plat', price: '', stock: '', imageUrl: '', available: true };
+const blankProduct = { name: '', description: '', category: 'Plat', price: '', stock: '', imageUrl: '', available: true, sides: '' };
 
 function slugify(value: string) {
   return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -60,6 +61,15 @@ export default function PartnerCatalogPage() {
     email: '', commune: '', address: '', specialty: '', story: '', hero_image: '',
   });
   const [product, setProduct] = useState(blankProduct);
+  const productFormRef = useRef<HTMLFormElement>(null);
+
+  const canPublishDirectly = vendor?.status === 'verified' && vendor.is_public;
+
+  const openProductForm = () => {
+    setEditingId(null);
+    setProduct(blankProduct);
+    productFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   const publishedCount = useMemo(() => products.filter((item) => item.is_public && item.status === 'verified').length, [products]);
   const availableCount = useMemo(() => products.filter((item) => item.is_available).length, [products]);
@@ -92,7 +102,7 @@ export default function PartnerCatalogPage() {
         hero_image: currentVendor.hero_image || '',
       });
       const { data: productData, error: productError } = await supabase
-        .from('products').select('id,vendor_id,name,description,category,price,image_url,stock_quantity,is_available,status,is_public')
+        .from('products').select('id,vendor_id,name,description,category,price,image_url,stock_quantity,is_available,status,is_public,sides')
         .eq('vendor_id', currentVendor.id).order('created_at', { ascending: false });
       if (productError) throw productError;
       setProducts((productData || []) as Product[]);
@@ -186,9 +196,10 @@ export default function PartnerCatalogPage() {
         image_url: product.imageUrl.trim() || null,
         stock_quantity: product.stock ? Math.max(0, Number(product.stock)) : null,
         is_available: product.available,
-        status: 'draft',
-        is_public: false,
+        status: canPublishDirectly ? 'verified' : 'draft',
+        is_public: canPublishDirectly,
         is_demo: false,
+        sides: product.sides.split(',').map((side) => side.trim()).filter(Boolean),
       };
       const request = editingId
         ? supabase.from('products').update(payload).eq('id', editingId)
@@ -198,7 +209,9 @@ export default function PartnerCatalogPage() {
       setProduct(blankProduct);
       setEditingId(null);
       await loadWorkspace();
-      showSuccess(editingId ? 'Modification envoyée en validation.' : 'Produit créé et envoyé en validation.');
+      showSuccess(canPublishDirectly
+        ? (editingId ? 'Plat modifié et publié sur le site.' : 'Plat ajouté et publié sur le site.')
+        : (editingId ? 'Modification envoyée en validation.' : 'Produit créé et envoyé en validation.'));
     } catch (error) {
       console.error(error);
       showError('Le produit n’a pas pu être enregistré.');
@@ -217,6 +230,7 @@ export default function PartnerCatalogPage() {
       stock: item.stock_quantity == null ? '' : String(item.stock_quantity),
       imageUrl: item.image_url || '',
       available: item.is_available,
+      sides: (item.sides || []).join(', '),
     });
     window.scrollTo({ top: 650, behavior: 'smooth' });
   };
@@ -250,9 +264,14 @@ export default function PartnerCatalogPage() {
     <Layout><main className="min-h-screen bg-[#fff8ef] px-4 py-8 text-[#26150f]">
       <div className="mx-auto max-w-6xl space-y-6">
         <section className="overflow-hidden rounded-[2.25rem] bg-gradient-to-br from-[#26150f] via-[#5c2819] to-[#d86a35] p-7 text-white shadow-2xl sm:p-10">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-xs font-black uppercase tracking-[.25em] text-orange-200">Studio partenaire</p><h1 className="mt-3 text-4xl font-black sm:text-5xl">{vendor.business_name || 'Ma vitrine'}</h1><p className="mt-3 max-w-2xl text-orange-50/85">Mettez à jour votre présentation et vos plats. Chaque changement est enregistré immédiatement puis contrôlé avant publication.</p></div>
-          <div className="flex flex-wrap gap-2"><Link to="/partner-documents" className="rounded-full bg-white/15 px-4 py-2 text-sm font-black">Mes documents</Link>{vendor.is_public && <Link to={`/traiteur/${slugify(vendor.business_name || '')}`} className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-[#5c2819]"><Eye className="h-4 w-4" /> Voir ma vitrine</Link>}</div></div>
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-xs font-black uppercase tracking-[.25em] text-orange-200">Studio partenaire</p><h1 className="mt-3 text-4xl font-black sm:text-5xl">{vendor.business_name || 'Ma vitrine'}</h1><p className="mt-3 max-w-2xl text-orange-50/85">Mettez à jour votre présentation, vos plats et vos menus depuis votre téléphone.</p></div>
+          <div className="flex flex-wrap gap-2"><button type="button" onClick={openProductForm} className="inline-flex items-center gap-2 rounded-full bg-[#f6c453] px-5 py-3 text-sm font-black text-[#26150f] shadow-lg"><Plus className="h-5 w-5" /> Ajouter un plat</button><Link to="/partner-documents" className="rounded-full bg-white/15 px-4 py-2 text-sm font-black">Mes documents</Link>{vendor.is_public && <Link to={`/traiteur/${slugify(vendor.business_name || '')}`} className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-[#5c2819]"><Eye className="h-4 w-4" /> Voir ma vitrine</Link>}</div></div>
           <div className="mt-7 grid gap-3 sm:grid-cols-3"><div className="rounded-2xl bg-white/10 p-4"><p className="text-xs text-orange-100">Produits</p><p className="mt-1 text-2xl font-black">{products.length}</p></div><div className="rounded-2xl bg-white/10 p-4"><p className="text-xs text-orange-100">Disponibles</p><p className="mt-1 text-2xl font-black">{availableCount}</p></div><div className="rounded-2xl bg-white/10 p-4"><p className="text-xs text-orange-100">Publiés</p><p className="mt-1 text-2xl font-black">{publishedCount}</p></div></div>
+        </section>
+
+        <section className="rounded-[2rem] border border-[#f6c453]/60 bg-[#fff3c9] p-5 shadow-soft">
+          <h2 className="font-black">Comment ajouter un plat ?</h2>
+          <ol className="mt-2 grid gap-2 text-sm text-stone-700 sm:grid-cols-3"><li><strong>1.</strong> Appuyez sur « + Ajouter un plat ».</li><li><strong>2.</strong> Indiquez nom, prix, stock, accompagnements et photo.</li><li><strong>3.</strong> Enregistrez : {canPublishDirectly ? 'le plat apparaît immédiatement sur DELIKREOL.' : 'DELIKREOL contrôle le plat avant publication.'}</li></ol>
         </section>
 
         <section className="grid gap-6 lg:grid-cols-2">
@@ -270,15 +289,19 @@ export default function PartnerCatalogPage() {
             <button disabled={savingProfile} className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-[#1f6a4a] px-5 py-3 font-black text-white disabled:opacity-60"><Save className="h-4 w-4" />{savingProfile ? 'Enregistrement…' : 'Enregistrer mon profil'}</button>
           </form>
 
-          <form onSubmit={saveProduct} className="rounded-[2rem] border border-primary/20 bg-white p-6 shadow-soft">
-            <div className="flex items-center gap-3"><Plus className="h-6 w-6 text-primary" /><div><h2 className="text-xl font-black">{editingId ? 'Modifier le produit' : 'Ajouter un produit'}</h2><p className="text-sm text-stone-500">Simple, rapide et contrôlé avant publication.</p></div></div>
+          <form ref={productFormRef} onSubmit={saveProduct} className="scroll-mt-6 rounded-[2rem] border border-primary/20 bg-white p-6 shadow-soft">
+            <div className="flex items-center gap-3"><Plus className="h-6 w-6 text-primary" /><div><h2 className="text-xl font-black">{editingId ? 'Modifier le plat' : 'Ajouter un plat ou un menu'}</h2><p className="text-sm text-stone-500">{canPublishDirectly ? 'Votre fiche est validée : l’enregistrement publie directement sur le site.' : 'Votre fiche doit être validée avant la publication publique.'}</p></div></div>
             <div className="mt-5 space-y-4">
               <input required placeholder="Nom du plat ou de l’offre" value={product.name} onChange={e=>setProduct({...product,name:e.target.value})} className="w-full rounded-xl border px-4 py-3" />
               <textarea placeholder="Description appétissante, accompagnements, portion…" value={product.description} onChange={e=>setProduct({...product,description:e.target.value})} rows={3} className="w-full rounded-xl border px-4 py-3" />
+              <label className="block text-sm font-bold">Accompagnements proposés
+                <input placeholder="Riz, lentilles, frites, crudités…" value={product.sides} onChange={e=>setProduct({...product,sides:e.target.value})} className="mt-2 w-full rounded-xl border px-4 py-3" />
+                <span className="mt-1 block text-xs font-normal text-stone-500">Séparez les choix par une virgule. Ils seront affichés sur la fiche du plat.</span>
+              </label>
               <div className="grid gap-3 sm:grid-cols-3"><select value={product.category} onChange={e=>setProduct({...product,category:e.target.value})} className="rounded-xl border px-4 py-3">{categories.map(item=><option key={item}>{item}</option>)}</select><input required type="number" min="0.01" step="0.01" placeholder="Prix €" value={product.price} onChange={e=>setProduct({...product,price:e.target.value})} className="rounded-xl border px-4 py-3" /><input type="number" min="0" placeholder="Stock" value={product.stock} onChange={e=>setProduct({...product,stock:e.target.value})} className="rounded-xl border px-4 py-3" /></div>
               <label className="flex items-center gap-3 rounded-xl bg-[#fff8ef] p-3 text-sm font-bold"><input type="checkbox" checked={product.available} onChange={e=>setProduct({...product,available:e.target.checked})} /> Disponible à la commande</label>
               <div className="rounded-2xl border border-dashed border-primary/30 bg-[#fff8ef] p-4"><div className="flex flex-wrap items-center gap-3"><label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-black text-primary shadow-sm"><ImagePlus className="h-4 w-4" />{uploading ? 'Envoi…' : 'Choisir une photo'}<input type="file" accept="image/jpeg,image/png,image/webp" onChange={uploadImage} className="hidden" /></label>{product.imageUrl && <img src={product.imageUrl} alt="Aperçu" className="h-20 w-20 rounded-xl object-cover" />}</div></div>
-              <div className="flex gap-2"><button disabled={savingProduct||uploading} className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-3 font-black text-white disabled:opacity-60"><Save className="h-4 w-4" />{savingProduct ? 'Enregistrement…' : editingId ? 'Enregistrer la modification' : 'Ajouter au catalogue'}</button>{editingId && <button type="button" onClick={()=>{setEditingId(null);setProduct(blankProduct);}} className="rounded-2xl border px-4 font-black">Annuler</button>}</div>
+              <div className="flex gap-2"><button disabled={savingProduct||uploading} className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-3 font-black text-white disabled:opacity-60"><Save className="h-4 w-4" />{savingProduct ? 'Enregistrement…' : editingId ? 'Enregistrer la modification' : canPublishDirectly ? 'Publier sur DELIKREOL' : 'Envoyer en validation'}</button>{editingId && <button type="button" onClick={()=>{setEditingId(null);setProduct(blankProduct);}} className="rounded-2xl border px-4 font-black">Annuler</button>}</div>
             </div>
           </form>
         </section>
