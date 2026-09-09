@@ -36,10 +36,20 @@ type Product = {
   status: string;
   is_public: boolean;
   sides: string[] | null;
+  menu_options: {
+    drinks?: string[];
+    included_side_count?: number;
+    included_drink_count?: number;
+  } | null;
 };
 
 const categories = ['Plat', 'Menu', 'Dessert', 'Boisson', 'Buffet', 'Brunch', 'Autre'];
-const blankProduct = { name: '', description: '', category: 'Plat', price: '', stock: '', imageUrl: '', available: true, sides: '' };
+const sideChoices = ['Riz', 'Lentilles', 'Frites', 'Crudités'];
+const drinkChoices = ['Eau', 'Jus local', 'Soda'];
+const blankProduct = {
+  name: '', description: '', category: 'Plat', price: '', stock: '', imageUrl: '', available: true,
+  sides: '', drinks: '', includedSideCount: '1', includedDrinkCount: '1',
+};
 const partnerTutorialImage = `${import.meta.env.BASE_URL}tutorials/tuto-ajouter-plat-delikreol.jpg`;
 
 function PartnerTutorial() {
@@ -82,6 +92,16 @@ export default function PartnerCatalogPage() {
 
   const canPublishDirectly = vendor?.status === 'verified' && vendor.is_public;
 
+  const toggleChoice = (field: 'sides' | 'drinks', choice: string) => {
+    setProduct((current) => {
+      const selected = current[field].split(',').map((item) => item.trim()).filter(Boolean);
+      const next = selected.includes(choice)
+        ? selected.filter((item) => item !== choice)
+        : [...selected, choice];
+      return { ...current, [field]: next.join(', ') };
+    });
+  };
+
   const openProductForm = () => {
     setEditingId(null);
     setProduct(blankProduct);
@@ -119,7 +139,7 @@ export default function PartnerCatalogPage() {
         hero_image: currentVendor.hero_image || '',
       });
       const { data: productData, error: productError } = await supabase
-        .from('products').select('id,vendor_id,name,description,category,price,image_url,stock_quantity,is_available,status,is_public,sides')
+        .from('products').select('id,vendor_id,name,description,category,price,image_url,stock_quantity,is_available,status,is_public,sides,menu_options')
         .eq('vendor_id', currentVendor.id).order('created_at', { ascending: false });
       if (productError) throw productError;
       setProducts((productData || []) as Product[]);
@@ -204,6 +224,9 @@ export default function PartnerCatalogPage() {
     }
     setSavingProduct(true);
     try {
+      const sides = product.sides.split(',').map((side) => side.trim()).filter(Boolean);
+      const drinks = product.drinks.split(',').map((drink) => drink.trim()).filter(Boolean);
+      const isMenu = product.category === 'Menu';
       const payload = {
         vendor_id: vendor.id,
         name: product.name.trim(),
@@ -216,7 +239,12 @@ export default function PartnerCatalogPage() {
         status: canPublishDirectly ? 'verified' : 'draft',
         is_public: canPublishDirectly,
         is_demo: false,
-        sides: product.sides.split(',').map((side) => side.trim()).filter(Boolean),
+        sides,
+        menu_options: isMenu ? {
+          drinks,
+          included_side_count: Math.min(sides.length, Math.max(0, Number(product.includedSideCount) || 0)),
+          included_drink_count: Math.min(drinks.length, Math.max(0, Number(product.includedDrinkCount) || 0)),
+        } : null,
       };
       const request = editingId
         ? supabase.from('products').update(payload).eq('id', editingId)
@@ -248,6 +276,9 @@ export default function PartnerCatalogPage() {
       imageUrl: item.image_url || '',
       available: item.is_available,
       sides: (item.sides || []).join(', '),
+      drinks: (item.menu_options?.drinks || []).join(', '),
+      includedSideCount: String(item.menu_options?.included_side_count ?? 1),
+      includedDrinkCount: String(item.menu_options?.included_drink_count ?? 1),
     });
     window.scrollTo({ top: 650, behavior: 'smooth' });
   };
@@ -312,11 +343,36 @@ export default function PartnerCatalogPage() {
             <div className="mt-5 space-y-4">
               <input required placeholder="Nom du plat ou de l’offre" value={product.name} onChange={e=>setProduct({...product,name:e.target.value})} className="w-full rounded-xl border px-4 py-3" />
               <textarea placeholder="Description appétissante, accompagnements, portion…" value={product.description} onChange={e=>setProduct({...product,description:e.target.value})} rows={3} className="w-full rounded-xl border px-4 py-3" />
-              <label className="block text-sm font-bold">Accompagnements proposés
-                <input placeholder="Riz, lentilles, frites, crudités…" value={product.sides} onChange={e=>setProduct({...product,sides:e.target.value})} className="mt-2 w-full rounded-xl border px-4 py-3" />
-                <span className="mt-1 block text-xs font-normal text-stone-500">Séparez les choix par une virgule. Ils seront affichés sur la fiche du plat.</span>
-              </label>
+              <fieldset className="rounded-2xl border p-4">
+                <legend className="px-2 text-sm font-black">Accompagnements proposés</legend>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {sideChoices.map((choice) => (
+                    <label key={choice} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl bg-[#fff8ef] px-4 py-3 text-sm font-bold">
+                      <input type="checkbox" checked={product.sides.split(',').map(item=>item.trim()).includes(choice)} onChange={()=>toggleChoice('sides', choice)} className="h-5 w-5 accent-primary" />
+                      {choice}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
               <div className="grid gap-3 sm:grid-cols-3"><select value={product.category} onChange={e=>setProduct({...product,category:e.target.value})} className="rounded-xl border px-4 py-3">{categories.map(item=><option key={item}>{item}</option>)}</select><input required type="number" min="0.01" step="0.01" placeholder="Prix €" value={product.price} onChange={e=>setProduct({...product,price:e.target.value})} className="rounded-xl border px-4 py-3" /><input type="number" min="0" placeholder="Stock" value={product.stock} onChange={e=>setProduct({...product,stock:e.target.value})} className="rounded-xl border px-4 py-3" /></div>
+              {product.category === 'Menu' && <div className="space-y-4 rounded-2xl border border-[#f6c453]/70 bg-[#fff8df] p-4">
+                <div><h3 className="font-black">Composition du menu</h3><p className="text-xs text-stone-600">Le client verra les accompagnements et les boissons compris dans le prix.</p></div>
+                <fieldset>
+                  <legend className="text-sm font-black">Boissons proposées</legend>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                    {drinkChoices.map((choice) => (
+                      <label key={choice} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border bg-white px-4 py-3 text-sm font-bold">
+                        <input type="checkbox" checked={product.drinks.split(',').map(item=>item.trim()).includes(choice)} onChange={()=>toggleChoice('drinks', choice)} className="h-5 w-5 accent-primary" />
+                        {choice}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="text-sm font-bold">Accompagnements inclus<input type="number" min="0" max="10" value={product.includedSideCount} onChange={e=>setProduct({...product,includedSideCount:e.target.value})} className="mt-2 w-full rounded-xl border bg-white px-4 py-3" /></label>
+                  <label className="text-sm font-bold">Boissons incluses<input type="number" min="0" max="10" value={product.includedDrinkCount} onChange={e=>setProduct({...product,includedDrinkCount:e.target.value})} className="mt-2 w-full rounded-xl border bg-white px-4 py-3" /></label>
+                </div>
+              </div>}
               <label className="flex items-center gap-3 rounded-xl bg-[#fff8ef] p-3 text-sm font-bold"><input type="checkbox" checked={product.available} onChange={e=>setProduct({...product,available:e.target.checked})} /> Disponible à la commande</label>
               <div className="rounded-2xl border border-dashed border-primary/30 bg-[#fff8ef] p-4"><div className="flex flex-wrap items-center gap-3"><label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-black text-primary shadow-sm"><ImagePlus className="h-4 w-4" />{uploading ? 'Envoi…' : 'Choisir une photo'}<input type="file" accept="image/jpeg,image/png,image/webp" onChange={uploadImage} className="hidden" /></label>{product.imageUrl && <img src={product.imageUrl} alt="Aperçu" className="h-20 w-20 rounded-xl object-cover" />}</div></div>
               <div className="flex gap-2"><button disabled={savingProduct||uploading} className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-3 font-black text-white disabled:opacity-60"><Save className="h-4 w-4" />{savingProduct ? 'Enregistrement…' : editingId ? 'Enregistrer la modification' : canPublishDirectly ? 'Publier sur DELIKREOL' : 'Envoyer en validation'}</button>{editingId && <button type="button" onClick={()=>{setEditingId(null);setProduct(blankProduct);}} className="rounded-2xl border px-4 font-black">Annuler</button>}</div>
