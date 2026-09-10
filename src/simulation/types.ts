@@ -20,6 +20,7 @@ export interface SimProduct {
   imageEmoji: string;
   requiresColdChain: boolean;
   storageType: SimStorageType;
+  menuOptions?: { sides: string[]; drinks: string[]; includedSideCount: number; includedDrinkCount: number };
 }
 
 export interface SimVendor {
@@ -36,6 +37,7 @@ export interface SimVendor {
 export interface SimCartItem {
   product: SimProduct;
   quantity: number;
+  selectedOptions?: { sides: string[]; drinks: string[] };
 }
 
 export interface SimOrderItem {
@@ -43,6 +45,7 @@ export interface SimOrderItem {
   qty: number;
   price: number;
   requiresColdChain: boolean;
+  selectedOptions?: { sides: string[]; drinks: string[] };
 }
 
 export interface SimOrder {
