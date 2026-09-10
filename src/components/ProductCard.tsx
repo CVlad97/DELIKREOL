@@ -173,11 +173,11 @@ export function ProductCard({ product }: ProductCardProps) {
           aria-expanded={showSim}
         >
           <Sparkles className="h-3.5 w-3.5" />
-          Délai estimé
+          Disponibilité
         </button>
         {showSim && (
           <div className="rounded-xl border border-border bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
-            Estimation : 25–35 min · Confirmation par le partenaire
+            Indication non garantie : créneau, retrait ou livraison à confirmer par le partenaire selon disponibilité.
           </div>
         )}
 
