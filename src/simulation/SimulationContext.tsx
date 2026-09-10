@@ -51,7 +51,7 @@ interface SimulationContextValue {
   drivers: SimDriver[];
   relayPoints: SimRelayPoint[];
   notifications: SimNotification[];
-  addToCart: (product: SimProduct) => void;
+  addToCart: (product: SimProduct, selectedOptions?: { sides: string[]; drinks: string[] }) => void;
   removeFromCart: (productId: string) => void;
   updateCartQty: (productId: string, qty: number) => void;
   clearCart: () => void;
@@ -95,13 +95,14 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     ]);
   }, []);
 
-  const addToCart = useCallback((product: SimProduct) => {
+  const addToCart = useCallback((product: SimProduct, selectedOptions?: { sides: string[]; drinks: string[] }) => {
     setCart(prev => {
-      const existing = prev.find(c => c.product.id === product.id);
+      const key = JSON.stringify(selectedOptions || null);
+      const existing = prev.find(c => c.product.id === product.id && JSON.stringify(c.selectedOptions || null) === key);
       if (existing) {
-        return prev.map(c => c.product.id === product.id ? { ...c, quantity: c.quantity + 1 } : c);
+        return prev.map(c => c === existing ? { ...c, quantity: c.quantity + 1 } : c);
       }
-      return [...prev, { product, quantity: 1 }];
+      return [...prev, { product, quantity: 1, selectedOptions }];
     });
   }, []);
 
@@ -156,6 +157,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         qty: c.quantity,
         price: c.product.price,
         requiresColdChain: c.product.requiresColdChain,
+        selectedOptions: c.selectedOptions,
       })),
       totalAmount: total,
       deliveryFee,
