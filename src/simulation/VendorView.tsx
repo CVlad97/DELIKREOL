@@ -90,6 +90,9 @@ export function VendorView() {
  <span className="font-bold">{(item.qty * item.price).toFixed(2)} EUR</span>
  </div>
  ))}
+ {o.items.flatMap(item => item.selectedOptions ? [`Accompagnement : ${item.selectedOptions.sides.join(', ')}`, `Boisson : ${item.selectedOptions.drinks.join(', ')}`] : []).map(line => (
+ <div key={line} className="text-xs font-bold text-primary">{line}</div>
+ ))}
  </div>
  <div className="flex items-center gap-3 text-xs text-muted-foreground">
  <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{DELIVERY_TYPE_LABELS[o.deliveryType]}</span>

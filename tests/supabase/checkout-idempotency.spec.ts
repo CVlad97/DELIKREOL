@@ -80,7 +80,7 @@ describe('suivi et administration — accès Supabase sécurisé', () => {
 
     expect(source).toContain("supabase.functions.invoke('public-order-status'");
     expect(source).not.toContain(".from('orders')");
-    expect(source).toContain('/^[0-9a-f]{32}$/i');
+    expect(source).toContain('/^[0-9a-f]{16}$/i');
     expect(edgeFunction).not.toContain('customer_phone');
     expect(edgeFunction).not.toContain('customer_email');
     expect(edgeFunction).not.toContain('customer_name');

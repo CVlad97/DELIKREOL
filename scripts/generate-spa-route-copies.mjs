@@ -15,6 +15,7 @@ const routes = [
   'marches-publics',
   'comptabilite',
   'demo',
+  'simulation-partenaires',
   'devenir-livreur',
   'devenir-point-relais',
   'points-relais',

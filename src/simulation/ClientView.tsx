@@ -18,6 +18,16 @@ export function ClientView() {
  const [address, setAddress] = useState('Rue de la Liberte, Fort-de-France');
  const [selectedRelay, setSelectedRelay] = useState('');
  const [tab, setTab] = useState<'shop' |'orders'>('shop');
+ const [menuDraft, setMenuDraft] = useState<Record<string, { sides: string[]; drinks: string[] }>>({});
+
+ const toggleMenuChoice = (productId: string, group: 'sides' | 'drinks', value: string, max: number) => {
+ setMenuDraft(current => {
+ const selection = current[productId] || { sides: [], drinks: [] };
+ const values = selection[group];
+ const next = values.includes(value) ? values.filter(item => item !== value) : values.length < max ? [...values, value] : values;
+ return { ...current, [productId]: { ...selection, [group]: next } };
+ });
+ };
 
  const filteredProducts = selectedVendor
  ? products.filter(p => p.vendorId === selectedVendor && p.available)
@@ -98,6 +108,8 @@ export function ClientView() {
  <div className="grid grid-cols-2 gap-3">
  {filteredProducts.map(p => {
  const inCart = cart.find(c => c.product.id === p.id);
+ const selection = menuDraft[p.id] || { sides: [], drinks: [] };
+ const menuComplete = !p.menuOptions || (selection.sides.length === p.menuOptions.includedSideCount && selection.drinks.length === p.menuOptions.includedDrinkCount);
  return (
  <div key={p.id} className="bg-card rounded-2xl border border-border/50 p-4 flex flex-col">
  <div className="w-full h-20 bg-muted rounded-xl mb-3 flex items-center justify-center text-3xl">
@@ -105,6 +117,7 @@ export function ClientView() {
  </div>
  <h4 className="font-bold text-foreground text-sm leading-tight">{p.name}</h4>
  <p className="text-[11px] text-muted-foreground mt-0.5">{p.vendorName}</p>
+ {p.menuOptions && <div className="mt-3 space-y-2 rounded-xl bg-muted/60 p-2 text-[11px]"><div><strong>1. Accompagnement ({selection.sides.length}/{p.menuOptions.includedSideCount})</strong><div className="mt-1 flex flex-wrap gap-1">{p.menuOptions.sides.map(choice => <button key={choice} type="button" onClick={() => toggleMenuChoice(p.id,'sides',choice,p.menuOptions!.includedSideCount)} className={`rounded-full px-2 py-1 ${selection.sides.includes(choice)?'bg-primary text-white':'bg-white'}`}>{choice}</button>)}</div></div><div><strong>2. Boisson ({selection.drinks.length}/{p.menuOptions.includedDrinkCount})</strong><div className="mt-1 flex flex-wrap gap-1">{p.menuOptions.drinks.map(choice => <button key={choice} type="button" onClick={() => toggleMenuChoice(p.id,'drinks',choice,p.menuOptions!.includedDrinkCount)} className={`rounded-full px-2 py-1 ${selection.drinks.includes(choice)?'bg-primary text-white':'bg-white'}`}>{choice}</button>)}</div></div></div>}
  {p.requiresColdChain && (
  <div className="flex items-center gap-1 mt-1">
  <Snowflake className="w-3 h-3 text-sky-500" />
@@ -119,12 +132,12 @@ export function ClientView() {
  <Minus className="w-3 h-3" />
  </button>
  <span className="text-sm font-black w-5 text-center">{inCart.quantity}</span>
- <button onClick={() => addToCart(p)} className="w-7 h-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center">
+ <button onClick={() => addToCart(p, inCart.selectedOptions)} className="w-7 h-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center">
  <Plus className="w-3 h-3" />
  </button>
  </div>
  ) : (
- <button onClick={() => addToCart(p)} className="w-8 h-8 rounded-xl bg-primary text-primary-foreground flex items-center justify-center hover:scale-110 transition-transform">
+ <button disabled={!menuComplete} aria-label={menuComplete ? `Ajouter ${p.name}` : 'Complétez le menu'} onClick={() => addToCart(p, p.menuOptions ? selection : undefined)} className="w-8 h-8 rounded-xl bg-primary text-primary-foreground flex items-center justify-center hover:scale-110 transition-transform disabled:cursor-not-allowed disabled:opacity-30">
  <Plus className="w-4 h-4" />
  </button>
  )}
@@ -157,6 +170,7 @@ export function ClientView() {
  <div>
  <p className="font-bold text-sm text-foreground">{c.product.name}</p>
  <p className="text-xs text-muted-foreground">{c.product.price.toFixed(2)} EUR x {c.quantity}</p>
+ {c.selectedOptions && <p className="text-[11px] text-muted-foreground">{c.selectedOptions.sides.join(', ')} · {c.selectedOptions.drinks.join(', ')}</p>}
  </div>
  </div>
  <div className="flex items-center gap-2">

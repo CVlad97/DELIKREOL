@@ -9,6 +9,7 @@ export const SIM_VENDORS: SimVendor[] = [
 ];
 
 export const SIM_PRODUCTS: SimProduct[] = [
+ { id:'sp-menu', vendorId:'sv1', vendorName:'Chez Tatie Mireille', name:'Menu créole — démonstration', description:'Exemple fictif pour apprendre à composer un menu', category:'Menus', price: 16.00, available: true, stock: 20, imageEmoji:'🍽️', requiresColdChain: false, storageType:'ambient', menuOptions: { sides:['Riz','Lentilles','Crudités'], drinks:['Eau','Jus local'], includedSideCount:1, includedDrinkCount:1 } },
  { id:'sp1', vendorId:'sv1', vendorName:'Chez Tatie Mireille', name:'Colombo de poulet', description:'Poulet marine aux epices colombo, riz et haricots rouges', category:'Plats', price: 12.50, available: true, stock: 25, imageEmoji:'🍗', requiresColdChain: false, storageType:'ambient' },
  { id:'sp2', vendorId:'sv1', vendorName:'Chez Tatie Mireille', name:'Accras de morue (12 pcs)', description:'Beignets croustillants a la morue', category:'Entrees', price: 8.00, available: true, stock: 40, imageEmoji:'🧆', requiresColdChain: false, storageType:'ambient' },
  { id:'sp3', vendorId:'sv1', vendorName:'Chez Tatie Mireille', name:'Poulet boucane', description:'Poulet fume au bois de canne, sauce chien', category:'Plats', price: 14.00, available: true, stock: 15, imageEmoji:'🍖', requiresColdChain: false, storageType:'ambient' },
