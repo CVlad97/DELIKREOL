@@ -2,6 +2,7 @@ import { useEffect, useState } from'react';
 import { Layout } from'../components/layout/Layout';
 import { isSupabaseConfigured, supabase } from'../lib/supabase';
 import { readDemoOrders, seedDemoData } from'../data/demoDb';
+import { formatMenuSelection } from '../types/menu';
 
 const allowDemoFallback = import.meta.env.VITE_ERP_FALLBACK_DEMO !=='false';
 const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER ||'596696653589';
@@ -77,7 +78,7 @@ export function OrderStatusPage() {
      }
 
      if (isSupabaseConfigured) {
-       if (!/^[0-9a-f]{32}$/i.test(trimmed)) throw new Error('TRACKING_TOKEN_REQUIRED');
+       if (!/^[0-9a-f]{16}$/i.test(trimmed)) throw new Error('TRACKING_TOKEN_REQUIRED');
        const { data, error: supabaseError } = await supabase.functions.invoke('public-order-status', {
          body: { tracking_token: trimmed },
        });
@@ -92,7 +93,7 @@ export function OrderStatusPage() {
          created_at?: string;
          commune?: string;
          mode?: string;
-         items?: Array<{ product_id?: string; name?: string; quantity?: number; unit_price?: number }>;
+         items?: Array<{ product_id?: string; name?: string; quantity?: number; unit_price?: number; selected_options?: { sides: string[]; drinks: string[] } }>;
        } | undefined;
        if (!orderData?.order_number) throw new Error('NOT_FOUND');
 
@@ -110,6 +111,7 @@ export function OrderStatusPage() {
            name: item.name,
            quantity: item.quantity,
            price: item.unit_price,
+           selected_options: item.selected_options,
          })),
        });
        return;
@@ -177,7 +179,7 @@ export function OrderStatusPage() {
 
  {(result.commune || result.mode) && <div className="mt-2 text-sm text-slate-600">{result.commune ||''} {result.mode ? `· ${result.mode}` :''}</div>}
 
- <div className="mt-4"><div className="text-sm font-semibold mb-2">Articles</div><div className="space-y-2">{(result.items || []).map((item: any, index: number) => (<div key={item.id || index} className="flex items-center justify-between text-sm"><span>{item.name || item.productId || item.product_id ||'Article'}</span><span>x{item.quantity || 1}</span></div>))}</div></div>
+ <div className="mt-4"><div className="text-sm font-semibold mb-2">Articles</div><div className="space-y-2">{(result.items || []).map((item: any, index: number) => (<div key={item.id || index} className="rounded-xl border border-orange-100 bg-white p-3 text-sm"><div className="flex items-center justify-between"><span className="font-semibold">{item.name || item.productId || item.product_id ||'Article'}</span><span>x{item.quantity || 1}</span></div>{formatMenuSelection(item.selected_options).map((line) => <div key={line} className="mt-1 text-xs text-slate-600">{line}</div>)}</div>))}</div></div>
 
  <div className="mt-6 flex flex-col sm:flex-row gap-3"><a href={whatsappLink} className="px-5 py-3 rounded-xl bg-green-600 text-white font-bold text-center">WhatsApp support</a><a href={baseUrl} className="px-5 py-3 rounded-xl border border-orange-300 text-primary font-bold text-center">Retour accueil</a></div>
  </div>
