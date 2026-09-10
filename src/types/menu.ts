@@ -11,6 +11,7 @@ export interface MenuSelection {
 }
 
 /** Ignore safely any incomplete menu configuration returned by the public catalogue. */
+/** The checkout function remains the authority for validating a customer's final choices. */
 export function normalizeMenuOptions(value: unknown): MenuOptions | null {
   if (!value || typeof value !== 'object') return null;
   const record = value as Record<string, unknown>;
