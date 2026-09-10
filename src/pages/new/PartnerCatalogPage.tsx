@@ -1,5 +1,5 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { CheckCircle2, ChefHat, Eye, ImagePlus, Loader2, Pencil, Plus, Save, ShieldCheck, Store, Trash2 } from 'lucide-react';
+import { CheckCircle2, ChefHat, Eye, ImagePlus, Loader2, Pencil, PlayCircle, Plus, Save, ShieldCheck, Sparkles, Store, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Layout } from '../../components/layout/Layout';
 import { useAuth } from '../../contexts/AuthContext';
@@ -51,6 +51,10 @@ const blankProduct = {
   sides: '', drinks: '', includedSideCount: '1', includedDrinkCount: '1',
 };
 const partnerTutorialImage = `${import.meta.env.BASE_URL}tutorials/tuto-ajouter-plat-delikreol.jpg`;
+const menuSuggestions = [
+  { label: 'Créole classique', sides: ['Riz', 'Lentilles', 'Crudités'], drinks: ['Eau', 'Jus local'] },
+  { label: 'Snack', sides: ['Frites', 'Crudités'], drinks: ['Eau', 'Soda'] },
+];
 
 function PartnerTutorial() {
   return (
@@ -100,6 +104,18 @@ export default function PartnerCatalogPage() {
         : [...selected, choice];
       return { ...current, [field]: next.join(', ') };
     });
+  };
+
+  const applyMenuSuggestion = (suggestion: typeof menuSuggestions[number]) => {
+    setProduct((current) => ({
+      ...current,
+      category: 'Menu',
+      sides: suggestion.sides.join(', '),
+      drinks: suggestion.drinks.join(', '),
+      includedSideCount: '1',
+      includedDrinkCount: '1',
+    }));
+    productFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const openProductForm = () => {
@@ -313,7 +329,7 @@ export default function PartnerCatalogPage() {
       <div className="mx-auto max-w-6xl space-y-6">
         <section className="overflow-hidden rounded-[2.25rem] bg-gradient-to-br from-[#26150f] via-[#5c2819] to-[#d86a35] p-7 text-white shadow-2xl sm:p-10">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-xs font-black uppercase tracking-[.25em] text-orange-200">Studio partenaire</p><h1 className="mt-3 text-4xl font-black sm:text-5xl">{vendor.business_name || 'Ma vitrine'}</h1><p className="mt-3 max-w-2xl text-orange-50/85">Mettez à jour votre présentation, vos plats et vos menus depuis votre téléphone.</p></div>
-          <div className="flex flex-wrap gap-2"><button type="button" onClick={openProductForm} className="inline-flex items-center gap-2 rounded-full bg-[#f6c453] px-5 py-3 text-sm font-black text-[#26150f] shadow-lg"><Plus className="h-5 w-5" /> Ajouter un plat</button><Link to="/partner-documents" className="rounded-full bg-white/15 px-4 py-2 text-sm font-black">Mes documents</Link>{vendor.is_public && <Link to={`/traiteur/${slugify(vendor.business_name || '')}`} className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-[#5c2819]"><Eye className="h-4 w-4" /> Voir ma vitrine</Link>}</div></div>
+          <div className="flex flex-wrap gap-2"><button type="button" onClick={openProductForm} className="inline-flex items-center gap-2 rounded-full bg-[#f6c453] px-5 py-3 text-sm font-black text-[#26150f] shadow-lg"><Plus className="h-5 w-5" /> Ajouter un plat</button><Link to="/simulation-partenaires" className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-black"><PlayCircle className="h-4 w-4" /> Tutoriel interactif</Link><Link to="/partner-documents" className="rounded-full bg-white/15 px-4 py-2 text-sm font-black">Mes documents</Link>{vendor.is_public && <Link to={`/traiteur/${slugify(vendor.business_name || '')}`} className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-[#5c2819]"><Eye className="h-4 w-4" /> Voir ma vitrine</Link>}</div></div>
           <div className="mt-7 grid gap-3 sm:grid-cols-3"><div className="rounded-2xl bg-white/10 p-4"><p className="text-xs text-orange-100">Produits</p><p className="mt-1 text-2xl font-black">{products.length}</p></div><div className="rounded-2xl bg-white/10 p-4"><p className="text-xs text-orange-100">Disponibles</p><p className="mt-1 text-2xl font-black">{availableCount}</p></div><div className="rounded-2xl bg-white/10 p-4"><p className="text-xs text-orange-100">Publiés</p><p className="mt-1 text-2xl font-black">{publishedCount}</p></div></div>
         </section>
 
@@ -322,6 +338,13 @@ export default function PartnerCatalogPage() {
           <ol className="mt-2 grid gap-2 text-sm text-stone-700 sm:grid-cols-3"><li><strong>1.</strong> Appuyez sur « + Ajouter un plat ».</li><li><strong>2.</strong> Indiquez nom, prix, stock, accompagnements et photo.</li><li><strong>3.</strong> Enregistrez : {canPublishDirectly ? 'le plat apparaît immédiatement sur DELIKREOL.' : 'DELIKREOL contrôle le plat avant publication.'}</li></ol>
         </section>
         <PartnerTutorial />
+
+        <section className="rounded-[2rem] border border-primary/20 bg-white p-6 shadow-soft">
+          <div className="flex items-start gap-3"><Sparkles className="mt-1 h-6 w-6 text-primary" /><div><h2 className="text-xl font-black">Propositions de menu</h2><p className="text-sm text-stone-600">Ces exemples préremplissent seulement le formulaire. Vérifiez chaque choix avec ce que vous cuisinez réellement avant d’enregistrer.</p></div></div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {menuSuggestions.map((suggestion) => <button key={suggestion.label} type="button" onClick={() => applyMenuSuggestion(suggestion)} className="rounded-2xl border border-[#f6c453]/70 bg-[#fff8df] p-4 text-left transition hover:border-primary"><span className="font-black">{suggestion.label}</span><span className="mt-1 block text-xs text-stone-600">{suggestion.sides.join(', ')} · {suggestion.drinks.join(', ')}</span><span className="mt-2 block text-xs font-black text-primary">Utiliser comme brouillon</span></button>)}
+          </div>
+        </section>
 
         <section className="grid gap-6 lg:grid-cols-2">
           <form onSubmit={saveProfile} className="rounded-[2rem] border border-primary/20 bg-white p-6 shadow-soft">
