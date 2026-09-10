@@ -10,6 +10,7 @@ export interface MenuSelection {
   drinks: string[];
 }
 
+/** Ignore safely any incomplete menu configuration returned by the public catalogue. */
 export function normalizeMenuOptions(value: unknown): MenuOptions | null {
   if (!value || typeof value !== 'object') return null;
   const record = value as Record<string, unknown>;
