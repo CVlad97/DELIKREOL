@@ -8,6 +8,7 @@ export type StorageType = 'cold' | 'hot' | 'dry' | 'frozen';
 export type DepositStatus = 'awaiting_deposit' | 'deposited' | 'picked_up' | 'expired';
 export type PaymentStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';
 export type CompensationType = 'per_pickup' | 'per_storage' | 'percentage';
+import type { MenuOptions, MenuSelection } from './menu';
 
 export interface Profile {
   id: string;
@@ -54,6 +55,7 @@ export interface Product {
   stock_quantity: number | null;
   created_at: string;
   vendor?: Vendor;
+  menu_options?: MenuOptions | null;
 }
 
 export interface Order {
@@ -82,6 +84,7 @@ export interface OrderItem {
   unit_price: number;
   subtotal: number;
   vendor_commission: number;
+  selected_options?: MenuSelection;
   product?: Product;
 }
 

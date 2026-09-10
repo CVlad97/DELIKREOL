@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AlertCircle, Loader, RefreshCw } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { formatMenuSelection, type MenuSelection } from '../../types/menu';
+
+interface OrderLineRow {
+  id: string;
+  product_name: string | null;
+  vendor_name: string | null;
+  quantity: number;
+  selected_options: MenuSelection | null;
+}
 
 interface OrderRow {
   id: string;
@@ -13,6 +22,7 @@ interface OrderRow {
   status: string;
   payment_status: string | null;
   created_at: string;
+  items: OrderLineRow[];
 }
 
 interface LocalOrderRow {
@@ -62,7 +72,7 @@ export function AdminCommandes() {
     const { data, error: queryError } = await supabase
       .from('orders')
       .select(
-        'id, order_number, customer_name, customer_commune, order_mode, delivery_type, total_amount, status, payment_status, created_at',
+        'id, order_number, customer_name, customer_commune, order_mode, delivery_type, total_amount, status, payment_status, created_at, items:order_items(id, product_name, vendor_name, quantity, selected_options)',
       )
       .order('created_at', { ascending: false })
       .limit(100);
@@ -128,7 +138,7 @@ export function AdminCommandes() {
           <table className="w-full">
             <thead className="border-b bg-muted/30">
               <tr>
-                {['Commande', 'Client', 'Commune', 'Mode', 'Total', 'Date', 'Statut', 'Paiement'].map(
+                {['Commande', 'Composition', 'Client', 'Commune', 'Mode', 'Total', 'Date', 'Statut', 'Paiement'].map(
                   (label) => (
                     <th key={label} className="px-4 py-3 text-left text-xs font-semibold uppercase text-muted-foreground">
                       {label}
@@ -141,6 +151,17 @@ export function AdminCommandes() {
               {orders.map((order) => (
                 <tr key={order.id} className="hover:bg-muted/10">
                   <td className="px-4 py-3 text-sm font-bold">{order.order_number || order.id}</td>
+                  <td className="min-w-64 px-4 py-3 text-sm">
+                    <div className="space-y-2">
+                      {(order.items || []).map((item) => (
+                        <div key={item.id} className="rounded-lg bg-muted/30 p-2">
+                          <div className="font-semibold">{item.product_name || 'Article'} × {item.quantity}</div>
+                          <div className="text-xs text-muted-foreground">{item.vendor_name || 'Partenaire'}</div>
+                          {formatMenuSelection(item.selected_options || undefined).map((line) => <div key={line} className="text-xs text-foreground">{line}</div>)}
+                        </div>
+                      ))}
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-sm">{order.customer_name || '—'}</td>
                   <td className="px-4 py-3 text-sm">{order.customer_commune || '—'}</td>
                   <td className="px-4 py-3 text-sm">{order.order_mode || order.delivery_type || '—'}</td>

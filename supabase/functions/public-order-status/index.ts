@@ -59,7 +59,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: items, error: itemsError } = await admin
       .from("order_items")
-      .select("product_id, product_name, quantity, unit_price, vendor_name")
+      .select("product_id, product_name, quantity, unit_price, vendor_name, selected_options")
       .eq("order_id", order.id);
 
     if (itemsError) throw itemsError;
@@ -80,6 +80,7 @@ Deno.serve(async (req: Request) => {
           quantity: item.quantity,
           unit_price: item.unit_price,
           vendor_name: item.vendor_name,
+          selected_options: item.selected_options,
         })),
       },
     });

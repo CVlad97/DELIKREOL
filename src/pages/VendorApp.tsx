@@ -3,6 +3,7 @@ import { Navigation } from '../components/Navigation';
 import { ProDashboard } from './ProDashboard';
 import { VendorProducts } from './vendor/VendorProducts';
 import { PartnerDashboardPage } from './PartnerDashboardPage';
+import { VendorOrders } from './vendor/VendorOrders';
 
 export function VendorApp() {
   const [currentView, setCurrentView] = useState('dashboard');
@@ -20,7 +21,7 @@ export function VendorApp() {
       case 'documents':
         return <PartnerDashboardPage />;
       case 'orders':
-        return <VendorProducts />;
+        return <VendorOrders />;
       case 'stats':
         return <ProDashboard onNavigate={setCurrentView} />;
       default:
