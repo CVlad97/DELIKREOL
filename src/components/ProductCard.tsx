@@ -1,10 +1,11 @@
 import { Plus, Sparkles } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Product } from '../types';
 import { useCart } from '../contexts/CartContext';
 import { useToast } from '../contexts/ToastContext';
 import { ProductThumbnail } from './ProductThumbnail';
 import { formatEuro, traiteurSpaces } from '../data/traiteurs';
+import { normalizeMenuOptions, type MenuSelection } from '../types/menu';
 
 interface ProductCardProps {
   product: Product;
@@ -30,9 +31,40 @@ export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
   const { showSuccess } = useToast();
   const [showSim, setShowSim] = useState(false);
+  const [selectedSides, setSelectedSides] = useState<string[]>([]);
+  const [selectedDrinks, setSelectedDrinks] = useState<string[]>([]);
   const vendorLabel = product.vendor?.business_name ?? (product.vendor_id ? 'Vendeur local' : null);
   const isAvailable = product.is_available !== false;
   const partnerImage = findPartnerImage(vendorLabel);
+  const menuOptions = useMemo(() => normalizeMenuOptions(product.menu_options), [product.menu_options]);
+
+  const menuComplete = !menuOptions || (
+    selectedSides.length === menuOptions.included_side_count &&
+    selectedDrinks.length === menuOptions.included_drink_count
+  );
+
+  const toggleChoice = (
+    value: string,
+    current: string[],
+    max: number,
+    setter: (values: string[]) => void,
+  ) => {
+    if (current.includes(value)) {
+      setter(current.filter((item) => item !== value));
+      return;
+    }
+    if (current.length >= max) return;
+    setter([...current, value]);
+  };
+
+  const addConfiguredProduct = () => {
+    if (!menuComplete) return;
+    const selection: MenuSelection | undefined = menuOptions
+      ? { sides: selectedSides, drinks: selectedDrinks }
+      : undefined;
+    addItem(product, selection);
+    showSuccess('Ajouté au panier');
+  };
 
   return (
     <article className="group overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-elegant">
@@ -59,17 +91,74 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
 
+        {menuOptions && (menuOptions.sides.length > 0 || menuOptions.drinks.length > 0) && (
+          <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-3">
+            {menuOptions.sides.length > 0 && (
+              <fieldset className="space-y-2">
+                <legend className="text-sm font-bold text-foreground">
+                  Accompagnements — choisissez {menuOptions.included_side_count}
+                </legend>
+                <div className="grid grid-cols-2 gap-2">
+                  {menuOptions.sides.map((side) => {
+                    const checked = selectedSides.includes(side);
+                    const disabled = !checked && selectedSides.length >= menuOptions.included_side_count;
+                    return (
+                      <label key={side} className="flex min-h-10 items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          disabled={disabled}
+                          onChange={() => toggleChoice(side, selectedSides, menuOptions.included_side_count, setSelectedSides)}
+                        />
+                        <span>{side}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </fieldset>
+            )}
+
+            {menuOptions.drinks.length > 0 && (
+              <fieldset className="space-y-2">
+                <legend className="text-sm font-bold text-foreground">
+                  Boissons — choisissez {menuOptions.included_drink_count}
+                </legend>
+                <div className="grid grid-cols-2 gap-2">
+                  {menuOptions.drinks.map((drink) => {
+                    const checked = selectedDrinks.includes(drink);
+                    const disabled = !checked && selectedDrinks.length >= menuOptions.included_drink_count;
+                    return (
+                      <label key={drink} className="flex min-h-10 items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          disabled={disabled}
+                          onChange={() => toggleChoice(drink, selectedDrinks, menuOptions.included_drink_count, setSelectedDrinks)}
+                        />
+                        <span>{drink}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </fieldset>
+            )}
+
+            {!menuComplete && (
+              <div className="text-xs font-semibold text-destructive">
+                Complétez la composition avant d'ajouter au panier.
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="flex items-center justify-between gap-3">
           <div className="text-xl font-black text-foreground">
             {formatEuro(product.price)}
           </div>
           <button
             type="button"
-            onClick={() => {
-              addItem(product);
-              showSuccess('Ajouté au panier');
-            }}
-            disabled={!isAvailable}
+            onClick={addConfiguredProduct}
+            disabled={!isAvailable || !menuComplete}
             className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition-all hover:bg-primary hover:shadow-warm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Plus className="h-4 w-4" />
