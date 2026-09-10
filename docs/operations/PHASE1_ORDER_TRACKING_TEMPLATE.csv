@@ -1,0 +1,2 @@
+date_heure,numero_commande,canal,client_nom,client_whatsapp,commune,partenaire,telephone_partenaire,produits,accompagnements,total_estime,mode,retrait_ou_livraison,creneau_demande,statut,operateur,commentaire
+2026-09-10 19:45,DK-TEST-001,WhatsApp,Client test,0696000000,Rivière-Pilote,Snack Savè Peyi'A,+596696002764,Entrecôte,"Riz + Lentilles",18.00,Test manuel,Retrait à confirmer,Soir,annulé,Vladimir,"TEST DELIKREOL — NE PAS PRÉPARER — COMMANDE À ANNULER"
