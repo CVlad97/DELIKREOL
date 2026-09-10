@@ -1,15 +1,17 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Product } from '../lib/supabase';
+import { menuSelectionKey, type MenuSelection } from '../types/menu';
 
 interface CartItem extends Product {
   quantity: number;
+  cart_line_id: string;
 }
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (product: Product) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  addItem: (product: Product, selection?: MenuSelection) => void;
+  removeItem: (cartLineId: string) => void;
+  updateQuantity: (cartLineId: string, quantity: number) => void;
   clearCart: () => void;
   total: number;
   itemCount: number;
@@ -35,7 +37,12 @@ function readInitialCart(): CartItem[] {
 
   try {
     const parsed = JSON.parse(saved);
-    return Array.isArray(parsed) ? (parsed as CartItem[]) : [];
+    return Array.isArray(parsed)
+      ? (parsed as Array<CartItem & { cart_line_id?: string }>).map((item) => ({
+          ...item,
+          cart_line_id: item.cart_line_id || `${item.id}:${menuSelectionKey(item.selected_options)}`,
+        }))
+      : [];
   } catch {
     localStorage.removeItem('cart');
     return [];
@@ -49,29 +56,30 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('cart', JSON.stringify(items));
   }, [items]);
 
-  const addItem = (product: Product) => {
+  const addItem = (product: Product, selection?: MenuSelection) => {
+    const cartLineId = `${product.id}:${menuSelectionKey(selection)}`;
     setItems((previousItems) => {
-      const existing = previousItems.find((item) => item.id === product.id);
+      const existing = previousItems.find((item) => item.cart_line_id === cartLineId);
       if (existing) {
         return previousItems.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
+          item.cart_line_id === cartLineId ? { ...item, quantity: item.quantity + 1 } : item,
         );
       }
-      return [...previousItems, { ...product, quantity: 1 }];
+      return [...previousItems, { ...product, selected_options: selection, cart_line_id: cartLineId, quantity: 1 }];
     });
   };
 
-  const removeItem = (productId: string) => {
-    setItems((previousItems) => previousItems.filter((item) => item.id !== productId));
+  const removeItem = (cartLineId: string) => {
+    setItems((previousItems) => previousItems.filter((item) => item.cart_line_id !== cartLineId));
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = (cartLineId: string, quantity: number) => {
     if (quantity <= 0) {
-      removeItem(productId);
+      removeItem(cartLineId);
       return;
     }
     setItems((previousItems) =>
-      previousItems.map((item) => (item.id === productId ? { ...item, quantity } : item)),
+      previousItems.map((item) => (item.cart_line_id === cartLineId ? { ...item, quantity } : item)),
     );
   };
 

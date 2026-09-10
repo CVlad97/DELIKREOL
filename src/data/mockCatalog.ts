@@ -3,6 +3,8 @@ function vendorImage(path: string): string {
   return `${base}${path.replace(/^\//, '')}`;
 }
 
+import type { MenuOptions } from '../types/menu';
+
 export const photoAConfirmer = vendorImage('vendors/_fallback/photo-a-confirmer.svg');
 
 export interface LocalProduct {
@@ -24,6 +26,7 @@ export interface LocalProduct {
   descQuality?: 'validée' | 'à corriger' | 'composition manquante' | 'à valider';
   /** Tags santé : diabétique, sans-sel, fibre, sans-gluten, vegan, etc. */
   healthTags?: HealthTag[];
+  menuOptions?: MenuOptions | null;
 }
 
 export type HealthTag = 'diabétique' | 'sans-sel' | 'fibre' | 'sans-gluten' | 'vegan' | 'equilibre' | 'brunch' | 'traiteur-evenementiel' | 'fait-maison';

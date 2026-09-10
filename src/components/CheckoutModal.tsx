@@ -18,6 +18,7 @@ import {
   getStableCheckoutIdempotencyKey,
 } from'../utils/checkoutIdempotency';
 import { Order } from'../types';
+import { formatMenuSelection } from'../types/menu';
 
 interface CheckoutModalProps {
  isOpen: boolean;
@@ -101,9 +102,10 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
  `Livraison: ${
  deliveryType ==='home_delivery' ? `domicile (${address ||'adresse à préciser'})` :'retrait'
  }`,'','Panier:',
- ...items.map(
- (item) => `- ${item.name} x${item.quantity} (${(item.price * item.quantity).toFixed(2)} €)`,
- ),'',
+ ...items.flatMap((item) => [
+ `- ${item.name} x${item.quantity} (${(item.price * item.quantity).toFixed(2)} €)`,
+ ...formatMenuSelection(item.selected_options).map((line) => `  ${line}`),
+ ]),'',
  notes.trim() ? `Note: ${notes.trim()}` :'','',
  `Paiement souhaité: ${paymentLabel}`,
  ]
@@ -135,7 +137,7 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
  paymentMode === 'bank_transfer' ? 'qonto_transfer' : 'cash_on_delivery';
 
  const fingerprint = buildCheckoutFingerprint(
- items.map((item) => ({ id: item.id, quantity: item.quantity })),
+ items.map((item) => ({ id: item.cart_line_id, quantity: item.quantity })),
  {
  mode: deliveryType,
  provider: paymentProviderId,
@@ -160,7 +162,7 @@ export function CheckoutModal({ isOpen, onClose, onOrderCreated }: CheckoutModal
  const { data, error: fnError } = await supabase.functions.invoke('checkout-order', {
  body: {
  idempotency_key: idempotencyKey,
- items: items.map((item) => ({ id: item.id, quantity: item.quantity })),
+ items: items.map((item) => ({ id: item.id, quantity: item.quantity, selected_options: item.selected_options })),
  mode: deliveryType,
  address: deliveryType === 'home_delivery' ? address.trim() : undefined,
  phone: customerPhone,

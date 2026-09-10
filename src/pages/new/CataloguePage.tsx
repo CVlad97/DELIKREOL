@@ -15,6 +15,7 @@ import {
 import { BackBar } from '../../components/BackBar';
 import { ImageLightbox } from '../../components/ImageLightbox';
 import { InteractiveMap } from '../../components/InteractiveMap';
+import { MenuCompositionModal } from '../../components/MenuCompositionModal';
 import { ProductThumbnail } from '../../components/ProductThumbnail';
 import { Layout } from '../../components/layout/Layout';
 import { useCart } from '../../contexts/CartContext';
@@ -27,11 +28,12 @@ import {
 } from '../../data/mockCatalog';
 import { martiniqueCommunes, normalizeCommuneQuery } from '../../data/martiniqueCommunes';
 import { PUBLIC_HIDDEN_PRODUCT_TRAITEURS, PUBLIC_HIDDEN_TRAITEURS, traiteurSpaces, type TraiteurSpace } from '../../data/traiteurs';
-import type { Product } from '../../lib/supabase';
+import { isSupabaseConfigured, supabase, type Product } from '../../lib/supabase';
 import { calculateDistanceKm } from '../../services/geolocation';
 import { isUsableThumbnail } from '../../services/catalogImageResolver';
 import { trackPublicView } from '../../services/metricsService';
 import { setPageMeta } from '../../services/seo';
+import { normalizeMenuOptions, type MenuOptions, type MenuSelection } from '../../types/menu';
 
 type SortMode = 'default' | 'prix-croissant' | 'prix-decroissant' | 'disponible' | 'distance';
 type DeliveryOption = 'retraite' | 'bateau' | 'infirmiere';
@@ -93,8 +95,22 @@ function toCartProduct(product: LocalProduct): Product {
     is_available: product.available !== false,
     stock_quantity: null,
     created_at: new Date().toISOString(),
+    menu_options: product.menuOptions,
   };
 }
+
+type PublicProductRow = {
+  id: string;
+  vendor_id: string;
+  name: string;
+  description: string | null;
+  category: string | null;
+  price: number | string;
+  image_url: string | null;
+  is_available: boolean;
+  menu_options: MenuOptions | null;
+  vendor: { business_name: string | null; address: string | null } | null;
+};
 
 export default function CataloguePage() {
   const { t } = useTranslation();
@@ -115,6 +131,8 @@ export default function CataloguePage() {
   const [locating, setLocating] = useState(false);
   const [position, setPosition] = useState<{ latitude: number; longitude: number } | null>(null);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string; caption: string } | null>(null);
+  const [liveProducts, setLiveProducts] = useState<LocalProduct[]>([]);
+  const [productToCompose, setProductToCompose] = useState<LocalProduct | null>(null);
 
   useEffect(() => {
     setPageMeta(
@@ -123,6 +141,35 @@ export default function CataloguePage() {
       'catalogue, plats créoles, traiteurs Martinique, livraison repas',
     );
     trackPublicView();
+  }, []);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    let cancelled = false;
+    void supabase
+      .from('products')
+      .select('id,vendor_id,name,description,category,price,image_url,is_available,menu_options,vendor:vendors!inner(business_name,address)')
+      .eq('is_available', true)
+      .eq('is_public', true)
+      .eq('is_demo', false)
+      .eq('status', 'verified')
+      .then(({ data, error }) => {
+        if (cancelled || error) return;
+        const products = (data as unknown as PublicProductRow[]).map((row) => ({
+          id: row.id,
+          name: row.name,
+          vendor: row.vendor?.business_name || row.vendor_id,
+          price: Number(row.price),
+          category: row.category || 'Plats',
+          image: row.image_url || undefined,
+          description: row.description || undefined,
+          zone: row.vendor?.address || undefined,
+          available: row.is_available,
+          menuOptions: normalizeMenuOptions(row.menu_options),
+        }));
+        setLiveProducts(products);
+      });
+    return () => { cancelled = true; };
   }, []);
 
   const vendorMap = useMemo<Map<string, VendorData>>(() => {
@@ -139,12 +186,18 @@ export default function CataloguePage() {
   }, []);
 
   const allProducts = useMemo<LocalProduct[]>(() => {
-    const products: LocalProduct[] = mockProducts.filter((product) => (
-      !PUBLIC_HIDDEN_TRAITEURS.has(product.vendor) &&
-      !PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(product.vendor) &&
-      isUsableThumbnail(product.image)
-    ));
+    const products: LocalProduct[] = liveProducts.slice();
     const ids = new Set(products.map((product) => product.id));
+    for (const product of mockProducts.filter((item) => (
+      !PUBLIC_HIDDEN_TRAITEURS.has(item.vendor) &&
+      !PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(item.vendor) &&
+      isUsableThumbnail(item.image)
+    ))) {
+      if (!ids.has(product.id)) {
+        products.push(product);
+        ids.add(product.id);
+      }
+    }
 
     for (const space of traiteurSpaces) {
       for (const item of space.menuItems) {
@@ -171,7 +224,7 @@ export default function CataloguePage() {
     }
 
     return products;
-  }, []);
+  }, [liveProducts]);
 
   const filteredProducts = useMemo(() => {
     const normalizedQuery = normalizeCommuneQuery(query.trim());
@@ -253,9 +306,14 @@ export default function CataloguePage() {
     );
   };
 
-  const addToCart = (product: LocalProduct) => {
-    addItem(toCartProduct(product));
+  const addToCart = (product: LocalProduct, selection?: MenuSelection) => {
+    if (product.menuOptions && !selection) {
+      setProductToCompose(product);
+      return;
+    }
+    addItem(toCartProduct(product), selection);
     showSuccess(`${product.name} ajouté au panier`);
+    setProductToCompose(null);
   };
 
   const openProductPreview = (product: LocalProduct, partnerImage?: string | null) => {
@@ -468,6 +526,14 @@ export default function CataloguePage() {
         </section>
         {lightboxImage && (
           <ImageLightbox images={[lightboxImage]} onClose={() => setLightboxImage(null)} />
+        )}
+        {productToCompose?.menuOptions && (
+          <MenuCompositionModal
+            productName={productToCompose.name}
+            options={productToCompose.menuOptions}
+            onCancel={() => setProductToCompose(null)}
+            onConfirm={(selection) => addToCart(productToCompose, selection)}
+          />
         )}
       </main>
     </Layout>

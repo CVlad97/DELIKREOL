@@ -1,9 +1,11 @@
 import { useMemo } from 'react';
 import { Store, Package } from 'lucide-react';
 import type { Product } from '../lib/supabase';
+import { formatMenuSelection } from '../types/menu';
 
 interface CartItem extends Product {
   quantity: number;
+  cart_line_id?: string;
 }
 
 interface PartnerGroup {
@@ -119,11 +121,12 @@ export function OrderSummaryByPartner({
               <ul className="divide-y divide-border-subtle">
                 {group.items.map((item) => (
                   <li
-                    key={item.id}
+                    key={item.cart_line_id || item.id}
                     className="flex items-center justify-between gap-3 px-4 py-2 text-sm"
                   >
-                    <span className="text-foreground truncate">
-                      <span className="text-muted-foreground">{item.quantity}×</span> {item.name}
+                    <span className="min-w-0 text-foreground">
+                      <span className="block truncate"><span className="text-muted-foreground">{item.quantity}×</span> {item.name}</span>
+                      {formatMenuSelection(item.selected_options).map((line) => <span key={line} className="block text-xs text-muted-foreground">{line}</span>)}
                     </span>
                     <span className="font-semibold text-foreground whitespace-nowrap">
                       {formatEuro(item.price * item.quantity)}

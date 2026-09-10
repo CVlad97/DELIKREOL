@@ -25,7 +25,11 @@ type CheckoutItemInput = {
   product_id?: unknown;
   id?: unknown;
   quantity?: unknown;
+  selected_options?: unknown;
 };
+
+type MenuSelection = { sides: string[]; drinks: string[] };
+type MenuOptions = MenuSelection & { included_side_count: number; included_drink_count: number };
 
 type ProductRow = {
   id: string;
@@ -36,6 +40,7 @@ type ProductRow = {
   is_public: boolean;
   is_demo: boolean;
   status: string;
+  menu_options: MenuOptions | null;
   vendors: {
     id: string;
     business_name: string | null;
@@ -116,6 +121,19 @@ function sanitizeText(value: unknown, maxLength: number) {
   return value.trim().slice(0, maxLength);
 }
 
+function parseSelectedOptions(value: unknown): MenuSelection | null {
+  if (value == null) return null;
+  if (!value || typeof value !== "object") throw new Response(JSON.stringify({ error: "Composition de menu invalide" }), { status: 400 });
+  const record = value as Record<string, unknown>;
+  const normalize = (choices: unknown) => {
+    if (!Array.isArray(choices) || choices.some((choice) => typeof choice !== "string")) {
+      throw new Response(JSON.stringify({ error: "Composition de menu invalide" }), { status: 400 });
+    }
+    return choices.map((choice) => sanitizeText(choice, 80));
+  };
+  return { sides: normalize(record.sides), drinks: normalize(record.drinks) };
+}
+
 async function sha256Hex(value: string) {
   const data = new TextEncoder().encode(value);
   const hash = await crypto.subtle.digest("SHA-256", data);
@@ -129,7 +147,7 @@ function parseItems(rawItems: unknown) {
     throw new Response(JSON.stringify({ error: "items invalides" }), { status: 400 });
   }
 
-  const aggregated = new Map<string, number>();
+  const aggregated = new Map<string, { productId: string; quantity: number; selectedOptions: MenuSelection | null }>();
   for (const item of rawItems as CheckoutItemInput[]) {
     const productId = typeof item.product_id === "string" ? item.product_id : typeof item.id === "string" ? item.id : "";
     const quantity = normalizeQuantity(item.quantity ?? 1);
@@ -138,9 +156,35 @@ function parseItems(rawItems: unknown) {
         status: 400,
       });
     }
-    aggregated.set(productId, (aggregated.get(productId) || 0) + quantity);
+    const selectedOptions = parseSelectedOptions(item.selected_options);
+    const key = `${productId}:${JSON.stringify(selectedOptions)}`;
+    const existing = aggregated.get(key);
+    aggregated.set(key, { productId, selectedOptions, quantity: (existing?.quantity || 0) + quantity });
   }
-  return Array.from(aggregated, ([productId, quantity]) => ({ productId, quantity }));
+  return Array.from(aggregated.values());
+}
+
+function validateMenuSelection(product: ProductRow, selection: MenuSelection | null) {
+  const options = product.menu_options;
+  if (!options) {
+    if (selection && (selection.sides.length || selection.drinks.length)) {
+      throw new Response(JSON.stringify({ error: `Composition non autorisée: ${product.name}` }), { status: 400 });
+    }
+    return null;
+  }
+  if (!Array.isArray(options.sides) || !Array.isArray(options.drinks) ||
+    !Number.isInteger(options.included_side_count) || !Number.isInteger(options.included_drink_count)) {
+    throw new Response(JSON.stringify({ error: `Configuration de menu invalide: ${product.name}` }), { status: 409 });
+  }
+  if (!selection) throw new Response(JSON.stringify({ error: `Composition requise: ${product.name}` }), { status: 400 });
+  const uniqueSides = new Set(selection.sides);
+  const uniqueDrinks = new Set(selection.drinks);
+  const valid = uniqueSides.size === options.included_side_count &&
+    uniqueDrinks.size === options.included_drink_count &&
+    [...uniqueSides].every((choice) => options.sides.includes(choice)) &&
+    [...uniqueDrinks].every((choice) => options.drinks.includes(choice));
+  if (!valid) throw new Response(JSON.stringify({ error: `Composition invalide: ${product.name}` }), { status: 400 });
+  return { sides: [...uniqueSides], drinks: [...uniqueDrinks] };
 }
 
 async function enforceRateLimit(
@@ -208,10 +252,10 @@ Deno.serve(async (req: Request) => {
     if (existing) return json(req, { existing: true, order: existing });
 
     const parsedItems = parseItems(body.items);
-    const productIds = parsedItems.map((item) => item.productId);
+    const productIds = [...new Set(parsedItems.map((item) => item.productId))];
     const { data: productsData, error: productsError } = await admin
       .from("products")
-      .select("id, vendor_id, name, price, is_available, is_public, is_demo, status, vendors(id, business_name, name, commission_rate, stripe_connect_account_id, stripe_charges_enabled, stripe_payouts_enabled, status, is_active, is_public, is_demo)")
+      .select("id, vendor_id, name, price, is_available, is_public, is_demo, status, menu_options, vendors(id, business_name, name, commission_rate, stripe_connect_account_id, stripe_charges_enabled, stripe_payouts_enabled, status, is_active, is_public, is_demo)")
       .in("id", productIds);
 
     if (productsError) throw productsError;
@@ -228,6 +272,7 @@ Deno.serve(async (req: Request) => {
       if (!isProductSellable || !isVendorSellable) {
         throw new Response(JSON.stringify({ error: `Produit indisponible: ${product.name}` }), { status: 409 });
       }
+      const selectedOptions = validateMenuSelection(product, item.selectedOptions);
       vendorIds.add(product.vendor_id);
       const unitCents = toCents(product.price);
       const subtotalCents = unitCents * item.quantity;
@@ -243,6 +288,7 @@ Deno.serve(async (req: Request) => {
         subtotal: subtotalCents / 100,
         total: subtotalCents / 100,
         vendor_commission: commissionCents / 100,
+        selected_options: selectedOptions,
       };
     });
 
@@ -314,6 +360,18 @@ Deno.serve(async (req: Request) => {
       .map((byte) => byte.toString(16).padStart(2, "0"))
       .join("");
 
+    const compositionNotes = orderItems.flatMap((item) => {
+      if (!item.selected_options) return [];
+      const details = [
+        item.selected_options.sides.length ? `accompagnement(s): ${item.selected_options.sides.join(", ")}` : "",
+        item.selected_options.drinks.length ? `boisson(s): ${item.selected_options.drinks.join(", ")}` : "",
+      ].filter(Boolean).join("; ");
+      return [`${item.product_name}: ${details}`];
+    });
+    const customerNotes = sanitizeText(body.notes, 1000);
+    const securedNotes = [customerNotes, compositionNotes.length ? `Composition des menus:\n${compositionNotes.join("\n")}` : ""]
+      .filter(Boolean).join("\n\n").slice(0, 1000);
+
     const { data: result, error: rpcError } = await admin.rpc("create_checkout_order_atomic", {
       target_idempotency_key: idempotencyKey,
       order_payload: {
@@ -331,7 +389,7 @@ Deno.serve(async (req: Request) => {
         total_cents: totalCents,
         total_amount: totalCents / 100,
         delivery_type: delivery.type,
-        notes: sanitizeText(body.notes, 1000) || null,
+        notes: securedNotes || null,
         creneaux: sanitizeText(body.creneaux, 240) || null,
         address: sanitizeText(body.address, 240) || null,
         source: "checkout_order_function",
@@ -359,6 +417,7 @@ Deno.serve(async (req: Request) => {
           vendor_id: Array.from(vendorIds)[0],
           payment_provider: paymentProvider,
           payment_reference: paymentReference,
+          menu_selections: orderItems.map((item) => ({ product_id: item.product_id, selected_options: item.selected_options })),
         },
       },
     });

@@ -47,9 +47,11 @@ import {
 import { OrderSummaryByPartner, groupItemsByPartner } from'../../components/OrderSummaryByPartner';
 import { isSupabaseConfigured, supabase } from'../../lib/supabase';
 import type { Product } from'../../lib/supabase';
+import { formatMenuSelection } from'../../types/menu';
 
 interface CartItem extends Product {
  quantity: number;
+ cart_line_id: string;
 }
 
 const WHATSAPP_NUMBER ='596696653589';
@@ -134,7 +136,7 @@ function formatPhoneError(): string {
 
 function buildCartFingerprint(items: CartItem[], mode: string, phone: string, email: string) {
  return JSON.stringify({
- items: items.map((item) => ({ id: item.id, quantity: item.quantity })).sort((a, b) => a.id.localeCompare(b.id)),
+ items: items.map((item) => ({ id: item.id, quantity: item.quantity, selected_options: item.selected_options })).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b))),
  mode,
  phone: phone.replace(/\s+/g, ''),
  email: email.trim().toLowerCase(),
@@ -178,8 +180,10 @@ function buildWhatsAppOrderMessage(params: {
  .map((group) => {
  const lines = group.items
  .map(
- (item) =>
- ` • ${item.name} x${item.quantity} — ${(item.price * item.quantity).toFixed(2)}€`
+ (item) => {
+ const composition = formatMenuSelection(item.selected_options);
+ return ` • ${item.name} x${item.quantity} — ${(item.price * item.quantity).toFixed(2)}€${composition.length ? `\n   ${composition.join('\n   ')}` : ''}`;
+ }
  )
  .join('\n');
  const header = partnerGroups.length > 1
@@ -341,6 +345,7 @@ export default function CartPage() {
  items: items.map((item) => ({
  id: item.id,
  quantity: item.quantity,
+ selected_options: item.selected_options,
  })),
  commune,
  mode,
@@ -422,6 +427,7 @@ export default function CartPage() {
  quantity: item.quantity,
  unit_price: item.price,
  vendor_name: item.vendor?.business_name || item.vendor_id || null,
+ selected_options: item.selected_options,
  })),
  subtotal: total,
  total_amount: total + deliveryFee,
@@ -660,7 +666,7 @@ export default function CartPage() {
 
  {items.map((item) => (
  <div
- key={item.id}
+ key={item.cart_line_id}
  className="bg-white rounded-2xl border border-primary/100 p-4 flex gap-4 group hover:border-primary/200 transition-all"
  >
  {/* Image */}
@@ -682,6 +688,9 @@ export default function CartPage() {
  <div className="flex-1 min-w-0">
  <h3 className="font-bold text-foreground text-base truncate">{item.name}</h3>
  <p className="text-sm text-muted-foreground">{item.vendor_id}</p>
+ {formatMenuSelection(item.selected_options).map((line) => (
+ <p key={line} className="mt-1 text-xs font-semibold text-foreground">{line}</p>
+ ))}
  <p className="text-lg font-black text-primary mt-1">
  {item.price.toFixed(2)} €
  </p>
@@ -691,7 +700,7 @@ export default function CartPage() {
  <div className="flex flex-col items-end justify-between">
  <button
  onClick={() => {
- removeItem(item.id);
+ removeItem(item.cart_line_id);
  showSuccess(`${item.name} retiré`);
  }}
  className="p-1.5 text-muted-foreground hover:text-red-500 transition-colors"
@@ -701,14 +710,14 @@ export default function CartPage() {
  </button>
  <div className="flex items-center gap-2 bg-muted rounded-xl px-1 py-1">
  <button
- onClick={() => updateQuantity(item.id, item.quantity - 1)}
+ onClick={() => updateQuantity(item.cart_line_id, item.quantity - 1)}
  className="w-8 h-8 rounded-lg bg-white border border-input flex items-center justify-center hover:border-primary/300 transition-colors"
  >
  <Minus className="w-3.5 h-3.5" />
  </button>
  <span className="w-8 text-center font-bold text-sm">{item.quantity}</span>
  <button
- onClick={() => updateQuantity(item.id, item.quantity + 1)}
+ onClick={() => updateQuantity(item.cart_line_id, item.quantity + 1)}
  className="w-8 h-8 rounded-lg bg-white border border-input flex items-center justify-center hover:border-primary/300 transition-colors"
  >
  <Plus className="w-3.5 h-3.5" />

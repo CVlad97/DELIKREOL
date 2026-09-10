@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import type { MenuOptions, MenuSelection } from '../types/menu';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -137,6 +138,9 @@ export interface Product {
   stock_quantity: number | null;
   created_at: string;
   vendor?: Vendor;
+  menu_options?: MenuOptions | null;
+  selected_options?: MenuSelection;
+  cart_line_id?: string;
 }
 
 export interface Order {

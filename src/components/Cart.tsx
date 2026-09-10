@@ -53,7 +53,7 @@ export function Cart({ onClose, onCheckout }: CartProps) {
           ) : (
             <div className="space-y-6">
               {items.map((item) => (
-                <div key={item.id} className="flex gap-6 group">
+                <div key={item.cart_line_id} className="flex gap-6 group">
                   <div className="w-24 h-24 bg-muted rounded-2xl flex-shrink-0 overflow-hidden shadow-sm">
                     {item.image_url ? (
                       <img
@@ -78,7 +78,7 @@ export function Cart({ onClose, onCheckout }: CartProps) {
 
                   <div className="flex flex-col items-end justify-between py-1">
                     <button
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => removeItem(item.cart_line_id)}
                       className="p-2 hover:bg-red-50 text-red-400 hover:text-red-600 rounded-lg transition-colors"
                     >
                       <Trash2 size={18} />
@@ -86,14 +86,14 @@ export function Cart({ onClose, onCheckout }: CartProps) {
 
                     <div className="flex items-center bg-muted rounded-xl p-1 gap-3">
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        onClick={() => updateQuantity(item.cart_line_id, item.quantity - 1)}
                         className="w-8 h-8 flex items-center justify-center bg-card rounded-lg shadow-sm hover:text-primary transition-all active:scale-90"
                       >
                         <Minus size={14} />
                       </button>
                       <span className="font-black text-sm w-4 text-center">{item.quantity}</span>
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(item.cart_line_id, item.quantity + 1)}
                         className="w-8 h-8 flex items-center justify-center bg-primary text-primary-foreground rounded-lg shadow-sm hover:scale-105 transition-all active:scale-90"
                       >
                         <Plus size={14} />
