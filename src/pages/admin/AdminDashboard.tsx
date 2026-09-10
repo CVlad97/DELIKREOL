@@ -16,16 +16,47 @@ function loadFromStorage(key: string): any[] {
 }
 
 /* ─── Composant candidatures récentes ─── */
+type LatestApplication = {
+ id: string;
+ businessName: string;
+ contactName: string;
+ commune: string;
+ phone: string;
+ createdAt: string;
+ kind: 'partner' | 'driver' | 'relay';
+};
+
 function LatestApplications() {
  const [apps, setApps] = useState<any[]>([]);
+ const [error, setError] = useState<string | null>(null);
 
  useEffect(() => {
- const raw = loadFromStorage('delikreol_partner_applications');
- const sorted = raw
- .sort((a, b) => new Date(b.createdAt || b.created_at || 0).getTime() - new Date(a.createdAt || a.created_at || 0).getTime())
- .slice(0, 5);
- setApps(sorted);
+ const load = async () => {
+ const [partners, drivers, relays] = await Promise.all([
+ supabase.from('partner_applications').select('id,business_name,contact_name,commune,phone,created_at'),
+ supabase.from('driver_applications').select('id,name,commune,phone,created_at'),
+ supabase.from('relay_point_applications').select('id,business_name,manager_name,commune,phone,created_at'),
+ ]);
+
+ const failed = [partners, drivers, relays].find((result) => result.error);
+ if (failed?.error) {
+ setError(failed.error.message);
+ return;
+ }
+
+ const combined: LatestApplication[] = [
+ ...(partners.data || []).map((app) => ({ id: app.id, businessName: app.business_name || 'Partenaire', contactName: app.contact_name || '', commune: app.commune || '', phone: app.phone || '', createdAt: app.created_at, kind: 'partner' as const })),
+ ...(drivers.data || []).map((app) => ({ id: app.id, businessName: app.name || 'Livreur', contactName: app.name || '', commune: app.commune || '', phone: app.phone || '', createdAt: app.created_at, kind: 'driver' as const })),
+ ...(relays.data || []).map((app) => ({ id: app.id, businessName: app.business_name || 'Point relais', contactName: app.manager_name || '', commune: app.commune || '', phone: app.phone || '', createdAt: app.created_at, kind: 'relay' as const })),
+ ];
+ setApps(combined.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5));
+ };
+ void load();
  }, []);
+
+ if (error) {
+ return <p className="text-sm text-red-600">Chargement impossible : {error}</p>;
+ }
 
  if (apps.length === 0) {
  return <p className="text-sm text-muted-foreground italic">Aucune candidature pour le moment</p>;
@@ -33,16 +64,17 @@ function LatestApplications() {
 
  return (
  <div className="space-y-3">
- {apps.map((app, i) => (
- <div key={i} className="text-sm p-3 bg-muted rounded-xl flex items-center justify-between gap-2">
+ {apps.map((app: LatestApplication) => (
+ <div key={`${app.kind}-${app.id}`} className="text-sm p-3 bg-muted rounded-xl flex items-center justify-between gap-2">
  <div className="min-w-0 flex-1">
- <p className="font-semibold text-foreground truncate">{app.business_name || app.nomActivite ||'—'}</p>
+ <p className="font-semibold text-foreground truncate">{app.businessName}</p>
  <p className="text-xs text-muted-foreground truncate">
- {app.name || app.nomResponsable ||''}{app.name || app.nomResponsable ?' •' :''}{app.commune ||''}{app.phone ? ` • ${app.phone}` :''}
+ {app.kind === 'partner' ? 'Partenaire' : app.kind === 'driver' ? 'Livreur' : 'Point relais'}
+ {app.contactName ? ` • ${app.contactName}` : ''}{app.commune ? ` • ${app.commune}` : ''}{app.phone ? ` • ${app.phone}` : ''}
  </p>
  </div>
  <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
- {new Date(app.createdAt || app.created_at || 0).toLocaleDateString('fr-FR')}
+ {new Date(app.createdAt).toLocaleDateString('fr-FR')}
  </span>
  </div>
  ))}
@@ -66,14 +98,25 @@ export function AdminDashboard() {
 
  useEffect(() => {
  document.title ='Dashboard Admin — DeliKreol';
+ const loadCounts = async () => {
+ const [orders, catering, partners, drivers, relays, leads] = await Promise.all([
+ supabase.from('orders').select('id', { count: 'exact', head: true }),
+ supabase.from('catering_requests').select('id', { count: 'exact', head: true }),
+ supabase.from('partner_applications').select('id', { count: 'exact', head: true }),
+ supabase.from('driver_applications').select('id', { count: 'exact', head: true }),
+ supabase.from('relay_point_applications').select('id', { count: 'exact', head: true }),
+ supabase.from('leads').select('id', { count: 'exact', head: true }),
+ ]);
  setStats({
- orders: loadFromStorage('delikreol_orders').length,
- cateringRequests: loadFromStorage('delikreol_catering_requests').length,
- partnerApplications: loadFromStorage('delikreol_partner_applications').length,
- driverApplications: loadFromStorage('delikreol_driver_applications').length,
- relayApplications: loadFromStorage('delikreol_relay_applications').length,
- leads: loadFromStorage('delikreol_leads').length,
+ orders: orders.error ? loadFromStorage('delikreol_orders').length : orders.count || 0,
+ cateringRequests: catering.error ? loadFromStorage('delikreol_catering_requests').length : catering.count || 0,
+ partnerApplications: partners.error ? loadFromStorage('delikreol_partner_applications').length : partners.count || 0,
+ driverApplications: drivers.error ? loadFromStorage('delikreol_driver_applications').length : drivers.count || 0,
+ relayApplications: relays.error ? loadFromStorage('delikreol_relay_applications').length : relays.count || 0,
+ leads: leads.error ? loadFromStorage('delikreol_leads').length : leads.count || 0,
  });
+ };
+ void loadCounts();
  }, []);
 
  useEffect(() => {
@@ -118,7 +161,7 @@ export function AdminDashboard() {
  const cards = [
  { label:'Commandes', value: stats.orders, icon: ShoppingCart, color:'text-blue-600 bg-blue-50', link:'/admin/commandes' },
  { label:'Devis traiteur', value: stats.cateringRequests, icon: FileText, color:'text-purple-600 bg-purple-50', link:'/admin/devis' },
- { label:'Partenaires', value: stats.partnerApplications, icon: ChefHat, color:'text-primary bg-primary/[0.08]', link:'/admin/partenaires' },
+ { label:'Candidatures partenaires', value: stats.partnerApplications, icon: ChefHat, color:'text-primary bg-primary/[0.08]', link:'/admin/applications' },
  { label:'Candidatures livreurs', value: stats.driverApplications, icon: Truck, color:'text-success bg-success/10', link:'/admin/livreurs' },
  { label:'Candidatures relais', value: stats.relayApplications, icon: MapPin, color:'text-amber-600 bg-muted', link:'/admin/points-relais' },
  { label:'Leads', value: stats.leads, icon: Target, color:'text-indigo-600 bg-indigo-50', link:'/admin/leads' },
