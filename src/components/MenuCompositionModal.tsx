@@ -43,11 +43,13 @@ export function MenuCompositionModal({ productName, options, onCancel, onConfirm
   const [drinks, setDrinks] = useState<string[]>([]);
   const [sauces, setSauces] = useState<string[]>([]);
   const [instructions, setInstructions] = useState('');
+  const sauceChoices = options.sauces || [];
+  const requiredSauces = options.included_sauce_count || 0;
   const valid = useMemo(() => (
     sides.length === options.included_side_count &&
     drinks.length === options.included_drink_count &&
-    sauces.length === options.included_sauce_count
-  ), [drinks.length, options.included_drink_count, options.included_sauce_count, options.included_side_count, sauces.length, sides.length]);
+    sauces.length === requiredSauces
+  ), [drinks.length, options.included_drink_count, options.included_side_count, requiredSauces, sauces.length, sides.length]);
   const toggle = (value: string, selected: string[], setSelected: (next: string[]) => void, limit: number) => {
     if (selected.includes(value)) setSelected(selected.filter((item) => item !== value));
     else if (limit === 0 || selected.length < limit) setSelected([...selected, value]);
@@ -63,7 +65,7 @@ export function MenuCompositionModal({ productName, options, onCancel, onConfirm
         <div className="mt-6 space-y-6">
           <ChoiceGroup title="Accompagnements" choices={options.sides} required={options.included_side_count} selected={sides} onToggle={(value) => toggle(value, sides, setSides, options.included_side_count)} />
           <ChoiceGroup title="Boissons" choices={options.drinks} required={options.included_drink_count} selected={drinks} onToggle={(value) => toggle(value, drinks, setDrinks, options.included_drink_count)} />
-          <ChoiceGroup title="Sauces" choices={options.sauces} required={options.included_sauce_count} selected={sauces} onToggle={(value) => toggle(value, sauces, setSauces, options.included_sauce_count)} />
+          <ChoiceGroup title="Sauces" choices={sauceChoices} required={requiredSauces} selected={sauces} onToggle={(value) => toggle(value, sauces, setSauces, requiredSauces)} />
           {options.instructions_enabled !== false && (
             <label className="block space-y-2">
               <span className="font-black text-foreground">Consigne cuisine <span className="text-sm font-medium text-muted-foreground">— optionnel</span></span>
