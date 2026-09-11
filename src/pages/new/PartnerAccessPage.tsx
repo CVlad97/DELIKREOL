@@ -8,28 +8,16 @@ import { isDemoMode, supabase } from '../../lib/supabase';
 const WHATSAPP_NUMBER = '596696653589';
 const STORAGE_KEY = 'delikreol_partner_submissions';
 
-const PILOT_PARTNERS = [
-  { code: 'SAVE-PEYIA-PILOTE', name: "Snack Savè Peyi'A", label: 'Save Peyi’A', zone: 'Rivière-Pilote — Pont de Fer', contact: '+596 696 00 27 64' },
-  { code: 'SAVEURS-PILOTE', name: "Saveurs d'Afrique", label: 'Saveurs d’Afrique', zone: 'Cluny / Fort-de-France', contact: '0596 68 12 25' },
-  { code: 'COCO-PILOTE', name: "Coco's Food", label: "Coco's Food", zone: 'Rivière-Pilote', contact: '+596 696 25 47 20' },
-  { code: 'NINICE-PILOTE', name: 'Les Délices de Ninice', label: 'Les Délices de Ninice', zone: 'Fort-de-France', contact: '+596 696 01 93 21' },
-  { code: 'SWEETFAMILY-PILOTE', name: 'Sweet Family Traiteur Orianne', label: 'Sweet Family', zone: 'Martinique', contact: '+596 696 88 75 28' },
-  { code: 'GOUTE-MWEN-PILOTE', name: 'Gouté Mwen', label: 'Gouté Mwen', zone: 'Martinique', contact: '+596 696 16 61 93' },
-];
+type PilotPartner = {
+  code: string;
+  name: string;
+  label: string;
+  zone: string;
+  contact: string;
+};
 
-const READINESS_TASKS = [
-  { id: 'identity', title: 'Identité et contact', detail: 'Nom du responsable, téléphone, email, commune.' },
-  { id: 'documents', title: 'Documents', detail: 'SIRET/Kbis ou statut, RIB, assurance, hygiène/HACCP si disponible.' },
-  { id: 'catalogue', title: 'Catalogue', detail: 'Plats, prix, photos et disponibilité réelle.' },
-  { id: 'composition', title: 'Composition menu', detail: 'Accompagnements, boissons, suppléments et allergènes.' },
-  { id: 'operations', title: 'Opérations', detail: 'Retrait, livraison, point relais, capacité et horaires.' },
-  { id: 'surplus', title: 'Invendus', detail: 'Panier du jour/lendemain à prix réduit façon anti-gaspillage.' },
-  { id: 'events', title: 'Événements', detail: 'Mise à l’honneur, vidéo, repas à gagner, Chef à Mada/GIE.' },
-  { id: 'test', title: 'Commande test', detail: 'Commande annulable : aucune préparation, aucun paiement réel.' },
-] as const;
-
-type ReadinessId = typeof READINESS_TASKS[number]['id'];
 type SubmitStatus = 'idle' | 'saving' | 'saved' | 'local_only' | 'error';
+type TaskId = 'identity' | 'documents' | 'catalogue' | 'composition' | 'operations' | 'surplus' | 'events' | 'test';
 
 type PartnerForm = {
   responsable: string;
@@ -49,35 +37,27 @@ type PartnerForm = {
   remarques: string;
 };
 
-const MODES = ['retrait', 'point relais', 'livraison'] as const;
+const PARTNERS: PilotPartner[] = [
+  { code: 'SAVE-PEYIA-PILOTE', name: "Snack Savè Peyi'A", label: 'Save Peyi’A', zone: 'Rivière-Pilote — Pont de Fer', contact: '+596 696 00 27 64' },
+  { code: 'SAVEURS-PILOTE', name: "Saveurs d'Afrique", label: 'Saveurs d’Afrique', zone: 'Cluny / Fort-de-France', contact: '0596 68 12 25' },
+  { code: 'COCO-PILOTE', name: "Coco's Food", label: "Coco's Food", zone: 'Rivière-Pilote', contact: '+596 696 25 47 20' },
+  { code: 'NINICE-PILOTE', name: 'Les Délices de Ninice', label: 'Les Délices de Ninice', zone: 'Fort-de-France', contact: '+596 696 01 93 21' },
+  { code: 'SWEETFAMILY-PILOTE', name: 'Sweet Family Traiteur Orianne', label: 'Sweet Family', zone: 'Martinique', contact: '+596 696 88 75 28' },
+  { code: 'GOUTE-MWEN-PILOTE', name: 'Gouté Mwen', label: 'Gouté Mwen', zone: 'Martinique', contact: '+596 696 16 61 93' },
+];
 
-function normalizeCode(value: string) {
-  return value.trim().toUpperCase();
-}
+const TASKS: Array<{ id: TaskId; title: string; detail: string }> = [
+  { id: 'identity', title: 'Identité', detail: 'Responsable, téléphone, email, commune.' },
+  { id: 'documents', title: 'Documents', detail: 'SIRET/Kbis, RIB, assurance, hygiène si disponible.' },
+  { id: 'catalogue', title: 'Catalogue', detail: 'Plats, prix, photos et disponibilité réelle.' },
+  { id: 'composition', title: 'Menus', detail: 'Accompagnements, boissons, suppléments et allergènes.' },
+  { id: 'operations', title: 'Opérations', detail: 'Retrait, livraison, point relais, capacité et horaires.' },
+  { id: 'surplus', title: 'Invendus', detail: 'Panier jour/lendemain à prix réduit.' },
+  { id: 'events', title: 'Actualité', detail: 'Mise à l’honneur, vidéo, repas à gagner, Chef à Mada/GIE.' },
+  { id: 'test', title: 'Commande test', detail: 'Test annulable sans paiement réel.' },
+];
 
-function resolvePartner(code: string) {
-  const upper = normalizeCode(code);
-  if (!upper) return null;
-  const direct = PILOT_PARTNERS.find((p) => p.code === upper);
-  if (direct) return direct;
-  if (upper.includes('SAVEURS')) return PILOT_PARTNERS[1];
-  if (upper.includes('COCO')) return PILOT_PARTNERS[2];
-  if (upper.includes('NINICE')) return PILOT_PARTNERS[3];
-  if (upper.includes('SWEET')) return PILOT_PARTNERS[4];
-  if (upper.includes('GOUTE')) return PILOT_PARTNERS[5];
-  if (upper.includes('SAVE') || upper.includes('PEYI')) return PILOT_PARTNERS[0];
-  return null;
-}
-
-function readStoredTasks(code: string): Record<ReadinessId, boolean> {
-  try {
-    const raw = localStorage.getItem(`delikreol_partner_readiness_${normalizeCode(code)}`);
-    if (!raw) return {} as Record<ReadinessId, boolean>;
-    return JSON.parse(raw) as Record<ReadinessId, boolean>;
-  } catch {
-    return {} as Record<ReadinessId, boolean>;
-  }
-}
+const MODES = ['retrait', 'point relais', 'livraison'];
 
 const emptyForm: PartnerForm = {
   responsable: '',
@@ -97,38 +77,60 @@ const emptyForm: PartnerForm = {
   remarques: '',
 };
 
+function normalizeCode(value: string) {
+  return value.trim().toUpperCase();
+}
+
+function resolvePartner(code: string): PilotPartner | null {
+  const upper = normalizeCode(code);
+  const direct = PARTNERS.find((partner) => partner.code === upper);
+  if (direct) return direct;
+  if (upper.includes('SAVEURS')) return PARTNERS[1];
+  if (upper.includes('COCO')) return PARTNERS[2];
+  if (upper.includes('NINICE')) return PARTNERS[3];
+  if (upper.includes('SWEET')) return PARTNERS[4];
+  if (upper.includes('GOUTE')) return PARTNERS[5];
+  if (upper.includes('SAVE') || upper.includes('PEYI')) return PARTNERS[0];
+  return null;
+}
+
+function readTasks(code: string): Record<TaskId, boolean> {
+  try {
+    return JSON.parse(localStorage.getItem(`delikreol_partner_readiness_${normalizeCode(code)}`) || '{}') as Record<TaskId, boolean>;
+  } catch {
+    return {} as Record<TaskId, boolean>;
+  }
+}
+
 export default function PartnerAccessPage() {
   const [searchParams] = useSearchParams();
   const code = normalizeCode(searchParams.get('code') || '');
   const partner = resolvePartner(code);
   const partnerName = partner?.name ?? null;
-
   const [form, setForm] = useState<PartnerForm>(emptyForm);
-  const [tasks, setTasks] = useState<Record<ReadinessId, boolean>>(() => readStoredTasks(code));
+  const [tasks, setTasks] = useState<Record<TaskId, boolean>>(() => readTasks(code));
   const [submitted, setSubmitted] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const readinessPercent = useMemo(() => {
-    const done = READINESS_TASKS.filter((task) => tasks[task.id]).length;
-    return Math.round((done / READINESS_TASKS.length) * 100);
+    const done = TASKS.filter((task) => tasks[task.id]).length;
+    return Math.round((done / TASKS.length) * 100);
   }, [tasks]);
 
   const eligibilityStatus = readinessPercent >= 100 ? 'ready_for_pilot' : readinessPercent >= 60 ? 'needs_final_review' : 'incomplete';
 
   useEffect(() => {
     document.title = partnerName ? `Espace ${partnerName} — DELIKREOL` : 'Accès partenaire — DELIKREOL';
-    try {
-      const events = JSON.parse(localStorage.getItem('delikreol_site_events') || '[]');
-      events.push({ type: 'partner_access_opened', code, partnerName, time: new Date().toISOString() });
-      localStorage.setItem('delikreol_site_events', JSON.stringify(events.slice(-200)));
-    } catch { /* noop */ }
-  }, [code, partnerName]);
+  }, [partnerName]);
 
   useEffect(() => {
+    if (!code) return;
     try {
       localStorage.setItem(`delikreol_partner_readiness_${code}`, JSON.stringify(tasks));
-    } catch { /* noop */ }
+    } catch {
+      // storage can be unavailable in private mode
+    }
   }, [code, tasks]);
 
   const updateForm = <K extends keyof PartnerForm>(key: K, value: PartnerForm[K]) => {
@@ -142,7 +144,7 @@ export default function PartnerAccessPage() {
     }));
   };
 
-  const toggleTask = (id: ReadinessId) => {
+  const toggleTask = (id: TaskId) => {
     setTasks((current) => ({ ...current, [id]: !current[id] }));
   };
 
@@ -164,15 +166,13 @@ export default function PartnerAccessPage() {
     `Commune : ${form.commune || '-'}`,
     `Modes : ${form.modes.join(', ') || '-'}`,
     `Horaires : ${form.horaires || '-'}`,
-    `Description : ${form.description || '-'}`,
     `Plats : ${form.plats || '-'}`,
     `Prix : ${form.prix || '-'}`,
     `Compositions : ${form.compositions || '-'}`,
-    `Allergènes : ${form.allergenes || '-'}`,
     `Documents : ${form.documents || '-'}`,
     `Invendus : ${form.invendus || '-'}`,
-    `Événements / mise à l’honneur : ${form.events || '-'}`,
-    `Remarques : ${form.remarques || '-'}`,
+    `Événements : ${form.events || '-'}`,
+    `Remarques/photos : ${form.remarques || '-'}`,
   ].join('\n'));
 
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${buildWhatsAppMessage()}`;
@@ -218,8 +218,8 @@ export default function PartnerAccessPage() {
         setSubmitStatus('local_only');
       }
       setSubmitted(true);
-    } catch (err: any) {
-      console.error('Erreur sauvegarde partenaire:', err);
+    } catch (error) {
+      console.error('Erreur sauvegarde partenaire:', error);
       setErrorMessage('La sauvegarde serveur a échoué. Les informations sont gardées localement : confirme aussi sur WhatsApp.');
       setSubmitStatus('error');
       setSubmitted(true);
@@ -239,7 +239,7 @@ export default function PartnerAccessPage() {
     );
   }
 
-  if (!partnerName) {
+  if (!partner) {
     return (
       <Layout>
         <BackBar label="Retour" backTo="/" />
@@ -281,7 +281,7 @@ export default function PartnerAccessPage() {
             <div>
               <h1 className="text-3xl font-black text-foreground">{partner.label}</h1>
               <p className="mt-2 text-muted-foreground">{partner.zone} · Contact connu : {partner.contact}</p>
-              <p className="mt-4 text-sm text-muted-foreground">Ce lien sert à corriger la fiche, composer les menus, préparer les invendus, les événements et l’organisation livraison/relais. Pour le vrai compte sécurisé, DELIKREOL active ensuite un email/magic link.</p>
+              <p className="mt-4 text-sm text-muted-foreground">Lien simple pour corriger la fiche, composer les menus, préparer les invendus, les événements et l’organisation livraison/relais. Le vrai compte sécurisé sera activé ensuite par email/magic link.</p>
             </div>
             <div className="rounded-3xl bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between text-sm font-black"><span>Préparation</span><span>{readinessPercent}%</span></div>
@@ -302,7 +302,7 @@ export default function PartnerAccessPage() {
           <aside className="rounded-[2rem] border bg-white p-5 shadow-sm">
             <h2 className="text-xl font-black">Checklist qualité</h2>
             <div className="mt-4 space-y-3">
-              {READINESS_TASKS.map((task) => (
+              {TASKS.map((task) => (
                 <label key={task.id} className="flex cursor-pointer gap-3 rounded-2xl border p-3 text-sm">
                   <input type="checkbox" checked={Boolean(tasks[task.id])} onChange={() => toggleTask(task.id)} className="mt-1" />
                   <span><strong>{task.title}</strong><br /><span className="text-xs text-muted-foreground">{task.detail}</span></span>
