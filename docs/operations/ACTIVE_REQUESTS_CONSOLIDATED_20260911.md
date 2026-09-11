@@ -20,14 +20,20 @@ Date : 2026-09-11
 
 ## Règles de composition publiées
 
-Plats / pâtes / bowl / apéritifs :
+Plats :
 - 1 accompagnement obligatoire : Riz blanc, Riz lentilles, Légumes pays, Frites, Crudités.
 - 1 boisson obligatoire : Eau, Jus local du jour, Soda, Sans boisson.
 - 1 sauce obligatoire : Sauce chien, Sauce créole, Sauce piment à part, Sans sauce.
 - Consigne cuisine optionnelle.
 
-Snacking salé :
-- 1 accompagnement obligatoire : Frites, Crudités, Légumes pays, Sans accompagnement.
+Pâtes / bowl :
+- 1 accompagnement obligatoire : Crudités, Légumes pays, Sans accompagnement.
+- 1 boisson obligatoire.
+- 1 sauce obligatoire.
+- Consigne cuisine optionnelle.
+
+Snacking salé / apéritifs :
+- 1 accompagnement obligatoire : Frites, Crudités, Sans accompagnement.
 - 1 boisson obligatoire.
 - 1 sauce obligatoire.
 - Consigne cuisine optionnelle.
