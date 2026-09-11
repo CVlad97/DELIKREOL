@@ -27,12 +27,50 @@ function findPartnerImage(vendorName?: string | null): string | null {
   return space?.heroImage || space?.galleryImages?.[0] || space?.portraitImage || null;
 }
 
+function CompositionFieldset({
+  title,
+  choices,
+  selected,
+  requiredCount,
+  onToggle,
+}: {
+  title: string;
+  choices: string[];
+  selected: string[];
+  requiredCount: number;
+  onToggle: (choice: string) => void;
+}) {
+  if (choices.length === 0) return null;
+  const label = requiredCount > 0 ? `choisissez ${requiredCount}` : 'optionnel';
+  return (
+    <fieldset className="space-y-2">
+      <legend className="text-sm font-bold text-foreground">
+        {title} — {label}
+      </legend>
+      <div className="grid grid-cols-2 gap-2">
+        {choices.map((choice) => {
+          const checked = selected.includes(choice);
+          const disabled = requiredCount > 0 && !checked && selected.length >= requiredCount;
+          return (
+            <label key={choice} className="flex min-h-10 items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm">
+              <input type="checkbox" checked={checked} disabled={disabled} onChange={() => onToggle(choice)} />
+              <span>{choice}</span>
+            </label>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
 export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
   const { showSuccess } = useToast();
   const [showSim, setShowSim] = useState(false);
   const [selectedSides, setSelectedSides] = useState<string[]>([]);
   const [selectedDrinks, setSelectedDrinks] = useState<string[]>([]);
+  const [selectedSauces, setSelectedSauces] = useState<string[]>([]);
+  const [instructions, setInstructions] = useState('');
   const vendorLabel = product.vendor?.business_name ?? (product.vendor_id ? 'Vendeur local' : null);
   const isAvailable = product.is_available !== false;
   const partnerImage = findPartnerImage(vendorLabel);
@@ -40,7 +78,8 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const menuComplete = !menuOptions || (
     selectedSides.length === menuOptions.included_side_count &&
-    selectedDrinks.length === menuOptions.included_drink_count
+    selectedDrinks.length === menuOptions.included_drink_count &&
+    selectedSauces.length === menuOptions.included_sauce_count
   );
 
   const toggleChoice = (
@@ -53,14 +92,19 @@ export function ProductCard({ product }: ProductCardProps) {
       setter(current.filter((item) => item !== value));
       return;
     }
-    if (current.length >= max) return;
+    if (max > 0 && current.length >= max) return;
     setter([...current, value]);
   };
 
   const addConfiguredProduct = () => {
     if (!menuComplete) return;
     const selection: MenuSelection | undefined = menuOptions
-      ? { sides: selectedSides, drinks: selectedDrinks }
+      ? {
+          sides: selectedSides,
+          drinks: selectedDrinks,
+          sauces: selectedSauces,
+          instructions: instructions.trim().slice(0, 240) || undefined,
+        }
       : undefined;
     addItem(product, selection);
     showSuccess('Ajouté au panier');
@@ -86,75 +130,54 @@ export function ProductCard({ product }: ProductCardProps) {
             {product.category}
           </div>
           <h3 className="line-clamp-2 text-lg font-bold text-foreground">{product.name}</h3>
-          {vendorLabel && (
-            <div className="text-xs text-muted-foreground">{vendorLabel}</div>
-          )}
+          {vendorLabel && <div className="text-xs text-muted-foreground">{vendorLabel}</div>}
         </div>
 
-        {menuOptions && (menuOptions.sides.length > 0 || menuOptions.drinks.length > 0) && (
+        {menuOptions && (menuOptions.sides.length > 0 || menuOptions.drinks.length > 0 || menuOptions.sauces.length > 0) && (
           <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-3">
-            {menuOptions.sides.length > 0 && (
-              <fieldset className="space-y-2">
-                <legend className="text-sm font-bold text-foreground">
-                  Accompagnements — choisissez {menuOptions.included_side_count}
-                </legend>
-                <div className="grid grid-cols-2 gap-2">
-                  {menuOptions.sides.map((side) => {
-                    const checked = selectedSides.includes(side);
-                    const disabled = !checked && selectedSides.length >= menuOptions.included_side_count;
-                    return (
-                      <label key={side} className="flex min-h-10 items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm">
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          disabled={disabled}
-                          onChange={() => toggleChoice(side, selectedSides, menuOptions.included_side_count, setSelectedSides)}
-                        />
-                        <span>{side}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </fieldset>
+            <CompositionFieldset
+              title="Accompagnements"
+              choices={menuOptions.sides}
+              selected={selectedSides}
+              requiredCount={menuOptions.included_side_count}
+              onToggle={(side) => toggleChoice(side, selectedSides, menuOptions.included_side_count, setSelectedSides)}
+            />
+            <CompositionFieldset
+              title="Boissons"
+              choices={menuOptions.drinks}
+              selected={selectedDrinks}
+              requiredCount={menuOptions.included_drink_count}
+              onToggle={(drink) => toggleChoice(drink, selectedDrinks, menuOptions.included_drink_count, setSelectedDrinks)}
+            />
+            <CompositionFieldset
+              title="Sauces"
+              choices={menuOptions.sauces}
+              selected={selectedSauces}
+              requiredCount={menuOptions.included_sauce_count}
+              onToggle={(sauce) => toggleChoice(sauce, selectedSauces, menuOptions.included_sauce_count, setSelectedSauces)}
+            />
+            {menuOptions.instructions_enabled !== false && (
+              <label className="block space-y-1">
+                <span className="text-sm font-bold text-foreground">Consigne cuisine — optionnel</span>
+                <textarea
+                  value={instructions}
+                  onChange={(event) => setInstructions(event.target.value.slice(0, 240))}
+                  rows={2}
+                  className="w-full rounded-xl border border-border bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  placeholder="Ex : sans piment, sauce à part, cuisson bien cuit..."
+                />
+              </label>
             )}
-
-            {menuOptions.drinks.length > 0 && (
-              <fieldset className="space-y-2">
-                <legend className="text-sm font-bold text-foreground">
-                  Boissons — choisissez {menuOptions.included_drink_count}
-                </legend>
-                <div className="grid grid-cols-2 gap-2">
-                  {menuOptions.drinks.map((drink) => {
-                    const checked = selectedDrinks.includes(drink);
-                    const disabled = !checked && selectedDrinks.length >= menuOptions.included_drink_count;
-                    return (
-                      <label key={drink} className="flex min-h-10 items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm">
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          disabled={disabled}
-                          onChange={() => toggleChoice(drink, selectedDrinks, menuOptions.included_drink_count, setSelectedDrinks)}
-                        />
-                        <span>{drink}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </fieldset>
-            )}
-
             {!menuComplete && (
               <div className="text-xs font-semibold text-destructive">
-                Complétez la composition avant d'ajouter au panier.
+                Complétez les accompagnements, boissons et sauces obligatoires avant d'ajouter au panier.
               </div>
             )}
           </div>
         )}
 
         <div className="flex items-center justify-between gap-3">
-          <div className="text-xl font-black text-foreground">
-            {formatEuro(product.price)}
-          </div>
+          <div className="text-xl font-black text-foreground">{formatEuro(product.price)}</div>
           <button
             type="button"
             onClick={addConfiguredProduct}
@@ -181,9 +204,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         )}
 
-        {!isAvailable && (
-          <div className="text-xs font-semibold text-destructive">Indisponible pour le moment</div>
-        )}
+        {!isAvailable && <div className="text-xs font-semibold text-destructive">Indisponible pour le moment</div>}
       </div>
     </article>
   );
