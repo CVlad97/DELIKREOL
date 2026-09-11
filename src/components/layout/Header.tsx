@@ -37,6 +37,7 @@ const primaryNavItems: NavItem[] = [
     icon: <ChefHat className="h-4 w-4" />,
     activePrefixes: ['/traiteurs', '/traiteur'],
   },
+  { label: 'Actualités', to: '/actualites', icon: <FileText className="h-4 w-4" /> },
   { label: 'Commander', to: '/devis', icon: <FileText className="h-4 w-4" /> },
   { label: 'Partenaire', to: '/devenir-partenaire', icon: <Users className="h-4 w-4" /> },
 ];
@@ -44,8 +45,6 @@ const primaryNavItems: NavItem[] = [
 const secondaryNavItems: NavItem[] = [
   { label: 'Signaler un bug', to: '/feedback', icon: <Bug className="h-4 w-4" /> },
 ];
-
-const allMobileNavItems = [...primaryNavItems, ...secondaryNavItems];
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -57,8 +56,9 @@ export function Header() {
     ...item,
     label: item.to === '/catalogue' ? t('nav.catalog')
       : item.to === '/traiteurs' ? t('nav.traiteurs')
-        : item.to === '/devenir-partenaire' ? t('nav.partner')
-          : t('home.hero_cta'),
+        : item.to === '/actualites' ? 'Actualités'
+          : item.to === '/devenir-partenaire' ? t('nav.partner')
+            : t('home.hero_cta'),
   }));
 
   useEffect(() => {
