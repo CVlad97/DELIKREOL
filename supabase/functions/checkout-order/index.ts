@@ -28,8 +28,22 @@ type CheckoutItemInput = {
   selected_options?: unknown;
 };
 
-type MenuSelection = { sides: string[]; drinks: string[] };
-type MenuOptions = MenuSelection & { included_side_count: number; included_drink_count: number };
+type MenuSelection = {
+  sides: string[];
+  drinks: string[];
+  sauces: string[];
+  instructions?: string;
+};
+
+type MenuOptions = {
+  sides: string[];
+  drinks: string[];
+  sauces?: string[];
+  included_side_count: number;
+  included_drink_count: number;
+  included_sauce_count?: number;
+  instructions_enabled?: boolean;
+};
 
 type ProductRow = {
   id: string;
@@ -56,28 +70,16 @@ type ProductRow = {
   } | null;
 };
 
-// Fournisseurs de paiement toujours autorisés côté serveur. La liste est
-// volontairement stricte : toute valeur non listée ici (y compris
-// `stripe_disabled`, `stripe_test`, `manual` et les variants `sumup_*`) est
-// rejetée avec un 400 explicite. Stripe reste désactivé pour ce lancement et
-// "manual" est trop vague pour être exposé au client.
 const BASE_PAYMENT_PROVIDERS = new Set([
   "qonto_transfer",
   "revolut_transfer",
   "cash_on_delivery",
 ]);
 
-// Fournisseurs optionnels activés par feature flag serveur uniquement. Aucun
-// client ne peut forcer leur activation : la décision vient de Deno.env, pas
-// du corps de la requête.
 function resolveAllowedPaymentProviders(): Set<string> {
   const providers = new Set(BASE_PAYMENT_PROVIDERS);
-  if (Deno.env.get("ENABLE_CRYPTO_PAYMENT") === "true") {
-    providers.add("crypto_wallet");
-  }
-  if (Deno.env.get("ENABLE_EXTERNAL_PAYMENT_LINK") === "true") {
-    providers.add("external_payment_link");
-  }
+  if (Deno.env.get("ENABLE_CRYPTO_PAYMENT") === "true") providers.add("crypto_wallet");
+  if (Deno.env.get("ENABLE_EXTERNAL_PAYMENT_LINK") === "true") providers.add("external_payment_link");
   return providers;
 }
 
@@ -121,25 +123,32 @@ function sanitizeText(value: unknown, maxLength: number) {
   return value.trim().slice(0, maxLength);
 }
 
+function parseChoiceArray(choices: unknown) {
+  if (choices == null) return [];
+  if (!Array.isArray(choices) || choices.some((choice) => typeof choice !== "string")) {
+    throw new Response(JSON.stringify({ error: "Composition de menu invalide" }), { status: 400 });
+  }
+  return choices.map((choice) => sanitizeText(choice, 80)).filter(Boolean);
+}
+
 function parseSelectedOptions(value: unknown): MenuSelection | null {
   if (value == null) return null;
-  if (!value || typeof value !== "object") throw new Response(JSON.stringify({ error: "Composition de menu invalide" }), { status: 400 });
+  if (!value || typeof value !== "object") {
+    throw new Response(JSON.stringify({ error: "Composition de menu invalide" }), { status: 400 });
+  }
   const record = value as Record<string, unknown>;
-  const normalize = (choices: unknown) => {
-    if (!Array.isArray(choices) || choices.some((choice) => typeof choice !== "string")) {
-      throw new Response(JSON.stringify({ error: "Composition de menu invalide" }), { status: 400 });
-    }
-    return choices.map((choice) => sanitizeText(choice, 80));
+  return {
+    sides: parseChoiceArray(record.sides),
+    drinks: parseChoiceArray(record.drinks),
+    sauces: parseChoiceArray(record.sauces),
+    instructions: sanitizeText(record.instructions, 240) || undefined,
   };
-  return { sides: normalize(record.sides), drinks: normalize(record.drinks) };
 }
 
 async function sha256Hex(value: string) {
   const data = new TextEncoder().encode(value);
   const hash = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(hash))
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
+  return Array.from(new Uint8Array(hash)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 function parseItems(rawItems: unknown) {
@@ -152,9 +161,7 @@ function parseItems(rawItems: unknown) {
     const productId = typeof item.product_id === "string" ? item.product_id : typeof item.id === "string" ? item.id : "";
     const quantity = normalizeQuantity(item.quantity ?? 1);
     if (!UUID_RE.test(productId) || !quantity) {
-      throw new Response(JSON.stringify({ error: "Chaque ligne doit contenir product_id UUID et quantity valide" }), {
-        status: 400,
-      });
+      throw new Response(JSON.stringify({ error: "Chaque ligne doit contenir product_id UUID et quantity valide" }), { status: 400 });
     }
     const selectedOptions = parseSelectedOptions(item.selected_options);
     const key = `${productId}:${JSON.stringify(selectedOptions)}`;
@@ -164,33 +171,53 @@ function parseItems(rawItems: unknown) {
   return Array.from(aggregated.values());
 }
 
+function normalizeOptions(product: ProductRow) {
+  const raw = product.menu_options;
+  if (!raw) return null;
+  const sides = Array.isArray(raw.sides) ? raw.sides.filter((item) => typeof item === "string") : [];
+  const drinks = Array.isArray(raw.drinks) ? raw.drinks.filter((item) => typeof item === "string") : [];
+  const sauces = Array.isArray(raw.sauces) ? raw.sauces.filter((item) => typeof item === "string") : [];
+  const sideCount = Number(raw.included_side_count ?? 0);
+  const drinkCount = Number(raw.included_drink_count ?? 0);
+  const sauceCount = Number(raw.included_sauce_count ?? 0);
+  if (!Number.isInteger(sideCount) || !Number.isInteger(drinkCount) || !Number.isInteger(sauceCount)) {
+    throw new Response(JSON.stringify({ error: `Configuration de menu invalide: ${product.name}` }), { status: 409 });
+  }
+  if (sideCount < 0 || drinkCount < 0 || sauceCount < 0 || sideCount > sides.length || drinkCount > drinks.length || sauceCount > sauces.length) {
+    throw new Response(JSON.stringify({ error: `Configuration de menu invalide: ${product.name}` }), { status: 409 });
+  }
+  return { sides, drinks, sauces, sideCount, drinkCount, sauceCount, instructionsEnabled: raw.instructions_enabled !== false };
+}
+
 function validateMenuSelection(product: ProductRow, selection: MenuSelection | null) {
-  const options = product.menu_options;
+  const options = normalizeOptions(product);
   if (!options) {
-    if (selection && (selection.sides.length || selection.drinks.length)) {
+    if (selection && (selection.sides.length || selection.drinks.length || selection.sauces.length || selection.instructions)) {
       throw new Response(JSON.stringify({ error: `Composition non autorisée: ${product.name}` }), { status: 400 });
     }
     return null;
   }
-  if (!Array.isArray(options.sides) || !Array.isArray(options.drinks) ||
-    !Number.isInteger(options.included_side_count) || !Number.isInteger(options.included_drink_count)) {
-    throw new Response(JSON.stringify({ error: `Configuration de menu invalide: ${product.name}` }), { status: 409 });
-  }
   if (!selection) throw new Response(JSON.stringify({ error: `Composition requise: ${product.name}` }), { status: 400 });
   const uniqueSides = new Set(selection.sides);
   const uniqueDrinks = new Set(selection.drinks);
-  const valid = uniqueSides.size === options.included_side_count &&
-    uniqueDrinks.size === options.included_drink_count &&
+  const uniqueSauces = new Set(selection.sauces);
+  const valid = uniqueSides.size === options.sideCount &&
+    uniqueDrinks.size === options.drinkCount &&
+    uniqueSauces.size === options.sauceCount &&
     [...uniqueSides].every((choice) => options.sides.includes(choice)) &&
-    [...uniqueDrinks].every((choice) => options.drinks.includes(choice));
+    [...uniqueDrinks].every((choice) => options.drinks.includes(choice)) &&
+    [...uniqueSauces].every((choice) => options.sauces.includes(choice));
   if (!valid) throw new Response(JSON.stringify({ error: `Composition invalide: ${product.name}` }), { status: 400 });
-  return { sides: [...uniqueSides], drinks: [...uniqueDrinks] };
+  const instructions = options.instructionsEnabled ? sanitizeText(selection.instructions, 240) : "";
+  return {
+    sides: [...uniqueSides],
+    drinks: [...uniqueDrinks],
+    sauces: [...uniqueSauces],
+    instructions: instructions || undefined,
+  };
 }
 
-async function enforceRateLimit(
-  admin: ReturnType<typeof createClient>,
-  requestFingerprint: string,
-) {
+async function enforceRateLimit(admin: ReturnType<typeof createClient>, requestFingerprint: string) {
   const windowStart = new Date();
   windowStart.setMinutes(0, 0, 0);
   const rateKey = await sha256Hex(`${requestFingerprint}:${windowStart.toISOString()}`);
@@ -202,10 +229,7 @@ async function enforceRateLimit(
 
   if (error) {
     console.error("[checkout-order] rate limit unavailable", error.message);
-    throw new Response(
-      JSON.stringify({ error: "Service de protection temporairement indisponible" }),
-      { status: 503 },
-    );
+    throw new Response(JSON.stringify({ error: "Service de protection temporairement indisponible" }), { status: 503 });
   }
 
   if (Number(data || 0) > 20) {
@@ -222,9 +246,7 @@ Deno.serve(async (req: Request) => {
     if (contentLength > MAX_BODY_BYTES) return json(req, { error: "Payload trop volumineux" }, 413);
 
     const rawBody = await req.text();
-    if (new TextEncoder().encode(rawBody).length > MAX_BODY_BYTES) {
-      return json(req, { error: "Payload trop volumineux" }, 413);
-    }
+    if (new TextEncoder().encode(rawBody).length > MAX_BODY_BYTES) return json(req, { error: "Payload trop volumineux" }, 413);
 
     const body = JSON.parse(rawBody);
     const admin = createClient(assertEnv("SUPABASE_URL"), assertEnv("SUPABASE_SERVICE_ROLE_KEY"));
@@ -233,14 +255,9 @@ Deno.serve(async (req: Request) => {
     const { data: authData } = token ? await admin.auth.getUser(token) : { data: { user: null } };
 
     const idempotencyKey = sanitizeText(body.idempotency_key, 120);
-    if (!idempotencyKey || idempotencyKey.length < 16) {
-      return json(req, { error: "idempotency_key required" }, 400);
-    }
+    if (!idempotencyKey || idempotencyKey.length < 16) return json(req, { error: "idempotency_key required" }, 400);
 
-    await enforceRateLimit(
-      admin,
-      `${req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for") || "unknown"}:${req.headers.get("user-agent") || "ua"}`,
-    );
+    await enforceRateLimit(admin, `${req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for") || "unknown"}:${req.headers.get("user-agent") || "ua"}`);
 
     const { data: existing, error: existingError } = await admin
       .from("orders")
@@ -292,9 +309,7 @@ Deno.serve(async (req: Request) => {
       };
     });
 
-    if (vendorIds.size !== 1) {
-      return json(req, { error: "Panier multi-vendeur bloqué en lancement: une commande par partenaire" }, 409);
-    }
+    if (vendorIds.size !== 1) return json(req, { error: "Panier multi-vendeur bloqué en lancement: une commande par partenaire" }, 409);
 
     const mode = sanitizeText(body.delivery_mode || body.mode, 32) || "retrait";
     const delivery = DELIVERY_FEES[mode];
@@ -304,31 +319,16 @@ Deno.serve(async (req: Request) => {
     const totalCents = subtotalCents + delivery.cents;
     if (totalCents <= 0) return json(req, { error: "Total commande invalide" }, 400);
 
-    // Validation stricte du provider : aucune confiance dans la valeur client.
-    // Un provider inconnu, désactivé (stripe_disabled, stripe_test, manual,
-    // sumup_*) ou non activé par feature flag serveur est rejeté en 400. Pas
-    // de repli silencieux vers qonto_transfer : le client doit désigner
-    // explicitement un provider autorisé.
     const rawPaymentProvider = sanitizeText(body.payment_provider, 32);
     const allowedPaymentProviders = resolveAllowedPaymentProviders();
     if (!rawPaymentProvider || !allowedPaymentProviders.has(rawPaymentProvider)) {
-      return json(
-        req,
-        {
-          error: "payment_provider non autorisé",
-          reason:
-            "Provider de paiement inconnu, désactivé ou non activé par feature flag serveur.",
-        },
-        400,
-      );
+      return json(req, { error: "payment_provider non autorisé", reason: "Provider de paiement inconnu, désactivé ou non activé par feature flag serveur." }, 400);
     }
     const paymentProvider = rawPaymentProvider;
     const phone = sanitizeText(body.phone || body.customer_phone, 30);
     if (!phone || phone.length < 8) return json(req, { error: "Téléphone requis" }, 400);
     const paymentExternalId = sanitizeText(body.payment_external_id, 180);
-    if (paymentProvider === "crypto_wallet" && !paymentExternalId) {
-      return json(req, { error: "Hash de transaction requis pour le paiement crypto" }, 400);
-    }
+    if (paymentProvider === "crypto_wallet" && !paymentExternalId) return json(req, { error: "Hash de transaction requis pour le paiement crypto" }, 400);
     if (paymentExternalId) {
       const { data: duplicatePayment, error: duplicatePaymentError } = await admin
         .from("orders")
@@ -336,41 +336,29 @@ Deno.serve(async (req: Request) => {
         .eq("payment_external_id", paymentExternalId)
         .maybeSingle();
       if (duplicatePaymentError) throw duplicatePaymentError;
-      if (duplicatePayment) {
-        return json(req, { error: "Référence paiement déjà utilisée", order: duplicatePayment }, 409);
-      }
+      if (duplicatePayment) return json(req, { error: "Référence paiement déjà utilisée", order: duplicatePayment }, 409);
     }
 
     const now = new Date();
     const datePart = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
-    const random = Array.from(crypto.getRandomValues(new Uint8Array(6)))
-      .map((byte) => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[byte % 36])
-      .join("");
+    const random = Array.from(crypto.getRandomValues(new Uint8Array(6))).map((byte) => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[byte % 36]).join("");
     const orderNumber = `DK-${datePart}-${random}`;
-
-    // Le statut de paiement est dérivé UNIQUEMENT de données serveur, jamais
-    // d'une valeur envoyée par le client (payment_external_id,
-    // payment_status, etc.). Toute commande nouvellement créée démarre à
-    // "pending" ; la transition vers "proof_submitted" / "paid" se fait via
-    // la revue admin ou un webhook de paiement vérifié, pas sur la base d'un
-    // champ fourni par le frontend.
     const paymentStatus = "pending";
     const paymentReference = `${paymentProvider.toUpperCase()}-${orderNumber}`;
-    const trackingToken = Array.from(crypto.getRandomValues(new Uint8Array(8)))
-      .map((byte) => byte.toString(16).padStart(2, "0"))
-      .join("");
+    const trackingToken = Array.from(crypto.getRandomValues(new Uint8Array(8))).map((byte) => byte.toString(16).padStart(2, "0")).join("");
 
     const compositionNotes = orderItems.flatMap((item) => {
       if (!item.selected_options) return [];
       const details = [
         item.selected_options.sides.length ? `accompagnement(s): ${item.selected_options.sides.join(", ")}` : "",
         item.selected_options.drinks.length ? `boisson(s): ${item.selected_options.drinks.join(", ")}` : "",
+        item.selected_options.sauces.length ? `sauce(s): ${item.selected_options.sauces.join(", ")}` : "",
+        item.selected_options.instructions ? `consigne: ${item.selected_options.instructions}` : "",
       ].filter(Boolean).join("; ");
       return [`${item.product_name}: ${details}`];
     });
     const customerNotes = sanitizeText(body.notes, 1000);
-    const securedNotes = [customerNotes, compositionNotes.length ? `Composition des menus:\n${compositionNotes.join("\n")}` : ""]
-      .filter(Boolean).join("\n\n").slice(0, 1000);
+    const securedNotes = [customerNotes, compositionNotes.length ? `Composition des menus:\n${compositionNotes.join("\n")}` : ""].filter(Boolean).join("\n\n").slice(0, 1000);
 
     const { data: result, error: rpcError } = await admin.rpc("create_checkout_order_atomic", {
       target_idempotency_key: idempotencyKey,
@@ -426,29 +414,21 @@ Deno.serve(async (req: Request) => {
     const order = result?.order;
     if (!order?.id || !order?.order_number) throw new Error("RPC create_checkout_order_atomic returned no order");
 
-    return json(req, {
-      success: true,
-      existing: Boolean(result?.existing),
-      order,
-    });
+    return json(req, { success: true, existing: Boolean(result?.existing), order });
   } catch (error) {
-      if (error instanceof Response) {
-        const body = await error.text();
-        return json(req, JSON.parse(body), error.status);
-      }
-      // Payment external_id collision → 409 Conflict
-      if (error instanceof Error && (
-        error.message?.includes('23505') ||
-        error.message?.includes('unique_violation') ||
-        error.message?.includes('duplicate key') ||
-        error.message?.includes('idx_orders_payment_external_id_unique')
-      )) {
-        return json(req, {
-          error: 'Ce paiement a déjà été utilisé pour une autre commande.',
-          code: 'PAYMENT_EXTERNAL_ID_COLLISION',
-        }, 409);
-      }
-      console.error('[checkout-order] error', error instanceof Error ? error.message : String(error));
-      return json(req, { error: 'Unable to create order' }, 500);
+    if (error instanceof Response) {
+      const body = await error.text();
+      return json(req, JSON.parse(body), error.status);
     }
+    if (error instanceof Error && (
+      error.message?.includes("23505") ||
+      error.message?.includes("unique_violation") ||
+      error.message?.includes("duplicate key") ||
+      error.message?.includes("idx_orders_payment_external_id_unique")
+    )) {
+      return json(req, { error: "Ce paiement a déjà été utilisé pour une autre commande.", code: "PAYMENT_EXTERNAL_ID_COLLISION" }, 409);
+    }
+    console.error("[checkout-order] error", error instanceof Error ? error.message : String(error));
+    return json(req, { error: "Unable to create order" }, 500);
+  }
 });
