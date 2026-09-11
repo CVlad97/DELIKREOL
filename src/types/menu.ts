@@ -1,11 +1,16 @@
 export interface MenuOptions {
   sides: string[];
   drinks: string[];
-  sauces: string[];
+  sauces?: string[];
   included_side_count: number;
   included_drink_count: number;
-  included_sauce_count: number;
+  included_sauce_count?: number;
   instructions_enabled?: boolean;
+}
+
+export interface NormalizedMenuOptions extends MenuOptions {
+  sauces: string[];
+  included_sauce_count: number;
 }
 
 export interface MenuSelection {
@@ -29,7 +34,7 @@ function normalizeCount(value: unknown, fallback: number): number | null {
 
 /** Ignore safely any incomplete menu configuration returned by the public catalogue. */
 /** The checkout function remains the authority for validating a customer's final choices. */
-export function normalizeMenuOptions(value: unknown): MenuOptions | null {
+export function normalizeMenuOptions(value: unknown): NormalizedMenuOptions | null {
   if (!value || typeof value !== 'object') return null;
   const record = value as Record<string, unknown>;
   const sides = normalizeChoiceArray(record.sides);
