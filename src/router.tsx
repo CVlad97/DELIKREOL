@@ -49,6 +49,7 @@ const DevenirPointRelaisPage = lazy(async () => {
 const PointsRelaisPage = lazy(() => import('./pages/new/PointsRelaisPage'));
 const AidePage = lazy(() => import('./pages/new/AidePage'));
 const LivraisonPage = lazy(() => import('./pages/new/LivraisonPage'));
+const ActualitesPage = lazy(() => import('./pages/new/ActualitesPage'));
 const NotFoundPage = lazy(() => import('./pages/new/NotFoundPage'));
 const ContactPage = lazy(() => import('./pages/new/ContactPage'));
 const FeedbackPage = lazy(() => import('./pages/new/FeedbackPage'));
@@ -120,6 +121,7 @@ const ROUTES_WITH_OWN_BACKBAR = [
   /^\/livraison\/?$/,
   /^\/contact\/?$/,
   /^\/aide\/?$/,
+  /^\/actualites\/?$/,
   /^\/partenaire\/?$/,
 ];
 
@@ -194,6 +196,7 @@ export function AppRouter() {
                   <Route path="points-relais" element={<PointsRelaisPage />} />
                   <Route path="aide" element={<AidePage />} />
                   <Route path="livraison" element={<LivraisonPage />} />
+                  <Route path="actualites" element={<ActualitesPage />} />
                   <Route path="contact" element={<ContactPage />} />
                   <Route path="feedback" element={<FeedbackPage />} />
                   <Route path="jobs" element={<JobsPage />} />
