@@ -13,6 +13,7 @@ import {
   LogIn,
   LayoutDashboard,
   Bug,
+  MapPin,
 } from 'lucide-react';
 import { LanguageSwitcher } from '../LanguageSwitcher';
 import { useCart } from '../../contexts/CartContext';
@@ -27,6 +28,54 @@ interface NavItem {
   to: string;
   icon: React.ReactNode;
   activePrefixes?: string[];
+}
+
+type BrandMarket = {
+  region: string;
+  subtitle: string;
+  badge: string;
+};
+
+const DEFAULT_MARKET: BrandMarket = {
+  region: 'Martinique',
+  subtitle: 'DeliKreol Martinique',
+  badge: 'À la carte',
+};
+
+function resolveMarketFromCoords(latitude: number, longitude: number): BrandMarket {
+  if (latitude >= 15.75 && latitude <= 16.65 && longitude >= -62 && longitude <= -60.85) {
+    return { region: 'Guadeloupe', subtitle: 'DeliKreol Guadeloupe', badge: 'À la carte' };
+  }
+  if (latitude >= 14.35 && latitude <= 14.95 && longitude >= -61.35 && longitude <= -60.75) {
+    return DEFAULT_MARKET;
+  }
+  if (latitude >= 2 && latitude <= 6 && longitude >= -55 && longitude <= -51) {
+    return { region: 'Guyane', subtitle: 'DeliKreol Guyane', badge: 'À la carte' };
+  }
+  if (latitude >= 17.75 && latitude <= 18.2 && longitude >= -63.25 && longitude <= -62.7) {
+    return { region: 'Saint-Martin', subtitle: 'DeliKreol Saint-Martin', badge: 'À la carte' };
+  }
+  if (latitude >= 15.15 && latitude <= 15.75 && longitude >= -61.6 && longitude <= -61.15) {
+    return { region: 'Dominique', subtitle: 'DeliKreol Dominique', badge: 'À la carte' };
+  }
+  return DEFAULT_MARKET;
+}
+
+function readStoredMarket(): BrandMarket {
+  if (typeof window === 'undefined') return DEFAULT_MARKET;
+  try {
+    const raw = window.localStorage.getItem('delikreol_brand_market');
+    if (!raw) return DEFAULT_MARKET;
+    const parsed = JSON.parse(raw) as Partial<BrandMarket>;
+    if (!parsed.region || !parsed.subtitle) return DEFAULT_MARKET;
+    return {
+      region: parsed.region,
+      subtitle: parsed.subtitle,
+      badge: parsed.badge || 'À la carte',
+    };
+  } catch {
+    return DEFAULT_MARKET;
+  }
 }
 
 const primaryNavItems: NavItem[] = [
@@ -48,6 +97,7 @@ const secondaryNavItems: NavItem[] = [
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [brandMarket, setBrandMarket] = useState<BrandMarket>(() => readStoredMarket());
   const { itemCount } = useCart();
   const { user, profile } = useAuth();
   const location = useLocation();
@@ -64,6 +114,37 @@ export function Header() {
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const applyMarket = (nextMarket: BrandMarket) => {
+      if (cancelled) return;
+      setBrandMarket(nextMarket);
+      try {
+        window.localStorage.setItem('delikreol_brand_market', JSON.stringify(nextMarket));
+      } catch { /* ignore */ }
+    };
+
+    if (typeof navigator === 'undefined' || !navigator.geolocation) return undefined;
+
+    const locate = () => navigator.geolocation.getCurrentPosition(
+      (position) => applyMarket(resolveMarketFromCoords(position.coords.latitude, position.coords.longitude)),
+      () => undefined,
+      { enableHighAccuracy: false, timeout: 7000, maximumAge: 900000 }
+    );
+
+    if ('permissions' in navigator && navigator.permissions?.query) {
+      navigator.permissions.query({ name: 'geolocation' as PermissionName })
+        .then((permission) => {
+          if (permission.state === 'granted') locate();
+        })
+        .catch(() => undefined);
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const isActive = (item: NavItem) => {
     const prefixes = item.activePrefixes || [item.to];
@@ -86,12 +167,20 @@ export function Header() {
     </span>
   );
 
+  const brandLogo = (
+    <img
+      src={`${import.meta.env.BASE_URL || '/'}branding/logo-mark.svg`}
+      alt=""
+      className="brand-logo-frame h-12 w-12 shrink-0 rounded-2xl object-contain p-1.5 ring-2 ring-white/90 sm:h-14 sm:w-14"
+    />
+  );
+
   return (
-    <header className="sticky top-0 z-40 border-b border-border-strong/50 bg-background shadow-sm">
+    <header className="sticky top-0 z-40 border-b border-border-strong/50 bg-background/95 shadow-sm backdrop-blur-xl">
       <div className="madras-strip" />
 
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-        <div className="relative grid h-[72px] grid-cols-[44px_minmax(0,1fr)_88px] items-center gap-1 xl:hidden">
+        <div className="relative grid h-[82px] grid-cols-[44px_minmax(0,1fr)_88px] items-center gap-1 xl:hidden">
           <button
             type="button"
             onClick={() => setMobileMenuOpen((open) => !open)}
@@ -106,16 +195,20 @@ export function Header() {
           <Link
             to="/"
             data-testid="header-brand-mobile"
-            className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 rounded-xl px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-[360px]:gap-1.5"
-            aria-label="Accueil DeliKreol"
+            className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-2 rounded-[1.4rem] border border-primary/20 bg-white/95 px-2.5 py-1.5 text-center shadow-[0_18px_45px_-28px_rgba(42,25,15,0.75)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label={`Accueil ${brandMarket.subtitle}`}
           >
-            <img
-              src={`${import.meta.env.BASE_URL || '/'}branding/logo-mark.svg`}
-              alt=""
-              className="brand-logo-frame h-8 w-8 shrink-0 rounded-lg object-contain p-1 min-[360px]:h-10 min-[360px]:w-10 min-[360px]:rounded-xl"
-            />
-            <span className="whitespace-nowrap text-sm font-black tracking-[-0.04em] text-foreground min-[360px]:text-lg">
-              DELI<span className="text-primary">KREOL</span>
+            {brandLogo}
+            <span className="leading-none">
+              <span className="block text-[9px] font-black uppercase tracking-[0.22em] text-primary">
+                {brandMarket.badge}
+              </span>
+              <span className="block whitespace-nowrap text-lg font-black tracking-[-0.05em] text-foreground">
+                DELI<span className="text-primary">KREOL</span>
+              </span>
+              <span className="mt-0.5 flex items-center justify-center gap-1 text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                <MapPin className="h-2.5 w-2.5" /> {brandMarket.region}
+              </span>
             </span>
           </Link>
 
@@ -140,7 +233,7 @@ export function Header() {
           </div>
         </div>
 
-        <div className="hidden h-[76px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 xl:grid">
+        <div className="hidden h-[88px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 xl:grid">
           <nav
             className="flex min-w-0 items-center gap-1 justify-self-start rounded-2xl border border-border-strong/40 bg-card p-1 shadow-sm"
             aria-label="Navigation principale"
@@ -168,20 +261,19 @@ export function Header() {
           <Link
             to="/"
             data-testid="header-brand-desktop"
-            className="flex items-center justify-self-center gap-2.5 rounded-xl px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            aria-label="Accueil DeliKreol"
+            className="group flex items-center justify-self-center gap-3 rounded-[1.6rem] border border-primary/20 bg-white/95 px-4 py-2.5 text-center shadow-[0_24px_70px_-42px_rgba(42,25,15,0.8)] transition-all hover:-translate-y-0.5 hover:shadow-[0_28px_90px_-48px_rgba(42,25,15,0.95)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label={`Accueil ${brandMarket.subtitle}`}
           >
-            <img
-              src={`${import.meta.env.BASE_URL || '/'}branding/logo-mark.svg`}
-              alt=""
-              className="brand-logo-frame h-11 w-11 rounded-xl object-contain p-1"
-            />
+            {brandLogo}
             <span className="leading-none">
-              <span className="block whitespace-nowrap text-xl font-black tracking-[-0.04em] text-foreground">
+              <span className="block text-[10px] font-black uppercase tracking-[0.28em] text-primary">
+                {brandMarket.badge}
+              </span>
+              <span className="block whitespace-nowrap text-2xl font-black tracking-[-0.055em] text-foreground">
                 DELI<span className="text-primary">KREOL</span>
               </span>
-              <span className="mt-1 block text-center text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                Martinique
+              <span className="mt-1 flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                <MapPin className="h-3 w-3" /> {brandMarket.subtitle}
               </span>
             </span>
           </Link>
