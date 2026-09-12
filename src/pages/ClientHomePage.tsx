@@ -577,7 +577,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
  <div className="flex items-center gap-3">
  <a
  href={whatsappLink}
- className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-success/[0.15]0 text-slate-950 font-semibold"
+ className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-400 text-slate-950 font-semibold"
  >
  WhatsApp
  <ArrowRight className="w-4 h-4" />
@@ -611,7 +611,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
  <button
  onClick={openCart}
  aria-label="Ouvrir le checkout"
- className="flex items-center gap-3 px-6 py-4 bg-success/[0.15]0 hover:bg-emerald-600 text-slate-950 rounded-2xl transition-colors font-semibold"
+ className="flex items-center gap-3 px-6 py-4 bg-emerald-400 hover:bg-emerald-500 text-slate-950 rounded-2xl transition-colors font-semibold"
  >
  <ShoppingBag className="w-6 h-6" />
  <div className="text-left">
@@ -681,21 +681,21 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
  <div className="mt-4 grid gap-3 sm:grid-cols-3 text-sm">
  <button
  onClick={() => setDeliveryMode('pickup')}
- className={`rounded-2xl border px-4 py-4 text-left ${deliveryMode ==='pickup' ?'border-emerald-400 bg-success/[0.15]0/10 text-emerald-200' :'border-slate-800 bg-slate-950/40 text-slate-300'}`}
+ className={`rounded-2xl border px-4 py-4 text-left ${deliveryMode ==='pickup' ?'border-emerald-400 bg-emerald-400/10 text-emerald-200' :'border-slate-800 bg-slate-950/40 text-slate-300'}`}
  >
  <div className="font-semibold">Retrait</div>
  <div className="mt-1 text-xs">0 €</div>
  </button>
  <button
  onClick={() => setDeliveryMode('pilot')}
- className={`rounded-2xl border px-4 py-4 text-left ${deliveryMode ==='pilot' ?'border-emerald-400 bg-success/[0.15]0/10 text-emerald-200' :'border-slate-800 bg-slate-950/40 text-slate-300'}`}
+ className={`rounded-2xl border px-4 py-4 text-left ${deliveryMode ==='pilot' ?'border-emerald-400 bg-emerald-400/10 text-emerald-200' :'border-slate-800 bg-slate-950/40 text-slate-300'}`}
  >
  <div className="font-semibold">Livraison pilote</div>
  <div className="mt-1 text-xs">Forfait 2,50 €</div>
  </button>
  <button
  onClick={() => setDeliveryMode('outside')}
- className={`rounded-2xl border px-4 py-4 text-left ${deliveryMode ==='outside' ?'border-emerald-400 bg-success/[0.15]0/10 text-emerald-200' :'border-slate-800 bg-slate-950/40 text-slate-300'}`}
+ className={`rounded-2xl border px-4 py-4 text-left ${deliveryMode ==='outside' ?'border-emerald-400 bg-emerald-400/10 text-emerald-200' :'border-slate-800 bg-slate-950/40 text-slate-300'}`}
  >
  <div className="font-semibold">Hors zone</div>
  <div className="mt-1 text-xs">Confirmation manuelle</div>
@@ -712,21 +712,21 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
  <div className="mt-4 grid gap-3 sm:grid-cols-3 text-sm">
  <button
  onClick={() => setOrderTiming('now')}
- className={`rounded-2xl border px-4 py-4 text-left ${orderTiming ==='now' ?'border-emerald-400 bg-success/[0.15]0/10 text-emerald-200' :'border-slate-800 bg-slate-950/40 text-slate-300'}`}
+ className={`rounded-2xl border px-4 py-4 text-left ${orderTiming ==='now' ?'border-emerald-400 bg-emerald-400/10 text-emerald-200' :'border-slate-800 bg-slate-950/40 text-slate-300'}`}
  >
  <div className="font-semibold">Maintenant</div>
  <div className="mt-1 text-xs">Confirmation rapide</div>
  </button>
  <button
  onClick={() => setOrderTiming('asap')}
- className={`rounded-2xl border px-4 py-4 text-left ${orderTiming ==='asap' ?'border-emerald-400 bg-success/[0.15]0/10 text-emerald-200' :'border-slate-800 bg-slate-950/40 text-slate-300'}`}
+ className={`rounded-2xl border px-4 py-4 text-left ${orderTiming ==='asap' ?'border-emerald-400 bg-emerald-400/10 text-emerald-200' :'border-slate-800 bg-slate-950/40 text-slate-300'}`}
  >
  <div className="font-semibold">Des que possible</div>
  <div className="mt-1 text-xs">Au plus tot selon la charge</div>
  </button>
  <button
  onClick={() => setOrderTiming('scheduled')}
- className={`rounded-2xl border px-4 py-4 text-left ${orderTiming ==='scheduled' ?'border-emerald-400 bg-success/[0.15]0/10 text-emerald-200' :'border-slate-800 bg-slate-950/40 text-slate-300'}`}
+ className={`rounded-2xl border px-4 py-4 text-left ${orderTiming ==='scheduled' ?'border-emerald-400 bg-emerald-400/10 text-emerald-200' :'border-slate-800 bg-slate-950/40 text-slate-300'}`}
  >
  <div className="font-semibold">Planifier</div>
  <div className="mt-1 text-xs">Aujourd'hui ou demain</div>
@@ -814,14 +814,14 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
  <div className="mt-4 grid gap-3 sm:grid-cols-2 text-sm">
  <button
  onClick={() => setIsBusinessCheckout(false)}
- className={`rounded-2xl border px-4 py-4 text-left ${!isBusinessCheckout ?'border-emerald-400 bg-success/[0.15]0/10 text-emerald-200' :'border-slate-800 bg-slate-950/40 text-slate-300'}`}
+ className={`rounded-2xl border px-4 py-4 text-left ${!isBusinessCheckout ?'border-emerald-400 bg-emerald-400/10 text-emerald-200' :'border-slate-800 bg-slate-950/40 text-slate-300'}`}
  >
  <div className="font-semibold">Commande particulier</div>
  <div className="mt-1 text-xs">Usage personnel ou familial</div>
  </button>
  <button
  onClick={() => setIsBusinessCheckout(true)}
- className={`rounded-2xl border px-4 py-4 text-left ${isBusinessCheckout ?'border-emerald-400 bg-success/[0.15]0/10 text-emerald-200' :'border-slate-800 bg-slate-950/40 text-slate-300'}`}
+ className={`rounded-2xl border px-4 py-4 text-left ${isBusinessCheckout ?'border-emerald-400 bg-emerald-400/10 text-emerald-200' :'border-slate-800 bg-slate-950/40 text-slate-300'}`}
  >
  <div className="font-semibold">Commande entreprise</div>
  <div className="mt-1 text-xs">Equipe, reunion, evenement</div>
@@ -880,7 +880,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
  href={canSubmitCheckout ? cartWhatsAppLink : undefined}
  aria-disabled={!canSubmitCheckout}
  tabIndex={canSubmitCheckout ? 0 : -1}
- className={`mt-5 inline-flex w-full items-center justify-center rounded-2xl px-5 py-4 font-bold text-slate-950 ${canSubmitCheckout ?'bg-success/[0.15]0 hover:bg-emerald-600' :'bg-success/[0.15]0/50 cursor-not-allowed pointer-events-none'}`}
+ className={`mt-5 inline-flex w-full items-center justify-center rounded-2xl px-5 py-4 font-bold text-slate-950 ${canSubmitCheckout ?'bg-emerald-400 hover:bg-emerald-500' :'bg-emerald-400/50 cursor-not-allowed pointer-events-none'}`}
  >
  Valider sur WhatsApp
  </a>
@@ -928,6 +928,8 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
  <img
  src={`${baseUrl}branding/logo-wordmark-premium.svg`}
  alt="DELIKREOL"
+ loading="eager"
+ fetchPriority="high"
  className="h-12 md:h-14"
  />
  <div className="madras-strip w-24 rounded-full" />
@@ -944,7 +946,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
  <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
  <button
  onClick={handleStartOrder}
- className="inline-flex items-center justify-center gap-3 rounded-2xl bg-success/[0.15]0 px-8 py-4 text-lg font-bold text-slate-950 transition-colors hover:bg-emerald-600"
+ className="inline-flex items-center justify-center gap-3 rounded-2xl bg-emerald-400 px-8 py-4 text-lg font-bold text-slate-950 transition-colors hover:bg-emerald-500"
  >
  Commander maintenant
  <ArrowRight className="w-5 h-5" />
@@ -962,7 +964,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
  onClick={() => {
  document.getElementById('entreprise')?.scrollIntoView({ behavior:'smooth' });
  }}
- className="inline-flex items-center justify-center gap-3 rounded-2xl border border-primary/50 bg-primary/[0.05]0/10 px-8 py-4 text-lg font-bold text-primary/60 transition-colors hover:border-orange-400"
+ className="inline-flex items-center justify-center gap-3 rounded-2xl border border-orange-400/50 bg-orange-400/10 px-8 py-4 text-lg font-bold text-orange-300 transition-colors hover:border-orange-400"
  >
  Devis entreprise
  <MapPin className="w-5 h-5" />
@@ -1091,7 +1093,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
  <div className="mt-6 flex flex-wrap gap-3">
  <button
  onClick={openCart}
- className="inline-flex items-center gap-2 rounded-2xl bg-success/[0.15]0 px-5 py-3 font-bold text-slate-950"
+ className="inline-flex items-center gap-2 rounded-2xl bg-emerald-400 px-5 py-3 font-bold text-slate-950"
  >
  {draftRequest.length > 0 ? `Valider chez ${activeVendorProfile.name}` : `Voir le menu de ${activeVendorProfile.name}`}
  <ArrowRight className="w-4 h-4" />
@@ -1143,7 +1145,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
  onClick={() => setSelectedVendorCategory(category)}
  className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
  selectedVendorCategory === category
- ?'bg-success/[0.15]0 text-slate-950'
+ ?'bg-emerald-400 text-slate-950'
  :'border border-slate-700 text-slate-300'
  }`}
  >
@@ -1197,7 +1199,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
  )}
  <button
  onClick={() => handleQuickOffer(offer.products)}
- className="mt-6 inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-success/[0.15]0 px-5 py-4 font-bold text-slate-950 transition-colors hover:bg-emerald-600"
+ className="mt-6 inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-emerald-400 px-5 py-4 font-bold text-slate-950 transition-colors hover:bg-emerald-500"
  >
  {offer.products.length > 0 ?'Commander cette selection' :'Decrire mon besoin'}
  <ArrowRight className="w-5 h-5" />
@@ -1240,7 +1242,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
  />
  <a
  href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Bonjour, voici ma demande sur mesure : ${customNeed ||'...'}${customBudget ? ` | Budget: ${customBudget}` :''}`)}`}
- className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-success/[0.15]0 px-5 py-4 font-bold text-slate-950 hover:bg-emerald-600"
+ className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-emerald-400 px-5 py-4 font-bold text-slate-950 hover:bg-emerald-500"
  >
  Envoyer ma demande
  </a>
@@ -1318,7 +1320,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
  />
  <a
  href={proWhatsAppLink}
- className="sm:col-span-2 inline-flex items-center justify-center rounded-2xl bg-success/[0.15]0 px-5 py-4 font-bold text-slate-950 hover:bg-emerald-600"
+ className="sm:col-span-2 inline-flex items-center justify-center rounded-2xl bg-emerald-400 px-5 py-4 font-bold text-slate-950 hover:bg-emerald-500"
  >
  Demander un devis entreprise
  </a>
@@ -1516,7 +1518,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
  <div className="grid gap-6 md:grid-cols-3">
  {howItWorks.map((step) => (
  <div key={step.title} className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
- <div className="inline-flex rounded-2xl bg-success/[0.15]0/15 p-4 text-success">
+ <div className="inline-flex rounded-2xl bg-emerald-400/15 p-4 text-emerald-300">
  <step.icon className="w-7 h-7" />
  </div>
  <h3 className="mt-5 text-2xl font-bold text-slate-50">{step.title}</h3>
@@ -1592,7 +1594,7 @@ export function ClientHomePage({ onSelectMode, onShowGuide, onOpenDemo, onShowLe
  </p>
  <a
  href={whatsappLink}
- className="inline-flex items-center gap-3 px-6 py-3 bg-success/[0.15]0 hover:bg-emerald-600 text-slate-950 rounded-xl font-bold transition-colors"
+ className="inline-flex items-center gap-3 px-6 py-3 bg-emerald-400 hover:bg-emerald-500 text-slate-950 rounded-xl font-bold transition-colors"
  >
  WhatsApp direct
  <ArrowRight className="w-5 h-5" />

@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Trash2, UploadCloud, RefreshCw, Check } from 'lucide-react';
-import { MediaUpload } from '../../components/MediaUpload';
+import { useEffect, useState } from 'react';
+import { RefreshCw, Check } from 'lucide-react';
+import { MediaUpload, type UploadedMedia } from '../../components/MediaUpload';
 import { isDemoMode, isSupabaseConfigured, supabase } from '../../lib/supabase';
 
 type Row = {
@@ -15,6 +15,16 @@ type Row = {
   mime_type: string;
   created_at: string;
   uploaded_by?: string | null;
+  storage_bucket?: string | null;
+  storage_path?: string | null;
+};
+
+type VendorOption = {
+  id: string;
+  business_name: string;
+  name: string | null;
+  hero_image: string | null;
+  gallery_images: string[] | null;
 };
 
 type FormData = {
@@ -41,14 +51,22 @@ export default function AdminTraiteurMedia() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [delConfirm, setDelConfirm] = useState<string | null>(null);
   const [uploadSlug, setUploadSlug] = useState('');
+  const [uploadVendorId, setUploadVendorId] = useState('');
+  const [vendors, setVendors] = useState<VendorOption[]>([]);
   const [uploadOk, setUploadOk] = useState(false);
 
   const load = async () => {
     setLoading(true); setError('');
     if (isDemoMode || !isSupabaseConfigured) { setRows([]); setLoading(false); return; }
-    const { data, error: e } = await supabase.from('traiteur_media').select('id,traiteur_slug,media_type,url,title,is_published,sort_order,file_size,mime_type,created_at,uploaded_by').order('sort_order', { ascending: true }).order('created_at', { ascending: false });
+    const [mediaResult, vendorResult] = await Promise.all([
+      supabase.from('traiteur_media').select('id,traiteur_slug,media_type,url,title,is_published,sort_order,file_size,mime_type,created_at,uploaded_by,storage_bucket,storage_path').order('sort_order', { ascending: true }).order('created_at', { ascending: false }),
+      supabase.from('vendors').select('id,business_name,name,hero_image,gallery_images').order('business_name'),
+    ]);
+    const { data, error: e } = mediaResult;
     if (e) setError(`Chargement refusé : ${e.message}`);
     else setRows((data || []) as Row[]);
+    if (vendorResult.error) setError(`Chargement des traiteurs refusé : ${vendorResult.error.message}`);
+    else setVendors((vendorResult.data || []) as VendorOption[]);
     setLoading(false);
   };
 
@@ -83,12 +101,40 @@ export default function AdminTraiteurMedia() {
   const doDelete = async (id: string) => {
     setDeleting(id); setError('');
     if (isDemoMode || !isSupabaseConfigured) { setDeleting(null); setDelConfirm(null); return; }
+    const row = rows.find((candidate) => candidate.id === id);
+    if (row?.storage_bucket && row.storage_path) {
+      const { error: storageError } = await supabase.storage.from(row.storage_bucket).remove([row.storage_path]);
+      if (storageError) {
+        setError(`Suppression Storage refusée : ${storageError.message}`);
+        setDeleting(null); setDelConfirm(null); return;
+      }
+    }
     const { error: e } = await supabase.from('traiteur_media').delete().eq('id', id);
     if (e) setError(`Suppression refusée : ${e.message}`);
     setDeleting(null); setDelConfirm(null); await load();
   };
 
-  const handleUpload = () => { setUploadOk(true); setTimeout(() => { setUploadOk(false); setUploadSlug(''); void load(); }, 1200); };
+  const selectVendor = (vendorId: string) => {
+    setUploadVendorId(vendorId);
+    const vendor = vendors.find((candidate) => candidate.id === vendorId);
+    const label = vendor?.business_name || vendor?.name || '';
+    setUploadSlug(label.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''));
+  };
+
+  const handleUpload = async (media: UploadedMedia) => {
+    if (media.mediaType === 'photo' && uploadVendorId) {
+      const vendor = vendors.find((candidate) => candidate.id === uploadVendorId);
+      const gallery = Array.from(new Set([media.url, ...(vendor?.gallery_images || [])]));
+      const { error: vendorError } = await supabase
+        .from('vendors')
+        .update({ hero_image: media.url, gallery_images: gallery, photo_status: 'confirmée', updated_at: new Date().toISOString() })
+        .eq('id', uploadVendorId);
+      if (vendorError) throw new Error(`Photo envoyée mais fiche traiteur non mise à jour : ${vendorError.message}`);
+    }
+    setUploadOk(true);
+    await load();
+    setTimeout(() => setUploadOk(false), 2500);
+  };
 
   const cols = ['Slug', 'Type', 'URL', 'Titre', 'Pub.', 'Ord.', 'Taille', 'MIME', 'Créé', 'Par'];
 
@@ -96,7 +142,7 @@ export default function AdminTraiteurMedia() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-black">Admin Traiteur Media</h1>
-        <p className="text-xs text-muted-foreground">Table publique `traiteur_media` — RLS `private.is_delikreol_admin()` — bucket `traiteur-media`</p>
+        <p className="text-xs text-muted-foreground">Photos publiques synchronisées avec les fiches traiteurs ; vidéos et audios restent privés.</p>
       </div>
 
       <div className="rounded-2xl border bg-card p-5 space-y-4">
@@ -121,12 +167,17 @@ export default function AdminTraiteurMedia() {
 
       <div className="rounded-2xl border bg-card p-5">
         <div className="flex items-center gap-3 mb-3">
-          <h2 className="font-bold">Upload — bucket `traiteur-media`</h2>
-          <input className="rounded-lg border px-2 py-1 text-sm" placeholder="slug pour upload" value={uploadSlug} onChange={e => setUploadSlug(e.target.value)} />
+          <h2 className="font-bold">Ajouter un média</h2>
+          <select required className="min-w-64 rounded-lg border px-2 py-1 text-sm" value={uploadVendorId} onChange={e => selectVendor(e.target.value)}>
+            <option value="">Choisir le traiteur…</option>
+            {vendors.map((vendor) => <option key={vendor.id} value={vendor.id}>{vendor.business_name || vendor.name}</option>)}
+          </select>
           {uploadOk ? <span className="flex items-center gap-1 text-green-700 text-sm"><Check className="h-4 w-4" /> Envoyé</span> : null}
         </div>
         <div className="rounded-xl border bg-muted/40 p-3">
-          <MediaUpload traiteurSlug={uploadSlug || 'default'} onUploaded={handleUpload} />
+          {uploadVendorId
+            ? <MediaUpload traiteurSlug={uploadSlug} onUploaded={handleUpload} />
+            : <p className="py-6 text-center text-sm text-muted-foreground">Sélectionnez d’abord le traiteur à mettre à jour.</p>}
         </div>
       </div>
 

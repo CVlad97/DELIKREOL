@@ -10,8 +10,7 @@ for (const viewport of viewports) {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.goto('/', { waitUntil: 'networkidle' });
 
-    // Le heading "À commander maintenant" doit être visible
-    await expect(page.getByRole('heading', { name: /À commander maintenant/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Menu \/ Catalogue/i })).toBeVisible();
 
     // Vérifier l'absence de débordement horizontal
     const hasHorizontalOverflow = await page.evaluate(() => (
@@ -19,17 +18,8 @@ for (const viewport of viewports) {
     ));
     expect(hasHorizontalOverflow).toBe(false);
 
-    // Le lien "Catalogue complet" doit être visible et dans le viewport
-    const catalogueLink = page.getByRole('link', { name: /Catalogue complet/i });
-    await expect(catalogueLink).toBeVisible();
-    const catalogueBox = await catalogueLink.boundingBox();
-    expect(catalogueBox).not.toBeNull();
-    expect(catalogueBox!.x).toBeGreaterThanOrEqual(0);
-    expect(catalogueBox!.x + catalogueBox!.width).toBeLessThanOrEqual(viewport.width + 1);
-
-    // La première carte produit doit être dans le viewport
-    const productSection = page.locator('section').filter({ hasText: /À commander maintenant/i }).first();
-    const firstCard = productSection.locator('a').first();
+    const productSection = page.locator('section').filter({ hasText: /Menu \/ Catalogue/i }).first();
+    const firstCard = productSection.locator('article, [class*="rounded-3xl"]').first();
     const firstCardBox = await firstCard.boundingBox();
     expect(firstCardBox).not.toBeNull();
     expect(firstCardBox!.x).toBeGreaterThanOrEqual(0);

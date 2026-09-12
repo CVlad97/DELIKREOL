@@ -5,9 +5,9 @@ test.describe('DeliKreol — Parcours utilisateur', () => {
   test('Page d\'accueil — affiche les éléments clés', async ({ page }) => {
     await page.goto('/');
     await expect(page).toHaveTitle(/DeliKreol/);
-    await expect(page.locator('h1')).toContainText(/Commandez créole/);
+    await expect(page.locator('h1')).toContainText(/Repas créoles/);
     await expect(
-      page.getByRole('link', { name: /Commander maintenant/i }).first()
+      page.getByRole('button', { name: /Commander maintenant/i }).first()
     ).toBeVisible();
   });
 

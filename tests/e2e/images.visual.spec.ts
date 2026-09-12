@@ -67,7 +67,7 @@ test.describe('Fidélité des couleurs originales', () => {
   test("le hero de l'accueil est visible et sans filtre destructif", async ({ page }) => {
     await page.goto('/');
 
-    const hero = page.locator('img[src*="branding/hero-tropical"]').first();
+    const hero = page.locator('img[src*="branding/logo-wordmark-premium"][fetchpriority="high"]').first();
     await expect(hero).toBeVisible();
 
     const styles = await hero.evaluate((image) => {

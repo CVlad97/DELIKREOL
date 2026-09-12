@@ -48,8 +48,16 @@ interface UploadItem {
 
 interface MediaUploadProps {
   traiteurSlug: string;
-  onUploaded?: () => void;
+  onUploaded?: (media: UploadedMedia) => void | Promise<void>;
 }
+
+export type UploadedMedia = {
+  id: string;
+  mediaType: 'photo' | 'video' | 'audio';
+  bucket: string;
+  path: string;
+  url: string;
+};
 
 export function MediaUpload({ traiteurSlug, onUploaded }: MediaUploadProps) {
   const { user } = useAuth();
@@ -104,6 +112,12 @@ export function MediaUpload({ traiteurSlug, onUploaded }: MediaUploadProps) {
       const ext = ALLOWED_TYPES[item.file.type];
       const fileName = `${traiteurSlug}/${crypto.randomUUID()}.${ext}`;
       const mediaType = getMediaType(item.file.type);
+      const storageBucket = mediaType === 'photo' ? 'caterer-photos' : 'traiteur-media';
+
+      if (!user?.id) throw new Error('Session administrateur expirée. Reconnectez-vous.');
+      if (mediaType === 'photo' && item.file.size > 5 * 1024 * 1024) {
+        throw new Error('Photo trop volumineuse (max 5 Mo)');
+      }
 
       if (isDemoMode || !isSupabaseConfigured) {
         // Demo mode: simulate upload
@@ -130,13 +144,13 @@ export function MediaUpload({ traiteurSlug, onUploaded }: MediaUploadProps) {
         });
         localStorage.setItem('delikreol_traiteur_media', JSON.stringify(demoRecords));
         setItems(prev => prev.map(i => i.id === item.id ? { ...i, progress: 100, status: 'done', url: demoUrl } : i));
-        onUploaded?.();
+        await onUploaded?.({ id: demoId, mediaType, bucket: 'demo', path: '', url: demoUrl });
         return;
       }
 
       // Upload to Supabase Storage with progress tracking
       const { data: storageData, error: storageError } = await supabase.storage
-        .from('traiteur-media')
+        .from(storageBucket)
         .upload(fileName, item.file, {
           cacheControl: '3600',
           contentType: item.file.type,
@@ -146,21 +160,20 @@ export function MediaUpload({ traiteurSlug, onUploaded }: MediaUploadProps) {
       if (storageError) throw storageError;
       uploadedPath = storageData.path;
 
-      const { data: urlData, error: signedUrlError } = await supabase.storage
-        .from('traiteur-media')
-        .createSignedUrl(storageData.path, 3600);
-      if (signedUrlError) throw signedUrlError;
-      const previewUrl = urlData.signedUrl;
+      const previewUrl = mediaType === 'photo'
+        ? supabase.storage.from(storageBucket).getPublicUrl(storageData.path).data.publicUrl
+        : (await supabase.storage.from(storageBucket).createSignedUrl(storageData.path, 3600)).data?.signedUrl;
+      if (!previewUrl) throw new Error('Impossible de générer l’URL du média');
 
       // Insert metadata into traiteur_media table
-      const { error: dbError } = await supabase
+      const { data: mediaRow, error: dbError } = await supabase
         .from('traiteur_media')
         .insert({
           traiteur_slug: traiteurSlug,
           media_type: mediaType,
-          storage_bucket: 'traiteur-media',
+          storage_bucket: storageBucket,
           storage_path: storageData.path,
-          url: '',
+          url: mediaType === 'photo' ? previewUrl : '',
           title: item.file.name,
           description: '',
           file_size: item.file.size,
@@ -168,18 +181,32 @@ export function MediaUpload({ traiteurSlug, onUploaded }: MediaUploadProps) {
           uploaded_by: user?.id,
           sort_order: 0,
           is_published: false,
-        });
+        })
+        .select('id')
+        .single();
 
       if (dbError) {
-        await supabase.storage.from('traiteur-media').remove([storageData.path]);
+        await supabase.storage.from(storageBucket).remove([storageData.path]);
         uploadedPath = null;
         throw dbError;
       }
 
+      if (mediaType === 'photo') {
+        const { error: publishError } = await supabase
+          .from('traiteur_media')
+          .update({ is_published: true, published_at: new Date().toISOString() })
+          .eq('id', mediaRow.id);
+        if (publishError) throw publishError;
+      }
+
+      uploadedPath = null;
       setItems(prev => prev.map(i => i.id === item.id ? { ...i, progress: 100, status: 'done', url: previewUrl } : i));
-      onUploaded?.();
+      await onUploaded?.({ id: mediaRow.id, mediaType, bucket: storageBucket, path: storageData.path, url: previewUrl });
     } catch (err: unknown) {
-      if (uploadedPath) await supabase.storage.from('traiteur-media').remove([uploadedPath]);
+      if (uploadedPath) {
+        const bucket = item.file.type.startsWith('image/') ? 'caterer-photos' : 'traiteur-media';
+        await supabase.storage.from(bucket).remove([uploadedPath]);
+      }
       const message = err instanceof Error ? err.message : 'Échec de l’upload';
       setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: 'error', error: message } : i));
     }

@@ -22,7 +22,7 @@ test.describe('PWA, SEO et Performance', () => {
 
   test('hero utilise loading=eager et fetchPriority=high', async ({ page }) => {
     await page.goto('/');
-    const heroImg = page.locator('img[alt*="Livraison DeliKreol"]');
+    const heroImg = page.locator('img[fetchpriority="high"]').first();
     await expect(heroImg).toHaveAttribute('loading', 'eager');
     await expect(heroImg).toHaveAttribute('fetchpriority', 'high');
   });

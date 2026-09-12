@@ -11,6 +11,7 @@ import { CartProvider } from './contexts/CartContext';
 import { ToastProvider } from './contexts/ToastContext';
 
 const HomePage = lazy(() => import('./pages/new/HomePage'));
+const PremiumHomePage = lazy(() => import('./pages/new/PremiumHomePage'));
 const ProSpacePage = lazy(async () => {
   const module = await import('./pages/ProSpacePage');
   return { default: module.ProSpacePage };
@@ -178,7 +179,8 @@ export function AppRouter() {
               <AuthReturnHandler />
               <Routes>
                 <Route element={<LayoutWrapper />}>
-                  <Route index element={<HomePage />} />
+                  <Route index element={<PremiumHomePage />} />
+                  <Route path="accueil-classique" element={<HomePage />} />
                   <Route path="catalogue" element={<CataloguePage />} />
                   <Route path="produit/:slug" element={<ProductDetailPage />} />
                   <Route path="traiteurs" element={<TraiteursListPage />} />

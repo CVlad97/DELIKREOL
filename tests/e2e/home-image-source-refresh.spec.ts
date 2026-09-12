@@ -4,8 +4,7 @@ test.describe('Accueil — source image fraîche', () => {
   test('la première photo produit est visible et chargée naturellement', async ({ page }) => {
     await page.goto('/');
 
-    // La section produits contient "À commander maintenant"
-    const productSection = page.locator('section').filter({ hasText: /À commander maintenant/i }).first();
+    const productSection = page.locator('section').filter({ hasText: /Menu \/ Catalogue/i }).first();
 
     // La première image produit doit être visible
     const image = productSection.locator('img').first();
