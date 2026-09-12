@@ -76,6 +76,25 @@ function slugify(value: string) {
   return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
+
+function parsePartnerCsv(text: string): string[][] {
+  return text.trim().split(/\r?\n/).filter(Boolean).map((line) => {
+    const cells: string[] = [];
+    let cell = '';
+    let quoted = false;
+    for (let i = 0; i < line.length; i += 1) {
+      const char = line[i];
+      if (char === '"') {
+        if (quoted && line[i + 1] === '"') { cell += '"'; i += 1; }
+        else quoted = !quoted;
+      } else if (char === ',' && !quoted) { cells.push(cell.trim()); cell = ''; }
+      else cell += char;
+    }
+    cells.push(cell.trim());
+    return cells;
+  });
+}
+
 export default function PartnerCatalogPage() {
   const { user, loading: authLoading, refreshProfile } = useAuth();
   const { showError, showSuccess } = useToast();
@@ -86,6 +105,7 @@ export default function PartnerCatalogPage() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingProduct, setSavingProduct] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [profile, setProfile] = useState({
     business_name: '', business_type: 'traiteur', description: '', phone: '', whatsapp: '',
@@ -232,6 +252,57 @@ export default function PartnerCatalogPage() {
     }
   };
 
+
+  const importCsv = async (file?: File) => {
+    if (!file || !vendor) return;
+    setImporting(true);
+    try {
+      const rows = parsePartnerCsv(await file.text());
+      if (rows.length < 2) throw new Error('Le fichier CSV est vide.');
+      const headers = rows[0].map((header) => header.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim());
+      const at = (...names: string[]) => names.map((name) => headers.indexOf(name)).find((index) => index >= 0) ?? -1;
+      const nameIndex = at('nom', 'name', 'produit');
+      const priceIndex = at('prix', 'price');
+      if (nameIndex < 0 || priceIndex < 0) throw new Error('Colonnes requises : nom et prix.');
+      const descriptionIndex = at('description', 'descriptif');
+      const categoryIndex = at('categorie', 'category');
+      const stockIndex = at('stock', 'quantite', 'quantity');
+      const imageIndex = at('image', 'image_url', 'photo', 'photo_url');
+      const sidesIndex = at('accompagnements', 'sides');
+      const drinksIndex = at('boissons', 'drinks');
+      const imported = rows.slice(1).map((row) => {
+        const sides = sidesIndex >= 0 ? (row[sidesIndex] || '').split(';').map((item) => item.trim()).filter(Boolean) : [];
+        const drinks = drinksIndex >= 0 ? (row[drinksIndex] || '').split(';').map((item) => item.trim()).filter(Boolean) : [];
+        const isMenu = (categoryIndex >= 0 ? row[categoryIndex] : '') === 'Menu';
+        return {
+          vendor_id: vendor.id,
+          name: row[nameIndex] || '',
+          description: descriptionIndex >= 0 ? row[descriptionIndex] || null : null,
+          category: categoryIndex >= 0 ? row[categoryIndex] || 'Plat' : 'Plat',
+          price: Number(String(row[priceIndex] || '').replace(',', '.')),
+          image_url: imageIndex >= 0 ? row[imageIndex] || null : null,
+          stock_quantity: stockIndex >= 0 && row[stockIndex] ? Math.max(0, Number(row[stockIndex])) : 15,
+          is_available: true,
+          status: canPublishDirectly ? 'verified' : 'draft',
+          is_public: canPublishDirectly,
+          is_demo: false,
+          sides,
+          menu_options: isMenu ? { drinks, included_side_count: Math.min(sides.length, 1), included_drink_count: Math.min(drinks.length, 1) } : null,
+        };
+      }).filter((item) => item.name && Number.isFinite(item.price) && item.price > 0);
+      if (imported.length === 0) throw new Error('Aucune ligne valide dans le CSV.');
+      const { error } = await supabase.from('products').insert(imported);
+      if (error) throw error;
+      await loadWorkspace();
+      showSuccess(canPublishDirectly ? `${imported.length} produit(s) importé(s) et publié(s).` : `${imported.length} produit(s) importé(s), en attente de validation.`);
+    } catch (error: any) {
+      console.error(error);
+      showError(error.message || 'Import CSV impossible.');
+    } finally {
+      setImporting(false);
+    }
+  };
+
   const saveProduct = async (event: FormEvent) => {
     event.preventDefault();
     if (!vendor || !product.name.trim() || Number(product.price) <= 0) {
@@ -329,7 +400,7 @@ export default function PartnerCatalogPage() {
       <div className="mx-auto max-w-6xl space-y-6">
         <section className="overflow-hidden rounded-[2.25rem] bg-gradient-to-br from-[#26150f] via-[#5c2819] to-[#d86a35] p-7 text-white shadow-2xl sm:p-10">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-xs font-black uppercase tracking-[.25em] text-orange-200">Studio partenaire</p><h1 className="mt-3 text-4xl font-black sm:text-5xl">{vendor.business_name || 'Ma vitrine'}</h1><p className="mt-3 max-w-2xl text-orange-50/85">Mettez à jour votre présentation, vos plats et vos menus depuis votre téléphone.</p></div>
-          <div className="flex flex-wrap gap-2"><button type="button" onClick={openProductForm} className="inline-flex items-center gap-2 rounded-full bg-[#f6c453] px-5 py-3 text-sm font-black text-[#26150f] shadow-lg"><Plus className="h-5 w-5" /> Ajouter un plat</button><Link to="/simulation-partenaires" className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-black"><PlayCircle className="h-4 w-4" /> Tutoriel interactif</Link><Link to="/partner-documents" className="rounded-full bg-white/15 px-4 py-2 text-sm font-black">Mes documents</Link>{vendor.is_public && <Link to={`/traiteur/${slugify(vendor.business_name || '')}`} className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-[#5c2819]"><Eye className="h-4 w-4" /> Voir ma vitrine</Link>}</div></div>
+          <div className="flex flex-wrap gap-2"><button type="button" onClick={openProductForm} className="inline-flex items-center gap-2 rounded-full bg-[#f6c453] px-5 py-3 text-sm font-black text-[#26150f] shadow-lg"><Plus className="h-5 w-5" /> Ajouter un plat</button><label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-black"><ImagePlus className="h-4 w-4" />{importing ? 'Import…' : 'Importer CSV'}<input type="file" accept=".csv,text/csv" className="hidden" disabled={importing} onChange={e=>{void importCsv(e.target.files?.[0]); e.target.value='';}} /></label><Link to="/simulation-partenaires" className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-black"><PlayCircle className="h-4 w-4" /> Tutoriel interactif</Link><Link to="/partner-documents" className="rounded-full bg-white/15 px-4 py-2 text-sm font-black">Mes documents</Link>{vendor.is_public && <Link to={`/traiteur/${slugify(vendor.business_name || '')}`} className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-[#5c2819]"><Eye className="h-4 w-4" /> Voir ma vitrine</Link>}</div></div>
           <div className="mt-7 grid gap-3 sm:grid-cols-3"><div className="rounded-2xl bg-white/10 p-4"><p className="text-xs text-orange-100">Produits</p><p className="mt-1 text-2xl font-black">{products.length}</p></div><div className="rounded-2xl bg-white/10 p-4"><p className="text-xs text-orange-100">Disponibles</p><p className="mt-1 text-2xl font-black">{availableCount}</p></div><div className="rounded-2xl bg-white/10 p-4"><p className="text-xs text-orange-100">Publiés</p><p className="mt-1 text-2xl font-black">{publishedCount}</p></div></div>
         </section>
 
