@@ -1,5 +1,8 @@
 import { RefreshCw, X } from 'lucide-react';
+import { useEffect } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
+
+const UPDATE_CHECK_INTERVAL_MS = 15 * 60 * 1000;
 
 /**
  * Bannière de mise à jour PWA — non bloquante et accessible.
@@ -10,10 +13,45 @@ export function PWAUpdatePrompt() {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
+    immediate: true,
     onRegisterError(error) {
       console.error('[PWA] Service worker registration failed', error);
     },
   });
+
+  useEffect(() => {
+    if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return;
+
+    const checkForUpdate = async () => {
+      try {
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (!registration) return;
+        if (registration.waiting) {
+          setNeedRefresh(true);
+          return;
+        }
+        await registration.update();
+        if (registration.waiting) setNeedRefresh(true);
+      } catch (error) {
+        console.error('[PWA] Update check failed', error);
+      }
+    };
+
+    const checkWhenVisible = () => {
+      if (document.visibilityState === 'visible') void checkForUpdate();
+    };
+
+    void checkForUpdate();
+    const intervalId = window.setInterval(() => void checkForUpdate(), UPDATE_CHECK_INTERVAL_MS);
+    document.addEventListener('visibilitychange', checkWhenVisible);
+    window.addEventListener('online', checkForUpdate);
+
+    return () => {
+      window.clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', checkWhenVisible);
+      window.removeEventListener('online', checkForUpdate);
+    };
+  }, [setNeedRefresh]);
 
   if (!needRefresh) return null;
 
