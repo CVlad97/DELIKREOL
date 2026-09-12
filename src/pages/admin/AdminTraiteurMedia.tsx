@@ -196,7 +196,10 @@ export default function AdminTraiteurMedia() {
                 <tr key={r.id} className="hover:bg-muted/30">
                   <td className="px-2 py-2 font-mono text-[11px]">{r.traiteur_slug}</td>
                   <td className="px-2 py-2">{r.media_type}</td>
-                  <td className="px-2 py-2 truncate max-w-[140px]">{r.url}</td>
+                  <td className="px-2 py-2 max-w-[180px]">
+                    {r.media_type === 'photo' && r.url ? <img src={r.url} alt={r.title || r.traiteur_slug} className="mb-1 h-12 w-16 rounded object-cover" loading="lazy" /> : null}
+                    <span className="block truncate">{r.url || 'Média privé'}</span>
+                  </td>
                   <td className="px-2 py-2">{r.title}</td>
                   <td className="px-2 py-2">{r.is_published ? '✓' : '—'}</td>
                   <td className="px-2 py-2">{r.sort_order}</td>
