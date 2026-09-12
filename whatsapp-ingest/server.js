@@ -23,8 +23,7 @@ function safeName(value) { return String(value || 'unknown').replace(/[^a-zA-Z0-
 function json(res, status, body) { const out = JSON.stringify(body); res.writeHead(status, {'content-type':'application/json; charset=utf-8','content-length':Buffer.byteLength(out)}); res.end(out); }
 function readBody(req) { return new Promise((resolve, reject) => { let size = 0; const chunks = []; req.on('data', c => { size += c.length; if (size > MAX_BODY) { reject(new Error('payload too large')); req.destroy(); return; } chunks.push(c); }); req.on('end', () => resolve(Buffer.concat(chunks))); req.on('error', reject); }); }
 function validSignature(req, raw) { if (!APP_SECRET) return !REQUIRE_SIGNATURE; const header = req.headers['x-hub-signature-256']; if (!header || !header.startsWith('sha256=')) return false; const expected = 'sha256=' + crypto.createHmac('sha256', APP_SECRET).update(raw).digest('hex'); return crypto.timingSafeEqual(Buffer.from(header), Buffer.from(expected)); }
-function writeJson(file, value) { fs.writeFileSync(file, JSON.stringify(value, null, 2) + '
-', { mode: 0o640 }); }
+function writeJson(file, value) { fs.writeFileSync(file, JSON.stringify(value, null, 2) + '\n', { mode: 0o640 }); }
 function extForMime(mime) { const map = {'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/gif':'gif','video/mp4':'mp4','audio/ogg':'ogg','audio/mpeg':'mp3','application/pdf':'pdf'}; return map[mime] || 'bin'; }
 
 async function fetchMedia(mediaId) {
