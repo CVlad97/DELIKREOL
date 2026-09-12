@@ -103,7 +103,7 @@ export default function AdminCatalog() {
   const filtered = products.filter(p => {
     const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.vendor?.business_name?.toLowerCase().includes(search.toLowerCase());
     const matchCat = !categoryFilter || p.category === categoryFilter;
-    const matchVendor = vendorFilter !== '' && p.vendor_id === vendorFilter;
+    const matchVendor = !vendorFilter || p.vendor_id === vendorFilter;
     return matchSearch && matchCat && matchVendor;
   });
 
