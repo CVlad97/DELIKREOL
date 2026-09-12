@@ -40,6 +40,7 @@ const emptyForm: ProductForm = {
 function parseCsvRows(text: string): string[][] {
   return text.trim().split(/\r?\n/).filter(Boolean).map((line) => {
     const cells: string[] = [];
+    const separator = line.includes(';') && !line.includes(',') ? ';' : ',';
     let cell = '';
     let quoted = false;
     for (let i = 0; i < line.length; i += 1) {
@@ -47,7 +48,7 @@ function parseCsvRows(text: string): string[][] {
       if (char === '"') {
         if (quoted && line[i + 1] === '"') { cell += '"'; i += 1; }
         else quoted = !quoted;
-      } else if (char === ',' && !quoted) { cells.push(cell.trim()); cell = ''; }
+      } else if (char === separator && !quoted) { cells.push(cell.trim()); cell = ''; }
       else cell += char;
     }
     cells.push(cell.trim());
