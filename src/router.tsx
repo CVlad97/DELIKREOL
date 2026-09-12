@@ -179,8 +179,8 @@ export function AppRouter() {
               <AuthReturnHandler />
               <Routes>
                 <Route element={<LayoutWrapper />}>
-                  <Route index element={<PremiumHomePage />} />
-                  <Route path="accueil-classique" element={<HomePage />} />
+                  <Route index element={<HomePage />} />
+                  <Route path="accueil-premium" element={<PremiumHomePage />} />
                   <Route path="catalogue" element={<CataloguePage />} />
                   <Route path="produit/:slug" element={<ProductDetailPage />} />
                   <Route path="traiteurs" element={<TraiteursListPage />} />
