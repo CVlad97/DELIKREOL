@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Search, Plus, Edit3, Trash2, Check, X, Package,
-  ChevronDown, ToggleLeft, ToggleRight, Store, Loader, ImagePlus
+  ChevronDown, ToggleLeft, ToggleRight, Store, Loader, ImagePlus, MessageCircle, Copy
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../contexts/ToastContext';
@@ -58,7 +58,7 @@ function parseCsvRows(text: string): string[][] {
 
 export default function AdminCatalog() {
   const [products, setProducts] = useState<CatalogProduct[]>([]);
-  const [vendors, setVendors] = useState<{ id: string; business_name: string }[]>([]);
+  const [vendors, setVendors] = useState<{ id: string; business_name: string; phone: string | null; whatsapp: string | null }[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [vendorFilter, setVendorFilter] = useState('');
@@ -88,7 +88,7 @@ export default function AdminCatalog() {
     try {
       const [prodRes, vendRes] = await Promise.all([
         supabase.from('products').select('*, vendor:vendors(business_name)').order('created_at', { ascending: false }),
-        supabase.from('vendors').select('id, business_name').order('business_name'),
+        supabase.from('vendors').select('id, business_name, phone, whatsapp').order('business_name'),
       ]);
       if (prodRes.data) setProducts(prodRes.data);
       if (vendRes.data) setVendors(vendRes.data);
@@ -109,6 +109,28 @@ export default function AdminCatalog() {
   });
 
   const selectedVendor = vendors.find(v => v.id === vendorFilter);
+  const templateUrl = `${window.location.origin}${import.meta.env.BASE_URL}templates/delikreol_template_import_traiteurs.xlsx`;
+  const partnerMessage = selectedVendor ? `Bonjour ${selectedVendor.business_name},
+
+Voici le template DELIKREOL pour importer vos produits :
+${templateUrl}
+
+Merci de remplir la feuille « Import » avec le nom, le prix, la description, la catégorie et le stock. Pour les photos, vous pouvez :
+1. indiquer une URL publique dans image_url ; ou
+2. envoyer les photos séparément dans votre espace traiteur, en les nommant comme le produit (exemple : colombo-de-poulet.jpg).
+
+Ensuite, enregistrez le fichier Excel en CSV UTF-8 et importez-le dans votre espace partenaire. Les produits restent en contrôle si votre fiche n’est pas encore validée.
+
+Merci, l’équipe DELIKREOL` : '';
+  const partnerWhatsappUrl = selectedVendor
+    ? `https://wa.me/${(selectedVendor.whatsapp || selectedVendor.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(partnerMessage)}`
+    : '#';
+
+  const copyPartnerMessage = async () => {
+    if (!partnerMessage) return;
+    await navigator.clipboard.writeText(partnerMessage);
+    showSuccess('Message WhatsApp copié.');
+  };
 
   const openCreate = () => {
     setEditingProduct(null);
@@ -350,6 +372,16 @@ export default function AdminCatalog() {
         <div className="rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
           <p className="font-bold text-foreground">{selectedVendor.business_name}</p>
           <p className="text-xs text-muted-foreground">{filtered.length} produit{filtered.length > 1 ? 's' : ''} affiché{filtered.length > 1 ? 's' : ''}. Les informations et photos ci-dessous concernent uniquement ce traiteur.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {selectedVendor.whatsapp || selectedVendor.phone ? (
+              <a href={partnerWhatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-3 py-2 text-xs font-black text-white">
+                <MessageCircle className="h-4 w-4" /> Préparer le WhatsApp
+              </a>
+            ) : <span className="text-xs font-bold text-amber-700">Aucun téléphone enregistré : copiez le message et ajoutez le numéro manuellement.</span>}
+            <button type="button" onClick={() => void copyPartnerMessage()} className="inline-flex items-center gap-2 rounded-xl border border-primary/20 bg-white px-3 py-2 text-xs font-black text-primary">
+              <Copy className="h-4 w-4" /> Copier le message
+            </button>
+          </div>
         </div>
       )}
 

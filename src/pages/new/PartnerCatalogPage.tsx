@@ -1,5 +1,5 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { CheckCircle2, ChefHat, Eye, ImagePlus, Loader2, Pencil, PlayCircle, Plus, Save, ShieldCheck, Sparkles, Store, Trash2 } from 'lucide-react';
+import { CheckCircle2, ChefHat, Download, Eye, FileSpreadsheet, ImagePlus, Images, Loader2, Pencil, PlayCircle, Plus, Save, ShieldCheck, Sparkles, Store, Trash2, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Layout } from '../../components/layout/Layout';
 import { useAuth } from '../../contexts/AuthContext';
@@ -76,24 +76,38 @@ function slugify(value: string) {
   return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
+function parseDelimitedLine(line: string, separator: string) {
+  const cells: string[] = [];
+  let current = '';
+  let quoted = false;
+  for (let index = 0; index < line.length; index += 1) {
+    const char = line[index];
+    if (char === '"' && line[index + 1] === '"' && quoted) { current += '"'; index += 1; continue; }
+    if (char === '"') { quoted = !quoted; continue; }
+    if (char === separator && !quoted) { cells.push(current.trim()); current = ''; continue; }
+    current += char;
+  }
+  cells.push(current.trim());
+  return cells;
+}
 
-function parsePartnerCsv(text: string): string[][] {
-  return text.trim().split(/\r?\n/).filter(Boolean).map((line) => {
-    const cells: string[] = [];
-    const separator = line.includes(';') && !line.includes(',') ? ';' : ',';
-    let cell = '';
-    let quoted = false;
-    for (let i = 0; i < line.length; i += 1) {
-      const char = line[i];
-      if (char === '"') {
-        if (quoted && line[i + 1] === '"') { cell += '"'; i += 1; }
-        else quoted = !quoted;
-      } else if (char === separator && !quoted) { cells.push(cell.trim()); cell = ''; }
-      else cell += char;
-    }
-    cells.push(cell.trim());
-    return cells;
-  });
+function parseCatalogCsv(text: string) {
+  const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/).filter((line) => line.trim());
+  if (lines.length < 2) throw new Error('Le fichier ne contient aucun produit.');
+  const separator = (lines[0].match(/;/g) || []).length >= (lines[0].match(/,/g) || []).length ? ';' : ',';
+  const headers = parseDelimitedLine(lines[0], separator).map((header) => slugify(header));
+  const find = (...names: string[]) => names.map(slugify).map((name) => headers.indexOf(name)).find((index) => index >= 0) ?? -1;
+  const columns = {
+    name: find('nom', 'name', 'produit'), price: find('prix', 'price'), description: find('description'),
+    category: find('categorie', 'category'), stock: find('stock', 'quantite', 'quantity'), image: find('image_url', 'image', 'photo', 'photo_url'),
+    sides: find('accompagnements', 'sides'), drinks: find('boissons', 'drinks'),
+  };
+  if (columns.name < 0 || columns.price < 0) throw new Error('Les colonnes nom et prix sont obligatoires.');
+  return lines.slice(1).map((line) => parseDelimitedLine(line, separator)).map((cells) => ({
+    name: cells[columns.name] || '', price: cells[columns.price] || '', description: columns.description >= 0 ? cells[columns.description] || '' : '',
+    category: columns.category >= 0 ? cells[columns.category] || 'Plat' : 'Plat', stock: columns.stock >= 0 ? cells[columns.stock] || '' : '',
+    imageUrl: columns.image >= 0 ? cells[columns.image] || '' : '', sides: columns.sides >= 0 ? cells[columns.sides] || '' : '', drinks: columns.drinks >= 0 ? cells[columns.drinks] || '' : '',
+  })).filter((row) => row.name && Number(row.price) > 0);
 }
 
 export default function PartnerCatalogPage() {
@@ -106,7 +120,8 @@ export default function PartnerCatalogPage() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingProduct, setSavingProduct] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [importing, setImporting] = useState(false);
+  const [importingCatalog, setImportingCatalog] = useState(false);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [profile, setProfile] = useState({
     business_name: '', business_type: 'traiteur', description: '', phone: '', whatsapp: '',
@@ -253,54 +268,72 @@ export default function PartnerCatalogPage() {
     }
   };
 
-
-  const importCsv = async (file?: File) => {
+  const importCatalog = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
     if (!file || !vendor) return;
-    setImporting(true);
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      showError('Enregistrez le template Excel en CSV UTF-8 avant l’import.');
+      return;
+    }
+    setImportingCatalog(true);
     try {
-      const rows = parsePartnerCsv(await file.text());
-      if (rows.length < 2) throw new Error('Le fichier CSV est vide.');
-      const headers = rows[0].map((header) => header.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim());
-      const at = (...names: string[]) => names.map((name) => headers.indexOf(name)).find((index) => index >= 0) ?? -1;
-      const nameIndex = at('nom', 'name', 'produit');
-      const priceIndex = at('prix', 'price');
-      if (nameIndex < 0 || priceIndex < 0) throw new Error('Colonnes requises : nom et prix.');
-      const descriptionIndex = at('description', 'descriptif');
-      const categoryIndex = at('categorie', 'category');
-      const stockIndex = at('stock', 'quantite', 'quantity');
-      const imageIndex = at('image', 'image_url', 'photo', 'photo_url');
-      const sidesIndex = at('accompagnements', 'sides');
-      const drinksIndex = at('boissons', 'drinks');
-      const imported = rows.slice(1).map((row) => {
-        const sides = sidesIndex >= 0 ? (row[sidesIndex] || '').split(';').map((item) => item.trim()).filter(Boolean) : [];
-        const drinks = drinksIndex >= 0 ? (row[drinksIndex] || '').split(';').map((item) => item.trim()).filter(Boolean) : [];
-        const isMenu = (categoryIndex >= 0 ? row[categoryIndex] : '') === 'Menu';
+      const rows = parseCatalogCsv(await file.text());
+      if (!rows.length) throw new Error('Aucune ligne valide trouvée. Vérifiez nom et prix.');
+      const payloads = rows.map((row) => {
+        const sides = row.sides.split(';').map((item) => item.trim()).filter(Boolean);
+        const drinks = row.drinks.split(';').map((item) => item.trim()).filter(Boolean);
+        const isMenu = row.category === 'Menu';
         return {
-          vendor_id: vendor.id,
-          name: row[nameIndex] || '',
-          description: descriptionIndex >= 0 ? row[descriptionIndex] || null : null,
-          category: categoryIndex >= 0 ? row[categoryIndex] || 'Plat' : 'Plat',
-          price: Number(String(row[priceIndex] || '').replace(',', '.')),
-          image_url: imageIndex >= 0 ? row[imageIndex] || null : null,
-          stock_quantity: stockIndex >= 0 && row[stockIndex] ? Math.max(0, Number(row[stockIndex])) : 15,
-          is_available: true,
-          status: canPublishDirectly ? 'verified' : 'draft',
-          is_public: canPublishDirectly,
-          is_demo: false,
-          sides,
-          menu_options: isMenu ? { drinks, included_side_count: Math.min(sides.length, 1), included_drink_count: Math.min(drinks.length, 1) } : null,
+          vendor_id: vendor.id, name: row.name.trim(), description: row.description.trim() || null, category: row.category,
+          price: Number(row.price.replace(',', '.')), image_url: row.imageUrl.trim() || null,
+          stock_quantity: row.stock ? Math.max(0, Number(row.stock.replace(',', '.'))) : 15, is_available: true,
+          status: canPublishDirectly ? 'verified' : 'draft', is_public: canPublishDirectly, is_demo: false, sides,
+          menu_options: isMenu ? { drinks, included_side_count: Math.min(1, sides.length), included_drink_count: Math.min(1, drinks.length) } : null,
         };
-      }).filter((item) => item.name && Number.isFinite(item.price) && item.price > 0);
-      if (imported.length === 0) throw new Error('Aucune ligne valide dans le CSV.');
-      const { error } = await supabase.from('products').insert(imported);
+      });
+      const { error } = await supabase.from('products').insert(payloads);
       if (error) throw error;
       await loadWorkspace();
-      showSuccess(canPublishDirectly ? `${imported.length} produit(s) importé(s) et publié(s).` : `${imported.length} produit(s) importé(s), en attente de validation.`);
-    } catch (error: any) {
+      showSuccess(`${payloads.length} produit${payloads.length > 1 ? 's' : ''} importé${payloads.length > 1 ? 's' : ''}.`);
+    } catch (error) {
       console.error(error);
-      showError(error.message || 'Import CSV impossible.');
+      showError(error instanceof Error ? error.message : 'Import impossible.');
     } finally {
-      setImporting(false);
+      setImportingCatalog(false);
+    }
+  };
+
+  const uploadProductPhotos = async (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    event.target.value = '';
+    if (!files.length || !vendor || !user) return;
+    const validFiles = files.filter((file) => ['image/jpeg', 'image/png', 'image/webp', 'image/avif'].includes(file.type) && file.size <= 5 * 1024 * 1024);
+    if (!validFiles.length) { showError('Sélectionnez des photos JPG, PNG, WebP ou AVIF de 5 Mo maximum.'); return; }
+    setUploadingPhotos(true);
+    try {
+      const currentProducts = products;
+      let updated = 0;
+      for (const file of validFiles) {
+        const productName = file.name.replace(/\.[^.]+$/, '');
+        const item = currentProducts.find((candidate) => slugify(candidate.name) === slugify(productName));
+        if (!item) continue;
+        const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+        const path = `${user.id}/${crypto.randomUUID()}.${extension}`;
+        const { error: uploadError } = await supabase.storage.from('product-photos').upload(path, file, { contentType: file.type, upsert: false });
+        if (uploadError) throw uploadError;
+        const { data } = supabase.storage.from('product-photos').getPublicUrl(path);
+        const { error: updateError } = await supabase.from('products').update({ image_url: data.publicUrl }).eq('id', item.id).eq('vendor_id', vendor.id);
+        if (updateError) throw updateError;
+        updated += 1;
+      }
+      await loadWorkspace();
+      showSuccess(updated ? `${updated} photo${updated > 1 ? 's' : ''} associée${updated > 1 ? 's' : ''}. Nommer les fichiers comme les produits.` : 'Aucune correspondance. Nommez chaque photo comme le produit correspondant.');
+    } catch (error) {
+      console.error(error);
+      showError('Une ou plusieurs photos n’ont pas pu être envoyées.');
+    } finally {
+      setUploadingPhotos(false);
     }
   };
 
@@ -401,13 +434,22 @@ export default function PartnerCatalogPage() {
       <div className="mx-auto max-w-6xl space-y-6">
         <section className="overflow-hidden rounded-[2.25rem] bg-gradient-to-br from-[#26150f] via-[#5c2819] to-[#d86a35] p-7 text-white shadow-2xl sm:p-10">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-xs font-black uppercase tracking-[.25em] text-orange-200">Studio partenaire</p><h1 className="mt-3 text-4xl font-black sm:text-5xl">{vendor.business_name || 'Ma vitrine'}</h1><p className="mt-3 max-w-2xl text-orange-50/85">Mettez à jour votre présentation, vos plats et vos menus depuis votre téléphone.</p></div>
-          <div className="flex flex-wrap gap-2"><button type="button" onClick={openProductForm} className="inline-flex items-center gap-2 rounded-full bg-[#f6c453] px-5 py-3 text-sm font-black text-[#26150f] shadow-lg"><Plus className="h-5 w-5" /> Ajouter un plat</button><label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-black"><ImagePlus className="h-4 w-4" />{importing ? 'Import…' : 'Importer CSV'}<input type="file" accept=".csv,text/csv" className="hidden" disabled={importing} onChange={e=>{void importCsv(e.target.files?.[0]); e.target.value='';}} /></label><Link to="/simulation-partenaires" className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-black"><PlayCircle className="h-4 w-4" /> Tutoriel interactif</Link><Link to="/partner-documents" className="rounded-full bg-white/15 px-4 py-2 text-sm font-black">Mes documents</Link>{vendor.is_public && <Link to={`/traiteur/${slugify(vendor.business_name || '')}`} className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-[#5c2819]"><Eye className="h-4 w-4" /> Voir ma vitrine</Link>}</div></div>
+          <div className="flex flex-wrap gap-2"><button type="button" onClick={openProductForm} className="inline-flex items-center gap-2 rounded-full bg-[#f6c453] px-5 py-3 text-sm font-black text-[#26150f] shadow-lg"><Plus className="h-5 w-5" /> Ajouter un plat</button><Link to="/simulation-partenaires" className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-black"><PlayCircle className="h-4 w-4" /> Tutoriel interactif</Link><Link to="/partner-documents" className="rounded-full bg-white/15 px-4 py-2 text-sm font-black">Mes documents</Link>{vendor.is_public && <Link to={`/traiteur/${slugify(vendor.business_name || '')}`} className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-[#5c2819]"><Eye className="h-4 w-4" /> Voir ma vitrine</Link>}</div></div>
           <div className="mt-7 grid gap-3 sm:grid-cols-3"><div className="rounded-2xl bg-white/10 p-4"><p className="text-xs text-orange-100">Produits</p><p className="mt-1 text-2xl font-black">{products.length}</p></div><div className="rounded-2xl bg-white/10 p-4"><p className="text-xs text-orange-100">Disponibles</p><p className="mt-1 text-2xl font-black">{availableCount}</p></div><div className="rounded-2xl bg-white/10 p-4"><p className="text-xs text-orange-100">Publiés</p><p className="mt-1 text-2xl font-black">{publishedCount}</p></div></div>
         </section>
 
         <section className="rounded-[2rem] border border-[#f6c453]/60 bg-[#fff3c9] p-5 shadow-soft">
           <h2 className="font-black">Comment ajouter un plat ?</h2>
           <ol className="mt-2 grid gap-2 text-sm text-stone-700 sm:grid-cols-3"><li><strong>1.</strong> Appuyez sur « + Ajouter un plat ».</li><li><strong>2.</strong> Indiquez nom, prix, stock, accompagnements et photo.</li><li><strong>3.</strong> Enregistrez : {canPublishDirectly ? 'le plat apparaît immédiatement sur DELIKREOL.' : 'DELIKREOL contrôle le plat avant publication.'}</li></ol>
+        </section>
+        <section className="rounded-[2rem] border border-primary/20 bg-white p-6 shadow-soft">
+          <div className="flex items-start gap-3"><FileSpreadsheet className="mt-1 h-6 w-6 text-primary" /><div><h2 className="text-xl font-black">Importer plusieurs produits et photos</h2><p className="text-sm text-stone-600">Téléchargez le modèle, complétez-le dans Excel, puis enregistrez-le en CSV UTF-8. Les photos peuvent être sélectionnées en lot.</p></div></div>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <a href={`${import.meta.env.BASE_URL}templates/delikreol_template_import_traiteurs.xlsx`} download className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-[#fff8ef] px-4 py-3 text-sm font-black text-primary"><Download className="h-4 w-4" /> Télécharger le template Excel</a>
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-black text-white"><Upload className="h-4 w-4" />{importingCatalog ? 'Import en cours…' : 'Importer le CSV'}<input type="file" accept=".csv,text/csv" onChange={importCatalog} disabled={importingCatalog} className="hidden" /></label>
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#1f6a4a] px-4 py-3 text-sm font-black text-white"><Images className="h-4 w-4" />{uploadingPhotos ? 'Envoi des photos…' : 'Importer les photos'}<input type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple onChange={uploadProductPhotos} disabled={uploadingPhotos} className="hidden" /></label>
+          </div>
+          <p className="mt-3 text-xs text-stone-500">Pour l’association automatique, nommez chaque photo comme le produit : <strong>colombo-de-poulet.jpg</strong> pour « Colombo de poulet ». Les lignes importées par un traiteur restent soumises à validation si sa fiche n’est pas encore validée.</p>
         </section>
         <PartnerTutorial />
 
