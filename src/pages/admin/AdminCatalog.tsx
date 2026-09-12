@@ -36,6 +36,25 @@ const emptyForm: ProductForm = {
   price: '', image_url: '', stock_quantity: '', is_available: true,
 };
 
+
+function parseCsvRows(text: string): string[][] {
+  return text.trim().split(/\r?\n/).filter(Boolean).map((line) => {
+    const cells: string[] = [];
+    let cell = '';
+    let quoted = false;
+    for (let i = 0; i < line.length; i += 1) {
+      const char = line[i];
+      if (char === '"') {
+        if (quoted && line[i + 1] === '"') { cell += '"'; i += 1; }
+        else quoted = !quoted;
+      } else if (char === ',' && !quoted) { cells.push(cell.trim()); cell = ''; }
+      else cell += char;
+    }
+    cells.push(cell.trim());
+    return cells;
+  });
+}
+
 export default function AdminCatalog() {
   const [products, setProducts] = useState<CatalogProduct[]>([]);
   const [vendors, setVendors] = useState<{ id: string; business_name: string }[]>([]);
@@ -50,6 +69,7 @@ export default function AdminCatalog() {
   const [imagePreview, setImagePreview] = useState('');
   const [imageLoadError, setImageLoadError] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [importing, setImporting] = useState(false);
   const { showSuccess, showError } = useToast();
 
   useEffect(() => {
@@ -190,6 +210,52 @@ export default function AdminCatalog() {
     }
   };
 
+
+  const handleCsvImport = async (file?: File) => {
+    if (!file) return;
+    setImporting(true);
+    try {
+      const rows = parseCsvRows(await file.text());
+      if (rows.length < 2) throw new Error('Le fichier CSV est vide.');
+      const headers = rows[0].map((header) => header.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim());
+      const at = (...names: string[]) => names.map((name) => headers.indexOf(name)).find((index) => index >= 0) ?? -1;
+      const nameIndex = at('nom', 'name', 'produit');
+      const priceIndex = at('prix', 'price', 'prix_partenaire');
+      const vendorIndex = at('traiteur', 'vendeur', 'vendor');
+      if (nameIndex < 0 || priceIndex < 0) throw new Error('Colonnes requises : nom et prix.');
+      const descriptionIndex = at('description', 'descriptif');
+      const categoryIndex = at('categorie', 'category');
+      const stockIndex = at('stock', 'quantite', 'quantity');
+      const imageIndex = at('image', 'image_url', 'photo', 'photo_url');
+      const imported = rows.slice(1).map((row) => {
+        const vendorName = vendorIndex >= 0 ? row[vendorIndex] : selectedVendor?.business_name;
+        const matchedVendor = vendors.find((item) => item.business_name.toLowerCase() === (vendorName || '').toLowerCase());
+        return {
+          vendor_id: matchedVendor?.id || vendorFilter,
+          name: row[nameIndex] || '',
+          description: descriptionIndex >= 0 ? row[descriptionIndex] || null : null,
+          category: categoryIndex >= 0 ? row[categoryIndex] || 'Plats' : 'Plats',
+          price: Number(String(row[priceIndex] || '').replace(',', '.')),
+          image_url: imageIndex >= 0 ? row[imageIndex] || null : null,
+          stock_quantity: stockIndex >= 0 && row[stockIndex] ? Math.max(0, Number(row[stockIndex])) : 15,
+          is_available: true,
+          is_public: true,
+          is_demo: false,
+          status: 'verified',
+        };
+      }).filter((item) => item.name && Number.isFinite(item.price) && item.price > 0 && item.vendor_id);
+      if (imported.length === 0) throw new Error('Aucune ligne valide. Sélectionnez un traiteur ou ajoutez une colonne traiteur.');
+      const { error } = await supabase.from('products').insert(imported);
+      if (error) throw error;
+      showSuccess(`${imported.length} produit(s) importé(s) et publié(s)`);
+      await loadData();
+    } catch (error: any) {
+      showError(error.message || 'Import CSV impossible');
+    } finally {
+      setImporting(false);
+    }
+  };
+
   const toggleAvailability = async (p: CatalogProduct) => {
     const { error } = await supabase.from('products').update({ is_available: !p.is_available }).eq('id', p.id);
     if (error) {
@@ -225,6 +291,10 @@ export default function AdminCatalog() {
           <h1 className="text-2xl font-black text-foreground tracking-tight">Catalogue Produits</h1>
           <p className="text-sm text-muted-foreground mt-1">{products.length} produits - {vendors.length} vendeurs</p>
         </div>
+        <label className="flex cursor-pointer items-center gap-2 px-4 py-2.5 bg-card border border-primary/30 text-primary rounded-2xl font-bold text-sm hover:bg-primary/5 transition-all">
+          <ImagePlus className="w-4 h-4" /> {importing ? 'Import en cours…' : 'Importer CSV'}
+          <input type="file" accept=".csv,text/csv" className="sr-only" disabled={importing} onChange={e => { void handleCsvImport(e.target.files?.[0]); e.target.value = ''; }} />
+        </label>
         <button onClick={openCreate} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-2xl font-bold text-sm hover:shadow-elegant transition-all">
           <Plus className="w-4 h-4" /> Ajouter
         </button>
