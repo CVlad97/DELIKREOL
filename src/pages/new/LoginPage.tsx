@@ -224,9 +224,9 @@ export default function LoginPage() {
               Connexion admin
             </Link>
             <Link
-              to="/connexion?next=/espace-partenaire"
+              to="/connexion?next=/catalogue-partenaire"
               className={`flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-black transition ${
-                next.startsWith('/espace-partenaire') || next.startsWith('/partner-documents')
+                next.startsWith('/espace-partenaire') || next.startsWith('/catalogue-partenaire') || next.startsWith('/partner-documents')
                   ? 'border-primary bg-primary text-white'
                   : 'border-input bg-white text-foreground hover:bg-muted'
               }`}
