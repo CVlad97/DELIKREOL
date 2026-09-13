@@ -3,12 +3,15 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { driveReimportGalleries, driveReimportPortraits } from './driveReimportAssets';
 
-const expectedDrivePreimportCounts = {
-  coco: 27,
-  ninice: 12,
-  savePeyia: 10,
+const expectedDrivePublishedCounts = {
+  coco: 26,
+  ninice: 11,
+  savePeyia: 12,
   saveursAfrique: 13,
-  sweetFamily: 18,
+  sweetFamily: 11,
+} as const;
+
+const expectedSuppliedNonDriveCounts = {
   gouteMwen: 20,
 } as const;
 
@@ -17,16 +20,19 @@ function publicPathFromAsset(asset: string) {
 }
 
 describe('driveReimportAssets', () => {
-  it('matches the curated bankable Drive preimport counts', () => {
-    expect(driveReimportGalleries.coco).toHaveLength(expectedDrivePreimportCounts.coco);
-    expect(driveReimportGalleries.ninice).toHaveLength(expectedDrivePreimportCounts.ninice);
-    expect(driveReimportGalleries.savePeyia).toHaveLength(expectedDrivePreimportCounts.savePeyia);
-    expect(driveReimportGalleries.saveursAfrique).toHaveLength(expectedDrivePreimportCounts.saveursAfrique);
-    expect(driveReimportGalleries.sweetFamily).toHaveLength(expectedDrivePreimportCounts.sweetFamily);
-    expect(driveReimportGalleries.gouteMwen).toHaveLength(expectedDrivePreimportCounts.gouteMwen);
+  it('matches the validated Drive WhatsApp photo counts', () => {
+    expect(driveReimportGalleries.coco).toHaveLength(expectedDrivePublishedCounts.coco);
+    expect(driveReimportGalleries.ninice).toHaveLength(expectedDrivePublishedCounts.ninice);
+    expect(driveReimportGalleries.savePeyia).toHaveLength(expectedDrivePublishedCounts.savePeyia);
+    expect(driveReimportGalleries.saveursAfrique).toHaveLength(expectedDrivePublishedCounts.saveursAfrique);
+    expect(driveReimportGalleries.sweetFamily).toHaveLength(expectedDrivePublishedCounts.sweetFamily);
   });
 
-  it('points every published Drive preimport asset to an existing local file', () => {
+  it('keeps Gouté Mwen out of the Drive WhatsApp count because no Drive source exists yet', () => {
+    expect(driveReimportGalleries.gouteMwen).toHaveLength(expectedSuppliedNonDriveCounts.gouteMwen);
+  });
+
+  it('points every published or supplied asset to an existing local file', () => {
     const publishedAssets = [
       ...driveReimportGalleries.coco,
       ...driveReimportGalleries.ninice,
@@ -34,6 +40,7 @@ describe('driveReimportAssets', () => {
       ...driveReimportGalleries.saveursAfrique,
       ...driveReimportGalleries.sweetFamily,
       ...driveReimportGalleries.gouteMwen,
+      driveReimportPortraits.coco,
       driveReimportPortraits.ninice,
       driveReimportPortraits.gouteMwen,
     ];
