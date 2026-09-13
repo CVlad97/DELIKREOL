@@ -20,7 +20,8 @@ export function AuthModal({ isOpen, onClose, onBack, initialMode = 'signin' }: A
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const googleButtonRef = useRef<HTMLDivElement | null>(null);
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const googleSsoEnabled = import.meta.env.VITE_GOOGLE_SSO_ENABLED === 'true';
+  const googleClientId = googleSsoEnabled ? import.meta.env.VITE_GOOGLE_CLIENT_ID : '';
 
   const { signIn, signUp, signInWithGoogleCredential } = useAuth();
   const handleBack = onBack ?? onClose;
@@ -224,7 +225,7 @@ export function AuthModal({ isOpen, onClose, onBack, initialMode = 'signin' }: A
             <div ref={googleButtonRef} className="flex justify-center" />
           ) : (
             <p className="text-center text-xs font-semibold text-muted-foreground">
-              Connexion Google disponible après configuration de VITE_GOOGLE_CLIENT_ID.
+              Connexion Google temporairement désactivée. Utilise l’accès email en attendant l’activation du provider Google dans Supabase.
             </p>
           )}
           <p className="mt-3 text-center text-[11px] font-semibold text-muted-foreground">
