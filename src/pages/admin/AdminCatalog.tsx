@@ -17,6 +17,9 @@ interface CatalogProduct {
   is_available: boolean;
   stock_quantity: number | null;
   created_at: string;
+  status: string;
+  is_public: boolean;
+  is_demo: boolean;
   vendor?: { business_name: string };
 }
 
@@ -208,16 +211,19 @@ Merci, l’équipe DELIKREOL` : '';
         image_url: uploadedImage.url,
         stock_quantity: form.stock_quantity ? parseInt(form.stock_quantity) : null,
         is_available: form.is_available,
+        is_public: true,
+        is_demo: false,
+        status: 'verified',
       };
 
       if (editingProduct) {
         const { error } = await supabase.from('products').update(payload).eq('id', editingProduct.id);
         if (error) throw error;
-        showSuccess('Produit mis a jour');
+        showSuccess('Produit mis à jour et publié');
       } else {
         const { error } = await supabase.from('products').insert(payload);
         if (error) throw error;
-        showSuccess('Produit cree');
+        showSuccess('Produit créé et publié');
       }
       setShowModal(false);
       setSelectedImage(null);
@@ -305,6 +311,20 @@ Merci, l’équipe DELIKREOL` : '';
       return;
     }
     setProducts(prev => prev.map(prod => prod.id === p.id ? { ...prod, is_available: !prod.is_available } : prod));
+  };
+
+  const togglePublication = async (p: CatalogProduct) => {
+    const publish = !(p.is_public && p.status === 'verified');
+    const updates = publish
+      ? { is_public: true, is_demo: false, status: 'verified' }
+      : { is_public: false, status: 'draft' };
+    const { data, error } = await supabase.from('products').update(updates).eq('id', p.id).select('id').maybeSingle();
+    if (error || !data) {
+      showError(error?.message || 'La publication n’a pas été enregistrée');
+      return;
+    }
+    setProducts(prev => prev.map(prod => prod.id === p.id ? { ...prod, ...updates } : prod));
+    showSuccess(publish ? 'Produit publié sur le site' : 'Produit masqué du site');
   };
 
   const handleDelete = async (p: CatalogProduct) => {
@@ -430,6 +450,7 @@ Merci, l’équipe DELIKREOL` : '';
                   <th className="text-right px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Prix</th>
                   <th className="text-center px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Stock</th>
                   <th className="text-center px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Dispo</th>
+                  <th className="text-center px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Publication</th>
                   <th className="text-right px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
@@ -464,6 +485,11 @@ Merci, l’équipe DELIKREOL` : '';
                       <span className={`font-bold text-sm ${p.stock_quantity === 0 ? 'text-red-500' : 'text-foreground'}`}>
                         {p.stock_quantity ?? '-'}
                       </span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <button onClick={() => void togglePublication(p)} className={`rounded-full px-3 py-1 text-xs font-black ${p.is_public && p.status === 'verified' ? 'bg-success/15 text-success' : 'bg-amber-100 text-amber-800'}`}>
+                        {p.is_public && p.status === 'verified' ? 'En ligne' : 'Publier'}
+                      </button>
                     </td>
                     <td className="px-4 py-3 text-center">
                       <button onClick={() => toggleAvailability(p)} className="inline-flex">
@@ -515,6 +541,9 @@ Merci, l’équipe DELIKREOL` : '';
                   <span className={p.stock_quantity === 0 ? 'font-bold text-red-500' : 'text-muted-foreground'}>Stock : {p.stock_quantity ?? '—'}</span>
                   <span className={p.is_available ? 'font-bold text-success' : 'font-bold text-muted-foreground'}>{p.is_available ? 'Disponible' : 'Indisponible'}</span>
                   <div className="flex items-center gap-1">
+                    <button onClick={() => void togglePublication(p)} className={`rounded-xl px-3 py-2 font-black ${p.is_public && p.status === 'verified' ? 'bg-success/15 text-success' : 'bg-amber-100 text-amber-800'}`}>
+                      {p.is_public && p.status === 'verified' ? 'En ligne' : 'Publier'}
+                    </button>
                     <button onClick={() => toggleAvailability(p)} className="rounded-xl p-2 hover:bg-muted" aria-label={p.is_available ? 'Rendre indisponible' : 'Rendre disponible'}>
                       {p.is_available ? <ToggleRight className="h-5 w-5 text-success" /> : <ToggleLeft className="h-5 w-5 text-muted-foreground" />}
                     </button>
@@ -675,7 +704,7 @@ Merci, l’équipe DELIKREOL` : '';
                 className="flex-1 px-4 py-3 bg-primary text-primary-foreground rounded-2xl font-bold text-sm hover:shadow-elegant transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {saving ? <Loader className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                {editingProduct ? 'Mettre a jour' : 'Creer'}
+                {editingProduct ? 'Mettre à jour et publier' : 'Créer et publier'}
               </button>
             </div>
           </div>
