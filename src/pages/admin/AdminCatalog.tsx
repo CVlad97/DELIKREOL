@@ -115,7 +115,7 @@ export default function AdminCatalog() {
 Voici le template DELIKREOL pour importer vos produits :
 ${templateUrl}
 
-Merci de remplir la feuille « Import » avec le nom, le prix, la description, la catégorie et le stock. Pour les photos, vous pouvez :
+Merci de remplir la feuille « Import » avec le nom, le prix, la description, la catégorie, le stock et, pour les menus, les accompagnements, boissons et sauces. Pour les photos, vous pouvez :
 1. indiquer une URL publique dans image_url ; ou
 2. envoyer les photos séparément dans votre espace traiteur, en les nommant comme le produit (exemple : colombo-de-poulet.jpg).
 
@@ -250,14 +250,25 @@ Merci, l’équipe DELIKREOL` : '';
       const categoryIndex = at('categorie', 'category');
       const stockIndex = at('stock', 'quantite', 'quantity');
       const imageIndex = at('image', 'image_url', 'photo', 'photo_url');
+      const sidesIndex = at('accompagnements', 'sides');
+      const drinksIndex = at('boissons', 'drinks');
+      const saucesIndex = at('sauces', 'sauce');
+      const includedSidesIndex = at('accompagnements_inclus', 'included_side_count');
+      const includedDrinksIndex = at('boissons_inclus', 'included_drink_count');
+      const includedSaucesIndex = at('sauces_inclus', 'included_sauce_count');
       const imported = rows.slice(1).map((row) => {
         const vendorName = vendorIndex >= 0 ? row[vendorIndex] : selectedVendor?.business_name;
         const matchedVendor = vendors.find((item) => item.business_name.toLowerCase() === (vendorName || '').toLowerCase());
+        const category = categoryIndex >= 0 ? row[categoryIndex] || 'Plats' : 'Plats';
+        const splitChoices = (index: number) => index >= 0 ? (row[index] || '').split(';').map((item) => item.trim()).filter(Boolean) : [];
+        const sides = splitChoices(sidesIndex);
+        const drinks = splitChoices(drinksIndex);
+        const sauces = splitChoices(saucesIndex);
         return {
           vendor_id: matchedVendor?.id || vendorFilter,
           name: row[nameIndex] || '',
           description: descriptionIndex >= 0 ? row[descriptionIndex] || null : null,
-          category: categoryIndex >= 0 ? row[categoryIndex] || 'Plats' : 'Plats',
+          category,
           price: Number(String(row[priceIndex] || '').replace(',', '.')),
           image_url: imageIndex >= 0 ? row[imageIndex] || null : null,
           stock_quantity: stockIndex >= 0 && row[stockIndex] ? Math.max(0, Number(row[stockIndex])) : 15,
@@ -265,6 +276,14 @@ Merci, l’équipe DELIKREOL` : '';
           is_public: true,
           is_demo: false,
           status: 'verified',
+          sides,
+          menu_options: category.toLowerCase() === 'menu' ? {
+            sides, drinks, sauces,
+            included_side_count: Math.min(sides.length, Math.max(0, Number(row[includedSidesIndex] || 1))),
+            included_drink_count: Math.min(drinks.length, Math.max(0, Number(row[includedDrinksIndex] || 1))),
+            included_sauce_count: Math.min(sauces.length, Math.max(0, Number(row[includedSaucesIndex] || 1))),
+            instructions_enabled: true,
+          } : null,
         };
       }).filter((item) => item.name && Number.isFinite(item.price) && item.price > 0 && item.vendor_id);
       if (imported.length === 0) throw new Error('Aucune ligne valide. Sélectionnez un traiteur ou ajoutez une colonne traiteur.');

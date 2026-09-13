@@ -38,17 +38,21 @@ type Product = {
   sides: string[] | null;
   menu_options: {
     drinks?: string[];
+    sauces?: string[];
     included_side_count?: number;
     included_drink_count?: number;
+    included_sauce_count?: number;
+    instructions_enabled?: boolean;
   } | null;
 };
 
 const categories = ['Plat', 'Menu', 'Dessert', 'Boisson', 'Buffet', 'Brunch', 'Autre'];
 const sideChoices = ['Riz', 'Lentilles', 'Frites', 'Crudités'];
 const drinkChoices = ['Eau', 'Jus local', 'Soda'];
+const sauceChoices = ['Sauce chien', 'Sauce créole', 'Sauce piment à part', 'Sans sauce'];
 const blankProduct = {
   name: '', description: '', category: 'Plat', price: '', stock: '', imageUrl: '', available: true,
-  sides: '', drinks: '', includedSideCount: '1', includedDrinkCount: '1',
+  sides: '', drinks: '', sauces: '', includedSideCount: '1', includedDrinkCount: '1', includedSauceCount: '1',
 };
 const partnerTutorialImage = `${import.meta.env.BASE_URL}tutorials/tuto-ajouter-plat-delikreol.jpg`;
 const menuSuggestions = [
@@ -100,13 +104,15 @@ function parseCatalogCsv(text: string) {
   const columns = {
     name: find('nom', 'name', 'produit'), price: find('prix', 'price'), description: find('description'),
     category: find('categorie', 'category'), stock: find('stock', 'quantite', 'quantity'), image: find('image_url', 'image', 'photo', 'photo_url'),
-    sides: find('accompagnements', 'sides'), drinks: find('boissons', 'drinks'),
+    sides: find('accompagnements', 'sides'), drinks: find('boissons', 'drinks'), sauces: find('sauces', 'sauce'),
+    includedSides: find('accompagnements_inclus', 'included_side_count'), includedDrinks: find('boissons_inclus', 'included_drink_count'), includedSauces: find('sauces_inclus', 'included_sauce_count'),
   };
   if (columns.name < 0 || columns.price < 0) throw new Error('Les colonnes nom et prix sont obligatoires.');
   return lines.slice(1).map((line) => parseDelimitedLine(line, separator)).map((cells) => ({
     name: cells[columns.name] || '', price: cells[columns.price] || '', description: columns.description >= 0 ? cells[columns.description] || '' : '',
     category: columns.category >= 0 ? cells[columns.category] || 'Plat' : 'Plat', stock: columns.stock >= 0 ? cells[columns.stock] || '' : '',
-    imageUrl: columns.image >= 0 ? cells[columns.image] || '' : '', sides: columns.sides >= 0 ? cells[columns.sides] || '' : '', drinks: columns.drinks >= 0 ? cells[columns.drinks] || '' : '',
+    imageUrl: columns.image >= 0 ? cells[columns.image] || '' : '', sides: columns.sides >= 0 ? cells[columns.sides] || '' : '', drinks: columns.drinks >= 0 ? cells[columns.drinks] || '' : '', sauces: columns.sauces >= 0 ? cells[columns.sauces] || '' : '',
+    includedSides: columns.includedSides >= 0 ? cells[columns.includedSides] || '1' : '1', includedDrinks: columns.includedDrinks >= 0 ? cells[columns.includedDrinks] || '1' : '1', includedSauces: columns.includedSauces >= 0 ? cells[columns.includedSauces] || '1' : '1',
   })).filter((row) => row.name && Number(row.price) > 0);
 }
 
@@ -132,7 +138,7 @@ export default function PartnerCatalogPage() {
 
   const canPublishDirectly = vendor?.status === 'verified' && vendor.is_public;
 
-  const toggleChoice = (field: 'sides' | 'drinks', choice: string) => {
+  const toggleChoice = (field: 'sides' | 'drinks' | 'sauces', choice: string) => {
     setProduct((current) => {
       const selected = current[field].split(',').map((item) => item.trim()).filter(Boolean);
       const next = selected.includes(choice)
@@ -150,6 +156,8 @@ export default function PartnerCatalogPage() {
       drinks: suggestion.drinks.join(', '),
       includedSideCount: '1',
       includedDrinkCount: '1',
+      sauces: 'Sauce chien, Sans sauce',
+      includedSauceCount: '1',
     }));
     productFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -283,13 +291,20 @@ export default function PartnerCatalogPage() {
       const payloads = rows.map((row) => {
         const sides = row.sides.split(';').map((item) => item.trim()).filter(Boolean);
         const drinks = row.drinks.split(';').map((item) => item.trim()).filter(Boolean);
+        const sauces = row.sauces.split(';').map((item) => item.trim()).filter(Boolean);
         const isMenu = row.category === 'Menu';
         return {
           vendor_id: vendor.id, name: row.name.trim(), description: row.description.trim() || null, category: row.category,
           price: Number(row.price.replace(',', '.')), image_url: row.imageUrl.trim() || null,
           stock_quantity: row.stock ? Math.max(0, Number(row.stock.replace(',', '.'))) : 15, is_available: true,
           status: canPublishDirectly ? 'verified' : 'draft', is_public: canPublishDirectly, is_demo: false, sides,
-          menu_options: isMenu ? { drinks, included_side_count: Math.min(1, sides.length), included_drink_count: Math.min(1, drinks.length) } : null,
+          menu_options: isMenu ? {
+            sides, drinks, sauces,
+            included_side_count: Math.min(sides.length, Math.max(0, Number(row.includedSides) || 0)),
+            included_drink_count: Math.min(drinks.length, Math.max(0, Number(row.includedDrinks) || 0)),
+            included_sauce_count: Math.min(sauces.length, Math.max(0, Number(row.includedSauces) || 0)),
+            instructions_enabled: true,
+          } : null,
         };
       });
       const { error } = await supabase.from('products').insert(payloads);
@@ -347,6 +362,7 @@ export default function PartnerCatalogPage() {
     try {
       const sides = product.sides.split(',').map((side) => side.trim()).filter(Boolean);
       const drinks = product.drinks.split(',').map((drink) => drink.trim()).filter(Boolean);
+      const sauces = product.sauces.split(',').map((sauce) => sauce.trim()).filter(Boolean);
       const isMenu = product.category === 'Menu';
       const payload = {
         vendor_id: vendor.id,
@@ -362,9 +378,13 @@ export default function PartnerCatalogPage() {
         is_demo: false,
         sides,
         menu_options: isMenu ? {
+          sides,
           drinks,
+          sauces,
           included_side_count: Math.min(sides.length, Math.max(0, Number(product.includedSideCount) || 0)),
           included_drink_count: Math.min(drinks.length, Math.max(0, Number(product.includedDrinkCount) || 0)),
+          included_sauce_count: Math.min(sauces.length, Math.max(0, Number(product.includedSauceCount) || 0)),
+          instructions_enabled: true,
         } : null,
       };
       const request = editingId
@@ -400,6 +420,8 @@ export default function PartnerCatalogPage() {
       drinks: (item.menu_options?.drinks || []).join(', '),
       includedSideCount: String(item.menu_options?.included_side_count ?? 1),
       includedDrinkCount: String(item.menu_options?.included_drink_count ?? 1),
+      sauces: (item.menu_options?.sauces || []).join(', '),
+      includedSauceCount: String(item.menu_options?.included_sauce_count ?? 1),
     });
     window.scrollTo({ top: 650, behavior: 'smooth' });
   };
@@ -505,9 +527,21 @@ export default function PartnerCatalogPage() {
                     ))}
                   </div>
                 </fieldset>
+                <fieldset>
+                  <legend className="text-sm font-black">Sauces proposées</legend>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                    {sauceChoices.map((choice) => (
+                      <label key={choice} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border bg-white px-4 py-3 text-sm font-bold">
+                        <input type="checkbox" checked={product.sauces.split(',').map(item=>item.trim()).includes(choice)} onChange={()=>toggleChoice('sauces', choice)} className="h-5 w-5 accent-primary" />
+                        {choice}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="text-sm font-bold">Accompagnements inclus<input type="number" min="0" max="10" value={product.includedSideCount} onChange={e=>setProduct({...product,includedSideCount:e.target.value})} className="mt-2 w-full rounded-xl border bg-white px-4 py-3" /></label>
                   <label className="text-sm font-bold">Boissons incluses<input type="number" min="0" max="10" value={product.includedDrinkCount} onChange={e=>setProduct({...product,includedDrinkCount:e.target.value})} className="mt-2 w-full rounded-xl border bg-white px-4 py-3" /></label>
+                  <label className="text-sm font-bold">Sauces incluses<input type="number" min="0" max="10" value={product.includedSauceCount} onChange={e=>setProduct({...product,includedSauceCount:e.target.value})} className="mt-2 w-full rounded-xl border bg-white px-4 py-3" /></label>
                 </div>
               </div>}
               <label className="flex items-center gap-3 rounded-xl bg-[#fff8ef] p-3 text-sm font-bold"><input type="checkbox" checked={product.available} onChange={e=>setProduct({...product,available:e.target.checked})} /> Disponible à la commande</label>

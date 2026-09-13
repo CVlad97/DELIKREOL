@@ -12,6 +12,7 @@ import {
 import { Layout } from '../../components/layout/Layout';
 import { BackBar } from '../../components/BackBar';
 import { ProductThumbnail } from '../../components/ProductThumbnail';
+import { MenuCompositionModal } from '../../components/MenuCompositionModal';
 import { mockProducts } from '../../data/mockCatalog';
 import { PUBLIC_HIDDEN_PRODUCT_TRAITEURS, PUBLIC_HIDDEN_TRAITEURS, traiteurSpaces } from '../../data/traiteurs';
 import { useCart } from '../../contexts/CartContext';
@@ -20,6 +21,8 @@ import { isUsableThumbnail, resolveProductThumbnail } from '../../services/catal
 import { trackPublicView } from '../../services/metricsService';
 import { setPageMeta } from '../../services/seo';
 import type { Product } from '../../types';
+import { isSupabaseConfigured, supabase } from '../../lib/supabase';
+import { normalizeMenuOptions, type MenuSelection } from '../../types/menu';
 
 const WHATSAPP_NUMBER = '596696653589';
 
@@ -37,8 +40,27 @@ export function ProductDetailPage() {
   const { addItem } = useCart();
   const { showSuccess } = useToast();
   const [quantity, setQuantity] = useState(1);
+  const [liveProduct, setLiveProduct] = useState<ReturnType<typeof buildLiveProduct> | null>(null);
+  const [showComposition, setShowComposition] = useState(false);
+
+  useEffect(() => {
+    if (!slug || !isSupabaseConfigured) return;
+    let cancelled = false;
+    void supabase
+      .from('products')
+      .select('id,vendor_id,name,description,category,price,image_url,is_available,menu_options,vendor:vendors!inner(business_name,address,commune,hero_image,gallery_images,portrait_image)')
+      .eq('id', slug)
+      .eq('is_public', true)
+      .eq('status', 'verified')
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (!cancelled && !error && data) setLiveProduct(buildLiveProduct(data));
+      });
+    return () => { cancelled = true; };
+  }, [slug]);
 
   const productData = useMemo(() => {
+    if (liveProduct) return liveProduct;
     const mock = mockProducts.find((product) => product.id === slug);
     if (mock) {
       if (
@@ -80,7 +102,7 @@ export function ProductDetailPage() {
     }
 
     return null;
-  }, [slug]);
+  }, [liveProduct, slug]);
 
   useEffect(() => {
     if (productData) {
@@ -124,7 +146,8 @@ export function ProductDetailPage() {
   const vendorName = product.vendor || 'Prestataire';
   const zone = product.zone || vendorSpace?.commune || vendorSpace?.zone || 'Martinique';
   const description = product.description || 'Description à compléter avec le prestataire.';
-  const sides = (product as { sides?: string[] }).sides || [];
+  const menuOptions = normalizeMenuOptions((product as { menuOptions?: unknown }).menuOptions);
+  const sides = menuOptions?.sides || (product as { sides?: string[] }).sides || [];
 
   const cartProduct: Product = {
     id: product.id,
@@ -137,10 +160,16 @@ export function ProductDetailPage() {
     is_available: product.available !== false,
     stock_quantity: null,
     created_at: new Date().toISOString(),
+    menu_options: menuOptions,
   };
 
-  const handleAddToCart = () => {
-    for (let index = 0; index < quantity; index += 1) addItem(cartProduct);
+  const handleAddToCart = (selection?: MenuSelection) => {
+    if (menuOptions && !selection) {
+      setShowComposition(true);
+      return;
+    }
+    for (let index = 0; index < quantity; index += 1) addItem(cartProduct, selection);
+    setShowComposition(false);
     showSuccess(`${product.name} (x${quantity}) ajouté au panier`);
   };
 
@@ -242,7 +271,7 @@ export function ProductDetailPage() {
 
               <button
                 type="button"
-                onClick={handleAddToCart}
+                onClick={() => handleAddToCart()}
                 className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-black text-primary-foreground transition hover:bg-primary"
               >
                 <ShoppingCart className="h-5 w-5" /> Ajouter au panier
@@ -260,8 +289,49 @@ export function ProductDetailPage() {
           </section>
         </div>
       </main>
+      {showComposition && menuOptions && (
+        <MenuCompositionModal
+          productName={product.name}
+          options={menuOptions}
+          onCancel={() => setShowComposition(false)}
+          onConfirm={handleAddToCart}
+        />
+      )}
     </Layout>
   );
 }
 
 export default ProductDetailPage;
+
+type LiveProductRow = {
+  id: string; vendor_id: string; name: string; description: string | null; category: string | null;
+  price: number | string; image_url: string | null; is_available: boolean; menu_options: unknown;
+  vendor: { business_name?: string | null; address?: string | null; commune?: string | null; hero_image?: string | null; gallery_images?: string[] | null; portrait_image?: string | null } | null;
+};
+
+function buildLiveProduct(value: unknown) {
+  const row = value as LiveProductRow;
+  const vendorName = row.vendor?.business_name || row.vendor_id;
+  return {
+    product: {
+      id: row.id,
+      name: row.name,
+      vendor: vendorName,
+      price: Number(row.price),
+      category: row.category || 'Plat',
+      image: row.image_url || undefined,
+      description: row.description || undefined,
+      zone: row.vendor?.commune || row.vendor?.address || 'Martinique',
+      available: row.is_available,
+      menuOptions: normalizeMenuOptions(row.menu_options),
+    },
+    vendorSpace: {
+      name: vendorName,
+      heroImage: row.vendor?.hero_image || null,
+      galleryImages: row.vendor?.gallery_images || [],
+      portraitImage: row.vendor?.portrait_image || null,
+      commune: row.vendor?.commune || '',
+      zone: row.vendor?.address || 'Martinique',
+    },
+  };
+}

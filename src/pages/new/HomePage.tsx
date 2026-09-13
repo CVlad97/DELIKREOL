@@ -175,6 +175,9 @@ export default function HomePage() {
   const allFeatured = [...featuredProducts, ...featuredTraiteurItems.filter(p => !featuredProducts.find(fp => fp.id === p.id))];
   // Tous les traiteurs confirmés sur l'accueil
   const featuredTraiteurs = traiteurSpaces.filter(t => t.status === 'public confirmé');
+  const spotlightTraiteur = featuredTraiteurs.length
+    ? featuredTraiteurs[Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000)) % featuredTraiteurs.length]
+    : null;
   const heroStats = [
     { value: `${featuredTraiteurs.length}`, label: 'traiteurs locaux', icon: ChefHat },
     { value: '34', label: 'communes couvertes', icon: MapPin },
@@ -235,6 +238,23 @@ export default function HomePage() {
     } catch {
       setShareFeedback('');
     }
+  };
+
+  const handleShareTraiteur = async () => {
+    if (!spotlightTraiteur) return;
+    const url = `https://delikreol.com/traiteur/${spotlightTraiteur.slug}`;
+    const shareData = {
+      title: `${spotlightTraiteur.name} sur DeliKreol`,
+      text: `Découvre ${spotlightTraiteur.name}, traiteur local à l’honneur cette semaine sur DeliKreol.`,
+      url,
+    };
+    try {
+      if (navigator.share) await navigator.share(shareData);
+      else {
+        await navigator.clipboard.writeText(`${shareData.text} ${url}`);
+        showSuccess('Lien du traiteur copié');
+      }
+    } catch { /* partage annulé */ }
   };
 
   const handleFindNearby = () => {
@@ -589,6 +609,27 @@ export default function HomePage() {
           </Suspense>
         </div>
       </section>
+
+      {spotlightTraiteur && (
+        <section className="bg-white px-4 py-10 sm:px-6 lg:px-8">
+          <div className="mx-auto grid max-w-7xl overflow-hidden rounded-[2.5rem] border border-[#f6c453]/60 bg-gradient-to-br from-[#26150f] via-[#6b2d1d] to-primary text-white shadow-2xl md:grid-cols-[1.1fr_.9fr]">
+            <div className="p-7 sm:p-10">
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#f6c453] px-3 py-1.5 text-xs font-black uppercase tracking-[.18em] text-[#26150f]"><Star className="h-4 w-4 fill-current" /> Traiteur à l’honneur</div>
+              <h2 className="mt-5 text-3xl font-black sm:text-5xl">{spotlightTraiteur.name}</h2>
+              <p className="mt-3 max-w-xl text-orange-50/85">{spotlightTraiteur.description || spotlightTraiteur.offer}</p>
+              <p className="mt-4 inline-flex items-center gap-2 text-sm font-bold"><MapPin className="h-4 w-4 text-[#f6c453]" /> {spotlightTraiteur.commune || spotlightTraiteur.zone}</p>
+              <div className="mt-7 flex flex-wrap gap-3">
+                <Link to={`/traiteur/${spotlightTraiteur.slug}`} className="inline-flex items-center gap-2 rounded-2xl bg-[#f6c453] px-5 py-3 font-black text-[#26150f]">Voir sa carte <ArrowRight className="h-4 w-4" /></Link>
+                <button type="button" onClick={handleShareTraiteur} className="inline-flex items-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-5 py-3 font-black"><Share2 className="h-4 w-4" /> Partager ce traiteur</button>
+              </div>
+              <p className="mt-4 text-xs text-orange-100/75">Sélection tournante chaque semaine, sans classement payant ni faux compte à rebours.</p>
+            </div>
+            <div className="min-h-64 bg-[#3b2119]">
+              {spotlightTraiteur.heroImage && <img src={spotlightTraiteur.heroImage} alt={spotlightTraiteur.name} className="h-full min-h-64 w-full object-cover" loading="lazy" />}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Featured Traiteurs */}
       {featuredTraiteurs.length > 0 && (
