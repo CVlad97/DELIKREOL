@@ -21,6 +21,13 @@ export interface ResolvedThumbnail {
 }
 
 const PLACEHOLDER_PATH = 'vignettes/photo-prochainement.svg';
+const PLACEHOLDER_TOKENS = [
+  'photo-a-confirmer',
+  'photo_a_confirmer',
+  'image-non-disponible',
+  'image_non_disponible',
+  'placeholder',
+];
 
 export function publicAsset(relativePath: string): string {
   const base = import.meta.env.BASE_URL || '/';
@@ -32,18 +39,14 @@ export function getThumbnailPlaceholder(): string {
   return publicAsset(PLACEHOLDER_PATH);
 }
 
-export function isUsableThumbnail(src?: string | null): src is string {
-  if (!src) return false;
-  const value = src.trim();
-  if (!value) return false;
+function isPlaceholderImage(src?: string | null): boolean {
+  const value = (src || '').trim().toLowerCase();
+  return PLACEHOLDER_TOKENS.some((token) => value.includes(token));
+}
 
-  return ![
-    'photo-a-confirmer',
-    'photo_a_confirmer',
-    'image-non-disponible',
-    'image_non_disponible',
-    'placeholder',
-  ].some((token) => value.toLowerCase().includes(token));
+export function isUsableThumbnail(src?: string | null): src is string {
+  const value = src?.trim();
+  return Boolean(value);
 }
 
 function normalize(value?: string | null): string {
@@ -141,7 +144,8 @@ export function inferProductImageKind(input: Pick<ThumbnailInput, 'name' | 'vend
 
 export function resolveProductThumbnail(input: ThumbnailInput): ResolvedThumbnail {
   const placeholder = getThumbnailPlaceholder();
-  const productImage = isUsableThumbnail(input.src) ? input.src : null;
+  const cleanSrc = input.src?.trim();
+  const productImage = cleanSrc && !isPlaceholderImage(cleanSrc) ? cleanSrc : null;
   const source: ThumbnailSource = productImage ? 'product' : 'placeholder';
 
   const src = productImage || placeholder;
