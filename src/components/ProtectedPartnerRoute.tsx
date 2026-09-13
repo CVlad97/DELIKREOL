@@ -1,14 +1,37 @@
 import { Link, Navigate, useLocation } from'react-router-dom';
 import { AlertCircle, ShieldCheck } from'lucide-react';
-import type { ReactNode } from'react';
+import { useState, type ReactNode } from'react';
 import { useAuth } from'../contexts/AuthContext';
 import { Layout } from'./layout/Layout';
+import { supabase } from'../lib/supabase';
 
 const partnerRoles = new Set(['vendor','driver','relay_host','admin']);
 
 export function ProtectedPartnerRoute({ children }: { children: ReactNode }) {
- const { user, profile, loading } = useAuth();
+ const { user, profile, loading, refreshProfile } = useAuth();
  const location = useLocation();
+ const [activating, setActivating] = useState(false);
+ const [activationError, setActivationError] = useState('');
+
+ const activatePartnerAccess = async () => {
+ setActivating(true);
+ setActivationError('');
+ try {
+ const { data, error } = await supabase.rpc('claim_partner_access');
+ if (error) throw error;
+ if (!data?.claimed) {
+ setActivationError("Aucune fiche traiteur ne correspond à l’adresse email confirmée de ce compte. Contactez DELIKREOL pour corriger l’email de votre fiche.");
+ return;
+ }
+ await refreshProfile();
+ window.location.assign('/catalogue-partenaire');
+ } catch (error) {
+ console.error('Partner access activation failed:', error);
+ setActivationError("L’activation a échoué. Vérifiez que votre adresse email est confirmée, puis réessayez.");
+ } finally {
+ setActivating(false);
+ }
+ };
 
  if (loading) {
  return (
@@ -55,13 +78,17 @@ export function ProtectedPartnerRoute({ children }: { children: ReactNode }) {
  </div>
 
  <div className="mt-6 grid gap-3 sm:grid-cols-2">
- <Link to="/partenaire" className="rounded-2xl bg-primary px-5 py-3 text-center text-sm font-black text-white">
- Envoyer une correction fiche
- </Link>
+ <button type="button" onClick={activatePartnerAccess} disabled={activating} className="rounded-2xl bg-primary px-5 py-3 text-center text-sm font-black text-white disabled:cursor-wait disabled:opacity-60">
+ {activating ? 'Activation…' : 'Activer ma fiche traiteur'}
+ </button>
  <Link to="/pro" className="rounded-2xl border border-primary/20 px-5 py-3 text-center text-sm font-black text-[#7c2d12]">
  Retour espace pro
  </Link>
  </div>
+ {activationError && <p role="alert" className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">{activationError}</p>}
+ <Link to="/partenaire" className="mt-4 block text-center text-sm font-bold text-primary underline underline-offset-4">
+ Demander la correction de ma fiche
+ </Link>
  </div>
  </section>
  </Layout>
