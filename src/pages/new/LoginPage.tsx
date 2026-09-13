@@ -392,7 +392,7 @@ export default function LoginPage() {
           )}
 
           <div className="mt-6 rounded-2xl bg-muted p-4 text-xs leading-5 text-muted-foreground">
-            Traiteurs et livreurs peuvent créer leur accès par email. Si le portail indique “accès à activer”, l’admin doit valider le rôle du compte.
+            Traiteurs et livreurs peuvent créer leur accès par email. Si l’email confirmé correspond à votre fiche traiteur, cliquez ensuite sur “Activer ma fiche traiteur”.
           </div>
 
           <div className="mt-5 flex justify-center gap-4 text-sm font-bold">
