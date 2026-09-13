@@ -5,10 +5,12 @@ function assetFromPublic(relativePath: string): string {
 
 const cocoProfile = assetFromPublic('vendors/coco/profile.svg');
 
+// Source contrôlée : Google Drive / INDEX — Préimport traiteurs DELIKREOL.
+// Règle : seules les photos explicitement validées comme publiables restent dans ces galeries.
+// Les captures, flyers, menus, QR codes et doublons sont conservés dans le dépôt mais exclus de l'affichage public.
 export const driveReimportGalleries = {
   coco: [
     assetFromPublic('vendors/coco/drive-reimport/IMG-20260526-WA0064.jpg'),
-    cocoProfile,
     assetFromPublic('vendors/coco/drive-reimport/IMG-20260526-WA0065.jpg'),
     assetFromPublic('vendors/coco/drive-reimport/IMG-20260526-WA0066.jpg'),
     assetFromPublic('vendors/coco/drive-reimport/IMG-20260526-WA0067.jpg'),
@@ -47,9 +49,11 @@ export const driveReimportGalleries = {
     assetFromPublic('vendors/ninice/drive-reimport/IMG-20260521-WA0078.jpg'),
     assetFromPublic('vendors/ninice/drive-reimport/IMG-20260521-WA0079.jpg'),
     assetFromPublic('vendors/ninice/drive-reimport/IMG-20260521-WA0080.jpg'),
-    assetFromPublic('vendors/ninice/drive-reimport/IMG-20260528-WA0212.jpg'),
   ],
   savePeyia: [
+    assetFromPublic('vendors/save-peyia/drive-reimport/IMG-20260710-WA0005.jpg'),
+    assetFromPublic('vendors/save-peyia/drive-reimport/IMG-20260710-WA0006.jpg'),
+    assetFromPublic('vendors/save-peyia/drive-reimport/IMG-20260710-WA0007.jpg'),
     assetFromPublic('vendors/save-peyia/drive-reimport/IMG-20260710-WA0008.jpg'),
     assetFromPublic('vendors/save-peyia/drive-reimport/IMG-20260710-WA0009.jpg'),
     assetFromPublic('vendors/save-peyia/drive-reimport/IMG-20260710-WA0010.jpg'),
@@ -59,7 +63,6 @@ export const driveReimportGalleries = {
     assetFromPublic('vendors/save-peyia/drive-reimport/IMG-20260710-WA0014.jpg'),
     assetFromPublic('vendors/save-peyia/drive-reimport/IMG-20260710-WA0015.jpg'),
     assetFromPublic('vendors/save-peyia/drive-reimport/IMG-20260710-WA0016.jpg'),
-    assetFromPublic('vendors/save-peyia/drive-reimport/IMG-20260604-WA0159.jpg'),
   ],
   saveursAfrique: [
     assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0155.jpg'),
@@ -69,12 +72,12 @@ export const driveReimportGalleries = {
     assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0159.jpg'),
     assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0160.jpg'),
     assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0161.jpg'),
+    assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0162.jpg'),
     assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0163.jpg'),
-    assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0164.jpg'),
     assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260612-WA0141.jpg'),
     assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260612-WA0142.jpg'),
+    assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260612-WA0203.jpg'),
     assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260612-WA0205.jpg'),
-    assetFromPublic('vendors/saveurs-afrique/drive-reimport/IMG-20260526-WA0162.jpg'),
   ],
   sweetFamily: [
     assetFromPublic('vendors/sweet-family/drive-reimport/IMG-20260627-WA0003.jpg'),
@@ -88,14 +91,8 @@ export const driveReimportGalleries = {
     assetFromPublic('vendors/sweet-family/drive-reimport/IMG-20260710-WA0034.jpg'),
     assetFromPublic('vendors/sweet-family/drive-reimport/IMG-20260710-WA0035.jpg'),
     assetFromPublic('vendors/sweet-family/drive-reimport/IMG-20260710-WA0036.jpg'),
-    assetFromPublic('vendors/sweet-family/drive-reimport/IMG-20260618-WA0298.jpg'),
-    assetFromPublic('vendors/sweet-family/drive-reimport/IMG-20260618-WA0299.jpg'),
-    assetFromPublic('vendors/sweet-family/drive-reimport/IMG-20260618-WA0300.jpg'),
-    assetFromPublic('vendors/sweet-family/drive-reimport/IMG-20260618-WA0301.jpg'),
-    assetFromPublic('vendors/sweet-family/drive-reimport/IMG-20260627-WA0001.jpg'),
-    assetFromPublic('vendors/sweet-family/drive-reimport/IMG-20260627-WA0002.jpg'),
-    assetFromPublic('vendors/sweet-family/drive-reimport/IMG-20260710-WA0025.jpg'),
   ],
+  // Gouté Mwen n'est pas dans le dossier Drive de réimport WhatsApp ; ces visuels restent marqués comme fournis/IA.
   gouteMwen: [
     assetFromPublic('vendors/goute-mwen/supplied-ai-20260722/goute-mwen-tour-des-yoles-2026.jpg'),
     assetFromPublic('vendors/goute-mwen/supplied-ai-20260722/goute-mwen-abricot-pays-ai.jpg'),
@@ -127,9 +124,17 @@ export const driveReimportPortraits = {
 } as const;
 
 export const driveReimportArchiveCounts = {
-  coco: 30,
+  coco: 29,
   ninice: 16,
   savePeyia: 17,
   saveursAfrique: 18,
   sweetFamily: 18,
+} as const;
+
+export const driveReimportPublishedCounts = {
+  coco: 26,
+  ninice: 11,
+  savePeyia: 12,
+  saveursAfrique: 13,
+  sweetFamily: 11,
 } as const;
