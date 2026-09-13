@@ -16,7 +16,7 @@
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "DENY"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "geolocation=(self 'https://delikreol.mq'), camera=(), microphone=()"
+    Permissions-Policy = "geolocation=(self 'https://delikreol.com'), camera=(), microphone=()"
 
 [[headers]]
   for = "/assets/*"
