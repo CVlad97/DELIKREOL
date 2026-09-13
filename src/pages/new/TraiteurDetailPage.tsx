@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   AlertTriangle,
@@ -21,6 +21,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { formatEuro, PUBLIC_HIDDEN_PRODUCT_TRAITEURS, traiteurSpaces } from '../../data/traiteurs';
 import { getThumbnailPlaceholder, isUsableThumbnail, resolveProductThumbnail } from '../../services/catalogImageResolver';
 import { trackPublicView } from '../../services/metricsService';
+import { loadPublicCatalog, type PublicCatalogProduct } from '../../services/publicCatalogService';
 import { setPageMeta } from '../../services/seo';
 import { socialLabel, type SocialLinkSet } from '../../utils/socialLinks';
 import type { Product } from '../../types';
@@ -81,6 +82,23 @@ export function TraiteurDetailPage() {
     () => traiteurSpaces.find((item) => item.slug === slug) || null,
     [slug],
   );
+  const [liveProducts, setLiveProducts] = useState<PublicCatalogProduct[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    if (!traiteur) {
+      setLiveProducts([]);
+      return () => { active = false; };
+    }
+
+    void loadPublicCatalog().then(({ products }) => {
+      if (!active) return;
+      const target = slugify(traiteur.name);
+      setLiveProducts(products.filter((product) => slugify(product.vendor_name) === target));
+    });
+
+    return () => { active = false; };
+  }, [traiteur]);
 
   useEffect(() => {
     if (!traiteur) {
@@ -115,9 +133,18 @@ export function TraiteurDetailPage() {
     );
   }
 
+  const databaseMenuItems = liveProducts.map((product) => ({
+    name: product.name,
+    description: product.description,
+    category: product.category,
+    price: product.price ?? 0,
+    image: product.image_url || undefined,
+  }));
   const menuItems = PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(traiteur.name)
     ? []
-    : (traiteur.menuItems || []).filter((item) => isUsableThumbnail(item.image));
+    : databaseMenuItems.length > 0
+      ? databaseMenuItems
+      : (traiteur.menuItems || []).filter((item) => isUsableThumbnail(item.image));
   const isChefMada = traiteur.slug === 'chef-a-mada';
   const showMadaBadge = MADA_BADGE_TRAITEURS.has(traiteur.name);
   const isGouteMwen = traiteur.slug === 'goute-mwen';
