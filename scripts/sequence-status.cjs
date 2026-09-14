@@ -35,12 +35,12 @@ async function main() {
 
   run('git branch', 'git', ['branch', '--show-current']);
   run('git status', 'git', ['status', '--short']);
-  run('site http', 'curl', ['-I', '-L', '--max-time', '15', 'https://cvlad97.github.io/DELIKREOL/']);
+  run('site http', 'curl', ['-I', '-L', '--max-time', '15', 'https://delikreol.com/']);
 
   const summary = {
     generated_at: new Date().toISOString(),
     project: 'DELIKREOL',
-    public_url: 'https://cvlad97.github.io/DELIKREOL/',
+    public_url: 'https://delikreol.com/',
     checks,
     ok: checks.filter((check) => check.status === 'ok').length,
     fail: checks.filter((check) => check.status === 'fail').length,
