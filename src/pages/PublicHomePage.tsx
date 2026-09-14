@@ -1,5 +1,6 @@
 import { FormEvent, Fragment, ReactNode, useEffect, useMemo, useState, type ComponentType, type MouseEvent } from'react';
 import { Circle, CircleMarker, MapContainer, Popup, TileLayer } from'react-leaflet';
+import { DeliveryAvailability } from'../components/DeliveryAvailability';
 import {
  ArrowRight,
  BadgeCheck,
@@ -174,7 +175,7 @@ type MarketplaceTab ='browse' |'traiteurs';
 
 const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER ||'596696653589';
 const whatsappBase = `https://wa.me/${whatsappNumber}`;
-const featuredCategories = ['plats créoles','traiteurs','box / plateaux','desserts','boissons','commande entreprise'];
+const featuredCategories = ['Entrées','Plats','Desserts','Boissons','Snacking','Traiteurs','Box / plateaux','Commande entreprise'];
 const budgetRanges = ['Tous','≤ 15 €','15 € - 30 €','30 € et plus'];
 const publicSiteUrl ='https://delikreol.com/';
 const defaultMapCenter: [number, number] = [14.6104, -61.0733];
@@ -575,7 +576,14 @@ export function PublicHomePage() {
  `${product.name} ${product.vendor_name} ${product.category} ${product.description} ${zone}`
  .toLowerCase()
  .includes(needle);
- const matchCategory = categoryFilter ==='Tous' || product.category === categoryFilter;
+ const normalizedCategory = (product.category ||'').toLocaleLowerCase();
+ const matchCategory = categoryFilter ==='Tous' ||
+ (categoryFilter ==='Entrées' && normalizedCategory.includes('entr')) ||
+ (categoryFilter ==='Plats' && (normalizedCategory.includes('plat') || normalizedCategory.includes('créole'))) ||
+ (categoryFilter ==='Desserts' && (normalizedCategory.includes('dessert') || normalizedCategory.includes('patis'))) ||
+ (categoryFilter ==='Boissons' && (normalizedCategory.includes('boisson') || normalizedCategory.includes('jus'))) ||
+ (categoryFilter ==='Snacking' && (normalizedCategory.includes('snack') || normalizedCategory.includes('sandwich'))) ||
+ product.category === categoryFilter;
  const matchCoverage =
  communeFilter ==='Tous'
  ? true
@@ -1956,6 +1964,10 @@ export function PublicHomePage() {
  <p className="mt-3 text-sm font-semibold text-stone-600">
  La livraison est calculée autour de chaque partenaire avec son rayon réel. La commune sert seulement de fallback si la position manque.
  </p>
+ <DeliveryAvailability
+ commune={communeFilter !=='Tous' ? communeFilter : undefined}
+ coords={(customerLocation || pendingCustomerLocation) ? { latitude: (customerLocation || pendingCustomerLocation)!.lat, longitude: (customerLocation || pendingCustomerLocation)!.lng } : null}
+ />
  {geoConsentState ==='ask' && (
  <div className="mt-4 rounded-2xl border border-primary/20 bg-[#fff8ef] p-4">
  <p className="text-sm font-black text-[#7c2d12]">Souhaitez-vous être géolocalisé et affiché sur la carte ?</p>

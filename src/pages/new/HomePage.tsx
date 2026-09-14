@@ -15,6 +15,7 @@ import {
   Truck,
   Utensils,
 } from 'lucide-react';
+import { DeliveryAvailability } from '../../components/DeliveryAvailability';
 import { Layout } from '../../components/layout/Layout';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 import { mockProducts } from '../../data/mockCatalog';
@@ -26,6 +27,7 @@ import {
 } from '../../data/traiteurs';
 import { trackPublicView } from '../../services/metricsService';
 import { setPageMeta } from '../../services/seo';
+import type { Coords } from '../../services/geolocation';
 
 const HOME_PARTNER_ORDER = [
   "Snack Savè Peyi'A",
@@ -56,6 +58,7 @@ function safeImage(src?: string | null) {
 export default function HomePage() {
   const navigate = useNavigate();
   const [selectedCommune, setSelectedCommune] = useState('');
+  const [geoPosition, setGeoPosition] = useState<Coords | null>(null);
   const [geoFeedback, setGeoFeedback] = useState('');
 
   useEffect(() => {
@@ -115,7 +118,10 @@ export default function HomePage() {
 
     setGeoFeedback('Recherche de votre position…');
     navigator.geolocation.getCurrentPosition(
-      () => setGeoFeedback('Position détectée. Les traiteurs les plus proches seront proposés dans le catalogue.'),
+      (position) => {
+        setGeoPosition({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+        setGeoFeedback('Position détectée. Vérification des livreurs et points relais autour de vous…');
+      },
       () => setGeoFeedback('Position non autorisée. Choisissez votre commune pour continuer.'),
       { enableHighAccuracy: false, maximumAge: 300000, timeout: 10000 }
     );
@@ -154,7 +160,10 @@ export default function HomePage() {
                   <select
                     className="w-full bg-transparent text-base font-black outline-none"
                     value={selectedCommune}
-                    onChange={(event) => setSelectedCommune(event.target.value)}
+                    onChange={(event) => {
+                      setSelectedCommune(event.target.value);
+                      setGeoPosition(null);
+                    }}
                     aria-label="Choisir ma commune"
                   >
                     <option value="">Choisir ma commune</option>
@@ -184,6 +193,7 @@ export default function HomePage() {
               </div>
 
               {geoFeedback && <p className="mt-3 text-sm font-semibold text-[#4b5f55]">{geoFeedback}</p>}
+              <DeliveryAvailability commune={selectedCommune} coords={geoPosition} />
 
               <div className="mt-7 grid gap-3 text-sm font-bold text-[#294d41] sm:grid-cols-3">
                 <div className="flex items-center gap-3 rounded-2xl bg-white/70 p-3 backdrop-blur">
