@@ -188,26 +188,31 @@ export default function CataloguePage() {
   const allProducts = useMemo<LocalProduct[]>(() => {
     const products: LocalProduct[] = liveProducts.slice();
     const ids = new Set(products.map((product) => product.id));
+    const catalogueKeys = new Set(products.map((product) => `${normalizeVendor(product.vendor)}::${slugify(product.name)}`));
+
+    const addUniqueProduct = (product: LocalProduct) => {
+      const key = `${normalizeVendor(product.vendor)}::${slugify(product.name)}`;
+      if (ids.has(product.id) || catalogueKeys.has(key)) return;
+      products.push(product);
+      ids.add(product.id);
+      catalogueKeys.add(key);
+    };
+
     for (const product of mockProducts.filter((item) => (
       !PUBLIC_HIDDEN_TRAITEURS.has(item.vendor) &&
       !PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(item.vendor) &&
       isUsableThumbnail(item.image)
     ))) {
-      if (!ids.has(product.id)) {
-        products.push(product);
-        ids.add(product.id);
-      }
+      addUniqueProduct(product);
     }
 
     for (const space of traiteurSpaces) {
       for (const item of space.menuItems) {
         if (PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(space.name)) continue;
         if (!isUsableThumbnail(item.image)) continue;
-        const id = `${space.slug}-${slugify(item.name)}`;
-        if (ids.has(id)) continue;
 
-        products.push({
-          id,
+        addUniqueProduct({
+          id: `${space.slug}-${slugify(item.name)}`,
           name: item.name,
           vendor: space.name,
           price: item.price,
@@ -219,7 +224,6 @@ export default function CataloguePage() {
           featured: item.featured,
           healthTags: space.healthTags,
         });
-        ids.add(id);
       }
     }
 
