@@ -27,7 +27,8 @@ import {
 } from '../../data/traiteurs';
 import { trackPublicView } from '../../services/metricsService';
 import { setPageMeta } from '../../services/seo';
-import type { Coords } from '../../services/geolocation';
+import { calculateDistanceKm, type Coords } from '../../services/geolocation';
+import { resolveTraiteurCoords } from '../../services/partnerGeo';
 
 const HOME_PARTNER_ORDER = [
   "Snack Savè Peyi'A",
@@ -75,13 +76,36 @@ export default function HomePage() {
     const visible = traiteurSpaces.filter(
       (partner) => partner.status === 'public confirmé' && !PUBLIC_HIDDEN_TRAITEURS.has(partner.name)
     );
+    const selectedOrigin = geoPosition ?? (selectedCommune ? (() => {
+      const point = resolveTraiteurCoords(selectedCommune, selectedCommune);
+      return point ? { latitude: point.latitude, longitude: point.longitude } : null;
+    })() : null);
+    const normalizedCommune = selectedCommune.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
-    return HOME_PARTNER_ORDER
-      .map((name) => visible.find((partner) => partner.name === name))
+    const filtered = visible.filter((partner) => {
+      if (!selectedCommune) return true;
+      const zone = ((partner.commune || '') + ' ' + (partner.zone || '')).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      return zone.includes(normalizedCommune);
+    });
+
+    const ordered = HOME_PARTNER_ORDER
+      .map((name) => filtered.find((partner) => partner.name === name))
       .filter((partner): partner is NonNullable<typeof partner> => Boolean(partner))
-      .concat(visible.filter((partner) => !HOME_PARTNER_ORDER.includes(partner.name)))
-      .slice(0, 5);
-  }, []);
+      .concat(filtered.filter((partner) => !HOME_PARTNER_ORDER.includes(partner.name)));
+
+    if (!selectedOrigin) return ordered.slice(0, 5);
+    return [...ordered].sort((a, b) => {
+      const aPoint = a.latitude != null && a.longitude != null
+        ? { latitude: a.latitude, longitude: a.longitude }
+        : resolveTraiteurCoords(a.address, a.commune || a.zone);
+      const bPoint = b.latitude != null && b.longitude != null
+        ? { latitude: b.latitude, longitude: b.longitude }
+        : resolveTraiteurCoords(b.address, b.commune || b.zone);
+      const aDistance = aPoint ? calculateDistanceKm(selectedOrigin, aPoint) : Number.POSITIVE_INFINITY;
+      const bDistance = bPoint ? calculateDistanceKm(selectedOrigin, bPoint) : Number.POSITIVE_INFINITY;
+      return aDistance - bDistance;
+    }).slice(0, 5);
+  }, [geoPosition, selectedCommune]);
 
   const spotlightPartner = useMemo(() => {
     return partners.find((partner) => partner.name === 'Les Delices de Ninice') || partners[0] || null;
@@ -91,18 +115,35 @@ export default function HomePage() {
     const visible = mockProducts.filter(
       (product) => product.available && !PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(product.vendor) && product.image
     );
+    const normalizedCommune = selectedCommune.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const selectedOrigin = geoPosition ?? (selectedCommune ? (() => {
+      const point = resolveTraiteurCoords(selectedCommune, selectedCommune);
+      return point ? { latitude: point.latitude, longitude: point.longitude } : null;
+    })() : null);
+    const filtered = visible.filter((product) => {
+      if (!selectedCommune) return true;
+      const zone = (product.zone || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      return zone.includes(normalizedCommune) || product.vendor.toLowerCase().includes(normalizedCommune);
+    });
 
     const ordered = HOME_PRODUCT_ORDER
-      .map((name) => visible.find((product) => product.name.toLowerCase().includes(name.toLowerCase())))
+      .map((name) => filtered.find((product) => product.name.toLowerCase().includes(name.toLowerCase())))
       .filter((product): product is NonNullable<typeof product> => Boolean(product));
-
-    const featured = visible.filter((product) => product.featured && !ordered.some((item) => item.id === product.id));
-    const others = visible.filter(
+    const featured = filtered.filter((product) => product.featured && !ordered.some((item) => item.id === product.id));
+    const others = filtered.filter(
       (product) => !ordered.some((item) => item.id === product.id) && !featured.some((item) => item.id === product.id)
     );
+    const result = [...ordered, ...featured, ...others];
 
-    return [...ordered, ...featured, ...others].slice(0, 4);
-  }, []);
+    if (!selectedOrigin) return result.slice(0, 4);
+    return [...result].sort((a, b) => {
+      const aPoint = resolveTraiteurCoords(a.zone, a.zone);
+      const bPoint = resolveTraiteurCoords(b.zone, b.zone);
+      const aDistance = aPoint ? calculateDistanceKm(selectedOrigin, { latitude: aPoint.latitude, longitude: aPoint.longitude }) : Number.POSITIVE_INFINITY;
+      const bDistance = bPoint ? calculateDistanceKm(selectedOrigin, { latitude: bPoint.latitude, longitude: bPoint.longitude }) : Number.POSITIVE_INFINITY;
+      return aDistance - bDistance;
+    }).slice(0, 4);
+  }, [geoPosition, selectedCommune]);
 
   const goToCatalogue = () => {
     const params = new URLSearchParams();
