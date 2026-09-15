@@ -87,7 +87,7 @@ const primaryNavItems: NavItem[] = [
     activePrefixes: ['/traiteurs', '/traiteur'],
   },
   { label: 'Actualités', to: '/actualites', icon: <FileText className="h-4 w-4" /> },
-  { label: 'Commander', to: '/devis', icon: <FileText className="h-4 w-4" /> },
+  { label: 'Commander', to: '/catalogue', icon: <Store className="h-4 w-4" /> },
   { label: 'Partenaire', to: '/devenir-partenaire', icon: <Users className="h-4 w-4" /> },
 ];
 
