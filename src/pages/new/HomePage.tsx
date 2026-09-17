@@ -197,13 +197,13 @@ export default function HomePage() {
           <img
             src={publicAsset('branding/hero-tropical.png')}
             alt="Plat créole local en Martinique"
-            className="absolute inset-0 h-full w-full object-cover object-center"
+            className="absolute inset-0 z-0 h-full w-full object-cover object-center"
             loading="eager"
           />
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,248,237,0.98)_0%,rgba(255,248,237,0.92)_42%,rgba(255,248,237,0.38)_72%,rgba(255,248,237,0.2)_100%)]" />
-          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#fff8ed] to-transparent" />
+          <div className="absolute inset-0 z-10 bg-[linear-gradient(90deg,rgba(255,248,237,0.98)_0%,rgba(255,248,237,0.92)_42%,rgba(255,248,237,0.38)_72%,rgba(255,248,237,0.2)_100%)]" />
+          <div className="absolute inset-x-0 bottom-0 z-10 h-32 bg-gradient-to-t from-[#fff8ed] to-transparent" />
 
-          <div className="relative mx-auto grid max-w-[1840px] gap-8 px-5 py-12 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:px-16 lg:py-16">
+          <div className="relative z-20 mx-auto grid max-w-[1840px] gap-8 px-5 py-12 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:px-16 lg:py-16">
             <div className="flex max-w-3xl flex-col justify-center">
               <p className="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-[0.32em] text-[#c84814]">
                 <span className="text-lg">✦</span>
