@@ -37,6 +37,6 @@ function toRad(value: number) {
   return (value * Math.PI) / 180;
 }
 
-function normalizeZone(value: string) {
-  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+function normalizeZone(value: string | null | undefined) {
+  return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }

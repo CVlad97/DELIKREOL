@@ -34,13 +34,20 @@ const ROUTES_ADMIN = [
 ];
 
 async function fetchPage(url) {
-  try {
-    const res = await fetch(url, { method: 'GET', signal: AbortSignal.timeout(8000) });
-    const text = await res.text();
-    return { status: res.status, ok: res.status < 500, text };
-  } catch {
-    return { status: 0, ok: false, text: '' };
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const res = await fetch(url, { method: 'GET', signal: AbortSignal.timeout(20000) });
+      const text = await res.text();
+      return { status: res.status, ok: res.status < 500, text };
+    } catch {
+      if (attempt === 1) return { status: 0, ok: false, text: '' };
+    }
   }
+  return { status: 0, ok: false, text: '' };
+}
+
+function routeUrl(path) {
+  return path ? `${BASE}/${path}/` : `${BASE}/`;
 }
 
 function isSpaFallback(text) {
@@ -60,7 +67,7 @@ async function main() {
 
   console.log('📄 Routes publiques :');
   for (const path of ROUTES_200) {
-    const url = `${BASE}/${path}`;
+    const url = routeUrl(path);
     const r = await fetchPage(url);
     const spaFallback = r.status === 404 && isSpaFallback(r.text);
     const routeOk = r.status === 200 || spaFallback;
@@ -71,10 +78,10 @@ async function main() {
 
   console.log('\n🔐 Routes admin :');
   for (const path of ROUTES_ADMIN) {
-    const url = `${BASE}/${path}`;
+    const url = routeUrl(path);
     const r = await fetchPage(url);
     const spaFallback = r.status === 404 && isSpaFallback(r.text);
-    const routeOk = r.status <= 404 || spaFallback;
+    const routeOk = (r.status > 0 && r.status <= 404) || spaFallback;
     const label = routeOk ? '✅' : '❌';
     console.log(`  ${label} /${path} → ${r.status}${spaFallback ? ' (SPA)' : ' (SPA normal si 404)'}`);
     if (routeOk) ok++; else ko++;

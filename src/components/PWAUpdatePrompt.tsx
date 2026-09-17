@@ -1,6 +1,7 @@
 import { RefreshCw, X } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
+import { activatePwaUpdate } from '../utils/pwaUpdate';
 
 const UPDATE_CHECK_INTERVAL_MS = 15 * 60 * 1000;
 
@@ -9,6 +10,7 @@ const UPDATE_CHECK_INTERVAL_MS = 15 * 60 * 1000;
  * Elle utilise directement l'API React officielle de vite-plugin-pwa.
  */
 export function PWAUpdatePrompt() {
+  const [isUpdating, setIsUpdating] = useState(false);
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
@@ -18,6 +20,18 @@ export function PWAUpdatePrompt() {
       console.error('[PWA] Service worker registration failed', error);
     },
   });
+
+  const applyUpdate = async () => {
+    if (isUpdating) return;
+    setIsUpdating(true);
+
+    try {
+      await activatePwaUpdate(updateServiceWorker);
+    } catch (error) {
+      console.error('[PWA] Update activation failed', error);
+      setIsUpdating(false);
+    }
+  };
 
   useEffect(() => {
     if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return;
@@ -72,11 +86,12 @@ export function PWAUpdatePrompt() {
           <div className="mt-3 flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => void updateServiceWorker(true)}
+              onClick={() => void applyUpdate()}
+              disabled={isUpdating}
               className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              <RefreshCw className="h-4 w-4" aria-hidden="true" />
-              Mettre à jour
+              <RefreshCw className={`h-4 w-4 ${isUpdating ? 'animate-spin' : ''}`} aria-hidden="true" />
+              {isUpdating ? 'Mise à jour…' : 'Mettre à jour'}
             </button>
 
             <button

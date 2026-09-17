@@ -44,8 +44,8 @@ const MARTINIQUE_COMMUNES = [
   { name: 'Morne-Vert', lat: 14.7000, lon: -61.1000, postal: '97226' },
 ];
 
-const normalizeSearchTerm = (value: string) =>
-  value
+const normalizeSearchTerm = (value: unknown) =>
+  String(value ?? '')
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')

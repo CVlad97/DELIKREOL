@@ -33,8 +33,8 @@ const MADA_BADGE_TRAITEURS = new Set([
   'Sweet Family Traiteur Orianne',
 ]);
 
-function slugify(value: string): string {
-  return value
+function slugify(value: unknown): string {
+  return String(value ?? '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
@@ -371,7 +371,7 @@ export function TraiteurDetailPage() {
                     <div className="flex flex-1 flex-col p-4">
                       <div className="flex items-start justify-between gap-3">
                         <h3 className="line-clamp-2 min-h-[2.75rem] font-black leading-tight">
-                          {item.name.replace(/^Gouté Mwen\s*[—-]\s*/i, '')}
+                          {String(item.name ?? 'Produit local').replace(/^Gouté Mwen\s*[—-]\s*/i, '')}
                         </h3>
                         <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-sm font-black text-primary">
                           {item.price > 0 ? formatEuro(item.price) : 'Devis'}

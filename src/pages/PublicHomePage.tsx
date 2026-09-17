@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 31705)
+Total output lines: 3403
+
 import { FormEvent, Fragment, ReactNode, useEffect, useMemo, useState, type ComponentType, type MouseEvent } from'react';
 import { Circle, CircleMarker, MapContainer, Popup, TileLayer } from'react-leaflet';
 import { DeliveryAvailability } from'../components/DeliveryAvailability';
@@ -190,13 +193,14 @@ const zoneCenterByLabel: Record<string, [number, number]> = {
 
 const pilotDrivers: Array<{ id: string; name: string; latitude: number; longitude: number }> = [];
 
-function formatWhatsAppLabel(value: string) {
- const digits = value.replace(/\D/g,'');
- return digits.startsWith('596') ? `+${digits}` : value;
+function formatWhatsAppLabel(value: string | null | undefined) {
+ const safeValue = String(value ?? '');
+ const digits = safeValue.replace(/\D/g,'');
+ return digits.startsWith('596') ? `+${digits}` : safeValue;
 }
 
-function normalizeLabel(value: string) {
- return value
+function normalizeLabel(value: string | null | undefined) {
+ return String(value ?? '')
  .normalize('NFD')
  .replace(/[\u0300-\u036f]/g,'')
  .toLowerCase()
@@ -1647,165 +1651,7 @@ export function PublicHomePage() {
  <button
  type="button"
  onClick={() => setMarketplaceTab('traiteurs')}
- className={`rounded-full px-4 py-2 text-sm font-black transition ${
- marketplaceTab ==='traiteurs' ?'bg-[#24170f] text-white shadow-lg shadow-stone-900/10' :'text-[#7c2d12]'
- }`}
- >
- Traiteurs & storytelling
- </button>
- </div>
- </div>
-
- {marketplaceTab ==='browse' ? (
- <div className="mt-7 grid gap-6 lg:grid-cols-[1fr_340px]">
- <div>
- <div className="flex flex-wrap gap-2">
- {zoneHighlights.length > 0 ? (
- zoneHighlights.map((item) => (
- <span key={item.zone} className="rounded-full border border-primary/20 bg-[#fff8ef] px-3 py-1.5 text-xs font-black text-[#7c2d12]">
- {item.zone} · {item.count} offre(s)
- </span>
- ))
- ) : (
- <span className="rounded-full border border-dashed border-primary/20 bg-white px-3 py-1.5 text-xs font-black text-stone-500">
- Activez une position pour voir les zones proches
- </span>
- )}
- </div>
-
- <div className="mt-5 rounded-[1.75rem] border border-primary/20 bg-[#fffaf4] p-4">
- <div className="flex flex-wrap items-center justify-between gap-3">
- <div>
- <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Proche de vous</p>
- <h3 className="mt-1 text-xl font-black text-[#2a190f]">Les premières offres qui comptent</h3>
- </div>
- <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">
- {customerLocation ?'Tri géolocalisé' :'Tri par zone'}
- </span>
- </div>
- <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
- {nearbyProducts.map((product) => (
- <ProductCard key={`nearby-${product.id}`} product={product} onAdd={() => addToSelection(product)} compact />
- ))}
- </div>
- </div>
- </div>
-
- <aside className="rounded-[1.75rem] border border-primary/20 bg-[#24170f] p-5 text-white">
- <p className="text-xs font-black uppercase tracking-[0.18em] text-primary/60">Filtre local</p>
- <h3 className="mt-2 text-2xl font-black">Catégories et rayon</h3>
- <p className="mt-3 text-sm leading-6 text-stone-300">
- Les produits affichés ici sont déjà triés selon la catégorie, le budget et la zone de livraison. Quand la position est validée, on ne pousse que les offres compatibles.
- </p>
- <div className="mt-4 space-y-3">
- <div className="rounded-2xl bg-white/8 p-4">
- <p className="text-xs font-black uppercase tracking-[0.16em] text-primary/60">Catégorie active</p>
- <p className="mt-2 text-lg font-black">{categoryFilter}</p>
- </div>
- <div className="rounded-2xl bg-white/8 p-4">
- <p className="text-xs font-black uppercase tracking-[0.16em] text-primary/60">Géolocalisation</p>
- <p className="mt-2 text-sm leading-6 text-stone-300">
- {customerLocation
- ? `Position validée avec précision ${customerLocation.accuracy ? `${Math.round(customerLocation.accuracy)} m` :'non fournie'}`
- :'Géolocalisez-vous pour voir uniquement les offres à proximité.'}
- </p>
- </div>
- <div className="rounded-2xl bg-white/8 p-4">
- <p className="text-xs font-black uppercase tracking-[0.16em] text-primary/60">Zone de livraison</p>
- <p className="mt-2 text-sm leading-6 text-stone-300">
- La commune reste un fallback; la carte et le rayon vendeur restent prioritaires.
- </p>
- </div>
- </div>
- </aside>
- </div>
- ) : (
- <div className="mt-7 grid gap-6 lg:grid-cols-2">
- {storyTraiteurs.map((profile) => {
- const space = featuredTraiteurSpaces.find((item) => item.name === profile.name);
- return (
- <article key={profile.name} className="overflow-hidden rounded-[1.75rem] border border-primary/20 bg-[#fffaf4] shadow-soft">
- <div className={`bg-gradient-to-br ${space?.gradient ??'from-[#7c3aed] via-[#ec4899] to-[hsl(var(--primary))]'} p-5 text-white`}>
- <p className="text-xs font-black uppercase tracking-[0.22em] text-white/75">Storytelling traiteur</p>
- <h3 className="mt-2 text-3xl font-black">{profile.name}</h3>
- <p className="mt-3 text-sm leading-6 text-white/90">{profile.story}</p>
- </div>
- <div className="p-5">
- <div className="grid gap-3 sm:grid-cols-2">
- <div className="rounded-2xl border border-primary/20 bg-white p-4">
- <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Promesse</p>
- <p className="mt-2 text-sm leading-6 text-stone-600">{profile.promise}</p>
- </div>
- <div className="rounded-2xl border border-primary/20 bg-white p-4">
- <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Signature</p>
- <p className="mt-2 text-sm leading-6 text-stone-600">{profile.specialty}</p>
- </div>
- </div>
- <div className="mt-4 flex flex-wrap gap-2">
- {profile.highlights.slice(0, 4).map((item) => (
- <span key={item} className="rounded-full border border-primary/20 bg-white px-3 py-1 text-xs font-black text-[#7c2d12]">
- {item}
- </span>
- ))}
- </div>
- <div className="mt-5 flex flex-wrap gap-3">
- <a
- href={buildTraiteurSpaceLink(baseUrl, normalizeSpaceSlug(profile.name))}
- className="inline-flex items-center justify-center gap-2 rounded-full bg-[hsl(var(--primary))] px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/20 transition hover:-translate-y-0.5"
- >
- Voir la vitrine
- </a>
- <a
- href={`#traiteurs`}
- onClick={(event) => {
- event.preventDefault();
- document.getElementById('traiteurs')?.scrollIntoView({ behavior:'smooth', block:'start' });
- }}
- className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/20 bg-white px-4 py-2 text-sm font-black text-[#7c2d12] transition hover:-translate-y-0.5"
- >
- Ouvrir la section
- </a>
- </div>
- </div>
- </article>
- );
- })}
- </div>
- )}
- </div>
- </section>
-
- <section className="mx-auto max-w-7xl px-4 py-10">
- <SectionTitle
- eyebrow="Comment ça marche"
- title="Chercher, ajouter, confirmer, suivre."
- text="Un parcours court, lisible sur mobile."
- />
- <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
- {howItWorks.slice(0, 3).map((step, index) => (
- <StepCard key={step.title} index={index + 1} title={step.title} text={step.text} />
- ))}
- </div>
- </section>
-
- <section id="traiteurs" className="mx-auto max-w-7xl px-4 py-10">
- <div className="rounded-[2rem] border border-primary/20 bg-white p-5 shadow-soft lg:p-7">
- <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
- <SectionTitle
- eyebrow="Traiteurs"
- title="Chaque traiteur a son espace."
- text="Descriptions, prix et accès direct à la vitrine dédiée pour commander sans friction."
- />
- <div className="grid gap-3 sm:grid-cols-3">
- <StatChip label="Espaces" value={`${featuredTraiteurSpaces.length}`} />
- <StatChip label="Références" value={`${featuredTraiteurSpaces.reduce((sum, space) => sum + space.menuItems.length, 0)}`} />
- <StatChip label="Prix dès" value={formatEuro(Math.min(...featuredTraiteurSpaces.flatMap((space) => space.menuItems.map((item) => item.price))))} />
- </div>
- </div>
-
- <div className="mt-7 grid gap-4 lg:grid-cols-2">
- {featuredTraiteurSpaces.map((space) => (
- <article key={space.slug} className="overflow-hidden rounded-[1.75rem] border border-primary/20 bg-[#fffaf4] shadow-soft">
+ className={`rounded-full px-4 py-2 text-sm font-black transiti…1705 tokens truncated…] shadow-soft">
  <div className={`bg-gradient-to-br ${space.gradient} p-5 text-white`}>
  <div className="flex flex-wrap gap-2">
  <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-[0.16em]">

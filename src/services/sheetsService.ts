@@ -91,8 +91,8 @@ function parseCsv(text: string): string[][] {
   return lines.map((line) => parseCsvRow(line, delimiter));
 }
 
-function normalizeHeaderKey(rawKey: string): string {
-  const base = rawKey.replace(/^\uFEFF/, '').trim().toLowerCase();
+function normalizeHeaderKey(rawKey: string | null | undefined): string {
+  const base = String(rawKey ?? '').replace(/^\uFEFF/, '').trim().toLowerCase();
   const cleaned = base.replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
   return HEADER_ALIASES[cleaned] ?? cleaned;
 }

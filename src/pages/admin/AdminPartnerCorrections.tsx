@@ -130,8 +130,8 @@ function readLocalCorrections(): Correction[] {
   }
 }
 
-function whatsappHref(phone: string): string {
-  const digits = phone.replace(/\D/g, '');
+function whatsappHref(phone: string | null | undefined): string {
+  const digits = String(phone ?? '').replace(/\D/g, '');
   const international = digits.startsWith('0') ? `596${digits.slice(1)}` : digits;
   return `https://wa.me/${international}`;
 }

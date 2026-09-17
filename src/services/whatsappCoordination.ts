@@ -5,13 +5,13 @@
 export const DELIKREOL_WHATSAPP = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 
 /** Génère un lien wa.me */
-function waLink(phone: string, msg: string): string {
-  return `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
+function waLink(phone: string | null | undefined, msg: string): string {
+  return `https://wa.me/${String(phone ?? '').replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
 }
 
 /** Formate un numéro Martinique */
-function formatPhone(raw: string): string {
-  return raw.replace(/\D/g, '').replace(/^0/, '596');
+function formatPhone(raw: string | null | undefined): string {
+  return String(raw ?? '').replace(/\D/g, '').replace(/^0/, '596');
 }
 
 // ─── MESSAGES TRAITEUR → LIVREUR ───
@@ -154,9 +154,10 @@ export function buildCommsLog(entry: DeliveryCommsLog): DeliveryCommsLog {
 
 // ─── FORMAT NUMÉRO — AFFICHAGE SÉCURISÉ ───
 
-export function maskPhone(phone: string): string {
-  const clean = phone.replace(/\D/g, '');
-  if (clean.length < 6) return phone;
+export function maskPhone(phone: string | null | undefined): string {
+  const safePhone = String(phone ?? '');
+  const clean = safePhone.replace(/\D/g, '');
+  if (clean.length < 6) return safePhone;
   return clean.slice(0, 4) + 'XX' + clean.slice(-2);
 }
 

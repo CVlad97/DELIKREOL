@@ -11,8 +11,8 @@ interface ProductCardProps {
   product: Product;
 }
 
-function normalizeVendor(value: string): string {
-  return value
+function normalizeVendor(value: unknown): string {
+  return String(value ?? '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[’']/g, '')

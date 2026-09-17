@@ -15,7 +15,7 @@ export function WhatsAppButton({
   variant = 'fixed',
   size = 'medium',
 }: WhatsAppButtonProps) {
-  const cleanNumber = phoneNumber.replace(/\D/g, '');
+  const cleanNumber = String(phoneNumber ?? '').replace(/\D/g, '');
   const encodedMessage = encodeURIComponent(message);
   const whatsappUrl = `https://wa.me/${cleanNumber}?text=${encodedMessage}`;
 

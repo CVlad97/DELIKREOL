@@ -1,6 +1,6 @@
 // DELIKREOL — Validation téléphone + email + adresse (P0)
 
-export function validateMartiniquePhone(phone: string): boolean {
+export function validateMartiniquePhone(phone: string | null | undefined): boolean {
   if (!phone || phone.trim() === '0' || phone.trim() === '') return false;
   const cleaned = phone.replace(/[\s+._-]/g, '');
   if (cleaned === '0' || cleaned.length < 10) return false;
@@ -10,8 +10,8 @@ export function validateMartiniquePhone(phone: string): boolean {
 
 export const PHONE_ERROR_MESSAGE = 'Merci d\'indiquer un numéro WhatsApp valide, par exemple 0696 XX XX XX ou +596 696 XX XX XX.';
 
-export function normalizePhone(phone: string): string {
-  const cleaned = phone.replace(/[\s+.\-_]/g, '');
+export function normalizePhone(phone: string | null | undefined): string {
+  const cleaned = String(phone ?? '').replace(/[\s+.\-_]/g, '');
   if (cleaned.startsWith('0')) return '+596' + cleaned.slice(1);
   if (cleaned.startsWith('596')) return '+' + cleaned;
   return cleaned.startsWith('+') ? cleaned : '+' + cleaned;

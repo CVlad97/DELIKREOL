@@ -10,8 +10,8 @@
 export const DELIKREOL_MAIN_WHATSAPP = import.meta.env.VITE_WHATSAPP_NUMBER || '596696653589';
 
 /** Génère un lien WhatsApp avec message pré-rempli */
-export function waLink(phone: string, message: string): string {
-  const clean = phone.replace(/\D/g, '');
+export function waLink(phone: string | null | undefined, message: string): string {
+  const clean = String(phone ?? '').replace(/\D/g, '');
   return `https://wa.me/${clean}?text=${encodeURIComponent(message)}`;
 }
 

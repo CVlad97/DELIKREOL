@@ -107,8 +107,8 @@ export default function AdminPartnersApplications() {
  }
  };
 
- const getWhatsAppLink = (phone: string) => {
- const cleaned = phone.replace(/[^0-9]/g,'');
+ const getWhatsAppLink = (phone: string | null | undefined) => {
+ const cleaned = String(phone ?? '').replace(/[^0-9]/g,'');
  const number = cleaned.startsWith('596') ? cleaned : `596${cleaned.replace(/^0+/,'')}`;
  return `https://wa.me/${number}`;
  };

@@ -26,8 +26,8 @@ import { normalizeMenuOptions, type MenuSelection } from '../../types/menu';
 
 const WHATSAPP_NUMBER = '596696653589';
 
-function slugify(value: string): string {
-  return value
+function slugify(value: unknown): string {
+  return String(value ?? '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()

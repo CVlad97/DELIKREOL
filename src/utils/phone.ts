@@ -7,7 +7,7 @@
 //   596696xxxxxx
 //   596697xxxxxx
 
-export function validateMartiniquePhone(phone: string): boolean {
+export function validateMartiniquePhone(phone: string | null | undefined): boolean {
   if (!phone || phone.trim() === '') return false;
 
   const cleaned = phone.replace(/[\s+]/g, '');

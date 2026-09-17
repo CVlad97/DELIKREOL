@@ -240,7 +240,7 @@ export function TraiteursListPage() {
                     </p>
                     <ul className="space-y-1 text-xs font-semibold leading-5 text-foreground/75">
                       {visibleMenuItems.map((item: any) => (
-                        <li key={item.name} className="line-clamp-1">• {item.name.replace(/\s+—.+$/, '')}</li>
+                        <li key={item.name || item.id} className="line-clamp-1">• {String(item.name ?? 'Produit local').replace(/\s+—.+$/, '')}</li>
                       ))}
                     </ul>
                   </div>

@@ -350,7 +350,7 @@ export function DriverApp() {
                   }`} />
                 </div>
                 <div>
-                  <p className="font-black text-foreground text-lg capitalize tracking-tight">{activeDelivery.status.replace('_', ' ')}</p>
+                  <p className="font-black text-foreground text-lg capitalize tracking-tight">{String(activeDelivery.status ?? 'en attente').replace('_', ' ')}</p>
                   <p className="text-sm text-muted-foreground font-medium">~{activeDelivery.estimated_time} min</p>
                 </div>
               </div>

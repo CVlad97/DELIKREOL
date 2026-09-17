@@ -19,6 +19,8 @@ describe('phone validation', () => {
   });
 
   it('should reject invalid numbers', () => {
+    expect(validateMartiniquePhone(null)).toBe(false);
+    expect(validateMartiniquePhone(undefined)).toBe(false);
     expect(validateMartiniquePhone('')).toBe(false);
     expect(validateMartiniquePhone('123')).toBe(false);
     expect(validateMartiniquePhone('0123456789')).toBe(false);
