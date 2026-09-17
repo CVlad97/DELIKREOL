@@ -4,6 +4,7 @@ const AUTH_SET_PASSWORD_STORAGE_KEY = 'delikreol_auth_set_password';
 const allowedAuthPrefixes = [
   '/admin',
   '/espace-partenaire',
+  '/catalogue-partenaire',
   '/espace-livreur',
   '/partner-documents',
   '/terminal-partenaire',
