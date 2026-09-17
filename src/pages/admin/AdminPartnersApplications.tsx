@@ -110,7 +110,10 @@ export default function AdminPartnersApplications() {
  const getWhatsAppLink = (phone: string | null | undefined) => {
  const cleaned = String(phone ?? '').replace(/[^0-9]/g,'');
  const number = cleaned.startsWith('596') ? cleaned : `596${cleaned.replace(/^0+/,'')}`;
- return `https://wa.me/${number}`;
+ const app = applications.find((item) => item.phone === phone);
+ const name = app?.business_name || app?.name ||'partenaire';
+ const message = `Bonjour ${name}, votre dossier partenaire DELIKREOL est enregistré. Pour finaliser votre activation, merci de confirmer vos coordonnées, votre catalogue, vos disponibilités, vos modes retrait/livraison et votre moyen d’encaissement. Ne transmettez aucun mot de passe ni code par WhatsApp. Connexion : https://delikreol.com/connexion/?next=/catalogue-partenaire`;
+ return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
  };
 
  const getWhatsAppSupportLink = () => {

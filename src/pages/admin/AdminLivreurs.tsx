@@ -1,5 +1,20 @@
 import { useEffect, useState } from'react';
 import { supabase, isDemoMode, isSupabaseConfigured } from'../../lib/supabase';
+import { useToast } from'../../contexts/ToastContext';
+
+function normalizeStatus(value?: string) {
+ const normalized = (value ||'candidat').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+ if (['valide','validated','accepted'].includes(normalized)) return'valide';
+ return normalized;
+}
+
+function whatsappNumber(value?: string | null) {
+ const digits = String(value ||'').replace(/\D/g,'');
+ if (!digits) return'';
+ if (digits.startsWith('596')) return digits;
+ if (digits.startsWith('0')) return `596${digits.slice(1)}`;
+ return `596${digits}`;
+}
 
 function loadLocal(): any[] {
  try { return JSON.parse(localStorage.getItem('delikreol_driver_applications') ||'[]'); }
@@ -18,6 +33,8 @@ export function AdminLivreurs() {
  const [loading, setLoading] = useState(true);
  const [source, setSource] = useState<'supabase' |'local'>('local');
  const [error, setError] = useState<string | null>(null);
+ const [updatingId, setUpdatingId] = useState<string | null>(null);
+ const { showSuccess, showError } = useToast();
 
  const loadApplications = async () => {
  setLoading(true);
@@ -52,15 +69,28 @@ export function AdminLivreurs() {
  }, []);
 
  const updateStatus = async (id: string, status: string) => {
- setItems((prev) => prev.map((item) => item.id === id ? { ...item, status } : item));
+ const previous = items.find((item) => item.id === id)?.status ||'candidat';
+ setUpdatingId(id);
 
  if (source ==='supabase' && isSupabaseConfigured && !isDemoMode) {
- const { error: dbError } = await supabase
+ const { data, error: dbError } = await supabase
  .from('driver_applications')
  .update({ status })
- .eq('id', id);
- if (dbError) setError(dbError.message);
+ .eq('id', id)
+ .select('id,status')
+ .maybeSingle();
+ if (dbError || !data) {
+   setError(dbError?.message ||'La modification n’a pas été enregistrée. Vérifiez les droits administrateur.');
+   setItems((prev) => prev.map((item) => item.id === id ? { ...item, status: previous } : item));
+   showError('Statut non modifié.');
+   setUpdatingId(null);
+   return;
  }
+ }
+ setItems((prev) => prev.map((item) => item.id === id ? { ...item, status } : item));
+ setError(null);
+ showSuccess('Statut du livreur enregistré.');
+ setUpdatingId(null);
  };
 
  return (
@@ -107,6 +137,8 @@ export function AdminLivreurs() {
  const transport = item.transport_mode || item.transportMode || item.moyenTransport ||'—';
  const zones = item.zones_acceptees || item.zonesAcceptees || [];
  const created = item.created_at || item.createdAt;
+ const contactNumber = whatsappNumber(item.whatsapp || phone);
+ const activationMessage = `Bonjour ${name}, votre candidature livreur DELIKREOL est enregistrée. Pour poursuivre l’activation, merci de confirmer votre identité, votre moyen de transport, vos zones, vos disponibilités, votre assurance et vos documents. Aucun paiement ne vous sera demandé par WhatsApp. Espace : https://delikreol.com/espace-livreur`;
 
  return (
  <tr key={item.id} className="hover:bg-muted/10 align-top">
@@ -115,7 +147,7 @@ export function AdminLivreurs() {
  <td className="px-4 py-3 text-sm">{transport}</td>
  <td className="px-4 py-3 text-sm">
  <div className="space-y-1">
- {phone ? <a className="block text-green-700 hover:underline" href={`https://wa.me/${String(phone).replace(/\D/g,'')}`} target="_blank" rel="noopener noreferrer">{phone}</a> :'—'}
+ {contactNumber ? <a className="block text-green-700 hover:underline" href={`https://wa.me/${contactNumber}?text=${encodeURIComponent(activationMessage)}`} target="_blank" rel="noopener noreferrer">Continuer sur WhatsApp · {phone}</a> :'—'}
  {item.email && <a className="block text-primary hover:underline" href={`mailto:${item.email}`}>{item.email}</a>}
  </div>
  </td>
@@ -123,8 +155,9 @@ export function AdminLivreurs() {
  <td className="px-4 py-3 text-sm">{formatDate(created)}</td>
  <td className="px-4 py-3 text-sm">
  <select
- value={item.status ||'candidat'}
- onChange={(e) => updateStatus(item.id, e.target.value)}
+ value={normalizeStatus(item.status)}
+ onChange={(e) => void updateStatus(item.id, e.target.value)}
+ disabled={updatingId === item.id}
  className="rounded-full border border-input bg-muted px-2 py-1 text-xs font-bold text-muted-foreground"
  >
  <option value="candidat">Candidat</option>
