@@ -14,6 +14,7 @@ import {
   Star,
   Truck,
   Utensils,
+  Clock3,
 } from 'lucide-react';
 import { DeliveryAvailability } from '../../components/DeliveryAvailability';
 import { Layout } from '../../components/layout/Layout';
@@ -61,6 +62,7 @@ export default function HomePage() {
   const [selectedCommune, setSelectedCommune] = useState('');
   const [geoPosition, setGeoPosition] = useState<Coords | null>(null);
   const [geoFeedback, setGeoFeedback] = useState('');
+  const [nearbyProductIndex, setNearbyProductIndex] = useState(0);
 
   useEffect(() => {
     trackPublicView();
@@ -145,6 +147,20 @@ export default function HomePage() {
     }).slice(0, 4);
   }, [geoPosition, selectedCommune]);
 
+  useEffect(() => {
+    setNearbyProductIndex(0);
+  }, [productsNow]);
+
+  useEffect(() => {
+    if (productsNow.length < 2) return undefined;
+    const timer = window.setInterval(() => {
+      setNearbyProductIndex((current) => (current + 1) % productsNow.length);
+    }, 3000);
+    return () => window.clearInterval(timer);
+  }, [productsNow.length]);
+
+  const nearbyProduct = productsNow[nearbyProductIndex] || productsNow[0] || null;
+
   const goToCatalogue = () => {
     const params = new URLSearchParams();
     if (selectedCommune) params.set('commune', selectedCommune);
@@ -171,6 +187,12 @@ export default function HomePage() {
   return (
     <Layout>
       <section className="overflow-hidden bg-[#fff8ed] text-[#173f32]">
+        <div className="border-b border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm font-bold text-amber-950">
+          <span className="inline-flex items-center gap-2">
+            <Clock3 className="h-4 w-4" aria-hidden="true" />
+            Préouverture DELIKREOL : découvrez les traiteurs et composez vos menus. Les commandes publiques ouvriront prochainement après les derniers tests partenaires.
+          </span>
+        </div>
         <div className="relative min-h-[560px] border-b border-orange-100">
           <img
             src={publicAsset('branding/hero-tropical.png')}
@@ -235,6 +257,50 @@ export default function HomePage() {
 
               {geoFeedback && <p className="mt-3 text-sm font-semibold text-[#4b5f55]">{geoFeedback}</p>}
               <DeliveryAvailability commune={selectedCommune} coords={geoPosition} />
+
+              {nearbyProduct && (
+                <div className="mt-5 max-w-4xl overflow-hidden rounded-[1.75rem] bg-white/95 shadow-[0_18px_55px_rgba(70,38,15,0.18)] ring-1 ring-orange-100 backdrop-blur" aria-live="polite">
+                  <div className="grid min-h-36 grid-cols-[120px_1fr] sm:grid-cols-[180px_1fr]">
+                    <img
+                      key={nearbyProduct.id}
+                      src={safeImage(nearbyProduct.image)}
+                      alt={nearbyProduct.name}
+                      className="h-full w-full animate-[fadeIn_.45s_ease-out] object-cover"
+                    />
+                    <div className="flex min-w-0 flex-col justify-center p-4 sm:p-5">
+                      <p className="text-[10px] font-black uppercase tracking-[.18em] text-[#09614f]">
+                        Commander près de chez vous
+                      </p>
+                      <h2 className="mt-1 truncate text-xl font-black text-[#1e1d1a] sm:text-2xl">{nearbyProduct.name}</h2>
+                      <p className="mt-1 text-sm font-bold text-[#6c6157]">
+                        {nearbyProduct.vendor} · {nearbyProduct.zone || 'Martinique'}
+                      </p>
+                      <div className="mt-3 flex items-center justify-between gap-3">
+                        <strong className="text-lg text-[#cc460f]">{formatEuro(nearbyProduct.price)}</strong>
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/produit/${nearbyProduct.id}`)}
+                          className="inline-flex items-center gap-2 rounded-full bg-[#cc460f] px-4 py-2 text-xs font-black text-white shadow-lg"
+                        >
+                          Voir le plat <ArrowRight className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-center gap-1.5 border-t border-orange-100 py-2" aria-label="Plats proposés">
+                    {productsNow.map((product, index) => (
+                      <button
+                        key={product.id}
+                        type="button"
+                        onClick={() => setNearbyProductIndex(index)}
+                        aria-label={`Afficher ${product.name}`}
+                        aria-current={index === nearbyProductIndex ? 'true' : undefined}
+                        className={`h-2 rounded-full transition-all ${index === nearbyProductIndex ? 'w-7 bg-[#cc460f]' : 'w-2 bg-orange-200'}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="mt-7 grid gap-3 text-sm font-bold text-[#294d41] sm:grid-cols-3">
                 <div className="flex items-center gap-3 rounded-2xl bg-white/70 p-3 backdrop-blur">

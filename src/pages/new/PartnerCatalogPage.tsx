@@ -47,9 +47,26 @@ type Product = {
 };
 
 const categories = ['Plat', 'Menu', 'Dessert', 'Boisson', 'Buffet', 'Brunch', 'Autre'];
-const sideChoices = ['Riz', 'Lentilles', 'Frites', 'Crudités'];
+const sideChoices = [
+  'Riz blanc',
+  'Riz créole',
+  'Lentilles',
+  'Haricots rouges',
+  'Légumes pays',
+  'Gratin de banane jaune',
+  'Frites',
+  'Crudités',
+];
 const drinkChoices = ['Eau', 'Jus local', 'Soda'];
-const sauceChoices = ['Sauce chien', 'Sauce créole', 'Sauce piment à part', 'Sans sauce'];
+const sauceChoices = [
+  'Sauce chien',
+  'Sauce créole',
+  'Sauce piment à part',
+  'Sauce barbecue',
+  'Mayonnaise',
+  'Ketchup',
+  'Sans sauce',
+];
 const blankProduct = {
   name: '', description: '', category: 'Plat', price: '', stock: '', imageUrl: '', available: true,
   sides: '', drinks: '', sauces: '', includedSideCount: '1', includedDrinkCount: '1', includedSauceCount: '1',
@@ -503,7 +520,7 @@ export default function PartnerCatalogPage() {
               <input required placeholder="Nom du plat ou de l’offre" value={product.name} onChange={e=>setProduct({...product,name:e.target.value})} className="w-full rounded-xl border px-4 py-3" />
               <textarea placeholder="Description appétissante, accompagnements, portion…" value={product.description} onChange={e=>setProduct({...product,description:e.target.value})} rows={3} className="w-full rounded-xl border px-4 py-3" />
               <fieldset className="rounded-2xl border p-4">
-                <legend className="px-2 text-sm font-black">Accompagnements proposés</legend>
+                <legend className="px-2 text-sm font-black">Garnitures et accompagnements proposés</legend>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {sideChoices.map((choice) => (
                     <label key={choice} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl bg-[#fff8ef] px-4 py-3 text-sm font-bold">
