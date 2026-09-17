@@ -39,17 +39,23 @@ function ChoiceGroup({ title, choices, required, selected, onToggle }: {
 }
 
 export function MenuCompositionModal({ productName, options, onCancel, onConfirm }: Props) {
+  const [appetizers, setAppetizers] = useState<string[]>([]);
   const [sides, setSides] = useState<string[]>([]);
   const [drinks, setDrinks] = useState<string[]>([]);
   const [sauces, setSauces] = useState<string[]>([]);
+  const [condiments, setCondiments] = useState<string[]>([]);
   const [instructions, setInstructions] = useState('');
   const sauceChoices = options.sauces || [];
   const requiredSauces = options.included_sauce_count || 0;
+  const requiredAppetizers = options.included_appetizer_count || 0;
+  const requiredCondiments = options.included_condiment_count || 0;
   const valid = useMemo(() => (
+    appetizers.length === requiredAppetizers &&
     sides.length === options.included_side_count &&
     drinks.length === options.included_drink_count &&
-    sauces.length === requiredSauces
-  ), [drinks.length, options.included_drink_count, options.included_side_count, requiredSauces, sauces.length, sides.length]);
+    sauces.length === requiredSauces &&
+    condiments.length === requiredCondiments
+  ), [appetizers.length, condiments.length, drinks.length, options.included_drink_count, options.included_side_count, requiredAppetizers, requiredCondiments, requiredSauces, sauces.length, sides.length]);
   const toggle = (value: string, selected: string[], setSelected: (next: string[]) => void, limit: number) => {
     if (selected.includes(value)) setSelected(selected.filter((item) => item !== value));
     else if (limit === 0 || selected.length < limit) setSelected([...selected, value]);
@@ -63,9 +69,11 @@ export function MenuCompositionModal({ productName, options, onCancel, onConfirm
           <button type="button" onClick={onCancel} className="rounded-full p-2 hover:bg-muted" aria-label="Fermer"><X className="h-5 w-5" /></button>
         </div>
         <div className="mt-6 space-y-6">
+          <ChoiceGroup title="Entrées" choices={options.appetizers || []} required={requiredAppetizers} selected={appetizers} onToggle={(value) => toggle(value, appetizers, setAppetizers, requiredAppetizers)} />
           <ChoiceGroup title="Garnitures et accompagnements" choices={options.sides} required={options.included_side_count} selected={sides} onToggle={(value) => toggle(value, sides, setSides, options.included_side_count)} />
           <ChoiceGroup title="Boissons" choices={options.drinks} required={options.included_drink_count} selected={drinks} onToggle={(value) => toggle(value, drinks, setDrinks, options.included_drink_count)} />
           <ChoiceGroup title="Sauces" choices={sauceChoices} required={requiredSauces} selected={sauces} onToggle={(value) => toggle(value, sauces, setSauces, requiredSauces)} />
+          <ChoiceGroup title="Condiments" choices={options.condiments || []} required={requiredCondiments} selected={condiments} onToggle={(value) => toggle(value, condiments, setCondiments, requiredCondiments)} />
           {options.instructions_enabled !== false && (
             <label className="block space-y-2">
               <span className="font-black text-foreground">Consigne cuisine <span className="text-sm font-medium text-muted-foreground">— optionnel</span></span>
@@ -79,10 +87,10 @@ export function MenuCompositionModal({ productName, options, onCancel, onConfirm
             </label>
           )}
         </div>
-        {!valid && <p className="mt-5 rounded-xl bg-secondary/10 px-4 py-3 text-sm font-semibold text-secondary">Sélectionnez exactement les garnitures, boissons et sauces incluses pour continuer.</p>}
+        {!valid && <p className="mt-5 rounded-xl bg-secondary/10 px-4 py-3 text-sm font-semibold text-secondary">Sélectionnez exactement les entrées, accompagnements, boissons, sauces et condiments inclus pour continuer.</p>}
         <div className="mt-6 grid grid-cols-2 gap-3">
           <button type="button" onClick={onCancel} className="min-h-12 rounded-xl border border-border font-bold">Annuler</button>
-          <button type="button" disabled={!valid} onClick={() => onConfirm({ sides, drinks, sauces, instructions: instructions.trim().slice(0, 240) || undefined })} className="min-h-12 rounded-xl bg-primary px-4 font-black text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50">Ajouter au panier</button>
+          <button type="button" disabled={!valid} onClick={() => onConfirm({ appetizers, sides, drinks, sauces, condiments, instructions: instructions.trim().slice(0, 240) || undefined })} className="min-h-12 rounded-xl bg-primary px-4 font-black text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50">Ajouter au panier</button>
         </div>
       </div>
     </div>

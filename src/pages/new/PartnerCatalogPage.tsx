@@ -37,11 +37,15 @@ type Product = {
   is_public: boolean;
   sides: string[] | null;
   menu_options: {
+    appetizers?: string[];
     drinks?: string[];
     sauces?: string[];
+    condiments?: string[];
+    included_appetizer_count?: number;
     included_side_count?: number;
     included_drink_count?: number;
     included_sauce_count?: number;
+    included_condiment_count?: number;
     instructions_enabled?: boolean;
   } | null;
 };
@@ -58,6 +62,7 @@ const sideChoices = [
   'Crudités',
 ];
 const drinkChoices = ['Eau', 'Jus local', 'Soda'];
+const appetizerChoices = ['Accras', 'Salade créole', 'Crudités', 'Soupe du jour'];
 const sauceChoices = [
   'Sauce chien',
   'Sauce créole',
@@ -67,9 +72,10 @@ const sauceChoices = [
   'Ketchup',
   'Sans sauce',
 ];
+const condimentChoices = ['Piment frais', 'Pickles', 'Citron vert', 'Cive', 'Sans condiment'];
 const blankProduct = {
   name: '', description: '', category: 'Plat', price: '', stock: '', imageUrl: '', available: true,
-  sides: '', drinks: '', sauces: '', includedSideCount: '1', includedDrinkCount: '1', includedSauceCount: '1',
+  appetizers: '', sides: '', drinks: '', sauces: '', condiments: '', includedAppetizerCount: '0', includedSideCount: '1', includedDrinkCount: '1', includedSauceCount: '1', includedCondimentCount: '0',
 };
 const partnerTutorialImage = `${import.meta.env.BASE_URL}tutorials/tuto-ajouter-plat-delikreol.jpg`;
 const menuSuggestions = [
@@ -155,7 +161,7 @@ export default function PartnerCatalogPage() {
 
   const canPublishDirectly = vendor?.status === 'verified' && vendor.is_public;
 
-  const toggleChoice = (field: 'sides' | 'drinks' | 'sauces', choice: string) => {
+  const toggleChoice = (field: 'appetizers' | 'sides' | 'drinks' | 'sauces' | 'condiments', choice: string) => {
     setProduct((current) => {
       const selected = current[field].split(',').map((item) => item.trim()).filter(Boolean);
       const next = selected.includes(choice)
@@ -169,12 +175,15 @@ export default function PartnerCatalogPage() {
     setProduct((current) => ({
       ...current,
       category: 'Menu',
+      appetizers: '',
       sides: suggestion.sides.join(', '),
       drinks: suggestion.drinks.join(', '),
       includedSideCount: '1',
       includedDrinkCount: '1',
       sauces: 'Sauce chien, Sans sauce',
       includedSauceCount: '1',
+      condiments: 'Piment frais, Sans condiment',
+      includedCondimentCount: '1',
     }));
     productFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -378,8 +387,10 @@ export default function PartnerCatalogPage() {
     setSavingProduct(true);
     try {
       const sides = product.sides.split(',').map((side) => side.trim()).filter(Boolean);
+      const appetizers = product.appetizers.split(',').map((item) => item.trim()).filter(Boolean);
       const drinks = product.drinks.split(',').map((drink) => drink.trim()).filter(Boolean);
       const sauces = product.sauces.split(',').map((sauce) => sauce.trim()).filter(Boolean);
+      const condiments = product.condiments.split(',').map((item) => item.trim()).filter(Boolean);
       const isMenu = product.category === 'Menu';
       const payload = {
         vendor_id: vendor.id,
@@ -395,12 +406,15 @@ export default function PartnerCatalogPage() {
         is_demo: false,
         sides,
         menu_options: isMenu ? {
-          sides,
+          appetizers, sides,
           drinks,
           sauces,
+          condiments,
+          included_appetizer_count: Math.min(appetizers.length, Math.max(0, Number(product.includedAppetizerCount) || 0)),
           included_side_count: Math.min(sides.length, Math.max(0, Number(product.includedSideCount) || 0)),
           included_drink_count: Math.min(drinks.length, Math.max(0, Number(product.includedDrinkCount) || 0)),
           included_sauce_count: Math.min(sauces.length, Math.max(0, Number(product.includedSauceCount) || 0)),
+          included_condiment_count: Math.min(condiments.length, Math.max(0, Number(product.includedCondimentCount) || 0)),
           instructions_enabled: true,
         } : null,
       };
@@ -434,11 +448,15 @@ export default function PartnerCatalogPage() {
       imageUrl: item.image_url || '',
       available: item.is_available,
       sides: (item.sides || []).join(', '),
+      appetizers: (item.menu_options?.appetizers || []).join(', '),
       drinks: (item.menu_options?.drinks || []).join(', '),
       includedSideCount: String(item.menu_options?.included_side_count ?? 1),
       includedDrinkCount: String(item.menu_options?.included_drink_count ?? 1),
       sauces: (item.menu_options?.sauces || []).join(', '),
       includedSauceCount: String(item.menu_options?.included_sauce_count ?? 1),
+      condiments: (item.menu_options?.condiments || []).join(', '),
+      includedAppetizerCount: String(item.menu_options?.included_appetizer_count ?? 0),
+      includedCondimentCount: String(item.menu_options?.included_condiment_count ?? 0),
     });
     window.scrollTo({ top: 650, behavior: 'smooth' });
   };
@@ -532,7 +550,13 @@ export default function PartnerCatalogPage() {
               </fieldset>
               <div className="grid gap-3 sm:grid-cols-3"><select value={product.category} onChange={e=>setProduct({...product,category:e.target.value})} className="rounded-xl border px-4 py-3">{categories.map(item=><option key={item}>{item}</option>)}</select><input required type="number" min="0.01" step="0.01" placeholder="Prix €" value={product.price} onChange={e=>setProduct({...product,price:e.target.value})} className="rounded-xl border px-4 py-3" /><input type="number" min="0" placeholder="Stock" value={product.stock} onChange={e=>setProduct({...product,stock:e.target.value})} className="rounded-xl border px-4 py-3" /></div>
               {product.category === 'Menu' && <div className="space-y-4 rounded-2xl border border-[#f6c453]/70 bg-[#fff8df] p-4">
-                <div><h3 className="font-black">Composition du menu</h3><p className="text-xs text-stone-600">Le client verra les accompagnements et les boissons compris dans le prix.</p></div>
+                <div><h3 className="font-black">Composition du menu</h3><p className="text-xs text-stone-600">Le client verra les entrées, accompagnements, boissons, sauces et condiments compris dans le prix.</p></div>
+                <fieldset>
+                  <legend className="text-sm font-black">Entrées proposées</legend>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                    {appetizerChoices.map((choice) => <label key={choice} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border bg-white px-4 py-3 text-sm font-bold"><input type="checkbox" checked={product.appetizers.split(',').map(item=>item.trim()).includes(choice)} onChange={()=>toggleChoice('appetizers', choice)} className="h-5 w-5 accent-primary" />{choice}</label>)}
+                  </div>
+                </fieldset>
                 <fieldset>
                   <legend className="text-sm font-black">Boissons proposées</legend>
                   <div className="mt-2 grid gap-2 sm:grid-cols-3">
@@ -555,10 +579,18 @@ export default function PartnerCatalogPage() {
                     ))}
                   </div>
                 </fieldset>
+                <fieldset>
+                  <legend className="text-sm font-black">Condiments proposés</legend>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                    {condimentChoices.map((choice) => <label key={choice} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border bg-white px-4 py-3 text-sm font-bold"><input type="checkbox" checked={product.condiments.split(',').map(item=>item.trim()).includes(choice)} onChange={()=>toggleChoice('condiments', choice)} className="h-5 w-5 accent-primary" />{choice}</label>)}
+                  </div>
+                </fieldset>
                 <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="text-sm font-bold">Entrées incluses<input type="number" min="0" max="10" value={product.includedAppetizerCount} onChange={e=>setProduct({...product,includedAppetizerCount:e.target.value})} className="mt-2 w-full rounded-xl border bg-white px-4 py-3" /></label>
                   <label className="text-sm font-bold">Accompagnements inclus<input type="number" min="0" max="10" value={product.includedSideCount} onChange={e=>setProduct({...product,includedSideCount:e.target.value})} className="mt-2 w-full rounded-xl border bg-white px-4 py-3" /></label>
                   <label className="text-sm font-bold">Boissons incluses<input type="number" min="0" max="10" value={product.includedDrinkCount} onChange={e=>setProduct({...product,includedDrinkCount:e.target.value})} className="mt-2 w-full rounded-xl border bg-white px-4 py-3" /></label>
                   <label className="text-sm font-bold">Sauces incluses<input type="number" min="0" max="10" value={product.includedSauceCount} onChange={e=>setProduct({...product,includedSauceCount:e.target.value})} className="mt-2 w-full rounded-xl border bg-white px-4 py-3" /></label>
+                  <label className="text-sm font-bold">Condiments inclus<input type="number" min="0" max="10" value={product.includedCondimentCount} onChange={e=>setProduct({...product,includedCondimentCount:e.target.value})} className="mt-2 w-full rounded-xl border bg-white px-4 py-3" /></label>
                 </div>
               </div>}
               <label className="flex items-center gap-3 rounded-xl bg-[#fff8ef] p-3 text-sm font-bold"><input type="checkbox" checked={product.available} onChange={e=>setProduct({...product,available:e.target.checked})} /> Disponible à la commande</label>

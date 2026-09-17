@@ -28,12 +28,16 @@ describe('menu selections', () => {
 
   it('normalizes old menu configurations without sauces', () => {
     expect(normalizeMenuOptions({ sides: ['Riz'], drinks: ['Eau'], included_side_count: 1, included_drink_count: 1 })).toEqual({
+      appetizers: [],
       sides: ['Riz'],
       drinks: ['Eau'],
       sauces: [],
+      condiments: [],
+      included_appetizer_count: 0,
       included_side_count: 1,
       included_drink_count: 1,
       included_sauce_count: 0,
+      included_condiment_count: 0,
       instructions_enabled: true,
     });
   });

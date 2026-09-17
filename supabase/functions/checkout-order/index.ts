@@ -29,19 +29,25 @@ type CheckoutItemInput = {
 };
 
 type MenuSelection = {
+  appetizers: string[];
   sides: string[];
   drinks: string[];
   sauces: string[];
+  condiments: string[];
   instructions?: string;
 };
 
 type MenuOptions = {
+  appetizers?: string[];
   sides: string[];
   drinks: string[];
   sauces?: string[];
+  condiments?: string[];
+  included_appetizer_count?: number;
   included_side_count: number;
   included_drink_count: number;
   included_sauce_count?: number;
+  included_condiment_count?: number;
   instructions_enabled?: boolean;
 };
 
@@ -86,6 +92,7 @@ function resolveAllowedPaymentProviders(): Set<string> {
 function corsHeaders(req: Request) {
   const origin = req.headers.get("origin") || "";
   return {
+    appetizers: parseChoiceArray(record.appetizers),
     "Access-Control-Allow-Origin": allowedOrigins.has(origin) ? origin : "https://delikreol.com",
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -141,6 +148,7 @@ function parseSelectedOptions(value: unknown): MenuSelection | null {
     sides: parseChoiceArray(record.sides),
     drinks: parseChoiceArray(record.drinks),
     sauces: parseChoiceArray(record.sauces),
+    condiments: parseChoiceArray(record.condiments),
     instructions: sanitizeText(record.instructions, 240) || undefined,
   };
 }
@@ -177,42 +185,52 @@ function normalizeOptions(product: ProductRow) {
   const sides = Array.isArray(raw.sides) ? raw.sides.filter((item) => typeof item === "string") : [];
   const drinks = Array.isArray(raw.drinks) ? raw.drinks.filter((item) => typeof item === "string") : [];
   const sauces = Array.isArray(raw.sauces) ? raw.sauces.filter((item) => typeof item === "string") : [];
+  const condiments = Array.isArray(raw.condiments) ? raw.condiments.filter((item) => typeof item === "string") : [];
+  const appetizerCount = Number(raw.included_appetizer_count ?? 0);
   const sideCount = Number(raw.included_side_count ?? 0);
   const drinkCount = Number(raw.included_drink_count ?? 0);
   const sauceCount = Number(raw.included_sauce_count ?? 0);
-  if (!Number.isInteger(sideCount) || !Number.isInteger(drinkCount) || !Number.isInteger(sauceCount)) {
+  const condimentCount = Number(raw.included_condiment_count ?? 0);
+  if (!Number.isInteger(appetizerCount) || !Number.isInteger(sideCount) || !Number.isInteger(drinkCount) || !Number.isInteger(sauceCount) || !Number.isInteger(condimentCount)) {
     throw new Response(JSON.stringify({ error: `Configuration de menu invalide: ${product.name}` }), { status: 409 });
   }
-  if (sideCount < 0 || drinkCount < 0 || sauceCount < 0 || sideCount > sides.length || drinkCount > drinks.length || sauceCount > sauces.length) {
+  if (appetizerCount < 0 || sideCount < 0 || drinkCount < 0 || sauceCount < 0 || condimentCount < 0 || appetizerCount > appetizers.length || sideCount > sides.length || drinkCount > drinks.length || sauceCount > sauces.length || condimentCount > condiments.length) {
     throw new Response(JSON.stringify({ error: `Configuration de menu invalide: ${product.name}` }), { status: 409 });
   }
-  return { sides, drinks, sauces, sideCount, drinkCount, sauceCount, instructionsEnabled: raw.instructions_enabled !== false };
+  return { appetizers, sides, drinks, sauces, condiments, appetizerCount, sideCount, drinkCount, sauceCount, condimentCount, instructionsEnabled: raw.instructions_enabled !== false };
 }
 
 function validateMenuSelection(product: ProductRow, selection: MenuSelection | null) {
   const options = normalizeOptions(product);
   if (!options) {
-    if (selection && (selection.sides.length || selection.drinks.length || selection.sauces.length || selection.instructions)) {
+    if (selection && (selection.appetizers.length || selection.sides.length || selection.drinks.length || selection.sauces.length || selection.condiments.length || selection.instructions)) {
       throw new Response(JSON.stringify({ error: `Composition non autorisée: ${product.name}` }), { status: 400 });
     }
     return null;
   }
   if (!selection) throw new Response(JSON.stringify({ error: `Composition requise: ${product.name}` }), { status: 400 });
+  const uniqueAppetizers = new Set(selection.appetizers);
   const uniqueSides = new Set(selection.sides);
   const uniqueDrinks = new Set(selection.drinks);
   const uniqueSauces = new Set(selection.sauces);
-  const valid = uniqueSides.size === options.sideCount &&
+  const uniqueCondiments = new Set(selection.condiments);
+  const valid = uniqueAppetizers.size === options.appetizerCount &&
+    uniqueSides.size === options.sideCount &&
     uniqueDrinks.size === options.drinkCount &&
-    uniqueSauces.size === options.sauceCount &&
+    uniqueSauces.size === options.sauceCount && uniqueCondiments.size === options.condimentCount &&
+    [...uniqueAppetizers].every((choice) => options.appetizers.includes(choice)) &&
     [...uniqueSides].every((choice) => options.sides.includes(choice)) &&
     [...uniqueDrinks].every((choice) => options.drinks.includes(choice)) &&
-    [...uniqueSauces].every((choice) => options.sauces.includes(choice));
+    [...uniqueSauces].every((choice) => options.sauces.includes(choice)) &&
+    [...uniqueCondiments].every((choice) => options.condiments.includes(choice));
   if (!valid) throw new Response(JSON.stringify({ error: `Composition invalide: ${product.name}` }), { status: 400 });
   const instructions = options.instructionsEnabled ? sanitizeText(selection.instructions, 240) : "";
   return {
+    appetizers: [...uniqueAppetizers],
     sides: [...uniqueSides],
     drinks: [...uniqueDrinks],
     sauces: [...uniqueSauces],
+    condiments: [...uniqueCondiments],
     instructions: instructions || undefined,
   };
 }
@@ -350,9 +368,11 @@ Deno.serve(async (req: Request) => {
     const compositionNotes = orderItems.flatMap((item) => {
       if (!item.selected_options) return [];
       const details = [
+        item.selected_options.appetizers.length ? `entrée(s): ${item.selected_options.appetizers.join(", ")}` : "",
         item.selected_options.sides.length ? `accompagnement(s): ${item.selected_options.sides.join(", ")}` : "",
         item.selected_options.drinks.length ? `boisson(s): ${item.selected_options.drinks.join(", ")}` : "",
         item.selected_options.sauces.length ? `sauce(s): ${item.selected_options.sauces.join(", ")}` : "",
+        item.selected_options.condiments.length ? `condiment(s): ${item.selected_options.condiments.join(", ")}` : "",
         item.selected_options.instructions ? `consigne: ${item.selected_options.instructions}` : "",
       ].filter(Boolean).join("; ");
       return [`${item.product_name}: ${details}`];
@@ -432,3 +452,5 @@ Deno.serve(async (req: Request) => {
     return json(req, { error: "Unable to create order" }, 500);
   }
 });
+  const appetizers = Array.isArray(raw.appetizers) ? raw.appetizers.filter((item) => typeof item === "string") : [];
+  const uniqueAppetizers = new Set(selection.appetizers);

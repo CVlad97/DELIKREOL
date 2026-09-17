@@ -67,9 +67,11 @@ export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
   const { showSuccess } = useToast();
   const [showSim, setShowSim] = useState(false);
+  const [selectedAppetizers, setSelectedAppetizers] = useState<string[]>([]);
   const [selectedSides, setSelectedSides] = useState<string[]>([]);
   const [selectedDrinks, setSelectedDrinks] = useState<string[]>([]);
   const [selectedSauces, setSelectedSauces] = useState<string[]>([]);
+  const [selectedCondiments, setSelectedCondiments] = useState<string[]>([]);
   const [instructions, setInstructions] = useState('');
   const vendorLabel = product.vendor?.business_name ?? (product.vendor_id ? 'Vendeur local' : null);
   const isAvailable = product.is_available !== false;
@@ -77,9 +79,11 @@ export function ProductCard({ product }: ProductCardProps) {
   const menuOptions = useMemo(() => normalizeMenuOptions(product.menu_options), [product.menu_options]);
 
   const menuComplete = !menuOptions || (
+    selectedAppetizers.length === menuOptions.included_appetizer_count &&
     selectedSides.length === menuOptions.included_side_count &&
     selectedDrinks.length === menuOptions.included_drink_count &&
-    selectedSauces.length === menuOptions.included_sauce_count
+    selectedSauces.length === menuOptions.included_sauce_count &&
+    selectedCondiments.length === menuOptions.included_condiment_count
   );
 
   const toggleChoice = (
@@ -100,9 +104,11 @@ export function ProductCard({ product }: ProductCardProps) {
     if (!menuComplete) return;
     const selection: MenuSelection | undefined = menuOptions
       ? {
+          appetizers: selectedAppetizers,
           sides: selectedSides,
           drinks: selectedDrinks,
           sauces: selectedSauces,
+          condiments: selectedCondiments,
           instructions: instructions.trim().slice(0, 240) || undefined,
         }
       : undefined;
@@ -133,8 +139,15 @@ export function ProductCard({ product }: ProductCardProps) {
           {vendorLabel && <div className="text-xs text-muted-foreground">{vendorLabel}</div>}
         </div>
 
-        {menuOptions && (menuOptions.sides.length > 0 || menuOptions.drinks.length > 0 || menuOptions.sauces.length > 0) && (
+        {menuOptions && (menuOptions.appetizers.length > 0 || menuOptions.sides.length > 0 || menuOptions.drinks.length > 0 || menuOptions.sauces.length > 0 || menuOptions.condiments.length > 0) && (
           <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-3">
+            <CompositionFieldset
+              title="Entrées"
+              choices={menuOptions.appetizers}
+              selected={selectedAppetizers}
+              requiredCount={menuOptions.included_appetizer_count}
+              onToggle={(choice) => toggleChoice(choice, selectedAppetizers, menuOptions.included_appetizer_count, setSelectedAppetizers)}
+            />
             <CompositionFieldset
               title="Accompagnements"
               choices={menuOptions.sides}
@@ -156,6 +169,13 @@ export function ProductCard({ product }: ProductCardProps) {
               requiredCount={menuOptions.included_sauce_count}
               onToggle={(sauce) => toggleChoice(sauce, selectedSauces, menuOptions.included_sauce_count, setSelectedSauces)}
             />
+            <CompositionFieldset
+              title="Condiments"
+              choices={menuOptions.condiments}
+              selected={selectedCondiments}
+              requiredCount={menuOptions.included_condiment_count}
+              onToggle={(choice) => toggleChoice(choice, selectedCondiments, menuOptions.included_condiment_count, setSelectedCondiments)}
+            />
             {menuOptions.instructions_enabled !== false && (
               <label className="block space-y-1">
                 <span className="text-sm font-bold text-foreground">Consigne cuisine — optionnel</span>
@@ -170,7 +190,7 @@ export function ProductCard({ product }: ProductCardProps) {
             )}
             {!menuComplete && (
               <div className="text-xs font-semibold text-destructive">
-                Complétez les accompagnements, boissons et sauces obligatoires avant d'ajouter au panier.
+                Complétez les entrées, accompagnements, boissons, sauces et condiments obligatoires avant d'ajouter au panier.
               </div>
             )}
           </div>
