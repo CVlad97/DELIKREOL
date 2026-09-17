@@ -117,8 +117,8 @@ export default function AdminOperations() {
  const next = nextStatus[order.status];
  if (!next) return;
 
- const { error } = await supabase.from('orders').update({ status: next }).eq('id', order.id);
- if (error) {
+ const { data, error } = await supabase.from('orders').update({ status: next }).eq('id', order.id).select('id,status').maybeSingle();
+ if (error || !data) {
  showError('Erreur de mise a jour');
  return;
  }
