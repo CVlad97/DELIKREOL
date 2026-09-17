@@ -48,7 +48,11 @@ img[src*="branding/hero-tropical"] {
   mix-blend-mode: normal !important;
 }
 
-img[src*="branding/hero-tropical"] ~ div {
+/* Hide only the two decorative colour veils.  The previous general-sibling
+   selector also hid the interactive hero content (commune, geolocation and
+   rotating nearby dish card). */
+img[src*="branding/hero-tropical"] + div.absolute.inset-0,
+img[src*="branding/hero-tropical"] + div.absolute.inset-0 + div.absolute.inset-x-0.bottom-0 {
   display: none !important;
   background: none !important;
 }
