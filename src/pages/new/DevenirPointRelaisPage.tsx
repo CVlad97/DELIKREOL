@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Layout } from '../../components/layout/Layout';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 import { validateMartiniquePhone } from '../../utils/validation';
@@ -51,7 +52,7 @@ export function DevenirPointRelaisPage() {
     <Layout>
       <div className="mx-auto max-w-lg px-4 py-12">
         <h1 className="mb-2 text-3xl font-black text-foreground">Devenir point relais</h1>
-        <p className="mb-8 text-muted-foreground">Proposez votre commerce comme point de retrait et dépôt DELIKREOL.</p>
+        <p className="mb-8 text-muted-foreground">Proposez votre commerce comme point de retrait et dépôt DELIKREOL.</p>\n        <div className="mb-8 flex flex-wrap gap-3"><Link to="/connexion?next=/espace-relais" className="rounded-xl border border-primary/30 px-4 py-2 text-sm font-bold text-primary">Déjà partenaire ? Se connecter</Link><Link to="/devenir-partenaire#parcours-reseau" className="rounded-xl border border-border px-4 py-2 text-sm font-bold text-foreground">Voir les autres parcours</Link></div>
         <form onSubmit={handleSubmit} className="space-y-4 rounded-3xl border border-border bg-card p-5 shadow-soft sm:p-7">
           <div><label className="mb-1 block text-sm font-semibold">Nom de l'établissement *</label><input value={form.business_name} onChange={e => handleChange('business_name', e.target.value)} className={controlClass} /></div>
           <div><label className="mb-1 block text-sm font-semibold">Responsable</label><input value={form.manager_name} onChange={e => handleChange('manager_name', e.target.value)} className={controlClass} /></div>
