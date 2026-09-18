@@ -10,6 +10,8 @@ import {
   Shield,
   Megaphone,
   Camera,
+  Truck,
+  PackageCheck,
 } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
@@ -225,6 +227,31 @@ export default function DevenirPartenairePage() {
           </p>
         </div>
 
+        {/* Parcours réseau : chaque partenaire possède son inscription et son espace */}
+        <section className="mb-10 rounded-3xl border border-primary/20 bg-primary/[0.04] p-5 sm:p-7" aria-labelledby="parcours-reseau">
+          <div className="mb-5">
+            <h2 id="parcours-reseau" className="text-xl font-black text-foreground">Choisissez votre parcours partenaire</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Les candidatures sont étudiées par DELIKREOL. Après validation, connectez-vous avec votre email pour accéder à votre espace.</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="rounded-2xl border border-primary/25 bg-card p-4">
+              <div className="mb-3 flex items-center gap-2 text-primary"><Store size={20} /><h3 className="font-bold">Traiteur</h3></div>
+              <p className="mb-4 text-sm text-muted-foreground">Ajoutez vos plats, menus, sauces, garnitures et boissons.</p>
+              <div className="flex flex-wrap gap-2"><a href="#candidature-partenaire" className="rounded-xl bg-primary px-3 py-2 text-xs font-bold text-primary-foreground">Candidater</a><Link to="/connexion?next=/espace-partenaire" className="rounded-xl border border-primary/30 px-3 py-2 text-xs font-bold text-primary">Se connecter</Link></div>
+            </div>
+            <div className="rounded-2xl border border-secondary/25 bg-card p-4">
+              <div className="mb-3 flex items-center gap-2 text-secondary"><Truck size={20} /><h3 className="font-bold">Livreur</h3></div>
+              <p className="mb-4 text-sm text-muted-foreground">Indiquez vos zones, votre véhicule et vos disponibilités.</p>
+              <div className="flex flex-wrap gap-2"><Link to="/devenir-livreur" className="rounded-xl bg-secondary px-3 py-2 text-xs font-bold text-secondary-foreground">Candidater</Link><Link to="/connexion?next=/espace-livreur" className="rounded-xl border border-secondary/30 px-3 py-2 text-xs font-bold text-secondary">Se connecter</Link></div>
+            </div>
+            <div className="rounded-2xl border border-success/25 bg-card p-4">
+              <div className="mb-3 flex items-center gap-2 text-success"><PackageCheck size={20} /><h3 className="font-bold">Point relais</h3></div>
+              <p className="mb-4 text-sm text-muted-foreground">Proposez votre commerce comme point de retrait.</p>
+              <div className="flex flex-wrap gap-2"><Link to="/devenir-point-relais" className="rounded-xl bg-success px-3 py-2 text-xs font-bold text-success-foreground">Candidater</Link><Link to="/connexion?next=/espace-relais" className="rounded-xl border border-success/30 px-3 py-2 text-xs font-bold text-success">Se connecter</Link></div>
+            </div>
+          </div>
+        </section>
+
         {/* Benefits */}
         <div className="grid sm:grid-cols-2 gap-4 mb-10">
           {BENEFITS.map((b) => {
@@ -298,7 +325,7 @@ export default function DevenirPartenairePage() {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form id="candidature-partenaire" onSubmit={handleSubmit} className="space-y-6">
           {/* Identity */}
           <fieldset className="space-y-4 p-5 bg-card rounded-2xl border border-border">
             <legend className="text-sm font-black uppercase tracking-wider text-foreground/60 px-2">
