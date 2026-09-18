@@ -39,7 +39,7 @@ export default function LoginPage() {
   const next = sanitizeAuthNext(params.get('next') || params.get('redirect'));
   const mode = useMemo<LoginMode>(() => {
     const requestedMode = params.get('mode') as LoginMode | null;
-    return requestedMode && passwordModes.includes(requestedMode) ? requestedMode : 'magic';
+    return requestedMode && passwordModes.includes(requestedMode) ? requestedMode : 'password';
   }, [params]);
   const isSettingPassword = mode === 'set-password';
 
@@ -209,7 +209,7 @@ export default function LoginPage() {
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
               {isSettingPassword
                 ? 'Choisis un mot de passe pour ouvrir ton espace DeliKreol.'
-                : 'Ouvre ton espace avec un lien email ou un mot de passe.'}
+                : 'Entre ton email et ton mot de passe.'}
             </p>
           </div>
 
@@ -244,23 +244,6 @@ export default function LoginPage() {
               Livreur
             </Link>
           </div>
-
-          {!isSettingPassword && (
-            <div className="mt-6 grid grid-cols-2 gap-2 rounded-2xl bg-muted p-1 text-sm font-black">
-              <Link
-                to={`/connexion?mode=magic&next=${encodeURIComponent(next)}`}
-                className={`rounded-xl px-3 py-2 text-center transition ${mode === 'magic' ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground'}`}
-              >
-                Lien email
-              </Link>
-              <Link
-                to={`/connexion?mode=password&next=${encodeURIComponent(next)}`}
-                className={`rounded-xl px-3 py-2 text-center transition ${mode === 'password' ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground'}`}
-              >
-                Mot de passe
-              </Link>
-            </div>
-          )}
 
           <form onSubmit={submitHandler} className="mt-6 space-y-4">
             {!isSettingPassword && (
@@ -343,12 +326,18 @@ export default function LoginPage() {
           </form>
 
           {mode === 'password' && (
-            <div className="mt-4 text-center text-sm">
+            <div className="mt-4 grid grid-cols-2 gap-3 text-center text-sm">
+              <Link
+                to={`/connexion?mode=magic&next=${encodeURIComponent(next)}`}
+                className="rounded-xl border border-primary/20 px-3 py-2 font-bold text-primary hover:bg-primary/[0.05]"
+              >
+                Créer mon accès
+              </Link>
               <Link
                 to={`/connexion?mode=reset&next=${encodeURIComponent(next)}`}
-                className="font-bold text-primary hover:underline"
+                className="rounded-xl border border-primary/20 px-3 py-2 font-bold text-primary hover:bg-primary/[0.05]"
               >
-                Configurer ou réinitialiser mon mot de passe
+                Mot de passe oublié
               </Link>
             </div>
           )}
@@ -392,7 +381,7 @@ export default function LoginPage() {
           )}
 
           <div className="mt-6 rounded-2xl bg-muted p-4 text-xs leading-5 text-muted-foreground">
-            Traiteurs et livreurs peuvent créer leur accès par email. Si l’email confirmé correspond à votre fiche traiteur, cliquez ensuite sur “Activer ma fiche traiteur”.
+            Utilisez l’adresse email enregistrée sur votre fiche partenaire. Pour une première connexion, choisissez “Créer mon accès”.
           </div>
 
           <div className="mt-5 flex justify-center gap-4 text-sm font-bold">
