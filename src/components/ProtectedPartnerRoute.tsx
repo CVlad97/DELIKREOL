@@ -79,10 +79,18 @@ export function ProtectedPartnerRoute({ children }: { children: ReactNode }) {
 
  <div className="mt-6 grid gap-3 sm:grid-cols-2">
  <button type="button" onClick={activatePartnerAccess} disabled={activating} className="rounded-2xl bg-primary px-5 py-3 text-center text-sm font-black text-white disabled:cursor-wait disabled:opacity-60">
- {activating ? 'Activation…' : 'Activer ma fiche traiteur'}
+ {activating ? 'Activation…' : 'Activer mon accès partenaire'}
  </button>
- <Link to="/pro" className="rounded-2xl border border-primary/20 px-5 py-3 text-center text-sm font-black text-[#7c2d12]">
- Retour espace pro
+ <Link to="/connexion?next=/espace-partenaire" className="rounded-2xl border border-primary/20 px-5 py-3 text-center text-sm font-black text-[#7c2d12]">
+ Changer de compte / se connecter
+ </Link>
+ </div>
+ <div className="mt-3 grid gap-3 sm:grid-cols-2">
+ <Link to="/devenir-partenaire#parcours-reseau" className="rounded-2xl border border-secondary/30 px-5 py-3 text-center text-sm font-black text-secondary">
+ Je suis livreur ou point relais
+ </Link>
+ <Link to="/partenaire" className="rounded-2xl border border-primary/20 px-5 py-3 text-center text-sm font-black text-primary">
+ Demander le rattachement de ma fiche
  </Link>
  </div>
  {activationError && <p role="alert" className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">{activationError}</p>}
