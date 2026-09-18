@@ -1,0 +1,4 @@
+interface:
+  display_name: "Rattachement partenaires DeliKreol"
+  short_description: "Rattache un partenaire DeliKreol en sécurité"
+  default_prompt: "Vérifie et rattache ce partenaire DeliKreol à son compte Supabase."
