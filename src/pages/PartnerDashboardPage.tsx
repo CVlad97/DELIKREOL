@@ -53,7 +53,7 @@ function StatusBadge({ status }: { status: PartnerDocumentStatus }) {
 }
 
 export function PartnerDashboardPage() {
- const { user, profile } = useAuth();
+ const { user, profile, refreshProfile } = useAuth();
  const { showError, showSuccess } = useToast();
  const [documents, setDocuments] = useState<PartnerDocument[]>([]);
  const [loading, setLoading] = useState(true);
@@ -62,6 +62,7 @@ export function PartnerDashboardPage() {
  const [expiresAt, setExpiresAt] = useState<Partial<Record<PartnerDocumentType, string>>>({});
  const [correctionText, setCorrectionText] = useState('');
  const [sendingCorrection, setSendingCorrection] = useState(false);
+ const [accessChecked, setAccessChecked] = useState(false);
 
  const role = isPartnerRole(profile?.user_type) ? profile.user_type : null;
  const requirements = useMemo(() => getRoleRequirements(role), [role]);
@@ -72,6 +73,20 @@ export function PartnerDashboardPage() {
  if (!user || !role) return;
  loadDocuments();
  }, [user, role]);
+
+ useEffect(() => {
+ if (!user || role) {
+ setAccessChecked(Boolean(role));
+ return;
+ }
+ let active = true;
+ refreshProfile().finally(() => {
+ if (active) setAccessChecked(true);
+ });
+ return () => {
+ active = false;
+ };
+ }, [user?.id, role]);
 
  const loadDocuments = async () => {
  if (!user) return;
@@ -183,12 +198,20 @@ export function PartnerDashboardPage() {
  if (!user || !role) {
  return (
  <div className="flex min-h-screen items-center justify-center bg-slate-950 p-4 text-slate-50">
- <div className="max-w-md rounded-3xl border border-red-500/30 bg-red-500/10 p-8 text-center">
- <AlertCircle className="mx-auto mb-4 h-12 w-12 text-red-300" />
- <h1 className="text-2xl font-black">Accès partenaire requis</h1>
- <p className="mt-3 text-sm text-red-100">
- Cette page est réservée aux vendeurs, livreurs et points relais connectés.
+ <div className="max-w-md rounded-3xl border border-primary/30 bg-primary/10 p-8 text-center">
+ <AlertCircle className="mx-auto mb-4 h-12 w-12 text-primary/60" />
+ <h1 className="text-2xl font-black">{!accessChecked ? 'Synchronisation de votre espace…' : 'Rattachement à finaliser'}</h1>
+ <p className="mt-3 text-sm text-orange-100">
+ {!accessChecked
+ ? 'Nous vérifions votre fiche traiteur, livreur ou point relais.'
+ : 'Reconnectez-vous avec l’adresse email enregistrée sur votre fiche partenaire.'}
  </p>
+ {accessChecked && (
+ <div className="mt-5 grid gap-3">
+ <a href="/connexion?next=/espace-partenaire" className="rounded-2xl bg-primary px-5 py-3 text-sm font-black text-white">Se reconnecter</a>
+ <a href="/partenaire" className="rounded-2xl border border-primary/30 px-5 py-3 text-sm font-black text-orange-100">Demander le rattachement</a>
+ </div>
+ )}
  </div>
  </div>
  );
