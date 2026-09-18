@@ -214,6 +214,7 @@ export function AppRouter() {
                   <Route path="catalogue-partenaire" element={<PartnerCatalogPage />} />
                   <Route path="espace-partenaire" element={<PartnerWrapper />} />
                   <Route path="espace-livreur" element={<PartnerWrapper />} />
+                  <Route path="espace-relais" element={<PartnerWrapper />} />
                   <Route path="partner-documents" element={<PartnerWrapper />} />
                   <Route path="terminal-partenaire" element={<PartnerTerminalWrapper />} />
                   <Route path="avis" element={<ReviewPage />} />
