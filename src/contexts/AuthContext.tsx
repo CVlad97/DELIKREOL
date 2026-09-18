@@ -73,19 +73,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // A partner can already be linked to a vendor while the profile read is
         // temporarily unavailable or an older client session still has no role.
         // Resolve the ownership link before falling back to a customer profile.
-        const { data: linkedVendor, error: vendorError } = await supabase
-          .from('vendors')
-          .select('id, name, email')
-          .eq('user_id', authUser.id)
-          .maybeSingle();
+        const partnerLookups = await Promise.all([
+          supabase.from('vendors').select('id, name, email').eq('user_id', authUser.id).limit(1).maybeSingle(),
+          supabase.from('drivers').select('id').eq('user_id', authUser.id).limit(1).maybeSingle(),
+          supabase.from('relay_points').select('id').eq('user_id', authUser.id).limit(1).maybeSingle(),
+        ]);
 
-        if (!vendorError && linkedVendor) {
-          const email = normalizeEmail(authUser.email || linkedVendor.email);
+        const linkedVendor = partnerLookups[0].data;
+        const linkedRole =
+          linkedVendor ? 'vendor'
+            : partnerLookups[1].data ? 'driver'
+              : partnerLookups[2].data ? 'relay_host'
+                : null;
+
+        if (linkedRole) {
+          const email = normalizeEmail(authUser.email || linkedVendor?.email);
           setProfile({
             id: authUser.id,
-            full_name: linkedVendor.name || email.split('@')[0] || 'Partenaire DeliKreol',
+            full_name: linkedVendor?.name || email.split('@')[0] || 'Partenaire DeliKreol',
             phone: null,
-            user_type: 'vendor',
+            user_type: linkedRole,
             avatar_url: null,
             email,
             contact_email: email,
@@ -94,9 +101,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        if (vendorError) {
-          console.error('Error resolving linked vendor:', vendorError);
-        }
+        partnerLookups.forEach(({ error: partnerError }) => {
+          if (partnerError) console.error('Error resolving linked partner:', partnerError);
+        });
 
         const fallbackProfile = buildProfileFromUser(authUser);
         const { data: createdProfile, error: createError } = await supabase
