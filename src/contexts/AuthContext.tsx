@@ -65,9 +65,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!error && data) {
         setProfile(data);
-      } else if (error) {
-        console.error('Error fetching profile:', error);
       } else {
+        if (error) {
+          console.error('Error fetching profile:', error);
+        }
+
+        // A partner can already be linked to a vendor while the profile read is
+        // temporarily unavailable or an older client session still has no role.
+        // Resolve the ownership link before falling back to a customer profile.
+        const { data: linkedVendor, error: vendorError } = await supabase
+          .from('vendors')
+          .select('id, name, email')
+          .eq('user_id', authUser.id)
+          .maybeSingle();
+
+        if (!vendorError && linkedVendor) {
+          const email = normalizeEmail(authUser.email || linkedVendor.email);
+          setProfile({
+            id: authUser.id,
+            full_name: linkedVendor.name || email.split('@')[0] || 'Partenaire DeliKreol',
+            phone: null,
+            user_type: 'vendor',
+            avatar_url: null,
+            email,
+            contact_email: email,
+            created_at: new Date().toISOString(),
+          });
+          return;
+        }
+
+        if (vendorError) {
+          console.error('Error resolving linked vendor:', vendorError);
+        }
+
         const fallbackProfile = buildProfileFromUser(authUser);
         const { data: createdProfile, error: createError } = await supabase
           .from('profiles')
