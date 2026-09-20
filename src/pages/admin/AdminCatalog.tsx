@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import ImagePreview from '../../components/ImagePreview';
 import {
   Search, Plus, Edit3, Trash2, Check, X, Package,
   ChevronDown, ToggleLeft, ToggleRight, Store, Loader, ImagePlus, MessageCircle, Copy
@@ -485,7 +486,7 @@ Merci, l’équipe DELIKREOL` : '';
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         {p.image_url ? (
-                          <img src={p.image_url} alt="" className="h-14 w-14 shrink-0 rounded-xl border border-border object-cover" loading="lazy" />
+                          <ImagePreview src={p.image_url} alt={`Photo de ${p.name}`} className="h-14 w-14 shrink-0 rounded-xl border border-border" imgClassName="h-full w-full object-cover" />
                         ) : (
                           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-border bg-muted" title="Aucune photo">
                             <ImagePlus className="h-5 w-5 text-muted-foreground" />
@@ -544,7 +545,7 @@ Merci, l’équipe DELIKREOL` : '';
               <article key={p.id} className="space-y-3 p-4">
                 <div className="overflow-hidden rounded-2xl border border-border bg-muted">
                   {p.image_url ? (
-                    <img src={p.image_url} alt={`Photo actuelle de ${p.name}`} className="h-44 w-full object-cover" loading="lazy" />
+                    <ImagePreview src={p.image_url} alt={`Photo actuelle de ${p.name}`} className="h-44 w-full" imgClassName="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-32 items-center justify-center gap-2 text-sm text-muted-foreground">
                       <ImagePlus className="h-5 w-5" /> Aucune photo enregistrée
