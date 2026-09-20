@@ -20,6 +20,8 @@ interface CatalogProduct {
   status: string;
   is_public: boolean;
   is_demo: boolean;
+  sides?: string[] | null;
+  menu_options?: { sides?: string[]; drinks?: string[]; sauces?: string[]; included_side_count?: number; included_drink_count?: number; included_sauce_count?: number; instructions_enabled?: boolean } | null;
   vendor?: { business_name: string };
 }
 
@@ -32,11 +34,18 @@ interface ProductForm {
   image_url: string;
   stock_quantity: string;
   is_available: boolean;
+  sides: string;
+  drinks: string;
+  sauces: string;
+  included_side_count: string;
+  included_drink_count: string;
+  included_sauce_count: string;
 }
 
 const emptyForm: ProductForm = {
   vendor_id: '', name: '', description: '', category: '',
   price: '', image_url: '', stock_quantity: '', is_available: true,
+  sides: '', drinks: '', sauces: '', included_side_count: '1', included_drink_count: '1', included_sauce_count: '1',
 };
 
 
@@ -155,6 +164,12 @@ Merci, l’équipe DELIKREOL` : '';
       image_url: p.image_url || '',
       stock_quantity: p.stock_quantity?.toString() || '',
       is_available: p.is_available,
+      sides: (p.menu_options?.sides || p.sides || []).join(', '),
+      drinks: (p.menu_options?.drinks || []).join(', '),
+      sauces: (p.menu_options?.sauces || []).join(', '),
+      included_side_count: String(p.menu_options?.included_side_count ?? 1),
+      included_drink_count: String(p.menu_options?.included_drink_count ?? 1),
+      included_sauce_count: String(p.menu_options?.included_sauce_count ?? 1),
     });
     setSelectedImage(null);
     setImagePreview(p.image_url || '');
@@ -214,6 +229,16 @@ Merci, l’équipe DELIKREOL` : '';
         is_public: true,
         is_demo: false,
         status: 'verified',
+        sides: form.sides.split(',').map(v => v.trim()).filter(Boolean),
+        menu_options: (form.sides || form.drinks || form.sauces) ? {
+          sides: form.sides.split(',').map(v => v.trim()).filter(Boolean),
+          drinks: form.drinks.split(',').map(v => v.trim()).filter(Boolean),
+          sauces: form.sauces.split(',').map(v => v.trim()).filter(Boolean),
+          included_side_count: Math.max(0, Number(form.included_side_count || 0)),
+          included_drink_count: Math.max(0, Number(form.included_drink_count || 0)),
+          included_sauce_count: Math.max(0, Number(form.included_sauce_count || 0)),
+          instructions_enabled: true,
+        } : null,
       };
 
       if (editingProduct) {
@@ -661,6 +686,20 @@ Merci, l’équipe DELIKREOL` : '';
                     className="w-full mt-1 px-4 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:ring-2 focus:ring-primary/30"
                     placeholder="12.50"
                   />
+                </div>
+              </div>
+              <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
+                <h3 className="font-black">Composition client</h3>
+                <p className="mb-3 text-xs text-muted-foreground">Fonctionne pour les plats et les menus. Séparez les choix par des virgules.</p>
+                <div className="grid gap-3">
+                  <label className="text-xs font-bold uppercase">Accompagnements<input value={form.sides} onChange={e => setForm(f => ({...f, sides:e.target.value}))} className="mt-1 w-full rounded-xl border bg-background px-4 py-2.5 normal-case" placeholder="Riz, Lentilles, Légumes pays, Frites, Crudités" /></label>
+                  <label className="text-xs font-bold uppercase">Boissons<input value={form.drinks} onChange={e => setForm(f => ({...f, drinks:e.target.value}))} className="mt-1 w-full rounded-xl border bg-background px-4 py-2.5 normal-case" placeholder="Eau, Jus local, Soda" /></label>
+                  <label className="text-xs font-bold uppercase">Sauces<input value={form.sauces} onChange={e => setForm(f => ({...f, sauces:e.target.value}))} className="mt-1 w-full rounded-xl border bg-background px-4 py-2.5 normal-case" placeholder="Sauce chien, Sauce créole, Piment à part" /></label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <label className="text-xs font-bold">Accomp. inclus<input type="number" min="0" value={form.included_side_count} onChange={e=>setForm(f=>({...f,included_side_count:e.target.value}))} className="mt-1 w-full rounded-xl border bg-background px-3 py-2" /></label>
+                    <label className="text-xs font-bold">Boissons incluses<input type="number" min="0" value={form.included_drink_count} onChange={e=>setForm(f=>({...f,included_drink_count:e.target.value}))} className="mt-1 w-full rounded-xl border bg-background px-3 py-2" /></label>
+                    <label className="text-xs font-bold">Sauces incluses<input type="number" min="0" value={form.included_sauce_count} onChange={e=>setForm(f=>({...f,included_sauce_count:e.target.value}))} className="mt-1 w-full rounded-xl border bg-background px-3 py-2" /></label>
+                  </div>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
