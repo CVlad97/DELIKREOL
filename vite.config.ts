@@ -12,12 +12,14 @@ export default defineConfig(({ mode }) => {
   return {
     base,
     plugins: [react(), VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       minify: false,
       includeAssets: ['branding/*.svg', 'branding/*.png'],
       manifest: false,
       workbox: {
         cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
         globPatterns: ['**/*.{js,css,html,svg,ico,json}'],
         runtimeCaching: [
           // Product and partner photographs are intentionally not cached by the
