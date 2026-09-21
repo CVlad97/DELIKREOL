@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Outlet, useLocation } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { PWAUpdatePrompt } from './components/PWAUpdatePrompt';
@@ -152,6 +152,35 @@ function GlobalPublicBackBar() {
   );
 }
 
+function RouteScrollManager() {
+  const location = useLocation();
+
+  useEffect(() => {
+    let frame = 0;
+    let secondFrame = 0;
+
+    frame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => {
+        if (location.hash) {
+          const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+          if (target) {
+            target.scrollIntoView({ block: 'start', behavior: 'auto' });
+            return;
+          }
+        }
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(secondFrame);
+    };
+  }, [location.pathname, location.search, location.hash]);
+
+  return null;
+}
+
 function LayoutWrapper() {
   return <Suspense fallback={<PageLoader />}><GlobalPublicBackBar /><Outlet /></Suspense>;
 }
@@ -177,6 +206,7 @@ export function AppRouter() {
             <ToastProvider>
               <PWAUpdatePrompt />
               <AuthReturnHandler />
+              <RouteScrollManager />
               <Routes>
                 <Route element={<LayoutWrapper />}>
                   <Route index element={<HomePage />} />

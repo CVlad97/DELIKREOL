@@ -116,7 +116,7 @@ export default function CataloguePage() {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { addItem } = useCart();
-  const { showSuccess } = useToast();
+  const { showError, showSuccess } = useToast();
 
   const [query, setQuery] = useState(searchParams.get('q') ?? '');
   const [category, setCategory] = useState(searchParams.get('cat') ?? 'tous');
@@ -201,6 +201,9 @@ export default function CataloguePage() {
     for (const product of mockProducts.filter((item) => (
       !PUBLIC_HIDDEN_TRAITEURS.has(item.vendor) &&
       !PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(item.vendor) &&
+      item.available !== false &&
+      Number.isFinite(item.price) &&
+      item.price > 0 &&
       isUsableThumbnail(item.image)
     ))) {
       addUniqueProduct(product);
@@ -209,6 +212,7 @@ export default function CataloguePage() {
     for (const space of traiteurSpaces) {
       for (const item of space.menuItems) {
         if (PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(space.name)) continue;
+        if (!Number.isFinite(item.price) || item.price <= 0) continue;
         if (!isUsableThumbnail(item.image)) continue;
 
         addUniqueProduct({
@@ -311,6 +315,10 @@ export default function CataloguePage() {
   };
 
   const addToCart = (product: LocalProduct, selection?: MenuSelection) => {
+    if (product.available === false || !Number.isFinite(product.price) || product.price <= 0) {
+      showError('Ce produit doit être confirmé par le traiteur avant de pouvoir être commandé.');
+      return;
+    }
     if (product.menuOptions && !selection) {
       setProductToCompose(product);
       return;
