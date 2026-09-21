@@ -121,22 +121,32 @@ function parseDelimitedLine(line: string, separator: string) {
 function parseCatalogCsv(text: string) {
   const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/).filter((line) => line.trim());
   if (lines.length < 2) throw new Error('Le fichier ne contient aucun produit.');
-  const separator = (lines[0].match(/;/g) || []).length >= (lines[0].match(/,/g) || []).length ? ';' : ',';
-  const headers = parseDelimitedLine(lines[0], separator).map((header) => slugify(header));
+  const headerLineIndex = lines.findIndex((line) => {
+    const normalized = slugify(line);
+    return normalized.includes('nom') && normalized.includes('prix');
+  });
+  if (headerLineIndex < 0) throw new Error('Les colonnes nom et prix sont obligatoires.');
+  const headerLine = lines[headerLineIndex];
+  const separator = (headerLine.match(/;/g) || []).length >= (headerLine.match(/,/g) || []).length ? ';' : ',';
+  const headers = parseDelimitedLine(headerLine, separator).map((header) => slugify(header));
   const find = (...names: string[]) => names.map(slugify).map((name) => headers.indexOf(name)).find((index) => index >= 0) ?? -1;
   const columns = {
     name: find('nom', 'name', 'produit'), price: find('prix', 'price'), description: find('description'),
     category: find('categorie', 'category'), stock: find('stock', 'quantite', 'quantity'), image: find('image_url', 'image', 'photo', 'photo_url'),
-    sides: find('accompagnements', 'sides'), drinks: find('boissons', 'drinks'), sauces: find('sauces', 'sauce'),
-    includedSides: find('accompagnements_inclus', 'included_side_count'), includedDrinks: find('boissons_inclus', 'included_drink_count'), includedSauces: find('sauces_inclus', 'included_sauce_count'),
+    appetizers: find('entrees', 'appetizers'), sides: find('accompagnements', 'sides'), drinks: find('boissons', 'drinks'), sauces: find('sauces', 'sauce'), condiments: find('condiments', 'condiment'),
+    includedAppetizers: find('entrees_incluses', 'included_appetizer_count'), includedSides: find('accompagnements_inclus', 'included_side_count'), includedDrinks: find('boissons_incluses', 'boissons_inclus', 'included_drink_count'), includedSauces: find('sauces_incluses', 'sauces_inclus', 'included_sauce_count'), includedCondiments: find('condiments_inclus', 'included_condiment_count'),
   };
   if (columns.name < 0 || columns.price < 0) throw new Error('Les colonnes nom et prix sont obligatoires.');
-  return lines.slice(1).map((line) => parseDelimitedLine(line, separator)).map((cells) => ({
+  return lines.slice(headerLineIndex + 1).map((line) => parseDelimitedLine(line, separator)).map((cells) => ({
     name: cells[columns.name] || '', price: cells[columns.price] || '', description: columns.description >= 0 ? cells[columns.description] || '' : '',
     category: columns.category >= 0 ? cells[columns.category] || 'Plat' : 'Plat', stock: columns.stock >= 0 ? cells[columns.stock] || '' : '',
-    imageUrl: columns.image >= 0 ? cells[columns.image] || '' : '', sides: columns.sides >= 0 ? cells[columns.sides] || '' : '', drinks: columns.drinks >= 0 ? cells[columns.drinks] || '' : '', sauces: columns.sauces >= 0 ? cells[columns.sauces] || '' : '',
-    includedSides: columns.includedSides >= 0 ? cells[columns.includedSides] || '1' : '1', includedDrinks: columns.includedDrinks >= 0 ? cells[columns.includedDrinks] || '1' : '1', includedSauces: columns.includedSauces >= 0 ? cells[columns.includedSauces] || '1' : '1',
+    imageUrl: columns.image >= 0 ? cells[columns.image] || '' : '', appetizers: columns.appetizers >= 0 ? cells[columns.appetizers] || '' : '', sides: columns.sides >= 0 ? cells[columns.sides] || '' : '', drinks: columns.drinks >= 0 ? cells[columns.drinks] || '' : '', sauces: columns.sauces >= 0 ? cells[columns.sauces] || '' : '', condiments: columns.condiments >= 0 ? cells[columns.condiments] || '' : '',
+    includedAppetizers: columns.includedAppetizers >= 0 ? cells[columns.includedAppetizers] || '0' : '0', includedSides: columns.includedSides >= 0 ? cells[columns.includedSides] || '1' : '1', includedDrinks: columns.includedDrinks >= 0 ? cells[columns.includedDrinks] || '1' : '1', includedSauces: columns.includedSauces >= 0 ? cells[columns.includedSauces] || '1' : '1', includedCondiments: columns.includedCondiments >= 0 ? cells[columns.includedCondiments] || '0' : '0',
   })).filter((row) => row.name && Number(row.price) > 0);
+}
+
+function splitCatalogOptions(value: string) {
+  return value.split(/[;,]/).map((item) => item.trim()).filter(Boolean);
 }
 
 export default function PartnerCatalogPage() {
@@ -315,9 +325,11 @@ export default function PartnerCatalogPage() {
       const rows = parseCatalogCsv(await file.text());
       if (!rows.length) throw new Error('Aucune ligne valide trouvée. Vérifiez nom et prix.');
       const payloads = rows.map((row) => {
-        const sides = row.sides.split(';').map((item) => item.trim()).filter(Boolean);
-        const drinks = row.drinks.split(';').map((item) => item.trim()).filter(Boolean);
-        const sauces = row.sauces.split(';').map((item) => item.trim()).filter(Boolean);
+        const appetizers = splitCatalogOptions(row.appetizers);
+        const sides = splitCatalogOptions(row.sides);
+        const drinks = splitCatalogOptions(row.drinks);
+        const sauces = splitCatalogOptions(row.sauces);
+        const condiments = splitCatalogOptions(row.condiments);
         const isMenu = row.category === 'Menu';
         return {
           vendor_id: vendor.id, name: row.name.trim(), description: row.description.trim() || null, category: row.category,
@@ -325,10 +337,12 @@ export default function PartnerCatalogPage() {
           stock_quantity: row.stock ? Math.max(0, Number(row.stock.replace(',', '.'))) : 15, is_available: true,
           status: canPublishDirectly ? 'verified' : 'draft', is_public: canPublishDirectly, is_demo: false, sides,
           menu_options: isMenu ? {
-            sides, drinks, sauces,
+            appetizers, sides, drinks, sauces, condiments,
+            included_appetizer_count: Math.min(appetizers.length, Math.max(0, Number(row.includedAppetizers) || 0)),
             included_side_count: Math.min(sides.length, Math.max(0, Number(row.includedSides) || 0)),
             included_drink_count: Math.min(drinks.length, Math.max(0, Number(row.includedDrinks) || 0)),
             included_sauce_count: Math.min(sauces.length, Math.max(0, Number(row.includedSauces) || 0)),
+            included_condiment_count: Math.min(condiments.length, Math.max(0, Number(row.includedCondiments) || 0)),
             instructions_enabled: true,
           } : null,
         };
@@ -500,9 +514,9 @@ export default function PartnerCatalogPage() {
           <ol className="mt-2 grid gap-2 text-sm text-stone-700 sm:grid-cols-3"><li><strong>1.</strong> Appuyez sur « + Ajouter un plat ».</li><li><strong>2.</strong> Indiquez nom, prix, stock, accompagnements et photo.</li><li><strong>3.</strong> Enregistrez : {canPublishDirectly ? 'le plat apparaît immédiatement sur DELIKREOL.' : 'DELIKREOL contrôle le plat avant publication.'}</li></ol>
         </section>
         <section className="rounded-[2rem] border border-primary/20 bg-white p-6 shadow-soft">
-          <div className="flex items-start gap-3"><FileSpreadsheet className="mt-1 h-6 w-6 text-primary" /><div><h2 className="text-xl font-black">Importer plusieurs produits et photos</h2><p className="text-sm text-stone-600">Téléchargez le modèle, complétez-le dans Excel, puis enregistrez-le en CSV UTF-8. Les photos peuvent être sélectionnées en lot.</p></div></div>
+          <div className="flex items-start gap-3"><FileSpreadsheet className="mt-1 h-6 w-6 text-primary" /><div><h2 className="text-xl font-black">Importer plusieurs produits et photos</h2><p className="text-sm text-stone-600">Téléchargez le modèle, complétez la feuille « Import produits », puis enregistrez cette feuille en CSV UTF-8. Les photos peuvent être sélectionnées en lot.</p></div></div>
           <div className="mt-4 flex flex-wrap gap-3">
-            <a href={`${import.meta.env.BASE_URL}templates/delikreol_template_import_traiteurs.xlsx`} download className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-[#fff8ef] px-4 py-3 text-sm font-black text-primary"><Download className="h-4 w-4" /> Télécharger le template Excel</a>
+            <a href={`${import.meta.env.BASE_URL}templates/delikreol_template_import_traiteurs.xlsx?v=20260921`} download="DELIKREOL_Modele_Catalogue_Traiteur.xlsx" className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-[#fff8ef] px-4 py-3 text-sm font-black text-primary"><Download className="h-4 w-4" /> Télécharger le modèle Excel</a>
             <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-black text-white"><Upload className="h-4 w-4" />{importingCatalog ? 'Import en cours…' : 'Importer le CSV'}<input type="file" accept=".csv,text/csv" onChange={importCatalog} disabled={importingCatalog} className="hidden" /></label>
             <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#1f6a4a] px-4 py-3 text-sm font-black text-white"><Images className="h-4 w-4" />{uploadingPhotos ? 'Envoi des photos…' : 'Importer les photos'}<input type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple onChange={uploadProductPhotos} disabled={uploadingPhotos} className="hidden" /></label>
           </div>

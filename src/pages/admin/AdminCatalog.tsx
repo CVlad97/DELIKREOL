@@ -122,13 +122,13 @@ export default function AdminCatalog() {
   });
 
   const selectedVendor = vendors.find(v => v.id === vendorFilter);
-  const templateUrl = `${window.location.origin}${import.meta.env.BASE_URL}templates/delikreol_template_import_traiteurs.xlsx`;
+  const templateUrl = `${window.location.origin}${import.meta.env.BASE_URL}templates/delikreol_template_import_traiteurs.xlsx?v=20260921`;
   const partnerMessage = selectedVendor ? `Bonjour ${selectedVendor.business_name},
 
 Voici le template DELIKREOL pour importer vos produits :
 ${templateUrl}
 
-Merci de remplir la feuille « Import » avec le nom, le prix, la description, la catégorie, le stock et, pour les menus, les accompagnements, boissons et sauces. Pour les photos, vous pouvez :
+Merci de remplir la feuille « Import produits » avec le nom, le prix, la description, la catégorie, le stock et, pour les menus, les entrées, accompagnements, boissons, sauces et condiments. Pour les photos, vous pouvez :
 1. indiquer une URL publique dans image_url ; ou
 2. envoyer les photos séparément dans votre espace traiteur, en les nommant comme le produit (exemple : colombo-de-poulet.jpg).
 
