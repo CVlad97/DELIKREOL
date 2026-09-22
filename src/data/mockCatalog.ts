@@ -65,7 +65,7 @@ export const mockProducts: LocalProduct[] = [
     vendor: "Snack Savè Peyi'A",
     price: 12,
     category: 'Plats',
-    image: vendorImage('vendors/save-peyia/cote-porc-riz.jpg'),
+    image: vendorImage('vendors/save-peyia/drive-reimport/IMG-20260710-WA0005.jpg'),
     description: 'Côte de porc grillée au feu de bois, riz et crudités. Composition à confirmer par le partenaire avant préparation.',
     zone: 'Rivière-Pilote',
     available: true,
