@@ -132,6 +132,7 @@ export default function CataloguePage() {
   const [position, setPosition] = useState<{ latitude: number; longitude: number } | null>(null);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string; caption: string } | null>(null);
   const [liveProducts, setLiveProducts] = useState<LocalProduct[]>([]);
+  const [liveCatalogLoaded, setLiveCatalogLoaded] = useState(false);
   const [productToCompose, setProductToCompose] = useState<LocalProduct | null>(null);
 
   useEffect(() => {
@@ -168,6 +169,7 @@ export default function CataloguePage() {
           menuOptions: normalizeMenuOptions(row.menu_options),
         }));
         setLiveProducts(products);
+        setLiveCatalogLoaded(true);
       });
     return () => { cancelled = true; };
   }, []);
@@ -197,6 +199,11 @@ export default function CataloguePage() {
       ids.add(product.id);
       catalogueKeys.add(key);
     };
+
+    // Supabase is the source of truth once the production catalogue has loaded.
+    // Static products are an offline fallback only: mixing both sources makes
+    // products hidden by an admin reappear publicly (for example Cabri).
+    if (liveCatalogLoaded) return products;
 
     for (const product of mockProducts.filter((item) => (
       !PUBLIC_HIDDEN_TRAITEURS.has(item.vendor) &&
@@ -232,7 +239,7 @@ export default function CataloguePage() {
     }
 
     return products;
-  }, [liveProducts]);
+  }, [liveCatalogLoaded, liveProducts]);
 
   const filteredProducts = useMemo(() => {
     const normalizedQuery = normalizeCommuneQuery(query.trim());
