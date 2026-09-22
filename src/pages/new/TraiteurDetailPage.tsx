@@ -10,6 +10,7 @@ import {
   MapPin,
   MessageCircle,
   ShoppingCart,
+  Star,
 } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
 import { BackBar } from '../../components/BackBar';
@@ -139,6 +140,7 @@ export function TraiteurDetailPage() {
     category: product.category,
     price: product.price ?? 0,
     image: product.image_url || undefined,
+    isSignature: product.is_signature,
   }));
   const menuItems = PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(traiteur.name)
     ? []
@@ -357,6 +359,7 @@ export function TraiteurDetailPage() {
                     key={`${traiteur.slug}-${item.name}`}
                     className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
                   >
+                    {'isSignature' in item && item.isSignature && <span className="absolute left-3 top-3 z-20 inline-flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1 text-xs font-black text-amber-950 shadow"><Star className="h-3.5 w-3.5 fill-current" /> Produit signature</span>}
                     <ProductThumbnail
                       src={item.image}
                       partnerImage={partnerFallback}

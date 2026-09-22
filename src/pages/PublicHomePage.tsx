@@ -251,6 +251,7 @@ function buildDemoCatalog(): CatalogState {
  stock_quantity: 10,
  zone_label: vendor.zone_label,
  available: product.available !== false,
+ is_signature: false,
  };
  });
 

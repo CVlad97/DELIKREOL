@@ -1,5 +1,5 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { CheckCircle2, ChefHat, Download, Eye, FileSpreadsheet, ImagePlus, Images, Loader2, Pencil, PlayCircle, Plus, Save, ShieldCheck, Sparkles, Store, Trash2, Upload } from 'lucide-react';
+import { CheckCircle2, ChefHat, Download, Eye, FileSpreadsheet, ImagePlus, Images, Loader2, Pencil, PlayCircle, Plus, Save, ShieldCheck, Sparkles, Star, Store, Trash2, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Layout } from '../../components/layout/Layout';
 import { useAuth } from '../../contexts/AuthContext';
@@ -35,6 +35,7 @@ type Product = {
   is_available: boolean;
   status: string;
   is_public: boolean;
+  is_signature: boolean;
   sides: string[] | null;
   menu_options: {
     appetizers?: string[];
@@ -74,7 +75,7 @@ const sauceChoices = [
 ];
 const condimentChoices = ['Piment frais', 'Pickles', 'Citron vert', 'Cive', 'Sans condiment'];
 const blankProduct = {
-  name: '', description: '', category: 'Plat', price: '', stock: '', imageUrl: '', available: true,
+  name: '', description: '', category: 'Plat', price: '', stock: '', imageUrl: '', available: true, signature: false,
   appetizers: '', sides: '', drinks: '', sauces: '', condiments: '', includedAppetizerCount: '0', includedSideCount: '1', includedDrinkCount: '1', includedSauceCount: '1', includedCondimentCount: '0',
 };
 const partnerTutorialImage = `${import.meta.env.BASE_URL}tutorials/tuto-ajouter-plat-delikreol.jpg`;
@@ -159,6 +160,7 @@ export default function PartnerCatalogPage() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingProduct, setSavingProduct] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [importingCatalog, setImportingCatalog] = useState(false);
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -235,7 +237,7 @@ export default function PartnerCatalogPage() {
         hero_image: currentVendor.hero_image || '',
       });
       const { data: productData, error: productError } = await supabase
-        .from('products').select('id,vendor_id,name,description,category,price,image_url,stock_quantity,is_available,status,is_public,sides,menu_options')
+        .from('products').select('id,vendor_id,name,description,category,price,image_url,stock_quantity,is_available,status,is_public,is_signature,sides,menu_options')
         .eq('vendor_id', currentVendor.id).order('created_at', { ascending: false });
       if (productError) throw productError;
       setProducts((productData || []) as Product[]);
@@ -309,6 +311,32 @@ export default function PartnerCatalogPage() {
     } finally {
       setUploading(false);
       event.target.value = '';
+    }
+  };
+
+  const uploadLogo = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file || !user) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) {
+      showError('Le logo doit être une image JPG, PNG ou WebP de 5 Mo maximum. Les PDF ne sont pas acceptés.');
+      return;
+    }
+    setUploadingLogo(true);
+    try {
+      const extension = file.name.split('.').pop()?.toLowerCase() || 'png';
+      const path = `${user.id}/logo-${crypto.randomUUID()}.${extension}`;
+      const { error } = await supabase.storage.from('product-photos').upload(path, file, { contentType: file.type, upsert: false });
+      if (error) throw error;
+      const { data } = supabase.storage.from('product-photos').getPublicUrl(path);
+      const { error: updateError } = await supabase.from('vendors').update({ logo_url: data.publicUrl }).eq('id', vendor?.id);
+      if (updateError) throw updateError;
+      showSuccess('Logo enregistré sur votre vitrine.');
+    } catch (error) {
+      console.error(error);
+      showError('Le logo n’a pas pu être envoyé.');
+    } finally {
+      setUploadingLogo(false);
     }
   };
 
@@ -418,6 +446,7 @@ export default function PartnerCatalogPage() {
         status: canPublishDirectly ? 'verified' : 'draft',
         is_public: canPublishDirectly,
         is_demo: false,
+        is_signature: product.signature,
         sides,
         menu_options: isMenu ? {
           appetizers, sides,
@@ -432,6 +461,14 @@ export default function PartnerCatalogPage() {
           instructions_enabled: true,
         } : null,
       };
+      if (product.signature) {
+        const { error: clearError } = await supabase
+          .from('products')
+          .update({ is_signature: false })
+          .eq('vendor_id', vendor.id)
+          .neq('id', editingId || '00000000-0000-0000-0000-000000000000');
+        if (clearError) throw clearError;
+      }
       const request = editingId
         ? supabase.from('products').update(payload).eq('id', editingId)
         : supabase.from('products').insert(payload);
@@ -461,6 +498,7 @@ export default function PartnerCatalogPage() {
       stock: item.stock_quantity == null ? '' : String(item.stock_quantity),
       imageUrl: item.image_url || '',
       available: item.is_available,
+      signature: item.is_signature,
       sides: (item.sides || []).join(', '),
       appetizers: (item.menu_options?.appetizers || []).join(', '),
       drinks: (item.menu_options?.drinks || []).join(', '),
@@ -542,6 +580,7 @@ export default function PartnerCatalogPage() {
               <label className="text-sm font-bold">WhatsApp<input value={profile.whatsapp} onChange={e=>setProfile({...profile,whatsapp:e.target.value})} className="mt-2 w-full rounded-xl border px-4 py-3" /></label>
               <label className="sm:col-span-2 text-sm font-bold">Description<textarea value={profile.description} onChange={e=>setProfile({...profile,description:e.target.value})} rows={4} className="mt-2 w-full rounded-xl border px-4 py-3" placeholder="Votre savoir-faire, vos produits locaux, votre promesse…" /></label>
               <label className="sm:col-span-2 text-sm font-bold">Votre histoire<textarea value={profile.story} onChange={e=>setProfile({...profile,story:e.target.value})} rows={3} className="mt-2 w-full rounded-xl border px-4 py-3" /></label>
+              <label className="sm:col-span-2 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-primary/40 bg-[#fff8ef] px-4 py-3 text-sm font-black text-primary"><ImagePlus className="h-4 w-4" />{uploadingLogo ? 'Envoi du logo…' : 'Ajouter ou remplacer mon logo'}<input type="file" accept="image/jpeg,image/png,image/webp" onChange={uploadLogo} disabled={uploadingLogo} className="hidden" /></label>
             </div>
             <button disabled={savingProfile} className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-[#1f6a4a] px-5 py-3 font-black text-white disabled:opacity-60"><Save className="h-4 w-4" />{savingProfile ? 'Enregistrement…' : 'Enregistrer mon profil'}</button>
           </form>
@@ -608,6 +647,7 @@ export default function PartnerCatalogPage() {
                 </div>
               </div>}
               <label className="flex items-center gap-3 rounded-xl bg-[#fff8ef] p-3 text-sm font-bold"><input type="checkbox" checked={product.available} onChange={e=>setProduct({...product,available:e.target.checked})} /> Disponible à la commande</label>
+              <label className="flex items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm font-bold text-amber-950"><input type="checkbox" checked={product.signature} onChange={e=>setProduct({...product,signature:e.target.checked})} className="h-5 w-5 accent-amber-500" /><Star className="h-5 w-5 fill-amber-400 text-amber-500" /> Mettre en avant comme produit signature (un seul par vitrine)</label>
               <div className="rounded-2xl border border-dashed border-primary/30 bg-[#fff8ef] p-4"><div className="flex flex-wrap items-center gap-3"><label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-black text-primary shadow-sm"><ImagePlus className="h-4 w-4" />{uploading ? 'Envoi…' : 'Choisir une photo'}<input type="file" accept="image/jpeg,image/png,image/webp" onChange={uploadImage} className="hidden" /></label>{product.imageUrl && <img src={product.imageUrl} alt="Aperçu" className="h-20 w-20 rounded-xl object-cover" />}</div></div>
               <div className="flex gap-2"><button disabled={savingProduct||uploading} className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-3 font-black text-white disabled:opacity-60"><Save className="h-4 w-4" />{savingProduct ? 'Enregistrement…' : editingId ? 'Enregistrer la modification' : canPublishDirectly ? 'Publier sur DELIKREOL' : 'Envoyer en validation'}</button>{editingId && <button type="button" onClick={()=>{setEditingId(null);setProduct(blankProduct);}} className="rounded-2xl border px-4 font-black">Annuler</button>}</div>
             </div>
@@ -616,7 +656,7 @@ export default function PartnerCatalogPage() {
 
         <section className="rounded-[2rem] border border-primary/20 bg-white p-6 shadow-soft"><div className="flex items-center justify-between"><div><h2 className="text-xl font-black">Ma carte</h2><p className="text-sm text-stone-500">Un statut « en contrôle » apparaît après chaque modification.</p></div><CheckCircle2 className="h-7 w-7 text-[#1f6a4a]" /></div>
           {products.length===0 ? <div className="mt-6 rounded-2xl border border-dashed p-8 text-center text-stone-500">Ajoutez votre premier plat pour donner vie à votre vitrine.</div> :
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{products.map(item=><article key={item.id} className="overflow-hidden rounded-2xl border bg-[#fffdfa]">{item.image_url ? <img src={item.image_url} alt={item.name} className="aspect-[4/3] w-full object-cover" /> : <div className="flex aspect-[4/3] items-center justify-center bg-[#f7ecdb]"><ChefHat className="h-10 w-10 text-primary/50" /></div>}<div className="p-4"><div className="flex justify-between gap-3"><div><h3 className="font-black">{item.name}</h3><p className="text-xs text-stone-500">{item.category}</p></div><strong className="text-primary">{Number(item.price).toFixed(2)} €</strong></div><p className="mt-2 line-clamp-2 text-sm text-stone-600">{item.description || 'Description à compléter'}</p><div className="mt-3 flex flex-wrap gap-2 text-[11px] font-black"><span className={`rounded-full px-2 py-1 ${item.is_available?'bg-emerald-100 text-emerald-800':'bg-stone-100 text-stone-600'}`}>{item.is_available?'Disponible':'En pause'}</span><span className="rounded-full bg-orange-100 px-2 py-1 text-orange-800">{item.is_public&&item.status==='verified'?'Publié':'En contrôle'}</span></div><div className="mt-4 flex gap-2"><button onClick={()=>editProduct(item)} className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#f7ecdb] px-3 py-2 text-xs font-black"><Pencil className="h-3.5 w-3.5" /> Modifier</button><button onClick={()=>void removeProduct(item)} aria-label={`Supprimer ${item.name}`} className="rounded-xl bg-red-50 p-2 text-red-700"><Trash2 className="h-4 w-4" /></button></div></div></article>)}</div>}
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{products.map(item=><article key={item.id} className="relative overflow-hidden rounded-2xl border bg-[#fffdfa]">{item.is_signature && <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1 text-xs font-black text-amber-950 shadow"><Star className="h-3.5 w-3.5 fill-current" /> Produit signature</span>}{item.image_url ? <img src={item.image_url} alt={item.name} className="aspect-[4/3] w-full object-cover" /> : <div className="flex aspect-[4/3] items-center justify-center bg-[#f7ecdb]"><ChefHat className="h-10 w-10 text-primary/50" /></div>}<div className="p-4"><div className="flex justify-between gap-3"><div><h3 className="font-black">{item.name}</h3><p className="text-xs text-stone-500">{item.category}</p></div><strong className="text-primary">{Number(item.price).toFixed(2)} €</strong></div><p className="mt-2 line-clamp-2 text-sm text-stone-600">{item.description || 'Description à compléter'}</p><div className="mt-3 flex flex-wrap gap-2 text-[11px] font-black"><span className={`rounded-full px-2 py-1 ${item.is_available?'bg-emerald-100 text-emerald-800':'bg-stone-100 text-stone-600'}`}>{item.is_available?'Disponible':'En pause'}</span><span className="rounded-full bg-orange-100 px-2 py-1 text-orange-800">{item.is_public&&item.status==='verified'?'Publié':'En contrôle'}</span></div><div className="mt-4 flex gap-2"><button onClick={()=>editProduct(item)} className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#f7ecdb] px-3 py-2 text-xs font-black"><Pencil className="h-3.5 w-3.5" /> Modifier</button><button onClick={()=>void removeProduct(item)} aria-label={`Supprimer ${item.name}`} className="rounded-xl bg-red-50 p-2 text-red-700"><Trash2 className="h-4 w-4" /></button></div></div></article>)}</div>}
         </section>
       </div>
     </main></Layout>

@@ -51,6 +51,7 @@ export type PublicProductRow = {
   is_demo?: boolean | string | null;
   status?: string | null;
   created_at?: string | null;
+  is_signature?: boolean | string | null;
 };
 
 export type PublicCatalogProduct = {
@@ -68,6 +69,7 @@ export type PublicCatalogProduct = {
   stock_quantity: number | null;
   zone_label: string;
   available: boolean;
+  is_signature: boolean;
 };
 
 export type PublicCatalogVendor = {
@@ -196,6 +198,7 @@ function normalizeProduct(row: PublicProductRow, vendor: PublicCatalogVendor): P
     stock_quantity: row.stock_quantity == null ? null : numberOr(row.stock_quantity, 0),
     zone_label: vendor.zone_label,
     available: true,
+    is_signature: truthy(row.is_signature),
   };
 }
 
@@ -233,6 +236,7 @@ function buildPilotProduct(seed: PilotVendorSeed, vendor: PublicCatalogVendor, i
     stock_quantity: null,
     zone_label: vendor.zone_label,
     available: false,
+    is_signature: false,
   };
 }
 

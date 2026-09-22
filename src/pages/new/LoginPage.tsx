@@ -35,19 +35,13 @@ export default function LoginPage() {
   const [message, setMessage] = useState('');
   const [params] = useSearchParams();
   const navigate = useNavigate();
-  const { user, loading, signIn, refreshProfile } = useAuth();
+  const { user, signIn, refreshProfile } = useAuth();
   const next = sanitizeAuthNext(params.get('next') || params.get('redirect'));
   const mode = useMemo<LoginMode>(() => {
     const requestedMode = params.get('mode') as LoginMode | null;
     return requestedMode && passwordModes.includes(requestedMode) ? requestedMode : 'password';
   }, [params]);
   const isSettingPassword = mode === 'set-password';
-
-  useEffect(() => {
-    if (!loading && user && !isSettingPassword) {
-      navigate(next, { replace: true });
-    }
-  }, [isSettingPassword, loading, navigate, next, user]);
 
   async function handleMagicLink(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
