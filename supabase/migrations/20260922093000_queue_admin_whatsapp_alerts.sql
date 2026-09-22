@@ -37,6 +37,7 @@ end;
 $$;
 
 revoke all on function public.queue_admin_whatsapp_alert() from public;
+revoke execute on function public.queue_admin_whatsapp_alert() from anon, authenticated;
 
 drop trigger if exists queue_admin_whatsapp_order on public.orders;
 create trigger queue_admin_whatsapp_order after insert on public.orders
