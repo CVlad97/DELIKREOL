@@ -331,12 +331,19 @@ Merci, l’équipe DELIKREOL` : '';
   };
 
   const toggleAvailability = async (p: CatalogProduct) => {
-    const { error } = await supabase.from('products').update({ is_available: !p.is_available }).eq('id', p.id);
-    if (error) {
-      showError('Erreur de mise a jour');
+    const nextAvailability = !p.is_available;
+    const { data, error } = await supabase
+      .from('products')
+      .update({ is_available: nextAvailability })
+      .eq('id', p.id)
+      .select('id,is_available')
+      .maybeSingle();
+    if (error || !data) {
+      showError(error?.message || 'La disponibilité n’a pas été enregistrée');
       return;
     }
-    setProducts(prev => prev.map(prod => prod.id === p.id ? { ...prod, is_available: !prod.is_available } : prod));
+    setProducts(prev => prev.map(prod => prod.id === p.id ? { ...prod, is_available: nextAvailability } : prod));
+    showSuccess(nextAvailability ? 'Produit disponible à la commande' : 'Produit rendu indisponible');
   };
 
   const togglePublication = async (p: CatalogProduct) => {
@@ -488,9 +495,9 @@ Merci, l’équipe DELIKREOL` : '';
                         {p.image_url ? (
                           <ImagePreview src={p.image_url} alt={`Photo de ${p.name}`} className="h-14 w-14 shrink-0 rounded-xl border border-border" imgClassName="h-full w-full object-cover" />
                         ) : (
-                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-border bg-muted" title="Aucune photo">
+                          <button type="button" onClick={() => openEdit(p)} className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-amber-300 bg-amber-50 transition hover:bg-amber-100" title="Ajouter une photo">
                             <ImagePlus className="h-5 w-5 text-muted-foreground" />
-                          </div>
+                          </button>
                         )}
                         <div className="min-w-0">
                           <div className="font-bold text-foreground text-sm">{p.name}</div>
@@ -513,16 +520,14 @@ Merci, l’équipe DELIKREOL` : '';
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <button onClick={() => void togglePublication(p)} className={`rounded-full px-3 py-1 text-xs font-black ${p.is_public && p.status === 'verified' ? 'bg-success/15 text-success' : 'bg-amber-100 text-amber-800'}`}>
-                        {p.is_public && p.status === 'verified' ? 'En ligne' : 'Publier'}
+                      <button onClick={() => void toggleAvailability(p)} className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-black ${p.is_available ? 'bg-success/15 text-success' : 'bg-stone-100 text-stone-600'}`}>
+                        {p.is_available ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
+                        {p.is_available ? 'Disponible' : 'Indisponible'}
                       </button>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <button onClick={() => toggleAvailability(p)} className="inline-flex">
-                        {p.is_available
-                          ? <ToggleRight className="w-6 h-6 text-success" />
-                          : <ToggleLeft className="w-6 h-6 text-muted-foreground" />
-                        }
+                      <button onClick={() => void togglePublication(p)} className={`rounded-full px-3 py-1 text-xs font-black ${p.is_public && p.status === 'verified' ? 'bg-success/15 text-success' : 'bg-amber-100 text-amber-800'}`}>
+                        {p.is_public && p.status === 'verified' ? 'En ligne' : 'Publier'}
                       </button>
                     </td>
                     <td className="px-4 py-3 text-right">
