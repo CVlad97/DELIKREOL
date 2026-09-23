@@ -37,6 +37,7 @@ const TraiteurDetailPage = lazy(() => import('./pages/new/TraiteurDetailPage'));
 const AccountPage = lazy(() => import('./pages/new/ClientAccountPage'));
 const CartPage = lazy(() => import('./pages/new/CartPage'));
 const DevisPage = lazy(() => import('./pages/new/DevisPage'));
+const ApprovisionnementPage = lazy(() => import('./pages/new/ApprovisionnementPage'));
 const DevenirPartenairePage = lazy(() => import('./pages/new/DevenirPartenairePage'));
 const DemoPage = lazy(() => import('./pages/new/DemoPage'));
 const DemoMode = lazy(() => import('./pages/DemoMode'));
@@ -218,6 +219,7 @@ export function AppRouter() {
                   <Route path="panier" element={<CartPage />} />
                   <Route path="compte" element={<AccountPage />} />
                   <Route path="devis" element={<DevisPage />} />
+                  <Route path="approvisionnement" element={<ApprovisionnementPage />} />
                   <Route path="devenir-partenaire" element={<DevenirPartenairePage />} />
                   <Route path="marches-publics" element={<MarchesPublicsPage />} />
                   <Route path="comptabilite" element={<ComptabilitePage />} />
