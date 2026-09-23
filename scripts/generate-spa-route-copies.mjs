@@ -12,6 +12,7 @@ const routes = [
   'panier',
   'compte',
   'devis',
+  'approvisionnement',
   'devenir-partenaire',
   'marches-publics',
   'comptabilite',
