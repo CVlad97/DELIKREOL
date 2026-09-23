@@ -435,6 +435,32 @@ export default function HomePage() {
             </section>
           </section>
 
+          <section className="mt-8 overflow-hidden rounded-[2rem] bg-[#173f32] p-6 text-white shadow-lg sm:p-8">
+            <div className="grid gap-6 lg:grid-cols-[1.3fr_.7fr] lg:items-center">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[.2em] text-emerald-200">Approvisionnement local — pilote KopéAgri</p>
+                <h2 className="mt-2 text-3xl font-black sm:text-4xl">Du producteur au traiteur, avec une origine mieux tracée</h2>
+                <p className="mt-3 max-w-3xl text-base font-semibold leading-relaxed text-emerald-50/90">
+                  DELIKREOL teste sa complémentarité avec KopéAgri & Pêche Caraïbes pour aider les traiteurs à identifier des produits locaux disponibles, rapprocher les volumes et organiser progressivement collecte, traçabilité et approvisionnement.
+                </p>
+                <div className="mt-5 flex flex-wrap gap-2 text-sm font-bold">
+                  <span className="rounded-full bg-white/10 px-4 py-2">🌱 Producteurs & pêcheurs</span>
+                  <span className="rounded-full bg-white/10 px-4 py-2">📦 Lots & volumes</span>
+                  <span className="rounded-full bg-white/10 px-4 py-2">🔎 Traçabilité</span>
+                  <span className="rounded-full bg-white/10 px-4 py-2">🥘 Débouché traiteurs</span>
+                </div>
+              </div>
+              <div className="rounded-[1.5rem] bg-white p-5 text-[#173f32]">
+                <p className="text-xs font-black uppercase tracking-widest text-[#09614f]">Circuit pilote</p>
+                <p className="mt-3 font-black">Producteur → KopéAgri → Traiteur DELIKREOL → Client</p>
+                <p className="mt-2 text-sm font-semibold text-[#5c6f66]">Les conditions commerciales, sanitaires, logistiques et contractuelles doivent être validées avant généralisation.</p>
+                <a href="https://cvlad97.github.io/kopeagri-caraibes/" target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#09614f] px-5 py-3 text-sm font-black text-white">
+                  Découvrir KopéAgri <ArrowRight className="h-4 w-4" />
+                </a>
+              </div>
+            </div>
+          </section>
+
           <section className="mt-8 grid gap-4 rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 md:grid-cols-3">
             <div className="flex items-start gap-3">
               <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-orange-100 text-[#cc460f]"><ShoppingBag className="h-6 w-6" /></span>
