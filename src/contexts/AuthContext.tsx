@@ -3,6 +3,7 @@ import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase, Profile, isDemoMode } from '../lib/supabase';
 
 const normalizeEmail = (email?: string | null) => email?.trim().toLowerCase() || '';
+const partnerUserTypes = new Set(['vendor', 'driver', 'relay_host', 'admin']);
 
 function buildProfileFromUser(user: User): Omit<Profile, 'created_at'> {
   const email = normalizeEmail(user.email);
@@ -64,6 +65,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .maybeSingle();
 
       if (!error && data) {
+        // Older profiles sometimes kept the partner role in `role` while the
+        // UI only read `user_type`. Normalize both shapes so a valid partner
+        // session never falls back to the customer screen.
+        const storedRole = data.user_type || (data as typeof data & { role?: Profile['user_type'] }).role;
+        if (storedRole && partnerUserTypes.has(storedRole)) {
+          setProfile({ ...data, user_type: storedRole });
+          return;
+        }
+
+        // A profile may still say "customer" even though the account is
+        // already securely linked to a partner row. Resolve ownership before
+        // accepting that stale role.
+        const partnerLookups = await Promise.all([
+          supabase.from('vendors').select('id, name, email').eq('user_id', authUser.id).limit(1).maybeSingle(),
+          supabase.from('drivers').select('id').eq('user_id', authUser.id).limit(1).maybeSingle(),
+          supabase.from('relay_points').select('id').eq('user_id', authUser.id).limit(1).maybeSingle(),
+        ]);
+        const linkedVendor = partnerLookups[0].data;
+        const linkedRole: Profile['user_type'] | null = linkedVendor
+          ? 'vendor'
+          : partnerLookups[1].data
+            ? 'driver'
+            : partnerLookups[2].data
+              ? 'relay_host'
+              : null;
+
+        if (linkedRole) {
+          setProfile({ ...data, user_type: linkedRole });
+          return;
+        }
+
         setProfile(data);
       } else {
         if (error) {
@@ -311,12 +343,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    setLoading(true);
+    setProfile(null);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-    return { error };
+    if (error || !data.user || !data.session) {
+      setLoading(false);
+      return { error };
+    }
+
+    // Do not redirect until the authenticated user's partner role is loaded.
+    // This prevents the protected route from rendering with a stale customer
+    // profile while onAuthStateChange is still running in the background.
+    setSession(data.session);
+    setUser(data.user);
+    await fetchProfile(data.user);
+    setLoading(false);
+    return { error: null };
   };
 
   const signOut = async () => {
