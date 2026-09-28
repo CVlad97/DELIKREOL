@@ -66,20 +66,26 @@ export function WhatsAppManager() {
  };
 
  const loadStats = async () => {
- const [totalRes, sessionsRes, recentRes] = await Promise.all([
+ const [totalRes, recentRes, conversationRes] = await Promise.all([
  supabase.from('whatsapp_messages').select('id', { count:'exact', head: true }),
- supabase.from('whatsapp_sessions').select('id', { count:'exact', head: true }),
  supabase
  .from('whatsapp_messages')
  .select('id', { count:'exact', head: true })
  .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
+ supabase.from('whatsapp_messages').select('from_number,to_number,direction').limit(1000),
  ]);
+
+ const activeConversations = new Set(
+ (conversationRes.data || [])
+ .map((msg) => msg.direction ==='inbound' ? msg.from_number : msg.to_number)
+ .filter(Boolean)
+ ).size;
 
  setStats({
  totalMessages: totalRes.count || 0,
- activeSessions: sessionsRes.count || 0,
+ activeSessions: activeConversations,
  messagesLast24h: recentRes.count || 0,
- avgResponseTime: 2.5,
+ avgResponseTime: 0,
  });
  };
 
@@ -152,7 +158,7 @@ export function WhatsAppManager() {
  <Users className="w-8 h-8 text-blue-600" />
  <span className="text-2xl font-bold text-foreground">{stats.activeSessions}</span>
  </div>
- <p className="text-sm text-muted-foreground">Sessions actives</p>
+ <p className="text-sm text-muted-foreground">Conversations</p>
  </div>
 
  <div className="bg-white rounded-xl shadow-md p-6">
@@ -166,9 +172,9 @@ export function WhatsAppManager() {
  <div className="bg-white rounded-xl shadow-md p-6">
  <div className="flex items-center justify-between mb-2">
  <Clock className="w-8 h-8 text-purple-600" />
- <span className="text-2xl font-bold text-foreground">{stats.avgResponseTime}min</span>
+ <span className="text-2xl font-bold text-foreground">V2</span>
  </div>
- <p className="text-sm text-muted-foreground">Temps de réponse</p>
+ <p className="text-sm text-muted-foreground">Gateway sécurisée</p>
  </div>
  </div>
 
@@ -252,7 +258,7 @@ export function WhatsAppManager() {
  <div className="flex gap-2">
  <input
  type="text"
- placeholder="Réponse automatique uniquement..."
+ placeholder="Envoi activé après connexion Meta Cloud API"
  className="flex-1 px-4 py-2 border border-input rounded-lg bg-muted"
  disabled
  />
@@ -264,7 +270,7 @@ export function WhatsAppManager() {
  </button>
  </div>
  <p className="text-xs text-muted-foreground mt-2">
- Les réponses sont gérées automatiquement par le bot WhatsApp
+ Réception et historique prêts. Envoi automatique désactivé tant que Meta Cloud API n’est pas activée.
  </p>
  </div>
  </>
@@ -284,16 +290,15 @@ export function WhatsAppManager() {
  <h3 className="font-bold text-blue-900 mb-2">Configuration WhatsApp Business</h3>
  <div className="space-y-2 text-sm text-blue-800">
  <p>
- <strong>Webhook URL:</strong>{''}
- <code className="bg-white px-2 py-1 rounded">
- {`${window.location.origin}/functions/v1/whatsapp-webhook`}
+ <strong>Webhook URL :</strong>{' '}
+ <code className="bg-white px-2 py-1 rounded break-all">
+ https://boihlgodmclljtckhmgz.supabase.co/functions/v1/whatsapp-webhook
  </code>
  </p>
- <p>
- <strong>Verify Token:</strong> delikreol_2024
- </p>
+ <p><strong>Verify Token :</strong> stocké sur le VPS, non affiché dans l’interface.</p>
+ <p><strong>État :</strong> passerelle installée · identifiants Meta requis pour activer l’envoi et la réception signée.</p>
  <p className="text-xs text-blue-600 mt-2">
- Configurez ces paramètres dans votre compte Meta Business Suite
+ Aucun token Meta n’est stocké dans le dépôt ou envoyé au navigateur.
  </p>
  </div>
  </div>
