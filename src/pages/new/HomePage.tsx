@@ -196,9 +196,10 @@ export default function HomePage() {
         <div className="relative min-h-[560px] border-b border-orange-100">
           <img
             src={publicAsset('branding/hero-tropical.png')}
-            alt="Plat créole local en Martinique"
+            alt="Livraison DeliKreol — plat créole local en Martinique"
             className="absolute inset-0 z-0 h-full w-full object-cover object-center"
             loading="eager"
+            fetchPriority="high"
           />
           <div className="absolute inset-0 z-10 bg-[linear-gradient(90deg,rgba(255,248,237,0.98)_0%,rgba(255,248,237,0.92)_42%,rgba(255,248,237,0.38)_72%,rgba(255,248,237,0.2)_100%)]" />
           <div className="absolute inset-x-0 bottom-0 z-10 h-32 bg-gradient-to-t from-[#fff8ed] to-transparent" />
@@ -236,14 +237,13 @@ export default function HomePage() {
                   </select>
                 </label>
 
-                <button
-                  type="button"
-                  onClick={goToCatalogue}
+                <Link
+                  to={`/catalogue${selectedCommune ? `?commune=${encodeURIComponent(selectedCommune)}` : ''}`}
                   className="inline-flex items-center justify-center gap-3 rounded-[1.5rem] bg-[#cc460f] px-7 py-4 text-base font-black text-white shadow-lg shadow-orange-900/20 transition hover:-translate-y-0.5 hover:bg-[#b83d0c]"
                 >
                   Commander maintenant
                   <ArrowRight className="h-5 w-5" aria-hidden="true" />
-                </button>
+                </Link>
 
                 <button
                   type="button"

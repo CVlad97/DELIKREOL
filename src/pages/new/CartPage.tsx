@@ -472,8 +472,10 @@ export default function CartPage() {
  saveLocal();
  }
  } catch (err) {
- console.warn('[DELIKREOL] Échec Supabase, fallback localStorage:', err);
- saveLocal();
+ console.error('[DELIKREOL] Échec enregistrement Supabase:', err);
+ setCheckoutStatus('error');
+ showError("La commande n'a pas pu être enregistrée. Votre panier est conservé : réessayez dans un instant.");
+ return;
  }
 
  const confirmedWhatsappText = buildWhatsAppOrderMessage({

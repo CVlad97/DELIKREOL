@@ -83,17 +83,10 @@ test.describe('Accès admin et partenaires', () => {
     await expect(page.getByRole('heading', { name: /Mes documents/i })).toBeVisible();
   });
 
-  test('Google affiche une erreur claire en mode démo', async ({ page }) => {
-    await page.addInitScript(() => window.localStorage.setItem('delikreol_demo_override', 'true'));
+  test('connexion partenaire reste simple sans Google', async ({ page }) => {
     await page.goto('/connexion?next=/admin');
-    await page.getByRole('button', { name: /Continuer avec Google/i }).click();
-    await expect(page.getByText(/Connexion Google indisponible sans Supabase/i)).toBeVisible();
-  });
-
-  test('Google indisponible affiche un message local sans quitter le site', async ({ page }) => {
-    await page.goto('/connexion?next=/admin');
-    await page.getByRole('button', { name: /Continuer avec Google/i }).click();
-    await expect(page).toHaveURL(/\/connexion/);
-    await expect(page.getByText(/Connexion Google (indisponible sans Supabase|en cours de configuration)/i)).toBeVisible();
+    await expect(page.getByRole('button', { name: /Continuer avec Google/i })).toHaveCount(0);
+    await expect(page.getByLabel(/Email/i)).toBeVisible();
+    await expect(page.getByLabel(/Mot de passe/i)).toBeVisible();
   });
 });
