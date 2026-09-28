@@ -33,6 +33,7 @@ const routes = [
   'inscription-traiteur',
   'pro',
   'espace-partenaire',
+  'espace-partenaire/commandes',
   'espace-livreur',
   'partner-documents',
   'partenaires-plateforme',
