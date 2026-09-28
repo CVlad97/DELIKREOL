@@ -25,7 +25,7 @@ type RelayRow = {
   latitude?: number;
   longitude?: number;
   capacity?: number;
-  current_load?: number;
+  current_capacity_used?: number;
   current_location?: Coords | null;
 };
 
@@ -69,7 +69,7 @@ export function DeliveryAvailability({ commune, coords }: Props) {
     setStatus('loading');
     Promise.all([
       supabase.from('drivers').select('is_available,is_active,status,commune,latitude,longitude,current_location,max_radius_km'),
-      supabase.from('relay_points').select('name,is_active,status,commune,latitude,longitude,capacity,current_load'),
+      supabase.from('relay_points').select('name,is_active,status,commune,latitude,longitude,capacity,current_capacity_used'),
     ]).then(([driverResult, relayResult]) => {
       if (cancelled) return;
       const availableDrivers = (driverResult.data || []).filter((row) =>
@@ -78,7 +78,7 @@ export function DeliveryAvailability({ commune, coords }: Props) {
       ) as DriverRow[];
       const availableRelays = (relayResult.data || []).filter((row) =>
         row.is_active !== false && (!row.status || ['available', 'actif', 'active'].includes(row.status)) &&
-        (row.capacity == null || (row.current_load || 0) < row.capacity)
+        (row.capacity == null || (row.current_capacity_used || 0) < row.capacity)
       ) as RelayRow[];
       const nearbyDrivers = availableDrivers.filter((row) =>
         isNear(row, commune, coords, row.max_radius_km || 15)
