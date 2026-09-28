@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AlertCircle, CheckCircle2, ChefHat, Loader, PackageCheck, RefreshCw, XCircle } from 'lucide-react';
+import { AlertCircle, Bell, BellOff, CheckCircle2, ChefHat, Loader, PackageCheck, RefreshCw, XCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../contexts/ToastContext';
 import { formatMenuSelection, type MenuSelection } from '../../types/menu';
+import { disableVendorPush, enableVendorPush, refreshVendorPushStatus, type VendorPushStatus } from '../../services/vendorPush';
 
 interface VendorOrderLine {
   id: string;
@@ -37,6 +38,8 @@ export function VendorOrders() {
   const [loading, setLoading] = useState(true);
   const [queryError, setQueryError] = useState('');
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
+  const [pushStatus, setPushStatus] = useState<VendorPushStatus>('default');
+  const [pushBusy, setPushBusy] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -52,6 +55,32 @@ export function VendorOrders() {
   }, []);
 
   useEffect(() => { void load(); }, [load]);
+
+  useEffect(() => {
+    let active = true;
+    refreshVendorPushStatus().then((status) => { if (active) setPushStatus(status); }).catch(() => undefined);
+    return () => { active = false; };
+  }, []);
+
+  const togglePush = async () => {
+    try {
+      setPushBusy(true);
+      if (pushStatus === 'subscribed') {
+        await disableVendorPush();
+        setPushStatus(await refreshVendorPushStatus());
+        showSuccess('Alertes commandes désactivées sur cet appareil.');
+      } else {
+        await enableVendorPush();
+        setPushStatus('subscribed');
+        showSuccess('Alertes commandes activées sur ce téléphone.');
+      }
+    } catch (error) {
+      showError(error instanceof Error ? error.message : 'Impossible de modifier les notifications.');
+      setPushStatus(await refreshVendorPushStatus().catch(() => pushStatus));
+    } finally {
+      setPushBusy(false);
+    }
+  };
 
   const orders = useMemo(() => {
     const grouped = new Map<string, VendorOrder>();
@@ -92,7 +121,13 @@ export function VendorOrders() {
     <main className="mx-auto min-h-screen max-w-5xl px-4 pb-28 pt-8">
       <div className="mb-6 flex items-center justify-between gap-3">
         <div><h1 className="text-2xl font-black">Commandes à préparer</h1><p className="text-sm text-muted-foreground">Uniquement les commandes de votre établissement.</p></div>
-        <button type="button" onClick={() => void load()} className="rounded-xl border bg-white p-3" aria-label="Actualiser"><RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} /></button>
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={() => void togglePush()} disabled={pushBusy || pushStatus === 'unsupported'} className="inline-flex items-center gap-2 rounded-xl border bg-white px-3 py-3 text-xs font-black disabled:opacity-50" aria-label="Notifications commandes">
+            {pushStatus === 'subscribed' ? <Bell className="h-5 w-5 text-success" /> : <BellOff className="h-5 w-5" />}
+            <span className="hidden sm:inline">{pushStatus === 'subscribed' ? 'Alertes actives' : pushStatus === 'denied' ? 'Notifications bloquées' : 'Activer les alertes'}</span>
+          </button>
+          <button type="button" onClick={() => void load()} className="rounded-xl border bg-white p-3" aria-label="Actualiser"><RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} /></button>
+        </div>
       </div>
       {loading && <div className="flex justify-center py-16"><Loader className="h-6 w-6 animate-spin" /></div>}
       {!loading && queryError && <div className="flex gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700"><AlertCircle className="h-5 w-5 shrink-0" /><span>Commandes indisponibles : {queryError}</span></div>}

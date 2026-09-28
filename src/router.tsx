@@ -66,6 +66,10 @@ const PartnerDashboardPage = lazy(async () => {
   const module = await import('./pages/PartnerDashboardPage');
   return { default: module.PartnerDashboardPage };
 });
+const VendorOrdersPage = lazy(async () => {
+  const module = await import('./pages/vendor/VendorOrders');
+  return { default: module.VendorOrders };
+});
 
 const basePath = import.meta.env.VITE_BASE_PATH || import.meta.env.BASE_URL || '/';
 const routerBaseName = basePath === '/' ? undefined : basePath.replace(/\/$/, '');
@@ -245,6 +249,7 @@ export function AppRouter() {
                   <Route path="partenaire" element={<PartnerAccessPage />} />
                   <Route path="catalogue-partenaire" element={<PartnerCatalogPage />} />
                   <Route path="espace-partenaire" element={<PartnerWrapper />} />
+                  <Route path="espace-partenaire/commandes" element={<ProtectedPartnerRoute><Suspense fallback={<PageLoader />}><VendorOrdersPage /></Suspense></ProtectedPartnerRoute>} />
                   <Route path="espace-livreur" element={<PartnerWrapper />} />
                   <Route path="espace-relais" element={<PartnerWrapper />} />
                   <Route path="partner-documents" element={<PartnerWrapper />} />

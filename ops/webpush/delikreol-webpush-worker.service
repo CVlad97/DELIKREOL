@@ -1,0 +1,19 @@
+[Unit]
+Description=DELIKREOL vendor Web Push worker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/delikreol-webpush-worker
+ExecStart=/usr/bin/node /opt/delikreol-webpush-worker/worker.mjs
+Restart=always
+RestartSec=5
+User=root
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target
