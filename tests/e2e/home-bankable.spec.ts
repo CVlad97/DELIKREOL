@@ -18,7 +18,7 @@ for (const viewport of viewports) {
     ));
     expect(hasHorizontalOverflow).toBe(false);
 
-    const catalogueLink = page.getByRole('link', { name: /Catalogue complet/i });
+    const catalogueLink = page.getByRole('link', { name: /Commander maintenant/i }).first();
     await expect(catalogueLink).toBeVisible();
     const catalogueBox = await catalogueLink.boundingBox();
     expect(catalogueBox).not.toBeNull();
@@ -26,7 +26,7 @@ for (const viewport of viewports) {
     expect(catalogueBox!.x + catalogueBox!.width).toBeLessThanOrEqual(viewport.width + 1);
 
     const productSection = page.locator('section').filter({ hasText: /À commander maintenant/i }).first();
-    const firstCard = productSection.locator('a').first();
+    const firstCard = productSection.getByRole('button', { name: /Commander /i }).first();
     const firstCardBox = await firstCard.boundingBox();
     expect(firstCardBox).not.toBeNull();
     expect(firstCardBox!.x).toBeGreaterThanOrEqual(0);

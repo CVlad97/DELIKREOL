@@ -271,7 +271,10 @@ export function ProDashboard({ onNavigate }: { onNavigate?: (view: string) => vo
  <h3 className="font-black text-[#2f1911]">{card.title}</h3>
  </div>
  <div className="mb-4 text-4xl font-black text-[#1f6a4a]">{card.value}</div>
- <button className="w-full rounded-2xl bg-[#7a2f22] px-4 py-3 text-sm font-black text-white transition hover:bg-[#642519]">
+ <button
+ onClick={() => { if (userType === 'vendor') onNavigate?.('orders'); }}
+ className="w-full rounded-2xl bg-[#7a2f22] px-4 py-3 text-sm font-black text-white transition hover:bg-[#642519]"
+ >
  {card.actionLabel}
  </button>
  </div>

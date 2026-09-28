@@ -104,10 +104,10 @@ export function Header() {
   const { t } = useTranslation();
   const localizedPrimaryNavItems = primaryNavItems.map((item) => ({
     ...item,
-    label: item.to === '/catalogue' ? t('nav.catalog')
-      : item.to === '/traiteurs' ? t('nav.traiteurs')
-        : item.to === '/actualites' ? 'Actualités'
-          : item.to === '/devenir-partenaire' ? t('nav.partner')
+    label: item.label === 'Catalogue' ? t('nav.catalog')
+      : item.label === 'Traiteurs' ? t('nav.traiteurs')
+        : item.label === 'Actualités' ? 'Actualités'
+          : item.label === 'Partenaire' ? t('nav.partner')
             : t('home.hero_cta'),
   }));
 
@@ -177,7 +177,7 @@ export function Header() {
   );
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border-strong/50 bg-background/95 shadow-sm backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-border-strong/50 bg-background shadow-sm">
       <div className="madras-strip" />
 
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
@@ -243,7 +243,7 @@ export function Header() {
               const active = isActive(item);
               return (
                 <Link
-                  key={item.to}
+                  key={`${item.label}:${item.to}`}
                   to={item.to}
                   aria-current={active ? 'page' : undefined}
                   className={`flex min-h-10 items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
@@ -339,7 +339,7 @@ export function Header() {
                 const active = isActive(item);
                 return (
                   <Link
-                    key={item.to}
+                    key={`${item.label}:${item.to}`}
                     to={item.to}
                     aria-current={active ? 'page' : undefined}
                     className={`flex min-h-12 items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${

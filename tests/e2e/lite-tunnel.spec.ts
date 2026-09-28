@@ -11,17 +11,30 @@ test('public home: hero CTA opens catalogue and product can be added', async ({ 
   await catalogueCta.click();
 
   await expect(page).toHaveURL(/\/catalogue/);
-  await expect(page.getByRole('heading', { name: 'Catalogue' })).toBeVisible();
+    const cookieAccept = page.getByRole('button', { name: /Tout accepter/i });
+    if (await cookieAccept.isVisible()) await cookieAccept.click();
+  await expect(page.getByRole('heading', { name: 'Catalogue' }).first()).toBeVisible();
 
   const addButton = page.getByRole('button', { name: /Ajouter/i }).first();
   await expect(addButton).toBeVisible({ timeout: 15000 });
   await addButton.click();
-  await expect(page.getByText(/ajouté au panier/i).first()).toBeVisible();
+
+  const dialog = page.getByRole('dialog');
+  if (await dialog.isVisible()) {
+    const groups = dialog.getByRole('group');
+    for (let index = 0; index < await groups.count(); index += 1) {
+      const checkboxes = groups.nth(index).getByRole('checkbox');
+      if (await checkboxes.count()) await checkboxes.first().check();
+    }
+    await dialog.getByRole('button', { name: /Ajouter au panier/i }).click();
+  }
+
+  await expect(page.getByRole('link', { name: /Panier, 1 article/i })).toBeVisible();
 });
 
 test('catalogue: search and filters render', async ({ page }) => {
   await page.goto('/catalogue');
-  await expect(page.getByRole('heading', { name: 'Catalogue' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Catalogue' }).first()).toBeVisible();
   await expect(
     page.getByPlaceholder(/Rechercher un plat, (un )?traiteur ou (une )?commune/i)
   ).toBeVisible();
