@@ -9,6 +9,20 @@ function read(path: string) {
 }
 
 describe('backend production hardening', () => {
+  it('keeps public checkout gateway aligned with in-function hardening', () => {
+    const config = read('supabase/config.toml');
+    const source = read('supabase/functions/checkout-order/index.ts');
+
+    expect(config).toMatch(/\[functions\.checkout-order\][\s\S]*?verify_jwt\s*=\s*false/);
+    expect(source).toContain('MAX_BODY_BYTES = 16_384');
+    expect(source).toContain('MAX_ITEMS = 25');
+    expect(source).toContain('consume_checkout_rate_limit');
+    expect(source).toContain('if (Number(data || 0) > 20)');
+    expect(source).toContain('create_checkout_order_atomic');
+    expect(source).toContain('isProductSellable');
+    expect(source).toContain('isVendorSellable');
+  });
+
   it('keeps checkout-order server-side priced and single-vendor', () => {
     const source = read('supabase/functions/checkout-order/index.ts');
 

@@ -39,7 +39,7 @@ Toutes les tables métier ont des policies RLS :
 - `create-payment-intent` : `verify_jwt: true`
 - `stripe-connect-onboard` : `verify_jwt: true`
 - `stripe-payout` : `verify_jwt: true`
-- `checkout-order` : authentifié
+- `checkout-order` : `verify_jwt: false` — checkout public ; contrôles serveur stricts + rate-limit + idempotence
 - `qonto-finance` : admin uniquement
 
 ### Frontend
