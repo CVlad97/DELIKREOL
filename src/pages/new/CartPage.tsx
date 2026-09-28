@@ -57,6 +57,8 @@ interface CartItem extends Product {
 const WHATSAPP_NUMBER ='596696653589';
 const CHECKOUT_IDEMPOTENCY_STORAGE_KEY = 'delikreol_checkout_idempotency_v1';
 const LAST_WHATSAPP_ORDER_STORAGE_KEY = 'delikreol_last_whatsapp_order_v1';
+const RELAY_POINTS_ENABLED = import.meta.env.VITE_ENABLE_RELAY_POINTS === 'true';
+const LIVE_DELIVERY_ENABLED = import.meta.env.VITE_ENABLE_LIVE_DELIVERY === 'true';
 
 interface PreparedWhatsAppOrder {
  orderNumber: string;
@@ -1014,28 +1016,33 @@ export default function CartPage() {
  Retrait {total > 0 ? `${total.toFixed(2).replace('.',',')} €` :''}
  </button>
  <button
- onClick={() => setMode('relais')}
- className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
+ disabled={!RELAY_POINTS_ENABLED}
+ onClick={() => { if (RELAY_POINTS_ENABLED) setMode('relais'); }}
+ className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
  mode ==='relais'
  ?'bg-primary text-white shadow-md'
  :'bg-muted text-muted-foreground border border-input hover:border-primary/300'
  }`}
  >
  <Store className="w-4 h-4" />
- Relais +2,50€
+ {RELAY_POINTS_ENABLED ? 'Relais +2,50€' : 'Relais bientôt'}
  </button>
  <button
- onClick={() => setMode('livraison')}
- className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
+ disabled={!LIVE_DELIVERY_ENABLED}
+ onClick={() => { if (LIVE_DELIVERY_ENABLED) setMode('livraison'); }}
+ className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
  mode ==='livraison'
  ?'bg-primary text-white shadow-md'
  :'bg-muted text-muted-foreground border border-input hover:border-primary/300'
  }`}
  >
  <Truck className="w-4 h-4" />
- Livraison +4€
+ {LIVE_DELIVERY_ENABLED ? 'Livraison +4€' : 'Livraison bientôt'}
  </button>
  </div>
+ {!RELAY_POINTS_ENABLED && !LIVE_DELIVERY_ENABLED && (
+ <p className="mt-2 text-xs font-semibold text-amber-800">Pilote en cours : retrait chez le traiteur uniquement. Livraison et relais seront activés dès validation des partenaires logistiques.</p>
+ )}
  </div>
 
  {/* Créneaux - checkboxes */}
