@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
-import { AlertCircle, Loader, RefreshCw } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { AlertCircle, CheckCircle2, ChefHat, Loader, PackageCheck, RefreshCw, XCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { useToast } from '../../contexts/ToastContext';
 import { formatMenuSelection, type MenuSelection } from '../../types/menu';
 
 interface VendorOrderLine {
@@ -9,8 +10,13 @@ interface VendorOrderLine {
   quantity: number;
   selected_options: MenuSelection | null;
   order: {
+    id: string;
     order_number: string;
     status: string;
+    payment_status: string | null;
+    total_amount: number | null;
+    customer_phone: string | null;
+    notes: string | null;
     order_mode: string | null;
     delivery_type: string | null;
     creneaux: string | null;
@@ -18,45 +24,122 @@ interface VendorOrderLine {
   } | null;
 }
 
+type VendorOrder = NonNullable<VendorOrderLine['order']> & { lines: VendorOrderLine[] };
+
+const statusLabels: Record<string, string> = {
+  pending: 'À confirmer', confirmed: 'Confirmée', preparing: 'En préparation', ready: 'Prête',
+  in_delivery: 'En livraison', delivered: 'Livrée', cancelled: 'Annulée',
+};
+
 export function VendorOrders() {
+  const { showError, showSuccess } = useToast();
   const [lines, setLines] = useState<VendorOrderLine[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [queryError, setQueryError] = useState('');
+  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    setError('');
-    const { data, error: queryError } = await supabase
+    setQueryError('');
+    const { data, error } = await supabase
       .from('order_items')
-      .select('id, product_name, quantity, selected_options, order:orders!order_items_order_id_fkey(order_number, status, order_mode, delivery_type, creneaux, created_at)')
+      .select('id, product_name, quantity, selected_options, order:orders!order_items_order_id_fkey(id, order_number, status, payment_status, total_amount, customer_phone, notes, order_mode, delivery_type, creneaux, created_at)')
       .order('created_at', { ascending: false })
       .limit(100);
-    if (queryError) setError(queryError.message);
+    if (error) setQueryError(error.message);
     else setLines((data || []) as unknown as VendorOrderLine[]);
     setLoading(false);
   }, []);
 
   useEffect(() => { void load(); }, [load]);
 
+  const orders = useMemo(() => {
+    const grouped = new Map<string, VendorOrder>();
+    for (const line of lines) {
+      if (!line.order?.id) continue;
+      const existing = grouped.get(line.order.id);
+      if (existing) existing.lines.push(line);
+      else grouped.set(line.order.id, { ...line.order, lines: [line] });
+    }
+    return Array.from(grouped.values()).sort((a, b) => b.created_at.localeCompare(a.created_at));
+  }, [lines]);
+
+  const transition = async (order: VendorOrder, nextStatus: 'confirmed' | 'preparing' | 'ready' | 'cancelled') => {
+    let reason: string | null = null;
+    if (nextStatus === 'cancelled') {
+      reason = window.prompt('Motif du refus / de l’annulation (obligatoire) :')?.trim() || null;
+      if (!reason || reason.length < 3) return;
+    }
+    try {
+      setUpdatingOrderId(order.id);
+      const { error } = await supabase.rpc('vendor_transition_order', {
+        target_order_id: order.id,
+        target_status: nextStatus,
+        target_reason: reason,
+      });
+      if (error) throw error;
+      showSuccess(`Commande ${order.order_number} : ${statusLabels[nextStatus]}.`);
+      await load();
+    } catch (error) {
+      console.error('Vendor order transition failed:', error);
+      showError(error instanceof Error ? error.message : 'Mise à jour de commande impossible.');
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  };
+
   return (
-    <main className="mx-auto min-h-screen max-w-4xl px-4 pb-28 pt-8">
+    <main className="mx-auto min-h-screen max-w-5xl px-4 pb-28 pt-8">
       <div className="mb-6 flex items-center justify-between gap-3">
-        <div><h1 className="text-2xl font-black">Commandes à préparer</h1><p className="text-sm text-muted-foreground">Uniquement les articles de votre établissement.</p></div>
+        <div><h1 className="text-2xl font-black">Commandes à préparer</h1><p className="text-sm text-muted-foreground">Uniquement les commandes de votre établissement.</p></div>
         <button type="button" onClick={() => void load()} className="rounded-xl border bg-white p-3" aria-label="Actualiser"><RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} /></button>
       </div>
       {loading && <div className="flex justify-center py-16"><Loader className="h-6 w-6 animate-spin" /></div>}
-      {!loading && error && <div className="flex gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700"><AlertCircle className="h-5 w-5 shrink-0" /><span>Commandes indisponibles : {error}</span></div>}
-      {!loading && !error && lines.length === 0 && <div className="rounded-2xl bg-white p-8 text-center text-muted-foreground">Aucune commande à préparer.</div>}
-      <div className="space-y-4">
-        {lines.map((line) => (
-          <article key={line.id} className="rounded-2xl border bg-white p-5 shadow-sm">
-            <div className="flex items-start justify-between gap-3"><div><div className="text-xs font-bold uppercase text-primary">{line.order?.order_number || 'Commande'}</div><h2 className="mt-1 text-lg font-black">{line.product_name || 'Article'} × {line.quantity}</h2></div><span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">{line.order?.status || 'pending'}</span></div>
-            <div className="mt-3 rounded-xl bg-orange-50 p-3">
-              {formatMenuSelection(line.selected_options || undefined).length > 0 ? formatMenuSelection(line.selected_options || undefined).map((text) => <div key={text} className="text-sm font-semibold">{text}</div>) : <div className="text-sm text-muted-foreground">Aucune composition particulière.</div>}
-            </div>
-            <div className="mt-3 text-xs text-muted-foreground">{line.order?.order_mode || line.order?.delivery_type || 'Mode à confirmer'}{line.order?.creneaux ? ` · ${line.order.creneaux}` : ''}</div>
-          </article>
-        ))}
+      {!loading && queryError && <div className="flex gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700"><AlertCircle className="h-5 w-5 shrink-0" /><span>Commandes indisponibles : {queryError}</span></div>}
+      {!loading && !queryError && orders.length === 0 && <div className="rounded-2xl bg-white p-8 text-center text-muted-foreground">Aucune commande à préparer.</div>}
+
+      <div className="space-y-5">
+        {orders.map((order) => {
+          const busy = updatingOrderId === order.id;
+          return (
+            <article key={order.id} className="rounded-2xl border bg-white p-5 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div><div className="text-xs font-bold uppercase text-primary">{order.order_number}</div><h2 className="mt-1 text-lg font-black">{order.lines.length} ligne{order.lines.length > 1 ? 's' : ''} · {Number(order.total_amount || 0).toFixed(2)} €</h2></div>
+                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">{statusLabels[order.status] || order.status}</span>
+              </div>
+
+              <div className="mt-4 space-y-3">
+                {order.lines.map((line) => (
+                  <div key={line.id} className="rounded-xl bg-orange-50 p-3">
+                    <div className="font-black">{line.product_name || 'Article'} × {line.quantity}</div>
+                    {formatMenuSelection(line.selected_options || undefined).length > 0
+                      ? formatMenuSelection(line.selected_options || undefined).map((text) => <div key={text} className="text-sm font-semibold">{text}</div>)
+                      : <div className="text-sm text-muted-foreground">Aucune composition particulière.</div>}
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-3 grid gap-1 text-xs text-muted-foreground sm:grid-cols-2">
+                <span>{order.order_mode || order.delivery_type || 'Mode à confirmer'}{order.creneaux ? ` · ${order.creneaux}` : ''}</span>
+                <span>Paiement : {order.payment_status || 'pending'}</span>
+                {order.customer_phone && <span>Client : {order.customer_phone}</span>}
+              </div>
+              {order.notes && <p className="mt-3 rounded-xl bg-slate-50 p-3 text-xs whitespace-pre-line">{order.notes}</p>}
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {order.status === 'pending' && <>
+                  <button disabled={busy} onClick={() => void transition(order, 'confirmed')} className="inline-flex items-center gap-2 rounded-xl bg-success px-4 py-2 text-sm font-black text-white disabled:opacity-50"><CheckCircle2 className="h-4 w-4" />Accepter</button>
+                  <button disabled={busy} onClick={() => void transition(order, 'cancelled')} className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-black text-white disabled:opacity-50"><XCircle className="h-4 w-4" />Refuser</button>
+                </>}
+                {order.status === 'confirmed' && <>
+                  <button disabled={busy} onClick={() => void transition(order, 'preparing')} className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-black text-white disabled:opacity-50"><ChefHat className="h-4 w-4" />Commencer la préparation</button>
+                  <button disabled={busy} onClick={() => void transition(order, 'cancelled')} className="rounded-xl border border-red-300 px-4 py-2 text-sm font-black text-red-700 disabled:opacity-50">Annuler</button>
+                </>}
+                {order.status === 'preparing' && <button disabled={busy} onClick={() => void transition(order, 'ready')} className="inline-flex items-center gap-2 rounded-xl bg-success px-4 py-2 text-sm font-black text-white disabled:opacity-50"><PackageCheck className="h-4 w-4" />Prête pour retrait</button>}
+              </div>
+            </article>
+          );
+        })}
       </div>
     </main>
   );

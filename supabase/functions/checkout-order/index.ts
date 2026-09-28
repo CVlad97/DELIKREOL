@@ -65,6 +65,7 @@ type ProductRow = {
     id: string;
     business_name: string | null;
     name: string | null;
+    phone: string | null;
     commission_rate: number | string | null;
     stripe_connect_account_id: string | null;
     stripe_charges_enabled: boolean | null;
@@ -286,7 +287,7 @@ Deno.serve(async (req: Request) => {
     const productIds = [...new Set(parsedItems.map((item) => item.productId))];
     const { data: productsData, error: productsError } = await admin
       .from("products")
-      .select("id, vendor_id, name, price, is_available, is_public, is_demo, status, menu_options, vendors(id, business_name, name, commission_rate, stripe_connect_account_id, stripe_charges_enabled, stripe_payouts_enabled, status, is_active, is_public, is_demo)")
+      .select("id, vendor_id, name, price, is_available, is_public, is_demo, status, menu_options, vendors(id, business_name, name, phone, commission_rate, stripe_connect_account_id, stripe_charges_enabled, stripe_payouts_enabled, status, is_active, is_public, is_demo)")
       .in("id", productIds);
     if (productsError) throw productsError;
     const products = new Map((productsData || []).map((product: ProductRow) => [product.id, product]));
@@ -323,6 +324,10 @@ Deno.serve(async (req: Request) => {
     });
 
     if (vendorIds.size !== 1) return json(req, { error: "Panier multi-vendeur bloqué en lancement: une commande par partenaire" }, 409);
+
+    const primaryVendor = products.get(parsedItems[0].productId)?.vendors || null;
+    const partnerName = sanitizeText(primaryVendor?.business_name || primaryVendor?.name, 160);
+    const partnerPhone = sanitizeText(primaryVendor?.phone, 30);
 
     const mode = sanitizeText(body.delivery_mode || body.mode, 32) || "retrait";
     const delivery = DELIVERY_FEES[mode];
@@ -406,6 +411,8 @@ Deno.serve(async (req: Request) => {
         payment_currency: "EUR",
         payment_proof_url: sanitizeText(body.payment_proof_url, 500) || null,
         tracking_token: trackingToken,
+        partner_phone: partnerPhone || null,
+        partner_notified_at: null,
       },
       items_payload: orderItems,
       event_payload: {
@@ -426,7 +433,41 @@ Deno.serve(async (req: Request) => {
     if (rpcError) throw rpcError;
     const order = result?.order;
     if (!order?.id || !order?.order_number) throw new Error("RPC create_checkout_order_atomic returned no order");
-    return json(req, { success: true, existing: Boolean(result?.existing), order });
+
+    let partnerNotificationQueued = false;
+    let partnerNotificationError: string | null = null;
+    if (partnerPhone) {
+      const testMarker = securedNotes.toUpperCase().includes("TEST TECHNIQUE") ? " · TEST TECHNIQUE — NE PAS PRÉPARER" : "";
+      const partnerMessage = `DELIKREOL · Nouvelle commande ${order.order_number} · ${(totalCents / 100).toFixed(2)} € · ${delivery.type === "pickup" ? "retrait" : delivery.type === "relay_point" ? "point relais" : "livraison"}${testMarker}. Ouvrez votre espace DELIKREOL pour accepter ou refuser.`;
+      const { error: notificationError } = await admin.from("partner_notifications").insert({
+        order_id: order.id,
+        order_number: order.order_number,
+        partner_name: partnerName || "Partenaire DELIKREOL",
+        partner_phone: partnerPhone,
+        channel: "whatsapp",
+        message: partnerMessage,
+        status: "queued",
+      });
+      if (notificationError) {
+        partnerNotificationError = notificationError.message;
+        console.error("[checkout-order] partner notification queue failed", notificationError.message);
+      } else {
+        partnerNotificationQueued = true;
+        const { error: notifiedAtError } = await admin
+          .from("orders")
+          .update({ partner_notified_at: new Date().toISOString(), partner_phone: partnerPhone })
+          .eq("id", order.id);
+        if (notifiedAtError) console.error("[checkout-order] partner_notified_at update failed", notifiedAtError.message);
+      }
+    }
+
+    return json(req, {
+      success: true,
+      existing: Boolean(result?.existing),
+      order,
+      partner_notification_queued: partnerNotificationQueued,
+      partner_notification_error: partnerNotificationError,
+    });
   } catch (error) {
     if (error instanceof Response) {
       const body = await error.text();
