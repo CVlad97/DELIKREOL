@@ -177,7 +177,7 @@ export function Header() {
   );
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border-strong/50 bg-background shadow-sm backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-border-strong/50 bg-background shadow-sm">
       <div className="madras-strip" />
 
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">

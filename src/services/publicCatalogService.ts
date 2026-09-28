@@ -101,6 +101,7 @@ type PilotVendorSeed = {
   description: string;
   product_name: string;
   product_description: string;
+  product_image?: string;
 };
 
 const pilotVendors: PilotVendorSeed[] = [
@@ -119,6 +120,7 @@ const pilotVendors: PilotVendorSeed[] = [
     description: 'Partenaire pilote. Spécialités en cours d’intégration.',
     product_name: 'Spécialités Les Délices de Ninice',
     product_description: 'Carte en cours d’intégration. Prix à confirmer.',
+    product_image: 'vendors/ninice/ninice-00-card.jpg',
   },
   {
     business_name: "Saveurs d'Afrique",
@@ -232,7 +234,7 @@ function buildPilotProduct(seed: PilotVendorSeed, vendor: PublicCatalogVendor, i
     description: seed.product_description,
     category: 'Partenaire pilote',
     price: null,
-    image_url: null,
+    image_url: seed.product_image ? assetFromPublic(seed.product_image) : null,
     stock_quantity: null,
     zone_label: vendor.zone_label,
     available: false,
