@@ -444,7 +444,7 @@ Deno.serve(async (req: Request) => {
         order_number: order.order_number,
         partner_name: partnerName || "Partenaire DELIKREOL",
         partner_phone: partnerPhone,
-        channel: "whatsapp",
+        channel: "webpush",
         message: partnerMessage,
         status: "queued",
       });

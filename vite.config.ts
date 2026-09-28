@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => {
       includeAssets: ['branding/*.svg', 'branding/*.png'],
       manifest: false,
       workbox: {
+        importScripts: ['push-handler.js'],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
