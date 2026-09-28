@@ -39,13 +39,13 @@ type MenuSelection = {
 
 type MenuOptions = {
   appetizers?: string[];
-  sides: string[];
-  drinks: string[];
+  sides?: string[];
+  drinks?: string[];
   sauces?: string[];
   condiments?: string[];
   included_appetizer_count?: number;
-  included_side_count: number;
-  included_drink_count: number;
+  included_side_count?: number;
+  included_drink_count?: number;
   included_sauce_count?: number;
   included_condiment_count?: number;
   instructions_enabled?: boolean;
@@ -92,7 +92,6 @@ function resolveAllowedPaymentProviders(): Set<string> {
 function corsHeaders(req: Request) {
   const origin = req.headers.get("origin") || "";
   return {
-    appetizers: parseChoiceArray(record.appetizers),
     "Access-Control-Allow-Origin": allowedOrigins.has(origin) ? origin : "https://delikreol.com",
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -145,6 +144,7 @@ function parseSelectedOptions(value: unknown): MenuSelection | null {
   }
   const record = value as Record<string, unknown>;
   return {
+    appetizers: parseChoiceArray(record.appetizers),
     sides: parseChoiceArray(record.sides),
     drinks: parseChoiceArray(record.drinks),
     sauces: parseChoiceArray(record.sauces),
@@ -163,7 +163,6 @@ function parseItems(rawItems: unknown) {
   if (!Array.isArray(rawItems) || rawItems.length === 0 || rawItems.length > MAX_ITEMS) {
     throw new Response(JSON.stringify({ error: "items invalides" }), { status: 400 });
   }
-
   const aggregated = new Map<string, { productId: string; quantity: number; selectedOptions: MenuSelection | null }>();
   for (const item of rawItems as CheckoutItemInput[]) {
     const productId = typeof item.product_id === "string" ? item.product_id : typeof item.id === "string" ? item.id : "";
@@ -182,6 +181,7 @@ function parseItems(rawItems: unknown) {
 function normalizeOptions(product: ProductRow) {
   const raw = product.menu_options;
   if (!raw) return null;
+  const appetizers = Array.isArray(raw.appetizers) ? raw.appetizers.filter((item) => typeof item === "string") : [];
   const sides = Array.isArray(raw.sides) ? raw.sides.filter((item) => typeof item === "string") : [];
   const drinks = Array.isArray(raw.drinks) ? raw.drinks.filter((item) => typeof item === "string") : [];
   const sauces = Array.isArray(raw.sauces) ? raw.sauces.filter((item) => typeof item === "string") : [];
@@ -217,7 +217,8 @@ function validateMenuSelection(product: ProductRow, selection: MenuSelection | n
   const valid = uniqueAppetizers.size === options.appetizerCount &&
     uniqueSides.size === options.sideCount &&
     uniqueDrinks.size === options.drinkCount &&
-    uniqueSauces.size === options.sauceCount && uniqueCondiments.size === options.condimentCount &&
+    uniqueSauces.size === options.sauceCount &&
+    uniqueCondiments.size === options.condimentCount &&
     [...uniqueAppetizers].every((choice) => options.appetizers.includes(choice)) &&
     [...uniqueSides].every((choice) => options.sides.includes(choice)) &&
     [...uniqueDrinks].every((choice) => options.drinks.includes(choice)) &&
@@ -239,17 +240,14 @@ async function enforceRateLimit(admin: ReturnType<typeof createClient>, requestF
   const windowStart = new Date();
   windowStart.setMinutes(0, 0, 0);
   const rateKey = await sha256Hex(`${requestFingerprint}:${windowStart.toISOString()}`);
-
   const { data, error } = await admin.rpc("consume_checkout_rate_limit", {
     target_rate_key: rateKey,
     target_window_started_at: windowStart.toISOString(),
   });
-
   if (error) {
     console.error("[checkout-order] rate limit unavailable", error.message);
     throw new Response(JSON.stringify({ error: "Service de protection temporairement indisponible" }), { status: 503 });
   }
-
   if (Number(data || 0) > 20) {
     throw new Response(JSON.stringify({ error: "Trop de tentatives, réessayez plus tard" }), { status: 429 });
   }
@@ -262,7 +260,6 @@ Deno.serve(async (req: Request) => {
   try {
     const contentLength = Number(req.headers.get("content-length") || 0);
     if (contentLength > MAX_BODY_BYTES) return json(req, { error: "Payload trop volumineux" }, 413);
-
     const rawBody = await req.text();
     if (new TextEncoder().encode(rawBody).length > MAX_BODY_BYTES) return json(req, { error: "Payload trop volumineux" }, 413);
 
@@ -282,7 +279,6 @@ Deno.serve(async (req: Request) => {
       .select("id, order_number, status, payment_status, tracking_token")
       .eq("idempotency_key", idempotencyKey)
       .maybeSingle();
-
     if (existingError) throw existingError;
     if (existing) return json(req, { existing: true, order: existing });
 
@@ -292,7 +288,6 @@ Deno.serve(async (req: Request) => {
       .from("products")
       .select("id, vendor_id, name, price, is_available, is_public, is_demo, status, menu_options, vendors(id, business_name, name, commission_rate, stripe_connect_account_id, stripe_charges_enabled, stripe_payouts_enabled, status, is_active, is_public, is_demo)")
       .in("id", productIds);
-
     if (productsError) throw productsError;
     const products = new Map((productsData || []).map((product: ProductRow) => [product.id, product]));
     if (products.size !== productIds.length) return json(req, { error: "Produit introuvable" }, 404);
@@ -332,7 +327,6 @@ Deno.serve(async (req: Request) => {
     const mode = sanitizeText(body.delivery_mode || body.mode, 32) || "retrait";
     const delivery = DELIVERY_FEES[mode];
     if (!delivery) return json(req, { error: "delivery_mode invalide" }, 400);
-
     const subtotalCents = orderItems.reduce((sum, item) => sum + Math.round(Number(item.subtotal) * 100), 0);
     const totalCents = subtotalCents + delivery.cents;
     if (totalCents <= 0) return json(req, { error: "Total commande invalide" }, 400);
@@ -429,11 +423,9 @@ Deno.serve(async (req: Request) => {
         },
       },
     });
-
     if (rpcError) throw rpcError;
     const order = result?.order;
     if (!order?.id || !order?.order_number) throw new Error("RPC create_checkout_order_atomic returned no order");
-
     return json(req, { success: true, existing: Boolean(result?.existing), order });
   } catch (error) {
     if (error instanceof Response) {
@@ -452,5 +444,3 @@ Deno.serve(async (req: Request) => {
     return json(req, { error: "Unable to create order" }, 500);
   }
 });
-  const appetizers = Array.isArray(raw.appetizers) ? raw.appetizers.filter((item) => typeof item === "string") : [];
-  const uniqueAppetizers = new Set(selection.appetizers);
