@@ -45,7 +45,7 @@ async function pullItems() {
   const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const { data: queued, error } = await admin.from("partner_notifications")
     .select("id,order_id,order_number,partner_name,partner_phone,message,status,attempts,created_at,channel")
-    .in("channel", ["webpush", "whatsapp"])
+    .eq("channel", "webpush")
     .in("status", ["queued", "pending"])
     .gte("created_at", cutoff)
     .order("created_at", { ascending: true })

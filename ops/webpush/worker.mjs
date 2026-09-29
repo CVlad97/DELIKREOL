@@ -24,6 +24,7 @@ async function disableSubscription(subscriptionId) {
 async function processItem(item) {
   const subscriptions = Array.isArray(item.subscriptions) ? item.subscriptions : [];
   if (subscriptions.length === 0) {
+    await gatewayCall({ action: 'ack', id: item.id, status: 'no_subscription', last_error: 'Aucun appareil traiteur abonné aux notifications Web Push.' });
     return;
   }
   const payload = JSON.stringify({
