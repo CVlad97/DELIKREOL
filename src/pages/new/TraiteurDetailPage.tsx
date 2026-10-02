@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   AlertTriangle,
@@ -24,6 +24,7 @@ import { getThumbnailPlaceholder, isUsableThumbnail, resolveProductThumbnail } f
 import { trackPublicView } from '../../services/metricsService';
 import { loadPublicCatalog, type PublicCatalogProduct } from '../../services/publicCatalogService';
 import { setPageMeta } from '../../services/seo';
+import { getVendorBySlug } from '../../services/vendorsService';
 import { socialLabel, type SocialLinkSet } from '../../utils/socialLinks';
 import type { Product } from '../../types';
 
@@ -79,11 +80,30 @@ export function TraiteurDetailPage() {
   const { addItem } = useCart();
   const { showSuccess } = useToast();
 
-  const traiteur = useMemo(
-    () => traiteurSpaces.find((item) => item.slug === slug) || null,
-    [slug],
-  );
+  const [traiteur, setTraiteur] = useState(() => traiteurSpaces.find((item) => item.slug === slug) || null);
+  const [vendorLoading, setVendorLoading] = useState(true);
   const [liveProducts, setLiveProducts] = useState<PublicCatalogProduct[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    const fallback = traiteurSpaces.find((item) => item.slug === slug) || null;
+    setTraiteur(fallback);
+    setVendorLoading(true);
+    if (!slug) {
+      setVendorLoading(false);
+      return () => { active = false; };
+    }
+
+    void getVendorBySlug(slug)
+      .then(({ vendor }) => {
+        if (active) setTraiteur(vendor || fallback);
+      })
+      .finally(() => {
+        if (active) setVendorLoading(false);
+      });
+
+    return () => { active = false; };
+  }, [slug]);
 
   useEffect(() => {
     let active = true;
@@ -116,6 +136,16 @@ export function TraiteurDetailPage() {
     );
     trackPublicView();
   }, [traiteur]);
+
+  if (vendorLoading && !traiteur) {
+    return (
+      <Layout>
+        <main className="flex min-h-[60vh] items-center justify-center px-4">
+          <p className="font-bold text-muted-foreground">Chargement de la vitrine…</p>
+        </main>
+      </Layout>
+    );
+  }
 
   if (!traiteur) {
     return (

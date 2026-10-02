@@ -2634,11 +2634,14 @@ function VendorCard({ vendor }: { vendor: PublicCatalogVendor }) {
  return (
  <article className="rounded-[1.9rem] border border-white/80 bg-white/90 p-5 shadow-soft backdrop-blur">
  <div className="flex items-start justify-between gap-4">
- <div>
+ <div className="flex min-w-0 items-center gap-3">
+ {vendor.logo_url ? <img src={vendor.logo_url} alt={`Logo ${vendor.business_name}`} className="h-16 w-16 shrink-0 rounded-2xl border border-orange-100 bg-white object-contain p-1 shadow-sm" loading="lazy" /> : <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[#fff4e7]"><Store className="h-7 w-7 text-[hsl(var(--primary))]/40" /></div>}
+ <div className="min-w-0">
  <p className="text-xs font-black uppercase tracking-[0.18em] text-[hsl(var(--primary))]">{vendor.business_type}</p>
- <h3 className="mt-2 text-2xl font-black text-[#2a190f]">{vendor.business_name}</h3>
+ <h3 className="mt-2 truncate text-2xl font-black text-[#2a190f]">{vendor.business_name}</h3>
  </div>
- <BadgeCheck className="h-7 w-7 text-success" />
+ </div>
+ <BadgeCheck className="h-7 w-7 shrink-0 text-success" />
  </div>
  <p className="mt-3 text-sm leading-6 text-stone-600">{vendor.description}</p>
  <div className="mt-4 grid gap-2 text-sm">

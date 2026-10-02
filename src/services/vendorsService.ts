@@ -24,6 +24,7 @@ export type VendorRaw = {
   name: string;
   business_name: string | null;
   description: string | null;
+  logo_url: string | null;
   address: string | null;
   zone_label: string | null;
   commune: string | null;
@@ -168,11 +169,12 @@ export function mergeVendorWithStatic(
 
   const supabaseGallery = trustedPublicMediaArray(vendor.gallery_images);
   const supabaseHighlights = nonEmptyArray(vendor.highlights);
+  const logoImage = trustedPublicMedia(vendor.logo_url);
   const heroImage = trustedPublicMedia(vendor.hero_image) || fallback?.heroImage || null;
-  const portraitImage = trustedPublicMedia(vendor.portrait_image) || fallback?.portraitImage || null;
+  const portraitImage = logoImage || trustedPublicMedia(vendor.portrait_image) || fallback?.portraitImage || null;
   const galleryImages = supabaseGallery || fallback?.galleryImages || [];
   const highlights = supabaseHighlights || fallback?.highlights || [];
-  const hasSupabaseMedia = Boolean(trustedPublicMedia(vendor.hero_image) || trustedPublicMedia(vendor.portrait_image) || supabaseGallery);
+  const hasSupabaseMedia = Boolean(logoImage || trustedPublicMedia(vendor.hero_image) || trustedPublicMedia(vendor.portrait_image) || supabaseGallery);
   const socialLinks = sanitizeSocialLinks({
     instagram: vendor.instagram_url || vendor.social_links?.instagram || fallback?.profile.instagram?.url,
     facebook: vendor.facebook_url || vendor.social_links?.facebook || fallback?.profile.facebook?.url,
@@ -182,7 +184,7 @@ export function mergeVendorWithStatic(
   const profileFallback = fallback?.profile;
   const profile: PartnerProfile = {
     ...(profileFallback || {}),
-    name: fallback?.name || businessName,
+    name: businessName,
     legalName: nonEmptyText(vendor.legal_name) || profileFallback?.legalName,
     zone,
     address: address || profileFallback?.address,
@@ -212,7 +214,7 @@ export function mergeVendorWithStatic(
   return {
     ...(fallback || {}),
     slug: fallback?.slug || normalizeSpaceSlug(businessName),
-    name: fallback?.name || businessName,
+    name: businessName,
     legalName: nonEmptyText(vendor.legal_name) || fallback?.legalName,
     zone,
     commune,
@@ -258,7 +260,7 @@ export async function getPublicVendors(): Promise<{ vendors: TraiteurSpace[]; so
   }
 
   const controller = new AbortController();
-  const timeout = globalThis.setTimeout(() => controller.abort(), 2500);
+  const timeout = globalThis.setTimeout(() => controller.abort(), 5000);
 
   try {
     const { data, error } = await publicSupabase
@@ -281,10 +283,10 @@ export async function getPublicVendors(): Promise<{ vendors: TraiteurSpace[]; so
       return { vendors: transformed, source: 'supabase' };
     }
 
-    const transformedKeys = new Set(transformed.map((vendor) => normalizedKey(vendor.name)));
+    const transformedSlugs = new Set(transformed.map((vendor) => normalizeSpaceSlug(vendor.slug)));
     const merged = [
       ...transformed,
-      ...staticPublicVendors().filter((vendor) => !transformedKeys.has(normalizedKey(vendor.name))),
+      ...staticPublicVendors().filter((vendor) => !transformedSlugs.has(normalizeSpaceSlug(vendor.slug))),
     ];
 
     return { vendors: merged, source: 'hybrid' };
