@@ -15,6 +15,7 @@ function sparseVendor(overrides: Partial<VendorRaw> = {}): VendorRaw {
     name: 'Gouté Mwen',
     business_name: 'Gouté Mwen',
     description: null,
+    logo_url: null,
     address: null,
     zone_label: 'Martinique',
     commune: null,
@@ -66,6 +67,23 @@ describe('vendorsService', () => {
     expect(merged?.menuItems.length).toBe(fallback?.menuItems.length);
     expect(merged?.story).toBe(fallback?.story);
     expect(merged?.photoStatus).toBe(fallback?.photoStatus);
+  });
+
+  it('uses the live Supabase business name and logo on a validated public vendor', () => {
+    const fallback = traiteurSpaces.find((vendor) => vendor.slug === 'goute-mwen');
+    const merged = mergeVendorWithStatic(
+      sparseVendor({
+        business_name: 'Gouté Mwen Martinique',
+        logo_url: 'https://delikreol.com/vendors/goute-mwen/logo-public.webp',
+        public_display_status: 'public confirmé',
+      }),
+      fallback,
+    );
+
+    expect(merged?.name).toBe('Gouté Mwen Martinique');
+    expect(merged?.profile.name).toBe('Gouté Mwen Martinique');
+    expect(merged?.portraitImage).toBe('https://delikreol.com/vendors/goute-mwen/logo-public.webp');
+    expect(merged?.slug).toBe('goute-mwen');
   });
 
   it('uses populated Supabase editorial fields without losing the static menu', () => {

@@ -8,14 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from'@/components/ui/tabs';
 import {
  buildCustomerSpaceLink,
  buildTraiteurSpaceLink,
- buildTraiteurSpaces,
  featuredTraiteurSpaces,
  formatEuro,
  getTraiteurSpaceBySlug,
  normalizeSpaceSlug,
  traiteurSpaces,
 } from'@/data/traiteurs';
-import { loadTraiteurProfiles } from'@/services/traiteurProfileService';
+import { getPublicVendors } from'@/services/vendorsService';
 import { socialLabel, type SocialLinkSet } from'@/utils/socialLinks';
 
 type DemoAccessConfig = {
@@ -93,11 +92,11 @@ export function TraiteursPage() {
  useEffect(() => {
  let cancelled = false;
 
- loadTraiteurProfiles().then((profiles) => {
+ getPublicVendors().then(({ vendors, source }) => {
  if (cancelled) return;
- const spaces = buildTraiteurSpaces(profiles);
+ const spaces = vendors;
  setTraiteurSpacesState(spaces);
- setCatalogSource(profiles.some((profile) => profile.source ==='backend') ?'backend' :'local');
+ setCatalogSource(source === 'static' ? 'local' : 'backend');
  if (!spaces.some((space) => space.slug === activeSlug) && spaces[0]) {
  setActiveSlug(spaces[0].slug);
  }

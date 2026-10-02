@@ -19,6 +19,7 @@ type Vendor = {
   specialty: string | null;
   story: string | null;
   hero_image: string | null;
+  logo_url: string | null;
   status: string;
   is_public: boolean;
 };
@@ -214,7 +215,7 @@ export default function PartnerCatalogPage() {
     setLoading(true);
     try {
       const { data: vendorData, error: vendorError } = await supabase
-        .from('vendors').select('id,business_name,business_type,description,phone,whatsapp,email,commune,address,specialty,story,hero_image,status,is_public')
+        .from('vendors').select('id,business_name,business_type,description,phone,whatsapp,email,commune,address,specialty,story,hero_image,logo_url,status,is_public')
         .eq('user_id', user.id).maybeSingle();
       if (vendorError) throw vendorError;
       const currentVendor = vendorData as Vendor | null;
@@ -331,7 +332,8 @@ export default function PartnerCatalogPage() {
       const { data } = supabase.storage.from('product-photos').getPublicUrl(path);
       const { error: updateError } = await supabase.from('vendors').update({ logo_url: data.publicUrl }).eq('id', vendor?.id);
       if (updateError) throw updateError;
-      showSuccess('Logo enregistré sur votre vitrine.');
+      await loadWorkspace();
+      showSuccess('Logo enregistré et synchronisé avec votre vitrine.');
     } catch (error) {
       console.error(error);
       showError('Le logo n’a pas pu être envoyé.');
@@ -580,6 +582,7 @@ export default function PartnerCatalogPage() {
               <label className="text-sm font-bold">WhatsApp<input value={profile.whatsapp} onChange={e=>setProfile({...profile,whatsapp:e.target.value})} className="mt-2 w-full rounded-xl border px-4 py-3" /></label>
               <label className="sm:col-span-2 text-sm font-bold">Description<textarea value={profile.description} onChange={e=>setProfile({...profile,description:e.target.value})} rows={4} className="mt-2 w-full rounded-xl border px-4 py-3" placeholder="Votre savoir-faire, vos produits locaux, votre promesse…" /></label>
               <label className="sm:col-span-2 text-sm font-bold">Votre histoire<textarea value={profile.story} onChange={e=>setProfile({...profile,story:e.target.value})} rows={3} className="mt-2 w-full rounded-xl border px-4 py-3" /></label>
+              {vendor.logo_url && <div className="sm:col-span-2 flex items-center gap-3 rounded-xl border bg-white p-3"><img src={vendor.logo_url} alt={`Logo ${vendor.business_name || 'traiteur'}`} className="h-16 w-16 rounded-xl object-contain" /><div><p className="text-sm font-black">Logo actuellement publié</p><p className="text-xs text-stone-500">La même image est utilisée sur la vitrine publique.</p></div></div>}
               <label className="sm:col-span-2 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-primary/40 bg-[#fff8ef] px-4 py-3 text-sm font-black text-primary"><ImagePlus className="h-4 w-4" />{uploadingLogo ? 'Envoi du logo…' : 'Ajouter ou remplacer mon logo'}<input type="file" accept="image/jpeg,image/png,image/webp" onChange={uploadLogo} disabled={uploadingLogo} className="hidden" /></label>
             </div>
             <button disabled={savingProfile} className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-[#1f6a4a] px-5 py-3 font-black text-white disabled:opacity-60"><Save className="h-4 w-4" />{savingProfile ? 'Enregistrement…' : 'Enregistrer mon profil'}</button>
