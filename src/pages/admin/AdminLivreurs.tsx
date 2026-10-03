@@ -44,7 +44,7 @@ export function AdminLivreurs() {
  try {
  const { data, error: dbError } = await supabase
  .from('driver_applications')
- .select('id,name,phone,whatsapp,email,commune,transport_mode,zones_acceptees,disponibilite,horaires,experience_livraison,status,created_at')
+ .select('id,name,phone,whatsapp,email,commune,transport_mode,zones_acceptees,disponibilite,horaires,experience_livraison,status,created_at,siret,accepts_independent_status,accepts_service_charter,consent_at,identity_document_ready,professional_insurance_ready,vehicle_insurance_ready,driving_licence_ready,insulated_equipment,smartphone_gps')
  .order('created_at', { ascending: false });
 
  if (dbError) throw dbError;
@@ -69,7 +69,12 @@ export function AdminLivreurs() {
  }, []);
 
  const updateStatus = async (id: string, status: string) => {
- const previous = items.find((item) => item.id === id)?.status ||'candidat';
+ const current = items.find((item) => item.id === id);
+ const previous = current?.status ||'candidat';
+ if (status === 'valide' && (!current?.accepts_independent_status || !current?.accepts_service_charter || !String(current?.siret || '').trim())) {
+   showError('Activation impossible : statut indépendant, charte et SIRET doivent être confirmés.');
+   return;
+ }
  setUpdatingId(id);
 
  if (source ==='supabase' && isSupabaseConfigured && !isDemoMode) {
@@ -126,6 +131,7 @@ export function AdminLivreurs() {
  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Transport</th>
  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Contact</th>
  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Zones</th>
+ <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Conformité indépendant</th>
  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Date</th>
  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Statut</th>
  </tr>
@@ -152,6 +158,13 @@ export function AdminLivreurs() {
  </div>
  </td>
  <td className="px-4 py-3 text-xs max-w-xs">{Array.isArray(zones) && zones.length ? zones.join(',') :'—'}</td>
+ <td className="px-4 py-3 text-xs">
+ <div className="space-y-1">
+ <div className={item.accepts_independent_status ? 'font-bold text-success' : 'font-bold text-red-600'}>{item.accepts_independent_status ? '✓ Indépendant accepté' : '✕ Statut à accepter'}</div>
+ <div className={item.accepts_service_charter ? 'font-bold text-success' : 'font-bold text-red-600'}>{item.accepts_service_charter ? '✓ Charte acceptée' : '✕ Charte à accepter'}</div>
+ <div className={item.siret ? 'font-semibold text-foreground' : 'text-amber-700'}>SIRET : {item.siret || 'à fournir'}</div>
+ </div>
+ </td>
  <td className="px-4 py-3 text-sm">{formatDate(created)}</td>
  <td className="px-4 py-3 text-sm">
  <select

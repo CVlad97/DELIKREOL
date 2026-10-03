@@ -20,6 +20,9 @@ type DriverFormData = {
   disponibilite: string;
   horaires: string;
   experienceLivraison: string;
+  siret: string;
+  acceptsIndependentStatus: boolean;
+  acceptsServiceCharter: boolean;
 };
 
 const initialFormData: DriverFormData = {
@@ -33,6 +36,9 @@ const initialFormData: DriverFormData = {
   disponibilite: '',
   horaires: '',
   experienceLivraison: '',
+  siret: '',
+  acceptsIndependentStatus: false,
+  acceptsServiceCharter: false,
 };
 
 export default function DevenirLivreurPage() {
@@ -71,6 +77,9 @@ export default function DevenirLivreurPage() {
       form.disponibilite ? `📅 Disponibilité : ${form.disponibilite}` : '',
       form.horaires ? `🕐 Horaires : ${form.horaires}` : '',
       form.experienceLivraison ? `💼 Expérience : ${form.experienceLivraison}` : '',
+      form.siret ? `🧾 SIRET : ${form.siret}` : '',
+      `🤝 Statut indépendant accepté : ${form.acceptsIndependentStatus ? 'Oui' : 'Non'}`,
+      `📜 Charte de service acceptée : ${form.acceptsServiceCharter ? 'Oui' : 'Non'}`,
     ];
     return lines.filter(Boolean).join('\n');
   };
@@ -109,6 +118,10 @@ export default function DevenirLivreurPage() {
           disponibilite: form.disponibilite || null,
           horaires: form.horaires || null,
           experience_livraison: form.experienceLivraison || null,
+          siret: form.siret.trim() || null,
+          accepts_independent_status: form.acceptsIndependentStatus,
+          accepts_service_charter: form.acceptsServiceCharter,
+          consent_at: new Date().toISOString(),
           status: 'candidat',
         });
 
@@ -204,6 +217,20 @@ export default function DevenirLivreurPage() {
             <input name="disponibilite" value={form.disponibilite} onChange={handleChange} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary" placeholder="Disponibilité : semaine, week-end, soir..." />
             <input name="horaires" value={form.horaires} onChange={handleChange} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary" placeholder="Horaires possibles" />
             <textarea name="experienceLivraison" rows={4} value={form.experienceLivraison} onChange={handleChange} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary" placeholder="Expérience livraison / remarques" />
+            <input name="siret" inputMode="numeric" value={form.siret} onChange={handleChange} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary" placeholder="SIRET de votre activité indépendante (si déjà obtenu)" />
+          </fieldset>
+
+          <fieldset className="space-y-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+            <legend className="px-2 text-sm font-black uppercase tracking-wider text-emerald-900">Cadre prestataire indépendant</legend>
+            <p className="text-sm leading-relaxed text-emerald-950">DeliKreol référence des prestataires de livraison indépendants, pas des salariés. Vous restez libre d’accepter ou refuser une mission, de choisir vos zones et disponibilités, sans exclusivité ni horaires imposés. Avant activation commerciale, les justificatifs professionnels et assurances nécessaires doivent être valides.</p>
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-emerald-200 bg-white p-4 text-sm font-semibold text-emerald-950">
+              <input required type="checkbox" checked={form.acceptsIndependentStatus} onChange={(e)=>setForm((prev)=>({...prev, acceptsIndependentStatus:e.target.checked}))} className="mt-0.5 h-5 w-5 accent-emerald-700" />
+              <span>Je confirme candidater comme prestataire indépendant et comprendre qu’aucun contrat de travail, horaire imposé ou exclusivité n’est créé par cette candidature.</span>
+            </label>
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-emerald-200 bg-white p-4 text-sm font-semibold text-emerald-950">
+              <input required type="checkbox" checked={form.acceptsServiceCharter} onChange={(e)=>setForm((prev)=>({...prev, acceptsServiceCharter:e.target.checked}))} className="mt-0.5 h-5 w-5 accent-emerald-700" />
+              <span>J’accepte la charte de service : sécurité, respect du Code de la route, soin des commandes, preuve de remise et protection des données clients.</span>
+            </label>
           </fieldset>
 
           {error && <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}

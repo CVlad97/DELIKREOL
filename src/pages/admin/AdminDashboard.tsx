@@ -52,6 +52,8 @@ function LatestApplications() {
  setApps(combined.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5));
  };
  void load();
+ const interval = window.setInterval(() => void load(), 30000);
+ return () => window.clearInterval(interval);
  }, []);
 
  if (error) {
@@ -93,7 +95,8 @@ export function AdminDashboard() {
  orders: 0, cateringRequests: 0, partnerApplications: 0,
  driverApplications: 0, relayApplications: 0, leads: 0,
  });
- const [liveStats, setLiveStats] = useState({ ordersToday: 0, revenueMonth: 0, activePartners: 0, ongoingDeliveries: 0 });
+ const [liveStats, setLiveStats] = useState({ ordersToday: 0, revenueMonth: 0, activePartners: 0, totalPartners: 0, partnersToVerify: 0, ongoingDeliveries: 0 });
+ const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
  const [catalogStats, setCatalogStats] = useState({ total: mockProducts.length, withoutDescription: 0, withoutPrice: 0 });
 
  useEffect(() => {
@@ -117,9 +120,14 @@ export function AdminDashboard() {
  });
  };
  void loadCounts();
+ const interval = window.setInterval(() => void loadCounts(), 30000);
+ const onVisible = () => { if (document.visibilityState === 'visible') void loadCounts(); };
+ document.addEventListener('visibilitychange', onVisible);
+ return () => { window.clearInterval(interval); document.removeEventListener('visibilitychange', onVisible); };
  }, []);
 
  useEffect(() => {
+   let active = true;
    const loadLiveStats = async () => {
      const now = new Date();
      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
@@ -127,35 +135,52 @@ export function AdminDashboard() {
      const [todayRes, monthRes, vendorsRes, deliveriesRes, productsRes] = await Promise.all([
        supabase.from('orders').select('id').gte('created_at', startOfDay),
        supabase.from('orders').select('total_amount').gte('created_at', startOfMonth),
-       supabase.from('vendors').select('id').eq('is_active', true),
+       supabase.from('vendors').select('id,status,is_public,is_active,is_demo'),
        supabase.from('deliveries').select('id').in('status', ['assigned', 'accepted', 'in_progress', 'picked_up', 'en_route']),
        supabase.from('products').select('id, description, price'),
      ]);
+     if (!active) return;
      const localOrders = loadFromStorage('delikreol_orders');
      const revenue = (monthRes.data || []).reduce((sum, row) => sum + Number((row as { total_amount?: number }).total_amount || 0), 0);
      const catalog = productsRes.data || [];
+     const vendorRows = vendorsRes.error ? [] : (vendorsRes.data || []);
+     const eligiblePartners = vendorRows.filter((v) => !v.is_demo);
+     const activePublicPartners = eligiblePartners.filter((v) => v.is_active && v.is_public && v.status === 'verified');
+     const partnersToVerify = eligiblePartners.filter((v) => !(v.is_active && v.is_public && v.status === 'verified'));
      setLiveStats({
        ordersToday: todayRes.error ? localOrders.length : (todayRes.data || []).length,
        revenueMonth: monthRes.error ? 0 : revenue,
-       activePartners: vendorsRes.error ? 0 : (vendorsRes.data || []).length,
+       activePartners: vendorsRes.error ? 0 : activePublicPartners.length,
+       totalPartners: vendorsRes.error ? traiteurSpaces.length : eligiblePartners.length,
+       partnersToVerify: vendorsRes.error ? traiteurSpaces.filter((t) => t.status !== 'public confirmé').length : partnersToVerify.length,
        ongoingDeliveries: deliveriesRes.error ? 0 : (deliveriesRes.data || []).length,
      });
-     if (!productsRes.error && catalog.length > 0) {
+     if (!productsRes.error) {
        setCatalogStats({
          total: catalog.length,
          withoutDescription: catalog.filter((p) => !p.description || p.description.trim().length < 10).length,
          withoutPrice: catalog.filter((p) => p.price == null || Number(p.price) <= 0).length,
        });
      }
+     setLastRefresh(new Date());
    };
    void loadLiveStats();
+   const interval = window.setInterval(() => void loadLiveStats(), 30000);
+   const onVisible = () => { if (document.visibilityState === 'visible') void loadLiveStats(); };
+   document.addEventListener('visibilitychange', onVisible);
+   return () => {
+     active = false;
+     window.clearInterval(interval);
+     document.removeEventListener('visibilitychange', onVisible);
+   };
  }, []);
 
  // Audit live depuis les données réelles
  const productsSansDescription = catalogStats.withoutDescription;
  const productsSansPrix = catalogStats.withoutPrice;
- const partenairesActifs = traiteurSpaces.filter(t => t.status ==='public confirmé').length;
- const partenairesAVerifier = traiteurSpaces.filter(t => t.status !=='public confirmé').length;
+ const partenairesActifs = liveStats.activePartners;
+ const partenairesAVerifier = liveStats.partnersToVerify;
+ const totalPartenaires = liveStats.totalPartners;
  const totalProduits = catalogStats.total;
 
  const cards = [
@@ -177,7 +202,7 @@ export function AdminDashboard() {
 
  return (
  <div>
- <h1 className="text-2xl font-display font-bold mb-6">Vue d'ensemble</h1>
+ <div className="mb-6 flex flex-wrap items-end justify-between gap-3"><div><h1 className="text-2xl font-display font-bold">Vue d'ensemble</h1><p className="mt-1 text-xs text-muted-foreground">Données Supabase en direct · actualisation automatique toutes les 30 s</p></div><span className="rounded-full border bg-card px-3 py-1 text-[11px] font-bold text-muted-foreground">{lastRefresh ? `Mis à jour ${lastRefresh.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}` : 'Synchronisation…'}</span></div>
 
  {/* Quick stats — 4 cartes clés */}
  <h2 className="sectionTitle text-lg font-display font-bold mb-3 text-foreground">Aperçu du jour</h2>
@@ -235,7 +260,7 @@ export function AdminDashboard() {
  Partenaires
  </h2>
  <div className="space-y-2 text-sm">
- <div className="flex justify-between"><span>Total partenaires</span><span className="font-bold">{traiteurSpaces.length}</span></div>
+ <div className="flex justify-between"><span>Total partenaires</span><span className="font-bold">{totalPartenaires}</span></div>
  <div className="flex justify-between text-success"><span>✅ Publiés</span><span>{partenairesActifs}</span></div>
  <div className="flex justify-between text-amber-600"><span>⚠️ À vérifier</span><span>{partenairesAVerifier}</span></div>
  <div className="flex justify-between"><span>Forfaits disponibles</span><span className="font-bold">{PARTNER_PLANS.length}</span></div>

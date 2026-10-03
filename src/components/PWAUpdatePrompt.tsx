@@ -1,5 +1,5 @@
 import { RefreshCw, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { activatePwaUpdate } from '../utils/pwaUpdate';
 
@@ -21,7 +21,7 @@ export function PWAUpdatePrompt() {
     },
   });
 
-  const applyUpdate = async () => {
+  const applyUpdate = useCallback(async () => {
     if (isUpdating) return;
     setIsUpdating(true);
 
@@ -31,7 +31,12 @@ export function PWAUpdatePrompt() {
       console.error('[PWA] Update activation failed', error);
       setIsUpdating(false);
     }
-  };
+  }, [isUpdating, updateServiceWorker]);
+
+  useEffect(() => {
+    if (!needRefresh || typeof window === 'undefined' || !window.location.pathname.startsWith('/admin')) return;
+    void applyUpdate();
+  }, [applyUpdate, needRefresh]);
 
   useEffect(() => {
     if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return;

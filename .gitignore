@@ -59,3 +59,6 @@ reports/
 scripts/audit-supabase-*.py
 scripts/audit-data.py
 scripts/audit-all-cols.py
+
+# Runtime local state
+runtime/

@@ -48,6 +48,14 @@ export default function TermsOfService() {
             et de la remise, et Delikreol reste responsable de ses propres fautes dans l’exploitation de la plateforme.
           </p>
 
+          <h3>3.1 Livreurs partenaires indépendants</h3>
+          <p>
+            Les livreurs activés sur DeliKreol interviennent comme prestataires professionnels indépendants et non comme salariés de DeliKreol. Ils restent libres d’accepter ou de refuser une mission, de choisir les zones et périodes pendant lesquelles ils souhaitent proposer leurs services et peuvent travailler pour d’autres clients ou plateformes. DeliKreol n’impose ni exclusivité ni horaire de travail.
+          </p>
+          <p>
+            Chaque livreur demeure responsable de son organisation, de ses obligations administratives, fiscales et sociales, de ses assurances professionnelles et du respect des règles applicables à son moyen de transport. Les exigences de sécurité, de traçabilité, de preuve de remise et de qualité de service fixées pour une mission ont pour objet la bonne exécution du service et ne dispensent pas le prestataire de ses propres obligations professionnelles.
+          </p>
+
           <h2>4. Commandes</h2>
           <h3>4.1 Processus de commande</h3>
           <p>
