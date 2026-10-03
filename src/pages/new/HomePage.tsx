@@ -186,14 +186,14 @@ export default function HomePage() {
 
   return (
     <Layout>
-      <section className="overflow-hidden bg-[#fff8ed] text-[#173f32]">
-        <div className="border-b border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm font-bold text-amber-950">
+      <section className="overflow-hidden bg-[radial-gradient(circle_at_top_left,#fff4df_0%,#fffaf5_38%,#f6fbf5_100%)] text-[#173f32]">
+        <div className="border-b border-white/60 bg-[#173f32] px-4 py-2.5 text-center text-sm font-bold text-white shadow-sm">
           <span className="inline-flex items-center gap-2">
             <Clock3 className="h-4 w-4" aria-hidden="true" />
-            Préouverture DELIKREOL : découvrez les traiteurs et composez vos menus. Les commandes publiques ouvriront prochainement après les derniers tests partenaires.
+            Préouverture DELIKREOL · Découvrez les traiteurs et composez vos menus pendant les derniers tests partenaires.
           </span>
         </div>
-        <div className="relative min-h-[560px] border-b border-orange-100">
+        <div className="relative min-h-[620px] border-b border-orange-100/70">
           <img
             src={publicAsset('branding/hero-tropical.png')}
             alt="Livraison DeliKreol — plat créole local en Martinique"
@@ -201,24 +201,30 @@ export default function HomePage() {
             loading="eager"
             fetchPriority="high"
           />
-          <div className="absolute inset-0 z-10 bg-[linear-gradient(90deg,rgba(255,248,237,0.98)_0%,rgba(255,248,237,0.92)_42%,rgba(255,248,237,0.38)_72%,rgba(255,248,237,0.2)_100%)]" />
+          <div className="absolute inset-0 z-10 bg-[linear-gradient(90deg,rgba(255,250,245,0.99)_0%,rgba(255,248,237,0.94)_44%,rgba(255,248,237,0.54)_68%,rgba(23,63,50,0.14)_100%)]" />
           <div className="absolute inset-x-0 bottom-0 z-10 h-32 bg-gradient-to-t from-[#fff8ed] to-transparent" />
 
           <div className="relative z-20 mx-auto grid max-w-[1840px] gap-8 px-5 py-12 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:px-16 lg:py-16">
             <div className="flex max-w-3xl flex-col justify-center">
-              <p className="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-[0.32em] text-[#c84814]">
+              <p className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-orange-200/80 bg-white/80 px-4 py-2 text-[11px] font-black uppercase tracking-[0.24em] text-[#b74406] shadow-sm backdrop-blur">
                 <span className="text-lg">✦</span>
                 Livraison & retrait en Martinique
               </p>
 
-              <h1 className="max-w-4xl text-5xl font-black leading-[0.95] tracking-tight text-[#07614e] sm:text-7xl lg:text-8xl">
+              <h1 className="max-w-4xl text-5xl font-black leading-[0.92] tracking-[-0.045em] text-[#075846] sm:text-7xl lg:text-[5.7rem]">
                 Commandez <span className="text-[#d54510]">créole local</span> en Martinique
               </h1>
               <p className="mt-5 max-w-2xl text-xl font-semibold text-[#4b5f55] sm:text-2xl">
-                Plats maison, traiteurs locaux, livraison ou retrait.
+                Le meilleur des cuisines créoles et caribéennes, préparé ici par des talents d’ici.
               </p>
 
-              <div className="mt-8 grid max-w-4xl gap-3 rounded-[2rem] bg-white/90 p-2 shadow-[0_20px_70px_rgba(70,38,15,0.18)] ring-1 ring-orange-100 backdrop-blur md:grid-cols-[1fr_auto_auto]">
+              <div className="mt-6 flex flex-wrap gap-2 text-xs font-black text-[#173f32] sm:text-sm">
+                <span className="rounded-full bg-white/80 px-3 py-2 shadow-sm ring-1 ring-orange-100">🌴 100% esprit péyi</span>
+                <span className="rounded-full bg-white/80 px-3 py-2 shadow-sm ring-1 ring-orange-100">🥘 Fait maison</span>
+                <span className="rounded-full bg-white/80 px-3 py-2 shadow-sm ring-1 ring-orange-100">📍 Près de chez vous</span>
+              </div>
+
+              <div className="mt-8 grid max-w-4xl gap-3 rounded-[2rem] bg-white/95 p-2.5 shadow-[0_24px_80px_rgba(70,38,15,0.16)] ring-1 ring-white/80 backdrop-blur-xl md:grid-cols-[1fr_auto_auto]">
                 <label className="flex items-center gap-3 rounded-[1.5rem] bg-white px-5 py-4 text-sm font-black text-[#173f32] ring-1 ring-orange-100">
                   <MapPin className="h-5 w-5 text-[#d54510]" aria-hidden="true" />
                   <select
@@ -303,15 +309,15 @@ export default function HomePage() {
               )}
 
               <div className="mt-7 grid gap-3 text-sm font-bold text-[#294d41] sm:grid-cols-3">
-                <div className="flex items-center gap-3 rounded-2xl bg-white/70 p-3 backdrop-blur">
+                <div className="flex items-center gap-3 rounded-2xl border border-white/70 bg-white/80 p-3 shadow-sm backdrop-blur">
                   <span className="grid h-11 w-11 place-items-center rounded-full bg-[#09614f] text-white"><Leaf className="h-5 w-5" /></span>
                   Des traiteurs locaux de confiance
                 </div>
-                <div className="flex items-center gap-3 rounded-2xl bg-white/70 p-3 backdrop-blur">
+                <div className="flex items-center gap-3 rounded-2xl border border-white/70 bg-white/80 p-3 shadow-sm backdrop-blur">
                   <span className="grid h-11 w-11 place-items-center rounded-full bg-[#09614f] text-white"><Truck className="h-5 w-5" /></span>
                   Livraison ou retrait près de chez vous
                 </div>
-                <div className="flex items-center gap-3 rounded-2xl bg-white/70 p-3 backdrop-blur">
+                <div className="flex items-center gap-3 rounded-2xl border border-white/70 bg-white/80 p-3 shadow-sm backdrop-blur">
                   <span className="grid h-11 w-11 place-items-center rounded-full bg-[#09614f] text-white"><Heart className="h-5 w-5" /></span>
                   Une cuisine authentique 100% Martinique
                 </div>
@@ -351,7 +357,7 @@ export default function HomePage() {
                   to={`/traiteur/${partner.slug}`}
                   className="group overflow-hidden rounded-[1.6rem] bg-white shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:shadow-xl"
                 >
-                  <div className="relative h-32 overflow-hidden">
+                  <div className="relative h-44 overflow-hidden">
                     <img src={safeImage(partner.heroImage || partner.galleryImages[0])} alt={partner.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
                     <span className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-black text-[#1e1d1a] shadow-sm">
                       <MapPin className="h-3.5 w-3.5" /> {partner.commune || partner.zone}
@@ -359,7 +365,7 @@ export default function HomePage() {
                     <img src={safeImage(partner.portraitImage)} alt="" className="absolute -bottom-5 right-4 h-16 w-16 rounded-full border-4 border-white object-cover shadow-lg" loading="lazy" />
                   </div>
                   <div className="p-5 pt-7">
-                    <h3 className="text-xl font-black text-[#cc460f]">{partner.name}</h3>
+                    <h3 className="text-xl font-black tracking-tight text-[#173f32] transition group-hover:text-[#cc460f]">{partner.name}</h3>
                     <p className="mt-1 min-h-[44px] text-sm font-semibold leading-relaxed text-[#6c6157]">{partner.offer}</p>
                     <p className="mt-4 text-sm font-black text-[#cc460f]">À partir de {formatEuro(partner.startingAt || 6)}</p>
                   </div>
@@ -414,7 +420,7 @@ export default function HomePage() {
                 {productsNow.map((product) => (
                   <article key={product.id} className="group overflow-hidden rounded-[1.4rem] bg-white shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-1 hover:shadow-xl">
                     <button type="button" onClick={() => navigate(`/produit/${product.id}`)} className="block w-full text-left">
-                      <img src={safeImage(product.image)} alt={product.name} className="h-28 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+                      <img src={safeImage(product.image)} alt={product.name} className="h-44 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
                     </button>
                     <div className="relative p-4">
                       <p className="text-[10px] font-black uppercase tracking-widest text-[#cc460f]">{product.category}</p>
@@ -435,7 +441,7 @@ export default function HomePage() {
             </section>
           </section>
 
-          <section className="mt-8 overflow-hidden rounded-[2rem] bg-[#173f32] p-6 text-white shadow-lg sm:p-8">
+          <section className="mt-10 overflow-hidden rounded-[2.25rem] bg-[linear-gradient(135deg,#173f32_0%,#0a6b55_100%)] p-6 text-white shadow-[0_24px_70px_rgba(23,63,50,0.22)] sm:p-8">
             <div className="grid gap-6 lg:grid-cols-[1.3fr_.7fr] lg:items-center">
               <div>
                 <p className="text-xs font-black uppercase tracking-[.2em] text-emerald-200">Approvisionnement local — pilote KopéAgri</p>
@@ -461,7 +467,7 @@ export default function HomePage() {
             </div>
           </section>
 
-          <section className="mt-8 grid gap-4 rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-orange-100 md:grid-cols-3">
+          <section className="mt-8 grid gap-4 rounded-[2rem] bg-white/90 p-5 shadow-[0_18px_60px_rgba(70,38,15,0.08)] ring-1 ring-orange-100/70 backdrop-blur md:grid-cols-3">
             <div className="flex items-start gap-3">
               <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-orange-100 text-[#cc460f]"><ShoppingBag className="h-6 w-6" /></span>
               <div>
