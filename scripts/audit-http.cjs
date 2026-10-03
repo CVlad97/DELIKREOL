@@ -75,6 +75,7 @@ function isSpaFallback(data) {
     { path: '/connexion', name: 'Connexion' },
     { path: '/compte', name: 'Compte client' },
     { path: '/catalogue', name: 'Catalogue' },
+    { path: '/presentation', name: 'Présentation commerciale' },
     { path: '/traiteurs', name: 'Traiteurs' },
     { path: '/traiteur/snack-save-peyi-a', name: 'Traiteur Save Peyia' },
     { path: '/traiteur/les-delices-de-ninice', name: 'Traiteur Ninice' },

@@ -261,6 +261,12 @@ export default function HomePage() {
                 </button>
               </div>
 
+              <div className="mt-4">
+                <Link to="/presentation" className="inline-flex items-center gap-2 rounded-full bg-[#173f32] px-4 py-2 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5">
+                  Voir la démo en 1 minute <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+
               {geoFeedback && <p className="mt-3 text-sm font-semibold text-[#4b5f55]">{geoFeedback}</p>}
               <DeliveryAvailability commune={selectedCommune} coords={geoPosition} />
 

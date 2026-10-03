@@ -18,6 +18,7 @@
     "audit:routes": "node scripts/audit-routes.cjs",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "demo:video": "bash scripts/generate-commercial-demo-video.sh",
     "audit:links": "node scripts/audit-http.cjs",
     "audit:all": "npm run typecheck && npm run lint && npm run build && npm run test && npm run audit:links && npm run audit:secrets",
     "audit:secrets": "node scripts/audit-secrets.mjs",
