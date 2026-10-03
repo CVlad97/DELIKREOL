@@ -225,24 +225,24 @@ export interface QontoOrganizationConfig {
 }
 
 export const DELIKREOL_ORG: QontoOrganizationConfig = {
-  legalName: 'DELIKREOL',
+  legalName: 'CLAVEAU VLADIMIR',
   brandName: 'DeliKreol',
   contactEmail: 'contact@delikreol.com',
-  phone: '+596 696 00 00 00',
+  phone: '+596 696 65 35 89',
   address: {
-    street: 'Rue principale',
-    city: 'Fort-de-France',
-    postalCode: '97200',
+    street: 'Quartier Fougainville',
+    city: 'Rivière-Pilote',
+    postalCode: '97211',
     department: 'Martinique',
     country: 'FR',
   },
-  siren: 'XXX XXX XXX',     // À compléter
-  siret: 'XXX XXX XXX XXXXX', // À compléter
-  nafCode: '56.10C',        // Restauration traditionnelle
-  legalForm: 'SAS',         // ou SARL / micro-entreprise
-  capitalSocial: 1000,
+  siren: '103 128 716',
+  siret: '103 128 716 00018',
+  nafCode: '',               // À renseigner uniquement après vérification de l'avis SIRENE
+  legalForm: 'Entrepreneur individuel (EI)',
+  capitalSocial: 0,           // Sans capital social pour une EI
   domTom: '972 - Martinique',
-  tvaIntracom: 'FR XX XXX XXX XXX', // À compléter
+  tvaIntracom: '',           // À renseigner si applicable et après vérification fiscale
   planId: DELIKREOL_RECOMMENDED_PLAN.id,
   defaultCurrency: 'EUR',
   status: 'pending',        // En attente de création du compte Qonto
