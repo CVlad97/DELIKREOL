@@ -10,7 +10,7 @@ make_slide() {
   local n="$1" tag="$2" title1="$3" title2="$4" line1="$5" line2="$6" auto="$7"
   convert -size 1920x1080 xc:'#fff7ec' \
     -fill '#24150f' -draw 'roundrectangle 75,70 1845,1010 45,45' \
-    -fill '#f6c453' -draw 'roundrectangle 120,120 420,195 38,38' \
+    -fill '#f6c453' -draw 'roundrectangle 120,120 720,195 38,38' \
     -font DejaVu-Sans-Bold -pointsize 34 -fill '#24150f' -annotate +155+170 "$tag" \
     -fill '#cc460f' -draw 'circle 1660,185 1735,185' \
     -font DejaVu-Sans-Bold -pointsize 62 -fill white -gravity northwest -annotate +1634+147 "$n" \
@@ -20,7 +20,7 @@ make_slide() {
     -font DejaVu-Sans -pointsize 40 -fill '#eadfd8' -gravity northwest -annotate +150+655 "$line2" \
     -fill '#3b2a22' -draw 'roundrectangle 140,770 1780,900 28,28' \
     -font DejaVu-Sans-Bold -pointsize 34 -fill '#f6c453' -gravity northwest -annotate +175+825 'AUTOMATISATION' \
-    -font DejaVu-Sans -pointsize 34 -fill white -gravity northwest -annotate +500+825 "$auto" \
+    -font DejaVu-Sans -pointsize 34 -fill white -gravity northwest -annotate +620+825 "$auto" \
     -font DejaVu-Sans-Bold -pointsize 30 -fill '#cc460f' -gravity southwest -annotate +145+65 'DELIKREOL.COM  •  Démonstration pilote sans débit réel' \
     "$TMP/slide-$n.png"
 }
