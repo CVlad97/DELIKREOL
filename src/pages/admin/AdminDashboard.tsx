@@ -97,10 +97,15 @@ export function AdminDashboard() {
  });
  const [liveStats, setLiveStats] = useState({ ordersToday: 0, revenueMonth: 0, activePartners: 0, totalPartners: 0, partnersToVerify: 0, ongoingDeliveries: 0 });
  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+ const [releaseVersion, setReleaseVersion] = useState('chargement…');
  const [catalogStats, setCatalogStats] = useState({ total: mockProducts.length, withoutDescription: 0, withoutPrice: 0 });
 
  useEffect(() => {
  document.title ='Dashboard Admin — DeliKreol';
+ void fetch('/release.json', { cache: 'no-store' })
+   .then((response) => response.ok ? response.json() : Promise.reject(new Error('release unavailable')))
+   .then((payload: { release?: string; commit?: string }) => setReleaseVersion(payload.release || payload.commit || 'inconnue'))
+   .catch(() => setReleaseVersion('inconnue'));
  const loadCounts = async () => {
  const [orders, catering, partners, drivers, relays, leads] = await Promise.all([
  supabase.from('orders').select('id', { count: 'exact', head: true }),
@@ -202,7 +207,7 @@ export function AdminDashboard() {
 
  return (
  <div>
- <div className="mb-6 flex flex-wrap items-end justify-between gap-3"><div><h1 className="text-2xl font-display font-bold">Vue d'ensemble</h1><p className="mt-1 text-xs text-muted-foreground">Données Supabase en direct · actualisation automatique toutes les 30 s</p></div><span className="rounded-full border bg-card px-3 py-1 text-[11px] font-bold text-muted-foreground">{lastRefresh ? `Mis à jour ${lastRefresh.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}` : 'Synchronisation…'}</span></div>
+ <div className="mb-6 flex flex-wrap items-end justify-between gap-3"><div><h1 className="text-2xl font-display font-bold">Vue d'ensemble</h1><p className="mt-1 text-xs text-muted-foreground">Données Supabase en direct · actualisation automatique toutes les 30 s</p></div><div className="flex flex-wrap gap-2"><span className="rounded-full border bg-card px-3 py-1 text-[11px] font-bold text-muted-foreground">Version {releaseVersion}</span><span className="rounded-full border bg-card px-3 py-1 text-[11px] font-bold text-muted-foreground">{lastRefresh ? `Mis à jour ${lastRefresh.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}` : 'Synchronisation…'}</span></div></div>
 
  {/* Quick stats — 4 cartes clés */}
  <h2 className="sectionTitle text-lg font-display font-bold mb-3 text-foreground">Aperçu du jour</h2>
