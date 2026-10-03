@@ -345,8 +345,8 @@ export const traiteurSpaces: TraiteurSpace[] = buildTraiteurSpaces();
 export const featuredTraiteurSpaces = traiteurSpaces.filter(t => t.status === 'public confirmé');
 
 export function getTraiteurSpaceBySlug(slug: string) {
-  const normalizedSlug = normalizeSpaceSlug(slug);
-  return traiteurSpaces.find((space) => space.slug === normalizedSlug);
+  const identity = normalizeSpaceSlug(slug).replace(/-/g, '');
+  return traiteurSpaces.find((space) => normalizeSpaceSlug(space.slug).replace(/-/g, '') === identity);
 }
 
 function resolveBaseUrl(baseUrl: string) {

@@ -19,7 +19,7 @@ import { SmartImage } from '../../components/SmartImage';
 import { ReviewSection } from '../../components/ReviewSection';
 import { useCart } from '../../contexts/CartContext';
 import { useToast } from '../../contexts/ToastContext';
-import { formatEuro, PUBLIC_HIDDEN_PRODUCT_TRAITEURS, traiteurSpaces } from '../../data/traiteurs';
+import { formatEuro, getTraiteurSpaceBySlug, PUBLIC_HIDDEN_PRODUCT_TRAITEURS } from '../../data/traiteurs';
 import { getThumbnailPlaceholder, isUsableThumbnail, resolveProductThumbnail } from '../../services/catalogImageResolver';
 import { trackPublicView } from '../../services/metricsService';
 import { loadPublicCatalog, type PublicCatalogProduct } from '../../services/publicCatalogService';
@@ -80,13 +80,13 @@ export function TraiteurDetailPage() {
   const { addItem } = useCart();
   const { showSuccess } = useToast();
 
-  const [traiteur, setTraiteur] = useState(() => traiteurSpaces.find((item) => item.slug === slug) || null);
+  const [traiteur, setTraiteur] = useState(() => (slug ? getTraiteurSpaceBySlug(slug) || null : null));
   const [vendorLoading, setVendorLoading] = useState(true);
   const [liveProducts, setLiveProducts] = useState<PublicCatalogProduct[]>([]);
 
   useEffect(() => {
     let active = true;
-    const fallback = traiteurSpaces.find((item) => item.slug === slug) || null;
+    const fallback = slug ? getTraiteurSpaceBySlug(slug) || null : null;
     setTraiteur(fallback);
     setVendorLoading(true);
     if (!slug) {

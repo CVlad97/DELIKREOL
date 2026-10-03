@@ -6,6 +6,12 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  if (mode === 'production') {
+    const missing = ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY'].filter((key) => !env[key]?.trim());
+    if (missing.length > 0) {
+      throw new Error(`[DELIKREOL] Production build blocked: missing ${missing.join(', ')}`);
+    }
+  }
   const base = env.VITE_BASE_PATH || '/';
   const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 

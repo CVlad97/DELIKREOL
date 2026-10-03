@@ -325,8 +325,8 @@ export function primePublicVendors(): Promise<{ vendors: TraiteurSpace[]; source
 
 export async function getVendorBySlug(slug: string): Promise<{ vendor: TraiteurSpace | null; source: SourceMode }> {
   const { vendors, source } = await getPublicVendors();
-  const normalizedSlug = normalizeSpaceSlug(slug);
-  const vendor = vendors.find((item) => normalizeSpaceSlug(item.slug) === normalizedSlug) || null;
+  const normalizedSlug = normalizeSpaceSlug(slug).replace(/-/g, '');
+  const vendor = vendors.find((item) => normalizeSpaceSlug(item.slug).replace(/-/g, '') === normalizedSlug) || null;
   return { vendor, source };
 }
 
