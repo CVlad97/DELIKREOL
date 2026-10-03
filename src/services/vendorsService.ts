@@ -167,14 +167,18 @@ export function mergeVendorWithStatic(
   const commune = nonEmptyText(vendor.commune) || fallback?.commune || (normalizedKey(zone) !== 'martinique' ? zone : '');
   const address = nonEmptyText(vendor.address) || fallback?.address;
 
-  const supabaseGallery = trustedPublicMediaArray(vendor.gallery_images);
+  const supabaseGallery = trustedPublicMediaArray(vendor.gallery_images) || [];
+  const staticGallery = fallback?.galleryImages || [];
+  const galleryImages = Array.from(new Set([...supabaseGallery, ...staticGallery]));
   const supabaseHighlights = nonEmptyArray(vendor.highlights);
   const logoImage = trustedPublicMedia(vendor.logo_url);
-  const heroImage = trustedPublicMedia(vendor.hero_image) || fallback?.heroImage || null;
-  const portraitImage = logoImage || trustedPublicMedia(vendor.portrait_image) || fallback?.portraitImage || null;
-  const galleryImages = supabaseGallery || fallback?.galleryImages || [];
+  const remoteHero = trustedPublicMedia(vendor.hero_image);
+  const remotePortrait = trustedPublicMedia(vendor.portrait_image);
+  const remoteHeroLooksLikeLogo = Boolean(remoteHero && /(?:^|[/_-])logo(?:[/_-]|\.|$)/i.test(remoteHero));
+  const heroImage = (!remoteHeroLooksLikeLogo ? remoteHero : null) || fallback?.heroImage || galleryImages[0] || remoteHero || null;
+  const portraitImage = logoImage || remotePortrait || fallback?.portraitImage || null;
   const highlights = supabaseHighlights || fallback?.highlights || [];
-  const hasSupabaseMedia = Boolean(logoImage || trustedPublicMedia(vendor.hero_image) || trustedPublicMedia(vendor.portrait_image) || supabaseGallery);
+  const hasSupabaseMedia = Boolean(logoImage || remoteHero || remotePortrait || supabaseGallery.length > 0);
   const socialLinks = sanitizeSocialLinks({
     instagram: vendor.instagram_url || vendor.social_links?.instagram || fallback?.profile.instagram?.url,
     facebook: vendor.facebook_url || vendor.social_links?.facebook || fallback?.profile.facebook?.url,

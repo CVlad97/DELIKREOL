@@ -102,10 +102,29 @@ describe('vendorsService', () => {
 
     expect(merged?.description).toBe('Description publiée depuis Supabase');
     expect(merged?.heroImage).toBe('https://delikreol.com/vendors/goute-mwen/hero.jpg');
-    expect(merged?.galleryImages).toEqual(['https://delikreol.com/vendors/goute-mwen/mangue.jpg']);
+    expect(merged?.galleryImages?.[0]).toBe('https://delikreol.com/vendors/goute-mwen/mangue.jpg');
+    expect(merged?.galleryImages).toEqual(expect.arrayContaining(fallback?.galleryImages || []));
     expect(merged?.highlights).toEqual(['Glaces locales']);
     expect(merged?.menuItems.length).toBe(fallback?.menuItems.length);
     expect(merged?.photoStatus).toBe('confirmée');
+  });
+
+
+  it('keeps the validated static hero when a remote hero is actually a logo and recovers gallery media', () => {
+    const fallback = traiteurSpaces.find((vendor) => vendor.slug === 'les-delices-de-ninice');
+    expect(fallback).toBeDefined();
+    const merged = mergeVendorWithStatic(
+      sparseVendor({
+        name: 'Les Delices de Ninice',
+        business_name: 'Les Delices de Ninice',
+        hero_image: 'https://delikreol.com/vendors/ninice/logo-les-delices-de-ninice.webp',
+        gallery_images: ['https://delikreol.com/vendors/ninice/drive-reimport/IMG-20260521-WA0071.jpg'],
+      }),
+      fallback,
+    );
+    expect(merged?.heroImage).toBe(fallback?.heroImage);
+    expect(merged?.galleryImages).toEqual(expect.arrayContaining(fallback?.galleryImages || []));
+    expect(merged?.galleryImages).toContain('https://delikreol.com/vendors/ninice/drive-reimport/IMG-20260521-WA0071.jpg');
   });
 
   it('rejects demo or non-public rows', () => {

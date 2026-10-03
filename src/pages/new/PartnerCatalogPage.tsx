@@ -20,6 +20,7 @@ type Vendor = {
   story: string | null;
   hero_image: string | null;
   logo_url: string | null;
+  gallery_images: string[] | null;
   status: string;
   is_public: boolean;
 };
@@ -209,13 +210,19 @@ export default function PartnerCatalogPage() {
 
   const publishedCount = useMemo(() => products.filter((item) => item.is_public && item.status === 'verified').length, [products]);
   const availableCount = useMemo(() => products.filter((item) => item.is_available).length, [products]);
+  const workspaceMedia = useMemo(() => Array.from(new Set([
+    vendor?.logo_url,
+    vendor?.hero_image,
+    ...(vendor?.gallery_images || []),
+    ...products.map((item) => item.image_url),
+  ].filter((value): value is string => Boolean(value)))), [vendor, products]);
 
   const loadWorkspace = async () => {
     if (!user) return;
     setLoading(true);
     try {
       const { data: vendorData, error: vendorError } = await supabase
-        .from('vendors').select('id,business_name,business_type,description,phone,whatsapp,email,commune,address,specialty,story,hero_image,logo_url,status,is_public')
+        .from('vendors').select('id,business_name,business_type,description,phone,whatsapp,email,commune,address,specialty,story,hero_image,logo_url,gallery_images,status,is_public')
         .eq('user_id', user.id).maybeSingle();
       if (vendorError) throw vendorError;
       const currentVendor = vendorData as Vendor | null;
@@ -583,6 +590,7 @@ export default function PartnerCatalogPage() {
               <label className="sm:col-span-2 text-sm font-bold">Description<textarea value={profile.description} onChange={e=>setProfile({...profile,description:e.target.value})} rows={4} className="mt-2 w-full rounded-xl border px-4 py-3" placeholder="Votre savoir-faire, vos produits locaux, votre promesse…" /></label>
               <label className="sm:col-span-2 text-sm font-bold">Votre histoire<textarea value={profile.story} onChange={e=>setProfile({...profile,story:e.target.value})} rows={3} className="mt-2 w-full rounded-xl border px-4 py-3" /></label>
               {vendor.logo_url && <div className="sm:col-span-2 flex items-center gap-3 rounded-xl border bg-white p-3"><img src={vendor.logo_url} alt={`Logo ${vendor.business_name || 'traiteur'}`} className="h-16 w-16 rounded-xl object-contain" /><div><p className="text-sm font-black">Logo actuellement publié</p><p className="text-xs text-stone-500">La même image est utilisée sur la vitrine publique.</p></div></div>}
+              {workspaceMedia.length > 0 && <div className="sm:col-span-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-4"><div className="flex items-center justify-between gap-3"><div><p className="text-sm font-black text-emerald-950">Photos récupérées de votre espace</p><p className="text-xs text-emerald-800">{workspaceMedia.length} média{workspaceMedia.length > 1 ? 's' : ''} encore enregistré{workspaceMedia.length > 1 ? 's' : ''}. Rien n’a été supprimé de votre fiche.</p></div><Images className="h-5 w-5 text-emerald-700" /></div><div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-5">{workspaceMedia.slice(0, 10).map((src) => <img key={src} src={src} alt="Média enregistré" loading="lazy" className="aspect-square w-full rounded-xl border bg-white object-cover" />)}</div></div>}
               <label className="sm:col-span-2 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-primary/40 bg-[#fff8ef] px-4 py-3 text-sm font-black text-primary"><ImagePlus className="h-4 w-4" />{uploadingLogo ? 'Envoi du logo…' : 'Ajouter ou remplacer mon logo'}<input type="file" accept="image/jpeg,image/png,image/webp" onChange={uploadLogo} disabled={uploadingLogo} className="hidden" /></label>
             </div>
             <button disabled={savingProfile} className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-[#1f6a4a] px-5 py-3 font-black text-white disabled:opacity-60"><Save className="h-4 w-4" />{savingProfile ? 'Enregistrement…' : 'Enregistrer mon profil'}</button>

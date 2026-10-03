@@ -22,7 +22,7 @@ interface CatalogProduct {
   is_public: boolean;
   is_demo: boolean;
   sides?: string[] | null;
-  menu_options?: { sides?: string[]; drinks?: string[]; sauces?: string[]; included_side_count?: number; included_drink_count?: number; included_sauce_count?: number; instructions_enabled?: boolean } | null;
+  menu_options?: { appetizers?: string[]; sides?: string[]; drinks?: string[]; sauces?: string[]; condiments?: string[]; included_appetizer_count?: number; included_side_count?: number; included_drink_count?: number; included_sauce_count?: number; included_condiment_count?: number; instructions_enabled?: boolean } | null;
   vendor?: { business_name: string };
 }
 
@@ -35,18 +35,22 @@ interface ProductForm {
   image_url: string;
   stock_quantity: string;
   is_available: boolean;
+  appetizers: string;
   sides: string;
   drinks: string;
   sauces: string;
+  condiments: string;
+  included_appetizer_count: string;
   included_side_count: string;
   included_drink_count: string;
   included_sauce_count: string;
+  included_condiment_count: string;
 }
 
 const emptyForm: ProductForm = {
   vendor_id: '', name: '', description: '', category: '',
   price: '', image_url: '', stock_quantity: '', is_available: true,
-  sides: '', drinks: '', sauces: '', included_side_count: '1', included_drink_count: '1', included_sauce_count: '1',
+  appetizers: '', sides: '', drinks: '', sauces: '', condiments: '', included_appetizer_count: '0', included_side_count: '1', included_drink_count: '0', included_sauce_count: '0', included_condiment_count: '0',
 };
 
 
@@ -103,10 +107,23 @@ export default function AdminCatalog() {
         supabase.from('products').select('*, vendor:vendors(business_name)').order('created_at', { ascending: false }),
         supabase.from('vendors').select('id, business_name, phone, whatsapp').order('business_name'),
       ]);
-      if (prodRes.data) setProducts(prodRes.data);
-      if (vendRes.data) setVendors(vendRes.data);
-    } catch {
-      showError('Erreur de chargement du catalogue');
+      if (vendRes.error) throw vendRes.error;
+      setVendors(vendRes.data || []);
+
+      if (prodRes.error) {
+        const fallback = await supabase.from('products').select('*').order('created_at', { ascending: false });
+        if (fallback.error) throw fallback.error;
+        const vendorById = new Map((vendRes.data || []).map((item) => [item.id, item.business_name]));
+        setProducts((fallback.data || []).map((item) => ({
+          ...item,
+          vendor: item.vendor_id && vendorById.has(item.vendor_id) ? { business_name: vendorById.get(item.vendor_id) as string } : undefined,
+        })) as CatalogProduct[]);
+      } else {
+        setProducts((prodRes.data || []) as CatalogProduct[]);
+      }
+    } catch (error) {
+      console.error('Admin catalog load failed:', error);
+      showError('Erreur de chargement du catalogue. Réessayez : vos données ne sont pas supprimées.');
     } finally {
       setLoading(false);
     }
@@ -165,12 +182,16 @@ Merci, l’équipe DELIKREOL` : '';
       image_url: p.image_url || '',
       stock_quantity: p.stock_quantity?.toString() || '',
       is_available: p.is_available,
+      appetizers: (p.menu_options?.appetizers || []).join(', '),
       sides: (p.menu_options?.sides || p.sides || []).join(', '),
       drinks: (p.menu_options?.drinks || []).join(', '),
       sauces: (p.menu_options?.sauces || []).join(', '),
+      condiments: (p.menu_options?.condiments || []).join(', '),
+      included_appetizer_count: String(p.menu_options?.included_appetizer_count ?? 0),
       included_side_count: String(p.menu_options?.included_side_count ?? 1),
-      included_drink_count: String(p.menu_options?.included_drink_count ?? 1),
-      included_sauce_count: String(p.menu_options?.included_sauce_count ?? 1),
+      included_drink_count: String(p.menu_options?.included_drink_count ?? 0),
+      included_sauce_count: String(p.menu_options?.included_sauce_count ?? 0),
+      included_condiment_count: String(p.menu_options?.included_condiment_count ?? 0),
     });
     setSelectedImage(null);
     setImagePreview(p.image_url || '');
@@ -231,13 +252,17 @@ Merci, l’équipe DELIKREOL` : '';
         is_demo: false,
         status: 'verified',
         sides: form.sides.split(',').map(v => v.trim()).filter(Boolean),
-        menu_options: (form.sides || form.drinks || form.sauces) ? {
+        menu_options: (form.appetizers || form.sides || form.drinks || form.sauces || form.condiments) ? {
+          appetizers: form.appetizers.split(',').map(v => v.trim()).filter(Boolean),
           sides: form.sides.split(',').map(v => v.trim()).filter(Boolean),
           drinks: form.drinks.split(',').map(v => v.trim()).filter(Boolean),
           sauces: form.sauces.split(',').map(v => v.trim()).filter(Boolean),
-          included_side_count: Math.max(0, Number(form.included_side_count || 0)),
-          included_drink_count: Math.max(0, Number(form.included_drink_count || 0)),
-          included_sauce_count: Math.max(0, Number(form.included_sauce_count || 0)),
+          condiments: form.condiments.split(',').map(v => v.trim()).filter(Boolean),
+          included_appetizer_count: Math.min(form.appetizers.split(',').map(v => v.trim()).filter(Boolean).length, Math.max(0, Number(form.included_appetizer_count || 0))),
+          included_side_count: Math.min(form.sides.split(',').map(v => v.trim()).filter(Boolean).length, Math.max(0, Number(form.included_side_count || 0))),
+          included_drink_count: Math.min(form.drinks.split(',').map(v => v.trim()).filter(Boolean).length, Math.max(0, Number(form.included_drink_count || 0))),
+          included_sauce_count: Math.min(form.sauces.split(',').map(v => v.trim()).filter(Boolean).length, Math.max(0, Number(form.included_sauce_count || 0))),
+          included_condiment_count: Math.min(form.condiments.split(',').map(v => v.trim()).filter(Boolean).length, Math.max(0, Number(form.included_condiment_count || 0))),
           instructions_enabled: true,
         } : null,
       };
@@ -698,6 +723,7 @@ Merci, l’équipe DELIKREOL` : '';
                 <h3 className="font-black">Composition client</h3>
                 <p className="mb-3 text-xs text-muted-foreground">Fonctionne pour les plats et les menus. Séparez les choix par des virgules.</p>
                 <div className="grid gap-3">
+                  <label className="text-xs font-bold uppercase">Entrées<input value={form.appetizers} onChange={e => setForm(f => ({...f, appetizers:e.target.value}))} className="mt-1 w-full rounded-xl border bg-background px-4 py-2.5 normal-case" placeholder="Accras, Salade créole" /></label>
                   <label className="text-xs font-bold uppercase">Accompagnements<input value={form.sides} onChange={e => setForm(f => ({...f, sides:e.target.value}))} className="mt-1 w-full rounded-xl border bg-background px-4 py-2.5 normal-case" placeholder="Riz, Lentilles, Légumes pays, Frites, Crudités" /></label>
                   <label className="text-xs font-bold uppercase">Boissons<input value={form.drinks} onChange={e => setForm(f => ({...f, drinks:e.target.value}))} className="mt-1 w-full rounded-xl border bg-background px-4 py-2.5 normal-case" placeholder="Eau, Jus local, Soda" /></label>
                   <label className="text-xs font-bold uppercase">Sauces<input value={form.sauces} onChange={e => setForm(f => ({...f, sauces:e.target.value}))} className="mt-1 w-full rounded-xl border bg-background px-4 py-2.5 normal-case" placeholder="Sauce chien, Sauce créole, Piment à part" /></label>
