@@ -10,13 +10,32 @@ export const isSupabaseConfigured =
   typeof supabaseAnonKey === 'string' &&
   supabaseAnonKey.length > 0;
 
+const explicitDemoEnvironment = import.meta.env.VITE_DEMO_MODE === 'true';
+const explicitSimulationRoute =
+  typeof window !== 'undefined' &&
+  (window.location.pathname.startsWith('/demo') ||
+    window.location.pathname.startsWith('/simulation-partenaires') ||
+    new URL(window.location.href).searchParams.get('mode') === 'simulation');
+
+// Older builds persisted a demo override in localStorage. Once production is
+// correctly connected to Supabase, that stale flag must not keep an installed
+// PWA or the admin/control app trapped in demo mode forever.
+if (typeof window !== 'undefined' && isSupabaseConfigured && !explicitDemoEnvironment && !explicitSimulationRoute) {
+  try {
+    window.localStorage.removeItem('delikreol_demo_override');
+  } catch {
+    // Storage can be unavailable in hardened/private browsers.
+  }
+}
+
 const demoOverride =
   typeof window !== 'undefined' &&
-  window.localStorage.getItem('delikreol_demo_override') === 'true';
+  window.sessionStorage.getItem('delikreol_demo_override') === 'true';
 
 export const isDemoMode =
-  import.meta.env.VITE_DEMO_MODE === 'true' ||
+  explicitDemoEnvironment ||
   !isSupabaseConfigured ||
+  explicitSimulationRoute ||
   demoOverride;
 
 let client: SupabaseClient;

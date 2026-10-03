@@ -54,7 +54,7 @@ export function shouldFallbackToDemo(error: unknown): boolean {
 
 export function activateDemoOverride(reason?: string) {
   try {
-    window.localStorage.setItem('delikreol_demo_override', 'true');
+    window.sessionStorage.setItem('delikreol_demo_override', 'true');
   } catch {
     // ignore
   }

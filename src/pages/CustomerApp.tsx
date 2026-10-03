@@ -54,7 +54,7 @@ export function CustomerApp({ initialDraftProducts }: CustomerAppProps = {}) {
 
   useEffect(() => {
     if (isPresentationMode) {
-      localStorage.setItem('delikreol_demo_override', 'true');
+      sessionStorage.setItem('delikreol_demo_override', 'true');
     }
   }, [isPresentationMode]);
 
