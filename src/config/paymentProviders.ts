@@ -94,10 +94,9 @@ export const PAYMENT_PROVIDERS: PaymentProvider[] = [
     id: 'sumup',
     label: 'SumUp',
     shortLabel: 'SumUp',
-    description: 'Lien de paiement SumUp généré manuellement. Aucun paiement automatisé côté site.',
-    status: import.meta.env.VITE_SUMUP_PUBLIC_KEY ? 'manual' : 'disabled',
+    description: 'Paiement carte sécurisé via le checkout hébergé SumUp.',
+    status: import.meta.env.VITE_SUMUP_ENABLED === 'true' ? 'ready' : 'disabled',
     requiresProof: false,
-    paymentUrl: import.meta.env.VITE_SUMUP_PUBLIC_KEY || '',
   },
   {
     id: 'stripe_disabled',

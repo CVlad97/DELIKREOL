@@ -54,6 +54,7 @@ jobs:
           VITE_ENABLE_GOOGLE_AUTH: ${{ secrets.VITE_ENABLE_GOOGLE_AUTH }}
           VITE_STRIPE_PUBLISHABLE_KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
           VITE_ENABLE_STRIPE_PUBLIC: ${{ secrets.VITE_ENABLE_STRIPE_PUBLIC }}
+          VITE_SUMUP_ENABLED: "true"
         run: npm run build
 
       - name: Add SPA fallback and nojekyll marker

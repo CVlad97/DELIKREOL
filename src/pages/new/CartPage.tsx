@@ -341,6 +341,9 @@ export default function CartPage() {
  const idempotencyKey = getStableCheckoutIdempotencyKey(provider, fingerprint);
  const provisionalOrderNumber = generateOrderId();
  const paymentReference = buildPaymentReference(provisionalOrderNumber, provider);
+ // checkout-order n'accepte pas encore SumUp comme provider initial. On crée d'abord
+ // la commande en attente, puis create-sumup-checkout bascule atomiquement le paiement sur SumUp.
+ const orderProvider: PaymentProviderId = provider === 'sumup' ? 'cash_on_delivery' : provider;
  const { data, error } = await supabase.functions.invoke('checkout-order', {
  body: {
  idempotency_key: idempotencyKey,
@@ -355,7 +358,7 @@ export default function CartPage() {
  email,
  notes,
  creneaux: getCreneauText(),
- payment_provider: provider,
+ payment_provider: orderProvider,
  payment_reference: paymentReference,
  payment_external_id: paymentExternalId.trim() || undefined,
  payment_proof_url: paymentProofUrl.trim() || undefined,
@@ -367,6 +370,21 @@ export default function CartPage() {
  throw new Error(data?.error ||'Commande non créée');
  }
  return data.order as { id: string; order_number: string; tracking_token?: string };
+ };
+
+ const createSumUpCheckout = async (orderId: string) => {
+ const { data, error } = await supabase.functions.invoke('create-sumup-checkout', {
+ body: { order_id: orderId, email: email.trim(), phone },
+ });
+ if (error) throw error;
+ const paymentUrl = typeof data?.payment_url === 'string' ? data.payment_url : '';
+ if (!paymentUrl) throw new Error(data?.error || 'Lien de paiement SumUp indisponible');
+ const url = new URL(paymentUrl);
+ const host = url.hostname.toLowerCase();
+ if (url.protocol !== 'https:' || !(host === 'sumup.com' || host.endsWith('.sumup.com'))) {
+ throw new Error('URL de paiement SumUp invalide');
+ }
+ return paymentUrl;
  };
 
  const validateOrderForm = () => {
@@ -385,7 +403,11 @@ export default function CartPage() {
  scrollToField(phoneInputRef.current);
  return false;
  }
- // Email valide si fourni
+ // Email valide si fourni ; obligatoire pour un paiement SumUp invité
+ if (paymentProvider === 'sumup' && !email.trim()) {
+ showError("Une adresse email est requise pour le paiement sécurisé SumUp.");
+ return false;
+ }
  if (email && !validateEmail(email)) {
  showError("Merci d'indiquer une adresse email valide.");
  return false;
@@ -478,6 +500,22 @@ export default function CartPage() {
  setCheckoutStatus('error');
  showError("La commande n'a pas pu être enregistrée. Votre panier est conservé : réessayez dans un instant.");
  return;
+ }
+
+ if (paymentProvider === 'sumup') {
+ try {
+ const paymentUrl = await createSumUpCheckout(String(order.id));
+ setOrderNumber(orderNumber);
+ setOrderStatusUrl(trackingToken ? `/statut-commande?order=${encodeURIComponent(trackingToken)}` : '/statut-commande');
+ setCheckoutStatus('success');
+ window.location.assign(paymentUrl);
+ return;
+ } catch (err) {
+ console.error('[DELIKREOL] Échec checkout SumUp:', err);
+ setCheckoutStatus('error');
+ showError("Le paiement SumUp n'a pas pu démarrer. Votre commande est conservée ; réessayez ou choisissez un autre moyen de paiement.");
+ return;
+ }
  }
 
  const confirmedWhatsappText = buildWhatsAppOrderMessage({
@@ -790,14 +828,14 @@ export default function CartPage() {
  </h3>
  <div className="flex flex-wrap items-center gap-2 mb-3">
  <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-semibold">
- WhatsApp-first
+ SumUp sécurisé
  </span>
  <span className="text-xs px-2 py-0.5 bg-muted text-muted-foreground rounded-full font-semibold">
- Stripe désactivé
+ Stripe en validation
  </span>
  </div>
  <p className="text-xs text-muted-foreground leading-relaxed">
- Choisissez un moyen de paiement hors Stripe. La commande reste à confirmer sur WhatsApp et le statut passe à payé uniquement après validation.
+ SumUp ouvre un checkout hébergé sécurisé. Les autres moyens restent confirmés selon leur parcours indiqué.
  </p>
  </div>
 
@@ -807,7 +845,7 @@ export default function CartPage() {
  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
  {PAYMENT_PROVIDERS.filter((provider) => isCustomerSelectablePaymentProvider(provider.id)).map((provider) => {
  const active = paymentProvider === provider.id;
- const Icon = provider.id ==='cash_on_delivery' ? Banknote : provider.id ==='crypto_wallet' ? Wallet : Landmark;
+ const Icon = provider.id ==='sumup' ? CreditCard : provider.id ==='cash_on_delivery' ? Banknote : provider.id ==='crypto_wallet' ? Wallet : Landmark;
  return (
  <button
  key={provider.id}
@@ -850,6 +888,12 @@ export default function CartPage() {
  <span className="text-xs font-black uppercase tracking-[0.18em] text-muted-foreground">Preuve de virement optionnelle</span>
  <input value={paymentProofUrl} onChange={(event) => setPaymentProofUrl(event.target.value)} placeholder="Lien photo/reçu ou note de preuve" className="mt-2 w-full rounded-xl border border-input px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30" />
  </label>
+ </div>
+ )}
+
+ {paymentProvider === 'sumup' && (
+ <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+ Paiement sécurisé hébergé par SumUp. Après création de la commande, vous serez redirigé vers SumUp ; le statut payé sera confirmé côté serveur.
  </div>
  )}
 
@@ -1113,12 +1157,12 @@ export default function CartPage() {
  onClick={handleWhatsAppClick}
  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-primary hover:bg-primary text-white font-bold rounded-2xl transition-all hover:scale-[1.02] shadow-lg shadow-primary/200 text-lg"
  >
- <MessageCircle className="w-6 h-6" />
- {t('cart.checkout')} WhatsApp
+ {paymentProvider === 'sumup' ? <CreditCard className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
+ {paymentProvider === 'sumup' ? `Payer avec SumUp · ${orderTotal.toFixed(2).replace('.', ',')} €` : `${t('cart.checkout')} WhatsApp`}
  </button>
  )}
  <p className="text-xs text-center text-muted-foreground">
- Demande à confirmer : aucun débit carte n’est lancé par le site. Le paiement est validé après rapprochement manuel.
+ {paymentProvider === 'sumup' ? 'Paiement carte traité sur la page sécurisée SumUp ; confirmation serveur avant statut payé.' : 'Demande à confirmer : aucun débit carte n’est lancé par le site. Le paiement est validé selon le moyen choisi.'}
  </p>
  </div>
  </div>
@@ -1131,11 +1175,11 @@ export default function CartPage() {
  disabled={checkoutStatus ==='processing'}
  className="flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-primary px-5 py-3 text-base font-black text-white shadow-lg shadow-primary/200 transition-all disabled:cursor-not-allowed disabled:opacity-70"
  >
- <MessageCircle className="h-5 w-5" />
- {checkoutStatus ==='processing' ? 'Préparation...' : `Confirmer WhatsApp · ${orderTotal.toFixed(2).replace('.', ',')} €`}
+ {paymentProvider === 'sumup' ? <CreditCard className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
+ {checkoutStatus ==='processing' ? 'Préparation...' : paymentProvider === 'sumup' ? `Payer avec SumUp · ${orderTotal.toFixed(2).replace('.', ',')} €` : `Confirmer WhatsApp · ${orderTotal.toFixed(2).replace('.', ',')} €`}
  </button>
  <p className="mt-1 text-center text-[11px] font-medium text-muted-foreground">
- Aucun débit carte : validation finale sur WhatsApp.
+ {paymentProvider === 'sumup' ? 'Vous serez redirigé vers le checkout sécurisé SumUp.' : 'Aucun débit carte : validation finale selon le moyen choisi.'}
  </p>
  </div>
  </Layout>
