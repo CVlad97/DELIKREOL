@@ -77,3 +77,19 @@ Calculer un score sur 100 mais un blocker P0 force NO-GO même si le score est �
 8. `ROLLBACK`: commit/sauvegarde permettant le retour arrière.
 
 Ne t’arrête pas après un audit. Corrige ce qui est sûr, reteste, publie seulement après les gates, puis continue jusqu’au prochain vrai blocage humain.
+
+## Topologie d’automatisation à maintenir
+- `DELIKREOL - Health Monitor 30m` : contrôle site, bridge WhatsApp et Ollama ; aucune action financière.
+- `DELIKREOL - WhatsApp Triage Local` : reçoit uniquement le relais interne du bridge déjà validé par signature Meta, classe via LLM local et ne répond pas automatiquement.
+- Le bridge public Meta reste l’unique point d’entrée WhatsApp. n8n reste lié à `127.0.0.1` et aux réseaux Docker internes.
+- Toute automatisation fournisseur/traiteur sortante doit partir d’une file `pending_approval` tant que les modèles, destinataires et règles d’escalade ne sont pas validés.
+- Les commandes, paiements, remboursements, litiges, KYC et contrats ne peuvent jamais être clôturés sur la seule décision d’un LLM.
+
+## PWA / cache / dashboard
+- `index.html` et `sw.js` doivent toujours être servis `no-store/no-cache`; seuls les assets hashés peuvent être `immutable`.
+- Après chaque déploiement, comparer les hashes d’assets servis par `https://delikreol.com` avec `/opt/delikreol-runtime/site`.
+- `/admin` et `/admin/dashboard` doivent charger le même composant live et afficher une heure de dernière synchronisation.
+- Si le dashboard paraît ancien, vérifier d’abord `sw.js`, le cache navigateur et le chunk `AdminDashboard-*` avant toute restauration de données.
+
+## Politique commerciale livraison indépendante
+Le modèle cible est une place de marché/coordinatrice utilisant des prestataires indépendants, sans salariés livreurs par défaut. Ne jamais imposer horaires fixes, exclusivité, présence obligatoire ou sanction automatique. Chaque mission doit pouvoir être librement acceptée/refusée, avec conditions tarifaires connues à l’avance, SIRET/assurance/identité vérifiés avant activation, et preuve de remise. Toute évolution vers un niveau de contrôle comparable à un employeur doit déclencher `BLOCKED_HUMAN` et une revue juridique/sociale.

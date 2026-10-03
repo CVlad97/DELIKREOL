@@ -13,6 +13,8 @@ const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
 const API_VERSION = process.env.WHATSAPP_API_VERSION || 'v23.0';
 const REQUIRE_SIGNATURE = process.env.REQUIRE_SIGNATURE === 'true';
 const DATA_DIR = process.env.DATA_DIR || '/data';
+const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || '';
+const FORWARD_TIMEOUT_MS = Number(process.env.N8N_FORWARD_TIMEOUT_MS || 5000);
 const INBOX_DIR = path.join(DATA_DIR, 'inbox');
 const MEDIA_DIR = path.join(DATA_DIR, 'media');
 const MAX_BODY = 2 * 1024 * 1024;
@@ -59,6 +61,15 @@ async function processPayload(payload) {
         catch (err) { item.status = 'media_error'; item.error = err.message; }
       }
       writeJson(base + '.json', item);
+      if (N8N_WEBHOOK_URL) {
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), FORWARD_TIMEOUT_MS);
+          const forwarded = await fetch(N8N_WEBHOOK_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(item), signal: controller.signal });
+          clearTimeout(timer);
+          if (!forwarded.ok) console.error(`n8n forward HTTP ${forwarded.status}`);
+        } catch (err) { console.error('n8n forward failed:', err.message); }
+      }
     }
   }
 }
@@ -67,7 +78,10 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   if (req.method === 'GET' && url.pathname === '/health') return json(res, 200, { ok: true, service: 'delikreol-whatsapp' });
   if (req.method === 'GET' && url.pathname === '/webhooks/whatsapp') {
-    if (url.searchParams.get('hub.mode') === 'subscribe' && url.searchParams.get('hub.verify_token') === VERIFY_TOKEN && VERIFY_TOKEN) res.writeHead(200, {'content-type':'text/plain; charset=utf-8'}); return res.end(url.searchParams.get('hub.challenge'));
+    if (url.searchParams.get('hub.mode') === 'subscribe' && url.searchParams.get('hub.verify_token') === VERIFY_TOKEN && VERIFY_TOKEN) {
+      res.writeHead(200, {'content-type':'text/plain; charset=utf-8'});
+      return res.end(url.searchParams.get('hub.challenge'));
+    }
     return json(res, 403, { ok: false });
   }
   if (req.method === 'POST' && url.pathname === '/webhooks/whatsapp') {

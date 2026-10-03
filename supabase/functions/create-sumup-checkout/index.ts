@@ -59,9 +59,11 @@ Deno.serve(async (req: Request) => {
   try {
     const body = await req.json();
     const orderId = typeof body.order_id === "string" ? body.order_id : "";
+    const trackingToken = typeof body.tracking_token === "string" ? body.tracking_token.trim().toLowerCase() : "";
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
     const phone = typeof body.phone === "string" ? normalizePhone(body.phone) : "";
     if (!isUuid(orderId)) return json({ error: "Invalid order_id" }, 400, origin);
+    if (!/^[0-9a-f]{16}$/.test(trackingToken)) return json({ error: "Invalid tracking token" }, 403, origin);
     if (!email || !phone) return json({ error: "Order email and phone are required" }, 400, origin);
 
     const orderQuery = new URLSearchParams({
@@ -75,7 +77,10 @@ Deno.serve(async (req: Request) => {
 
     const savedEmail = String(order.customer_email ?? "").trim().toLowerCase();
     const savedPhone = normalizePhone(String(order.customer_phone ?? ""));
-    if (savedEmail !== email || !savedPhone || savedPhone !== phone) return json({ error: "Order details did not match" }, 403, origin);
+    const savedTrackingToken = String(order.tracking_token ?? "").trim().toLowerCase();
+    if (!savedTrackingToken || savedTrackingToken !== trackingToken || savedEmail !== email || !savedPhone || savedPhone !== phone) {
+      return json({ error: "Order details did not match" }, 403, origin);
+    }
     if (!["pending", "awaiting_payment", "failed", "processing"].includes(String(order.payment_status))) {
       return json({ error: "Order is not payable", payment_status: order.payment_status }, 409, origin);
     }
@@ -101,9 +106,8 @@ Deno.serve(async (req: Request) => {
     if (!/^[A-Z]{3}$/.test(currency)) return json({ error: "Invalid currency" }, 400, origin);
 
     const reference = `DK-${String(order.order_number || order.id).replace(/[^A-Za-z0-9_-]/g, "").slice(0, 40)}`;
-    const trackingToken = String(order.tracking_token || "");
-    const returnUrl = trackingToken
-      ? `https://delikreol.com/statut-commande?order=${encodeURIComponent(trackingToken)}`
+    const returnUrl = savedTrackingToken
+      ? `https://delikreol.com/statut-commande?order=${encodeURIComponent(savedTrackingToken)}`
       : "https://delikreol.com/statut-commande";
 
     const sumupResponse = await fetch(SUMUP_CHECKOUTS_URL, {

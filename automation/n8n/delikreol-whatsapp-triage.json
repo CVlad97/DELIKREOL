@@ -1,0 +1,85 @@
+{
+  "id": "dkrwatsatri20261003",
+  "name": "DELIKREOL - WhatsApp Triage Local",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "nodes": [
+    {
+      "id": "webhook",
+      "name": "Signed bridge ingest",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "dkr-whatsapp-ingest-20261003",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "delikreol-whatsapp-ingest",
+        "responseMode": "onReceived",
+        "options": {}
+      }
+    },
+    {
+      "id": "normalize",
+      "name": "Normalize and classify",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        280,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const src = $json.body ?? $json;\nconst text = String(src.text ?? src.caption ?? '').slice(0, 4000);\nconst lower = text.toLowerCase();\nlet category = 'general';\nif (/commande|livraison|retard|client/.test(lower)) category = 'order';\nif (/connexion|accès|acces|mot de passe|traiteur|partenaire/.test(lower)) category = 'partner_access';\nif (/fournisseur|devis|catalogue|prix|stock|rfq/.test(lower)) category = 'supplier';\nif (/rembours|plainte|réclamation|reclamation|litige/.test(lower)) category = 'complaint';\nif (/paiement|sumup|stripe|carte/.test(lower)) category = 'payment';\nconst urgent = /urgent|immédiat|immediat|bloqué|bloque|erreur|panne/.test(lower);\nreturn [{json:{message_id:src.id ?? null,from:src.from ?? null,type:src.type ?? null,text,category,urgent,received_at:src.received_at ?? new Date().toISOString()}}];"
+      }
+    },
+    {
+      "id": "ollama",
+      "name": "Local LLM triage",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://ollama:11434/api/generate",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: 'supergtp-fast-hermes-lite:latest', stream: false, prompt: 'Tu classes un message opérationnel DELIKREOL. Réponds uniquement en JSON compact avec category, urgency, summary, suggested_action, needs_human. Ne demande aucun secret et ne déclenche aucune action externe. Message: ' + $json.text }) }}",
+        "options": {
+          "timeout": 30000
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Signed bridge ingest": {
+      "main": [
+        [
+          {
+            "node": "Normalize and classify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize and classify": {
+      "main": [
+        [
+          {
+            "node": "Local LLM triage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

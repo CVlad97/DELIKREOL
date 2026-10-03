@@ -372,9 +372,9 @@ export default function CartPage() {
  return data.order as { id: string; order_number: string; tracking_token?: string };
  };
 
- const createSumUpCheckout = async (orderId: string) => {
+ const createSumUpCheckout = async (orderId: string, trackingToken: string) => {
  const { data, error } = await supabase.functions.invoke('create-sumup-checkout', {
- body: { order_id: orderId, email: email.trim(), phone },
+ body: { order_id: orderId, tracking_token: trackingToken, email: email.trim(), phone },
  });
  if (error) throw error;
  const paymentUrl = typeof data?.payment_url === 'string' ? data.payment_url : '';
@@ -504,7 +504,8 @@ export default function CartPage() {
 
  if (paymentProvider === 'sumup') {
  try {
- const paymentUrl = await createSumUpCheckout(String(order.id));
+ if (!trackingToken) throw new Error('Jeton de suivi manquant');
+ const paymentUrl = await createSumUpCheckout(String(order.id), trackingToken);
  setOrderNumber(orderNumber);
  setOrderStatusUrl(trackingToken ? `/statut-commande?order=${encodeURIComponent(trackingToken)}` : '/statut-commande');
  setCheckoutStatus('success');

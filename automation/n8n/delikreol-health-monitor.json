@@ -1,0 +1,113 @@
+{
+  "name": "DELIKREOL - Health Monitor 30m",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "nodes": [
+    {
+      "id": "schedule",
+      "name": "Every 30 minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "site",
+      "name": "Check DELIKREOL",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        0
+      ],
+      "parameters": {
+        "url": "https://delikreol.com/",
+        "options": {
+          "timeout": 10000
+        }
+      }
+    },
+    {
+      "id": "wa",
+      "name": "Check WhatsApp bridge",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        0
+      ],
+      "parameters": {
+        "url": "http://delikreol-whatsapp:3000/health",
+        "options": {
+          "timeout": 10000
+        }
+      }
+    },
+    {
+      "id": "ollama",
+      "name": "Check local Ollama",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        780,
+        0
+      ],
+      "parameters": {
+        "url": "http://ollama:11434/api/tags",
+        "options": {
+          "timeout": 10000
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every 30 minutes": {
+      "main": [
+        [
+          {
+            "node": "Check DELIKREOL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check DELIKREOL": {
+      "main": [
+        [
+          {
+            "node": "Check WhatsApp bridge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check WhatsApp bridge": {
+      "main": [
+        [
+          {
+            "node": "Check local Ollama",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "id": "dkrhealth20261003001"
+}
