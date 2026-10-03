@@ -15,7 +15,7 @@ export default function PrivacyPolicy() {
             Politique de Confidentialité
           </h1>
           <p className="text-muted-foreground mt-2">
-            Dernière mise à jour : 19 décembre 2024
+            Dernière mise à jour : 3 octobre 2026
           </p>
         </div>
       </section>
@@ -44,7 +44,7 @@ export default function PrivacyPolicy() {
           <h3>3.2 Données de connexion</h3>
           <ul>
             <li>Identifiant de connexion</li>
-            <li>Mot de passe (chiffré)</li>
+            <li>Identifiants techniques d’authentification ; les mots de passe ne sont pas accessibles en clair à DELIKREOL</li>
             <li>Adresse IP</li>
             <li>Données de navigation</li>
           </ul>
@@ -98,9 +98,9 @@ export default function PrivacyPolicy() {
             <li><strong>Nos livreurs</strong> : pour effectuer la livraison</li>
             <li><strong>Nos prestataires de services</strong> :
               <ul>
-                <li>Hébergement (Supabase)</li>
-                <li>Paiement (lien bancaire ou virement)</li>
-                <li>Communication (services email/SMS)</li>
+                <li>Hébergement du site (infrastructure VPS Hostinger) et données applicatives/authentification (Supabase)</li>
+                <li>Paiement (SumUp et, lorsqu’il est activé, Stripe ; ou moyen manuel explicitement choisi par le client)</li>
+                <li>Communication et notifications nécessaires au suivi de commande</li>
               </ul>
             </li>
             <li><strong>Autorités compétentes</strong> : en cas d'obligation légale</li>
@@ -113,7 +113,7 @@ export default function PrivacyPolicy() {
           <ul>
             <li><strong>Données de compte</strong> : pendant toute la durée d'utilisation du service + 3 ans après la dernière activité</li>
             <li><strong>Données de commande</strong> : 10 ans pour les obligations comptables et fiscales</li>
-            <li><strong>Données de paiement</strong> : 13 mois (obligation légale anti-fraude)</li>
+            <li><strong>Données de paiement</strong> : DELIKREOL conserve uniquement les références et statuts techniques nécessaires au suivi de la transaction, à la prévention de la fraude et aux obligations légales ; les données de carte restent chez le prestataire de paiement</li>
             <li><strong>Cookies</strong> : 13 mois maximum</li>
           </ul>
 

@@ -6,7 +6,7 @@ export function CGVPage() {
       <section className="pageSection max-w-3xl mx-auto">
         <div className="badge">Légal</div>
         <h1>Conditions Générales de Vente</h1>
-        <p className="text-sm text-muted-foreground mb-8">Dernière mise à jour : juin 2026</p>
+        <p className="text-sm text-muted-foreground mb-8">Dernière mise à jour : octobre 2026</p>
 
         <div className="space-y-6 text-sm leading-relaxed">
           <div>
@@ -36,7 +36,7 @@ export function CGVPage() {
 
           <div>
             <h2 className="text-lg font-semibold mb-2">6. Paiement</h2>
-            <p>Les seuls moyens de paiement utilisables sont ceux affichés au moment de la demande. Pendant la phase pilote, le paiement à la livraison peut être proposé. Un lien de paiement externe ou un virement ne sera présenté qu'après son activation et sa validation. La commande reste à confirmer par WhatsApp et le statut payé n'est validé qu'après contrôle du règlement. Aucune donnée bancaire ni clé privée n'est stockée par Delikreol.</p>
+            <p>Les seuls moyens de paiement utilisables sont ceux affichés au moment de la commande. Lorsque SumUp est proposé, le paiement par carte est réalisé sur le checkout hébergé et sécurisé de SumUp ; DELIKREOL ne reçoit ni ne stocke les données de carte. Le statut payé n'est enregistré qu'après confirmation serveur du prestataire de paiement. Stripe et les moyens manuels (virement, paiement à la remise ou lien externe) ne sont proposés que lorsqu'ils sont explicitement activés et affichés au client.</p>
           </div>
 
           <div>

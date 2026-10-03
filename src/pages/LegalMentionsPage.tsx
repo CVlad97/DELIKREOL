@@ -8,15 +8,14 @@ export function LegalMentionsPage() {
       <section className="pageSection mx-auto max-w-3xl">
         <div className="badge">Informations légales</div>
         <h1>Mentions légales</h1>
-        <p className="mb-8 text-sm text-muted-foreground">Dernière mise à jour : septembre 2026</p>
+        <p className="mb-8 text-sm text-muted-foreground">Dernière mise à jour : octobre 2026</p>
 
         <div className="space-y-6 text-sm leading-relaxed">
           <section>
             <h2 className="mb-2 text-lg font-semibold">Édition et contact</h2>
             <p>
-              DELIKREOL est une plateforme numérique en phase pilote en Martinique. Les informations
-              d’immatriculation définitives de l’éditeur seront publiées avant l’ouverture commerciale
-              complète. Contact :{' '}
+              DELIKREOL est une plateforme numérique exploitée en Martinique et actuellement en phase de lancement contrôlé.
+              Les informations d’immatriculation complètes de l’éditeur doivent être affichées ici avant toute ouverture commerciale générale. Contact :{' '}
               <a className="text-primary underline" href={`mailto:${PUBLIC_CONTACT_EMAIL}`}>
                 {PUBLIC_CONTACT_EMAIL}
               </a>.
@@ -25,7 +24,7 @@ export function LegalMentionsPage() {
 
           <section>
             <h2 className="mb-2 text-lg font-semibold">Hébergement</h2>
-            <p>Le site public est diffusé par GitHub Pages. Les services de données applicatives sont hébergés par Supabase.</p>
+            <p>Le site public est servi depuis une infrastructure VPS Hostinger. Les services de données applicatives et d’authentification sont fournis par Supabase.</p>
           </section>
 
           <section>

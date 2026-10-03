@@ -129,6 +129,18 @@ export function VendorOrders() {
           <button type="button" onClick={() => void load()} className="rounded-xl border bg-white p-3" aria-label="Actualiser"><RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} /></button>
         </div>
       </div>
+      {pushStatus !== 'subscribed' && pushStatus !== 'unsupported' && (
+        <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-950 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-black">Activez les alertes de nouvelles commandes sur ce téléphone</p>
+            <p className="mt-1 text-xs">Sans cette activation, DELIKREOL ne peut pas envoyer de notification Web Push à cet appareil. Vous pourrez toujours consulter les commandes ici.</p>
+          </div>
+          <button type="button" onClick={() => void togglePush()} disabled={pushBusy || pushStatus === 'denied'} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-amber-900 px-4 py-3 text-sm font-black text-white disabled:opacity-50">
+            <Bell className="h-4 w-4" />
+            {pushStatus === 'denied' ? 'Notifications bloquées dans le navigateur' : pushBusy ? 'Activation...' : 'Activer maintenant'}
+          </button>
+        </div>
+      )}
       {loading && <div className="flex justify-center py-16"><Loader className="h-6 w-6 animate-spin" /></div>}
       {!loading && queryError && <div className="flex gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700"><AlertCircle className="h-5 w-5 shrink-0" /><span>Commandes indisponibles : {queryError}</span></div>}
       {!loading && !queryError && orders.length === 0 && <div className="rounded-2xl bg-white p-8 text-center text-muted-foreground">Aucune commande à préparer.</div>}

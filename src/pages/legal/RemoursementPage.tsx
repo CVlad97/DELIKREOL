@@ -7,7 +7,7 @@ export function RemoursementPage() {
       <section className="pageSection max-w-3xl mx-auto">
         <div className="badge">Légal</div>
         <h1>Politique de Remboursement et Annulation</h1>
-        <p className="text-sm text-muted-foreground mb-8">Dernière mise à jour : juin 2026</p>
+        <p className="text-sm text-muted-foreground mb-8">Dernière mise à jour : octobre 2026</p>
 
         <div className="space-y-6 text-sm leading-relaxed">
           <div>
@@ -27,7 +27,7 @@ export function RemoursementPage() {
           <div>
             <h2 className="text-lg font-semibold mb-2">Commandes annulées par le traiteur</h2>
             <p>
-              Si le traiteur partenaire annule votre commande pour quelque raison que ce soit (indisponibilité d'un produit, problème technique, etc.), vous serez informé dans les meilleurs délais et <strong>un remboursement intégral</strong> vous sera effectué. Le remboursement sera traité sous 48 à 72 heures ouvrées selon votre moyen de paiement.
+              Si le traiteur partenaire annule votre commande pour quelque raison que ce soit (indisponibilité d'un produit, problème technique, etc.), vous serez informé dans les meilleurs délais et <strong>un remboursement intégral</strong> sera initié après validation. Le délai d'apparition des fonds dépend ensuite du prestataire de paiement et de la banque du client.
             </p>
           </div>
 
