@@ -13,13 +13,17 @@ export function LegalMentionsPage() {
         <div className="space-y-6 text-sm leading-relaxed">
           <section>
             <h2 className="mb-2 text-lg font-semibold">Édition et contact</h2>
-            <p>
-              DELIKREOL est une plateforme numérique exploitée en Martinique et actuellement en phase de lancement contrôlé.
-              Les informations d’immatriculation complètes de l’éditeur doivent être affichées ici avant toute ouverture commerciale générale. Contact :{' '}
-              <a className="text-primary underline" href={`mailto:${PUBLIC_CONTACT_EMAIL}`}>
-                {PUBLIC_CONTACT_EMAIL}
-              </a>.
-            </p>
+            <div className="space-y-1">
+              <p><strong>Éditeur :</strong> CLAVEAU VLADIMIR — Entrepreneur individuel (EI), nom commercial DELIKREOL.</p>
+              <p><strong>SIREN :</strong> 103 128 716 · <strong>SIRET :</strong> 103 128 716 00018.</p>
+              <p><strong>Adresse de correspondance :</strong> Quartier Fougainville, 97211 Rivière-Pilote, Martinique.</p>
+              <p><strong>Responsable de la publication :</strong> Vladimir Claveau.</p>
+              <p>Contact :{' '}
+                <a className="text-primary underline" href={`mailto:${PUBLIC_CONTACT_EMAIL}`}>
+                  {PUBLIC_CONTACT_EMAIL}
+                </a>.
+              </p>
+            </div>
           </section>
 
           <section>
@@ -46,8 +50,7 @@ export function LegalMentionsPage() {
           </section>
 
           <p className="border-t pt-6 text-xs text-muted-foreground">
-            L’ouverture commerciale complète reste conditionnée à la publication des informations légales
-            obligatoires et du médiateur de la consommation.
+            En cas de litige de consommation non résolu amiablement, les coordonnées du médiateur de la consommation désigné par DELIKREOL doivent être communiquées au client conformément au droit applicable.
           </p>
         </div>
       </section>

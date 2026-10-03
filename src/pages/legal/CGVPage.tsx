@@ -55,8 +55,8 @@ export function CGVPage() {
           </div>
 
           <div className="border-t pt-6 mt-8 text-xs text-muted-foreground">
-            <p>Delikreol — Martinique, Caraïbe</p>
-            <p>Plateforme en phase pilote — informations d'immatriculation à publier avant l'ouverture commerciale complète.</p>
+            <p>DELIKREOL — CLAVEAU VLADIMIR, Entrepreneur individuel (EI) — Martinique.</p>
+            <p>SIREN 103 128 716 · SIRET 103 128 716 00018 · Quartier Fougainville, 97211 Rivière-Pilote.</p>
           </div>
         </div>
       </section>

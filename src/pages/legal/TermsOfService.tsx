@@ -78,8 +78,8 @@ export default function TermsOfService() {
 
           <h3>5.2 Modalités de paiement</h3>
           <p>
-            Le paiement s'effectue via un lien bancaire, un prestataire de paiement, ou par virement après validation humaine de la commande.
-            Le Client reçoit les modalités (lien ou coordonnées) avant préparation.
+            Les moyens de paiement utilisables sont ceux affichés au Client au moment de la commande. Lorsque SumUp est proposé, le paiement carte est réalisé sur le checkout hébergé du prestataire et DELIKREOL ne reçoit pas les données de carte. Stripe ou les moyens manuels ne sont utilisés que lorsqu’ils sont explicitement activés et présentés au Client.
+            Le statut payé n’est enregistré qu’après confirmation serveur ou rapprochement du moyen de paiement concerné.
           </p>
           <p>
             Quand la solution de paiement le permet, Delikreol peut utiliser un schéma

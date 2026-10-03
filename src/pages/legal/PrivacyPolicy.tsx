@@ -29,7 +29,7 @@ export default function PrivacyPolicy() {
 
           <h2>2. Responsable du traitement</h2>
           <p>
-            Le responsable du traitement des données est Delikreol, joignable à l'adresse : {PUBLIC_CONTACT_EMAIL}
+            Le responsable du traitement est CLAVEAU VLADIMIR, Entrepreneur individuel (EI), exploitant DELIKREOL — SIRET 103 128 716 00018 — Quartier Fougainville, 97211 Rivière-Pilote, Martinique. Contact : {PUBLIC_CONTACT_EMAIL}.
           </p>
 
           <h2>3. Données collectées</h2>
