@@ -5,7 +5,7 @@ type DemoRole = 'admin' | 'vendor' | 'driver' | 'relay_host' | 'customer';
 async function installDemoSession(page: Page, role: DemoRole, email = `${role}@demo.delikreol.local`) {
   await page.addInitScript(({ role, email }) => {
     const id = `demo_${role}_access`;
-    window.localStorage.setItem('delikreol_demo_override', 'true');
+    window.sessionStorage.setItem('delikreol_demo_override', 'true');
     window.localStorage.setItem('delikreol_demo_session', JSON.stringify({ userId: id, email }));
     window.localStorage.setItem('delikreol_demo_profiles', JSON.stringify([
       {
