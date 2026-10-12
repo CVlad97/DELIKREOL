@@ -160,12 +160,8 @@ export default function HomePage() {
   }, [productsNow.length]);
 
   const nearbyProduct = productsNow[nearbyProductIndex] || productsNow[0] || null;
-
-  const goToCatalogue = () => {
-    const params = new URLSearchParams();
-    if (selectedCommune) params.set('commune', selectedCommune);
-    navigate(`/catalogue${params.toString() ? `?${params.toString()}` : ''}`);
-  };
+  const activePartnerCount = partners.length;
+  const availableProductCount = productsNow.length;
 
   const handleGeolocation = () => {
     if (!navigator.geolocation) {
@@ -218,6 +214,21 @@ export default function HomePage() {
                 Le meilleur des cuisines créoles et caribéennes, préparé ici par des talents d’ici.
               </p>
 
+              <div className="mt-6 grid max-w-2xl gap-3 sm:grid-cols-3" aria-label="Indicateurs de lancement DELIKREOL">
+                <div className="rounded-2xl bg-white/90 px-4 py-3 shadow-sm ring-1 ring-orange-100">
+                  <p className="text-2xl font-black text-[#cc460f]">{activePartnerCount}</p>
+                  <p className="text-xs font-black uppercase tracking-wide text-[#4b5f55]">Traiteurs visibles</p>
+                </div>
+                <div className="rounded-2xl bg-white/90 px-4 py-3 shadow-sm ring-1 ring-orange-100">
+                  <p className="text-2xl font-black text-[#cc460f]">{availableProductCount}</p>
+                  <p className="text-xs font-black uppercase tracking-wide text-[#4b5f55]">Plats en vitrine</p>
+                </div>
+                <div className="rounded-2xl bg-white/90 px-4 py-3 shadow-sm ring-1 ring-orange-100">
+                  <p className="text-2xl font-black text-[#09614f]">Pilote</p>
+                  <p className="text-xs font-black uppercase tracking-wide text-[#4b5f55]">Confirmation traiteur</p>
+                </div>
+              </div>
+
               <div className="mt-6 flex flex-wrap gap-2 text-xs font-black text-[#173f32] sm:text-sm">
                 <span className="rounded-full bg-white/80 px-3 py-2 shadow-sm ring-1 ring-orange-100">🌴 100% esprit péyi</span>
                 <span className="rounded-full bg-white/80 px-3 py-2 shadow-sm ring-1 ring-orange-100">🥘 Fait maison</span>
@@ -261,11 +272,18 @@ export default function HomePage() {
                 </button>
               </div>
 
-              <div className="mt-4">
+              <div className="mt-4 flex flex-wrap gap-3">
                 <Link to="/presentation" className="inline-flex items-center gap-2 rounded-full bg-[#173f32] px-4 py-2 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5">
                   Voir la démo en 1 minute <ArrowRight className="h-4 w-4" />
                 </Link>
+                <Link to="/aide" className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-[#173f32] shadow-sm ring-1 ring-orange-100 transition hover:-translate-y-0.5">
+                  Besoin d’aide pour commander ?
+                </Link>
               </div>
+
+              <p className="mt-3 max-w-2xl rounded-2xl bg-white/85 px-4 py-3 text-sm font-bold leading-relaxed text-[#4b5f55] ring-1 ring-orange-100">
+                Pendant la préouverture, chaque demande est confirmée par le traiteur avant préparation. Paiement, livraison et disponibilité restent validés sur le parcours de commande.
+              </p>
 
               {geoFeedback && <p className="mt-3 text-sm font-semibold text-[#4b5f55]">{geoFeedback}</p>}
               <DeliveryAvailability commune={selectedCommune} coords={geoPosition} />
