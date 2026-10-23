@@ -345,7 +345,6 @@ function buildPilotProduct(seed: PilotVendorSeed, vendor: PublicCatalogVendor, i
 
 function mergePilotFallback(vendors: PublicCatalogVendor[], products: PublicCatalogProduct[]) {
   const vendorByKey = new Map(vendors.map((vendor) => [catalogKey(vendor.business_name), vendor]));
-  const missingPilotKeys = new Set<string>();
   const mergedVendors = [...vendors];
 
   pilotVendors.forEach((seed, index) => {
@@ -353,17 +352,21 @@ function mergePilotFallback(vendors: PublicCatalogVendor[], products: PublicCata
     if (vendorByKey.has(key)) return;
     const pilotVendor = buildPilotVendor(seed, index);
     vendorByKey.set(key, pilotVendor);
-    missingPilotKeys.add(key);
     mergedVendors.push(pilotVendor);
   });
 
   const mergedProducts = [...products];
   pilotVendors.forEach((seed, index) => {
     const key = catalogKey(seed.business_name);
-    if (!missingPilotKeys.has(key)) return;
     const vendor = vendorByKey.get(key);
     if (!vendor) return;
-    mergedProducts.push(buildPilotProduct(seed, vendor, index));
+
+    const matchingVendorProducts = mergedProducts.filter(
+      (product) => product.vendor_id === vendor.id || catalogKey(product.vendor_name) === key,
+    );
+    const seedProductKey = normalizeName(seed.product_name);
+    const alreadyPresent = matchingVendorProducts.some((product) => normalizeName(product.name) === seedProductKey);
+    if (!alreadyPresent) mergedProducts.push(buildPilotProduct(seed, vendor, index));
   });
 
   return { vendors: mergedVendors, products: mergedProducts };
