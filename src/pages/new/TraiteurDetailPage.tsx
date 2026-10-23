@@ -171,6 +171,7 @@ export function TraiteurDetailPage() {
     price: product.price ?? 0,
     image: product.image_url || undefined,
     isSignature: product.is_signature,
+    available: product.available,
   }));
   const menuItems = PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(traiteur.name)
     ? []
@@ -420,6 +421,14 @@ export function TraiteurDetailPage() {
                         >
                           Demander un devis
                         </Link>
+                      ) : item.available === false ? (
+                        <button
+                          type="button"
+                          disabled
+                          className="mt-auto inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-muted px-3 py-2.5 text-sm font-black text-muted-foreground"
+                        >
+                          À compléter avec le traiteur
+                        </button>
                       ) : (
                         <button
                           type="button"

@@ -82,6 +82,7 @@ export function TraiteursListPage() {
   };
 
   const filtered = traiteurSpaces
+    .filter((traiteur) => traiteur.status !== 'brouillon')
     .filter((traiteur) => !selectedCommune || traiteur.zone?.toLowerCase().includes(selectedCommune.toLowerCase()))
     .sort((left, right) => {
       if (!userPosition) return 0;
