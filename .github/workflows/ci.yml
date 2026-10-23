@@ -17,6 +17,12 @@ jobs:
     name: Validate build
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      VITE_BASE_PATH: /
+      VITE_SUPABASE_URL: https://boihlgodmclljtckhmgz.supabase.co
+      VITE_SUPABASE_ANON_KEY: sb_publishable_LE_NgMgaOlJEhkJlVF_zow_4NNOtTHX
+      VITE_PUBLIC_VENDOR_SOURCE: hybrid
+      VITE_DEMO_MODE: "false"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -56,6 +62,12 @@ jobs:
         run: npm run audit:secrets --if-present
 
       - name: Build
+        env:
+          VITE_BASE_PATH: /
+          VITE_SUPABASE_URL: https://boihlgodmclljtckhmgz.supabase.co
+          VITE_SUPABASE_ANON_KEY: sb_publishable_LE_NgMgaOlJEhkJlVF_zow_4NNOtTHX
+          VITE_PUBLIC_VENDOR_SOURCE: hybrid
+          VITE_DEMO_MODE: "false"
         run: npm run build
 
       - name: Install Playwright browsers
