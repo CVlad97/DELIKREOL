@@ -13,6 +13,37 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  android-apk:
+    name: Build Android VPS Companion APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: mobile/vps-companion
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - name: Build debug APK
+        run: gradle --no-daemon assembleDebug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: delikreol-vps-debug-apk
+          path: mobile/vps-companion/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
+
   validate:
     name: Validate build
     runs-on: ubuntu-latest
@@ -22,22 +53,18 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: npm
-
       - name: Install dependencies
         run: npm ci --legacy-peer-deps --prefer-offline --no-audit --fund=false
-
       - name: Typecheck
         shell: bash
         run: |
           npx tsc --noEmit -p tsconfig.app.json --pretty false 2>&1 | tee /tmp/typecheck.log
           test ${PIPESTATUS[0]} -eq 0
-
       - name: Upload TypeScript diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
@@ -45,22 +72,16 @@ jobs:
           name: typecheck-diagnostics
           path: /tmp/typecheck.log
           retention-days: 3
-
       - name: Lint
         run: npm run lint
-
       - name: Tests
         run: npm run test --if-present
-
       - name: Secret audit
         run: npm run audit:secrets --if-present
-
       - name: Build
         run: npm run build
-
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
-
       - name: E2E tests
         shell: bash
         run: |
@@ -68,7 +89,6 @@ jobs:
           test ${PIPESTATUS[0]} -eq 0
         env:
           PLAYWRIGHT_USE_PREBUILT: "true"
-
       - name: Upload E2E diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
