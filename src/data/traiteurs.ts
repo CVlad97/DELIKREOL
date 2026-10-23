@@ -14,6 +14,7 @@ export type TraiteurMenuItem = {
   category: string;
   featured?: boolean;
   image?: string | null;
+  available?: boolean;
 };
 
 export type TraiteurSpace = {
@@ -257,6 +258,10 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
     .filter((profile) => profile.type.toLowerCase().includes('traiteur'))
     .filter((profile) => !PUBLIC_HIDDEN_TRAITEURS.has(profile.name))
     .map((profile) => {
+      if (profile.name === 'Langouste House') {
+        return buildSpace(profile, 'from-[#0f766e] via-[#0891b2] to-[#164e63]', '#ecfeff', 'public à vérifier', 'à confirmer');
+      }
+
       if (profile.name === 'Les Delices de Ninice') {
         return {
           ...buildSpace(profile, 'from-[#d95f2d] via-[#f49d4b] to-[#7c2d12]', '#fff7ed', 'public confirmé', 'confirmée'),
