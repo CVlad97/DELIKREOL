@@ -1,0 +1,4 @@
+interface:
+  display_name: "DELIKREOL Catalogue Vision Audit"
+  short_description: "Vérifie les photos, la carte et les prix publiés"
+  default_prompt: "Utilise $delikreol-catalogue-vision-audit pour comparer les photos, la carte, les prix et la fiche publique d’un traiteur."
