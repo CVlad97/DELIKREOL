@@ -137,8 +137,8 @@ const pilotVendors: PilotVendorSeed[] = [
     business_type: 'Carte prévisionnelle — Schoelcher',
     description: 'Carte reçue de Charles. Préparation de l’ouverture; commandes et disponibilités non confirmées.',
     product_name: 'Bisque de langouste maison (250 g)',
-    product_description: 'Prix indiqué sur la carte prévisionnelle reçue par e-mail le 22 octobre 2026. Photo réelle et disponibilité à confirmer.',
-    product_image: 'vendors/_fallback/photo-a-confirmer.svg',
+    product_description: 'Prix indiqué sur la carte prévisionnelle reçue par e-mail le 22 octobre 2026. Photo transmise par Charles le 14 octobre 2026. Disponibilité à confirmer.',
+    product_image: 'vendors/langouste-house/bisque-maison.jpg',
     price: 15,
   },
   {

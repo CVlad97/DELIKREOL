@@ -64,6 +64,7 @@ export const PUBLIC_HIDDEN_TRAITEURS = new Set(['An Tjè Coco']);
 export const PUBLIC_HIDDEN_PRODUCT_TRAITEURS = new Set(['An Tjè Coco']);
 
 function resolveHeroImage(name: string) {
+  if (name === 'Langouste House') return assetFromPublic('vendors/langouste-house/restaurant.jpg');
   if (name === 'An Tjè Coco') {
     return anTjeCocoAssets.hero;
   }
@@ -92,6 +93,7 @@ function resolveHeroImage(name: string) {
 }
 
 function resolveGalleryImages(name: string) {
+  if (name === 'Langouste House') return ['bisque-maison.jpg', 'terrasse.jpg', 'preparation-01.jpg', 'preparation-02.jpg', 'boulettes-saucisse.jpg', 'porc.jpg'].map(file => assetFromPublic('vendors/langouste-house/' + file));
   if (name === 'An Tjè Coco') {
     return anTjeCocoAssets.gallery;
   }

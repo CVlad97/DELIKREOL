@@ -299,6 +299,18 @@ export function TraiteurDetailPage() {
             </div>
           </section>
 
+          {traiteur.name === 'Langouste House' && (
+            <section className="mt-6 rounded-2xl border border-border bg-card p-4" aria-label="Photos de Langouste House">
+              <h2 className="text-xl font-bold">En images chez Langouste House</h2>
+              <p className="mt-2 text-sm text-muted-foreground">Photos transmises par Charles. Aperçu du lieu et des préparations ; les plats présentés ne sont pas tous proposés dans la carte ci-dessous. Disponibilités à confirmer.</p>
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {traiteur.galleryImages.map((image, index) => (
+                  <img key={image} src={image} alt={`Langouste House — lieu et préparations, photo ${index + 1}`} loading="lazy" className="h-48 w-full rounded-xl object-cover" />
+                ))}
+              </div>
+            </section>
+          )}
+
           <section className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
             <div className="rounded-2xl border border-border bg-card p-4">
               <p className="text-2xl font-black text-foreground">{menuItems.length}</p>
