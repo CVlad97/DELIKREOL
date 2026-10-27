@@ -421,6 +421,7 @@ export function TraiteurDetailPage() {
                         </h3>
                         <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-sm font-black text-primary">
                           {item.price > 0 ? formatEuro(item.price) : 'Devis'}
+                          {item.name.includes('prix / 100 g') && <span className="block text-center text-xs font-semibold">/ 100 g</span>}
                         </span>
                       </div>
                       <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
