@@ -20,6 +20,7 @@ export function NotFoundPage() {
             Catalogue
           </Link>
         </div>
+        <Link to="/mise-a-jour" className="mt-6 inline-block text-primary underline">Mettre à jour l’application</Link>
       </div>
     </div>
   );
