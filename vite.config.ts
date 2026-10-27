@@ -27,8 +27,20 @@ export default defineConfig(({ mode }) => {
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
+        navigateFallback: null,
+        globIgnores: ['**/release.json', '**/mise-a-jour.html'],
         globPatterns: ['**/*.{js,css,html,svg,ico,json}'],
         runtimeCaching: [
+          {
+            urlPattern: ({ request, url }) => request.mode === 'navigate' && url.origin === self.location.origin,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'delikreol-pages-v1',
+              networkTimeoutSeconds: 5,
+              cacheableResponse: { statuses: [200] },
+              expiration: { maxEntries: 30, maxAgeSeconds: 604800 },
+            },
+          },
           // Product and partner photographs are intentionally not cached by the
           // service worker. Stable file paths are frequently replaced with a
           // verified original, so the network/browser cache must remain the
