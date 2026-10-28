@@ -1,3 +1,4 @@
+import { langousteHouseGallery } from './langousteHouseGallery';
 import { mockProducts } from './mockCatalog';
 import type { HealthTag } from './mockCatalog';
 import { anTjeCocoAssets, cocoFoodAssets } from './partnerAssets';
@@ -93,7 +94,7 @@ function resolveHeroImage(name: string) {
 }
 
 function resolveGalleryImages(name: string) {
-  if (name === 'Langouste House') return ['bisque-maison.jpg', 'terrasse.jpg', 'preparation-01.jpg', 'preparation-02.jpg', 'boulettes-saucisse.jpg', 'porc.jpg'].map(file => assetFromPublic('vendors/langouste-house/' + file));
+  if (name === 'Langouste House') return langousteHouseGallery.map(({ file }) => assetFromPublic('vendors/langouste-house/' + file));
   if (name === 'An Tjè Coco') {
     return anTjeCocoAssets.gallery;
   }

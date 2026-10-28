@@ -1,3 +1,4 @@
+import { langousteHouseGallery } from '../../data/langousteHouseGallery';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
@@ -181,7 +182,7 @@ export function TraiteurDetailPage() {
   const isChefMada = traiteur.slug === 'chef-a-mada';
   const showMadaBadge = MADA_BADGE_TRAITEURS.has(traiteur.name);
   const isLangousteHouse = traiteur.slug === 'langouste-house';
-  const langousteCaptions = ['Bisque de langouste maison', 'La terrasse', 'Préparation transmise par Charles', 'Préparation transmise par Charles', 'Boulettes de saucisse — aperçu hors carte', 'Porc et accompagnements — aperçu hors carte'];
+  const langousteCaptions = langousteHouseGallery.map(({ caption }) => caption);
   const isGouteMwen = traiteur.slug === 'goute-mwen';
   const useContainedHero = isGouteMwen;
   const firstProductImage = menuItems.find((item) => Boolean(item.image))?.image || null;
