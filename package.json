@@ -32,7 +32,10 @@
     "prepare": "husky",
     "supabase:link": "supabase link --project-ref boihlgodmclljtckhmgz",
     "supabase:deploy:functions": "supabase functions deploy checkout-order public-order-status create-checkout-session create-payment-intent stripe-webhook --project-ref boihlgodmclljtckhmgz --use-api",
-    "supabase:deploy:checkout": "supabase functions deploy checkout-order create-checkout-session create-payment-intent stripe-webhook --project-ref boihlgodmclljtckhmgz --use-api"
+    "supabase:deploy:checkout": "supabase functions deploy checkout-order create-checkout-session create-payment-intent stripe-webhook --project-ref boihlgodmclljtckhmgz --use-api",
+    "api:catalog": "node scripts/public-api-bridge.mjs list",
+    "api:audit": "node scripts/public-api-bridge.mjs audit",
+    "api:test": "node --test tests/public-api-bridge.test.mjs"
   },
   "dependencies": {
     "@blinkdotnew/react": "^1.0.2",
