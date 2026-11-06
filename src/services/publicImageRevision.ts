@@ -9,7 +9,21 @@ const ABSOLUTE_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 export function withPublicImageRevision(src: string): string {
   const value = src.trim();
   if (!value || value.startsWith('data:') || value.startsWith('blob:')) return value;
-  if (ABSOLUTE_SCHEME.test(value)) return value;
+  if (ABSOLUTE_SCHEME.test(value)) {
+    // Assets from the canonical public site belong to this app: use the
+    // current origin so previews and mirrored deployments never fetch them
+    // from production. Supabase and all other external URLs stay untouched.
+    try {
+      const url = new URL(value);
+      const canonicalHost = url.hostname === 'delikreol.com' || url.hostname === 'www.delikreol.com';
+      if (canonicalHost && /^\/(vendors|branding|vignettes)\//.test(url.pathname)) {
+        return withPublicImageRevision(`${url.pathname}${url.search}${url.hash}`);
+      }
+    } catch {
+      // Unparseable URLs retain their previous behavior.
+    }
+    return value;
+  }
 
   const hashIndex = value.indexOf('#');
   const withoutHash = hashIndex >= 0 ? value.slice(0, hashIndex) : value;

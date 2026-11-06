@@ -13,7 +13,6 @@ import {
 import { Layout } from '../../components/layout/Layout';
 import { BackBar } from '../../components/BackBar';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
-import { useToast } from '../../contexts/ToastContext';
 
 const WHATSAPP_NUMBER = '596696653589';
 
@@ -62,7 +61,6 @@ const initialFormData: DevisFormData = {
 export default function DevisPage() {
   const [form, setForm] = useState<DevisFormData>(initialFormData);
   const [submitted, setSubmitted] = useState(false);
-  const { showSuccess } = useToast();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -94,26 +92,15 @@ export default function DevisPage() {
     return lines.filter(Boolean).join('\n');
   };
 
+  const whatsappUrl = () =>
+    `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(buildWhatsAppMessage())}`;
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-
-    const existing = JSON.parse(localStorage.getItem('delikreol_catering_requests') || '[]');
-    const entry = {
-      ...form,
-      id: `devis_${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      status: 'nouveau',
-    };
-    existing.push(entry);
-    localStorage.setItem('delikreol_catering_requests', JSON.stringify(existing));
-
+    // No backend receives this quote request. Never claim delivery or store
+    // customer names, phones or dietary information in browser storage.
     setSubmitted(true);
-    showSuccess('Votre demande a bien été reçue. Nous revenons vers vous rapidement par WhatsApp.');
-  };
-
-  const openWhatsApp = () => {
-    const msg = encodeURIComponent(buildWhatsAppMessage());
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
+    window.open(whatsappUrl(), '_blank', 'noopener,noreferrer');
   };
 
   if (submitted) {
@@ -124,18 +111,20 @@ export default function DevisPage() {
           <div className="inline-flex p-4 bg-green-100 text-green-600 rounded-full">
             <CheckCircle2 size={48} />
           </div>
-          <h2 className="text-2xl font-bold text-foreground">Merci pour votre demande !</h2>
+          <h2 className="text-2xl font-bold text-foreground">Votre demande est prête</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Votre demande a bien été reçue. Nous revenons vers vous rapidement par WhatsApp.
+            Pour nous transmettre votre demande, ouvrez WhatsApp puis appuyez sur « Envoyer ». Le devis et la disponibilité seront confirmés après échange.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
-            <button
-              onClick={openWhatsApp}
+            <a
+              href={whatsappUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold transition-colors"
             >
-              <MessageCircle size={18} fill="white" />
-              Envoyer aussi par WhatsApp
-            </button>
+              <MessageCircle size={18} />
+              Ouvrir WhatsApp pour envoyer
+            </a>
             <Link
               to="/catalogue"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary text-primary-foreground rounded-xl font-bold transition-colors"
@@ -417,16 +406,9 @@ export default function DevisPage() {
               className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary text-primary-foreground rounded-xl font-bold text-sm transition-colors shadow-lg"
             >
               <Send size={16} />
-              Envoyer la demande
+              Préparer et envoyer via WhatsApp
             </button>
-            <button
-              type="button"
-              onClick={openWhatsApp}
-              className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold text-sm transition-colors"
-            >
-              <MessageCircle size={16} fill="white" />
-              Envoyer par WhatsApp
-            </button>
+
           </div>
         </form>
       </div>

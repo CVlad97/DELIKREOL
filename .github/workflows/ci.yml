@@ -61,6 +61,9 @@ jobs:
       - name: Secret audit
         run: npm run audit:secrets --if-present
 
+      - name: Public API catalog security audit
+        run: npm run api:audit && npm run api:test
+
       - name: Build
         env:
           VITE_BASE_PATH: /
@@ -69,6 +72,9 @@ jobs:
           VITE_PUBLIC_VENDOR_SOURCE: hybrid
           VITE_DEMO_MODE: "false"
         run: npm run build
+
+      - name: Catalogue media audit
+        run: npm run audit:catalog-media
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
