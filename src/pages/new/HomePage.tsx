@@ -284,6 +284,21 @@ export default function HomePage() {
                 </Link>
               </div>
 
+              <section aria-label="Partenaire pilote mis en avant" className="mt-5 max-w-3xl overflow-hidden rounded-[1.5rem] border border-orange-200 bg-white shadow-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-[170px_1fr]">
+                  <img src={publicAsset('vendors/langouste-house/langouste-entiere-bbq.jpg')} alt="Langouste préparée par Langouste House, photo du partenaire" loading="lazy" className="h-44 w-full object-cover sm:h-full"/>
+                  <div className="space-y-2 p-4 sm:p-5">
+                    <p className="text-xs font-black uppercase tracking-widest text-[#b84313]">Partenaire pilote prioritaire · offre sur devis</p>
+                    <h2 className="text-xl font-black text-[#173f32]">Langouste House · Schœlcher</h2>
+                    <p className="text-sm text-[#4b5f55]">Langoustes grillées ou pochées, traiteur et demandes pour événements ou professionnels. Disponibilités, tarifs et livraison à confirmer par l'exploitant.</p>
+                    <div className="flex flex-wrap gap-2">
+                      <Link to="/traiteur/langouste-house" className="inline-flex rounded-xl bg-[#173f32] px-4 py-2 text-sm font-bold text-white">Découvrir la fiche</Link>
+                      <Link to="/devis" className="inline-flex rounded-xl bg-[#cc460f] px-4 py-2 text-sm font-bold text-white">Demander un devis</Link>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
               <p className="mt-3 max-w-2xl rounded-2xl bg-white/85 px-4 py-3 text-sm font-bold leading-relaxed text-[#4b5f55] ring-1 ring-orange-100">
                 Pendant la préouverture, chaque demande est confirmée par le traiteur avant préparation. Paiement, livraison et disponibilité restent validés sur le parcours de commande.
               </p>
