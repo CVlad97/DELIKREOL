@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
 import { martiniqueCommunes } from '../../data/martiniqueCommunes';
-import { useToast } from '../../contexts/ToastContext';
 import { supabase } from '../../lib/supabase';
 import { trackPublicView } from '../../services/metricsService';
 import { setPageMeta } from '../../services/seo';
@@ -69,7 +68,7 @@ const BENEFITS = [
   {
     icon: TrendingUp,
     title: 'Visibilité immédiate',
-    text: 'Votre activité est mise en avant auprès de milliers de Martiniquais.',
+    text: 'Présentez votre activité aux visiteurs de la plateforme pendant son développement.',
   },
   {
     icon: Shield,
@@ -79,12 +78,12 @@ const BENEFITS = [
   {
     icon: Megaphone,
     title: 'Marketing local inclus',
-    text: 'DeliKreol fait la promotion de vos plats sur les réseaux.',
+    text: "Visibilité et actions de communication à définir avec l’équipe.",
   },
   {
     icon: Star,
     title: 'Accompagnement personnalisé',
-    text: 'Aide à la rédaction du menu, photos et mise en page.',
+    text: 'Accompagnement possible pour préparer votre espace, sur accord.',
   },
 ];
 
@@ -92,7 +91,8 @@ export default function DevenirPartenairePage() {
   useEffect(() => { trackPublicView(); setPageMeta('Devenir partenaire — DeliKreol | Traiteur en Martinique', 'Rejoignez DeliKreol comme traiteur partenaire en Martinique. Visibilité, commandes, croissance.'); }, []);
   const [form, setForm] = useState<PartnerFormData>(initialFormData);
   const [submitted, setSubmitted] = useState(false);
-  const { showSuccess } = useToast();
+  const [submissionError, setSubmissionError] = useState('');
+  const [saving, setSaving] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -126,47 +126,50 @@ export default function DevenirPartenairePage() {
     return lines.filter(Boolean).join('\n');
   };
 
+  const whatsappUrl = () =>
+    `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(buildWhatsAppMessage())}`;
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
-    const existing = JSON.parse(localStorage.getItem('delikreol_partner_applications') || '[]');
-    const entry = {
-      ...form,
-      id: `partner_${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      status: 'nouveau',
-    };
-    existing.push(entry);
-    localStorage.setItem('delikreol_partner_applications', JSON.stringify(existing));
-
-    // Tentative de sauvegarde dans Supabase (fallback silencieux si indisponible)
+    if (saving) return;
+    setSaving(true);
+    setSubmissionError('');
     try {
-      const { error } = await supabase
-        .from('partner_applications')
-        .insert({
-          name: form.nomResponsable,
-          business_name: form.nomActivite,
-          email: form.email || null,
-          phone: form.telephone,
-          commune: form.commune,
-          activity_type: form.typeActivite,
-          description: form.message || null,
-        });
-
-      if (error) {
-        console.warn('[DevenirPartenaire] Supabase insert failed, keeping localStorage only:', error.message);
-      }
-    } catch (err) {
-      console.warn('[DevenirPartenaire] Supabase unavailable, keeping localStorage only:', err);
+      // Persist on the real public applications table. Its RLS policy accepts
+      // public applications with a valid business name and contact details.
+      const { error } = await supabase.from('partner_applications').insert({
+        contact_name: form.nomResponsable.trim(),
+        business_name: form.nomActivite.trim(),
+        phone: form.telephone.trim(),
+        whatsapp: form.whatsapp.trim() || null,
+        email: form.email.trim() || null,
+        commune: form.commune,
+        partner_type: 'vendor',
+        activity_type: form.typeActivite,
+        source: 'public_partner_portal',
+        status: 'pending',
+        details: {
+          produits: form.produitsProposés,
+          horaires: form.horaires,
+          retrait_livraison: form.conditionsRetrait,
+          zones: form.zonesPossibles,
+          photos_disponibles: form.photosDisponibles,
+          aide_menu: form.besoinAideMenu,
+          message: form.message,
+        },
+      });
+      if (error) throw error;
+      setSubmitted(true);
+    } catch (error) {
+      console.error('[DevenirPartenaire] Enregistrement refusé', error);
+      setSubmissionError('Votre candidature n’a pas été enregistrée. Utilisez WhatsApp ci-dessous pour transmettre directement votre demande.');
+    } finally {
+      setSaving(false);
     }
-
-    setSubmitted(true);
-    showSuccess('Votre demande a bien été reçue. Nous revenons vers vous rapidement par WhatsApp.');
   };
 
   const openWhatsApp = () => {
-    const msg = encodeURIComponent(buildWhatsAppMessage());
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
+    window.open(whatsappUrl(), '_blank', 'noopener,noreferrer');
   };
 
   if (submitted) {
@@ -176,19 +179,19 @@ export default function DevenirPartenairePage() {
           <div className="inline-flex p-4 bg-green-100 text-green-600 rounded-full">
             <CheckCircle2 size={48} />
           </div>
-          <h2 className="text-2xl font-bold text-foreground">Merci pour votre candidature !</h2>
+          <h2 className="text-2xl font-bold text-foreground">Candidature enregistrée</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Votre demande a bien été reçue. Nous revenons vers vous rapidement par WhatsApp.
+            Votre candidature est enregistrée pour examen. L’activation de votre espace reste soumise à validation.
           </p>
           <p className="text-xs text-muted-foreground">
-            Statut : <span className="font-bold text-primary">nouveau / à vérifier</span>
+            Statut : <span className="font-bold text-primary">en attente de validation</span>
           </p>
           <p className="text-sm text-muted-foreground">
-            Vous serez contacté rapidement. Contact support si besoin.
+            Vous pouvez compléter votre dossier ou contacter l’équipe pour préparer votre catalogue.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
             <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Bonjour DeliKreol, j\'ai postulé pour devenir partenaire et souhaitais un suivi.')}`}
+              href={whatsappUrl()}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold transition-colors"
@@ -576,13 +579,22 @@ export default function DevenirPartenairePage() {
           </fieldset>
 
           {/* Submit */}
+          {submissionError && (
+            <div role="alert" className="rounded-xl border border-orange-300 bg-orange-50 p-4 text-sm text-orange-950">
+              <p className="font-bold">{submissionError}</p>
+              <a href={whatsappUrl()} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-2 font-bold underline">
+                <MessageCircle size={18} /> Transmettre ma candidature sur WhatsApp
+              </a>
+            </div>
+          )}
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               type="submit"
+              disabled={saving}
               className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary text-primary-foreground rounded-xl font-bold text-sm transition-colors shadow-lg"
             >
               <Send size={16} />
-              Envoyer ma candidature
+              {saving ? 'Enregistrement…' : 'Envoyer ma candidature'}
             </button>
             <button
               type="button"
