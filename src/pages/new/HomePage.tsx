@@ -273,6 +273,9 @@ export default function HomePage() {
               </div>
 
               <div className="mt-4 flex flex-wrap gap-3">
+                <Link to="/devis" className="inline-flex items-center gap-2 rounded-full bg-[#cc460f] px-4 py-2 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5" aria-label="Demander un devis traiteur pour un événement ou une entreprise">
+                  <ChefHat className="h-4 w-4" aria-hidden="true" /> Devis traiteur &amp; événements
+                </Link>
                 <Link to="/presentation" className="inline-flex items-center gap-2 rounded-full bg-[#173f32] px-4 py-2 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5">
                   Voir la démo en 1 minute <ArrowRight className="h-4 w-4" />
                 </Link>
