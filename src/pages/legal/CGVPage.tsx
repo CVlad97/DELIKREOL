@@ -6,32 +6,32 @@ export function CGVPage() {
       <section className="pageSection max-w-3xl mx-auto">
         <div className="badge">Légal</div>
         <h1>Conditions Générales de Vente</h1>
-        <p className="text-sm text-muted-foreground mb-8">Dernière mise à jour : octobre 2026</p>
+        <p className="text-sm text-muted-foreground mb-8">Version pilote — clauses à valider avant toute ouverture des paiements commerciaux</p>
 
         <div className="space-y-6 text-sm leading-relaxed">
           <div>
             <h2 className="text-lg font-semibold mb-2">1. Objet</h2>
-            <p>Les présentes CGV régissent les ventes de plats et services proposés par Delikreol (ci-après « la Plateforme ») reliant des clients à des traiteurs, restaurateurs, producteurs locaux, livreurs et points relais en Martinique.</p>
+            <p>Ces conditions présentent le fonctionnement pilote de DELIKREOL, plateforme de mise en relation avec des professionnels de la restauration et des produits locaux. L’identité du vendeur contractuel et ses responsabilités doivent être précisées pour chaque offre avant toute commande ferme. Les ventes B2B et export nécessitent des conditions particulières validées par les parties.</p>
           </div>
 
           <div>
             <h2 className="text-lg font-semibold mb-2">2. Produits</h2>
-            <p>Les produits proposés à la vente sont décrits sur la Plateforme. Les photos des plats sont non contractuelles. Les allergènes et origines des viandes sont indiqués sur chaque fiche produit.</p>
+            <p>Les produits visibles peuvent être des propositions pilotes et ne valent pas disponibilité garantie. Le vendeur doit confirmer les caractéristiques, les ingrédients, les allergènes et les informations d’origine exigées avant toute vente. Une fiche incomplète ne doit pas donner lieu à une commande payante.</p>
           </div>
 
           <div>
             <h2 className="text-lg font-semibold mb-2">3. Prix</h2>
-            <p>Les prix sont indiqués en euros TTC. Le prix total est clairement affiché avant validation de la commande, incluant : le prix des articles, les frais de service, et les frais de livraison le cas échéant. Aucun frais caché n'est appliqué.</p>
+            <p>Pour les offres effectivement commercialisées, le montant total, les taxes et les éventuels frais de livraison ou de service doivent être confirmés avant paiement. Les produits et devis en préparation n’ont pas de prix ferme tant que le vendeur ne les a pas validés.</p>
           </div>
 
           <div>
             <h2 className="text-lg font-semibold mb-2">4. Commande</h2>
-            <p>La commande est enregistrée après validation par le client. Un récapitulatif est envoyé. La commande est soumise à la confirmation du traiteur partenaire. En cas d'indisponibilité, le client est informé dans les meilleurs délais.</p>
+            <p>Une demande de devis ou de disponibilité n’est pas une commande acceptée. La vente est subordonnée à la confirmation du vendeur et, si paiement en ligne disponible, aux contrôles du prestataire de paiement et aux informations précontractuelles applicables.</p>
           </div>
 
           <div>
             <h2 className="text-lg font-semibold mb-2">5. Livraison et retrait</h2>
-            <p>Les modes de livraison proposés sont : livraison à domicile, retrait chez le traiteur, point relais. Les délais sont estimatifs et communiqués avant validation. Le client est responsable de la réception de sa commande.</p>
+            <p>Selon les partenaires et les produits, retrait, livraison ou point relais peuvent être proposés. Les frais, délais, conditions de conservation et la personne responsable de la livraison doivent être confirmés avant engagement.</p>
           </div>
 
           <div>
@@ -41,12 +41,12 @@ export function CGVPage() {
 
           <div>
             <h2 className="text-lg font-semibold mb-2">7. Rétractation et remboursement</h2>
-            <p>Conformément à l'article L221-28 du Code de la consommation, le droit de rétractation ne s'applique pas aux denrées périssables. En cas de problème constaté, le client doit contacter le support dans les 2 heures suivant la réception via WhatsApp. Delikreol s'engage à trouver une solution amiable avec le partenaire.</p>
+            <p>Certaines denrées susceptibles de se détériorer ou de se périmer rapidement relèvent d’exceptions au droit de rétractation, selon les conditions légales applicables. Les droits du client en matière de non-conformité et de réclamation demeurent applicables. Le support peut être contacté rapidement via WhatsApp ; aucun délai arbitraire de deux heures ne limite les droits légaux.</p>
           </div>
 
           <div>
             <h2 className="text-lg font-semibold mb-2">8. Données personnelles</h2>
-            <p>Les données collectées sont utilisées uniquement dans le cadre de la commande et de la livraison. Conformément au RGPD, le client peut demander la suppression de ses données à tout moment. Voir notre <a href="/confidentialite" className="text-primary underline">Politique de confidentialité</a>.</p>
+            <p>Les données nécessaires au service peuvent être utilisées pour les demandes, commandes, facturation et obligations légales, dans les conditions précisées par la politique de confidentialité. Les personnes disposent des droits prévus par le RGPD, sous réserve des durées de conservation obligatoires. Voir notre <a href="/confidentialite" className="text-primary underline">Politique de confidentialité</a>.</p>
           </div>
 
           <div>
