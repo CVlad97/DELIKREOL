@@ -101,7 +101,7 @@ export default function TermsOfService() {
             Deux modes de livraison sont proposés :
           </p>
           <ul>
-            <li><strong>Livraison à domicile</strong> : délai estimé de 1 à 2 heures selon la disponibilité</li>
+            <li><strong>Livraison à domicile</strong> : délai et disponibilité confirmés au cas par cas</li>
             <li><strong>Point relais</strong> : retrait dans un délai de 2 à 4 heures, le Client est notifié par SMS/email</li>
           </ul>
 
