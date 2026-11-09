@@ -303,6 +303,13 @@ export function TraiteurDetailPage() {
             </div>
           </section>
 
+          {isLangousteHouse && (
+            <section className="mt-6 rounded-2xl border border-border bg-card p-6">
+              <h2 className="text-2xl font-bold">La carte de Langouste House</h2>
+              <p className="mt-2">Terrasse sur la plage, traiteur et mareyage. Retrouvez les plats, les desserts maison et les cinq cocktails signature.</p>
+              <a href="/langouste-house/" className="mt-4 inline-block font-semibold text-primary underline">Découvrir la carte et les tarifs</a>
+            </section>
+          )}
           {traiteur.name === 'Langouste House' && (
             <section className="mt-6 rounded-2xl border border-border bg-card p-4" aria-label="Photos de Langouste House">
               <h2 className="text-xl font-bold">En images chez Langouste House</h2>
