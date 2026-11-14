@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vérification de release DeliKreol"
+  short_description: "Prouve quelle release est réellement servie et sécurise le déploiement"
+  default_prompt: "Vérifie que la release attendue est servie en production et prépare un déploiement réversible."

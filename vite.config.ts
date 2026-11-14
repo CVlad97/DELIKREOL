@@ -94,7 +94,7 @@ export default defineConfig(({ mode }) => {
     test: {
       globals: true,
       environment: 'jsdom',
-      setupFiles: [],
+      setupFiles: ['tests/setup/dom-storage.ts'],
       include: ['src/**/*.{test,spec}.{ts,tsx}', 'tests/supabase/**/*.{test,spec}.{ts,tsx}'],
       exclude: ['node_modules', 'dist', 'tests/e2e/**'],
     },

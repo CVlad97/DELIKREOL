@@ -1,0 +1,4 @@
+interface:
+  display_name: "Preuve de paiement DeliKreol"
+  short_description: "Vérifie le cycle sandbox, l'idempotence et les remboursements"
+  default_prompt: "Établis la preuve du cycle de paiement sandbox DeliKreol ou classe-le BLOCKED_HUMAN avec l'action exacte."

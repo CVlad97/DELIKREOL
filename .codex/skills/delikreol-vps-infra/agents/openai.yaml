@@ -1,0 +1,4 @@
+interface:
+  display_name: "Infra VPS DeliKreol"
+  short_description: "Audite nginx, docroot, conteneurs, disque et certificats du VPS"
+  default_prompt: "Audite l'infrastructure du VPS DeliKreol en lecture seule et rends un état par ressource avec les P0."

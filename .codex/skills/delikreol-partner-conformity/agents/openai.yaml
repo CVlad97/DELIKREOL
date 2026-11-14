@@ -1,0 +1,4 @@
+interface:
+  display_name: "Conformité partenaires DeliKreol"
+  short_description: "Contrôle allergènes, photos, droits et cadre légal avant publication"
+  default_prompt: "Vérifie la conformité des partenaires DeliKreol avant publication et liste les blocages humains."

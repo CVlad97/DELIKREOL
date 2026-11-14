@@ -35,7 +35,11 @@
     "supabase:deploy:checkout": "supabase functions deploy checkout-order create-checkout-session create-payment-intent stripe-webhook --project-ref boihlgodmclljtckhmgz --use-api",
     "api:catalog": "node scripts/public-api-bridge.mjs list",
     "api:audit": "node scripts/public-api-bridge.mjs audit",
-    "api:test": "node --test tests/public-api-bridge.test.mjs"
+    "api:test": "node --test tests/public-api-bridge.test.mjs",
+    "launch:gate": "node scripts/launch-gate.mjs",
+    "launch:gate:write": "node scripts/launch-gate.mjs --write",
+    "connectors:check": "node scripts/connectors/verify.mjs",
+    "connectors:write": "node scripts/connectors/verify.mjs --write"
   },
   "dependencies": {
     "@blinkdotnew/react": "^1.0.2",

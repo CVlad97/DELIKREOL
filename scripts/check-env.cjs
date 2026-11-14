@@ -98,9 +98,9 @@ function main() {
 
   if (hasErrors) {
     console.log(chalk.red.bold('❌ ÉCHEC: Variables obligatoires manquantes\n'));
-    console.log(chalk.yellow('Pour Cloudflare Pages:'));
-    console.log('1. Allez dans Dashboard > Pages > delikreol > Settings > Environment Variables');
-    console.log('2. Ajoutez les variables manquantes pour Production ET Preview\n');
+    console.log(chalk.yellow('Pour la production (VPS Hostinger, nginx):'));
+    console.log('1. Les VITE_* sont figées à la COMPILATION : les définir côté nginx ne change rien.');
+    console.log('2. Exportez-les avant `npm run build` (ou dans .env.production), puis republiez dist/ vers le docroot réel.\n');
     console.log(chalk.yellow('Pour développement local:'));
     console.log('1. Créez un fichier .env.local à la racine du projet');
     console.log('2. Copiez le contenu depuis .env.example');
@@ -117,8 +117,8 @@ function main() {
 
   console.log(chalk.blue('🔗 Liens utiles:'));
   console.log(`  Supabase Dashboard: ${chalk.underline('https://supabase.com/dashboard/project/boihlgodmclljtckhmgz')}`);
-  console.log(`  Cloudflare Pages: ${chalk.underline('https://dash.cloudflare.com')}`);
-  console.log(`  Production: ${chalk.underline('https://delikreol.pages.dev')}\n`);
+  console.log(`  VPS Hostinger: ${chalk.underline('https://hpanel.hostinger.com')}`);
+  console.log(`  Production: ${chalk.underline('https://delikreol.com')}\n`);
 
   process.exit(0);
 }

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Orchestrateur de lancement DeliKreol"
+  short_description: "Coordonne les sous-agents et décide GO / NO-GO sur preuves"
+  default_prompt: "Établis l'état de lancement DeliKreol : délègue à l'infra, la release, la conformité puis le paiement, et rends GO / NO-GO par gate."
