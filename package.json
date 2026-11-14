@@ -1,5 +1,5 @@
 {
-  "name": "vite-react-typescript-starter",
+  "name": "delikreol",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -28,7 +28,9 @@
     "partners:sql": "node scripts/partners-sync.mjs --sql",
     "partners:sql:write": "node scripts/partners-sync.mjs --sql > supabase/seed.partners.sql",
     "test:supabase": "vitest run tests/supabase",
-    "deploy": "npm run build && wrangler deploy",
+    "deploy": "node scripts/deploy-vps.mjs",
+    "deploy:apply": "node scripts/deploy-vps.mjs --apply",
+    "audit:origins": "node scripts/audit-origins.mjs",
     "prepare": "husky",
     "supabase:link": "supabase link --project-ref boihlgodmclljtckhmgz",
     "supabase:deploy:functions": "supabase functions deploy checkout-order public-order-status create-checkout-session create-payment-intent stripe-webhook --project-ref boihlgodmclljtckhmgz --use-api",

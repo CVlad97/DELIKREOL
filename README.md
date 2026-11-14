@@ -38,7 +38,14 @@ npm run test
 npm run build
 npm run audit:secrets
 npm run audit:catalog-media
+npm run audit:origins      # aucune copie publique concurrente de l'app
+npm run launch:gate        # verdict GO / NO-GO chiffré, gate par gate
+npm run connectors:check   # état des connecteurs, lecture seule
 ```
+
+## Déploiement
+
+`npm run deploy` produit un **plan** : contrôle SSH, docroot lu dans `nginx -T`, aucune écriture. `npm run deploy:apply` déploie réellement — build, sauvegarde de `index.html`, `rsync` (sans suppression sauf `--prune`), puis vérification de `release.json` côté serveur **et** côté domaine. `wrangler deploy` a été retiré : la production est le VPS, pas Cloudflare.
 
 ## Documentation
 

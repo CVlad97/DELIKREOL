@@ -69,6 +69,7 @@ Chaque constat porte un état : **PASS**, **FAIL**, **BLOCKED_HUMAN**, **NOT_TES
 
 ### 3.2 Inférence de déploiement — FAIL
 
+- **Copie publique concurrente — mesurée** : `https://delikreol.pages.dev/` **sert l'application DELIKREOL complète** (HTTP 200, `<title>Delikreol - Marketplace Logistique Martinique</title>`, `/admin/` en 200, `/release.json` renvoyé en `text/html` par le repli SPA donc build **antérieur** à `write-release.mjs`). Même backend Supabase : la copie est fonctionnelle et permet de se connecter à l'admin. Deux applications publiques, deux versions, un seul backend. Action : Settings → Pages → Source → *None* (ou supprimer `.github/workflows/deploy.yml`). Preuve automatisée : `npm run audit:origins` (FAIL tant que la copie répond).
 - **Pipeline obsolète** : `.github/workflows/deploy.yml` publie sur **GitHub Pages** à chaque push sur `main`, alors que la production est le VPS nginx. Un push ne met donc **pas** à jour delikreol.com, et publie en parallèle un site fantôme. Le workflow fige aussi `VITE_SUPABASE_ANON_KEY` en clair (clé publishable, donc publique par nature, mais la duplication crée deux sources de vérité). À trancher : soit le workflow déploie vers le VPS, soit il est limité à la CI et le déploiement devient explicite.
 
 - prod `84c0d40` = HEAD du checkout VPS, mais **`main` est à `4194bd0`** : 2 commits d'avance (démo Langouste House, lien fiche partenaire → carte ; 2 fichiers, +8 lignes).
