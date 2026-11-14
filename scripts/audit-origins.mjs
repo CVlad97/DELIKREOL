@@ -14,39 +14,43 @@
  * Usage :
  *   node scripts/audit-origins.mjs           # vérifie et sort 0/1
  *   node scripts/audit-origins.mjs --json    # sortie machine
- *   node scripts/audit-origins.mjs --origin https://exemple.test   # origine en plus
  *
  * Les origines supplémentaires peuvent être fournies par AUDIT_ORIGINS
  * (liste séparée par des virgules) sans modifier le fichier.
  */
+import { pathToFileURL } from 'node:url';
 
-const CANONICAL = 'https://delikreol.com';
+export const CANONICAL = 'https://delikreol.com';
 
 // Origines historiques connues. Elles ne doivent plus servir l'application.
-const DEFAULT_SUSPECTS = [
+export const DEFAULT_SUSPECTS = [
   'https://delikreol.pages.dev',
   'https://delikreol.netlify.app',
 ];
 
 // Marqueurs propres à DELIKREOL. On ne teste pas seulement le 200 : un domaine
 // parké ou une page d'erreur personnalisée répond aussi 200.
-const APP_MARKERS = [/Delikreol/i, /Marketplace Logistique Martinique/i];
+export const APP_MARKERS = [/Delikreol/i, /Marketplace Logistique Martinique/i];
 
-const TIMEOUT_MS = 12_000;
+export const TIMEOUT_MS = 12_000;
 
-function origins() {
-  const extra = (process.env.AUDIT_ORIGINS || '')
+export function origins(env = process.env) {
+  const extra = (env.AUDIT_ORIGINS || '')
     .split(',')
     .map((value) => value.trim())
     .filter(Boolean);
   return [...new Set([...DEFAULT_SUSPECTS, ...extra])];
 }
 
-async function probe(origin) {
+function describeError(error) {
+  if (error?.name === 'TimeoutError') return 'délai dépassé';
+  return error?.code || error?.message || 'erreur inconnue';
+}
+
+export async function probeOrigin(origin, { fetchImpl = globalThis.fetch, timeoutMs = TIMEOUT_MS } = {}) {
   const url = new URL('/', origin);
-  const signal = AbortSignal.timeout(TIMEOUT_MS);
   try {
-    const response = await fetch(url, { signal, redirect: 'follow' });
+    const response = await fetchImpl(url, { redirect: 'follow', signal: AbortSignal.timeout(timeoutMs) });
     const body = await response.text();
     const marker = APP_MARKERS.find((pattern) => pattern.test(body));
     const served = response.ok && Boolean(marker);
@@ -59,20 +63,14 @@ async function probe(origin) {
         : `n'expose pas l'application (HTTP ${response.status})`,
     };
   } catch (error) {
-    const reason = error?.name === 'TimeoutError' ? 'délai dépassé' : error?.code || error?.message;
-    return {
-      origin,
-      status: 'PASS',
-      http: null,
-      detail: `injoignable (${reason}) : rien à retirer`,
-    };
+    return { origin, status: 'PASS', http: null, detail: `injoignable (${describeError(error)}) : rien à retirer` };
   }
 }
 
-async function probeCanonical(origin) {
+export async function probeCanonical(origin, { fetchImpl = globalThis.fetch, timeoutMs = TIMEOUT_MS } = {}) {
   const url = new URL('/release.json', origin);
   try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) });
+    const response = await fetchImpl(url, { signal: AbortSignal.timeout(timeoutMs) });
     const contentType = response.headers.get('content-type') || '';
     if (!response.ok) {
       return { origin, status: 'FAIL', detail: `/release.json → HTTP ${response.status} : la release servie n'est pas identifiable` };
@@ -88,28 +86,37 @@ async function probeCanonical(origin) {
     }
     return { origin, status: 'PASS', detail: `release servie : ${payload.release} (${payload.published_at})` };
   } catch (error) {
-    const reason = error?.name === 'TimeoutError' ? 'délai dépassé' : error?.code || error?.message;
-    return { origin, status: 'FAIL', detail: `canonique injoignable (${reason})` };
+    return { origin, status: 'FAIL', detail: `canonique injoignable (${describeError(error)})` };
   }
 }
 
-const results = [await probeCanonical(CANONICAL), ...(await Promise.all(origins().map(probe)))];
-const failed = results.filter((row) => row.status === 'FAIL');
-const state = failed.length === 0 ? 'PASS' : 'FAIL';
-
-if (process.argv.includes('--json')) {
-  console.log(JSON.stringify({ state, generated_at: new Date().toISOString(), results }, null, 2));
-} else {
-  console.log('=== DELIKREOL — ORIGINES PUBLIQUES ===');
-  for (const row of results) {
-    console.log(`${row.status === 'PASS' ? '✅' : '❌'} ${row.origin} — ${row.status}`);
-    console.log(`   ${row.detail}`);
-  }
-  console.log('');
-  console.log(`STATE : ${state}`);
-  if (state === 'FAIL') {
-    console.log('Une origine concurrente sert l\'application : désactiver la publication avant tout GO.');
-  }
+export function summarize(results) {
+  const failed = results.filter((row) => row.status === 'FAIL');
+  return { state: failed.length === 0 ? 'PASS' : 'FAIL', failed };
 }
 
-process.exit(state === 'PASS' ? 0 : 1);
+async function main() {
+  const results = [await probeCanonical(CANONICAL), ...(await Promise.all(origins().map((origin) => probeOrigin(origin))))];
+  const { state } = summarize(results);
+
+  if (process.argv.includes('--json')) {
+    console.log(JSON.stringify({ state, generated_at: new Date().toISOString(), results }, null, 2));
+  } else {
+    console.log('=== DELIKREOL — ORIGINES PUBLIQUES ===');
+    for (const row of results) {
+      console.log(`${row.status === 'PASS' ? '✅' : '❌'} ${row.origin} — ${row.status}`);
+      console.log(`   ${row.detail}`);
+    }
+    console.log('');
+    console.log(`STATE : ${state}`);
+    if (state === 'FAIL') {
+      console.log('Une origine concurrente sert l\'application : désactiver la publication avant tout GO.');
+    }
+  }
+
+  process.exit(state === 'PASS' ? 0 : 1);
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  await main();
+}
