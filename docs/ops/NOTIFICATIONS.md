@@ -58,9 +58,39 @@ SUPABASE_ACCESS_TOKEN=... npm run supabase:deploy:functions
 Puis vérifier qu'une commande de test produit bien une ligne `queued` avec un
 `attempts` qui progresse — c'est la preuve que le worker tourne.
 
-## Limite connue
+## Canal e-mail client (confirmation de commande)
 
-Il n'existe **aucun canal de notification pour le client** (confirmation de
-commande, commande prête) ni pour l'administrateur : la chaîne ci-dessus est
-exclusivement destinée au traiteur. Ajouter un canal e-mail demande un
-fournisseur et une clé d'API.
+Ajouté le 15/11 dans `checkout-order`, après l'écriture de la commande.
+Fournisseur : **Resend** (`POST https://api.resend.com/emails`), sans SDK.
+
+| Secret Supabase | Obligatoire | Rôle |
+|---|---|---|
+| `RESEND_API_KEY` | **oui** | envoi des e-mails ; absent = aucun e-mail, la commande passe quand même |
+| `ORDER_EMAIL_FROM` | non | expéditeur, défaut `DELIKREOL <commandes@delikreol.com>` |
+| `ORDER_EMAIL_REPLY_TO` | non | réponse, défaut `commandes@delikreol.com` |
+
+Règles appliquées :
+
+- **jamais sur un rejeu idempotent** — `result.existing` vrai signifie que
+  l'e-mail n'est pas renvoyé, pour éviter les doublons sur un rafraîchissement ;
+- **best-effort** — un échec d'envoi ne fait pas échouer la commande, mais il
+  est retourné dans `customer_email_sent` / `customer_email_error` et écrit en
+  log : le silence n'est pas un état acceptable ;
+- **aucune adresse** — `customer_email_error = 'aucune adresse e-mail client fournie'`.
+
+Preuve d'envoi : la réponse de `checkout-order` (`customer_email_sent: true`)
+plus l'identifiant `id` renvoyé par Resend dans le tableau de bord Resend →
+Emails. Un `sent: true` seul ne prouve pas la délivrabilité, seulement l'acceptation.
+
+### Domaine d'envoi
+
+Resend refuse d'envoyer depuis un domaine non vérifié : tant que
+`delikreol.com` n'est pas vérifié (enregistrements DKIM/SPF à ajouter), l'envoi
+vers une adresse autre que celle du propriétaire du compte Resend est rejeté.
+Le domaine DNS de `delikreol.com` est chez Hostinger (`dns-parking.com`).
+
+### Limite connue
+
+Il n'existe toujours **aucun canal pour l'administrateur** (nouvelle commande,
+incident paiement) : les notifications traiteur restent du Web Push et le
+client reçoit un e-mail, mais personne n'alerte l'exploitant.

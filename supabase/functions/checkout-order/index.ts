@@ -21,6 +21,100 @@ const DELIVERY_FEES: Record<string, { cents: number; type: string }> = {
   home_delivery: { cents: 400, type: "home_delivery" },
 };
 
+// --- Confirmation client par e-mail (Resend) -------------------------------
+// Best-effort assumé : la commande est déjà écrite quand on envoie. Un e-mail
+// qui échoue ne doit jamais faire échouer une commande — mais il doit être
+// visible, jamais silencieux : l'échec remonte dans la réponse et dans les logs.
+const RESEND_ENDPOINT = "https://api.resend.com/emails";
+const ORDER_EMAIL_FROM = Deno.env.get("ORDER_EMAIL_FROM") ?? "DELIKREOL <commandes@delikreol.com>";
+const ORDER_EMAIL_REPLY_TO = Deno.env.get("ORDER_EMAIL_REPLY_TO") ?? "commandes@delikreol.com";
+const SITE_URL = "https://delikreol.com";
+
+function escapeHtml(value: unknown) {
+  return String(value ?? "").replace(/[&<>"']/g, (char) => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char] as string
+  ));
+}
+
+function euros(cents: number) {
+  return `${(cents / 100).toFixed(2).replace(".", ",")} €`;
+}
+
+type OrderConfirmationEmail = {
+  to: string;
+  orderNumber: string;
+  partnerName: string;
+  modeLabel: string;
+  address: string | null;
+  scheduled: string | null;
+  subtotalCents: number;
+  deliveryCents: number;
+  totalCents: number;
+  items: Array<{ product_name: string; quantity: number; subtotalCents: number }>;
+};
+
+async function sendOrderConfirmationEmail(input: OrderConfirmationEmail): Promise<{ sent: boolean; id?: string; error?: string }> {
+  const apiKey = Deno.env.get("RESEND_API_KEY");
+  if (!apiKey) return { sent: false, error: "RESEND_API_KEY absente (aucun e-mail envoyé)" };
+
+  const lines = input.items.map((item) =>
+    `<tr><td style="padding:6px 0;color:#0f172a">${escapeHtml(item.quantity)} × ${escapeHtml(item.product_name)}</td>`
+    + `<td align="right" style="padding:6px 0;color:#0f172a;white-space:nowrap">${euros(item.subtotalCents)}</td></tr>`
+  ).join("");
+
+  const html = `<!doctype html><html lang="fr"><body style="margin:0;padding:24px;background:#f8fafc;font-family:system-ui,-apple-system,'Segoe UI',sans-serif">
+<div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;padding:24px">
+  <p style="margin:0 0 4px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#64748b">DELIKREOL</p>
+  <h1 style="margin:0 0 16px;font-size:20px;color:#0f172a">Commande ${escapeHtml(input.orderNumber)} confirmée</h1>
+  <p style="margin:0 0 16px;color:#334155;font-size:14px">Merci. Votre commande a été transmise à <strong>${escapeHtml(input.partnerName)}</strong>, qui la confirme et la prépare.</p>
+  <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:14px;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0">${lines}
+    <tr><td style="padding:8px 0;color:#64748b">Sous-total</td><td align="right" style="padding:8px 0;color:#334155">${euros(input.subtotalCents)}</td></tr>
+    <tr><td style="padding:0 0 8px;color:#64748b">${escapeHtml(input.modeLabel)}</td><td align="right" style="padding:0 0 8px;color:#334155">${euros(input.deliveryCents)}</td></tr>
+    <tr><td style="padding:8px 0;font-weight:700;color:#0f172a">Total</td><td align="right" style="padding:8px 0;font-weight:700;color:#0f172a">${euros(input.totalCents)}</td></tr>
+  </table>
+  <p style="margin:16px 0 0;font-size:14px;color:#334155"><strong>${escapeHtml(input.modeLabel)}</strong>${input.address ? ` — ${escapeHtml(input.address)}` : ""}${input.scheduled ? `<br>Créneau souhaité : ${escapeHtml(input.scheduled)}` : ""}</p>
+  <p style="margin:20px 0 0;font-size:13px;color:#475569">Suivre votre commande : <a href="${SITE_URL}/statut-commande" style="color:#0369a1">${SITE_URL}/statut-commande</a> — munissez-vous du numéro ${escapeHtml(input.orderNumber)}.</p>
+  <p style="margin:12px 0 0;font-size:12px;color:#94a3b8">Le montant est encaissé par DELIKREOL ; le traiteur prépare, DELIKREOL organise la remise. Une question : répondez à cet e-mail.</p>
+</div></body></html>`;
+
+  const text = [
+    `Commande ${input.orderNumber} confirmée`,
+    `Partenaire : ${input.partnerName}`,
+    "",
+    ...input.items.map((item) => `- ${item.quantity} × ${item.product_name} : ${euros(item.subtotalCents)}`),
+    "",
+    `Sous-total : ${euros(input.subtotalCents)}`,
+    `${input.modeLabel} : ${euros(input.deliveryCents)}`,
+    `Total : ${euros(input.totalCents)}`,
+    input.address ? `Adresse : ${input.address}` : "",
+    input.scheduled ? `Créneau souhaité : ${input.scheduled}` : "",
+    "",
+    `Suivi : ${SITE_URL}/statut-commande (numéro ${input.orderNumber})`,
+  ].filter(Boolean).join("\n");
+
+  try {
+    const response = await fetch(RESEND_ENDPOINT, {
+      method: "POST",
+      headers: { authorization: `Bearer ${apiKey}`, "content-type": "application/json" },
+      body: JSON.stringify({
+        from: ORDER_EMAIL_FROM,
+        to: [input.to],
+        reply_to: ORDER_EMAIL_REPLY_TO,
+        subject: `Votre commande ${input.orderNumber} — DELIKREOL`,
+        html,
+        text,
+      }),
+    });
+    const payload = await response.json().catch(() => ({} as Record<string, unknown>));
+    if (!response.ok) {
+      return { sent: false, error: `resend ${response.status}: ${String(payload?.message ?? "echec")}`.slice(0, 300) };
+    }
+    return { sent: true, id: typeof payload?.id === "string" ? payload.id : undefined };
+  } catch (error) {
+    return { sent: false, error: (error instanceof Error ? error.message : "envoi impossible").slice(0, 300) };
+  }
+}
+
 type CheckoutItemInput = {
   product_id?: unknown;
   id?: unknown;
@@ -470,12 +564,48 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    // Confirmation client : uniquement sur une commande neuve, jamais sur un
+    // rejeu idempotent — sinon un client qui rafraîchit recevrait l'e-mail
+    // plusieurs fois.
+    let customerEmailSent = false;
+    let customerEmailError: string | null = null;
+    if (result?.existing) {
+      customerEmailError = "commande existante : e-mail de confirmation non renvoyé";
+    } else {
+      const customerEmail = sanitizeText(body.email || authData.user?.email, 160).toLowerCase();
+      if (!customerEmail.includes("@")) {
+        customerEmailError = "aucune adresse e-mail client fournie";
+      } else {
+        const emailResult = await sendOrderConfirmationEmail({
+          to: customerEmail,
+          orderNumber: String(order.order_number),
+          partnerName: partnerName || "votre traiteur",
+          modeLabel: delivery.type === "pickup" ? "Retrait" : delivery.type === "relay_point" ? "Point relais" : "Livraison",
+          address: sanitizeText(body.address || body.delivery_address, 240) || null,
+          scheduled: sanitizeText(body.scheduled_date || body.creneaux, 60) || null,
+          subtotalCents,
+          deliveryCents: delivery.cents,
+          totalCents,
+          items: orderItems.map((item) => ({
+            product_name: String(item.product_name),
+            quantity: Number(item.quantity),
+            subtotalCents: Math.round(Number(item.subtotal) * 100),
+          })),
+        });
+        customerEmailSent = emailResult.sent;
+        customerEmailError = emailResult.error ?? null;
+        if (!emailResult.sent) console.error("[checkout-order] customer confirmation email failed", customerEmailError);
+      }
+    }
+
     return json(req, {
       success: true,
       existing: Boolean(result?.existing),
       order,
       partner_notification_queued: partnerNotificationQueued,
       partner_notification_error: partnerNotificationError,
+      customer_email_sent: customerEmailSent,
+      customer_email_error: customerEmailError,
     });
   } catch (error) {
     if (error instanceof Response) {
