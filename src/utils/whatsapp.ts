@@ -15,6 +15,58 @@ export function waLink(phone: string | null | undefined, message: string): strin
   return `https://wa.me/${clean}?text=${encodeURIComponent(message)}`;
 }
 
+/**
+ * Numéro au format attendu par wa.me : chiffres seuls, préfixe pays inclus.
+ * Un numéro martiniquais saisi « 0696 17 80 00 » devient 596696178000 —
+ * sans cette conversion, wa.me ouvre une conversation vers un numéro inconnu.
+ */
+export function toInternationalDigits(phone: string | null | undefined): string {
+  const digits = String(phone ?? '').replace(/\D/g, '');
+  if (digits.length === 10 && digits.startsWith('0')) return `596${digits.slice(1)}`;
+  return digits;
+}
+
+export interface PartnerOrderSummary {
+  orderNumber: string;
+  customerName?: string | null;
+  commune?: string | null;
+  mode?: string | null;
+  totalAmount?: number | string | null;
+  lines?: Array<{ product_name?: string | null; quantity?: number | null }>;
+}
+
+/** Message envoyé au traiteur pour qu'il prépare une commande. */
+export function partnerOrderMessage(input: PartnerOrderSummary): string {
+  const total = Number(input.totalAmount ?? 0);
+  const items = (input.lines ?? [])
+    .map((line) => `• ${Number(line.quantity ?? 1)} × ${line.product_name || 'Article'}`)
+    .join('\n');
+  const client = [input.customerName, input.commune].filter(Boolean).join(' · ');
+
+  return [
+    `DELIKREOL · Nouvelle commande ${input.orderNumber}`,
+    items ? `\n${items}` : '',
+    total > 0 ? `\nTotal : ${total.toFixed(2).replace('.', ',')} €` : '',
+    client ? `Client : ${client}` : '',
+    input.mode ? `Mode : ${input.mode}` : '',
+    '\nMerci de confirmer la préparation en répondant à ce message.',
+  ].filter(Boolean).join('\n');
+}
+
+/**
+ * Lien « Envoyer au traiteur sur WhatsApp ». Renvoie `null` quand aucun numéro
+ * exploitable n'est connu : mieux vaut pas de bouton qu'un lien qui ouvre une
+ * conversation vide vers un destinataire inventé.
+ */
+export function partnerOrderWhatsappLink(
+  phone: string | null | undefined,
+  input: PartnerOrderSummary,
+): string | null {
+  const digits = toInternationalDigits(phone);
+  if (digits.length < 8) return null;
+  return `https://wa.me/${digits}?text=${encodeURIComponent(partnerOrderMessage(input))}`;
+}
+
 /** Lien WhatsApp support DELIKREOL */
 export function supportLink(orderId?: string): string {
   const msg = orderId

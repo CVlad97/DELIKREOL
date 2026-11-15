@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AlertCircle, Loader, RefreshCw } from 'lucide-react';
+import { AlertCircle, Loader, MessageCircle, RefreshCw } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { formatMenuSelection, type MenuSelection } from '../../types/menu';
+import { partnerOrderWhatsappLink } from '../../utils/whatsapp';
 
 interface OrderLineRow {
   id: string;
   product_name: string | null;
   vendor_name: string | null;
+  vendor_id: string | null;
   quantity: number;
   selected_options: MenuSelection | null;
 }
@@ -21,6 +23,7 @@ interface OrderRow {
   total_amount: number | string | null;
   status: string;
   payment_status: string | null;
+  partner_phone: string | null;
   created_at: string;
   items: OrderLineRow[];
 }
@@ -63,6 +66,10 @@ export function AdminCommandes() {
   const [localOrders, setLocalOrders] = useState<LocalOrderRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // `orders.partner_phone` n'est renseigné qu'à partir du moment où une
+  // notification a été mise en file : sur les commandes antérieures il est
+  // nul. On retrouve donc le numéro via `order_items.vendor_id` → `vendors`.
+  const [vendorPhones, setVendorPhones] = useState<Record<string, string>>({});
 
   const loadOrders = useCallback(async () => {
     setLoading(true);
@@ -72,7 +79,7 @@ export function AdminCommandes() {
     const { data, error: queryError } = await supabase
       .from('orders')
       .select(
-        'id, order_number, customer_name, customer_commune, order_mode, delivery_type, total_amount, status, payment_status, created_at, items:order_items(id, product_name, vendor_name, quantity, selected_options)',
+        'id, order_number, customer_name, customer_commune, order_mode, delivery_type, total_amount, status, payment_status, partner_phone, created_at, items:order_items(id, product_name, vendor_name, vendor_id, quantity, selected_options)',
       )
       .order('created_at', { ascending: false })
       .limit(100);
@@ -83,6 +90,18 @@ export function AdminCommandes() {
     } else {
       setOrders((data ?? []) as OrderRow[]);
     }
+    const { data: vendorData } = await supabase
+      .from('vendors')
+      .select('id, phone, whatsapp')
+      .limit(200);
+    if (vendorData) {
+      setVendorPhones(
+        Object.fromEntries(
+          vendorData.map((vendor) => [String(vendor.id), String(vendor.whatsapp || vendor.phone || '')]),
+        ),
+      );
+    }
+
     setLoading(false);
   }, []);
 
@@ -138,7 +157,7 @@ export function AdminCommandes() {
           <table className="w-full">
             <thead className="border-b bg-muted/30">
               <tr>
-                {['Commande', 'Composition', 'Client', 'Commune', 'Mode', 'Total', 'Date', 'Statut', 'Paiement'].map(
+                {['Commande', 'Composition', 'Client', 'Commune', 'Mode', 'Total', 'Date', 'Statut', 'Paiement', 'Traiteur'].map(
                   (label) => (
                     <th key={label} className="px-4 py-3 text-left text-xs font-semibold uppercase text-muted-foreground">
                       {label}
@@ -169,6 +188,31 @@ export function AdminCommandes() {
                   <td className="px-4 py-3 text-sm">{formatDate(order.created_at)}</td>
                   <td className="px-4 py-3 text-sm">{order.status || 'pending'}</td>
                   <td className="px-4 py-3 text-sm">{order.payment_status || 'pending'}</td>
+                  <td className="px-4 py-3 text-sm">
+                    {(() => {
+                      // Le push traiteur reste le canal nominal, mais il depend
+                      // d'un appareil abonne. Ce lien permet a l'exploitant
+                      // d'envoyer la commande sur WhatsApp sans rien installer.
+                      const vendorId = order.items?.find((item) => item.vendor_id)?.vendor_id;
+                      const phone = order.partner_phone || (vendorId ? vendorPhones[vendorId] : '') || '';
+                      const link = partnerOrderWhatsappLink(phone, {
+                        orderNumber: order.order_number || order.id,
+                        customerName: order.customer_name,
+                        commune: order.customer_commune,
+                        mode: order.order_mode || order.delivery_type,
+                        totalAmount: order.total_amount,
+                        lines: order.items,
+                      });
+                      if (!link) {
+                        return <span className="text-xs text-muted-foreground">numéro traiteur inconnu</span>;
+                      }
+                      return (
+                        <a href={link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-lg border border-green-300 bg-green-50 px-3 py-2 text-xs font-bold text-green-800 hover:bg-green-100">
+                          <MessageCircle className="h-4 w-4" /> Envoyer
+                        </a>
+                      );
+                    })()}
+                  </td>
                 </tr>
               ))}
             </tbody>
