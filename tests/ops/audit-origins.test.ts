@@ -29,6 +29,15 @@ describe('origines concurrentes', () => {
     expect(row.status).toBe('PASS');
   });
 
+  it('passe sur une page de renvoi qui cite le domaine sans servir l\'app', async () => {
+    const tombstone =
+      '<html><title>Adresse retirée</title><a href="https://delikreol.com">delikreol.com</a></html>';
+    const row = await probeOrigin('https://cvlad97.github.io/DELIKREOL/', {
+      fetchImpl: fakeFetch({ body: tombstone }),
+    });
+    expect(row.status).toBe('PASS');
+  });
+
   it('passe sur un 404', async () => {
     const row = await probeOrigin('https://delikreol.pages.dev', { fetchImpl: fakeFetch({ status: 404, body: 'Not Found' }) });
     expect(row.status).toBe('PASS');

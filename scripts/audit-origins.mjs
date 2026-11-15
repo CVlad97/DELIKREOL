@@ -23,14 +23,19 @@ import { pathToFileURL } from 'node:url';
 export const CANONICAL = 'https://delikreol.com';
 
 // Origines historiques connues. Elles ne doivent plus servir l'application.
+// pages.dev = Cloudflare Pages, github.io = GitHub Pages : deux hébergeurs
+// distincts, et c'est précisément la confusion qui a laissé la copie en ligne.
 export const DEFAULT_SUSPECTS = [
   'https://delikreol.pages.dev',
+  'https://cvlad97.github.io/DELIKREOL/',
   'https://delikreol.netlify.app',
 ];
 
-// Marqueurs propres à DELIKREOL. On ne teste pas seulement le 200 : un domaine
-// parké ou une page d'erreur personnalisée répond aussi 200.
-export const APP_MARKERS = [/Delikreol/i, /Marketplace Logistique Martinique/i];
+// Marqueur propre à l'application déployée : le titre de son index.html.
+// Volontairement PAS /Delikreol/i seul : une page de renvoi qui cite le nom
+// de domaine (`delikreol.com`) déclencherait un faux positif, et on ne veut
+// pas d'un gate qu'on désactive dès qu'il gêne.
+export const APP_MARKERS = [/Marketplace Logistique Martinique/i];
 
 export const TIMEOUT_MS = 12_000;
 
@@ -48,9 +53,13 @@ function describeError(error) {
 }
 
 export async function probeOrigin(origin, { fetchImpl = globalThis.fetch, timeoutMs = TIMEOUT_MS } = {}) {
-  const url = new URL('/', origin);
+  // On conserve le chemin de l'origine : « cvlad97.github.io/DELIKREOL/ » est
+  // le site, « cvlad97.github.io/ » est autre chose (404). Une normalisation
+  // en `new URL('/', origin)` faisait perdre le segment et rendait un faux PASS.
+  const target = new URL(origin);
+  if (!target.pathname.endsWith('/')) target.pathname += '/';
   try {
-    const response = await fetchImpl(url, { redirect: 'follow', signal: AbortSignal.timeout(timeoutMs) });
+    const response = await fetchImpl(target, { redirect: 'follow', signal: AbortSignal.timeout(timeoutMs) });
     const body = await response.text();
     const marker = APP_MARKERS.find((pattern) => pattern.test(body));
     const served = response.ok && Boolean(marker);

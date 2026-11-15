@@ -69,7 +69,15 @@ Chaque constat porte un état : **PASS**, **FAIL**, **BLOCKED_HUMAN**, **NOT_TES
 
 ### 3.2 Inférence de déploiement — FAIL
 
-- **Copie publique concurrente — mesurée** : `https://delikreol.pages.dev/` **sert l'application DELIKREOL complète** (HTTP 200, `<title>Delikreol - Marketplace Logistique Martinique</title>`, `/admin/` en 200, `/release.json` renvoyé en `text/html` par le repli SPA donc build **antérieur** à `write-release.mjs`). Même backend Supabase : la copie est fonctionnelle et permet de se connecter à l'admin. Deux applications publiques, deux versions, un seul backend. Action : Settings → Pages → Source → *None* (ou supprimer `.github/workflows/deploy.yml`). Preuve automatisée : `npm run audit:origins` (FAIL tant que la copie répond).
+- **Copies publiques concurrentes — mesurées le 15/11/2026.** Le domaine canonique `delikreol.com` n'est pas le seul à servir l'application : **deux** autres origines le faisaient, sur le **même backend Supabase**, donc avec `/admin/` fonctionnel.
+  | Origine | Hébergeur | État |
+  |---|---|---|
+  | `delikreol.pages.dev` | **Cloudflare Pages** (`server: cloudflare`) | **sert toujours l'app** — à supprimer dans le dashboard Cloudflare |
+  | `cvlad97.github.io/DELIKREOL/` | GitHub Pages | neutralisée le 15/11 : source basculée sur la branche `pages-disabled` qui ne contient qu'une page de renvoi |
+
+  La confusion entre les deux hébergeurs est la cause racine : `pages.dev` est un domaine Cloudflare, `github.io` un domaine GitHub, et `npm run deploy` appelait `wrangler deploy` — donc Cloudflare. GitHub Pages revendiquait aussi `delikreol.com` en domaine personnalisé avec un certificat ACME en `bad_authz` ; cette revendication a été retirée (DNS déjà pointé sur le VPS).
+
+  Action restante, hors de portée sans jeton Cloudflare : Cloudflare Dashboard → Workers & Pages → projet `delikreol` → Delete (ou `npx wrangler pages project delete delikreol` avec `CLOUDFLARE_API_TOKEN`). Preuve automatisée : `npm run audit:origins` (FAIL tant qu'une copie répond).
 - **Pipeline obsolète** : `.github/workflows/deploy.yml` publie sur **GitHub Pages** à chaque push sur `main`, alors que la production est le VPS nginx. Un push ne met donc **pas** à jour delikreol.com, et publie en parallèle un site fantôme. Le workflow fige aussi `VITE_SUPABASE_ANON_KEY` en clair (clé publishable, donc publique par nature, mais la duplication crée deux sources de vérité). À trancher : soit le workflow déploie vers le VPS, soit il est limité à la CI et le déploiement devient explicite.
 
 - prod `84c0d40` = HEAD du checkout VPS, mais **`main` est à `4194bd0`** : 2 commits d'avance (démo Langouste House, lien fiche partenaire → carte ; 2 fichiers, +8 lignes).
