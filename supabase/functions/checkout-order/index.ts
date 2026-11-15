@@ -436,6 +436,12 @@ Deno.serve(async (req: Request) => {
 
     let partnerNotificationQueued = false;
     let partnerNotificationError: string | null = null;
+    if (!partnerPhone) {
+      // Un traiteur sans numéro ne peut être joint par aucun canal : c'est une
+      // donnée à corriger, pas un cas à ignorer en silence.
+      partnerNotificationError = "traiteur sans numéro de téléphone";
+      console.error("[checkout-order] vendor without phone", primaryVendor?.id ?? order.id);
+    }
     if (partnerPhone) {
       const testMarker = securedNotes.toUpperCase().includes("TEST TECHNIQUE") ? " · TEST TECHNIQUE — NE PAS PRÉPARER" : "";
       const partnerMessage = `DELIKREOL · Nouvelle commande ${order.order_number} · ${(totalCents / 100).toFixed(2)} € · ${delivery.type === "pickup" ? "retrait" : delivery.type === "relay_point" ? "point relais" : "livraison"}${testMarker}. Ouvrez votre espace DELIKREOL pour accepter ou refuser.`;
@@ -453,11 +459,14 @@ Deno.serve(async (req: Request) => {
         console.error("[checkout-order] partner notification queue failed", notificationError.message);
       } else {
         partnerNotificationQueued = true;
+        // On enregistre le numéro, mais surtout PAS `partner_notified_at` :
+        // mettre en file n'est pas notifier. Le drapeau est désormais posé par
+        // `vendor-push-gateway` quand l'envoi réussit réellement.
         const { error: notifiedAtError } = await admin
           .from("orders")
-          .update({ partner_notified_at: new Date().toISOString(), partner_phone: partnerPhone })
+          .update({ partner_phone: partnerPhone })
           .eq("id", order.id);
-        if (notifiedAtError) console.error("[checkout-order] partner_notified_at update failed", notifiedAtError.message);
+        if (notifiedAtError) console.error("[checkout-order] partner_phone update failed", notifiedAtError.message);
       }
     }
 

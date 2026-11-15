@@ -30,15 +30,21 @@ async function workerAuthorized(req: Request) {
   return key.length >= 32 && await sha256(key) === WORKER_HASH;
 }
 
+// Le filtre `is_active` a été retiré : un traiteur désactivé ou en cours
+// d'onboarding reste le destinataire des commandes déjà passées chez lui, et
+// `Langouste House` (inactif, mais partenaire de la commande de démonstration)
+// ne pouvait structurellement jamais être trouvé — d'où un `no_subscription`
+// alors que la commande avait bien été notifiée.
 async function findVendor(phone: string) {
   const { data } = await admin.from("vendors")
     .select("id,business_name,name,phone,whatsapp,is_active,status")
-    .eq("is_active", true)
-    .limit(100);
+    .limit(200);
   const normalized = normalizePhone(phone);
-  return (data ?? []).find((vendor) =>
+  if (!normalized) return null;
+  const matches = (data ?? []).filter((vendor) =>
     normalizePhone(vendor.whatsapp) === normalized || normalizePhone(vendor.phone) === normalized
-  ) ?? null;
+  );
+  return matches.find((vendor) => vendor.is_active) ?? matches[0] ?? null;
 }
 
 async function pullItems() {
@@ -48,6 +54,10 @@ async function pullItems() {
     .eq("channel", "webpush")
     .in("status", ["queued", "pending"])
     .gte("created_at", cutoff)
+    // Espacement des reprises : une notif déjà tentée n'est réessayée qu'après
+    // deux minutes, sinon la boucle du worker la consomme en quelques secondes
+    // et épuise ses tentatives avant qu'un appareil ait pu s'abonner.
+    .or(`attempts.eq.0,updated_at.lt.${new Date(Date.now() - 2 * 60 * 1000).toISOString()}`)
     .order("created_at", { ascending: true })
     .limit(10);
   if (error) throw error;
@@ -75,17 +85,41 @@ async function ack(body: any) {
     return json({ error: "invalid ack" }, 400);
   }
   const { data: current } = await admin.from("partner_notifications")
-    .select("attempts").eq("id", id).maybeSingle();
+    .select("attempts,order_id").eq("id", id).maybeSingle();
+  const attempts = Number(current?.attempts ?? 0) + 1;
   const patch: Record<string, unknown> = {
     status,
-    attempts: Number(current?.attempts ?? 0) + 1,
+    attempts,
     last_error: body.last_error ? String(body.last_error).slice(0, 500) : null,
     provider_message_id: body.provider_message_id ? String(body.provider_message_id).slice(0, 250) : null,
     updated_at: new Date().toISOString(),
   };
+
+  // « Aucun appareil abonné » n'est pas une fin de vie : c'est un état qui peut
+  // se débloquer (le traiteur active ses alertes depuis son téléphone). On
+  // remet la notification en file pour qu'elle parte encore, au lieu de la
+  // perdre définitivement et sans trace.
+  if (status === "no_subscription" && attempts <= 10) {
+    patch.status = "queued";
+  }
   if (status === "sent") patch.sent_at = new Date().toISOString();
+
   const { error } = await admin.from("partner_notifications").update(patch).eq("id", id);
-  return error ? json({ error: error.message }, 500) : json({ ok: true });
+  if (error) return json({ error: error.message }, 500);
+
+  // `orders.partner_notified_at` ne doit être renseigné qu'une fois la
+  // notification réellement partie. Il était écrit au moment de la mise en
+  // file, ce qui faisait apparaître comme « traiteur prévenu » une commande
+  // dont la notification n'était jamais arrivée.
+  if (status === "sent" && current?.order_id) {
+    const { error: orderError } = await admin.from("orders")
+      .update({ partner_notified_at: new Date().toISOString() })
+      .eq("id", String(current.order_id))
+      .is("partner_notified_at", null);
+    if (orderError) console.error("[vendor-push-gateway] partner_notified_at update failed", orderError.message);
+  }
+
+  return json({ ok: true, requeued: patch.status === "queued" });
 }
 
 Deno.serve(async (req: Request) => {
