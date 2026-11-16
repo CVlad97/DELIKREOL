@@ -67,7 +67,7 @@ Fournisseur : **Resend** (`POST https://api.resend.com/emails`), sans SDK.
 |---|---|---|
 | `RESEND_API_KEY` | **oui** | envoi des e-mails ; absent = aucun e-mail, la commande passe quand même |
 | `ORDER_EMAIL_FROM` | non | expéditeur, défaut `DELIKREOL <commandes@delikreol.com>` |
-| `ORDER_EMAIL_REPLY_TO` | non | réponse, défaut `commandes@delikreol.com` |
+| `ORDER_EMAIL_REPLY_TO` | non | adresse de réponse — **aucune par défaut**, voir l'avertissement MX ci-dessous |
 
 Règles appliquées :
 
@@ -81,6 +81,21 @@ Règles appliquées :
 Preuve d'envoi : la réponse de `checkout-order` (`customer_email_sent: true`)
 plus l'identifiant `id` renvoyé par Resend dans le tableau de bord Resend →
 Emails. Un `sent: true` seul ne prouve pas la délivrabilité, seulement l'acceptation.
+
+### Avertissement : `delikreol.com` ne reçoit aucun e-mail
+
+Constaté le 16/11/2026 : `delikreol.com` a un SPF (`_spf.reach.hostinger.com`)
+mais **aucun enregistrement MX**. Conséquences :
+
+- `contact@`, `commandes@`, `partenaires@`, `dpo@`… soit une soixantaine de
+  mentions dans le code et le site, **ne peuvent pas recevoir de message** ;
+- toute réponse à l'un de ces e-mails rebondit ;
+- l'intégration Resend n'envoie donc **aucun `reply_to`** par défaut : un
+  client qui répond utiliserait une adresse morte.
+
+Pour rétablir la réception : créer une boîte chez Hostinger pour `delikreol.com`
+ou router le domaine vers une boîte existante, puis définir
+`ORDER_EMAIL_REPLY_TO` sur une adresse réellement relevée.
 
 ### Domaine d'envoi
 

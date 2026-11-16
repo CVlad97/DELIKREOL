@@ -27,7 +27,11 @@ const DELIVERY_FEES: Record<string, { cents: number; type: string }> = {
 // visible, jamais silencieux : l'échec remonte dans la réponse et dans les logs.
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 const ORDER_EMAIL_FROM = Deno.env.get("ORDER_EMAIL_FROM") ?? "DELIKREOL <commandes@delikreol.com>";
-const ORDER_EMAIL_REPLY_TO = Deno.env.get("ORDER_EMAIL_REPLY_TO") ?? "commandes@delikreol.com";
+// Pas de valeur par défaut : `delikreol.com` n'a **aucun enregistrement MX**,
+// donc une réponse adressée à `commandes@delikreol.com` rebondit. Mieux vaut
+// un e-mail sans `reply_to` qu'un e-mail qui invite le client à répondre à une
+// adresse morte. À définir explicitement quand la boîte existera.
+const ORDER_EMAIL_REPLY_TO = Deno.env.get("ORDER_EMAIL_REPLY_TO") ?? "";
 const SITE_URL = "https://delikreol.com";
 
 function escapeHtml(value: unknown) {
@@ -74,7 +78,7 @@ async function sendOrderConfirmationEmail(input: OrderConfirmationEmail): Promis
   </table>
   <p style="margin:16px 0 0;font-size:14px;color:#334155"><strong>${escapeHtml(input.modeLabel)}</strong>${input.address ? ` — ${escapeHtml(input.address)}` : ""}${input.scheduled ? `<br>Créneau souhaité : ${escapeHtml(input.scheduled)}` : ""}</p>
   <p style="margin:20px 0 0;font-size:13px;color:#475569">Suivre votre commande : <a href="${SITE_URL}/statut-commande" style="color:#0369a1">${SITE_URL}/statut-commande</a> — munissez-vous du numéro ${escapeHtml(input.orderNumber)}.</p>
-  <p style="margin:12px 0 0;font-size:12px;color:#94a3b8">Le montant est encaissé par DELIKREOL ; le traiteur prépare, DELIKREOL organise la remise. Une question : répondez à cet e-mail.</p>
+  <p style="margin:12px 0 0;font-size:12px;color:#94a3b8">Le montant est encaissé par DELIKREOL ; le traiteur prépare, DELIKREOL organise la remise. Une question : écrivez-nous depuis la page Contact du site.</p>
 </div></body></html>`;
 
   const text = [
@@ -99,7 +103,7 @@ async function sendOrderConfirmationEmail(input: OrderConfirmationEmail): Promis
       body: JSON.stringify({
         from: ORDER_EMAIL_FROM,
         to: [input.to],
-        reply_to: ORDER_EMAIL_REPLY_TO,
+        ...(ORDER_EMAIL_REPLY_TO ? { reply_to: ORDER_EMAIL_REPLY_TO } : {}),
         subject: `Votre commande ${input.orderNumber} — DELIKREOL`,
         html,
         text,
