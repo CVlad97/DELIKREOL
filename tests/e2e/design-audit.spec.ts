@@ -63,18 +63,21 @@ test('public form controls have a visible 3:1 boundary', async ({ page }) => {
 
 test('catalogue product thumbnails share the same 4:3 format', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto('/catalogue', { waitUntil: 'domcontentloaded' });
+  await page.goto('/catalogue', { waitUntil: 'networkidle' });
 
   const thumbnails = page.locator('[data-catalogue-grid="true"] [data-thumbnail-source] [data-smart-image-container="true"]');
   await expect(thumbnails.first()).toBeVisible();
-  const count = Math.min(await thumbnails.count(), 12);
-
-  for (let index = 0; index < count; index += 1) {
-    const box = await thumbnails.nth(index).boundingBox();
-    expect(box).not.toBeNull();
-    expect((box?.width ?? 0) / (box?.height ?? 1)).toBeCloseTo(4 / 3, 1);
+  const sizes = await thumbnails.evaluateAll((items) => items.slice(0, 12).map((item) => {
+    const { width, height } = item.getBoundingClientRect();
+    return { width, height };
+  }));
+  expect(sizes.length).toBeGreaterThan(0);
+  for (const { width, height } of sizes) {
+    expect(height).toBeGreaterThan(0);
+    expect(width / height).toBeCloseTo(4 / 3, 1);
   }
 });
+
 
 for (const route of ['/', '/catalogue', '/traiteurs', '/devenir-point-relais']) {
   test(`${route} reflows at 320 CSS pixels`, async ({ page }) => {
