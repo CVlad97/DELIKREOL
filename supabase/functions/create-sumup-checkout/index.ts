@@ -14,6 +14,7 @@ const supabaseSecretKey = secretKeys["payments"];
 if (!supabaseSecretKey) throw new Error("Supabase secret key named payments is required");
 
 const SUMUP_CHECKOUTS_URL = "https://api.sumup.com/v0.1/checkouts";
+const SUMUP_WEBHOOK_URL = new URL("/functions/v1/sumup-webhook", SUPABASE_URL).href;
 const ALLOWED_ORIGINS = new Set([
   "https://delikreol.com",
   "https://www.delikreol.com",
@@ -106,9 +107,8 @@ Deno.serve(async (req: Request) => {
     if (!/^[A-Z]{3}$/.test(currency)) return json({ error: "Invalid currency" }, 400, origin);
 
     const reference = `DK-${String(order.order_number || order.id).replace(/[^A-Za-z0-9_-]/g, "").slice(0, 40)}`;
-    const returnUrl = savedTrackingToken
-      ? `https://delikreol.com/statut-commande?order=${encodeURIComponent(savedTrackingToken)}`
-      : "https://delikreol.com/statut-commande";
+    const redirectUrl = new URL("https://delikreol.com/statut-commande");
+    redirectUrl.searchParams.set("order", savedTrackingToken);
 
     const sumupResponse = await fetch(SUMUP_CHECKOUTS_URL, {
       method: "POST",
@@ -119,7 +119,8 @@ Deno.serve(async (req: Request) => {
         currency,
         merchant_code: SUMUP_MERCHANT_CODE,
         description: `Commande DeliKreol ${order.order_number || order.id}`,
-        return_url: returnUrl,
+        return_url: SUMUP_WEBHOOK_URL,
+        redirect_url: redirectUrl.href,
         hosted_checkout: { enabled: true },
       }),
     });
