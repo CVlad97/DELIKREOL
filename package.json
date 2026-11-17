@@ -31,6 +31,7 @@
     "deploy": "node scripts/deploy-vps.mjs",
     "deploy:apply": "node scripts/deploy-vps.mjs --apply",
     "audit:origins": "node scripts/audit-origins.mjs",
+    "verify:email": "node scripts/verify-email-domain.mjs",
     "prepare": "husky",
     "supabase:link": "supabase link --project-ref boihlgodmclljtckhmgz",
     "supabase:deploy:functions": "supabase functions deploy checkout-order public-order-status create-checkout-session create-payment-intent stripe-webhook --project-ref boihlgodmclljtckhmgz --use-api",
