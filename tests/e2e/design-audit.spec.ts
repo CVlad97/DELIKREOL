@@ -40,7 +40,7 @@ async function expectNoHorizontalOverflow(page: Page) {
 }
 
 test('primary actions keep AA text contrast before and during hover', async ({ page }) => {
-  await page.goto('/catalogue', { waitUntil: 'domcontentloaded' });
+  await page.goto('/catalogue', { waitUntil: 'networkidle' });
   const action = page.getByRole('button', { name: /Ajouter/i }).first();
   await expect(action).toBeVisible();
 
