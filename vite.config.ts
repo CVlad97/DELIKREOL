@@ -28,7 +28,8 @@ export default defineConfig(({ mode }) => {
         clientsClaim: true,
         skipWaiting: true,
         navigateFallback: null,
-        globIgnores: ['**/release.json', '**/mise-a-jour.html'],
+        // Nginx serves the 404 document only as an internal error page.
+        globIgnores: ['**/release.json', '**/mise-a-jour.html', '**/404.html'],
         globPatterns: ['**/*.{js,css,html,svg,ico,json}'],
         runtimeCaching: [
           {
