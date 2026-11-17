@@ -2,6 +2,7 @@ package com.delikreol.vps;
 
 import android.app.*;
 import android.os.*;
+import android.net.Uri;
 import android.content.*;
 import android.graphics.Typeface;
 import android.security.keystore.KeyGenParameterSpec;
@@ -32,6 +33,24 @@ public class MainActivity extends Activity {
         ScrollView sc=new ScrollView(this); LinearLayout page=new LinearLayout(this);page.setOrientation(1);page.setPadding(dp(20),dp(28),dp(20),dp(24));page.setBackgroundColor(0xfff6f5fa);sc.addView(page);
         TextView title=new TextView(this);title.setText("DELIKREOL VPS");title.setTextSize(27);title.setTypeface(null,Typeface.BOLD);title.setTextColor(0xff211a36);page.addView(title);
         TextView intro=new TextView(this);intro.setText("Connexion SSH protégée · actions DELIKREOL en lecture seule");intro.setTextSize(14);intro.setPadding(0,dp(5),0,dp(20));page.addView(intro);
+        Button openSite = button("Ouvrir DELIKREOL");
+        openSite.setOnClickListener(v -> {
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://delikreol.com/")));
+            } catch (ActivityNotFoundException e) {
+                toast("Aucun navigateur disponible.");
+            }
+        });
+        page.addView(openSite);
+        Button openVersion = button("Voir la version en ligne");
+        openVersion.setOnClickListener(v -> {
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://delikreol.com/release.json")));
+            } catch (ActivityNotFoundException e) {
+                toast("Aucun navigateur disponible.");
+            }
+        });
+        page.addView(openVersion);
         host=field(page,"Hôte VPS (DELIKREOL)","srv1729857.hstgr.cloud");user=field(page,"Utilisateur SSH","root");port=field(page,"Port SSH","22");port.setInputType(InputType.TYPE_CLASS_NUMBER);
         fingerprint=field(page,"Empreinte SHA256 de l’hôte (obligatoire)","");
         TextView hint=new TextView(this);hint.setText("Sur le VPS : ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub -E sha256. Vérifie l’empreinte dans Hostinger avant de la saisir.");hint.setTextSize(12);hint.setPadding(0,0,0,dp(12));page.addView(hint);
