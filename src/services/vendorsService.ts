@@ -255,7 +255,7 @@ export function mergeVendorWithStatic(
 }
 
 function staticPublicVendors(): TraiteurSpace[] {
-  return traiteurSpaces.filter((vendor) => vendor.status === 'public confirmé');
+  return traiteurSpaces.filter((vendor) => vendor.status === 'public confirmé' || vendor.status === 'public à vérifier');
 }
 
 export async function getPublicVendors(): Promise<{ vendors: TraiteurSpace[]; source: SourceMode }> {

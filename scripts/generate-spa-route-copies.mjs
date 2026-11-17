@@ -77,6 +77,7 @@ const routes = [
   'admin/analytics',
   'admin/operations',
   'admin/avis',
+  'traiteur/langouste-house',
   'traiteur/chef-a-mada',
   'traiteur/cocos-food',
   'traiteur/goute-mwen',

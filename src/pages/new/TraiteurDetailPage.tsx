@@ -1,3 +1,4 @@
+import { langousteHouseGallery } from '../../data/langousteHouseGallery';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
@@ -171,6 +172,7 @@ export function TraiteurDetailPage() {
     price: product.price ?? 0,
     image: product.image_url || undefined,
     isSignature: product.is_signature,
+    available: product.available,
   }));
   const menuItems = PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(traiteur.name)
     ? []
@@ -179,6 +181,8 @@ export function TraiteurDetailPage() {
       : (traiteur.menuItems || []).filter((item) => isUsableThumbnail(item.image));
   const isChefMada = traiteur.slug === 'chef-a-mada';
   const showMadaBadge = MADA_BADGE_TRAITEURS.has(traiteur.name);
+  const isLangousteHouse = traiteur.slug === 'langouste-house';
+  const langousteCaptions = langousteHouseGallery.map(({ caption }) => caption);
   const isGouteMwen = traiteur.slug === 'goute-mwen';
   const useContainedHero = isGouteMwen;
   const firstProductImage = menuItems.find((item) => Boolean(item.image))?.image || null;
@@ -292,11 +296,31 @@ export function TraiteurDetailPage() {
                   <p className="text-xs font-bold uppercase tracking-wide text-neutral-500">À partir de</p>
                   <p className="text-3xl font-black text-primary">
                     {visibleStartingAt > 0 ? formatEuro(visibleStartingAt) : 'Sur devis'}
+                    {isLangousteHouse && <span className="block text-sm font-semibold">/ 100 g de langouste entière</span>}
                   </p>
                 </div>
               </div>
             </div>
           </section>
+
+          {isLangousteHouse && (
+            <section className="mt-6 rounded-2xl border border-border bg-card p-6">
+              <h2 className="text-2xl font-bold">La carte de Langouste House</h2>
+              <p className="mt-2">Terrasse sur la plage, traiteur et mareyage. Retrouvez les plats, les desserts maison et les cinq cocktails signature.</p>
+              <a href="/langouste-house/" className="mt-4 inline-block font-semibold text-primary underline">Découvrir la carte et les tarifs</a>
+            </section>
+          )}
+          {traiteur.name === 'Langouste House' && (
+            <section className="mt-6 rounded-2xl border border-border bg-card p-4" aria-label="Photos de Langouste House">
+              <h2 className="text-xl font-bold">En images chez Langouste House</h2>
+              <p className="mt-2 text-sm text-muted-foreground">Photos transmises par Charles. Aperçu du lieu et des préparations ; les plats présentés ne sont pas tous proposés dans la carte ci-dessous. Disponibilités à confirmer.</p>
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {traiteur.galleryImages.map((image, index) => (
+                  <figure key={image}><a href={image} target="_blank" rel="noopener noreferrer" aria-label={`Agrandir : ${langousteCaptions[index] || "photo de Langouste House"}`}><img src={image} alt={langousteCaptions[index] || "Photo de Langouste House"} loading="lazy" className="h-48 w-full rounded-xl bg-secondary/10 object-contain" /></a><figcaption className="mt-2 text-sm text-muted-foreground">{langousteCaptions[index]}</figcaption></figure>
+                ))}
+              </div>
+            </section>
+          )}
 
           <section className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
             <div className="rounded-2xl border border-border bg-card p-4">
@@ -307,7 +331,7 @@ export function TraiteurDetailPage() {
               <p className="text-2xl font-black text-foreground">
                 {visibleStartingAt > 0 ? formatEuro(visibleStartingAt) : 'Devis'}
               </p>
-              <p className="text-xs text-muted-foreground">prix de départ</p>
+              <p className="text-xs text-muted-foreground">{isLangousteHouse ? 'par 100 g de langouste entière' : 'prix de départ'}</p>
             </div>
             <div className="rounded-2xl border border-border bg-card p-4">
               <p className="inline-flex items-center gap-1 text-sm font-black text-foreground">
@@ -345,7 +369,7 @@ export function TraiteurDetailPage() {
               <p className="text-xs font-black uppercase tracking-[0.2em] text-secondary">Commander</p>
               <h2 className="mt-2 text-2xl font-black">Envie de goûter ?</h2>
               <p className="mt-2 text-sm text-white/70">
-                {isChefMada
+                {isLangousteHouse ? 'Découvrez la carte prévisionnelle et contactez DeliKreol pour vérifier les disponibilités. Les commandes en ligne ne sont pas encore ouvertes.' : isChefMada
                   ? 'Cette vitrine regroupe des plats partenaires. Les commandes passent uniquement par devis et créneau planifié.'
                   : 'Ajoutez les produits au panier ou vérifiez les disponibilités avec DeliKreol.'}
               </p>
@@ -358,7 +382,7 @@ export function TraiteurDetailPage() {
               >
                 <MessageCircle className="h-5 w-5" /> Vérifier les disponibilités
               </a>
-              {!isChefMada && (
+              {!isChefMada && !isLangousteHouse && (
                 <Link
                   to="/panier"
                   className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-black text-neutral-950"
@@ -368,6 +392,14 @@ export function TraiteurDetailPage() {
               )}
             </aside>
           </section>
+
+          {isLangousteHouse && <section className="mt-8 rounded-2xl border border-border bg-card p-6" aria-label="Informations pratiques">
+            <h2 className="text-2xl font-bold">Préparer votre visite</h2>
+            <p className="mt-3">14 rue Chery Rosette, boulevard des Pêcheurs, Fond Lahaye, 97233 Schœlcher.</p>
+            <p className="mt-2">La carte réunit bisque, accras, salades, langoustes entières, queues de langouste et deux plateaux. Les références au poids sont facturées par tranche de 100 g.</p>
+            <p className="mt-2 text-sm text-muted-foreground">Carte prévisionnelle du 22 octobre 2026. Faites confirmer le prix final, les portions, les allergènes et les possibilités de retrait avant de vous déplacer.</p>
+            <a className="mt-4 inline-block font-semibold text-primary underline" href="https://www.langouste-house.com/" target="_blank" rel="noopener noreferrer">Consulter le site de Langouste House</a>
+          </section>}
 
           <section className="mt-12 border-t border-border pt-10" id="catalogue">
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -403,11 +435,12 @@ export function TraiteurDetailPage() {
                     />
                     <div className="flex flex-1 flex-col p-4">
                       <div className="flex items-start justify-between gap-3">
-                        <h3 className="line-clamp-2 min-h-[2.75rem] font-black leading-tight">
+                        <h3 className={`${isLangousteHouse ? "" : "line-clamp-2"} min-h-[2.75rem] font-black leading-tight`}>
                           {String(item.name ?? 'Produit local').replace(/^Gouté Mwen\s*[—-]\s*/i, '')}
                         </h3>
                         <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-sm font-black text-primary">
                           {item.price > 0 ? formatEuro(item.price) : 'Devis'}
+                          {item.name.includes('prix / 100 g') && <span className="block text-center text-xs font-semibold">/ 100 g</span>}
                         </span>
                       </div>
                       <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
@@ -420,6 +453,14 @@ export function TraiteurDetailPage() {
                         >
                           Demander un devis
                         </Link>
+                      ) : item.available === false ? (
+                        <button
+                          type="button"
+                          disabled
+                          className="mt-auto inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-muted px-3 py-2.5 text-sm font-black text-muted-foreground"
+                        >
+                          À compléter avec le traiteur
+                        </button>
                       ) : (
                         <button
                           type="button"
@@ -448,7 +489,7 @@ export function TraiteurDetailPage() {
 
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white/95 p-3 backdrop-blur sm:hidden">
           <div className="mx-auto flex max-w-md gap-2">
-            {!isChefMada && (
+            {!isChefMada && !isLangousteHouse && (
               <Link to="/panier" className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-black text-primary-foreground">
                 <ShoppingCart className="h-4 w-4" /> Panier
               </Link>

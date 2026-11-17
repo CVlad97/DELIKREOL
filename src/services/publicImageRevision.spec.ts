@@ -22,6 +22,15 @@ describe('publicImageRevision', () => {
     expect(withPublicImageRevision('blob:https://delikreol.com/id')).toBe('blob:https://delikreol.com/id');
   });
 
+  it('rewrites canonical site images to the current origin for previews', () => {
+    expect(withPublicImageRevision('https://delikreol.com/vendors/ninice/drive-reimport/photo.jpg'))
+      .toBe(`/vendors/ninice/drive-reimport/photo.jpg?v=${PUBLIC_IMAGE_REVISION}`);
+    expect(withPublicImageRevision('https://www.delikreol.com/branding/hero.webp'))
+      .toBe(`/branding/hero.webp?v=${PUBLIC_IMAGE_REVISION}`);
+    expect(withPublicImageRevision('https://delikreol.com/private/image.jpg'))
+      .toBe('https://delikreol.com/private/image.jpg');
+  });
+
   it('versions every local candidate in a srcset', () => {
     expect(reviseSrcSet('/one.webp 1x, /two.webp 2x'))
       .toBe(`/one.webp?v=${PUBLIC_IMAGE_REVISION} 1x, /two.webp?v=${PUBLIC_IMAGE_REVISION} 2x`);

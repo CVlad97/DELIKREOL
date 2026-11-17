@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { traiteurSpaces } from '../../src/data/traiteurs';
 import {
   getPublicVendors,
+  primePublicVendors,
   getVendorBySlug,
   mergeVendorWithStatic,
   type VendorRaw,
@@ -178,4 +179,12 @@ describe('vendorsService', () => {
     const slugs = result.vendors.map((vendor) => vendor.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
   });
+});
+
+it('keeps the published Langouste House preview accessible after catalogue hydration', async () => {
+  await primePublicVendors();
+  const { vendor } = await getVendorBySlug('langouste-house');
+  expect(vendor?.name).toBe('Langouste House');
+  expect(vendor?.status).toBe('public à vérifier');
+  expect(traiteurSpaces.some(item => item.slug === 'langouste-house')).toBe(true);
 });

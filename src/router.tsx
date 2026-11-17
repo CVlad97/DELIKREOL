@@ -10,6 +10,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { ToastProvider } from './contexts/ToastContext';
 
+const UpdatePage = lazy(() => import('./pages/new/UpdatePage'));
 const HomePage = lazy(() => import('./pages/new/HomePage'));
 const PremiumHomePage = lazy(() => import('./pages/new/PremiumHomePage'));
 const ProSpacePage = lazy(async () => {
@@ -215,6 +216,8 @@ export function AppRouter() {
               <Routes>
                 <Route element={<LayoutWrapper />}>
                   <Route index element={<HomePage />} />
+                  <Route path="mise-a-jour" element={<UpdatePage />} />
+                  <Route path="mise-a-jour.html" element={<UpdatePage />} />
                   <Route path="accueil-premium" element={<PremiumHomePage />} />
                   <Route path="catalogue" element={<CataloguePage />} />
                   <Route path="produit/:slug" element={<ProductDetailPage />} />

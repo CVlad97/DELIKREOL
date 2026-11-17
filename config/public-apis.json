@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "project": "DELIKREOL",
+  "description": "Approved discovery list only. Providers disabled until policy, credentials, cost and data checks are confirmed.",
+  "providers": [
+    {
+      "id": "supabase",
+      "status": "existing_code",
+      "enabled": false,
+      "data_policy": "no_customer_data",
+      "use_case": "Authentification, catalogue, commandes et gestion partenaires",
+      "docs": "https://supabase.com/docs"
+    },
+    {
+      "id": "openstreetmap",
+      "status": "existing_code",
+      "enabled": false,
+      "data_policy": "no_customer_data",
+      "use_case": "Carte et positionnement des traiteurs et points relais",
+      "docs": "https://www.openstreetmap.org/copyright"
+    },
+    {
+      "id": "open-meteo",
+      "status": "candidate_unverified",
+      "enabled": false,
+      "data_policy": "no_customer_data",
+      "use_case": "Météo indicative pour planification de livraisons",
+      "docs": "https://open-meteo.com/en/docs"
+    }
+  ]
+}

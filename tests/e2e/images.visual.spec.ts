@@ -43,10 +43,20 @@ for (const vp of VIEWPORTS) {
 
       await p.waitForTimeout(2000);
 
+      // Lazy images below the fold are not errors: only an attempted local
+      // load that completed with zero width is a verified broken asset.
+      // External images are deliberately aborted in this offline visual test.
       const brokenImages = await p.evaluate(() => {
         return Array.from(document.querySelectorAll('img'))
-          .filter(img => !img.complete || img.naturalWidth === 0)
-          .map(img => img.src);
+          .filter(img => {
+            if (!img.complete || img.naturalWidth > 0 || !img.currentSrc) return false;
+            try {
+              return new URL(img.currentSrc).origin === window.location.origin;
+            } catch {
+              return false;
+            }
+          })
+          .map(img => img.currentSrc);
       });
 
       await p.screenshot({

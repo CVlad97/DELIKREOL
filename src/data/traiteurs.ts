@@ -1,3 +1,4 @@
+import { langousteHouseGallery } from './langousteHouseGallery';
 import { mockProducts } from './mockCatalog';
 import type { HealthTag } from './mockCatalog';
 import { anTjeCocoAssets, cocoFoodAssets } from './partnerAssets';
@@ -14,6 +15,7 @@ export type TraiteurMenuItem = {
   category: string;
   featured?: boolean;
   image?: string | null;
+  available?: boolean;
 };
 
 export type TraiteurSpace = {
@@ -63,6 +65,7 @@ export const PUBLIC_HIDDEN_TRAITEURS = new Set(['An Tjè Coco']);
 export const PUBLIC_HIDDEN_PRODUCT_TRAITEURS = new Set(['An Tjè Coco']);
 
 function resolveHeroImage(name: string) {
+  if (name === 'Langouste House') return assetFromPublic('vendors/langouste-house/restaurant.jpg');
   if (name === 'An Tjè Coco') {
     return anTjeCocoAssets.hero;
   }
@@ -91,6 +94,7 @@ function resolveHeroImage(name: string) {
 }
 
 function resolveGalleryImages(name: string) {
+  if (name === 'Langouste House') return langousteHouseGallery.map(({ file }) => assetFromPublic('vendors/langouste-house/' + file));
   if (name === 'An Tjè Coco') {
     return anTjeCocoAssets.gallery;
   }
@@ -257,6 +261,10 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
     .filter((profile) => profile.type.toLowerCase().includes('traiteur'))
     .filter((profile) => !PUBLIC_HIDDEN_TRAITEURS.has(profile.name))
     .map((profile) => {
+      if (profile.name === 'Langouste House') {
+        return buildSpace(profile, 'from-[#0f766e] via-[#0891b2] to-[#164e63]', '#ecfeff', 'public à vérifier', 'à confirmer');
+      }
+
       if (profile.name === 'Les Delices de Ninice') {
         return {
           ...buildSpace(profile, 'from-[#d95f2d] via-[#f49d4b] to-[#7c2d12]', '#fff7ed', 'public confirmé', 'confirmée'),

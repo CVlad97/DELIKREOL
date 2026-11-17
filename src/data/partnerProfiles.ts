@@ -188,4 +188,22 @@ export const partnerProfiles: PartnerProfile[] = [
     healthTags: ['fait-maison', 'traiteur-evenementiel'],
     deliveryOptions: ['retraite', 'infirmiere'],
   },
+  {
+    name: 'Langouste House',
+    zone: 'Schoelcher, Martinique',
+    offer: 'Langoustes et produits de la mer — traiteur, B2C et demandes B2B sur devis',
+    type: 'Traiteur / restaurant de produits de la mer',
+    availability: 'Partenaire pilote en préparation — commandes sur validation',
+    story: 'Carte prévisionnelle transmise par Charles par e-mail le 22 octobre 2026. Les prix sont ceux de cette proposition; l’ouverture, les disponibilités et les commandes ne sont pas confirmées. Une première photo réelle de bisque a été intégrée depuis les échanges WhatsApp avec Charles.',
+    promise: 'Langouste et spécialités de la mer à Schoelcher',
+    eta: 'À confirmer',
+    specialty: 'Langouste grillée ou pochée, bisque, accras, salades et plateaux',
+    highlights: [
+      'Carte prévisionnelle reçue de Charles',
+      'Commandes non ouvertes',
+      'Photo de bisque transmise par Charles',
+    ],
+    planifiable: false,
+    enterprise: true,
+  },
 ];

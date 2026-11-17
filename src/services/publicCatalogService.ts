@@ -102,6 +102,7 @@ type PilotVendorSeed = {
   product_name: string;
   product_description: string;
   product_image?: string;
+  price?: number | null;
 };
 
 const pilotVendors: PilotVendorSeed[] = [
@@ -129,6 +130,106 @@ const pilotVendors: PilotVendorSeed[] = [
     description: 'Partenaire pilote. Carte à confirmer.',
     product_name: 'Saveur Afrique — carte à confirmer',
     product_description: 'Carte en cours d’intégration. Prix à confirmer.',
+  },
+  {
+    business_name: 'Langouste House',
+    display_name: 'Langouste House',
+    business_type: 'Carte prévisionnelle — Schoelcher',
+    description: 'Carte reçue de Charles. Préparation de l’ouverture; commandes et disponibilités non confirmées.',
+    product_name: 'Bisque de langouste maison (250 g)',
+    product_description: 'Prix indiqué sur la carte prévisionnelle reçue par e-mail le 22 octobre 2026. Photo transmise par Charles le 14 octobre 2026. Disponibilité à confirmer.',
+    product_image: 'vendors/langouste-house/bisque-maison.jpg',
+    price: 15,
+  },
+  {
+    business_name: 'Langouste House',
+    display_name: 'Langouste House',
+    business_type: 'Carte prévisionnelle — Schoelcher',
+    description: 'Carte reçue de Charles. Préparation de l’ouverture; commandes et disponibilités non confirmées.',
+    product_name: 'Accras de langouste (8 pièces)',
+    product_description: "Accras de langouste, portion de 8 pièces. Photo légendée par Charles le 25 octobre 2026 ; présentation indicative. Tarif de la carte du 22 octobre 2026. Disponibilité à confirmer.",
+    product_image: 'vendors/langouste-house/accras-langouste.jpg',
+    price: 15,
+  },
+  {
+    business_name: 'Langouste House',
+    display_name: 'Langouste House',
+    business_type: 'Carte prévisionnelle — Schoelcher',
+    description: 'Carte reçue de Charles. Préparation de l’ouverture; commandes et disponibilités non confirmées.',
+    product_name: 'Petite salade de langouste (150 g)',
+    product_description: 'Prix indiqué sur la carte prévisionnelle reçue par e-mail le 22 octobre 2026. Photo réelle et disponibilité à confirmer.',
+    product_image: 'vendors/_fallback/photo-a-confirmer.svg',
+    price: 19.5,
+  },
+  {
+    business_name: 'Langouste House',
+    display_name: 'Langouste House',
+    business_type: 'Carte prévisionnelle — Schoelcher',
+    description: 'Carte reçue de Charles. Préparation de l’ouverture; commandes et disponibilités non confirmées.',
+    product_name: 'Langouste entière au barbecue (prix / 100 g)',
+    product_description: "Langouste entière au barbecue. Facturation au poids : 8,68 € / 100 g. Photo légendée par Charles le 25 octobre 2026 ; poids et garniture présentés indicatifs. Disponibilité à confirmer.",
+    product_image: 'vendors/langouste-house/langouste-entiere-bbq.jpg',
+    price: 8.68,
+  },
+  {
+    business_name: 'Langouste House',
+    display_name: 'Langouste House',
+    business_type: 'Carte prévisionnelle — Schoelcher',
+    description: 'Carte reçue de Charles. Préparation de l’ouverture; commandes et disponibilités non confirmées.',
+    product_name: 'Langouste entière pochée (prix / 100 g)',
+    product_description: "Langouste entière pochée. Facturation au poids : 8,68 € / 100 g. Photo légendée par Charles le 25 octobre 2026 ; présentation indicative. Disponibilité à confirmer.",
+    product_image: 'vendors/langouste-house/langoustes-entieres-pochees.jpg',
+    price: 8.68,
+  },
+  {
+    business_name: 'Langouste House',
+    display_name: 'Langouste House',
+    business_type: 'Carte prévisionnelle — Schoelcher',
+    description: 'Carte reçue de Charles. Préparation de l’ouverture; commandes et disponibilités non confirmées.',
+    product_name: 'Queue de langouste au barbecue (prix / 100 g)',
+    product_description: "Queue de langouste au barbecue. Facturation au poids : 15,00 € / 100 g. Photo légendée par Charles le 25 octobre 2026 ; garniture et dressage indicatifs. Disponibilité à confirmer.",
+    product_image: 'vendors/langouste-house/queues-langoustes-bbq.jpg',
+    price: 15,
+  },
+  {
+    business_name: 'Langouste House',
+    display_name: 'Langouste House',
+    business_type: 'Carte prévisionnelle — Schoelcher',
+    description: 'Carte reçue de Charles. Préparation de l’ouverture; commandes et disponibilités non confirmées.',
+    product_name: 'Queue de langouste pochée (prix / 100 g)',
+    product_description: "Queue de langouste pochée. Facturation au poids : 15,00 € / 100 g. Photo de présentation légendée par Charles le 25 octobre 2026 ; recette à l’anis et au poivre à confirmer avec les cuisiniers. Disponibilité à confirmer.",
+    product_image: 'vendors/langouste-house/queues-langoustes-pochees.jpg',
+    price: 15,
+  },
+  {
+    business_name: 'Langouste House',
+    display_name: 'Langouste House',
+    business_type: 'Carte prévisionnelle — Schoelcher',
+    description: 'Carte reçue de Charles. Préparation de l’ouverture; commandes et disponibilités non confirmées.',
+    product_name: 'Grande salade de queue de langouste (300 g)',
+    product_description: 'Prix indiqué sur la carte prévisionnelle reçue par e-mail le 22 octobre 2026. Photo réelle et disponibilité à confirmer.',
+    product_image: 'vendors/_fallback/photo-a-confirmer.svg',
+    price: 30,
+  },
+  {
+    business_name: 'Langouste House',
+    display_name: 'Langouste House',
+    business_type: 'Carte prévisionnelle — Schoelcher',
+    description: 'Carte reçue de Charles. Préparation de l’ouverture; commandes et disponibilités non confirmées.',
+    product_name: 'Plateau Langouste House 1',
+    product_description: '6 accras et langouste pochée (pièce d’environ 500 g ou demi-langouste). Prix de la carte prévisionnelle reçue le 22 octobre 2026; photo et disponibilité à confirmer.',
+    product_image: 'vendors/_fallback/photo-a-confirmer.svg',
+    price: 54.25,
+  },
+  {
+    business_name: 'Langouste House',
+    display_name: 'Langouste House',
+    business_type: 'Carte prévisionnelle — Schoelcher',
+    description: 'Carte reçue de Charles. Préparation de l’ouverture; commandes et disponibilités non confirmées.',
+    product_name: 'Plateau Langouste House 2',
+    product_description: 'Bisque (170 g) et langouste pochée (pièce d’environ 500 g ou demi-langouste). Prix de la carte prévisionnelle reçue le 22 octobre 2026; photo et disponibilité à confirmer.',
+    product_image: 'vendors/_fallback/photo-a-confirmer.svg',
+    price: 53.2,
   },
 ];
 
@@ -233,7 +334,7 @@ function buildPilotProduct(seed: PilotVendorSeed, vendor: PublicCatalogVendor, i
     name: seed.product_name,
     description: seed.product_description,
     category: 'Partenaire pilote',
-    price: null,
+    price: seed.price ?? null,
     image_url: seed.product_image ? assetFromPublic(seed.product_image) : null,
     stock_quantity: null,
     zone_label: vendor.zone_label,
@@ -244,7 +345,6 @@ function buildPilotProduct(seed: PilotVendorSeed, vendor: PublicCatalogVendor, i
 
 function mergePilotFallback(vendors: PublicCatalogVendor[], products: PublicCatalogProduct[]) {
   const vendorByKey = new Map(vendors.map((vendor) => [catalogKey(vendor.business_name), vendor]));
-  const missingPilotKeys = new Set<string>();
   const mergedVendors = [...vendors];
 
   pilotVendors.forEach((seed, index) => {
@@ -252,17 +352,21 @@ function mergePilotFallback(vendors: PublicCatalogVendor[], products: PublicCata
     if (vendorByKey.has(key)) return;
     const pilotVendor = buildPilotVendor(seed, index);
     vendorByKey.set(key, pilotVendor);
-    missingPilotKeys.add(key);
     mergedVendors.push(pilotVendor);
   });
 
   const mergedProducts = [...products];
   pilotVendors.forEach((seed, index) => {
     const key = catalogKey(seed.business_name);
-    if (!missingPilotKeys.has(key)) return;
     const vendor = vendorByKey.get(key);
     if (!vendor) return;
-    mergedProducts.push(buildPilotProduct(seed, vendor, index));
+
+    const matchingVendorProducts = mergedProducts.filter(
+      (product) => product.vendor_id === vendor.id || catalogKey(product.vendor_name) === key,
+    );
+    const seedProductKey = normalizeName(seed.product_name);
+    const alreadyPresent = matchingVendorProducts.some((product) => normalizeName(product.name) === seedProductKey);
+    if (!alreadyPresent) mergedProducts.push(buildPilotProduct(seed, vendor, index));
   });
 
   return { vendors: mergedVendors, products: mergedProducts };

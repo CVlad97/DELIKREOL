@@ -563,6 +563,7 @@ export function PublicHomePage() {
  const customerPoint = customerLocation ? { latitude: customerLocation.lat, longitude: customerLocation.lng } : null;
 
  return catalog.products
+ .filter((product) => product.available !== false)
  .map((product) => {
  const hasVendorGeo = product.vendor_latitude != null && product.vendor_longitude != null;
  const distanceToCustomerKm =
