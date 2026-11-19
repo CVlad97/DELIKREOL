@@ -302,13 +302,21 @@ export function TraiteurDetailPage() {
           </section>
 
           {isLangousteHouse && (
-            <section className="mt-6 rounded-2xl border border-border bg-card p-6">
-              <h2 className="text-2xl font-bold">La carte de Langouste House</h2>
-              <p className="mt-2">Terrasse sur la plage, traiteur et mareyage. Retrouvez les plats, les desserts maison et les cinq cocktails signature.</p>
-              <a href="/langouste-house/" className="mt-4 inline-block font-semibold text-primary underline">Découvrir la carte et les tarifs</a>
+            <section className="mt-6 overflow-hidden rounded-[1.75rem] bg-[#111111] text-white shadow-2xl" aria-label="Langouste House — sélection de spécialités">
+              <div className="flex items-center justify-between gap-3 bg-[#ff5611] px-5 py-4 sm:px-8"><div><p className="text-[10px] font-bold uppercase tracking-[.25em]">Schœlcher · Martinique</p><h2 className="text-2xl font-black tracking-tight sm:text-3xl">LANGOUSTE HOUSE</h2></div><span className="rounded-full bg-black/20 px-3 py-1.5 text-xs font-bold">Carte en préparation</span></div>
+              <div className="relative h-64 overflow-hidden sm:h-96"><img src={`${import.meta.env.BASE_URL}vendors/langouste-house/langouste-entiere-bbq.jpg`} alt="Langouste au barbecue — photographie du dossier partenaire" className="h-full w-full object-cover" loading="lazy"/><div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"/><div className="absolute bottom-5 left-5 right-5 sm:bottom-8 sm:left-8"><p className="text-xs font-bold uppercase tracking-[.3em] text-[#ffb18e]">La carte</p><h3 className="mt-1 text-3xl font-black sm:text-5xl">La langouste à l’honneur</h3></div></div>
+              <div className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 sm:gap-5 sm:p-6">
+                {[
+                  {image:'bisque-maison.jpg',title:'Bisque maison',detail:'250 g',price:'15 €'},
+                  {image:'accras-langouste.jpg',title:'Accras de langouste',detail:'8 pièces',price:'15 €'},
+                  {image:'queues-langoustes-bbq.jpg',title:'Queue de langouste',detail:'Barbecue · 100 g',price:'15 €'},
+                  {image:'langouste-entiere-bbq.jpg',title:'Langouste entière',detail:'Barbecue · 100 g',price:'8,68 €'},
+                ].map(item=><article key={item.title} className="overflow-hidden rounded-xl border border-white/10 bg-[#222] sm:rounded-2xl"><img src={`${import.meta.env.BASE_URL}vendors/langouste-house/${item.image}`} alt={item.title} loading="lazy" className="aspect-[4/3] w-full object-cover"/><div className="p-3 sm:p-4"><h4 className="text-sm font-black leading-tight sm:text-lg">{item.title}</h4><p className="mt-1 text-xs text-white/60">{item.detail}</p><p className="mt-2 text-xl font-black text-[#ff793c]">{item.price}</p></div></article>)}
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-5 py-4 sm:px-8"><p className="text-xs text-white/60">Prix prévisionnels · Disponibilité à confirmer</p><a href="#catalogue" className="rounded-full bg-[#ff5611] px-5 py-3 text-sm font-black">Tous les plats et tarifs</a></div>
             </section>
           )}
-          <section className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {!isLangousteHouse && <section className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
             <div className="rounded-2xl border border-border bg-card p-4">
               <p className="text-2xl font-black text-foreground">{menuItems.length}</p>
               <p className="text-xs text-muted-foreground">références catalogue</p>
@@ -331,9 +339,9 @@ export function TraiteurDetailPage() {
               </p>
               <p className="mt-1 text-xs text-muted-foreground">préparation</p>
             </div>
-          </section>
+          </section>}
 
-          <section className="mt-8 grid gap-6 lg:grid-cols-[1.35fr_.65fr]">
+          {!isLangousteHouse && <section className="mt-8 grid gap-6 lg:grid-cols-[1.35fr_.65fr]">
             <div className="rounded-3xl border border-border bg-card p-6 shadow-sm sm:p-8">
               <p className="text-xs font-black uppercase tracking-[0.2em] text-primary">La marque</p>
               <h2 className="mt-2 text-2xl font-black sm:text-3xl">Une histoire locale, une offre lisible</h2>
@@ -377,7 +385,7 @@ export function TraiteurDetailPage() {
                 </Link>
               )}
             </aside>
-          </section>
+          </section>}
 
           {isLangousteHouse && <section className="mt-8 rounded-2xl border border-border bg-card p-6" aria-label="Informations pratiques">
             <h2 className="text-2xl font-bold">Préparer votre visite</h2>
@@ -429,8 +437,8 @@ export function TraiteurDetailPage() {
                           {item.name.includes('prix / 100 g') && <span className="block text-center text-xs font-semibold">/ 100 g</span>}
                         </span>
                       </div>
-                      <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
-                        {item.description || 'Description à confirmer avec le prestataire.'}
+                      <p className={`mt-2 text-sm text-muted-foreground ${isLangousteHouse ? 'line-clamp-1' : 'line-clamp-3'}`}>
+                        {isLangousteHouse ? (item.name.includes('100 g') ? 'Prix au poids' : 'Spécialité de la mer') : item.description || 'Description à confirmer avec le prestataire.'}
                       </p>
                       {isChefMada ? (
                         <Link
