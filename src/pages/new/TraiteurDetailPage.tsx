@@ -1,4 +1,3 @@
-import { langousteHouseGallery } from '../../data/langousteHouseGallery';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
@@ -182,7 +181,6 @@ export function TraiteurDetailPage() {
   const isChefMada = traiteur.slug === 'chef-a-mada';
   const showMadaBadge = MADA_BADGE_TRAITEURS.has(traiteur.name);
   const isLangousteHouse = traiteur.slug === 'langouste-house';
-  const langousteCaptions = langousteHouseGallery.map(({ caption }) => caption);
   const isGouteMwen = traiteur.slug === 'goute-mwen';
   const useContainedHero = isGouteMwen;
   const firstProductImage = menuItems.find((item) => Boolean(item.image))?.image || null;
@@ -310,40 +308,6 @@ export function TraiteurDetailPage() {
               <a href="/langouste-house/" className="mt-4 inline-block font-semibold text-primary underline">Découvrir la carte et les tarifs</a>
             </section>
           )}
-          {traiteur.name === 'Langouste House' && (
-            <section className="mt-6 rounded-2xl border border-border bg-card p-4" aria-label="Photos de Langouste House">
-              <h2 className="text-xl font-bold">En images chez Langouste House</h2>
-              <p className="mt-2 text-sm text-muted-foreground">Photos transmises par Charles. Aperçu du lieu et des préparations ; les plats présentés ne sont pas tous proposés dans la carte ci-dessous. Disponibilités à confirmer.</p>
-              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {traiteur.galleryImages.map((image, index) => (
-                  <figure key={image}><a href={image} target="_blank" rel="noopener noreferrer" aria-label={`Agrandir : ${langousteCaptions[index] || "photo de Langouste House"}`}><img src={image} alt={langousteCaptions[index] || "Photo de Langouste House"} loading="lazy" className="h-48 w-full rounded-xl bg-secondary/10 object-contain" /></a><figcaption className="mt-2 text-sm text-muted-foreground">{langousteCaptions[index]}</figcaption></figure>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {isLangousteHouse && (
-            <section className="mt-6 overflow-hidden rounded-[2rem] bg-[#151515] text-white shadow-xl" aria-label="Langouste House — carte illustrée">
-              <div className="flex flex-wrap items-center justify-between gap-3 bg-[#ff5611] px-6 py-5">
-                <div><p className="text-xs font-semibold uppercase tracking-widest">Fond-Lahaye · Schœlcher</p><h2 className="text-3xl font-black">LANGOUSTE HOUSE</h2></div>
-                <span className="rounded-full bg-black/20 px-4 py-2 text-xs font-bold">Carte à confirmer</span>
-              </div>
-              <div className="relative h-64 sm:h-96">
-                <img src={`${import.meta.env.BASE_URL}vendors/langouste-house/langouste-entiere-bbq.jpg`} alt="Langouste grillée, photo du dossier partenaire" loading="lazy" className="h-full w-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent" />
-                <div className="absolute bottom-5 left-6 right-6"><p className="text-xs font-bold uppercase tracking-[0.3em] text-[#ffb28f]">Cuisine de la mer</p><h3 className="mt-1 text-3xl font-black sm:text-5xl">Langouste & saveurs créoles</h3></div>
-              </div>
-              <div className="grid gap-4 p-4 sm:grid-cols-3 sm:p-6">
-                {[
-                  {image:'bisque-maison.jpg',title:'Bisque maison',description:'250 g',price:'15 €'},
-                  {image:'accras-langouste.jpg',title:'Accras de langouste',description:'8 pièces',price:'15 €'},
-                  {image:'queues-langoustes-bbq.jpg',title:'Queue de langouste BBQ',description:'Prix pour 100 g',price:'15 €'},
-                ].map(item => <article key={item.title} className="overflow-hidden rounded-2xl bg-[#252525]"><img src={`${import.meta.env.BASE_URL}vendors/langouste-house/${item.image}`} alt={item.title} loading="lazy" className="h-52 w-full object-cover"/><div className="flex items-start justify-between gap-3 p-4"><div><h4 className="font-black">{item.title}</h4><p className="mt-1 text-xs text-white/65">{item.description}</p></div><strong className="whitespace-nowrap text-lg text-[#ff8a55]">{item.price}</strong></div></article>)}
-              </div>
-              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-6 py-4"><p className="text-xs text-white/65">Prix indicatifs · Disponibilités à confirmer · Commandes non ouvertes</p><a href="#catalogue" className="rounded-full bg-[#ff5611] px-5 py-2.5 text-sm font-bold">Voir tous les plats et prix</a></div>
-            </section>
-          )}
-
           <section className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
             <div className="rounded-2xl border border-border bg-card p-4">
               <p className="text-2xl font-black text-foreground">{menuItems.length}</p>
