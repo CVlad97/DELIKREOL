@@ -1,3 +1,4 @@
+import { PartnerIdentityPrecheck } from '../../components/PartnerIdentityPrecheck';
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, ChefHat, Download, Eye, FileSpreadsheet, ImagePlus, Images, Loader2, Pencil, PlayCircle, Plus, Save, ShieldCheck, Sparkles, Star, Store, Trash2, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -552,7 +553,7 @@ export default function PartnerCatalogPage() {
       <div className="mx-auto max-w-6xl space-y-6">
         <section className="overflow-hidden rounded-[2.25rem] bg-gradient-to-br from-[#26150f] via-[#5c2819] to-[#d86a35] p-7 text-white shadow-2xl sm:p-10">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-xs font-black uppercase tracking-[.25em] text-orange-200">Studio partenaire</p><h1 className="mt-3 text-4xl font-black sm:text-5xl">{vendor.business_name || 'Ma vitrine'}</h1><p className="mt-3 max-w-2xl text-orange-50/85">Mettez à jour votre présentation, vos plats et vos menus depuis votre téléphone.</p></div>
-          <div className="flex flex-wrap gap-2"><button type="button" onClick={openProductForm} className="inline-flex items-center gap-2 rounded-full bg-[#f6c453] px-5 py-3 text-sm font-black text-[#26150f] shadow-lg"><Plus className="h-5 w-5" /> Ajouter un plat</button><Link to="/simulation-partenaires" className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-black"><PlayCircle className="h-4 w-4" /> Tutoriel interactif</Link><Link to="/partner-documents" className="rounded-full bg-white/15 px-4 py-2 text-sm font-black">Mes documents</Link>{vendor.is_public && <Link to={`/traiteur/${slugify(vendor.business_name || '')}`} className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-[#5c2819]"><Eye className="h-4 w-4" /> Voir ma vitrine</Link>}</div></div>
+          <div className="flex flex-wrap gap-2"><Link to="/" className="inline-flex items-center rounded-full bg-white/15 px-4 py-2 text-sm font-black">← Accueil</Link><button type="button" onClick={openProductForm} className="inline-flex items-center gap-2 rounded-full bg-[#f6c453] px-5 py-3 text-sm font-black text-[#26150f] shadow-lg"><Plus className="h-5 w-5" /> Ajouter un plat</button><Link to="/simulation-partenaires" className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-black"><PlayCircle className="h-4 w-4" /> Tutoriel interactif</Link><Link to="/partner-documents" className="rounded-full bg-white/15 px-4 py-2 text-sm font-black">Mes documents</Link>{vendor.is_public && <Link to={`/traiteur/${slugify(vendor.business_name || '')}`} className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-[#5c2819]"><Eye className="h-4 w-4" /> Voir ma vitrine</Link>}</div></div>
           <div className="mt-7 grid gap-3 sm:grid-cols-3"><div className="rounded-2xl bg-white/10 p-4"><p className="text-xs text-orange-100">Produits</p><p className="mt-1 text-2xl font-black">{products.length}</p></div><div className="rounded-2xl bg-white/10 p-4"><p className="text-xs text-orange-100">Disponibles</p><p className="mt-1 text-2xl font-black">{availableCount}</p></div><div className="rounded-2xl bg-white/10 p-4"><p className="text-xs text-orange-100">Publiés</p><p className="mt-1 text-2xl font-black">{publishedCount}</p></div></div>
         </section>
 
@@ -560,7 +561,7 @@ export default function PartnerCatalogPage() {
           <h2 className="font-black">Comment ajouter un plat ?</h2>
           <ol className="mt-2 grid gap-2 text-sm text-stone-700 sm:grid-cols-3"><li><strong>1.</strong> Appuyez sur « + Ajouter un plat ».</li><li><strong>2.</strong> Indiquez nom, prix, stock, accompagnements et photo.</li><li><strong>3.</strong> Enregistrez : {canPublishDirectly ? 'le plat apparaît immédiatement sur DELIKREOL.' : 'DELIKREOL contrôle le plat avant publication.'}</li></ol>
         </section>
-        <section className="rounded-[2rem] border border-primary/20 bg-white p-6 shadow-soft">
+        {false && <section className="rounded-[2rem] border border-primary/20 bg-white p-6 shadow-soft">
           <div className="flex items-start gap-3"><FileSpreadsheet className="mt-1 h-6 w-6 text-primary" /><div><h2 className="text-xl font-black">Importer plusieurs produits et photos</h2><p className="text-sm text-stone-600">Téléchargez le modèle, complétez la feuille « Import produits », puis enregistrez cette feuille en CSV UTF-8. Les photos peuvent être sélectionnées en lot.</p></div></div>
           <div className="mt-4 flex flex-wrap gap-3">
             <a href={`${import.meta.env.BASE_URL}templates/delikreol_template_import_traiteurs.xlsx?v=20260921`} download="DELIKREOL_Modele_Catalogue_Traiteur.xlsx" className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-[#fff8ef] px-4 py-3 text-sm font-black text-primary"><Download className="h-4 w-4" /> Télécharger le modèle Excel</a>
@@ -568,7 +569,8 @@ export default function PartnerCatalogPage() {
             <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#1f6a4a] px-4 py-3 text-sm font-black text-white"><Images className="h-4 w-4" />{uploadingPhotos ? 'Envoi des photos…' : 'Importer les photos'}<input type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple onChange={uploadProductPhotos} disabled={uploadingPhotos} className="hidden" /></label>
           </div>
           <p className="mt-3 text-xs text-stone-500">Pour l’association automatique, nommez chaque photo comme le produit : <strong>colombo-de-poulet.jpg</strong> pour « Colombo de poulet ». Les lignes importées par un traiteur restent soumises à validation si sa fiche n’est pas encore validée.</p>
-        </section>
+        </section>}
+        <PartnerIdentityPrecheck />
         <PartnerTutorial />
 
         <section className="rounded-[2rem] border border-primary/20 bg-white p-6 shadow-soft">
