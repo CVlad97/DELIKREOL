@@ -1,3 +1,5 @@
+import { PartnerIdentityPrecheck } from '../../components/PartnerIdentityPrecheck';
+import { BackBar } from '../../components/BackBar';
 import { useState, useRef, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -325,7 +327,7 @@ export default function CatererSignupPage() {
         logoUrl = result.logoUrl;
         storageUsed = photoUrls.length > 0 || logoUrl !== null;
       } catch (err) {
-        console.warn('[CatererSignup] Storage upload failed, falling back to localStorage:', err);
+        console.warn('[CatererSignup] Storage upload failed:', err);
       }
     }
 
@@ -346,13 +348,6 @@ export default function CatererSignupPage() {
       status: 'nouveau',
       source: 'inscription_traiteur_beta',
     };
-
-    // Sauvegarde dans localStorage (toujours faite)
-    const existing = JSON.parse(
-      localStorage.getItem('delikreol_caterer_applications') || '[]'
-    );
-    existing.push(entry);
-    localStorage.setItem('delikreol_caterer_applications', JSON.stringify(existing));
 
     // Tentative Supabase table partner_applications
     try {
@@ -382,10 +377,12 @@ export default function CatererSignupPage() {
         });
 
       if (error) {
-        console.warn('[CatererSignup] Supabase insert failed, localStorage only:', error.message);
+        showError('Inscription non enregistrée : ' + error.message);
+        return;
       }
     } catch (err) {
-      console.warn('[CatererSignup] Supabase unavailable, localStorage only:', err);
+      showError('Service d’inscription indisponible. Réessayez : votre demande n’a pas été enregistrée.');
+      return;
     }
 
     // Stocker les données pour l'affichage de confirmation
@@ -395,14 +392,11 @@ export default function CatererSignupPage() {
 
     setSubmitted(true);
 
-    // Incrémenter le compteur de traiteurs
-    const currentCount = parseInt(localStorage.getItem('delikreol_caterer_count') || '0', 10);
-    localStorage.setItem('delikreol_caterer_count', String(currentCount + 1));
 
     if (storageUsed) {
       showSuccess('Photos sauvegardées ! Votre inscription traiteur bêta a bien été reçue !');
     } else if (photos.length > 0 && !storageUsed) {
-      showSuccess('Photos enregistrées localement (en attente de configuration Storage). Votre inscription traiteur bêta a bien été reçue !');
+      showSuccess('Inscription reçue, mais les photos n’ont pas été enregistrées. Vous pourrez les ajouter dans votre espace partenaire.');
     } else {
       showSuccess('Votre inscription traiteur bêta a bien été reçue !');
     }
@@ -557,6 +551,8 @@ export default function CatererSignupPage() {
         </section>
 
         {/* Form */}
+        <BackBar backTo="/" label="Retour à l’accueil" />
+        <PartnerIdentityPrecheck />
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Identité */}
           <fieldset className="space-y-4 p-5 bg-card rounded-2xl border border-border">
