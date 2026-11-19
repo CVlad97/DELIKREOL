@@ -303,15 +303,38 @@ export function TraiteurDetailPage() {
             </div>
           </section>
 
-          {traiteur.name === 'Langouste House' && (
-            <section className="mt-6 rounded-2xl border border-border bg-card p-4" aria-label="Photos de Langouste House">
-              <h2 className="text-xl font-bold">En images chez Langouste House</h2>
-              <p className="mt-2 text-sm text-muted-foreground">Photos transmises par Charles. Aperçu du lieu et des préparations ; les plats présentés ne sont pas tous proposés dans la carte ci-dessous. Disponibilités à confirmer.</p>
-              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {traiteur.galleryImages.map((image, index) => (
-                  <figure key={image}><a href={image} target="_blank" rel="noopener noreferrer" aria-label={`Agrandir : ${langousteCaptions[index] || "photo de Langouste House"}`}><img src={image} alt={langousteCaptions[index] || "Photo de Langouste House"} loading="lazy" className="h-48 w-full rounded-xl bg-secondary/10 object-contain" /></a><figcaption className="mt-2 text-sm text-muted-foreground">{langousteCaptions[index]}</figcaption></figure>
-                ))}
+          {isLangousteHouse && (
+            <section className="mt-6 overflow-hidden rounded-[2rem] bg-[#171411] text-white shadow-2xl" aria-label="Langouste House — univers et carte">
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 bg-[#ff5611] px-6 py-5">
+                <div><p className="text-xs font-black uppercase tracking-[0.3em] text-white/80">Schœlcher · Martinique</p><h2 className="text-3xl font-black tracking-tight sm:text-4xl">LANGOUSTE HOUSE</h2></div>
+                <span className="rounded-full border border-white/70 px-4 py-2 text-xs font-bold uppercase tracking-wider">Carte en préparation</span>
               </div>
+              <nav className="flex flex-wrap gap-2 bg-[#231a15] px-5 py-4 text-sm font-bold" aria-label="Rubriques Langouste House">
+                <a href="#lh-terrasse" className="rounded-full bg-white/10 px-4 py-2 hover:bg-[#ff5611]">Terrasse</a>
+                <a href="#catalogue" className="rounded-full bg-white/10 px-4 py-2 hover:bg-[#ff5611]">Carte & traiteur</a>
+                <a href="#lh-mareyage" className="rounded-full bg-white/10 px-4 py-2 hover:bg-[#ff5611]">Mareyage</a>
+                <a href="#lh-contact" className="rounded-full bg-white/10 px-4 py-2 hover:bg-[#ff5611]">Contact</a>
+              </nav>
+              <div id="lh-terrasse" className="relative min-h-[360px] overflow-hidden sm:min-h-[460px]">
+                <img src={`${import.meta.env.BASE_URL}vendors/langouste-house/langouste-entiere-bbq.jpg`} alt="Langouste grillée — photographie fournie pour le projet Langouste House" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
+                <div className="relative flex min-h-[360px] max-w-xl flex-col justify-end p-7 sm:min-h-[460px] sm:p-12">
+                  <p className="text-sm font-bold uppercase tracking-[0.35em] text-[#ff9d74]">La mer à votre table</p>
+                  <h3 className="mt-4 text-4xl font-black leading-tight sm:text-6xl">Le goût de la langouste, l'esprit des Caraïbes.</h3>
+                  <p className="mt-5 max-w-md text-sm text-white/85 sm:text-base">Bisque maison, accras, langoustes grillées et spécialités marines. Découvrez la carte prévisionnelle de Charles.</p>
+                  <a href="#catalogue" className="mt-6 inline-flex w-fit rounded-full bg-[#ff5611] px-6 py-3 font-black text-white hover:bg-[#df4709]">Découvrir la carte</a>
+                </div>
+              </div>
+              <div className="grid gap-4 p-5 sm:grid-cols-3 sm:p-7">
+                {[
+                  {image:'bisque-maison.jpg',title:'Bisque maison',description:'250 g · 15 €'},
+                  {image:'accras-langouste.jpg',title:'Accras de langouste',description:'8 pièces · 15 €'},
+                  {image:'queues-langoustes-bbq.jpg',title:'Queues de langouste',description:'Barbecue · prix au poids'},
+                ].map(item=><article key={item.title} className="overflow-hidden rounded-2xl bg-[#2c2520]"><img src={`${import.meta.env.BASE_URL}vendors/langouste-house/${item.image}`} alt={item.title} loading="lazy" className="h-52 w-full object-cover"/><div className="p-4"><h4 className="text-lg font-black">{item.title}</h4><p className="mt-1 text-sm text-white/70">{item.description}</p></div></article>)}
+              </div>
+              <div id="lh-mareyage" className="border-t border-white/10 px-7 py-6"><h3 className="text-xl font-black">Mareyage & produits de la mer</h3><p className="mt-2 text-sm text-white/75">Demandes de produits de la mer et de prestations B2B sur devis, sous réserve de disponibilité et de validation de l'activité.</p></div>
+              <div id="lh-contact" className="border-t border-white/10 px-7 py-6"><h3 className="text-xl font-black">Nous trouver</h3><p className="mt-2 text-sm text-white/75">Fond-Lahaye, Schœlcher · Retrait et livraison à confirmer avant ouverture.</p><a className="mt-3 inline-block font-bold text-[#ff9d74] underline" href="https://www.langouste-house.com/" target="_blank" rel="noopener noreferrer">Site de Langouste House</a></div>
+              <p className="border-t border-white/10 bg-[#211a16] px-7 py-4 text-xs text-white/65">Photos du dossier partenaire : présentation indicative. Prix et disponibilités soumis à confirmation, commandes non ouvertes.</p>
             </section>
           )}
 
