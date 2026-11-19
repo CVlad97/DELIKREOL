@@ -235,7 +235,12 @@ export function TraiteurDetailPage() {
       <BackBar label="Traiteurs" backTo="/traiteurs" />
       <main className="pb-24 sm:pb-12">
         <div className="mx-auto max-w-6xl px-4 pt-6 sm:px-6 lg:px-8">
-          <section className="relative overflow-hidden rounded-[2rem] bg-neutral-950 shadow-xl">
+          {isLangousteHouse && (
+            <div className="mb-4 overflow-hidden rounded-2xl bg-[#101010] p-2 shadow-xl sm:p-4" aria-label="Identité originale Langouste House">
+              <img src={`${import.meta.env.BASE_URL}vendors/langouste-house/bandeau-original-langouste-house.jpg`} alt="Bandeau et logo original Langouste House" className="mx-auto h-auto w-full max-w-[1051px] object-contain" loading="eager" />
+            </div>
+          )}
+          {!isLangousteHouse && <section className="relative overflow-hidden rounded-[2rem] bg-neutral-950 shadow-xl">
             {heroImage ? (
               <SmartImage
                 src={heroImage}
@@ -299,7 +304,7 @@ export function TraiteurDetailPage() {
                 </div>
               </div>
             </div>
-          </section>
+          </section>}
 
           {isLangousteHouse && (
             <section className="mt-6 overflow-hidden rounded-[1.75rem] bg-[#111111] text-white shadow-2xl" aria-label="Langouste House — sélection de spécialités">
