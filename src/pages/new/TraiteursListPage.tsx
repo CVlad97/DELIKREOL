@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { AlertCircle, ArrowRight, ChefHat, Euro, Locate, MapPin, Star } from 'lucide-react';
+import { ArrowRight, Locate, MapPin, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { formatEuro, PUBLIC_HIDDEN_PRODUCT_TRAITEURS, traiteurSpaces } from '../../data/traiteurs';
 import { calculateDistanceKm } from '../../services/geolocation';
@@ -22,10 +22,16 @@ function hasMadaBadge(name: string) {
   return MADA_BADGE_TRAITEURS.has(name);
 }
 
-function getLogoForTraiteur(slug: string) {
+// Only use an actual partner logo when the partner asset exists.
+// Do not display DeliKreol branding as though it were a partner logo.
+function getLogoForTraiteur(slug: string): string | null {
   if (slug === 'chef-a-mada') return `${import.meta.env.BASE_URL}vendors/chef-a-mada/logo.jpg`;
-  if (slug === 'les-delices-de-ninice') return `${import.meta.env.BASE_URL}vendors/ninice/logo-les-delices-de-ninice.webp`;
+  if (slug.includes('ninice')) return `${import.meta.env.BASE_URL}vendors/ninice/logo-les-delices-de-ninice.webp`;
   return null;
+}
+
+function getPartnerInitials(name: string) {
+  return name.split(/\s+/).filter((word) => !['de', 'des', 'la', 'le', 'à', 'a'].includes(word.toLowerCase())).slice(0, 2).map((word) => word[0]).join('').toUpperCase();
 }
 
 export function TraiteursListPage() {
@@ -83,7 +89,6 @@ export function TraiteursListPage() {
   };
 
   const filtered = traiteurSpaces
-    .filter((traiteur) => traiteur.status !== 'brouillon')
     .filter((traiteur) => !selectedCommune || traiteur.zone?.toLowerCase().includes(selectedCommune.toLowerCase()))
     .sort((left, right) => {
       if (!userPosition) return 0;
@@ -146,72 +151,27 @@ export function TraiteursListPage() {
               to={`/traiteur/${traiteur.slug}`}
               className="card group block overflow-hidden rounded-2xl border border-border bg-card shadow-elegant transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-warm"
             >
-              <div className="relative aspect-video overflow-hidden bg-muted">
-                {traiteur.heroImage ? (
-                  <img
-                    loading="lazy"
-                    src={traiteur.heroImage}
-                    alt={`Vitrine de ${traiteur.name}`}
-                    className="h-full w-full object-contain bg-gradient-to-br from-secondary/8 to-primary/10 p-3 transition-transform duration-500 group-hover:scale-[1.03]"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-secondary/8 to-primary/10">
-                    <ChefHat className="h-12 w-12 text-primary/30" />
-                  </div>
-                )}
-
-                <div className="absolute left-4 top-4 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border-2 border-white bg-white p-1.5 shadow-lg">
-                  {getLogoForTraiteur(traiteur.slug) ? (
-                    <img loading="lazy" src={getLogoForTraiteur(traiteur.slug)!} alt={`Logo officiel ${traiteur.name}`} className="h-full w-full object-contain" />
-                  ) : (
-                    <span className="text-lg font-black text-[#173f32]" aria-label={`Initiales de ${traiteur.name}`}>
-                      {traiteur.name.split(/\s+/).filter(Boolean).slice(0, 2).map((word: string) => word[0]).join('').toUpperCase()}
-                    </span>
-                  )}
+              <div className="relative flex min-h-[220px] flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-[#f7f1eb] to-white px-5 py-7 sm:min-h-[240px]">
+                <div className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-emerald-800 shadow-sm">
+                  {isVerified ? '☆ Partenaire' : 'Partenaire à confirmer'}
                 </div>
-
                 {hasMadaBadge(traiteur.name) && (
-                  <div className="absolute right-3 top-3 flex max-w-[70%] items-center gap-1.5 rounded-full border border-white/80 bg-white/95 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-primary shadow-sm">
-                    <img
-                      loading="lazy"
-                      src={`${import.meta.env.BASE_URL}vendors/chef-a-mada/logo.jpg`}
-                      alt="Écusson Chef à Mada"
-                      className="h-5 w-5 rounded-full object-contain"
-                    />
+                  <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase text-primary shadow-sm">
                     Chef à Mada
                   </div>
                 )}
-
-                {traiteur.portraitImage && (
-                  <div className="absolute bottom-0 left-4 translate-y-1/3">
-                    <div className="h-16 w-16 overflow-hidden rounded-full border-4 border-white bg-white shadow-lg md:h-20 md:w-20">
-                      <img loading="lazy" src={traiteur.portraitImage} alt={`Portrait du partenaire ${traiteur.name}`} className="h-full w-full object-cover object-center" />
-                    </div>
-                  </div>
-                )}
-
-                {!isVerified && (
-                  <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-warning/15 px-2 py-1 text-xs font-bold text-secondary">
-                    <AlertCircle className="h-3 w-3" /> À vérifier
-                  </div>
-                )}
-                {isVerified && !hasMadaBadge(traiteur.name) && (
-                  <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-success/10 px-2 py-1 text-xs font-bold text-success">
-                    <Star className="h-3 w-3" /> Partenaire
-                  </div>
-                )}
-                {traiteur.photoStatus && traiteur.photoStatus !== 'confirmée' && (
-                  <div className="absolute bottom-3 left-3 rounded-full bg-white/90 px-2 py-1 text-xs font-bold text-primary shadow-sm">
-                    📸 {traiteur.photoStatus === 'externe à vérifier' ? 'Externe' : 'À confirmer'}
-                  </div>
-                )}
-                <div className="badge absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-foreground shadow-sm">
-                  <Euro className="h-3 w-3 text-primary" />
+                <div className="flex h-36 w-36 items-center justify-center overflow-hidden rounded-3xl border-4 border-white bg-white p-3 shadow-xl sm:h-40 sm:w-40" aria-label={`Identité visuelle de ${traiteur.name}`}>
+                  {getLogoForTraiteur(traiteur.slug) ? (
+                    <img loading="lazy" decoding="async" src={getLogoForTraiteur(traiteur.slug)!} alt={`Logo de ${traiteur.name}`} className="h-full w-full object-contain" />
+                  ) : (
+                    <span className="text-4xl font-black tracking-tight text-emerald-900" aria-label={`Initiales de ${traiteur.name}`}>{getPartnerInitials(traiteur.name)}</span>
+                  )}
+                </div>
+                <div className="mt-4 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-foreground shadow-sm">
                   {getStartingPrice(traiteur)}
                 </div>
               </div>
-
-              <div className="p-5 pt-8">
+              <div className="p-5 pt-5">
                 <h2 className="font-bold text-foreground transition-colors group-hover:text-primary">{traiteur.name}</h2>
                 <RatingBadge traiteurSlug={traiteur.slug} />
 
@@ -246,6 +206,18 @@ export function TraiteursListPage() {
                         <li key={item.name || item.id} className="line-clamp-1">• {String(item.name ?? 'Produit local').replace(/\s+—.+$/, '')}</li>
                       ))}
                     </ul>
+                  </div>
+                )}
+                {(traiteur.portraitImage || traiteur.heroImage) && (
+                  <div className="mb-4 overflow-hidden rounded-xl border border-border bg-muted">
+                    <img
+                      loading="lazy"
+                      decoding="async"
+                      src={traiteur.portraitImage || traiteur.heroImage || undefined}
+                      alt={traiteur.portraitImage ? `Portrait fourni pour ${traiteur.name}` : `Photographie de la vitrine ${traiteur.name}`}
+                      className="h-44 w-full object-cover object-center sm:h-48"
+                    />
+                    <p className="px-3 py-2 text-[11px] text-muted-foreground">{traiteur.portraitImage ? 'Portrait du partenaire' : 'Photo de la vitrine du partenaire'}</p>
                   </div>
                 )}
                 <div className="flex items-center justify-between gap-3">
