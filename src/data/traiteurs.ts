@@ -79,7 +79,7 @@ function resolveHeroImage(name: string) {
     return driveReimportGalleries.savePeyia[0] ?? null;
   }
   if (name === 'Les Delices de Ninice') {
-    return driveReimportGalleries.ninice[0] ?? null;
+    return assetFromPublic('vendors/ninice/logo-les-delices-de-ninice.webp');
   }
   if (name === 'Sweet Family Traiteur Orianne') {
     return driveReimportGalleries.sweetFamily[0] ?? null;
@@ -105,7 +105,7 @@ function resolveGalleryImages(name: string) {
     return [...driveReimportGalleries.saveursAfrique];
   }
   if (name === 'Les Delices de Ninice') {
-    return [...driveReimportGalleries.ninice];
+    return []; // Photos en attente de sélection éditoriale explicite.
   }
   if (name === 'Snack Savè Peyi\u2019A') {
     return [...driveReimportGalleries.savePeyia];

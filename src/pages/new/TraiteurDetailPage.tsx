@@ -174,7 +174,7 @@ export function TraiteurDetailPage() {
     isSignature: product.is_signature,
     available: product.available,
   }));
-  const menuItems = PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(traiteur.name)
+  const menuItems = PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(traiteur.name) || traiteur.slug === 'les-delices-de-ninice'
     ? []
     : databaseMenuItems.length > 0
       ? databaseMenuItems
@@ -184,7 +184,9 @@ export function TraiteurDetailPage() {
   const isLangousteHouse = traiteur.slug === 'langouste-house';
   const langousteCaptions = langousteHouseGallery.map(({ caption }) => caption);
   const isGouteMwen = traiteur.slug === 'goute-mwen';
-  const useContainedHero = isGouteMwen;
+  const isNinice = traiteur.slug === 'les-delices-de-ninice';
+  const niniceLogo = `${import.meta.env.BASE_URL}vendors/ninice/logo-les-delices-de-ninice.webp`;
+  const useContainedHero = isGouteMwen || isNinice;
   const firstProductImage = menuItems.find((item) => Boolean(item.image))?.image || null;
   const galleryImages = uniqueImages([
     traiteur.heroImage,
@@ -192,7 +194,7 @@ export function TraiteurDetailPage() {
     ...menuItems.map((item) => item.image),
   ]);
   const legacyHeroSuffix = `/hero.${'jpg'}`;
-  const heroImage = isGouteMwen
+  const heroImage = isNinice ? niniceLogo : isGouteMwen
     ? firstProductImage || galleryImages.find((image) => !image.endsWith(legacyHeroSuffix)) || traiteur.heroImage
     : traiteur.heroImage || firstProductImage || traiteur.galleryImages?.[0];
   const partnerFallback = heroImage || traiteur.galleryImages?.[0] || traiteur.portraitImage || getThumbnailPlaceholder();
@@ -244,11 +246,11 @@ export function TraiteurDetailPage() {
                 fallbackSrc={partnerFallback}
                 finalFallbackSrc={getThumbnailPlaceholder()}
                 alt={`${traiteur.name} — visuel principal`}
-                kind={useContainedHero ? 'packaging' : 'ambient'}
+                kind={isNinice ? 'logo' : useContainedHero ? 'packaging' : 'ambient'}
                 fit={useContainedHero ? 'contain' : 'cover'}
                 aspectRatio="16 / 8"
                 priority
-                containerClassName="w-full min-h-[360px] sm:min-h-[430px]"
+                containerClassName={isNinice ? 'w-full min-h-[270px] sm:min-h-[360px] bg-white p-6 sm:p-10' : 'w-full min-h-[360px] sm:min-h-[430px]'}
                 imgClassName="product-photo-natural"
               />
             ) : (
@@ -256,7 +258,7 @@ export function TraiteurDetailPage() {
                 <ChefHat className="h-24 w-24 text-white/20" aria-hidden="true" />
               </div>
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent" />
+            <div className={isNinice ? "absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent pointer-events-none" : "absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent pointer-events-none"} />
             <div className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-8 lg:p-10">
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 {isVerified && (
@@ -265,7 +267,7 @@ export function TraiteurDetailPage() {
                   </span>
                 )}
                 <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-bold backdrop-blur">
-                  {traiteur.photoStatus === 'confirmée' ? 'Photos validées' : 'Visuels en validation'}
+                  {isNinice ? 'Logo de la maison' : traiteur.photoStatus === 'confirmée' ? 'Photos validées' : 'Visuels en validation'}
                 </span>
                 {showMadaBadge && (
                   <span className="inline-flex items-center gap-2 rounded-full bg-white/95 px-3 py-1 text-xs font-black text-primary shadow-sm">
