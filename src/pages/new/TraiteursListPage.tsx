@@ -48,7 +48,7 @@ export function TraiteursListPage() {
     const communeFilter = selectedCommune ? ` à ${selectedCommune}` : '';
     setPageMeta(
       `Nos traiteurs partenaires${communeFilter} — DeliKreol`,
-      `Les meilleurs traiteurs de Martinique par commune${communeFilter} — livraison repas, plats créoles et cuisine locale.`,
+      `Découvrez les traiteurs référencés en Martinique${communeFilter}, leurs spécialités et les modalités de commande, retrait ou livraison à confirmer.`,
     );
   }, [selectedCommune]);
 
@@ -134,6 +134,19 @@ export function TraiteursListPage() {
         </div>
       </header>
 
+      <section aria-label="Comment commander" className="mb-8 rounded-2xl border border-primary/15 bg-primary/[0.04] p-4 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div><h2 className="text-lg font-bold text-foreground">Commander en 3 étapes</h2><p className="mt-1 text-sm text-muted-foreground">1. Choisissez un traiteur et ses produits · 2. Vérifiez votre panier · 3. Confirmez les modalités disponibles au paiement.</p></div>
+          <div className="flex flex-wrap gap-2"><Link to="/catalogue" className="inline-flex min-h-11 items-center rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">Voir les produits</Link><Link to="/panier" className="inline-flex min-h-11 items-center rounded-xl border border-primary/25 bg-white px-4 py-2 text-sm font-bold text-primary">Mon panier</Link></div>
+        </div>
+        <p className="mt-3 text-xs text-muted-foreground">Les horaires, frais de livraison, stocks et moyens de paiement dépendent du partenaire et doivent être confirmés avant validation.</p>
+      </section>
+      {filtered.length === 0 && (
+        <div role="status" className="mb-6 rounded-2xl border border-border bg-card p-6 text-center">
+          <p className="font-semibold">Aucun traiteur affiché pour cette commune.</p>
+          <button type="button" onClick={() => setSelectedCommune('')} className="mt-3 min-h-11 rounded-xl bg-primary px-5 py-2 font-bold text-primary-foreground">Afficher toutes les communes</button>
+        </div>
+      )}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filtered.map((traiteur) => {
           const isVerified = traiteur.status === 'public confirmé';
