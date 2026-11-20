@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { AlertCircle, ArrowRight, ChefHat, Euro, Locate, MapPin, Star } from 'lucide-react';
+import { AlertCircle, ArrowRight, ChefHat, Locate, MapPin, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { formatEuro, PUBLIC_HIDDEN_PRODUCT_TRAITEURS, traiteurSpaces } from '../../data/traiteurs';
 import { calculateDistanceKm } from '../../services/geolocation';
@@ -12,16 +12,6 @@ import { BackBar } from '../../components/BackBar';
 import { trackPublicView } from '../../services/metricsService';
 import { isUsableThumbnail } from '../../services/catalogImageResolver';
 import { getVerifiedPartnerLogo } from '../../data/verifiedPartnerLogos';
-
-const MADA_BADGE_TRAITEURS = new Set([
-  "Saveurs d'Afrique",
-  'Les Delices de Ninice',
-  'Sweet Family Traiteur Orianne',
-]);
-
-function hasMadaBadge(name: string) {
-  return MADA_BADGE_TRAITEURS.has(name);
-}
 
 export function TraiteursListPage() {
   const [userPosition, setUserPosition] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -127,6 +117,8 @@ export function TraiteursListPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filtered.map((traiteur) => {
           const isVerified = traiteur.status === 'public confirmé';
+          const verifiedLogo = getVerifiedPartnerLogo(traiteur.slug);
+          const verifiedPortrait = traiteur.slug === 'les-delices-de-ninice' ? `${import.meta.env.BASE_URL}vendors/ninice/portrait-full.jpg` : null;
           const menuCount = PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(traiteur.name)
             ? 0
             : traiteur.slug === 'chef-a-mada'
@@ -141,73 +133,37 @@ export function TraiteursListPage() {
               to={`/traiteur/${traiteur.slug}`}
               className="card group block overflow-hidden rounded-2xl border border-border bg-card shadow-elegant transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-warm"
             >
-              <div className="relative aspect-video overflow-hidden bg-muted">
-                {traiteur.heroImage ? (
-                  <img
-                    loading="lazy"
-                    src={traiteur.heroImage}
-                    alt={`Vitrine de ${traiteur.name}`}
-                    className="h-full w-full object-contain bg-gradient-to-br from-secondary/8 to-primary/10 p-3 transition-transform duration-500 group-hover:scale-[1.03]"
-                  />
+              <div className="relative flex aspect-video items-center justify-center overflow-hidden bg-gradient-to-br from-[#fffaf1] via-[#f8f0e5] to-[#e8f0e9] px-8 py-7">
+                {verifiedLogo ? (
+                  <img loading="lazy" src={verifiedLogo} alt={`Logo de ${traiteur.name}`} className="max-h-full max-w-[82%] object-contain drop-shadow-sm transition-transform duration-500 group-hover:scale-[1.04]" />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-secondary/8 to-primary/10">
-                    <ChefHat className="h-12 w-12 text-primary/30" />
+                  <div className="max-w-full text-center">
+                    <ChefHat aria-hidden="true" className="mx-auto mb-3 h-8 w-8 text-[#a15b32]/60" />
+                    <span className="font-display text-2xl font-semibold leading-tight text-[#173f32] sm:text-3xl">{traiteur.name}</span>
                   </div>
                 )}
-
-                <div className="absolute left-4 top-4 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border-2 border-white bg-white p-1.5 shadow-lg">
-                  {getVerifiedPartnerLogo(traiteur.slug) ? (
-                    <img loading="lazy" src={getVerifiedPartnerLogo(traiteur.slug)!} alt={`Logo officiel ${traiteur.name}`} className="h-full w-full object-contain" />
-                  ) : (
-                    <span className="text-lg font-black text-[#173f32]" aria-label={`Initiales de ${traiteur.name}`}>
-                      {traiteur.name.split(/\s+/).filter(Boolean).slice(0, 2).map((word: string) => word[0]).join('').toUpperCase()}
-                    </span>
-                  )}
-                </div>
-
-                {hasMadaBadge(traiteur.name) && (
-                  <div className="absolute right-3 top-3 flex max-w-[70%] items-center gap-1.5 rounded-full border border-white/80 bg-white/95 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-primary shadow-sm">
-                    <img
-                      loading="lazy"
-                      src={`${import.meta.env.BASE_URL}vendors/chef-a-mada/logo.jpg`}
-                      alt="Écusson Chef à Mada"
-                      className="h-5 w-5 rounded-full object-contain"
-                    />
-                    Chef à Mada
+                {verifiedPortrait && (
+                  <div className="absolute bottom-3 left-3 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-[3px] border-white bg-white shadow-lg">
+                    <img loading="lazy" src={verifiedPortrait} alt={`Portrait de ${traiteur.name}`} className="h-full w-full object-cover" />
                   </div>
                 )}
-
-                {traiteur.portraitImage && !getVerifiedPartnerLogo(traiteur.slug) && (
-                  <div className="absolute bottom-0 left-4 translate-y-1/3">
-                    <div className="h-16 w-16 overflow-hidden rounded-full border-4 border-white bg-white shadow-lg md:h-20 md:w-20">
-                      <img loading="lazy" src={traiteur.portraitImage} alt={`Portrait du partenaire ${traiteur.name}`} className="h-full w-full object-cover object-center" />
-                    </div>
-                  </div>
-                )}
-
                 {!isVerified && (
-                  <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-warning/15 px-2 py-1 text-xs font-bold text-secondary">
+                  <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-xs font-semibold text-[#805a34]">
                     <AlertCircle className="h-3 w-3" /> À vérifier
                   </div>
                 )}
-                {isVerified && !hasMadaBadge(traiteur.name) && (
-                  <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-success/10 px-2 py-1 text-xs font-bold text-success">
+                {isVerified && (
+                  <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-xs font-semibold text-[#176b49]">
                     <Star className="h-3 w-3" /> Partenaire
                   </div>
                 )}
-                {traiteur.photoStatus && traiteur.photoStatus !== 'confirmée' && (
-                  <div className="absolute bottom-3 left-3 rounded-full bg-white/90 px-2 py-1 text-xs font-bold text-primary shadow-sm">
-                    📸 {traiteur.photoStatus === 'externe à vérifier' ? 'Externe' : 'À confirmer'}
-                  </div>
-                )}
-                <div className="badge absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-foreground shadow-sm">
-                  <Euro className="h-3 w-3 text-primary" />
+                <div className="absolute bottom-3 right-3 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-[#173f32] shadow-sm">
                   {getStartingPrice(traiteur)}
                 </div>
               </div>
 
               <div className="p-5 pt-8">
-                <h2 className="font-bold text-foreground transition-colors group-hover:text-primary">{traiteur.name}</h2>
+                <h2 className="font-display text-xl font-semibold leading-snug text-[#173f32] transition-colors group-hover:text-primary">{traiteur.name}</h2>
                 <RatingBadge traiteurSlug={traiteur.slug} />
 
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
