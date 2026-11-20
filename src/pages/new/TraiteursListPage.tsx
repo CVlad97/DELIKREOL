@@ -24,7 +24,8 @@ function hasMadaBadge(name: string) {
 
 function getLogoForTraiteur(slug: string) {
   if (slug === 'chef-a-mada') return `${import.meta.env.BASE_URL}vendors/chef-a-mada/logo.jpg`;
-  return `${import.meta.env.BASE_URL}branding/logo-mark.svg`;
+  if (slug === 'les-delices-de-ninice') return `${import.meta.env.BASE_URL}vendors/ninice/logo-les-delices-de-ninice.webp`;
+  return null;
 }
 
 export function TraiteursListPage() {
@@ -159,13 +160,14 @@ export function TraiteursListPage() {
                   </div>
                 )}
 
-                <div className="absolute left-4 top-4 flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border-2 border-white bg-white p-1.5 shadow-lg">
-                  <img
-                    loading="lazy"
-                    src={getLogoForTraiteur(traiteur.slug)}
-                    alt={`Logo ${traiteur.name}`}
-                    className="h-full w-full object-contain"
-                  />
+                <div className="absolute left-4 top-4 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border-2 border-white bg-white p-1.5 shadow-lg">
+                  {getLogoForTraiteur(traiteur.slug) ? (
+                    <img loading="lazy" src={getLogoForTraiteur(traiteur.slug)!} alt={`Logo officiel ${traiteur.name}`} className="h-full w-full object-contain" />
+                  ) : (
+                    <span className="text-lg font-black text-[#173f32]" aria-label={`Initiales de ${traiteur.name}`}>
+                      {traiteur.name.split(/\s+/).filter(Boolean).slice(0, 2).map((word: string) => word[0]).join('').toUpperCase()}
+                    </span>
+                  )}
                 </div>
 
                 {hasMadaBadge(traiteur.name) && (

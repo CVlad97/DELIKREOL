@@ -53,6 +53,13 @@ function publicAsset(path: string) {
   return `${base}${path.replace(/^\//, '')}`;
 }
 
+// Only display a brand logo when an identifiable asset exists in the public catalogue.
+function partnerBrandLogo(name: string): string | null {
+  if (name === 'Les Delices de Ninice') return publicAsset('vendors/ninice/logo-les-delices-de-ninice.webp');
+  if (name === 'Chef à Mada') return publicAsset('vendors/chef-a-mada/logo.jpg');
+  return null;
+}
+
 function safeImage(src?: string | null) {
   return src || publicAsset('branding/hero-tropical.png');
 }
@@ -404,7 +411,15 @@ export default function HomePage() {
                     <span className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-black text-[#1e1d1a] shadow-sm">
                       <MapPin className="h-3.5 w-3.5" /> {partner.commune || partner.zone}
                     </span>
-                    <img src={safeImage(partner.portraitImage)} alt="" className="absolute -bottom-5 right-4 h-16 w-16 rounded-full border-4 border-white object-cover shadow-lg" loading="lazy" />
+                    {partnerBrandLogo(partner.name) ? (
+                      <span className="absolute bottom-3 right-3 flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border-2 border-white bg-white p-2 shadow-xl" aria-label={`Logo de ${partner.name}`}>
+                        <img src={partnerBrandLogo(partner.name)!} alt={`Logo officiel ${partner.name}`} className="h-full w-full object-contain" loading="lazy" />
+                      </span>
+                    ) : (
+                      <span className="absolute bottom-3 right-3 flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-white bg-[#173f32] px-1 text-center text-xl font-black text-white shadow-xl" aria-label={`Identité visuelle de ${partner.name}`}>
+                        {partner.name.split(/\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]).join('').toUpperCase()}
+                      </span>
+                    )}
                   </div>
                   <div className="p-5 pt-7">
                     <h3 className="text-xl font-black tracking-tight text-[#173f32] transition group-hover:text-[#cc460f]">{partner.name}</h3>
