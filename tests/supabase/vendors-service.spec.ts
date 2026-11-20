@@ -111,7 +111,7 @@ describe('vendorsService', () => {
   });
 
 
-  it('keeps the validated static hero when a remote hero is actually a logo and recovers gallery media', () => {
+  it('uses Ninice brand logo and quarantines unapproved remote gallery media', () => {
     const fallback = traiteurSpaces.find((vendor) => vendor.slug === 'les-delices-de-ninice');
     expect(fallback).toBeDefined();
     const merged = mergeVendorWithStatic(
@@ -124,8 +124,7 @@ describe('vendorsService', () => {
       fallback,
     );
     expect(merged?.heroImage).toBe(fallback?.heroImage);
-    expect(merged?.galleryImages).toEqual(expect.arrayContaining(fallback?.galleryImages || []));
-    expect(merged?.galleryImages).toContain('https://delikreol.com/vendors/ninice/drive-reimport/IMG-20260521-WA0071.jpg');
+    expect(merged?.galleryImages).toEqual([]);
   });
 
   it('rejects demo or non-public rows', () => {
