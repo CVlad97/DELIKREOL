@@ -169,13 +169,16 @@ export function mergeVendorWithStatic(
 
   const supabaseGallery = trustedPublicMediaArray(vendor.gallery_images) || [];
   const staticGallery = fallback?.galleryImages || [];
-  const galleryImages = Array.from(new Set([...supabaseGallery, ...staticGallery]));
+  const isNinice = normalizedKey(businessName) === normalizedKey("Les Delices de Ninice");
+  const galleryImages = isNinice ? [] : Array.from(new Set([...supabaseGallery, ...staticGallery]));
   const supabaseHighlights = nonEmptyArray(vendor.highlights);
   const logoImage = trustedPublicMedia(vendor.logo_url);
   const remoteHero = trustedPublicMedia(vendor.hero_image);
   const remotePortrait = trustedPublicMedia(vendor.portrait_image);
   const remoteHeroLooksLikeLogo = Boolean(remoteHero && /(?:^|[/_-])logo(?:[/_-]|\.|$)/i.test(remoteHero));
-  const heroImage = (!remoteHeroLooksLikeLogo ? remoteHero : null) || fallback?.heroImage || galleryImages[0] || remoteHero || null;
+  const heroImage = isNinice
+    ? `${import.meta.env.BASE_URL}vendors/ninice/logo-les-delices-de-ninice.webp`
+    : (!remoteHeroLooksLikeLogo ? remoteHero : null) || fallback?.heroImage || galleryImages[0] || remoteHero || null;
   const portraitImage = logoImage || remotePortrait || fallback?.portraitImage || null;
   const highlights = supabaseHighlights || fallback?.highlights || [];
   const hasSupabaseMedia = Boolean(logoImage || remoteHero || remotePortrait || supabaseGallery.length > 0);
