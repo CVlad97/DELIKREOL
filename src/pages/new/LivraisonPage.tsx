@@ -1,19 +1,14 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Truck,
-  MapPin,
-  Clock,
   MessageCircle,
   ShoppingCart,
-  AlertCircle,
   CheckCircle,
   ArrowRight,
   Store,
 } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
 import { BackBar } from '../../components/BackBar';
-import { martiniqueCommunes } from '../../data/martiniqueCommunes';
 
 const WHATSAPP_NUMBER = '596696653589';
 
@@ -21,32 +16,11 @@ const DELIVERY_MODES = [
   {
     icon: Store,
     title: 'Retrait chez le traiteur',
-    description:
-      'Vous récupérez votre commande directement chez le prestataire. Pas de frais de livraison.',
+    description: 'Le retrait est le seul mode activé pendant le pilote. Le lieu et le créneau sont confirmés avec le partenaire.',
     color: 'bg-blue-50 border-blue-200',
     iconColor: 'bg-blue-500',
-    badge: 'Gratuit',
+    badge: 'Disponible selon partenaire',
     badgeColor: 'bg-blue-100 text-blue-700',
-  },
-  {
-    icon: Truck,
-    title: 'Livraison proche',
-    description:
-      'Livraison dans un rayon proche du prestataire, selon sa disponibilité et celle de DeliKreol.',
-    color: 'bg-green-50 border-green-200',
-    iconColor: 'bg-green-500',
-    badge: 'Selon disponibilité',
-    badgeColor: 'bg-green-100 text-green-700',
-  },
-  {
-    icon: MapPin,
-    title: 'Livraison éloignée',
-    description:
-      'Livraison sur toute la Martinique, possible à partir de 40€ de commande, selon validation du prestataire et disponibilité DeliKreol.',
-    color: 'bg-primary/[0.08] border-primary/30',
-    iconColor: 'bg-primary/[0.08]0',
-    badge: 'À partir de 40€',
-    badgeColor: 'bg-primary/[0.15] text-primary',
   },
 ];
 
@@ -57,7 +31,7 @@ export default function LivraisonPage() {
 
   const openWhatsAppVerify = () => {
     const msg = encodeURIComponent(
-      'Bonjour DeliKreol ! Je souhaite vérifier la possibilité de livraison dans ma commune. Merci !'
+      'Bonjour DeliKreol ! Je souhaite vérifier les modalités de retrait disponibles pour ma commande. Merci !'
     );
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
   };
@@ -68,36 +42,22 @@ export default function LivraisonPage() {
       {/* Intro */}
       <div className="mb-8 space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase tracking-wider">
-          <Truck size={14} />
-          Modes de livraison
+          <Store size={14} />
+          Modalités de retrait
         </div>
         <p className="text-muted-foreground leading-relaxed max-w-2xl">
-          DeliKreol propose plusieurs modes de récupération de vos commandes, adaptés à votre
-          localisation et au montant de votre panier.
+          Pendant le pilote, le retrait est proposé chez certains partenaires après confirmation du lieu et du créneau.
         </p>
       </div>
 
-      {/* Important notices */}
-      <div className="space-y-3 mb-8">
-        <div className="p-4 bg-secondary/10 border border-secondary/30 rounded-xl flex gap-3">
-          <AlertCircle size={18} className="text-secondary flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-secondary leading-relaxed">
-            <strong>Livraison éloignée</strong> possible à partir de <strong>40€ de commande</strong>,
-            selon validation du prestataire et disponibilité DeliKreol.
-          </p>
-        </div>
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl flex gap-3">
-          <Clock size={18} className="text-blue-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-blue-900 leading-relaxed">
-            Pour une <strong>livraison midi</strong>, la commande doit idéalement être passée
-            <strong> avant 10h</strong>, selon disponibilité du prestataire.
-          </p>
-        </div>
+      <div className="mb-8 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+        Pendant le pilote, la livraison à domicile et les points relais ne sont pas ouverts.
+        Le retrait n’est proposé que si le partenaire confirme votre commande et son créneau.
       </div>
 
       {/* 3 modes */}
       <div className="space-y-4 mb-10">
-        <h2 className="text-lg font-black text-foreground">Les 3 modes de récupération</h2>
+        <h2 className="text-lg font-black text-foreground">Mode disponible pendant le pilote</h2>
         <div className="grid gap-4">
           {DELIVERY_MODES.map((mode) => {
             const Icon = mode.icon;
@@ -151,7 +111,7 @@ export default function LivraisonPage() {
             },
             {
               step: 4,
-              text: 'Récupérez votre commande ou attendez la livraison selon l\'option choisie.',
+              text: 'Retirez la commande au lieu et au créneau confirmés par le partenaire.',
             },
           ].map((item) => (
             <div key={item.step} className="flex items-start gap-4 p-4 bg-card border border-border rounded-xl">
@@ -164,37 +124,21 @@ export default function LivraisonPage() {
         </div>
       </div>
 
-      {/* Zones */}
-      <div className="mb-10">
-        <h2 className="text-lg font-black text-foreground mb-4">
-          <MapPin size={18} className="inline mr-2 text-primary" />
-          Zones desservies
-        </h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          DeliKreol couvre les 34 communes de la Martinique. La disponibilité de la livraison
-          dépend du prestataire et du montant de votre commande.
+      <div className="mb-10 rounded-2xl border border-border bg-card p-5">
+        <h2 className="text-lg font-black text-foreground mb-2">Zone de retrait</h2>
+        <p className="text-sm text-muted-foreground">
+          Les zones ne sont pas encore couvertes par un service de livraison garanti. Vérifiez le lieu de retrait
+          affiché par le partenaire avant de commander.
         </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-          {martiniqueCommunes.map((c) => (
-            <div
-              key={c.name}
-              className="flex items-center gap-2 px-3 py-2 bg-card border border-border rounded-lg text-xs font-medium text-foreground"
-            >
-              <CheckCircle size={12} className="text-green-500 flex-shrink-0" />
-              {c.name}
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Not sure? WhatsApp */}
       <div className="p-6 bg-gradient-to-r from-green-50 to-success/10 border border-green-200 rounded-2xl">
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <div className="flex-1 space-y-2">
-            <h3 className="font-bold text-foreground">Pas sûr(e) de votre zone ?</h3>
+            <h3 className="font-bold text-foreground">Besoin de vérifier le retrait ?</h3>
             <p className="text-sm text-muted-foreground">
-              Contactez-nous sur WhatsApp et nous vérifierons la possibilité de livraison dans
-              votre commune.
+              Contactez-nous sur WhatsApp pour vérifier les modalités de retrait proposées par le partenaire.
             </p>
           </div>
           <button
@@ -202,7 +146,7 @@ export default function LivraisonPage() {
             className="inline-flex items-center gap-2 px-5 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold text-sm transition-colors whitespace-nowrap"
           >
             <MessageCircle size={16} fill="white" />
-            Vérifier la possibilité
+            Vérifier le retrait
           </button>
         </div>
       </div>
