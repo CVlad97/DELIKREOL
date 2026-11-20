@@ -235,6 +235,12 @@ export function TraiteurDetailPage() {
       <BackBar label="Traiteurs" backTo="/traiteurs" />
       <main className="pb-24 sm:pb-12">
         <div className="mx-auto max-w-6xl px-4 pt-6 sm:px-6 lg:px-8">
+          {slugify(traiteur.name) === 'les-delices-de-ninice' && (
+            <section className="mb-5 flex flex-col items-center gap-3 rounded-3xl border border-violet-100 bg-white px-5 py-5 text-center shadow-sm sm:flex-row sm:text-left" aria-label="Identité Les Délices de Ninice">
+              <img src={`${import.meta.env.BASE_URL}vendors/ninice/logo-les-delices-de-ninice.webp`} alt="Logo Les Délices de Ninice" loading="eager" className="h-28 w-full max-w-[260px] object-contain sm:h-32" />
+              <div><p className="text-xs font-bold uppercase tracking-widest text-violet-700">Cuisine & traiteur</p><h2 className="mt-1 text-xl font-black text-neutral-900 sm:text-2xl">Les Délices de Ninice</h2><p className="mt-1 text-sm text-neutral-600">Entre épices et éclats de rire, je cuisine pour vous réunir.</p></div>
+            </section>
+          )}
           {isLangousteHouse && (
             <div className="mb-4 overflow-hidden rounded-2xl bg-[#101010] p-2 shadow-xl sm:p-4" aria-label="Identité originale Langouste House">
               <img src={`${import.meta.env.BASE_URL}vendors/langouste-house/bandeau-original-langouste-house.jpg`} alt="Bandeau et logo original Langouste House" className="mx-auto h-auto w-full max-w-[1051px] object-contain" loading="eager" />
