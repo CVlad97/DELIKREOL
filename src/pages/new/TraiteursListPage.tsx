@@ -11,6 +11,7 @@ import { RatingBadge } from '../../components/ReviewSection';
 import { BackBar } from '../../components/BackBar';
 import { trackPublicView } from '../../services/metricsService';
 import { isUsableThumbnail } from '../../services/catalogImageResolver';
+import { getVerifiedPartnerLogo } from '../../data/verifiedPartnerLogos';
 
 const MADA_BADGE_TRAITEURS = new Set([
   "Saveurs d'Afrique",
@@ -20,12 +21,6 @@ const MADA_BADGE_TRAITEURS = new Set([
 
 function hasMadaBadge(name: string) {
   return MADA_BADGE_TRAITEURS.has(name);
-}
-
-function getLogoForTraiteur(slug: string) {
-  if (slug === 'chef-a-mada') return `${import.meta.env.BASE_URL}vendors/chef-a-mada/logo.jpg`;
-  if (slug === 'les-delices-de-ninice') return `${import.meta.env.BASE_URL}vendors/ninice/logo-les-delices-de-ninice.webp`;
-  return null;
 }
 
 export function TraiteursListPage() {
@@ -161,8 +156,8 @@ export function TraiteursListPage() {
                 )}
 
                 <div className="absolute left-4 top-4 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border-2 border-white bg-white p-1.5 shadow-lg">
-                  {getLogoForTraiteur(traiteur.slug) ? (
-                    <img loading="lazy" src={getLogoForTraiteur(traiteur.slug)!} alt={`Logo officiel ${traiteur.name}`} className="h-full w-full object-contain" />
+                  {getVerifiedPartnerLogo(traiteur.slug) ? (
+                    <img loading="lazy" src={getVerifiedPartnerLogo(traiteur.slug)!} alt={`Logo officiel ${traiteur.name}`} className="h-full w-full object-contain" />
                   ) : (
                     <span className="text-lg font-black text-[#173f32]" aria-label={`Initiales de ${traiteur.name}`}>
                       {traiteur.name.split(/\s+/).filter(Boolean).slice(0, 2).map((word: string) => word[0]).join('').toUpperCase()}
@@ -182,7 +177,7 @@ export function TraiteursListPage() {
                   </div>
                 )}
 
-                {traiteur.portraitImage && (
+                {traiteur.portraitImage && !getVerifiedPartnerLogo(traiteur.slug) && (
                   <div className="absolute bottom-0 left-4 translate-y-1/3">
                     <div className="h-16 w-16 overflow-hidden rounded-full border-4 border-white bg-white shadow-lg md:h-20 md:w-20">
                       <img loading="lazy" src={traiteur.portraitImage} alt={`Portrait du partenaire ${traiteur.name}`} className="h-full w-full object-cover object-center" />

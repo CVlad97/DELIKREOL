@@ -1,3 +1,4 @@
+import { getVerifiedPartnerLogo } from './verifiedPartnerLogos';
 import { langousteHouseGallery } from './langousteHouseGallery';
 import { mockProducts } from './mockCatalog';
 import type { HealthTag } from './mockCatalog';
@@ -79,7 +80,7 @@ function resolveHeroImage(name: string) {
     return driveReimportGalleries.savePeyia[0] ?? null;
   }
   if (name === 'Les Delices de Ninice') {
-    return assetFromPublic('vendors/ninice/logo-les-delices-de-ninice.webp');
+    return getVerifiedPartnerLogo('les-delices-de-ninice');
   }
   if (name === 'Sweet Family Traiteur Orianne') {
     return driveReimportGalleries.sweetFamily[0] ?? null;
@@ -88,7 +89,7 @@ function resolveHeroImage(name: string) {
     return driveReimportGalleries.gouteMwen[0] ?? null;
   }
   if (name === 'Chef à Mada') {
-    return assetFromPublic('vendors/chef-a-mada/logo.jpg');
+    return getVerifiedPartnerLogo('chef-a-mada');
   }
   return mockProducts.find((product) => product.vendor === name && product.image)?.image ?? null;
 }
