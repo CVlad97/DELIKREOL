@@ -176,6 +176,8 @@ export function TraiteursListPage() {
                 <div className="flex h-36 w-36 items-center justify-center overflow-hidden rounded-3xl border-4 border-white bg-white p-3 shadow-xl sm:h-40 sm:w-40" aria-label={`Identité visuelle de ${traiteur.name}`}>
                   {getLogoForTraiteur(traiteur.slug) ? (
                     <img loading="lazy" decoding="async" src={getLogoForTraiteur(traiteur.slug)!} alt={`Logo de ${traiteur.name}`} className="h-full w-full object-contain" />
+                  ) : traiteur.portraitImage ? (
+                    <img loading="lazy" decoding="async" src={traiteur.portraitImage} alt={`Photo de profil de ${traiteur.name}`} className="h-full w-full rounded-2xl object-cover" />
                   ) : (
                     <span className="text-4xl font-black tracking-tight text-emerald-900" aria-label={`Initiales de ${traiteur.name}`}>{getPartnerInitials(traiteur.name)}</span>
                   )}
@@ -221,16 +223,16 @@ export function TraiteursListPage() {
                     </ul>
                   </div>
                 )}
-                {(traiteur.portraitImage || traiteur.heroImage) && (
+                {traiteur.heroImage && traiteur.slug !== 'chef-a-mada' && (
                   <div className="mb-4 overflow-hidden rounded-xl border border-border bg-muted">
                     <img
                       loading="lazy"
                       decoding="async"
-                      src={traiteur.portraitImage || traiteur.heroImage || undefined}
-                      alt={traiteur.portraitImage ? `Portrait fourni pour ${traiteur.name}` : `Photographie de la vitrine ${traiteur.name}`}
+                      src={traiteur.heroImage || undefined}
+                      alt={`Photographie de la vitrine ${traiteur.name}`}
                       className="h-44 w-full object-cover object-center sm:h-48"
                     />
-                    <p className="px-3 py-2 text-[11px] text-muted-foreground">{traiteur.portraitImage ? 'Portrait du partenaire' : 'Photo de la vitrine du partenaire'}</p>
+                    <p className="px-3 py-2 text-[11px] text-muted-foreground">Photo de la vitrine du partenaire</p>
                   </div>
                 )}
                 <div className="flex items-center justify-between gap-3">
