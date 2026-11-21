@@ -42,6 +42,7 @@ let client: SupabaseClient;
 
 if (isSupabaseConfigured) {
   client = createClient(supabaseUrl!, supabaseAnonKey!, {
+    db: { schema: 'public' },
     auth: {
       autoRefreshToken: true,
       detectSessionInUrl: true,

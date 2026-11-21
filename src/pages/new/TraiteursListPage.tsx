@@ -22,9 +22,12 @@ function hasMadaBadge(name: string) {
   return MADA_BADGE_TRAITEURS.has(name);
 }
 
-function getLogoForTraiteur(slug: string) {
-  if (slug === 'chef-a-mada') return `${import.meta.env.BASE_URL}vendors/chef-a-mada/logo.jpg`;
-  return `${import.meta.env.BASE_URL}branding/logo-mark.svg`;
+// Only display partner logos whose original files are present in the repository.
+// A DeliKreol brand mark must never impersonate a partner logo.
+function getLogoForTraiteur(name: string): string | null {
+  if (name === 'Chef à Mada') return `${import.meta.env.BASE_URL}vendors/chef-a-mada/logo.jpg`;
+  if (name === 'Les Delices de Ninice') return `${import.meta.env.BASE_URL}vendors/ninice/logo-les-delices-de-ninice.webp`;
+  return null;
 }
 
 export function TraiteursListPage() {
@@ -131,6 +134,7 @@ export function TraiteursListPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filtered.map((traiteur) => {
           const isVerified = traiteur.status === 'public confirmé';
+          const partnerLogo = getLogoForTraiteur(traiteur.name);
           const menuCount = PUBLIC_HIDDEN_PRODUCT_TRAITEURS.has(traiteur.name)
             ? 0
             : traiteur.slug === 'chef-a-mada'
@@ -159,14 +163,16 @@ export function TraiteursListPage() {
                   </div>
                 )}
 
-                <div className="absolute left-4 top-4 flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border-2 border-white bg-white p-1.5 shadow-lg">
-                  <img
-                    loading="lazy"
-                    src={getLogoForTraiteur(traiteur.slug)}
-                    alt={`Logo ${traiteur.name}`}
-                    className="h-full w-full object-contain"
-                  />
-                </div>
+                {partnerLogo && (
+                  <div className="absolute left-3 top-3 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border-2 border-white bg-white p-2 shadow-lg sm:h-[4.5rem] sm:w-[4.5rem]">
+                    <img
+                      loading="lazy"
+                      src={partnerLogo}
+                      alt={`Logo ${traiteur.name}`}
+                      className="h-full w-full object-contain object-center"
+                    />
+                  </div>
+                )}
 
                 {hasMadaBadge(traiteur.name) && (
                   <div className="absolute right-3 top-3 flex max-w-[70%] items-center gap-1.5 rounded-full border border-white/80 bg-white/95 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-primary shadow-sm">
@@ -189,12 +195,12 @@ export function TraiteursListPage() {
                 )}
 
                 {!isVerified && (
-                  <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-warning/15 px-2 py-1 text-xs font-bold text-secondary">
+                  <div className="absolute right-3 top-12 flex items-center gap-1 rounded-full bg-warning/90 px-2 py-1 text-xs font-bold text-secondary">
                     <AlertCircle className="h-3 w-3" /> À vérifier
                   </div>
                 )}
                 {isVerified && !hasMadaBadge(traiteur.name) && (
-                  <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-success/10 px-2 py-1 text-xs font-bold text-success">
+                  <div className="absolute right-3 top-12 flex items-center gap-1 rounded-full bg-success/90 px-2 py-1 text-xs font-bold text-success">
                     <Star className="h-3 w-3" /> Partenaire
                   </div>
                 )}
