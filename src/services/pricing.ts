@@ -20,6 +20,43 @@ export const DRIVER_SHARE_EUR = 3.5;
 /** Part DELIKREOL logistique */
 export const DELIKREOL_LOGISTICS_EUR = 0.5;
 
+/** Simulation de tarification transport, non utilisée pour encaisser tant que
+ * checkout-order ne valide pas le même montant côté serveur.
+ * Les majorations sont des hypothèses commerciales modifiables, non des tarifs validés.
+ */
+export type LogisticsMargin = 0.15 | 0.30 | 0.50;
+export type DeliveryQuote = {
+  driverPay: number;
+  platformGrossMargin: number;
+  customerDeliveryFee: number;
+  distanceSurcharge: number;
+  nightSurcharge: number;
+  availableOnly: true;
+};
+export function simulateDeliveryQuote(
+  distanceKm: number,
+  isNight: boolean,
+  platformMargin: LogisticsMargin = 0.30,
+  distanceIncrementPerKm = 0.75,
+  nightIncrement = 1.50,
+): DeliveryQuote {
+  if (!Number.isFinite(distanceKm) || distanceKm < 0) throw new Error('Distance non vérifiée');
+  if (![0.15, 0.30, 0.50].includes(platformMargin)) throw new Error('Marge logistique invalide');
+  if (!Number.isFinite(distanceIncrementPerKm) || distanceIncrementPerKm < 0 || !Number.isFinite(nightIncrement) || nightIncrement < 0) throw new Error('Majoration invalide');
+  const round = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
+  const distanceSurcharge = round(Math.max(0, Math.ceil(distanceKm - 3)) * distanceIncrementPerKm);
+  const nightSurcharge = isNight ? round(nightIncrement) : 0;
+  const driverPay = round(4 + distanceSurcharge + nightSurcharge);
+  return {
+    driverPay,
+    platformGrossMargin: platformMargin,
+    customerDeliveryFee: round(driverPay + platformMargin),
+    distanceSurcharge,
+    nightSurcharge,
+    availableOnly: true,
+  };
+}
+
 /** Seuil livraison éloignée */
 export const DELIVERY_THRESHOLD_EUR = 40;
 export const DELIVERY_NOTICE = `Livraison éloignée possible à partir de ${DELIVERY_THRESHOLD_EUR} € de commande, sous réserve de validation.`;
