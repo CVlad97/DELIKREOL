@@ -69,7 +69,7 @@ export function TraiteursListPage() {
     if (!userPosition) return null;
     const latitude = traiteur.latitude ?? resolveTraiteurCoords(traiteur.zone, traiteur.commune)?.latitude;
     const longitude = traiteur.longitude ?? resolveTraiteurCoords(traiteur.zone, traiteur.commune)?.longitude;
-    if (!latitude || !longitude) return null;
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
     return calculateDistanceKm(userPosition, { latitude, longitude });
   };
 
@@ -89,7 +89,7 @@ export function TraiteursListPage() {
   };
 
   const filtered = traiteurSpaces
-    .filter((traiteur) => !selectedCommune || traiteur.zone?.toLowerCase().includes(selectedCommune.toLowerCase()))
+    .filter((traiteur) => !selectedCommune || [traiteur.commune, traiteur.zone].some((value) => value?.toLowerCase().includes(selectedCommune.toLowerCase())))
     .sort((left, right) => {
       if (!userPosition) return 0;
       return (distTo(left) ?? 999) - (distTo(right) ?? 999);
@@ -166,7 +166,7 @@ export function TraiteursListPage() {
             >
               <div className="relative flex min-h-[220px] flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-[#f7f1eb] to-white px-5 py-7 sm:min-h-[240px]">
                 <div className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-emerald-800 shadow-sm">
-                  {isVerified ? '☆ Partenaire' : 'Partenaire à confirmer'}
+                  {isVerified ? 'Partenaire référencé' : 'Informations à confirmer'}
                 </div>
                 {hasMadaBadge(traiteur.name) && (
                   <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase text-primary shadow-sm">
@@ -232,7 +232,7 @@ export function TraiteursListPage() {
                       alt={`Photographie de la vitrine ${traiteur.name}`}
                       className="h-44 w-full object-cover object-center sm:h-48"
                     />
-                    <p className="px-3 py-2 text-[11px] text-muted-foreground">Photo de la vitrine du partenaire</p>
+                    <p className="px-3 py-2 text-[11px] text-muted-foreground">Photo du partenaire — visuel à confirmer</p>
                   </div>
                 )}
                 <div className="flex items-center justify-between gap-3">

@@ -104,8 +104,6 @@ export default function DevenirLivreurPage() {
     setSubmitting(true);
 
     try {
-      saveLocalCopy();
-
       if (isSupabaseConfigured && !isDemoMode) {
         const { error: dbError } = await supabase.from('driver_applications').insert({
           name: form.nom.trim(),
@@ -127,12 +125,15 @@ export default function DevenirLivreurPage() {
 
         if (dbError) throw dbError;
         setSavedInSupabase(true);
+      } else {
+        saveLocalCopy();
       }
 
       setSubmitted(true);
-      showSuccess('Candidature livreur enregistrée.');
+      showSuccess(isSupabaseConfigured && !isDemoMode ? 'Candidature transmise.' : 'Brouillon enregistré sur cet appareil. Envoyez-le par WhatsApp.');
     } catch (err: any) {
       console.warn('[Driver application] Supabase insert failed', err);
+      saveLocalCopy();
       setError('La candidature est gardée sur ce téléphone, mais l’envoi serveur a échoué. Merci d’envoyer aussi par WhatsApp.');
       setSubmitted(true);
     } finally {
@@ -148,10 +149,10 @@ export default function DevenirLivreurPage() {
     return (
       <Layout>
         <div className="mx-auto max-w-lg space-y-6 px-4 py-16 text-center">
-          <div className="inline-flex rounded-full bg-green-100 p-4 text-green-600"><CheckCircle2 size={48} /></div>
-          <h2 className="text-2xl font-bold text-foreground">Candidature reçue</h2>
+          <div className="inline-flex rounded-full bg-green-100 p-4 text-green-600">{savedInSupabase ? <CheckCircle2 size={48} /> : <MessageCircle size={48} />}</div>
+          <h2 className="text-2xl font-bold text-foreground">{savedInSupabase ? 'Candidature transmise' : 'Candidature à envoyer'}</h2>
           <p className="text-muted-foreground leading-relaxed">
-            {savedInSupabase ? 'La candidature est enregistrée dans l’admin DeliKreol.' : 'La candidature est sauvegardée localement. Envoie aussi par WhatsApp pour être sûr.'}
+            {savedInSupabase ? 'La candidature est enregistrée dans l’admin DeliKreol.' : 'La candidature est enregistrée sur cet appareil uniquement. Envoyez-la par WhatsApp pour que notre équipe la reçoive.'}
           </p>
           {error && <div className="rounded-xl border border-secondary/30 bg-secondary/10 p-3 text-sm text-secondary">{error}</div>}
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
