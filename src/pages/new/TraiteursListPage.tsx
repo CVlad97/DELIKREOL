@@ -176,7 +176,7 @@ export function TraiteursListPage() {
               to={`/traiteur/${traiteur.slug}`}
               className="card group block overflow-hidden rounded-2xl border border-border bg-card shadow-elegant transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-warm"
             >
-              <div className="relative flex min-h-[220px] flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-[#f7f1eb] to-white px-5 py-7 sm:min-h-[240px]">
+              <div className={`relative flex min-h-[220px] flex-col items-center justify-center overflow-hidden px-5 py-7 sm:min-h-[240px] ${traiteur.name === 'Langouste House' ? 'bg-gradient-to-br from-[#161616] via-[#342314] to-[#b65a18]' : 'bg-gradient-to-b from-[#f7f1eb] to-white'}`}>
                 <div className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-emerald-800 shadow-sm">
                   {isVerified ? 'Partenaire référencé' : 'Informations à confirmer'}
                 </div>
@@ -185,6 +185,9 @@ export function TraiteursListPage() {
                     Chef à Mada
                   </div>
                 )}
+                {traiteur.name === 'Langouste House' ? (
+                  <img loading="lazy" decoding="async" src={`${import.meta.env.BASE_URL}vendors/langouste-house/bandeau-original.jpg`} alt="Bandeau original Langouste House fourni par le partenaire" className="relative mt-8 h-36 w-full max-w-[290px] rounded-xl bg-white object-contain shadow-xl" />
+                ) : (
                 <div className="flex h-36 w-36 items-center justify-center overflow-hidden rounded-3xl border-4 border-white bg-white p-3 shadow-xl sm:h-40 sm:w-40" aria-label={`Identité visuelle de ${traiteur.name}`}>
                   {getLogoForTraiteur(traiteur.slug) ? (
                     <img loading="lazy" decoding="async" src={getLogoForTraiteur(traiteur.slug)!} alt={`Logo de ${traiteur.name}`} className="h-full w-full object-contain" />
@@ -194,6 +197,7 @@ export function TraiteursListPage() {
                     <span className="text-4xl font-black tracking-tight text-emerald-900" aria-label={`Initiales de ${traiteur.name}`}>{getPartnerInitials(traiteur.name)}</span>
                   )}
                 </div>
+                )}
                 <div className="mt-4 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-foreground shadow-sm">
                   {getStartingPrice(traiteur)}
                 </div>
