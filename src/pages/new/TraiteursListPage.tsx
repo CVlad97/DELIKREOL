@@ -29,6 +29,8 @@ function getLogoForTraiteur(slug: string): string | null {
     'chef-a-mada': 'vendors/chef-a-mada/logo.jpg',
     'les-delices-de-ninice': 'vendors/ninice/logo-les-delices-de-ninice.webp',
     'saveurs-dafrique': 'vendors/saveurs-afrique/logo-officiel-20261123.jpg',
+    'sweet-family-traiteur-orianne': 'vendors/sweet-family/identite-extraite-menu-20260627.webp',
+    'snack-save-peyia': 'vendors/save-peyia/identite-extraite-menu-20260710.webp',
   };
   const file = logos[slug];
   return file ? `${import.meta.env.BASE_URL}${file}` : null;
@@ -213,7 +215,7 @@ export function TraiteursListPage() {
                 ) : (
                 <div className="relative z-10 flex h-36 w-36 items-center justify-center overflow-hidden rounded-3xl border-4 border-white bg-white p-3 shadow-xl sm:h-40 sm:w-40" aria-label={`Identité visuelle de ${traiteur.name}`}>
                   {getLogoForTraiteur(traiteur.slug) ? (
-                    <img loading="lazy" decoding="async" src={getLogoForTraiteur(traiteur.slug)!} alt={`Logo de ${traiteur.name}`} className="h-full w-full object-contain" />
+                    <img loading="lazy" decoding="async" src={getLogoForTraiteur(traiteur.slug)!} alt={`${['sweet-family-traiteur-orianne', 'snack-save-peyia'].includes(traiteur.slug) ? 'Identité de marque extraite du menu transmis par' : 'Logo de'} ${traiteur.name}`} className="h-full w-full object-contain" />
                   ) : traiteur.portraitImage ? (
                     <img loading="lazy" decoding="async" src={traiteur.portraitImage} alt={`Photo de profil de ${traiteur.name}`} className="h-full w-full rounded-2xl object-cover" />
                   ) : (
