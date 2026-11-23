@@ -143,7 +143,7 @@ function resolveMenuItems(name: string): TraiteurMenuItem[] {
       }));
   }
 
-  // Menu et tarifs transmis ultérieurement par la partenaire : ne pas exposer d'anciens prix.
+  // Tarifs reçus et vérifiés partiellement ; ne pas exposer le catalogue statique tant que les photos et commandes ne sont pas validées.
   if (name === "Saveurs d'Afrique") return [];
   const normalized = normalizeVendorName(name);
   return mockProducts
@@ -339,7 +339,7 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
         };
       }
 
-      // Saveurs d'Afrique : accord pilote, mais carte et tarifs non validés.
+      // Saveurs d'Afrique : carte reçue, mais photos et parcours de commande encore à valider.
       return {
         ...buildSpace(profile, 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'public à vérifier', 'confirmée'),
         horaires: { mar: { open: '10:00', close: '20:00' }, mer: { open: '10:00', close: '20:00' }, jeu: { open: '10:00', close: '20:00' }, ven: { open: '10:00', close: '20:00' }, sam: { open: '10:00', close: '20:00' }, dim: { open: '10:00', close: '20:00' } },
