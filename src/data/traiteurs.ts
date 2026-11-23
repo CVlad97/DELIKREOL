@@ -264,7 +264,7 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
     .filter((profile) => !PUBLIC_HIDDEN_TRAITEURS.has(profile.name))
     .map((profile) => {
       if (profile.name === 'Langouste House') {
-        return buildSpace(profile, 'from-[#0f766e] via-[#0891b2] to-[#164e63]', '#ecfeff', 'public à vérifier', 'à confirmer');
+        return buildSpace(profile, 'from-[#151515] via-[#8a4217] to-[#d97706]', '#fff7ed', 'public à vérifier', 'à confirmer');
       }
 
       if (profile.name === 'Les Delices de Ninice') {
