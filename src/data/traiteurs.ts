@@ -73,7 +73,7 @@ function resolveHeroImage(name: string) {
     return driveReimportGalleries.coco[0] ?? cocoFoodAssets.hero;
   }
   if (name === "Saveurs d'Afrique") {
-    return driveReimportGalleries.saveursAfrique[0] ?? null;
+    return assetFromPublic('vendors/saveurs-afrique/logo-officiel-20261123.jpg');
   }
   if (name.startsWith('Snack Savè Peyi')) {
     return driveReimportGalleries.savePeyia[0] ?? null;
@@ -143,6 +143,8 @@ function resolveMenuItems(name: string): TraiteurMenuItem[] {
       }));
   }
 
+  // Menu et tarifs transmis ultérieurement par la partenaire : ne pas exposer d'anciens prix.
+  if (name === "Saveurs d'Afrique") return [];
   const normalized = normalizeVendorName(name);
   return mockProducts
     .filter((product) => normalizeVendorName(product.vendor) === normalized)
@@ -183,7 +185,7 @@ function resolvePortraitImage(name: string) {
     return driveReimportGalleries.coco[1] ?? null;
   }
   if (name === "Saveurs d'Afrique") {
-    return driveReimportGalleries.saveursAfrique[1] ?? null;
+    return null;
   }
   if (name === 'Snack Savè Peyi\u2019A') {
     return driveReimportGalleries.savePeyia[1] ?? null;
@@ -337,13 +339,10 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
         };
       }
 
-      // Saveurs d'Afrique — public confirmé
+      // Saveurs d'Afrique : accord pilote, mais carte et tarifs non validés.
       return {
-        ...buildSpace(profile, 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'public confirmé', 'confirmée'),
-        horaires: { lun: { open: '09:00', close: '18:00' }, mar: { open: '09:00', close: '18:00' }, mer: { open: '09:00', close: '18:00' }, jeu: { open: '09:00', close: '18:00' }, ven: { open: '09:00', close: '18:00' }, sam: { open: '10:00', close: '16:00' } },
-        cutoff_time: '10:00',
-        prep_time: 35,
-        delivery_slots: ['11:30-12:30', '12:30-13:30', '18:00-19:00', '19:00-20:00'],
+        ...buildSpace(profile, 'from-[#7c2d12] via-[#d97706] to-[#f59e0b]', '#fff7ed', 'public à vérifier', 'confirmée'),
+        horaires: { mar: { open: '10:00', close: '20:00' }, mer: { open: '10:00', close: '20:00' }, jeu: { open: '10:00', close: '20:00' }, ven: { open: '10:00', close: '20:00' }, sam: { open: '10:00', close: '20:00' }, dim: { open: '10:00', close: '20:00' } },
       };
     });
 }
