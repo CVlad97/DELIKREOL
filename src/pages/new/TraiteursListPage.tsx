@@ -25,10 +25,17 @@ function hasMadaBadge(name: string) {
 // Only use an actual partner logo when the partner asset exists.
 // Do not display DeliKreol branding as though it were a partner logo.
 function getLogoForTraiteur(slug: string): string | null {
-  if (slug === 'chef-a-mada') return `${import.meta.env.BASE_URL}vendors/chef-a-mada/logo.jpg`;
-  if (slug.includes('ninice')) return `${import.meta.env.BASE_URL}vendors/ninice/logo-les-delices-de-ninice.webp`;
-  return null;
+  const logos: Record<string, string> = {
+    'chef-a-mada': 'vendors/chef-a-mada/logo.jpg',
+    'les-delices-de-ninice': 'vendors/ninice/logo-les-delices-de-ninice.webp',
+    'saveurs-dafrique': 'vendors/saveurs-afrique/logo-officiel-20261123.jpg',
+    'cocos-food': 'vendors/coco/profile.svg',
+  };
+  const file = logos[slug];
+  return file ? `${import.meta.env.BASE_URL}${file}` : null;
 }
+
+const RAPID_DELIVERY_RADIUS_KM = 3;
 
 function getPartnerInitials(name: string) {
   return name.split(/\s+/).filter((word) => !['de', 'des', 'la', 'le', 'à', 'a'].includes(word.toLowerCase())).slice(0, 2).map((word) => word[0]).join('').toUpperCase();
@@ -156,6 +163,11 @@ export function TraiteursListPage() {
               ? (traiteur.menuItems || []).length
               : (traiteur.menuItems || []).filter((item: any) => isUsableThumbnail(item.image)).length;
           const distance = distTo(traiteur);
+          const deliveryLabel = distance === null
+            ? 'Localisez-vous pour vérifier la livraison rapide (3 km)'
+            : distance <= RAPID_DELIVERY_RADIUS_KM
+              ? 'Zone de livraison rapide · sous réserve de disponibilité'
+              : 'Hors portée rapide · livraison programmée sur confirmation';
           const visibleMenuItems = (traiteur.menuItems || []).slice(0, 4);
 
           return (
@@ -202,6 +214,9 @@ export function TraiteursListPage() {
                   )}
                 </div>
 
+                <p className="mt-2 rounded-lg bg-primary/[0.06] px-3 py-2 text-xs font-semibold text-primary" aria-label="Modalités de livraison">
+                  {deliveryLabel}
+                </p>
                 {traiteur.specialty && (
                   <p className="mt-2 line-clamp-2 text-xs font-semibold leading-5 text-primary">
                     {traiteur.specialty}
