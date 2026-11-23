@@ -3,7 +3,7 @@ import { useTranslation } from'react-i18next';
 import { Link } from'react-router-dom';
 import { validateMartiniquePhone, PHONE_ERROR_MESSAGE } from'../../utils/phone';
 import { validateEmail } from'../../utils/validation';
-import { DELIVERY_FEES } from'../../services/pricing';
+import { DELIVERY_FEES, minimumBasketByDistance, remainingToMinimum } from'../../services/pricing';
 import { generateOrderId } from'../../utils/orderId';
 import { trackPublicView } from'../../services/metricsService';
 import { setPageMeta } from'../../services/seo';
@@ -249,6 +249,9 @@ export default function CartPage() {
  const phoneInputRef = useRef<HTMLInputElement>(null);
  const selectedPaymentProvider = getPaymentProvider(paymentProvider);
  const orderTotal = total + (DELIVERY_FEES[mode]?.fee || 0);
+ // Aucune distance partenaire-client vérifiée dans ce formulaire : seuil prudent de 30 € en livraison.
+ const minimumBasket = mode === 'livraison' ? minimumBasketByDistance(null) : 0;
+ const minimumRemaining = mode === 'livraison' ? remainingToMinimum(total, null) : 0;
 
  useEffect(() => {
  if (panierRef.current) {
@@ -395,6 +398,10 @@ export default function CartPage() {
  }
  // Anti-double-click
  if (checkoutStatus ==='processing') {
+ return false;
+ }
+ if (minimumRemaining > 0) {
+ showError(`Panier minimum de ${minimumBasket} € pour une livraison sans distance vérifiée. Ajoutez ${minimumRemaining.toFixed(2).replace('.', ',')} € ou choisissez le retrait.`);
  return false;
  }
  // Validate phone — obligatoire
@@ -800,9 +807,11 @@ export default function CartPage() {
  {mode ==='retrait' ?'Gratuit' : `${(DELIVERY_FEES[mode]?.fee || 0).toFixed(2).replace('.',',')} €`}
  </span>
  </div>
- {mode ==='livraison' && total < 40 && (
- <div className="text-xs text-secondary bg-secondary/10 rounded-lg px-3 py-2">
- Livraison éloignée possible à partir de 40 € de commande, sous réserve de validation.
+ {mode === 'livraison' && (
+ <div className="text-xs text-secondary bg-secondary/10 rounded-lg px-3 py-2" role="status">
+ Panier minimum selon la distance : 15 € jusqu’à 3 km, 20 € de 3 à 10 km, 30 € au-delà.
+ Sans distance vérifiée, le seuil prudent de 30 € s'applique. {minimumRemaining > 0 ? `Il manque ${minimumRemaining.toFixed(2).replace('.', ',')} €.` : 'Minimum atteint.'}
+ Livraison programmée et frais définitifs soumis à confirmation.
  </div>
  )}
  <hr className="border-primary/100" />

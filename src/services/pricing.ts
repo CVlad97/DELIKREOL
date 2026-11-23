@@ -24,6 +24,22 @@ export const DELIKREOL_LOGISTICS_EUR = 0.5;
 export const DELIVERY_THRESHOLD_EUR = 40;
 export const DELIVERY_NOTICE = `Livraison éloignée possible à partir de ${DELIVERY_THRESHOLD_EUR} € de commande, sous réserve de validation.`;
 
+/** Minimum de panier (hors livraison) pour la livraison programmée.
+ * Distance à vol d'oiseau ; ne jamais utiliser une distance inconnue pour promettre une livraison rapide.
+ * Le serveur doit revalider la zone et le minimum avant toute capture de paiement.
+ */
+export const RAPID_DELIVERY_RADIUS_KM = 3;
+export function minimumBasketByDistance(distanceKm: number | null | undefined): number {
+  if (distanceKm == null || !Number.isFinite(distanceKm) || distanceKm < 0) return 30;
+  if (distanceKm <= RAPID_DELIVERY_RADIUS_KM) return 15;
+  if (distanceKm <= 10) return 20;
+  return 30;
+}
+
+export function remainingToMinimum(subtotal: number, distanceKm: number | null | undefined): number {
+  return Math.max(0, Math.round((minimumBasketByDistance(distanceKm) - subtotal) * 100) / 100);
+}
+
 // ═══════════════════════════════════════════════════
 // CALCUL PRIX CLIENT
 // ═══════════════════════════════════════
