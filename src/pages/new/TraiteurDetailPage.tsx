@@ -33,6 +33,8 @@ import type { Product } from '../../types';
 const VERIFIED_PARTNER_LOGO_FILES: Record<string, string> = {
   'les-delices-de-ninice': 'vendors/ninice/logo-les-delices-de-ninice.webp',
   'saveurs-dafrique': 'vendors/saveurs-afrique/logo-officiel-20261123.jpg',
+  'sweet-family-traiteur-orianne': 'vendors/sweet-family/identite-extraite-menu-20260627.webp',
+  'snack-save-peyia': 'vendors/save-peyia/identite-extraite-menu-20260710.webp',
   'chef-a-mada': 'vendors/chef-a-mada/logo.jpg',
 };
 const PARTNER_SIGNATURE_STYLES: Record<string, string> = {
