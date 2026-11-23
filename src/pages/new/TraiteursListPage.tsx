@@ -29,10 +29,29 @@ function getLogoForTraiteur(slug: string): string | null {
     'chef-a-mada': 'vendors/chef-a-mada/logo.jpg',
     'les-delices-de-ninice': 'vendors/ninice/logo-les-delices-de-ninice.webp',
     'saveurs-dafrique': 'vendors/saveurs-afrique/logo-officiel-20261123.jpg',
-    'cocos-food': 'vendors/coco/profile.svg',
   };
   const file = logos[slug];
   return file ? `${import.meta.env.BASE_URL}${file}` : null;
+}
+
+// Couleurs distinctes, photos existantes et logos fournis. Aucune création de marque.
+// Coco's Food : profile.svg n'est pas un logo officiel confirmé ; utiliser le portrait.
+const PARTNER_CARD_COLORS: Record<string, string> = {
+  'langouste-house': 'from-[#100f0d] via-[#442615] to-[#a75a16]',
+  'les-delices-de-ninice': 'from-[#56114d] via-[#9c2369] to-[#f0a02b]',
+  'saveurs-dafrique': 'from-[#351c12] via-[#834323] to-[#c98a2c]',
+  'cocos-food': 'from-[#20140f] via-[#69442d] to-[#b87b39]',
+  'sweet-family-traiteur-orianne': 'from-[#4e1738] via-[#963e5d] to-[#d28e6e]',
+  'snack-save-peyia': 'from-[#224331] via-[#427149] to-[#cb972c]',
+  'goute-mwen': 'from-[#522b6b] via-[#a45c94] to-[#eaad44]',
+  'chef-a-mada': 'from-[#3e1615] via-[#8d392c] to-[#d6a34e]',
+};
+
+function getPartnerCardCover(traiteur: (typeof traiteurSpaces)[number]): string | null {
+  // Le jeu Gouté Mwen est identifié comme illustré par IA : ne pas le faire passer pour une photo réelle.
+  if (traiteur.slug === 'goute-mwen') return null;
+  if (traiteur.slug === 'saveurs-dafrique') return traiteur.galleryImages?.[0] ?? null;
+  return traiteur.heroImage || traiteur.galleryImages?.[0] || null;
 }
 
 const RAPID_DELIVERY_RADIUS_KM = 3;
@@ -169,6 +188,8 @@ export function TraiteursListPage() {
               ? 'Zone de livraison rapide · sous réserve de disponibilité'
               : 'Hors portée rapide · livraison programmée sur confirmation';
           const visibleMenuItems = (traiteur.menuItems || []).slice(0, 4);
+          const coverImage = getPartnerCardCover(traiteur);
+          const cardColors = PARTNER_CARD_COLORS[traiteur.slug] || 'from-[#2e241c] via-[#77513b] to-[#bc8458]';
 
           return (
             <Link
@@ -176,19 +197,21 @@ export function TraiteursListPage() {
               to={`/traiteur/${traiteur.slug}`}
               className="card group block overflow-hidden rounded-2xl border border-border bg-card shadow-elegant transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-warm"
             >
-              <div className={`relative flex min-h-[220px] flex-col items-center justify-center overflow-hidden px-5 py-7 sm:min-h-[240px] ${traiteur.name === 'Langouste House' ? 'bg-gradient-to-br from-[#161616] via-[#342314] to-[#b65a18]' : 'bg-gradient-to-b from-[#f7f1eb] to-white'}`}>
-                <div className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-emerald-800 shadow-sm">
+              <div className={`relative isolate flex min-h-[220px] flex-col items-center justify-center overflow-hidden bg-gradient-to-br px-5 py-7 sm:min-h-[240px] ${cardColors}`}>
+                {coverImage && <img loading="lazy" decoding="async" src={coverImage} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40" />}
+                <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                <div className="absolute left-3 top-3 z-10 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-emerald-800 shadow-sm">
                   {isVerified ? 'Partenaire référencé' : 'Informations à confirmer'}
                 </div>
                 {hasMadaBadge(traiteur.name) && (
-                  <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase text-primary shadow-sm">
+                  <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase text-primary shadow-sm">
                     Chef à Mada
                   </div>
                 )}
                 {traiteur.name === 'Langouste House' ? (
-                  <img loading="lazy" decoding="async" src={`${import.meta.env.BASE_URL}vendors/langouste-house/bandeau-original.jpg`} alt="Bandeau original Langouste House fourni par le partenaire" className="relative mt-8 h-36 w-full max-w-[290px] rounded-xl bg-white object-contain shadow-xl" />
+                  <img loading="lazy" decoding="async" src={`${import.meta.env.BASE_URL}vendors/langouste-house/bandeau-original.jpg`} alt="Bandeau original Langouste House fourni par le partenaire" className="relative z-10 mt-8 h-36 w-full max-w-[290px] rounded-xl bg-white object-contain shadow-xl" />
                 ) : (
-                <div className="flex h-36 w-36 items-center justify-center overflow-hidden rounded-3xl border-4 border-white bg-white p-3 shadow-xl sm:h-40 sm:w-40" aria-label={`Identité visuelle de ${traiteur.name}`}>
+                <div className="relative z-10 flex h-36 w-36 items-center justify-center overflow-hidden rounded-3xl border-4 border-white bg-white p-3 shadow-xl sm:h-40 sm:w-40" aria-label={`Identité visuelle de ${traiteur.name}`}>
                   {getLogoForTraiteur(traiteur.slug) ? (
                     <img loading="lazy" decoding="async" src={getLogoForTraiteur(traiteur.slug)!} alt={`Logo de ${traiteur.name}`} className="h-full w-full object-contain" />
                   ) : traiteur.portraitImage ? (
@@ -198,7 +221,7 @@ export function TraiteursListPage() {
                   )}
                 </div>
                 )}
-                <div className="mt-4 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-foreground shadow-sm">
+                <div className="relative z-10 mt-4 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-foreground shadow-sm">
                   {getStartingPrice(traiteur)}
                 </div>
               </div>
