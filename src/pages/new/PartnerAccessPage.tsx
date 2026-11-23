@@ -17,7 +17,7 @@ type PilotPartner = {
 };
 
 type SubmitStatus = 'idle' | 'saving' | 'saved' | 'local_only' | 'error';
-type TaskId = 'identity' | 'documents' | 'catalogue' | 'composition' | 'operations' | 'surplus' | 'events' | 'test';
+type TaskId = 'identity' | 'media' | 'documents' | 'catalogue' | 'composition' | 'operations' | 'surplus' | 'events' | 'test';
 
 type PartnerForm = {
   responsable: string;
@@ -48,6 +48,7 @@ const PARTNERS: PilotPartner[] = [
 
 const TASKS: Array<{ id: TaskId; title: string; detail: string }> = [
   { id: 'identity', title: 'Identité', detail: 'Responsable, téléphone, email, commune.' },
+  { id: 'media', title: 'Vitrine obligatoire', detail: 'Logo officiel, photo traiteur/stand, bio et photos réelles des plats pour les vignettes de vente.' },
   { id: 'documents', title: 'Documents', detail: 'SIRET/Kbis, RIB, assurance, hygiène si disponible.' },
   { id: 'catalogue', title: 'Catalogue', detail: 'Plats, prix, photos et disponibilité réelle.' },
   { id: 'composition', title: 'Menus', detail: 'Accompagnements, boissons, suppléments et allergènes.' },
@@ -319,7 +320,7 @@ export default function PartnerAccessPage() {
               <label className="text-sm font-bold">Email<input value={form.email} onChange={(e) => updateForm('email', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal" placeholder="email" /></label>
               <label className="text-sm font-bold">Commune<select value={form.commune} onChange={(e) => updateForm('commune', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal"><option value="">Sélectionnez</option>{martiniqueCommunes.map((commune) => <option key={commune.name} value={commune.name}>{commune.name}</option>)}</select></label>
             </div>
-            <label className="mt-4 block text-sm font-bold">Description / bio<textarea value={form.description} onChange={(e) => updateForm('description', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal" rows={3} placeholder="Bio, histoire, spécialité, vidéo disponible..." /></label>
+            <label className="mt-4 block text-sm font-bold">Description / bio obligatoire<textarea value={form.description} onChange={(e) => updateForm('description', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal" rows={3} placeholder="Bio, histoire, spécialité, vidéo disponible..." /></label>
             <label className="mt-4 block text-sm font-bold">Horaires et capacité<textarea value={form.horaires} onChange={(e) => updateForm('horaires', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal" rows={2} placeholder="Jours, heures, capacité max par service..." /></label>
             <div className="mt-4"><p className="text-sm font-bold">Modes opérationnels</p><div className="mt-2 flex flex-wrap gap-2">{MODES.map((mode) => <button key={mode} type="button" onClick={() => toggleMode(mode)} className={`rounded-full border px-3 py-2 text-xs font-black ${form.modes.includes(mode) ? 'bg-primary text-white' : 'bg-white text-muted-foreground'}`}>{mode}</button>)}</div></div>
             <label className="mt-4 block text-sm font-bold">Plats et prix<textarea value={form.plats} onChange={(e) => updateForm('plats', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal" rows={3} placeholder="Plat — prix — quantité possible" /></label>

@@ -306,6 +306,19 @@ export default function CatererSignupPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
+    // Dossier commercial complet : aucune inscription vitrine sans identité visuelle réelle.
+    if (!form.bio.trim() || !form.description.trim()) {
+      showError('La bio et la description de votre activité sont obligatoires pour présenter votre vitrine.');
+      return;
+    }
+    if (!form.logo) {
+      showError('Ajoutez le logo officiel de votre activité.');
+      return;
+    }
+    if (photos.length < 2 || photos.some((photo) => !photo.description.trim())) {
+      showError('Ajoutez au moins deux photos réelles : portrait ou stand, puis plat destiné à la vente, avec une description pour chaque photo.');
+      return;
+    }
     if (!validateMartiniquePhone(form.telephone)) {
       showError('Le numéro de téléphone doit être un numéro martiniquais valide (0696 XX XX XX).');
       return;
@@ -661,11 +674,12 @@ export default function CatererSignupPage() {
 
             <div className="formGroup space-y-1.5">
               <label htmlFor="bio" className="block text-sm font-semibold text-foreground">
-                Bio courte du traiteur
+                Bio courte du traiteur *
               </label>
               <textarea
                 id="bio"
                 name="bio"
+                required
                 rows={2}
                 value={form.bio}
                 onChange={handleChange}
@@ -681,6 +695,7 @@ export default function CatererSignupPage() {
               <textarea
                 id="description"
                 name="description"
+                required
                 rows={3}
                 value={form.description}
                 onChange={handleChange}
@@ -819,7 +834,7 @@ export default function CatererSignupPage() {
 
             <div className="formGroup space-y-1.5">
               <label className="block text-sm font-semibold text-foreground">
-                Photos de vos plats / activité
+                Photos de votre activité et de vos plats *
               </label>
               <input
                 ref={photoInputRef}
@@ -830,7 +845,7 @@ export default function CatererSignupPage() {
                 className="w-full text-sm text-muted-foreground file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-primary/10 file:text-primary file:font-semibold file:text-sm hover:file:bg-primary/20 cursor-pointer"
               />
               <p className="text-[10px] text-muted-foreground">
-                Vous pouvez sélectionner plusieurs photos
+                Obligatoire : au moins 2 photos réelles, dont une photo du traiteur ou de son stand et une photo de plat pour la vignette de vente. Décrivez chaque photo.
               </p>
             </div>
 
@@ -876,11 +891,12 @@ export default function CatererSignupPage() {
 
             <div className="formGroup space-y-1.5">
               <label className="block text-sm font-semibold text-foreground">
-                Logo de votre activité
+                Logo officiel de votre activité *
               </label>
               <input
                 ref={logoInputRef}
                 type="file"
+                required={!form.logo}
                 accept="image/*"
                 onChange={handleLogoUpload}
                 className="w-full text-sm text-muted-foreground file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-primary/10 file:text-primary file:font-semibold file:text-sm hover:file:bg-primary/20 cursor-pointer"

@@ -173,7 +173,11 @@ export default function PartnerCatalogPage() {
   const [product, setProduct] = useState(blankProduct);
   const productFormRef = useRef<HTMLFormElement>(null);
 
-  const canPublishDirectly = vendor?.status === 'verified' && vendor.is_public;
+  // Un vendeur déjà vérifié peut préparer un brouillon ; la vente directe exige
+  // logo, portrait/vitrine, bio et image réelle du produit. Ne pas modifier
+  // automatiquement les produits historiques ni le statut du vendeur.
+  const hasCompletePublicProfile = Boolean(vendor?.logo_url?.trim() && vendor?.hero_image?.trim() && (vendor?.description?.trim() || vendor?.story?.trim()));
+  const canPublishDirectly = vendor?.status === 'verified' && vendor.is_public && hasCompletePublicProfile;
 
   const toggleChoice = (field: 'appetizers' | 'sides' | 'drinks' | 'sauces' | 'condiments', choice: string) => {
     setProduct((current) => {
@@ -435,6 +439,10 @@ export default function PartnerCatalogPage() {
       showError('Indiquez au minimum un nom et un prix supérieur à zéro.');
       return;
     }
+    if (!product.imageUrl.trim() || !product.description.trim()) {
+      showError('Pour créer une vignette de vente, ajoutez une photo réelle et une description du plat.');
+      return;
+    }
     setSavingProduct(true);
     try {
       const sides = product.sides.split(',').map((side) => side.trim()).filter(Boolean);
@@ -597,7 +605,7 @@ export default function PartnerCatalogPage() {
           </form>
 
           <form ref={productFormRef} onSubmit={saveProduct} className="scroll-mt-6 rounded-[2rem] border border-primary/20 bg-white p-6 shadow-soft">
-            <div className="flex items-center gap-3"><Plus className="h-6 w-6 text-primary" /><div><h2 className="text-xl font-black">{editingId ? 'Modifier le plat' : 'Ajouter un plat ou un menu'}</h2><p className="text-sm text-stone-500">{canPublishDirectly ? 'Votre fiche est validée : l’enregistrement publie directement sur le site.' : 'Votre fiche doit être validée avant la publication publique.'}</p></div></div>
+            <div className="flex items-center gap-3"><Plus className="h-6 w-6 text-primary" /><div><h2 className="text-xl font-black">{editingId ? 'Modifier le plat' : 'Ajouter un plat ou un menu'}</h2><p className="text-sm text-stone-500">{canPublishDirectly ? 'Votre fiche est validée : l’enregistrement publie directement sur le site.' : 'Publication suspendue : logo officiel, photo de vitrine, bio et validation du partenaire sont obligatoires. Les nouveaux plats restent en brouillon.'}</p></div></div>
             <div className="mt-5 space-y-4">
               <input required placeholder="Nom du plat ou de l’offre" value={product.name} onChange={e=>setProduct({...product,name:e.target.value})} className="w-full rounded-xl border px-4 py-3" />
               <textarea placeholder="Description appétissante, accompagnements, portion…" value={product.description} onChange={e=>setProduct({...product,description:e.target.value})} rows={3} className="w-full rounded-xl border px-4 py-3" />
