@@ -29,6 +29,22 @@ import { getVendorBySlug } from '../../services/vendorsService';
 import { socialLabel, type SocialLinkSet } from '../../utils/socialLinks';
 import type { Product } from '../../types';
 
+// Identités réellement présentes dans le dépôt ; ne jamais attribuer un logo fictif.
+const VERIFIED_PARTNER_LOGO_FILES: Record<string, string> = {
+  'les-delices-de-ninice': 'vendors/ninice/logo-les-delices-de-ninice.webp',
+  'saveurs-dafrique': 'vendors/saveurs-afrique/logo-officiel-20261123.jpg',
+  'chef-a-mada': 'vendors/chef-a-mada/logo.jpg',
+};
+const PARTNER_SIGNATURE_STYLES: Record<string, string> = {
+  'les-delices-de-ninice': 'border-[#d48f32] bg-[#5d154b]',
+  'saveurs-dafrique': 'border-[#c88c43] bg-[#482719]',
+  'cocos-food': 'border-[#b37c43] bg-[#301e15]',
+  'sweet-family-traiteur-orianne': 'border-[#c77992] bg-[#571e3e]',
+  'snack-save-peyia': 'border-[#a3a35b] bg-[#244a35]',
+  'goute-mwen': 'border-[#e6b35f] bg-[#5d2e70]',
+  'chef-a-mada': 'border-[#dc9b48] bg-[#5f251e]',
+};
+
 const WHATSAPP_NUMBER = '596696653589';
 const MADA_BADGE_TRAITEURS = new Set([
   "Saveurs d'Afrique",
@@ -182,6 +198,8 @@ export function TraiteurDetailPage() {
   const isChefMada = traiteur.slug === 'chef-a-mada';
   const showMadaBadge = MADA_BADGE_TRAITEURS.has(traiteur.name);
   const isLangousteHouse = traiteur.slug === 'langouste-house';
+  const identityLogoFile = VERIFIED_PARTNER_LOGO_FILES[traiteur.slug] || null;
+  const identityStyle = PARTNER_SIGNATURE_STYLES[traiteur.slug] || 'border-[#bd985f] bg-[#30261d]';
   const langousteCaptions = langousteHouseGallery.map(({ caption }) => caption);
   const isGouteMwen = traiteur.slug === 'goute-mwen';
   const useContainedHero = isGouteMwen;
@@ -312,6 +330,22 @@ export function TraiteurDetailPage() {
             </div>
           </section>
 
+          {!isLangousteHouse && (
+            <section className={`mt-6 flex flex-col gap-4 rounded-2xl border p-5 text-white shadow-lg sm:flex-row sm:items-center sm:p-6 ${identityStyle}`} aria-label={`Univers de ${traiteur.name}`}>
+              {identityLogoFile ? (
+                <div className="flex h-28 w-36 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-3 shadow-lg">
+                  <img src={`${import.meta.env.BASE_URL}${identityLogoFile}`} alt={`Identité visuelle de ${traiteur.name}`} loading="lazy" className="h-full w-full object-contain" />
+                </div>
+              ) : traiteur.portraitImage && traiteur.slug !== 'goute-mwen' ? (
+                <img src={traiteur.portraitImage} alt={`Photo de présentation de ${traiteur.name}`} loading="lazy" className="h-28 w-36 shrink-0 rounded-xl bg-white/10 object-cover" />
+              ) : null}
+              <div>
+                <h2 className="text-xl font-black sm:text-2xl">L’univers de {traiteur.name}</h2>
+                <p className="mt-2 max-w-3xl text-sm leading-6 text-white/90">{traiteur.specialty || traiteur.offer}</p>
+                <p className="mt-2 text-xs text-white/75">Consultez les photos et les plats de ce partenaire ; les offres et disponibilités restent soumises à confirmation.</p>
+              </div>
+            </section>
+          )}
           {isLangousteHouse && (
             <section className="mt-6 rounded-2xl border border-[#ff7900]/50 bg-[#171717] p-5 text-white shadow-lg sm:p-6" aria-label="Présentation et accès Langouste House">
               <p className="text-xs font-black uppercase tracking-[0.2em] text-[#ff9a36]">Langouste House · Fond Lahaye</p>
