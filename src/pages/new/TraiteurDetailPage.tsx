@@ -287,6 +287,15 @@ export function TraiteurDetailPage() {
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div className="max-w-3xl">
+                  {isLangousteHouse && (
+                    <div className="mb-4 inline-flex max-w-[280px] rounded-xl border-2 border-[#ff7900] bg-white p-2 shadow-2xl sm:max-w-[380px]" aria-label="Identité visuelle fournie par Langouste House">
+                      <img
+                        src={`${import.meta.env.BASE_URL}vendors/langouste-house/bandeau-original.jpg`}
+                        alt="Bandeau original Langouste House transmis par Charles, conservé sans modification"
+                        className="max-h-28 w-full object-contain sm:max-h-36"
+                      />
+                    </div>
+                  )}
                   <h1 className="text-3xl font-black tracking-tight sm:text-5xl">{traiteur.name}</h1>
                   <p className="mt-2 max-w-2xl text-sm text-white/90 sm:text-lg">
                     {traiteur.promise || traiteur.offer}
@@ -303,6 +312,26 @@ export function TraiteurDetailPage() {
             </div>
           </section>
 
+          {isLangousteHouse && (
+            <section className="mt-6 rounded-2xl border border-[#ff7900]/50 bg-[#171717] p-5 text-white shadow-lg sm:p-6" aria-label="Présentation et accès Langouste House">
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#ff9a36]">Langouste House · Fond Lahaye</p>
+              <h2 className="mt-2 text-2xl font-black">Une identité à part, des spécialités de la mer</h2>
+              <p className="mt-2 max-w-3xl text-sm text-white/80">Découvrez l’univers de Langouste House et sa carte communiquée. Commandes, prix au poids et disponibilités à confirmer auprès du partenaire.</p>
+              <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {[
+                  { label: 'Terrasse', anchor: 'terrasse' },
+                  { label: 'Traiteur', anchor: 'traiteur' },
+                  { label: 'Mareyage', anchor: 'mareyage' },
+                  { label: 'Contact', anchor: 'contact' },
+                ].map(({ label, anchor }) => (
+                  <a key={anchor} href={`/langouste-house/?tab=${anchor}`} className="rounded-xl border border-[#ff7900]/40 bg-white/10 px-3 py-3 text-center text-sm font-bold text-white transition hover:bg-[#ff7900]/20" title={`Ouvrir la vitrine : ${label}`}>
+                    {label}
+                  </a>
+                ))}
+              </div>
+              <a href="/langouste-house/" className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#ff7900] px-5 py-3 text-sm font-black text-black">Ouvrir la vitrine et la carte de Charles</a>
+            </section>
+          )}
           {isLangousteHouse && (
             <section className="mt-6 rounded-2xl border border-border bg-card p-6">
               <h2 className="text-2xl font-bold">La carte de Langouste House</h2>
