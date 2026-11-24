@@ -349,30 +349,37 @@ export function TraiteurDetailPage() {
             </section>
           )}
           {isLangousteHouse && (
-            <section className="mt-6 rounded-2xl border border-[#ff7900]/50 bg-[#171717] p-5 text-white shadow-lg sm:p-6" aria-label="Présentation et accès Langouste House">
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#ff9a36]">Langouste House · Fond Lahaye</p>
-              <h2 className="mt-2 text-2xl font-black">Une identité à part, des spécialités de la mer</h2>
-              <p className="mt-2 max-w-3xl text-sm text-white/80">Découvrez l’univers de Langouste House et sa carte communiquée. Commandes, prix au poids et disponibilités à confirmer auprès du partenaire.</p>
-              <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {[
-                  { label: 'Terrasse', anchor: 'terrasse' },
-                  { label: 'Traiteur', anchor: 'traiteur' },
-                  { label: 'Mareyage', anchor: 'mareyage' },
-                  { label: 'Contact', anchor: 'contact' },
-                ].map(({ label, anchor }) => (
-                  <a key={anchor} href={`/langouste-house/?tab=${anchor}`} className="rounded-xl border border-[#ff7900]/40 bg-white/10 px-3 py-3 text-center text-sm font-bold text-white transition hover:bg-[#ff7900]/20" title={`Ouvrir la vitrine : ${label}`}>
-                    {label}
-                  </a>
-                ))}
+            <section className="mt-6 overflow-hidden rounded-[1.75rem] border border-[#f47719]/40 bg-[#141414] text-white shadow-2xl" aria-label="Langouste House — présentation partenaire">
+              <div className="grid items-stretch lg:grid-cols-[1.12fr_.88fr]">
+                <div className="flex flex-col justify-center p-5 sm:p-8 lg:p-10">
+                  <p className="text-xs font-extrabold uppercase tracking-[.24em] text-[#ff982f]">DELIKREOL × Langouste House</p>
+                  <div className="mt-5 w-full max-w-[450px] overflow-hidden rounded-xl border border-white/15 bg-white p-2 shadow-xl">
+                    <img src={`${import.meta.env.BASE_URL}vendors/langouste-house/bandeau-original.jpg`} alt="Bandeau original fourni pour Langouste House, sans modification" className="h-auto w-full object-contain" loading="eager" />
+                  </div>
+                  <h2 className="mt-6 text-2xl font-black leading-tight sm:text-4xl">La mer à l’honneur, à Fond Lahaye</h2>
+                  <p className="mt-4 max-w-xl text-sm leading-7 text-white/75 sm:text-base">Découvrez la terrasse sur la plage, le traiteur et le mareyage de Langouste House. Retrouvez les photos du partenaire et consultez sa carte avant de prendre contact.</p>
+                  <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    {[
+                      { label: 'Terrasse', anchor: 'terrasse' },
+                      { label: 'Traiteur', anchor: 'traiteur' },
+                      { label: 'Mareyage', anchor: 'mareyage' },
+                      { label: 'Contact', anchor: 'contact' },
+                    ].map(({ label, anchor }) => (
+                      <a key={anchor} href={`/langouste-house/?tab=${anchor}`} className="rounded-xl border border-[#ff7900]/50 bg-white/5 px-3 py-3 text-center text-sm font-bold text-white transition hover:border-[#ff7900] hover:bg-[#ff7900]/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff7900]">{label}</a>
+                    ))}
+                  </div>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <a href="/langouste-house/" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#ff7900] px-6 py-3 text-sm font-black text-[#111] transition hover:bg-[#ff9a3d]">Découvrir la carte et la vitrine</a>
+                    <a href="#catalogue" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/40 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10">Voir les produits référencés</a>
+                  </div>
+                  <p className="mt-4 text-xs leading-5 text-white/60">Carte et prix à confirmer avec le partenaire. Les commandes en ligne ne sont pas encore ouvertes.</p>
+                </div>
+                <div className="grid min-h-[360px] grid-cols-2 gap-2 bg-[#211913] p-2 sm:min-h-[460px]">
+                  <img src={`${import.meta.env.BASE_URL}vendors/langouste-house/langouste-entiere-bbq.jpg`} alt="Langouste grillée, photo du dossier partenaire" loading="lazy" className="col-span-2 h-56 w-full rounded-xl object-cover sm:h-72 lg:h-full" />
+                  <img src={`${import.meta.env.BASE_URL}vendors/langouste-house/terrasse.jpg`} alt="Terrasse Langouste House" loading="lazy" className="h-36 w-full rounded-xl object-cover lg:hidden" />
+                  <img src={`${import.meta.env.BASE_URL}vendors/langouste-house/plateau-langoustes-pochees.jpg`} alt="Plateau de langoustes" loading="lazy" className="h-36 w-full rounded-xl object-cover lg:hidden" />
+                </div>
               </div>
-              <a href="/langouste-house/" className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#ff7900] px-5 py-3 text-sm font-black text-black">Ouvrir la vitrine et la carte de Charles</a>
-            </section>
-          )}
-          {isLangousteHouse && (
-            <section className="mt-6 rounded-2xl border border-border bg-card p-6">
-              <h2 className="text-2xl font-bold">La carte de Langouste House</h2>
-              <p className="mt-2">Terrasse sur la plage, traiteur et mareyage. Retrouvez les plats, les desserts maison et les cinq cocktails signature.</p>
-              <a href="/langouste-house/" className="mt-4 inline-block font-semibold text-primary underline">Découvrir la carte et les tarifs</a>
             </section>
           )}
           {traiteur.name === 'Langouste House' && (
