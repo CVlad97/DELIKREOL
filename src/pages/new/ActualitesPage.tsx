@@ -104,6 +104,30 @@ export default function ActualitesPage() {
           </div>
         </section>
 
+        <section aria-labelledby="rejoindre-delikreol-title" className="mt-8 rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm md:p-9">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">Rejoindre le réseau DELIKREOL</p>
+          <h2 id="rejoindre-delikreol-title" className="mt-2 text-2xl font-black text-foreground md:text-3xl">Traiteurs, livreurs et points relais : construisons la livraison locale ensemble</h2>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">Nous préparons le lancement de services de commande, de retrait et de livraison en Martinique. Chaque candidature est étudiée avant activation : l’inscription ne garantit ni commandes, ni revenus.</p>
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <article className="rounded-2xl border border-orange-100 bg-orange-50 p-5">
+              <h3 className="text-lg font-black text-[#63301c]">Vous êtes traiteur ?</h3>
+              <p className="mt-2 text-sm leading-6 text-[#5b493f]">Présentez votre cuisine, vos spécialités, vos photos, vos horaires et votre carte. Notre équipe vérifie les informations avant publication commerciale.</p>
+              <Link to="/inscription-traiteur" className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-[#873b21] px-4 py-2 text-sm font-black text-white hover:bg-[#682d19]">Proposer ma candidature</Link>
+            </article>
+            <article className="rounded-2xl border border-green-100 bg-green-50 p-5">
+              <h3 className="text-lg font-black text-[#235a35]">Vous souhaitez livrer ?</h3>
+              <p className="mt-2 text-sm leading-6 text-[#31503c]">Indiquez votre zone, vos disponibilités et votre mode de déplacement. Les missions éventuelles seront proposées après validation de votre profil.</p>
+              <Link to="/devenir-livreur" className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-[#22683c] px-4 py-2 text-sm font-black text-white hover:bg-[#164a2a]">Devenir livreur</Link>
+            </article>
+            <article className="rounded-2xl border border-stone-200 bg-stone-50 p-5">
+              <h3 className="text-lg font-black text-foreground">Vous avez un lieu de retrait ?</h3>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">Commerce, local ou emplacement adapté : proposez un point relais et précisez vos conditions d’accueil, horaires et capacité.</p>
+              <Link to="/devenir-point-relais" className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-stone-800 px-4 py-2 text-sm font-black text-white hover:bg-stone-700">Proposer un point relais</Link>
+            </article>
+          </div>
+          <p className="mt-5 text-xs text-muted-foreground">Conditions de partenariat, frais et modalités opérationnelles communiqués et validés avant toute activation commerciale.</p>
+        </section>
+
         <section className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-4">
             <h2 className="text-2xl font-black">Mise à l’honneur de la semaine</h2>
