@@ -111,6 +111,7 @@ export default function PartnerAccessPage() {
   const [form, setForm] = useState<PartnerForm>(emptyForm);
   const [tasks, setTasks] = useState<Record<TaskId, boolean>>(() => readTasks(code));
   const [submitted, setSubmitted] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -180,8 +181,12 @@ export default function PartnerAccessPage() {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setSubmitStatus('saving');
     setErrorMessage(null);
+    if (!form.responsable.trim() || !(form.email.trim() || form.telephone.trim()) || !form.commune) {
+      setErrorMessage('Indiquez le responsable, un moyen de contact et la commune pour transmettre la demande.');
+      return;
+    }
+    setSubmitStatus('saving');
 
     const payload = {
       partner_id: code || partnerName || 'partner-pilot',
@@ -260,7 +265,7 @@ export default function PartnerAccessPage() {
         <main className="mx-auto max-w-2xl px-4 py-12 text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-3xl">✅</div>
           <h1 className="mt-4 text-3xl font-black">Merci, {partner.label}</h1>
-          <p className="mt-3 text-muted-foreground">Préparation enregistrée : <strong>{readinessPercent}%</strong>. Statut : <strong>{eligibilityStatus}</strong>.</p>
+          <p className="mt-3 text-muted-foreground">Demande transmise pour contrôle, sans activation automatique des droits. Préparation enregistrée : <strong>{readinessPercent}%</strong>. Statut : <strong>{eligibilityStatus}</strong>.</p>
           {errorMessage && <p className="mt-4 rounded-2xl bg-red-50 p-3 text-sm font-bold text-red-700">{errorMessage}</p>}
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <a href={whatsappUrl} target="_blank" rel="noreferrer" className="rounded-2xl bg-green-600 px-5 py-3 font-black text-white">Confirmer sur WhatsApp</a>
@@ -277,7 +282,7 @@ export default function PartnerAccessPage() {
       <BackBar label="Retour" backTo="/" />
       <main className="mx-auto max-w-5xl px-4 py-8">
         <section className="rounded-[2rem] border border-primary/20 bg-gradient-to-br from-orange-50 to-white p-6 shadow-sm">
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-primary">Accès pilote sans mot de passe</p>
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-primary">Préinscription express · 3 étapes essentielles</p>
           <div className="mt-3 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
             <div>
               <h1 className="text-3xl font-black text-foreground">{partner.label}</h1>
@@ -301,7 +306,9 @@ export default function PartnerAccessPage() {
 
         <form onSubmit={handleSubmit} className="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <aside className="rounded-[2rem] border bg-white p-5 shadow-sm">
-            <h2 className="text-xl font-black">Checklist qualité</h2>
+            <h2 className="text-xl font-black">Étape 3 · Préparation du lancement</h2>
+            <p className="mt-2 text-sm text-muted-foreground">Cette liste est facultative à la première prise de contact. Elle sera vérifiée avant tout accès opérationnel et toute vente.</p>
+            <details className="mt-3"><summary className="cursor-pointer rounded-xl border px-3 py-3 text-sm font-bold">Afficher les 9 points de vérification</summary>
             <div className="mt-4 space-y-3">
               {TASKS.map((task) => (
                 <label key={task.id} className="flex cursor-pointer gap-3 rounded-2xl border p-3 text-sm">
@@ -309,29 +316,35 @@ export default function PartnerAccessPage() {
                   <span><strong>{task.title}</strong><br /><span className="text-xs text-muted-foreground">{task.detail}</span></span>
                 </label>
               ))}
-            </div>
+            </div></details>
           </aside>
 
           <section className="rounded-[2rem] border bg-white p-5 shadow-sm">
-            <h2 className="text-xl font-black">Informations à valider</h2>
+            <h2 className="text-xl font-black">Étape 1 · Coordonnées</h2><p className="mt-2 text-sm text-muted-foreground">Responsable + téléphone ou email + commune. Quelques informations suffisent pour démarrer la vérification.</p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <label className="text-sm font-bold">Responsable<input value={form.responsable} onChange={(e) => updateForm('responsable', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal" placeholder="Nom" /></label>
               <label className="text-sm font-bold">Téléphone<input value={form.telephone} onChange={(e) => updateForm('telephone', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal" placeholder="0696..." /></label>
               <label className="text-sm font-bold">Email<input value={form.email} onChange={(e) => updateForm('email', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal" placeholder="email" /></label>
               <label className="text-sm font-bold">Commune<select value={form.commune} onChange={(e) => updateForm('commune', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal"><option value="">Sélectionnez</option>{martiniqueCommunes.map((commune) => <option key={commune.name} value={commune.name}>{commune.name}</option>)}</select></label>
             </div>
-            <label className="mt-4 block text-sm font-bold">Description / bio obligatoire<textarea value={form.description} onChange={(e) => updateForm('description', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal" rows={3} placeholder="Bio, histoire, spécialité, vidéo disponible..." /></label>
+            <h3 className="mt-5 text-lg font-black">Étape 2 · Votre activité</h3>
+            <label className="mt-4 block text-sm font-bold">Présentation de votre cuisine<textarea value={form.description} onChange={(e) => updateForm('description', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal" rows={3} placeholder="Bio, histoire, spécialité, vidéo disponible..." /></label>
             <label className="mt-4 block text-sm font-bold">Horaires et capacité<textarea value={form.horaires} onChange={(e) => updateForm('horaires', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal" rows={2} placeholder="Jours, heures, capacité max par service..." /></label>
             <div className="mt-4"><p className="text-sm font-bold">Modes opérationnels</p><div className="mt-2 flex flex-wrap gap-2">{MODES.map((mode) => <button key={mode} type="button" onClick={() => toggleMode(mode)} className={`rounded-full border px-3 py-2 text-xs font-black ${form.modes.includes(mode) ? 'bg-primary text-white' : 'bg-white text-muted-foreground'}`}>{mode}</button>)}</div></div>
             <label className="mt-4 block text-sm font-bold">Plats et prix<textarea value={form.plats} onChange={(e) => updateForm('plats', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal" rows={3} placeholder="Plat — prix — quantité possible" /></label>
             <label className="mt-4 block text-sm font-bold">Prix / règles commerciales<input value={form.prix} onChange={(e) => updateForm('prix', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal" placeholder="Prix partenaire, prix public, menus, suppléments..." /></label>
+            <button type="button" onClick={() => setShowAdvanced((value) => !value)} aria-expanded={showAdvanced} className="mt-5 w-full rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-left text-sm font-bold text-primary">{showAdvanced ? 'Masquer' : 'Compléter'} les informations avancées (menus, documents, événements) · facultatif au départ</button>
+            {showAdvanced && <div className="mt-2 space-y-3">
             <label className="mt-4 block text-sm font-bold">Compositions obligatoires<textarea value={form.compositions} onChange={(e) => updateForm('compositions', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal" rows={3} placeholder="Ex : 1 accompagnement + 1 boisson obligatoires, riz/lentilles/légumes/frite/crudités..." /></label>
             <label className="mt-4 block text-sm font-bold">Allergènes<textarea value={form.allergenes} onChange={(e) => updateForm('allergenes', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal" rows={2} /></label>
             <label className="mt-4 block text-sm font-bold">Documents / règlement<textarea value={form.documents} onChange={(e) => updateForm('documents', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal" rows={2} placeholder="SIRET, RIB, assurance, hygiène, lien SumUp/Stripe si disponible..." /></label>
             <label className="mt-4 block text-sm font-bold">Invendus jour/lendemain<textarea value={form.invendus} onChange={(e) => updateForm('invendus', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal" rows={2} placeholder="Paniers anti-gaspillage, prix réduit, créneau retrait..." /></label>
             <label className="mt-4 block text-sm font-bold">Événement / mise à l’honneur<textarea value={form.events} onChange={(e) => updateForm('events', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal" rows={2} placeholder="Vidéo, lieu, repas à gagner, Chef à Mada/GIE..." /></label>
             <label className="mt-4 block text-sm font-bold">Remarques / photos à corriger<textarea value={form.remarques} onChange={(e) => updateForm('remarques', e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 font-normal" rows={3} placeholder="Ex : supprimer Panini saumon, changer photo, rupture produit..." /></label>
-            <button disabled={submitStatus === 'saving'} type="submit" className="mt-5 w-full rounded-2xl bg-primary px-6 py-4 font-black text-white disabled:opacity-60">{submitStatus === 'saving' ? 'Enregistrement…' : 'Enregistrer et envoyer à DELIKREOL'}</button>
+            </div>}
+            {errorMessage && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">{errorMessage}</p>}
+            <p className="mt-4 text-xs text-muted-foreground">Cette demande n’active pas seule les commandes : vérification d’identité, pièces nécessaires et autorisation sécurisée restent obligatoires.</p>
+            <button disabled={submitStatus === 'saving'} type="submit" className="mt-5 w-full rounded-2xl bg-primary px-6 py-4 font-black text-white disabled:opacity-60">{submitStatus === 'saving' ? 'Enregistrement…' : 'Envoyer ma demande de démarrage'}</button>
           </section>
         </form>
       </main>

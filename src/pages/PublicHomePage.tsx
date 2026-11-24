@@ -1818,6 +1818,26 @@ export function PublicHomePage() {
  {space.zone}
  </span>
  </div>
+ <div className="mt-4 flex items-center gap-3 rounded-2xl border border-white/20 bg-black/15 p-3">
+ {({
+ 'langouste-house': 'vendors/langouste-house/bandeau-original.jpg',
+ 'les-delices-de-ninice': 'vendors/ninice/logo-les-delices-de-ninice.webp',
+ 'saveurs-dafrique': 'vendors/saveurs-afrique/logo-officiel-20261123.jpg',
+ 'sweet-family-traiteur-orianne': 'vendors/sweet-family/identite-extraite-menu-20260627.webp',
+ 'snack-save-peyia': 'vendors/save-peyia/identite-extraite-menu-20260710.webp',
+ } as Record<string, string>)[space.slug] ? (
+ <img loading="lazy" src={`${import.meta.env.BASE_URL}${({
+ 'langouste-house': 'vendors/langouste-house/bandeau-original.jpg',
+ 'les-delices-de-ninice': 'vendors/ninice/logo-les-delices-de-ninice.webp',
+ 'saveurs-dafrique': 'vendors/saveurs-afrique/logo-officiel-20261123.jpg',
+ 'sweet-family-traiteur-orianne': 'vendors/sweet-family/identite-extraite-menu-20260627.webp',
+ 'snack-save-peyia': 'vendors/save-peyia/identite-extraite-menu-20260710.webp',
+ } as Record<string, string>)[space.slug]}`} alt={`Identité visuelle de ${space.name} fournie par le partenaire`} className="h-20 w-28 shrink-0 rounded-xl bg-white p-1 object-contain" />
+ ) : space.portraitImage ? (
+ <img loading="lazy" src={space.portraitImage} alt={`Portrait ou vitrine de ${space.name}`} className="h-20 w-24 shrink-0 rounded-xl object-cover" />
+ ) : null}
+ <div className="min-w-0"><p className="text-xs font-bold uppercase tracking-wider text-white/70">Rencontrez le traiteur</p><p className="mt-1 line-clamp-2 text-sm text-white/95">{space.promise || space.specialty}</p></div>
+ </div>
  <div className="mt-5 grid gap-5 md:grid-cols-[1fr_180px]">
  <div>
  <p className="text-xs font-black uppercase tracking-[0.22em] text-white/75">Espace dédié</p>
@@ -1850,6 +1870,14 @@ export function PublicHomePage() {
  ))}
  </div>
 
+ {space.menuItems.some((item) => item.featured && item.image && item.price > 0) && (
+ <div className="mt-5 overflow-hidden rounded-2xl border border-orange-200 bg-[#201510] text-white shadow-sm sm:flex">
+ {(() => { const hero = space.menuItems.find((item) => item.featured && item.image && item.price > 0)!; return <>
+ <img src={hero.image!} alt={`Plat signature réel de ${space.name} : ${hero.name}`} loading="lazy" className="h-48 w-full object-cover sm:h-44 sm:w-48" />
+ <div className="flex-1 p-4"><p className="text-xs font-black uppercase tracking-widest text-orange-300">À découvrir chez {space.name}</p><h4 className="mt-2 text-lg font-black">{hero.name}</h4><p className="mt-2 text-sm text-white/75 line-clamp-2">{hero.description}</p><p className="mt-2 font-black">{formatEuro(hero.price)}</p></div>
+ </>; })()}
+ </div>
+ )}
  <div className="mt-5 space-y-2">
  {space.menuItems.slice(0, 3).map((item) => (
  <div key={item.name} className="overflow-hidden rounded-2xl border border-primary/20 bg-white shadow-sm">
