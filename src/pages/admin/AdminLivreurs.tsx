@@ -69,6 +69,11 @@ export function AdminLivreurs() {
  }, []);
 
  const updateStatus = async (id: string, status: string) => {
+ if (source !== 'supabase') {
+   setError('Mode consultation locale uniquement : reconnectez Supabase pour enregistrer une décision administrative.');
+   showError('Validation impossible hors connexion Supabase.');
+   return;
+ }
  const current = items.find((item) => item.id === id);
  const previous = current?.status ||'candidat';
  if (status === 'valide' && (!current?.accepts_independent_status || !current?.accepts_service_charter || !String(current?.siret || '').trim())) {
@@ -94,7 +99,7 @@ export function AdminLivreurs() {
  }
  setItems((prev) => prev.map((item) => item.id === id ? { ...item, status } : item));
  setError(null);
- showSuccess('Statut du livreur enregistré.');
+ showSuccess(status === 'valide' ? 'Dossier validé. Compte livreur et accès aux missions à activer séparément.' : 'Statut de candidature enregistré.');
  setUpdatingId(null);
  };
 
@@ -104,6 +109,7 @@ export function AdminLivreurs() {
  <div>
  <h1 className="text-2xl font-display font-bold">Candidatures livreurs</h1>
  <p className="mt-1 text-xs text-muted-foreground">Source : {source ==='supabase' ?'Supabase' :'localStorage'}</p>
+ <p className="mt-1 text-xs text-muted-foreground">La validation du dossier ne crée pas automatiquement un compte livreur et n'autorise aucune mission.</p>
  </div>
  <button onClick={loadApplications} className="rounded-lg bg-muted px-3 py-2 text-xs font-bold text-muted-foreground hover:text-foreground">
  Actualiser
@@ -176,7 +182,7 @@ export function AdminLivreurs() {
  <option value="candidat">Candidat</option>
  <option value="a_appeler">À appeler</option>
  <option value="documents">Documents</option>
- <option value="valide">Validé</option>
+ <option value="valide">Dossier validé (compte à activer)</option>
  <option value="suspendu">Suspendu</option>
  <option value="inactif">Inactif</option>
  </select>
