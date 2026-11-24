@@ -1818,7 +1818,7 @@ export function PublicHomePage() {
  {space.zone}
  </span>
  </div>
- <div className="mt-4 flex items-center gap-3 rounded-2xl border border-white/20 bg-black/15 p-3">
+ <div className="mt-5 rounded-2xl border border-white/20 bg-black/15 p-4">
  {({
  'langouste-house': 'vendors/langouste-house/bandeau-original.jpg',
  'les-delices-de-ninice': 'vendors/ninice/logo-les-delices-de-ninice.webp',
@@ -1826,17 +1826,24 @@ export function PublicHomePage() {
  'sweet-family-traiteur-orianne': 'vendors/sweet-family/identite-extraite-menu-20260627.webp',
  'snack-save-peyia': 'vendors/save-peyia/identite-extraite-menu-20260710.webp',
  } as Record<string, string>)[space.slug] ? (
+ <div className="flex min-h-40 items-center justify-center overflow-hidden rounded-xl bg-white px-5 py-4 sm:min-h-48">
  <img loading="lazy" src={`${import.meta.env.BASE_URL}${({
  'langouste-house': 'vendors/langouste-house/bandeau-original.jpg',
  'les-delices-de-ninice': 'vendors/ninice/logo-les-delices-de-ninice.webp',
  'saveurs-dafrique': 'vendors/saveurs-afrique/logo-officiel-20261123.jpg',
  'sweet-family-traiteur-orianne': 'vendors/sweet-family/identite-extraite-menu-20260627.webp',
  'snack-save-peyia': 'vendors/save-peyia/identite-extraite-menu-20260710.webp',
- } as Record<string, string>)[space.slug]}`} alt={`Identité visuelle de ${space.name} fournie par le partenaire`} className="h-20 w-28 shrink-0 rounded-xl bg-white p-1 object-contain" />
- ) : space.portraitImage ? (
- <img loading="lazy" src={space.portraitImage} alt={`Portrait ou vitrine de ${space.name}`} className="h-20 w-24 shrink-0 rounded-xl object-cover" />
- ) : null}
- <div className="min-w-0"><p className="text-xs font-bold uppercase tracking-wider text-white/70">Rencontrez le traiteur</p><p className="mt-1 line-clamp-2 text-sm text-white/95">{space.promise || space.specialty}</p></div>
+ } as Record<string, string>)[space.slug]}`} alt={`Logo ou identité transmise par ${space.name}`} className="max-h-36 w-full object-contain sm:max-h-40" />
+ </div>
+ ) : (
+ <div className="flex min-h-40 items-center justify-center rounded-xl border border-white/20 bg-black/30 px-6 text-center"><strong className="text-3xl font-black leading-tight text-white">{space.name}</strong></div>
+ )}
+ <div className="mt-3 flex items-center gap-3">
+ {space.portraitImage && space.slug !== 'goute-mwen' && (
+ <img loading="lazy" src={space.portraitImage} alt={`Portrait ou photo de ${space.name}`} className="h-14 w-16 shrink-0 rounded-lg border border-white/40 object-cover" />
+ )}
+ <p className="line-clamp-2 text-sm text-white/90">{space.promise || space.specialty}</p>
+ </div>
  </div>
  <div className="mt-5 grid gap-5 md:grid-cols-[1fr_180px]">
  <div>

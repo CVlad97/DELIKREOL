@@ -58,10 +58,6 @@ function getPartnerCardCover(traiteur: (typeof traiteurSpaces)[number]): string 
 
 const RAPID_DELIVERY_RADIUS_KM = 3;
 
-function getPartnerInitials(name: string) {
-  return name.split(/\s+/).filter((word) => !['de', 'des', 'la', 'le', 'à', 'a'].includes(word.toLowerCase())).slice(0, 2).map((word) => word[0]).join('').toUpperCase();
-}
-
 export function TraiteursListPage() {
   const [userPosition, setUserPosition] = useState<{ latitude: number; longitude: number } | null>(null);
   const [selectedCommune, setSelectedCommune] = useState('');
@@ -210,19 +206,32 @@ export function TraiteursListPage() {
                     Chef à Mada
                   </div>
                 )}
-                {traiteur.name === 'Langouste House' ? (
-                  <img loading="lazy" decoding="async" src={`${import.meta.env.BASE_URL}vendors/langouste-house/bandeau-original.jpg`} alt="Bandeau original Langouste House fourni par le partenaire" className="relative z-10 mt-8 h-36 w-full max-w-[290px] rounded-xl bg-white object-contain shadow-xl" />
-                ) : (
-                <div className="relative z-10 flex h-36 w-36 items-center justify-center overflow-hidden rounded-3xl border-4 border-white bg-white p-3 shadow-xl sm:h-40 sm:w-40" aria-label={`Identité visuelle de ${traiteur.name}`}>
-                  {getLogoForTraiteur(traiteur.slug) ? (
-                    <img loading="lazy" decoding="async" src={getLogoForTraiteur(traiteur.slug)!} alt={`${['sweet-family-traiteur-orianne', 'snack-save-peyia'].includes(traiteur.slug) ? 'Identité de marque extraite du menu transmis par' : 'Logo de'} ${traiteur.name}`} className="h-full w-full object-contain" />
-                  ) : traiteur.portraitImage ? (
-                    <img loading="lazy" decoding="async" src={traiteur.portraitImage} alt={`Photo de profil de ${traiteur.name}`} className="h-full w-full rounded-2xl object-cover" />
+                <div className="relative z-10 mt-9 flex w-full max-w-[340px] flex-col items-center gap-3">
+                  {traiteur.name === 'Langouste House' || getLogoForTraiteur(traiteur.slug) ? (
+                    <div className="flex h-40 w-full items-center justify-center overflow-hidden rounded-2xl border border-white/80 bg-white p-4 shadow-xl sm:h-44">
+                      <img
+                        loading="lazy"
+                        decoding="async"
+                        src={traiteur.name === 'Langouste House' ? `${import.meta.env.BASE_URL}vendors/langouste-house/bandeau-original.jpg` : getLogoForTraiteur(traiteur.slug)!}
+                        alt={`Identité visuelle de ${traiteur.name} issue des fichiers du partenaire`}
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
                   ) : (
-                    <span className="text-4xl font-black tracking-tight text-emerald-900" aria-label={`Initiales de ${traiteur.name}`}>{getPartnerInitials(traiteur.name)}</span>
+                    <div className="flex min-h-36 w-full items-center justify-center rounded-2xl border border-white/40 bg-black/45 px-6 py-5 text-center shadow-xl">
+                      <strong className="text-2xl font-black leading-tight text-white sm:text-3xl">{traiteur.name}</strong>
+                    </div>
+                  )}
+                  {traiteur.portraitImage && traiteur.slug !== 'goute-mwen' && (
+                    <img
+                      loading="lazy"
+                      decoding="async"
+                      src={traiteur.portraitImage}
+                      alt={`Portrait ou photo du partenaire ${traiteur.name}`}
+                      className="h-16 w-20 rounded-xl border-2 border-white bg-white object-cover shadow-md"
+                    />
                   )}
                 </div>
-                )}
                 <div className="relative z-10 mt-4 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-foreground shadow-sm">
                   {getStartingPrice(traiteur)}
                 </div>
