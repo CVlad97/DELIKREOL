@@ -1,4 +1,6 @@
 import { useMemo, useState } from'react';
+import { partnerProfiles } from '../../data/partnerProfiles';
+import { additionalPartnerProfiles } from '../../data/additionalPartnerProfiles';
 import { Copy, ExternalLink, MessageCircle, ShieldCheck } from'lucide-react';
 
 const PILOT_PARTNERS = [
@@ -9,6 +11,27 @@ const PILOT_PARTNERS = [
  { name:'Virtuel Gouté Mwen', code:'GOUTE-MWEN-PILOTE', contact:'' },
  { name:"Snack Savè Peyi'A", code:'SAVE-PEYI-PILOTE', contact:'' },
 ];
+
+const INVITEABLE_PARTNERS = [...partnerProfiles, ...additionalPartnerProfiles]
+ .filter((partner) => partner.name !== 'An Tjè Coco' && partner.name !== 'Chef à Mada')
+ .filter((partner) => partner.type.toLowerCase().includes('traiteur'))
+ .filter((partner, index, all) => all.findIndex((item) => item.name === partner.name) === index);
+
+function normalizePhone(phone?: string) {
+ const digits = (phone || '').replace(/\D/g, '');
+ if (digits.startsWith('596') && digits.length === 12) return digits;
+ if (digits.startsWith('0') && digits.length === 10) return `596${digits.slice(1)}`;
+ if (digits.startsWith('696') && digits.length === 9) return `596${digits}`;
+ return null;
+}
+
+function prepareInvitation(name: string, event: boolean, access: boolean, baseUrl: string) {
+ const paragraphs = [`Bonjour ${name},`, 'Je vous contacte pour DELIKREOL, la plateforme qui met en avant les traiteurs martiniquais.'];
+ if (event) paragraphs.push('Le collectif Chef à Mada organise le vendredi 11 décembre 2026 au Lamentin un concours et une exposition culinaires : dégustations, créations salées, sucrées et cocktails. Souhaiteriez-vous recevoir les modalités pour y participer ?');
+ if (access) paragraphs.push(`Je vous propose également de vérifier votre fiche DELIKREOL et de préparer votre espace professionnel : ${baseUrl}/partenaire. Pour l’activation, nous confirmerons ensemble vos coordonnées, horaires, menus, prix, allergènes et informations professionnelles.`);
+ paragraphs.push('Pouvez-vous me confirmer votre intérêt et les informations à mettre à jour ? Merci et à bientôt !', 'L’équipe DELIKREOL');
+ return paragraphs.join('\n\n');
+}
 
 function getBaseUrl() {
  if (typeof window ==='undefined') return'https://delikreol.com';
@@ -23,6 +46,9 @@ function buildMessage(name: string, link: string) {
 
 export default function AdminPilotAccess() {
  const [copied, setCopied] = useState<string | null>(null);
+ const [eventInvite, setEventInvite] = useState(true);
+ const [accessInvite, setAccessInvite] = useState(true);
+ const [selected, setSelected] = useState<string[]>([]);
  const baseUrl = useMemo(() => getBaseUrl(), []);
 
  const copyText = async (label: string, text: string) => {
@@ -57,6 +83,37 @@ export default function AdminPilotAccess() {
  </div>
  </div>
  </div>
+
+ <section className="mb-8 rounded-2xl border border-orange-200 bg-orange-50 p-5" aria-labelledby="campagne-chef-mada">
+ <h2 id="campagne-chef-mada" className="text-xl font-black text-[#6b2b15]">Campagne partenaires · Chef à Mada & activation DELIKREOL</h2>
+ <p className="mt-2 text-sm text-[#633d2a]">Vendredi 11 décembre 2026 au Lamentin. Préparez des messages humains personnalisés et ouvrez WhatsApp ou votre messagerie pour confirmer chaque envoi. Aucune diffusion automatique ni inscription au concours n'est déclenchée.</p>
+ <div className="mt-4 flex flex-wrap gap-4 text-sm font-semibold">
+ <label className="flex items-center gap-2"><input type="checkbox" checked={eventInvite} onChange={(e) => setEventInvite(e.target.checked)} /> Concours Chef à Mada</label>
+ <label className="flex items-center gap-2"><input type="checkbox" checked={accessInvite} onChange={(e) => setAccessInvite(e.target.checked)} /> Activation de l'espace partenaire</label>
+ </div>
+ <p className="mt-4 text-sm text-[#633d2a]">{selected.length} contact(s) sélectionné(s) · vérifiez l'accord du destinataire pour la prospection avant l'envoi.</p>
+ <div className="mt-3 flex flex-wrap gap-2">
+ <button type="button" className="rounded-lg border border-orange-300 bg-white px-3 py-2 text-sm font-bold" onClick={() => setSelected(INVITEABLE_PARTNERS.map((partner) => partner.name))}>Tout sélectionner</button>
+ <button type="button" className="rounded-lg border border-orange-300 bg-white px-3 py-2 text-sm font-bold" onClick={() => setSelected([])}>Effacer la sélection</button>
+ <button type="button" disabled={!selected.length || (!eventInvite && !accessInvite)} className="rounded-lg bg-[#75351f] px-3 py-2 text-sm font-bold text-white disabled:opacity-40" onClick={() => copyText('campagne', INVITEABLE_PARTNERS.filter((partner) => selected.includes(partner.name)).map((partner) => `${partner.name} | ${partner.contactEmail || 'email à confirmer'} | ${partner.contactPhone || 'téléphone à confirmer'}\n${prepareInvitation(partner.name, eventInvite, accessInvite, baseUrl)}`).join('\n\n---\n\n'))}>Copier les messages sélectionnés</button>
+ </div>
+ <div className="mt-4 grid gap-3 md:grid-cols-2">
+ {INVITEABLE_PARTNERS.map((partner) => {
+ const phone = normalizePhone(partner.contactPhone);
+ const message = prepareInvitation(partner.name, eventInvite, accessInvite, baseUrl);
+ return <div key={partner.name} className="rounded-xl border border-orange-200 bg-white p-4">
+ <label className="flex cursor-pointer items-start gap-3"><input type="checkbox" className="mt-1" checked={selected.includes(partner.name)} onChange={(e) => setSelected((current) => e.target.checked ? [...current, partner.name] : current.filter((name) => name !== partner.name))} /><span className="font-black">{partner.name}</span></label>
+ <p className="mt-2 text-xs text-muted-foreground">{partner.contactEmail || 'Adresse e-mail à vérifier'} · {partner.contactPhone || 'Téléphone à vérifier'}</p>
+ <div className="mt-3 flex flex-wrap gap-2">
+ {phone && (eventInvite || accessInvite) && <a href={`https://wa.me/${phone}?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-green-700 px-3 py-2 text-xs font-black text-white">WhatsApp personnel</a>}
+ {partner.contactEmail && (eventInvite || accessInvite) && <a href={`mailto:${partner.contactEmail}?subject=${encodeURIComponent('DELIKREOL — Chef à Mada / espace partenaire')}&body=${encodeURIComponent(message)}`} className="rounded-lg border px-3 py-2 text-xs font-black">Préparer l’e-mail</a>}
+ <button type="button" className="rounded-lg border px-3 py-2 text-xs font-black" onClick={() => copyText(partner.name, message)}>Copier</button>
+ </div>
+ </div>;
+ })}
+ </div>
+ <p className="mt-4 text-xs text-[#6b503f]">Mode groupé : préparation et copie de messages individualisés. WhatsApp n'autorise pas ici l'envoi automatique à plusieurs numéros ; aucun message n'est envoyé sans votre action.</p>
+ </section>
 
  <div className="grid gap-4">
  {PILOT_PARTNERS.map((partner) => {
