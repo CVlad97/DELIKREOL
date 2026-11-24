@@ -100,6 +100,22 @@ export default function ActualitesPage() {
           </div>
         </section>
 
+        <section aria-labelledby="chef-mada-title" className="mt-8 overflow-hidden rounded-[2rem] border border-orange-200 bg-[#fff9f0] shadow-sm">
+          <div className="grid gap-5 p-6 sm:p-8 md:grid-cols-[140px_1fr] md:items-center">
+            <img src={`${import.meta.env.BASE_URL}vendors/chef-a-mada/logo.jpg`} alt="Identité Chef à Mada" className="mx-auto h-32 w-32 rounded-2xl bg-white p-3 object-contain shadow-sm" loading="lazy" decoding="async" />
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-800">Événement culinaire · 11 décembre 2026</p>
+              <h2 id="chef-mada-title" className="mt-2 text-2xl font-black text-[#532516] md:text-3xl">Concours et exposition Chef à Mada au Lamentin</h2>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-[#50392c]">Le collectif Chef à Mada prépare le vendredi 11 décembre 2026 une rencontre dédiée aux traiteurs, cuisiniers et artisans culinaires de Martinique, avec dégustations, échanges et compétition autour des créations salées, sucrées et des cocktails.</p>
+              <p className="mt-2 text-sm font-semibold text-[#50392c]">Traiteurs DELIKREOL : manifestez votre intérêt pour participer. Horaires, lieu exact et modalités d'inscription à confirmer auprès de l'organisation.</p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <a className="rounded-xl bg-[#78361c] px-5 py-3 text-sm font-black text-white hover:bg-[#5b2916]" href={`https://wa.me/596696653589?text=${encodeURIComponent('Bonjour, je suis traiteur partenaire DELIKREOL et je souhaite recevoir les modalités de participation au concours Chef à Mada du 11 décembre 2026 au Lamentin.')}`} target="_blank" rel="noopener noreferrer">Demander les modalités sur WhatsApp</a>
+                <Link className="rounded-xl border border-[#78361c] px-5 py-3 text-sm font-black text-[#78361c] hover:bg-white" to="/devenir-partenaire">Devenir partenaire DELIKREOL</Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-4">
             <h2 className="text-2xl font-black">Mise à l’honneur de la semaine</h2>
