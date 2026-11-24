@@ -48,43 +48,6 @@ export type PartnerProfile = {
 
 export const partnerProfiles: PartnerProfile[] = [
   {
-    name: 'An Tjè Coco',
-    legalName: 'AN TJE COCO',
-    zone: 'Fort-de-France',
-    address: 'Fort-de-France, Martinique',
-    offer: 'Crêpes gastronomiques, pépites salées et sucrées',
-    type: 'Traiteur',
-    availability: 'Précommande du dimanche au mardi 12h, retrait mercredi 12h-14h30, jeudi et vendredi 17h-20h',
-    story: 'Fondée par Coralie Arnaud, infirmière anesthésiste reconvertie dans la gastronomie, An Tjè Coco réinvente la crêpe en Pépites artisanales sucrées et salées, avec des produits locaux, des saveurs antillaises et une approche haut de gamme.',
-    promise: 'Pépites artisanales, produits locaux, précommande WhatsApp',
-    eta: 'Conservation jusqu’à 72h',
-    specialty: 'Pépite façon gratin de banane jaune, coco-passion, fleur d’oranger-pistache, rougail saucisses, poulet-curry-lait de coco, tiramisu café',
-    highlights: [
-      'Crêpes gastronomiques',
-      'Pépites salées & sucrées',
-      'Précommande WhatsApp',
-      'Produits locaux',
-      'Traiteur événementiel',
-    ],
-    contactPhone: '0696 85 70 77',
-    contactEmail: 'antjecoco@gmail.com',
-    instagram: {
-      label: 'Instagram à confirmer',
-    },
-    events: [
-      {
-        title: 'Maison La Mauny x An Tjè Coco',
-        description: 'Prestation événementielle avec accords rhum et pépites, sur réservation.',
-        location: 'Maison La Mauny, Rivière-Pilote',
-        schedule: 'Sur réservation',
-        status: 'Actif',
-      },
-    ],
-    planifiable: true,
-    enterprise: true,
-    healthTags: ['fait-maison', 'equilibre'],
-  },
-  {
     name: "Coco's Food",
     legalName: "COCO'S FOOD",
     zone: 'Rivière-Pilote — Marché',

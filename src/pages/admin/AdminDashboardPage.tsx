@@ -43,7 +43,6 @@ export default function AdminDashboardPage() {
  { name:"Coco's Food", code:'COCO-PILOTE' },
  { name:'Les Délices de Ninice', code:'NINICE-PILOTE' },
  { name:"Saveurs d'Afrique", code:'SAVEURS-PILOTE' },
- { name:'An Tjè Coco', code:'ANTJECOC-PILOTE' },
  { name:"Snack Savè Peyi'A", code:'SAVEPEYI-PILOTE' },
  { name:'Sweet Family Traiteur Orianne', code:'SWEET-PILOTE' },
  { name:'Gouté Mwen', code:'GOUTEMWEN-PILOTE' },

@@ -62,12 +62,6 @@ const demoAccessBySlug: Record<string, DemoAccessConfig> = {
  email:'saveurs.afrique@demo.delikreol.local',
  phone:'+596696677679',
  },
- [normalizeSpaceSlug('An Tjè Coco')]: {
- id:'demo_vendor_an_tje_coco',
- fullName:'An Tjè Coco',
- email:'antjecoco@gmail.com',
- phone:'0696857077',
- },
  [normalizeSpaceSlug("Coco's Food")]: {
  id:'demo_vendor_cocos_food',
  fullName:"Coco's Food",
