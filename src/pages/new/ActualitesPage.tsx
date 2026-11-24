@@ -46,18 +46,6 @@ const fallbackFeatured: FeaturedVendor = {
   status: 'scheduled',
 };
 
-const fallbackSurplus: SurplusOffer = {
-  id: 'pilot-surplus',
-  title: 'Panier invendus pilote — à confirmer',
-  description: 'Offre du jour/lendemain façon anti-gaspillage. Le contenu est confirmé par le traiteur avant remise client.',
-  original_price: 12,
-  sale_price: 7.9,
-  quantity_available: 3,
-  pickup_window: 'Demain 11h30–13h30 ou selon confirmation WhatsApp',
-  offer_date: '',
-  status: 'draft',
-};
-
 function formatEuro(value: number | null | undefined) {
   if (value == null || Number.isNaN(Number(value))) return 'Prix à confirmer';
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(Number(value));
@@ -65,7 +53,7 @@ function formatEuro(value: number | null | undefined) {
 
 export default function ActualitesPage() {
   const [featured, setFeatured] = useState<FeaturedVendor[]>([fallbackFeatured]);
-  const [surplus, setSurplus] = useState<SurplusOffer[]>([fallbackSurplus]);
+  const [surplus, setSurplus] = useState<SurplusOffer[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -77,7 +65,7 @@ export default function ActualitesPage() {
       }
       const [{ data: featuredRows }, { data: surplusRows }] = await Promise.all([
         publicSupabase.from('featured_vendor_weeks').select('*').in('status', ['scheduled', 'active']).order('week_start', { ascending: false }).limit(3),
-        publicSupabase.from('surplus_offers').select('*').in('status', ['active', 'draft']).order('created_at', { ascending: false }).limit(6),
+        publicSupabase.from('surplus_offers').select('*').eq('status', 'active').order('created_at', { ascending: false }).limit(6),
       ]);
       if (Array.isArray(featuredRows) && featuredRows.length > 0) setFeatured(featuredRows as FeaturedVendor[]);
       if (Array.isArray(surplusRows) && surplusRows.length > 0) setSurplus(surplusRows as SurplusOffer[]);
@@ -146,6 +134,7 @@ export default function ActualitesPage() {
                 <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Bonjour DELIKREOL, je veux réserver : ${offer.title}`)}`} className="mt-4 inline-flex rounded-2xl bg-primary px-4 py-2 text-sm font-black text-white">Réserver / tester</a>
               </article>
             ))}
+            {loaded && surplus.length === 0 && <p className="rounded-2xl border border-dashed border-orange-200 bg-orange-50 p-5 text-sm text-[#644632]">Aucune offre anti-gaspillage validée pour le moment. Les paniers seront affichés ici après confirmation par les traiteurs.</p>}
             {!loaded && <p className="text-sm text-muted-foreground">Chargement des actualités…</p>}
           </div>
         </section>
