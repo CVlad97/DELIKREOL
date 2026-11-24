@@ -1,7 +1,7 @@
 import { langousteHouseGallery } from './langousteHouseGallery';
 import { mockProducts } from './mockCatalog';
 import type { HealthTag } from './mockCatalog';
-import { anTjeCocoAssets, cocoFoodAssets } from './partnerAssets';
+import { cocoFoodAssets } from './partnerAssets';
 import { partnerProfiles, type PartnerProfile } from './partnerProfiles';
 import { additionalPartnerProfiles } from './additionalPartnerProfiles';
 import { driveReimportGalleries, driveReimportPortraits } from './driveReimportAssets';
@@ -66,9 +66,6 @@ export const PUBLIC_HIDDEN_PRODUCT_TRAITEURS = new Set(['An Tjè Coco']);
 
 function resolveHeroImage(name: string) {
   if (name === 'Langouste House') return assetFromPublic('vendors/langouste-house/restaurant.jpg');
-  if (name === 'An Tjè Coco') {
-    return anTjeCocoAssets.hero;
-  }
   if (name === "Coco's Food") {
     return driveReimportGalleries.coco[0] ?? cocoFoodAssets.hero;
   }
@@ -95,9 +92,6 @@ function resolveHeroImage(name: string) {
 
 function resolveGalleryImages(name: string) {
   if (name === 'Langouste House') return langousteHouseGallery.map(({ file }) => assetFromPublic('vendors/langouste-house/' + file));
-  if (name === 'An Tjè Coco') {
-    return anTjeCocoAssets.gallery;
-  }
   if (name === "Coco's Food") {
     return [...driveReimportGalleries.coco];
   }
@@ -274,16 +268,6 @@ export function buildTraiteurSpaces(profiles: PartnerProfile[] = allPartnerProfi
           cutoff_time: '10:30',
           prep_time: 30,
           delivery_slots: ['11:30-12:30', '12:30-13:30', '18:00-19:00', '19:00-20:00'],
-        };
-      }
-
-      if (profile.name === 'An Tjè Coco') {
-        return {
-          ...buildSpace(profile, 'from-[#7c3aed] via-[#ec4899] to-[#c2410c]', '#fff1f2', 'public confirmé', 'confirmée'),
-          horaires: { mar: { open: '14:00', close: '22:00' }, mer: { open: '14:00', close: '22:00' }, jeu: { open: '14:00', close: '22:00' }, ven: { open: '14:00', close: '22:00' }, sam: { open: '14:00', close: '22:00' } },
-          cutoff_time: '09:30',
-          prep_time: 40,
-          delivery_slots: ['18:00-19:00', '19:00-20:00', '20:00-21:00'],
         };
       }
 

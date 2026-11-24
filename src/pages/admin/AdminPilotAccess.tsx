@@ -7,7 +7,6 @@ const PILOT_PARTNERS = [
  { name:'Les Délices de Ninice', code:'NINICE-PILOTE', contact:'' },
  { name:'Sweet Family Traiteur Orianne', code:'SWEETFAMILY-PILOTE', contact:'' },
  { name:'Virtuel Gouté Mwen', code:'GOUTE-MWEN-PILOTE', contact:'' },
- { name:'An Tjè Coco', code:'ANTJE-COCO-PILOTE', contact:'' },
  { name:"Snack Savè Peyi'A", code:'SAVE-PEYI-PILOTE', contact:'' },
 ];
 
