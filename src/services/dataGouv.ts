@@ -2,7 +2,7 @@
 // APIs publiques françaises pour valider communes, adresses et entreprises
 
 const API_BASE = 'https://geo.api.gouv.fr';
-const ADRESSE_BASE = 'https://api-adresse.data.gouv.fr';
+const ADRESSE_BASE = 'https://data.geopf.fr/geocodage';
 const ENTREPRISE_BASE = 'https://recherche-entreprises.api.gouv.fr';
 
 // ─── CACHE ───────────────────────────────────────────────────
@@ -34,17 +34,18 @@ interface Commune {
 export async function searchCommunes(query: string): Promise<Commune[]> {
   const data = await cachedFetch<Commune[]>(
     `communes:${query}`,
-    `${API_BASE}/communes?nom=${encodeURIComponent(query)}&boost=population&limit=10`
+    `${API_BASE}/communes?nom=${encodeURIComponent(query)}&codeDepartement=972&boost=population&limit=10`
   );
-  return data || [];
+  return (data || []).filter(c => c.code.startsWith('972'));
 }
 
 export async function getCommuneByCodePostal(cp: string): Promise<Commune | null> {
+  if (!/^972\d{2}$/.test(cp)) return null;
   const list = await cachedFetch<Commune[]>(
     `cp:${cp}`,
     `${API_BASE}/communes?codePostal=${cp}&limit=1`
   );
-  return list?.[0] || null;
+  return list?.find(c => c.code.startsWith('972')) || null;
 }
 
 export async function getCommunesByDepartement(dep: string = '972'): Promise<Commune[]> {
@@ -74,7 +75,7 @@ export async function searchAddress(query: string): Promise<AdresseFeature[]> {
     `addr:${query}`,
     `${ADRESSE_BASE}/search/?q=${encodeURIComponent(query)}&limit=5&autocomplete=1`
   );
-  return data?.features || [];
+  return (data?.features || []).filter(f => /^972\d{2}$/.test(f.properties.postcode));
 }
 
 export async function reverseGeocode(lat: number, lng: number): Promise<AdresseFeature | null> {
@@ -82,7 +83,7 @@ export async function reverseGeocode(lat: number, lng: number): Promise<AdresseF
     `rev:${lat},${lng}`,
     `${ADRESSE_BASE}/reverse/?lon=${lng}&lat=${lat}`
   );
-  return data?.features?.[0] || null;
+  return data?.features?.find(f => /^972\d{2}$/.test(f.properties.postcode)) || null;
 }
 
 // ─── 3. ENTREPRISE (SIRET/SIREN) ────────────────────────────
@@ -128,40 +129,22 @@ export interface ValidationResult {
 }
 
 export async function validateDeliveryAddress(commune: string, address?: string): Promise<ValidationResult> {
-  // 1. Try geo.api.gouv.fr for commune info
+  const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const communes = await searchCommunes(commune);
-  if (communes.length > 0) {
-    const c = communes.find(c => c.nom.toLowerCase() === commune.toLowerCase()) || communes[0];
-    const coords = c.centre?.coordinates;
-    return {
-      valid: true,
-      commune: c.nom,
-      codePostal: c.codesPostaux?.[0],
-      coordinates: coords as [number, number] | undefined,
-      source: 'data.gouv',
-    };
-  }
-
-  // 2. Try address search if address provided
-  if (address) {
-    const features = await searchAddress(`${address} ${commune}`);
-    if (features.length > 0 && features[0].properties.score > 0.5) {
-      const f = features[0].properties;
-      return {
-        valid: true,
-        commune: f.city,
-        codePostal: f.postcode,
-        coordinates: features[0].geometry.coordinates as [number, number],
-        source: 'data.gouv',
-      };
-    }
+  const c = communes.find(item => normalize(item.nom) === normalize(commune));
+  if (c && address?.trim()) {
+    const features = await searchAddress(`${address} ${c.nom} Martinique`);
+    const match = features.find(f => f.properties.score > 0.5 && normalize(f.properties.city) === normalize(c.nom) && c.codesPostaux.includes(f.properties.postcode));
+    if (match) return { valid: true, commune: c.nom, codePostal: match.properties.postcode, coordinates: match.geometry.coordinates, source: 'data.gouv' };
+  } else if (c) {
+    return { valid: true, commune: c.nom, codePostal: c.codesPostaux?.[0], coordinates: c.centre?.coordinates, source: 'data.gouv' };
   }
 
   return { valid: false, source: 'invalid' };
 }
 
 export async function validatePartnerSiret(siret: string): Promise<{ valid: boolean; name?: string; commune?: string }> {
-  if (!siret || siret.length !== 14) return { valid: false };
+  if (!/^\d{14}$/.test(siret)) return { valid: false };
   const ent = await getEntrepriseBySiret(siret);
   if (!ent) return { valid: false };
   return {
