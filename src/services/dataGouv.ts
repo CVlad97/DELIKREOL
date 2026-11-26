@@ -51,7 +51,7 @@ export async function getCommuneByCodePostal(cp: string): Promise<Commune | null
 export async function getCommunesByDepartement(dep: string = '972'): Promise<Commune[]> {
   const data = await cachedFetch<Commune[]>(
     `dep:${dep}`,
-    `${API_BASE}/communes?codeDepartement=${dep}&fields=nom,codesPostaux,centre,surface&format=json&limit=50`
+    `${API_BASE}/communes?codeDepartement=${dep}&fields=code,nom,codesPostaux,centre,surface&format=json&limit=50`
   );
   return data || [];
 }
@@ -73,7 +73,7 @@ interface AdresseFeature {
 export async function searchAddress(query: string): Promise<AdresseFeature[]> {
   const data = await cachedFetch<{ features: AdresseFeature[] }>(
     `addr:${query}`,
-    `${ADRESSE_BASE}/search/?q=${encodeURIComponent(query)}&limit=5&autocomplete=1`
+    `${ADRESSE_BASE}/search?q=${encodeURIComponent(query)}&limit=5&autocomplete=1`
   );
   return (data?.features || []).filter(f => /^972\d{2}$/.test(f.properties.postcode));
 }
@@ -81,7 +81,7 @@ export async function searchAddress(query: string): Promise<AdresseFeature[]> {
 export async function reverseGeocode(lat: number, lng: number): Promise<AdresseFeature | null> {
   const data = await cachedFetch<{ features: AdresseFeature[] }>(
     `rev:${lat},${lng}`,
-    `${ADRESSE_BASE}/reverse/?lon=${lng}&lat=${lat}`
+    `${ADRESSE_BASE}/reverse?lon=${lng}&lat=${lat}`
   );
   return data?.features?.find(f => /^972\d{2}$/.test(f.properties.postcode)) || null;
 }
