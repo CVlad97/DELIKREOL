@@ -43,6 +43,9 @@ jobs:
       - name: Tests
         run: npm run test
 
+      - name: SumUp checkout contract
+        run: npm run test:sumup
+
       - name: Audit secrets
         run: npm run audit:secrets
 

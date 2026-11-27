@@ -35,7 +35,8 @@
     "supabase:deploy:checkout": "supabase functions deploy checkout-order create-checkout-session create-payment-intent stripe-webhook --project-ref boihlgodmclljtckhmgz --use-api",
     "api:catalog": "node scripts/public-api-bridge.mjs list",
     "api:audit": "node scripts/public-api-bridge.mjs audit",
-    "api:test": "node --test tests/public-api-bridge.test.mjs"
+    "api:test": "node --test tests/public-api-bridge.test.mjs",
+    "test:sumup": "node tests/sumup-checkout.test.mjs"
   },
   "dependencies": {
     "@blinkdotnew/react": "^1.0.2",
