@@ -43,7 +43,7 @@ Cela importe :
 Ajouter dans `.env` ou dans les secrets GitHub (Settings → Secrets and variables → Actions) :
 ```
 VITE_SUPABASE_URL=https://abcdefghijklm.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs...
+VITE_SUPABASE_ANON_KEY=<your-supabase-publishable-key>
 ```
 
 **⚠️ Ne jamais ajouter SUPABASE_SERVICE_ROLE_KEY dans le frontend**
