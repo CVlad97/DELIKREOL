@@ -42,7 +42,7 @@ Aucune intégration Cloudflare active détectée. Le domaine pointe directement 
 |----------|-------|----------|
 | VITE_BASE_PATH | / | Non |
 | VITE_SUPABASE_URL | https://boihlgodmclljtckhmgz.supabase.co | Non (URL publique) |
-| VITE_SUPABASE_ANON_KEY | sb_publishable_... | Non (clé publique) |
+| VITE_SUPABASE_ANON_KEY | <your-supabase-publishable-key> |
 | VITE_DEMO_MODE | false | Non |
 | VITE_STRIPE_PUBLISHABLE_KEY | (secret GitHub) | Oui (stocké en secret) |
 

@@ -80,7 +80,7 @@ test('goute mwen displays imported usable product photos', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/traiteur/goute-mwen', { waitUntil: 'networkidle' });
 
-  await expect(page.getByRole('heading', { name: 'Gouté Mwen' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Gouté Mwen', exact: true, level: 1 })).toBeVisible();
   const catalogue = page.locator('[data-partner-catalogue="true"]');
   await expect(catalogue).toBeVisible();
   const thumbnails = catalogue.locator('[data-thumbnail-source]');
