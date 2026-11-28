@@ -114,6 +114,8 @@ export function getPaymentProvider(id: PaymentProviderId): PaymentProvider {
 export function isCustomerSelectablePaymentProvider(id: PaymentProviderId): boolean {
   const provider = getPaymentProvider(id);
   if (provider.status === 'disabled' || id === 'stripe_disabled') return false;
+ // Regle commerciale : paiement a l'avance. Le paiement a la livraison n'est plus propose au client.
+ if (id === 'cash_on_delivery') return false;
   if (id === 'qonto_transfer' || id === 'revolut_transfer') {
     // Manual bank-transfer providers. Selectable ONLY when the dedicated
     // per-provider IBAN/BIC are configured — the generic VITE_BANK_* fallback

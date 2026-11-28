@@ -43,7 +43,7 @@ describe('backend production hardening', () => {
     expect(source).toContain('BASE_PAYMENT_PROVIDERS');
     expect(source).toContain('"qonto_transfer"');
     expect(source).toContain('"revolut_transfer"');
-    expect(source).toContain('"cash_on_delivery"');
+    expect(source).not.toContain('"cash_on_delivery"');
     expect(source).toContain('resolveAllowedPaymentProviders');
     expect(source).toContain('Deno.env.get("ENABLE_CRYPTO_PAYMENT")');
     expect(source).toContain('Deno.env.get("ENABLE_EXTERNAL_PAYMENT_LINK")');
