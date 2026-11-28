@@ -27,7 +27,7 @@ describe('manual payment providers', () => {
   it('does not expose bank transfers without complete public bank coordinates', () => {
     expect(isCustomerSelectablePaymentProvider('qonto_transfer')).toBe(false);
     expect(isCustomerSelectablePaymentProvider('revolut_transfer')).toBe(false);
-    expect(isCustomerSelectablePaymentProvider('cash_on_delivery')).toBe(true);
+    expect(isCustomerSelectablePaymentProvider('cash_on_delivery')).toBe(false);
   });
 
   it('supports requested manual payment statuses', () => {

@@ -77,10 +77,10 @@ type ProductRow = {
   } | null;
 };
 
+// Paiement a l'avance uniquement : cash_on_delivery retire (regle commerciale).
 const BASE_PAYMENT_PROVIDERS = new Set([
   "qonto_transfer",
   "revolut_transfer",
-  "cash_on_delivery",
 ]);
 
 function resolveAllowedPaymentProviders(): Set<string> {
